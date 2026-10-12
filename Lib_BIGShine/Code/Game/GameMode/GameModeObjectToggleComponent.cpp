@@ -4,6 +4,7 @@
 
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Serialize/ComponentRegistry.h"
+#include "Engine/Physics/ColliderComponent.h"
 
 #include <imgui.h>
 
@@ -55,11 +56,11 @@ void GameModeObjectToggleComponent::CaptureEnabledStates()
 
     for (const std::shared_ptr<Component>& component_ : owner_->components)
     {
-        normalComponentEnabledStates.push_back(component_ ? component_->IsEnabled() : false);
+        normalComponentEnabledStates.push_back(component_ ? component_->IsConfiguredEnabled() : false);
     }
     for (const std::shared_ptr<Component>& component_ : owner_->colliderComponents)
     {
-        colliderComponentEnabledStates.push_back(component_ ? component_->IsEnabled() : false);
+        colliderComponentEnabledStates.push_back(component_ ? component_->IsConfiguredEnabled() : false);
     }
 
     capturedStates = true;
@@ -81,7 +82,8 @@ void GameModeObjectToggleComponent::ApplyEnabledStates(bool enabled_)
                 index_ < normalComponentEnabledStates.size()
                 ? normalComponentEnabledStates[index_]
                 : true;
-            component_->SetEnabled(enabled_ ? restoreEnabled_ : false);
+            if (enabled_) component_->SetEnabled(restoreEnabled_);
+            component_->SetRuntimeSuppressed(!enabled_);
         }
     }
 
@@ -96,7 +98,17 @@ void GameModeObjectToggleComponent::ApplyEnabledStates(bool enabled_)
                 index_ < colliderComponentEnabledStates.size()
                 ? colliderComponentEnabledStates[index_]
                 : true;
-            component_->SetEnabled(enabled_ ? restoreEnabled_ : false);
+            if (enabled_) component_->SetEnabled(restoreEnabled_);
+            // 初期無効のHitBoxもShow時は一時停止を解除し、後続のActivateを受け付ける。
+            component_->SetRuntimeSuppressed(!enabled_);
+            // 非表示ObjectのColliderがPhysX内へ残り、見えない壁になるのを防ぐ。
+            if (!enabled_)
+                if (const auto collider_ = std::dynamic_pointer_cast<ColliderComponent>(component_))
+                {
+                    collider_->currentTriggers.clear();
+                    collider_->m_CollisionMainFolds.clear();
+                    collider_->ReleasePhysXActor();
+                }
         }
     }
 }

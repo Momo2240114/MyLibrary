@@ -85,6 +85,11 @@ public:
 
     void Play();
     void Stop();
+    // 保存済みEmitter設定を変更せず、演出中の連続発生量だけを補正する。
+    void SetEmissionScale(float scale_);
+    // 外周Particleの半径と色を、保存設定とは別の実行時補正として渡す。
+    void SetRuntimeRingAppearance(float radius_, const DirectX::XMFLOAT4& color_);
+    void ClearRuntimeRingAppearance() { runtimeRingEnabled = false; }
     void ResetRuntime();
     bool HasRuntimeResources() const;
     bool PlayEmitter(const std::string& emitterName_);
@@ -132,6 +137,10 @@ private:
     const EmitterTrack* FindEmitterTrack(const std::string& emitterName_) const;
 
 private:
+    std::string meshSourceObjectName;
+    std::string attractionTargetName;
+    bool emitDissolveBoundary = false;
+    float dissolveBoundaryBand = 0.15f;
     std::vector<EmitterTrack> tracks;
     std::unordered_map<StringId, size_t> emitterTrackIndexByNameId;
     std::vector<std::string> textureFiles;
@@ -144,5 +153,9 @@ private:
     float timer = 0.0f;
     double applyFeedbackUntil = 0.0;
     bool isPlaying = false;
+    float emissionScale = 1.0f;
+    bool runtimeRingEnabled = false;
+    float runtimeRingRadius = 0.0f;
+    DirectX::XMFLOAT4 runtimeRingColor{ 1.0f, 1.0f, 1.0f, 1.0f };
     std::vector<std::string> registeredActionNames;
 };

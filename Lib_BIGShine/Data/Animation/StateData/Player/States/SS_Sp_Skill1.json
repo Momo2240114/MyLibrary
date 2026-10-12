@@ -339,6 +339,42 @@
                 "ownerTarget": "Self",
                 "playbackSpeed": 1.0,
                 "startTime": 0.7166666388511658
+            },
+            {
+                "actionEnd": "MotionWarp.Clear",
+                "actionStart": "MotionWarp.Play",
+                "actionUpdate": "",
+                "attachNodeName": "",
+                "attachToOwner": false,
+                "attackTemplateId": "",
+                "blackboardWrites": [],
+                "callEndOnStateExit": false,
+                "endTime": 0.8833333253860474,
+                "eventTemplateType": "NONE",
+                "label": "New Event",
+                "localPosition": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localRotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localScale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "meshVFXAssetPath": "",
+                "meshVFXLifeTime": 1.0,
+                "meshVFXPlaybackSpeed": 1.0,
+                "mirrorMeshVFX": false,
+                "overridePlaybackSpeed": false,
+                "ownerTarget": "Self",
+                "playbackSpeed": 1.0,
+                "startTime": 0.1666666716337204
             }
         ],
         "loop": false,
@@ -358,6 +394,7 @@
         },
         "rootMotionScale": 0.03999999910593033,
         "rootMotionScaleCurveName": "",
+        "sequenceClips": [],
         "sequencer": "",
         "speed": 1.600000023841858,
         "speedCurveName": "",

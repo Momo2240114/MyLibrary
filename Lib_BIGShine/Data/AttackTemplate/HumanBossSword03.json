@@ -1,0 +1,77 @@
+{
+  "AssetType": "AttackTemplate",
+  "AssetVersion": 1,
+  "attack": {
+    "allowMultiHit": false,
+    "damage": 150.0,
+    "hitGroupId": 0,
+    "hitStopDuration": 0.035,
+    "hitStopScale": 0.85,
+    "knockBackPower": 2.0,
+    "knockBackType": 0
+  },
+  "cameraShake": {
+    "enabled": true,
+    "powerLevel": 1
+  },
+  "attackEffects": [],
+  "displayName": "HumanBoss Sword 03",
+  "hitEffect": {
+    "hitMeshVfxAssetPath": "",
+    "hitParticleAssetPath": "EnemyMudSwordHit",
+    "hitParticleEmitterName": "",
+    "hitParticleLifeTime": 0.5,
+    "hitParticleNormalOffset": 0.06,
+    "hitParticleUseImpactAxis": true,
+    "hitParticleAxisToAttackerBlend": 0.85,
+    "hitParticleUseTargetAttraction": true,
+    "hitParticleTargetAttractionStrength": 1.4,
+    "hitParticleTargetAttractionRange": 3.0,
+    "hitParticleTargetAttractionFalloff": 1.25,
+    "spawnOnHit": true
+  },
+  "id": "HumanBossSword03",
+  "owner": {
+    "canHitOwner": false,
+    "ownerTarget": 0
+  },
+  "slashEffects": [
+    {
+      "enabled": true,
+      "vfxPath": "EnemyMudSwordArc",
+      "spawnTimeOffset": 0,
+      "lifeTime": 0.17,
+      "localOffset": [
+        -6.4,
+        2.8,
+        3.1
+      ],
+      "localRotation": [
+        -25,
+        0,
+        0
+      ],
+      "localScale": [
+        55,
+        55,
+        55
+      ],
+      "alpha": 1,
+      "followOwner": true,
+      "followNode": true,
+      "baseNodeName": "hand_r",
+      "hitBox": {
+        "enabled": false
+      }
+    }
+  ],
+  "weaponHitBox": {
+    "activeEndTime": 0.13,
+    "activeStartTime": 0.0,
+    "enabled": true,
+    "endNodeName": "TrailEnd",
+    "hitBoxName": "Sword",
+    "radius": 32.0,
+    "startNodeName": "TrailStart"
+  }
+}

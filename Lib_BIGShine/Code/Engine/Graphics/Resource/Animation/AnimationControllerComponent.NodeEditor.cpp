@@ -1275,6 +1275,8 @@ void AnimationControllerComponent::DrawTransitionInspectorContent()
     }
 
     ImGui::Separator();
+    if (transition_.blackboardRequestRoute)
+        ImGui::TextDisabled("Blackboard request route: playback timing comes from the request.");
     if (ImGui::DragFloat("Fade Duration", &transition_.duration, 0.01f, 0.0f, 2.0f))
     {
         useTransitionGraph = true;

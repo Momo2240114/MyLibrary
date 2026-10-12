@@ -16,6 +16,7 @@ public:
     }
 
     void Start() override;
+    void OnDestroy() override { Stop(); }
     void Gui() override;
     void Serialize(nlohmann::json& json_) const override;
     void Deserialize(const nlohmann::json& json_) override;

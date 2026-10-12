@@ -27,7 +27,7 @@ private:
     void ResolveAttackAssistTarget();
     // 攻撃中の向き補正と位置補正をまとめて適用する。
     void ApplyAttackAssist(float elapsedTime_);
-    // 攻撃中の向きをTarget方向へ補間する。
+    // 攻撃中の向きをTarget方向へ補間する。a
     void ApplyAttackFacingAssist(const std::shared_ptr<GameObject>& target_, float elapsedTime_);
     // 攻撃が届きやすい距離まで水平移動を補助する。
     void ApplyAttackPositionAssist(const std::shared_ptr<GameObject>& target_, float elapsedTime_);

@@ -11,7 +11,7 @@
 
 class BlackboardComponent;
 class CharacterMovementComponent;
-class AnimationControllerComponent;
+class AnimationGraphBridgeComponent;
 class DragonNeckCommandIKComponent;
 class DragonTailCommandIKComponent;
 class GameObject;
@@ -440,7 +440,7 @@ private:
     BlackboardComponent* blackboard = nullptr;
     HealthComponent* health = nullptr;
     std::weak_ptr<GameObject> playerObject;
-    std::weak_ptr<AnimationControllerComponent> animationController;
+    std::weak_ptr<AnimationGraphBridgeComponent> animationGraph;
     std::weak_ptr<CharacterMovementComponent> movement;
     std::weak_ptr<DragonNeckCommandIKComponent> neckIK;
     std::weak_ptr<DragonTailCommandIKComponent> tailIK;

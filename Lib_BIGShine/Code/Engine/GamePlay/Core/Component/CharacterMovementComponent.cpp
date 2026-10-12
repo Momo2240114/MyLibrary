@@ -154,6 +154,16 @@ void CharacterMovementComponent::SetUnscaledDeltaTime(float deltaTime_)
     unscaledDeltaTime = (std::max)(deltaTime_, 0.0f);
 }
 
+void CharacterMovementComponent::ResetMovementRequests()
+{
+    ClearFrameRequests();
+    desiredHorizontalVelocity = { 0.0f, 0.0f, 0.0f };
+    impulseVelocity = { 0.0f, 0.0f, 0.0f };
+    hasFacingRequest = false;
+    unscaledDeltaTime = 0.0f;
+    if (const auto collider_ = ResolveCollider()) collider_->velocity = { 0.0f, 0.0f, 0.0f };
+}
+
 void CharacterMovementComponent::AddRootMotionDelta(
     const DirectX::XMFLOAT3& delta_)
 {

@@ -116,7 +116,7 @@ void DangerAreaComponent::Update(float deltaTime_)
     for (DangerAreaInstance& instance_ : instances)
     {
         instance_.lifeTimer -= safeDeltaTime_;
-        if (instance_.templateIndex < templates.size() && templates[instance_.templateIndex].followOwner)
+        if (!instance_.fixedPosition && instance_.templateIndex < templates.size() && templates[instance_.templateIndex].followOwner)
         {
             const DangerAreaTemplate& template_ = templates[instance_.templateIndex];
             ApplyInstanceTransform(template_, BuildEmitFrame(template_), instance_.object);
@@ -192,6 +192,43 @@ void DangerAreaComponent::Show(size_t templateIndex_)
     instance_.templateIndex = templateIndex_;
     instance_.lifeTimer = template_.lifeTime;
     instances.push_back(instance_);
+}
+
+void DangerAreaComponent::ShowAt(const DangerAreaTemplate& template_, const DirectX::XMFLOAT3& position_)
+{
+    BS_PROFILE_SCOPE("DangerAreaComponent::ShowAt");
+    const auto owner_ = GetGameObject();
+    if (!owner_) return;
+    const auto object_ = GetManager().Create("RuntimeDangerArea");
+    if (!object_) return;
+    object_->SetNoSaveObject();
+    const auto mesh_ = object_->AddComponent<MeshVFXComponent>();
+    if (!mesh_) { GetManager().Destroy(object_); return; }
+    auto asset_ = BuildDangerAreaAsset(template_);
+    // 確定地点の予兆では残り時間で色を変え、所有者が消えても表示を終了する。
+    for (auto& part_ : asset_.parts) { part_.duration = template_.lifeTime; part_.loop = false; }
+    mesh_->SetAsset(asset_);
+    mesh_->SetPlaybackSpeed(template_.playbackSpeed);
+    mesh_->Reset();
+    mesh_->Play();
+    object_->transform->ApplyWorldMatrix(DirectX::XMMatrixTranslation(position_.x,
+        position_.y + template_.groundOffset, position_.z));
+    object_->UpdateTransform();
+    DangerAreaInstance instance_;
+    instance_.object = object_;
+    instance_.meshVFX = mesh_;
+    // Templateの追従更新から外し、予兆開始後の着地点を固定する。
+    instance_.templateIndex = templates.size();
+    instance_.fixedPosition = true;
+    instance_.lifeTimer = template_.lifeTime;
+    instances.push_back(instance_);
+}
+
+void DangerAreaComponent::StopAll()
+{
+    BS_PROFILE_SCOPE("DangerAreaComponent::StopAll");
+    for (auto& instance_ : instances) StopInstance(instance_);
+    instances.clear();
 }
 
 void DangerAreaComponent::ShowByName(const std::string& templateName_)

@@ -1,0 +1,131 @@
+{
+  "RegisterGlobal": false,
+  "Sequences": [
+    {
+      "name": "HumanBoss_COMBO_PATTERN_01",
+      "duration": 1.0,
+      "completionAction": "",
+      "actions": [
+        {
+          "cat": "HumanBoss",
+          "name": "HumanBoss_FaceTarget",
+          "time": 0,
+          "animationState": "Combo_Attack_01_01_Seq",
+          "useNormalizedTime": true
+        },
+        {
+          "cat": "HumanBoss",
+          "name": "HumanBoss_WindupBegin",
+          "time": 0,
+          "animationState": "Combo_Attack_01_01_Seq",
+          "useNormalizedTime": true
+        },
+        {
+          "cat": "HumanBoss",
+          "name": "HumanBoss_WindupEnd",
+          "time": 0.065,
+          "animationState": "Combo_Attack_01_01_Seq",
+          "useNormalizedTime": true
+        },
+        {
+          "cat": "HumanBoss",
+          "name": "ActionEnd",
+          "time": 0.3428571195018551,
+          "animationState": "Combo_Attack_01_01_Seq",
+          "useNormalizedTime": true
+        },
+        {
+          "cat": "HumanBoss",
+          "name": "ActionEnd",
+          "time": 0.35142854748940144,
+          "animationState": "Combo_Attack_01_02_Seq",
+          "useNormalizedTime": true
+        },
+        {
+          "cat": "HumanBoss",
+          "name": "ActionEnd",
+          "time": 0.4528301621977244,
+          "animationState": "Combo_Attack_01_03_Seq",
+          "useNormalizedTime": true
+        }
+      ]
+    },
+    {
+      "name": "HumanBoss_COMBO_PATTERN_02",
+      "duration": 1.0,
+      "completionAction": "",
+      "actions": [
+        {
+          "cat": "HumanBoss",
+          "name": "HumanBoss_FaceTarget",
+          "time": 0,
+          "animationState": "Combo_Attack_02_01_Seq",
+          "useNormalizedTime": true
+        },
+        {
+          "cat": "HumanBoss",
+          "name": "HumanBoss_WindupBegin",
+          "time": 0,
+          "animationState": "Combo_Attack_02_01_Seq",
+          "useNormalizedTime": true
+        },
+        {
+          "cat": "HumanBoss",
+          "name": "HumanBoss_WindupEnd",
+          "time": 0.095,
+          "animationState": "Combo_Attack_02_01_Seq",
+          "useNormalizedTime": true
+        },
+        {
+          "cat": "HumanBoss",
+          "name": "ActionEnd",
+          "time": 0.35142854748940144,
+          "animationState": "Combo_Attack_02_01_Seq",
+          "useNormalizedTime": true
+        },
+        {
+          "cat": "HumanBoss",
+          "name": "ActionEnd",
+          "time": 0.5323943375926307,
+          "animationState": "Combo_Attack_02_02_Seq",
+          "useNormalizedTime": true
+        },
+        {
+          "cat": "HumanBoss",
+          "name": "ActionEnd",
+          "time": 0.41,
+          "animationState": "Combo_Attack_02_03_Seq",
+          "useNormalizedTime": true
+        }
+      ]
+    },
+    {
+      "name": "HumanBoss_HEAVY_SINGLE_ATTACK_Sequence",
+      "duration": 1.0,
+      "completionAction": "",
+      "actions": [
+        {
+          "cat": "HumanBoss",
+          "name": "HumanBoss_FaceTarget",
+          "time": 0,
+          "animationState": "SS_Sp_Skill3",
+          "useNormalizedTime": true
+        },
+        {
+          "cat": "HumanBoss",
+          "name": "HumanBoss_WindupBegin",
+          "time": 0,
+          "animationState": "SS_Sp_Skill3",
+          "useNormalizedTime": true
+        },
+        {
+          "cat": "HumanBoss",
+          "name": "HumanBoss_WindupEnd",
+          "time": 0.34,
+          "animationState": "SS_Sp_Skill3",
+          "useNormalizedTime": true
+        }
+      ]
+    }
+  ]
+}

@@ -66,6 +66,11 @@ public:
     // 指定Indexの危険範囲を生成する。
     void Show(size_t templateIndex_);
 
+    // 確定済みの着地点へ追尾しない円形予兆を生成する。
+    void ShowAt(const DangerAreaTemplate& template_, const DirectX::XMFLOAT3& position_);
+    // 所有者の強制中断時に、このComponentが生成した予兆を解除する。
+    void StopAll();
+
     // Template名またはAction名から危険範囲を生成する。
     void ShowByName(const std::string& templateName_);
 
@@ -79,6 +84,7 @@ private:
         std::weak_ptr<MeshVFXComponent> meshVFX;
         size_t templateIndex = 0u;
         float lifeTimer = 0.0f;
+        bool fixedPosition = false; // 着地点を固定した予兆は所有者を追従しない。
     };
 
     struct EmitFrame

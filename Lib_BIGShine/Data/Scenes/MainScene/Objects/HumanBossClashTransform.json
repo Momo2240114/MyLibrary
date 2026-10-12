@@ -1,0 +1,26 @@
+{
+    "Name": "HumanBossClashTransform",
+    "ParentName": "",
+    "Layer": 0,
+    "CollisionMask": 0,
+    "RequiredForSceneStart": true,
+    "Transform": {
+        "Pos": [
+            18,
+            -0.122791,
+            -28
+        ],
+        "Rot": [
+            0,
+            180,
+            0
+        ],
+        "Scale": [
+            1,
+            1,
+            1
+        ]
+    },
+    "Components": [],
+    "ColliderComponents": []
+}

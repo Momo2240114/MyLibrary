@@ -45,6 +45,22 @@
                         "intensity": 1.0,
                         "returnDur": 0.5,
                         "sat": 0.699999988079071
+                    },
+                    {
+                        "balance": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "bri": 0,
+                        "con": 1,
+                        "sat": 1,
+                        "hue": 0,
+                        "intensity": 1,
+                        "dur": 0.6,
+                        "holdDur": 0.45,
+                        "returnDur": 0.8,
+                        "ease": 1
                     }
                 ],
                 "DefaultFilter": {

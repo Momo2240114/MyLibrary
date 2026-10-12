@@ -1,0 +1,65 @@
+{
+  "RegisterGlobal": false,
+  "Sequences": [
+    {
+      "name": "HumanBoss_SHADOW_SLASH_Sequence",
+      "duration": 4,
+      "completionAction": "",
+      "actions": [
+        {
+          "cat": "HumanBoss",
+          "name": "HumanBoss_WindupBegin",
+          "time": 0,
+          "animationState": "SS_Sp_Skill1",
+          "useNormalizedTime": true
+        },
+        {
+          "cat": "HumanBoss",
+          "name": "HumanBoss_WindupEnd",
+          "time": 0.23,
+          "animationState": "SS_Sp_Skill1",
+          "useNormalizedTime": true
+        }
+      ]
+    },
+    {
+      "name": "HumanBoss_SHADOW_DIVE_01_Sequence",
+      "duration": 4,
+      "completionAction": "",
+      "actions": [
+        {
+          "cat": "HumanBoss",
+          "name": "HumanBoss_ShadowShowArea",
+          "time": 0,
+          "useNormalizedTime": false
+        }
+      ]
+    },
+    {
+      "name": "HumanBoss_SHADOW_DIVE_02_Sequence",
+      "duration": 4,
+      "completionAction": "",
+      "actions": [
+        {
+          "cat": "HumanBoss",
+          "name": "HumanBoss_ShadowShowArea",
+          "time": 0,
+          "useNormalizedTime": false
+        }
+      ]
+    },
+    {
+      "name": "HumanBoss_SHADOW_DOMAIN_Sequence",
+      "duration": 4,
+      "completionAction": "",
+      "actions": [
+        {
+          "cat": "HumanBoss",
+          "name": "HumanBoss_ShadowShowArea",
+          "time": 0,
+          "useNormalizedTime": false
+        }
+      ]
+    }
+  ]
+}

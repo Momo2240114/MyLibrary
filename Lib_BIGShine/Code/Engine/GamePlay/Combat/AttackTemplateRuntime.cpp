@@ -129,6 +129,8 @@ namespace
         hitBox_->SetHitEffectBlackboardOverrideEnabled(false);
         hitBox_->SetAttackDataBlackboardOverrideEnabled(false);
         hitBox_->canHitOwner = attackTemplate_.canHitOwner;
+        hitBox_->guardBreak = attackTemplate_.guardBreak;
+        hitBox_->canBeGuarded = attackTemplate_.canBeGuarded;
         hitBox_->allowMultiHit =
             attackTemplate_.allowMultiHit ||
             attackTemplate_.damageApplyType != DAMAGE_APPLY_TYPE::SINGLE_HIT;
@@ -148,6 +150,9 @@ void AttackTemplateRuntime::Start(
 
     // AnimEvent側にRuntime状態を持たせ、Update/Endで同じ攻撃インスタンスを追跡する。
     event_.attackTemplateRuntimeActive = true;
+    if (attackTemplate_->weaponHitBox.enabled)
+        if (const auto hitBox_ = FindHitBox(GetRoot(owner_), attackTemplate_->weaponHitBox.hitBoxName))
+            event_.previousCanBeGuarded = hitBox_->canBeGuarded;
     event_.attackTemplateInstanceId = owner_->GetManager().GetAttackSystem().CreateAttackInstance();
     event_.spawnedAttackEffects.assign(attackTemplate_->attackEffects.size(), false);
     ConfigureWeaponHitBox(owner_, *attackTemplate_, event_.attackTemplateInstanceId);
@@ -166,7 +171,9 @@ void AttackTemplateRuntime::Start(
         request_.setting.localOffset = slash_.localOffset;
         request_.setting.localRotation = slash_.localRotation;
         request_.setting.localScale = slash_.localScale;
-        request_.setting.followOwner = slash_.followOwner;
+        // 保存済みのボーン追従設定を渡し、斬撃を実際の武器を持つ手の姿勢へ同期する。
+        request_.setting.followOwner = slash_.followOwner || slash_.followNode;
+        request_.setting.attachNodeName = slash_.followNode ? slash_.baseNodeName : std::string{};
         request_.setting.hasHitBox = slash_.hitBox.enabled;
         request_.setting.hitBoxName = slash_.hitBox.hitBoxName;
         request_.setting.hitStartTime = slash_.hitBox.activeStartTime;
@@ -187,6 +194,8 @@ void AttackTemplateRuntime::Start(
         request_.setting.hitStopScale = attackTemplate_->hitStopScale;
         request_.setting.hitEffectPath = attackTemplate_->hitEffect.hitMeshVfxAssetPath;
         request_.setting.hitGroupId = attackTemplate_->hitGroupId;
+        request_.setting.canBeGuarded = attackTemplate_->canBeGuarded;
+        request_.setting.guardBreak = attackTemplate_->guardBreak;
         request_.setting.allowMultiHit =
             attackTemplate_->allowMultiHit ||
             attackTemplate_->damageApplyType != DAMAGE_APPLY_TYPE::SINGLE_HIT;
@@ -254,6 +263,8 @@ void AttackTemplateRuntime::End(
             GetRoot(owner_), attackTemplate_->weaponHitBox.hitBoxName))
         {
             hitBox_->Deactivate();
+            hitBox_->guardBreak = false;
+            hitBox_->canBeGuarded = event_.previousCanBeGuarded;
             hitBox_->SetHitEffectBlackboardOverrideEnabled(true);
             hitBox_->SetAttackDataBlackboardOverrideEnabled(true);
         }

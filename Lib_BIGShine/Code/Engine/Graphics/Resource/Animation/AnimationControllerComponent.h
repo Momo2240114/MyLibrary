@@ -38,7 +38,7 @@ public:
     // エディタ側からポーズライブラリを直接操作・保存できるように、ゲッターを用意すると便利です
     std::shared_ptr<PoseLibraryResource> GetPoseLibrary() { return poseLibrary; }
     // 特定のステートへ遷移させる（直接呼び出し用）
-    void ChangeState(const std::string& stateName_, float duration_ = 0.2f, bool restart_ = false);
+    void ChangeState(const std::string& stateName_, float duration_ = 0.2f, bool restart_ = false, float startTime_ = 0.0f);
     // 演出再生中は通常グラフの自動遷移だけを抑制し、Animationとイベントは更新する。
     void SetPresentationControlled(bool controlled_) { presentationControlled = controlled_; }
     // SkillStateがPhaseを選択中も、Animation EventとRootMotionは通常どおり更新する。
@@ -51,6 +51,8 @@ public:
 
     // ステートを手動で追加する
     void AddState(const std::string& stateName_, int animationIndex_);
+    // 編集済みStateを維持し、未登録のStateだけを既存Asset読み込み処理で追加する。
+    bool LoadMissingStateAsset(const std::string& stateName_, const std::string& assetName_);
     bool AddOrUpdateCustomState(int customAnimIndex_);
     bool PreviewCustomAnimation(int customAnimIndex_, float time_);
     bool SelectStateForEditing(const std::string& stateName_);
@@ -77,6 +79,9 @@ public:
     // AIなど外部制御から、RootMotionのYaw回転が指定角度を超えないように制限する。
     void SetRootMotionYawLimit(float yawDegrees_);
     void ClearRootMotionYawLimit();
+    // 単一クリップのRootMotionを区間サンプリングし、AIの到達判定へ予定量を返す。
+    bool EstimateRootMotion(const std::string& stateName_, float startNormalizedTime_,
+        float endNormalizedTime_, DirectX::XMFLOAT3& localDelta_, float& playbackDuration_) const;
 
     // ーーー 窓にデータを差し出すためのゲッター群 ーーー
     std::vector<AnimGraphNode>& GetGraphNodes() { return graphNodes; }
@@ -89,8 +94,13 @@ public:
     void EvaluateGraphTransitions();
     bool EvaluateCondition(const AnimCondition& condition_);
 
+    // Blackboardから届いた要求を、グラフ条件と制御権を確認して処理する。
+    void ProcessBlackboardGraphRequests(bool transitions_ = true);
+    // AIへ公開する現在State・再生時間・制御権をBlackboardへ反映する。
+    void PublishGraphFeedback();
     void SetUseTransitionGraph(bool useTransitionGraph_) { useTransitionGraph = useTransitionGraph_; }
 private:
+    bool processingBlackboardGraphRequests = false; // Actionからの再入時は次の処理へ要求を残す。
     std::string graphAssetFilePath;
     std::string graphAssetStatus;
 

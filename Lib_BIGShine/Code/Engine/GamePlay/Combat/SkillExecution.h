@@ -16,7 +16,8 @@ enum class SkillExecutionResult
     INTERRUPTED,
     PHASE_START_FAILED,
     TIMEOUT,
-    ANIMATION_CHANGED
+    ANIMATION_CHANGED,
+    FOLLOW_UP_REJECTED // 次の打撃が届かない場合は、現在段の終了時に連続攻撃を打ち切る。
 };
 
 // 入力やAIのStateに依存せず、共通DefinitionのPhaseを実行する。
@@ -25,6 +26,8 @@ class SkillExecution
 {
 public:
     using PhaseCallback = std::function<void(const SkillPhase&)>;
+    // 未指定なら従来通り進み、所有側だけが次段の開始可否を判断する。
+    using PhaseTransitionCheck = std::function<bool(const SkillPhase&)>;
     SkillExecution() = default;
     // 実行中の制御権と予約Sequenceを複数の所有側へ複製しない。
     SkillExecution(const SkillExecution&) = delete;
@@ -35,13 +38,15 @@ public:
         const SkillDefinition& definition_, std::string& error_);
     // 実行データを複製し、呼び出し側固有の受付窓だけCallbackへ渡す。
     bool Start(const std::shared_ptr<GameObject>& owner_, const SkillDefinition& definition_,
-        PhaseCallback phaseCallback_ = {});
+        PhaseCallback phaseCallback_ = {}, PhaseTransitionCheck phaseTransitionCheck_ = {}, bool useAnimationGraph_ = false);
     // 既存Animationの時間、通知、Phase秒数から次のPhaseへ進める。
     void Update(float deltaTime_);
     // 中断時にも自分の予約Sequenceと設定済みCleanupActionを閉じる。
     void Stop(SkillExecutionResult result_ = SkillExecutionResult::INTERRUPTED);
     // Animation Event/ActionSequenceのActionEndを現在のPhaseに渡す。
     void NotifyPhaseEnd();
+    // 実行中の待機Phaseだけを延長し、保存された定義と攻撃方向は変更しない。
+    bool ExtendCurrentDuration(float extension_, float maximum_);
     bool IsActive() const { return active; }
     int GetPhaseIndex() const { return phaseIndex; }
     float GetPhaseTime() const { return phaseTime; }
@@ -58,7 +63,7 @@ private:
     // CallbackとActionで中断されても、古いPhaseの開始処理を続けない。
     bool BeginPhase();
     // 開始済みPhaseを閉じ、別のSequenceの予約は維持する。
-    void EndPhase();
+    void EndPhase(bool continueSequence_ = false);
     // Owner Localを優先し、既存Global Actionへフォールバックする。
     void CallAction(const std::string& name_);
     // 共通Skillカテゴリへ実行状況を書き、BehaviorGraphとEditorから参照できるようにする。
@@ -71,6 +76,7 @@ private:
 
     std::weak_ptr<CharacterMovementComponent> movement;
     std::weak_ptr<ColliderComponent> movementCollider;
+    bool animationGraphPlayback = false; // AIのPhaseだけBlackboard経由でグラフに再生を要求する。
     bool ownsMovement = false;
     bool originalUseGravity = false;
     float originalGravityScale = 1.0f;
@@ -79,6 +85,7 @@ private:
     std::weak_ptr<GameObject> owner;
     SkillDefinition definition;
     PhaseCallback phaseCallback;
+    PhaseTransitionCheck phaseTransitionCheck;
     int phaseIndex = -1;
     float phaseTime = 0.0f;
     float groundedTime = 0.0f; // 一時的な接地フラグで着地攻撃へ進まないための連続確認時間。

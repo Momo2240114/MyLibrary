@@ -155,7 +155,7 @@ void ContainmentVolumeComponent::Update(float deltaTime_)
     if (!owner_ || !owner_->transform) return;
 
     const DirectX::XMFLOAT3 scale_ = owner_->transform->GetWorldScale();
-    const float worldRadius_ = radius * (std::max)(std::abs(scale_.x), std::abs(scale_.z));
+    const float worldRadius_ = GetEffectiveRadius() * (std::max)(std::abs(scale_.x), std::abs(scale_.z));
     const float worldHeight_ = halfHeight * 2.0f * std::abs(scale_.y);
 
     auto& renderer_ = GraphicsDeviceManager::Instance().GetShapeRendererSystem();
@@ -184,7 +184,6 @@ void ContainmentVolumeComponent::ApplyContainment()
         physicsDirty ||
         !actor ||
         cachedShape != shape ||
-        !NearlyEqual(cachedRadius, radius) ||
         !NearlyEqual(cachedHalfHeight, halfHeight) ||
         cachedConstrainHeight != constrainHeight ||
         cachedSegments != segments ||
@@ -197,6 +196,22 @@ void ContainmentVolumeComponent::ApplyContainment()
         return;
     }
 
+    const float effectiveRadius_ = GetEffectiveRadius();
+    if (!NearlyEqual(appliedRadius, effectiveRadius_) && cachedRadius > 0.0001f)
+    {
+        BS_PROFILE_SCOPE("ContainmentVolumeComponent::ScaleRadius");
+        PxShape* shape_ = nullptr;
+        if (actor->getShapes(&shape_, 1) == 1 && shape_ &&
+            shape_->getGeometry().getType() == PxGeometryType::eTRIANGLEMESH)
+        {
+            // 演出中は既存Meshの倍率だけを更新し、毎フレームのTriangle Mesh Cookを避ける。
+            auto geometry_ = static_cast<const PxTriangleMeshGeometry&>(shape_->getGeometry());
+            const float scale_ = (std::max)(effectiveRadius_, 0.001f) / cachedRadius;
+            geometry_.scale = PxMeshScale(PxVec3(scale_, 1.0f, scale_));
+            shape_->setGeometry(geometry_);
+            appliedRadius = effectiveRadius_;
+        }
+    }
     actor->setGlobalPose(pose_);
 }
 
@@ -216,7 +231,7 @@ void ContainmentVolumeComponent::RebuildPhysicsVolume()
     ReleasePhysicsVolume();
 
     const float scaleRadius_ = (std::max)(std::abs(scale_.x), std::abs(scale_.z));
-    const float volumeRadius_ = (std::max)(radius * scaleRadius_, 0.001f);
+    const float volumeRadius_ = (std::max)(GetEffectiveRadius() * scaleRadius_, 0.001f);
     const float volumeHalfHeight_ = (std::max)(halfHeight * std::abs(scale_.y), 0.001f);
     const int segments_ = std::clamp(segments, 8, 128);
 
@@ -274,7 +289,8 @@ void ContainmentVolumeComponent::RebuildPhysicsVolume()
 
     cachedShape = shape;
     // 再構築判定用に、PhysXへ反映した設定値をCacheする。
-    cachedRadius = radius;
+    cachedRadius = GetEffectiveRadius();
+    appliedRadius = GetEffectiveRadius();
     cachedHalfHeight = halfHeight;
     cachedConstrainHeight = constrainHeight;
     cachedSegments = segments;
@@ -374,6 +390,7 @@ void ContainmentVolumeComponent::Serialize(nlohmann::json& json_) const
 
 void ContainmentVolumeComponent::Deserialize(const nlohmann::json& json_)
 {
+    runtimeRadius = -1.0f;
     // 保存値を復元し、Mesh分割数などは安全範囲へ丸める。
     // 復元後はPhysX Actorを作り直す必要があるためDirtyにする。
     shape = static_cast<CONTAINMENT_SHAPE>(json_.value("Shape", static_cast<int>(shape)));

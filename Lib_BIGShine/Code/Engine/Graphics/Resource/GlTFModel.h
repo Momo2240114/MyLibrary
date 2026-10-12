@@ -31,6 +31,9 @@ public:
 	bool IsLoadReady() const override;
 	bool IsRuntimeReady() const override;
 	bool HasRuntimeFailure() const override;
+    // 影渡りなどの一時的な非表示を、アニメーション更新と保存設定から分離する。
+    void SetRuntimeVisible(bool visible_) { runtimeVisible = visible_; }
+    bool IsRuntimeVisible() const { return runtimeVisible; }
 	bool IsModelReady() const;
 	bool IsModelLoading() const;
 
@@ -268,6 +271,8 @@ public:
 	void MarkTransformDirty();
 	void UpdateTransformIfDirty();
 	const std::vector<DirectX::XMFLOAT4X4>& GetSkinningTransforms(int meshIndex_);
+    // 現在のSkinning行列から少量のワールド頂点を採取し、構図と泥の発生位置へ共有する。
+    void CollectWorldVertexSamples(std::vector<DirectX::XMFLOAT3>& positions_, std::size_t maximumCount_ = 1024);
 
 
 	// トランスフォーム更新処理
@@ -398,6 +403,7 @@ private:
 	std::vector<NodePose>	bindNodePoses;
 	std::vector<Animation>	animations;
 
+    bool runtimeVisible = true; // 実行中だけの描画状態。Serializeの対象にしない。
 	bool poseDirty = true;
 	bool transformDirty = true;
 	bool isStaticModel = false;
@@ -412,4 +418,5 @@ private:
 
 	void MarkSkinningTransformsDirty();
 	void UpdateSkinningTransforms(int meshIndex_);
+
 };

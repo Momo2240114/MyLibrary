@@ -1,0 +1,104 @@
+{
+    "CollisionMask": 0,
+    "Components": [
+        {
+            "Data": {
+                "InputEnabled": false,
+                "ParentWidgetId": "PlayerStatusRoot",
+                "RaycastTarget": false,
+                "RectTransform": {
+                    "AnchorMax": [
+                        0.0,
+                        0.0
+                    ],
+                    "AnchorMin": [
+                        0.0,
+                        0.0
+                    ],
+                    "AnchoredPosition": [
+                        61.0,
+                        61.0
+                    ],
+                    "LocalRotation": 45.0,
+                    "LocalScale": [
+                        1.0,
+                        1.0
+                    ],
+                    "Pivot": [
+                        0.5,
+                        0.5
+                    ],
+                    "SizeDelta": [
+                        112.0,
+                        112.0
+                    ]
+                },
+                "Version": 1,
+                "Visible": true,
+                "WidgetId": "PlayerFaceFrame",
+                "ZOrder": 0
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "UIWidgetComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "CatPos": [
+                    0.0,
+                    0.0
+                ],
+                "CatSize": [
+                    1.0,
+                    1.0
+                ],
+                "Color": [
+                    0.07999999821186066,
+                    0.12999999523162842,
+                    0.18000000715255737,
+                    0.9599999785423279
+                ],
+                "LocalSize": [
+                    112.0,
+                    112.0
+                ],
+                "ShaderID": 0,
+                "TexturePath": "",
+                "Visible": true,
+                "pivotType": 0
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "SpriteRenderer",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        }
+    ],
+    "Layer": 16,
+    "Name": "PlayerFaceFrame",
+    "ParentName": "PlayerStatusRoot",
+    "RequiredForSceneStart": false,
+    "Transform": {
+        "Pos": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

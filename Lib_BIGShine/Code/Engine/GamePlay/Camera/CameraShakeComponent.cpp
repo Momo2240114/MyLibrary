@@ -176,7 +176,7 @@ void CameraShakeComponent::RegisterActions()
     {
         // Preset名をCameraShakeカテゴリのGlobal Actionとして登録し、Timeline/Eventから呼べるようにする。
         registry_.RemoveAction("CameraShake", preset_.actionName);
-        registry_.RegisterAction("CameraShake", preset_.actionName, [this, actionName_ = preset_.actionName]()
+        GetGameObject()->RegisterNamedGlobalAction("CameraShake", preset_.actionName, [this, actionName_ = preset_.actionName]()
         {
             PlayShakeByName(actionName_);
         });

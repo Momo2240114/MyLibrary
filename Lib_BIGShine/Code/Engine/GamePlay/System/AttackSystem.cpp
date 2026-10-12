@@ -12,6 +12,7 @@
 #include "Engine/Physics/ColliderComponent.h"
 #include "Engine/Physics/HitBox.h"
 #include "Engine/Physics/HurtBox.h"
+#include "Game/GameMode/GameModeManager.h"
 
 #include <algorithm>
 #include <cmath>
@@ -129,6 +130,12 @@ void AttackSystem::BeginFrame()
     frameHitEvents.clear();
 }
 
+float AttackSystem::CalculateGuardDamage(HitBox& hitBox_, const HurtBox& hurtBox_)
+{
+    float attackPower_ = 0.0f;
+    return CalculateDamage(hitBox_.GetAttackOwner(), hitBox_, hurtBox_, attackPower_);
+}
+
 void AttackSystem::Clear()
 {
     BS_PROFILE_SCOPE("AttackSystem::Clear");
@@ -198,6 +205,12 @@ void AttackSystem::HandleHit(
     std::shared_ptr<GameObject> target_ = hurtBox_.ResolveCollisionOwnerObject();
     if (!target_) target_ = hurtBoxObject_;
     if (!hitBoxObject_ || !attacker_ || !target_ || !hurtBoxObject_) return;
+    // 撃破直後に残ったProjectileも含め、シネマティック中の通常ダメージを受け付けない。
+    if (attacker_->manager)
+    {
+        const auto mode_ = attacker_->GetManager().GetGameModeManager();
+        if (mode_ && mode_->IsPresentationPlaying()) return;
+    }
     if (!hitBox_.canHitOwner && IsSameHierarchy(attacker_, target_)) return;
     if (!hitBox_.IsEnabled() || !hurtBox_.IsEnabled()) return;
     if (!hitBox_.CanHit(target_.get())) return;

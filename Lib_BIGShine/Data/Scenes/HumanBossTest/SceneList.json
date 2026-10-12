@@ -1,0 +1,126 @@
+{
+    "GraphicsSettings": {
+        "Bloom": {
+            "blurPasses": 5,
+            "enabled": true,
+            "exposure": 1.0,
+            "intensity": 0.6000000238418579,
+            "kawaseScale": 3.0,
+            "threshold": 1.8899999856948853,
+            "toneMappingEnabled": true
+        },
+        "IBL": {
+            "hdrIntensity": 0.003000000026077032,
+            "specularHdrPath": "Data/Texture/IBL/qwantani_dusk_2_2k.hdr"
+        },
+        "ShadowMap": {
+            "cascadeDepthPadding": 180.0,
+            "cascadeShadowBias": [
+                0.0008999999845400453,
+                0.0020000000949949026,
+                0.003000000026077032,
+                0.004999999888241291
+            ],
+            "cascadeShadowSoftnessRadius": 2.0,
+            "cascadeShadowSoftnessSampleCount": 8,
+            "cascadeSplitDistances": [
+                25.0,
+                100.0,
+                250.0,
+                1000.0
+            ],
+            "cascadeXyPadding": 8.0,
+            "displayCascadeArea": false,
+            "lightDistance": 500.0,
+            "shadowAttenuation": 0.0,
+            "texelSnapEnabled": true,
+            "useCascadeShadow": true,
+            "useCascadeShadowRandomRotation": true,
+            "useCascadeShadowSoftness": true
+        },
+        "Toon": {
+            "shadeFeathers": [
+                0.05000000074505806,
+                0.05000000074505806,
+                0.05000000074505806,
+                0.05000000074505806
+            ],
+            "shadeSteps": [
+                0.05000000074505806,
+                0.05000000074505806,
+                0.05000000074505806,
+                0.05000000074505806
+            ]
+        },
+        "ToonOutline": {
+            "color": [
+                0.19607843458652496,
+                0.0784313753247261,
+                0.0784313753247261,
+                1.0
+            ],
+            "thickness": 0.0
+        },
+        "ToonPBR": {
+            "shadeFeathers": [
+                0.0010000000474974513,
+                0.03500000014901161,
+                0.0010000000474974513,
+                0.0010000000474974513
+            ],
+            "shadeSteps": [
+                0.3720000088214874,
+                0.8349999785423279,
+                0.847000002861023,
+                1.0
+            ]
+        }
+    },
+    "ObjectList": [
+        "MainCamera",
+        "PlayerModel",
+        "Weapon",
+        "Shield",
+        "KickHit",
+        "DirLight",
+        "Stage",
+        "RockWall",
+        "RockWall_01",
+        "RockWall_02",
+        "RockWall_03",
+        "RockWall_04",
+        "RockWall_05",
+        "RockWall_06",
+        "RockWall_07",
+        "Wall",
+        "HumanBoss",
+        "HumanBossWeapon",
+        "HumanBossShield",
+        "JustDodgeEventPool",
+        "UI",
+        "BossNamePlate",
+        "BossHealthBar",
+        "BossHealthBackground",
+        "BossHealthDamageDelay",
+        "BossHealthHealDelay",
+        "BossHealthCurrent",
+        "BossHealthFlash",
+        "BossHealthEdgeHighlight",
+        "BossHealthFrame",
+        "PlayerStatusRoot",
+        "PlayerFaceFrame",
+        "PlayerFaceIcon",
+        "PlayerHpFrame",
+        "PlayerHpBar",
+        "PlayerHpBackground",
+        "PlayerHpDamageDelay",
+        "PlayerHpHealDelay",
+        "PlayerHpCurrent",
+        "PlayerHpFlash",
+        "PlayerHpEdgeHighlight",
+        "PlayerStaminaBar",
+        "TestDamge",
+        "ParryEvantPool"
+    ],
+    "SceneName": "HumanBossTest"
+}

@@ -1,4 +1,5 @@
 #include "PrecompiledHeader.h"
+#include "Engine/GamePlay/System/CombatObservationSystem.h"
 
 #include "GameObjectManager.h"
 #include "Engine/Audio/AudioManager.h"
@@ -172,6 +173,7 @@ void GameObjectManager::Initialize()
     timeManager = std::make_shared<TimeManager>();
     effectManager->Initialize(this);
     RegisterAttackCallbacks();
+    EnsureCombatObservationRuntime();
     ModelResourceManager::Instance().LoadPreloadSettings();
     ModelResourceManager::Instance().StartAsyncLoader();
 
@@ -195,14 +197,14 @@ std::shared_ptr<GameObject> GameObjectManager::Find(const std::string& name_)
             continue;
         }
 
-        if (object_->GetName() == name_) return object_;
+        if (!object_->IsPendingDestroy() && object_->GetName() == name_) return object_;
         ++candidateIterator_;
     }
 
     // Hash衝突などで候補が一致しなかった場合だけ、従来検索で安全確認する。
     for (const std::shared_ptr<GameObject>& object_ : objects)
     {
-        if (object_ && object_->GetName() == name_) return object_;
+        if (object_ && !object_->IsPendingDestroy() && object_->GetName() == name_) return object_;
     }
 
     return nullptr;
@@ -214,6 +216,7 @@ void GameObjectManager::RegisterObjectNameIndex(const std::shared_ptr<GameObject
 
     // 同名ObjectもPool用途では存在し得るため、候補リストとして保持する。
     objectNameIndex[StringIdUtility::Hash(object_->GetName())].push_back(object_);
+    if (combatObservationSystem) combatObservationSystem->RegisterObject(object_);
 }
 
 void GameObjectManager::UnregisterObjectNameIndex(
@@ -250,6 +253,7 @@ void GameObjectManager::NotifyObjectNameChanged(
 {
     if (!object_ || oldName_ == newName_) return;
 
+    if (combatObservationSystem) combatObservationSystem->NotifyObjectNameChanged(object_, oldName_);
     UnregisterObjectNameIndex(object_, oldName_);
     for (const std::shared_ptr<GameObject>& candidate_ : objects)
     {
@@ -284,6 +288,7 @@ void GameObjectManager::Update(float elapsedTime_)
 void GameObjectManager::UpdateRunningRuntime(float elapsedTime_)
 {
     BS_PROFILE_SCOPE("SceneRuntime::Running");
+    EnsureCombatObservationRuntime();
     BS_PROFILE_PLOT("GameObject.ActiveCount", static_cast<int64_t>(objects.size()));
     float worldDeltaTime_ = elapsedTime_;
 
@@ -335,7 +340,7 @@ void GameObjectManager::UpdateRunningRuntime(float elapsedTime_)
 
             for (auto& object_ : startList_)
             {
-                if (!object_) continue;
+                if (!object_ || object_->IsPendingDestroy()) continue;
                 bool isReadyToStart_ = false;
                 {
                     BS_PROFILE_SCOPE("PendingStarts::CheckReadyToStart");
@@ -355,6 +360,7 @@ void GameObjectManager::UpdateRunningRuntime(float elapsedTime_)
 
                 {
                     BS_PROFILE_SCOPE("GameObject::CallAllComponentStart");
+                    if (combatObservationSystem) combatObservationSystem->RegisterObject(object_);
                     object_->CallAllComponentStart();
                 }
                 readyStartList_.push_back(object_);
@@ -432,6 +438,8 @@ void GameObjectManager::UpdateRunningRuntime(float elapsedTime_)
 
     {
         BS_PROFILE_SCOPE("GameObjectManager::ObjectsUpdate");
+        // 更新順に依存した先読みを避け、全AIへ同じ確定済みPlayer状態を渡す。
+        if (combatObservationSystem) combatObservationSystem->CaptureFrame(worldDeltaTime_);
         const bool useUnscaledCameraDelta_ = timeManager && timeManager->ShouldUseUnscaledCameraDelta();
         int updatedObjectCount_ = 0;
 
@@ -497,6 +505,8 @@ void GameObjectManager::UpdateRunningRuntime(float elapsedTime_)
 
     {
         BS_PROFILE_SCOPE("GameObjectManager::ObjectsLateUpdate");
+        // 更新順に依存した先読みを避け、全AIへ同じ確定済みPlayer状態を渡す。
+        if (combatObservationSystem) combatObservationSystem->RefreshSnapshots();
         const bool useUnscaledCameraDelta_ = timeManager && timeManager->ShouldUseUnscaledCameraDelta();
         int lateUpdatedObjectCount_ = 0;
 
@@ -626,7 +636,7 @@ void GameObjectManager::ProcessPendingStarts()
 
         for (auto& object_ : startList_)
         {
-            if (!object_) continue;
+            if (!object_ || object_->IsPendingDestroy()) continue;
             bool isReadyToStart_ = false;
             {
                 BS_PROFILE_SCOPE("PendingStarts::CheckReadyToStart");
@@ -646,6 +656,7 @@ void GameObjectManager::ProcessPendingStarts()
 
             {
                 BS_PROFILE_SCOPE("GameObject::CallAllComponentStart");
+                if (combatObservationSystem) combatObservationSystem->RegisterObject(object_);
                 object_->CallAllComponentStart();
             }
             readyStartList_.push_back(object_);
@@ -803,6 +814,10 @@ void GameObjectManager::FailSceneRuntime(const std::string& message_)
 
 void GameObjectManager::Clear()
 {
+    // 外部にshared_ptrが残っていても、Sceneを離れる時点で物理と予約を終了する。
+    const auto retiringObjects_ = objects;
+    for (const auto& object_ : retiringObjects_) if (object_) object_->PrepareForDestroy();
+    combatObservationObject.reset();
     // Scene切り替え前にObject、各System、描画状態、Action/Eventを初期状態へ戻す。
     sceneLoadProgress = 0.0f;
     sceneRuntimeError.clear();
@@ -823,11 +838,14 @@ void GameObjectManager::Clear()
     guardSystem->Clear();
     effectManager->Clear();
 
+    // 外部に残った参照から破棄済みManagerへアクセスさせない。
+    for (const auto& object_ : retiringObjects_) if (object_) object_->SetManager(nullptr);
     objects.clear();
     objectNameIndex.clear();
     pendingStarts.clear();
     pendingDestroys.clear();
     particleComponents.clear();
+    if (combatObservationSystem) combatObservationSystem->Reset();
 
     // Scene objects were removed, so cached effect pool objects must be
     // recreated and registered with this manager before the next scene runs.
@@ -862,6 +880,7 @@ void GameObjectManager::AddObject(std::shared_ptr<GameObject> object_)
 void GameObjectManager::DetachObject(const std::shared_ptr<GameObject>& object_)
 {
     if (!object_) return;
+    if (combatObservationSystem) combatObservationSystem->UnregisterObject(object_.get());
 
     for (const std::shared_ptr<ColliderComponent>& collider_ :
         object_->GetComponents<ColliderComponent>())
@@ -895,28 +914,8 @@ void GameObjectManager::DetachObject(const std::shared_ptr<GameObject>& object_)
 }
 void GameObjectManager::RemoveObject(const std::string& name_)
 {
-    for (const std::shared_ptr<GameObject>& object_ : objects)
-    {
-        if (!object_ || object_->GetName() != name_) continue;
-        for (const std::shared_ptr<ColliderComponent>& collider_ :
-            object_->GetComponents<ColliderComponent>())
-        {
-            collisionStepSystem->UnregisterCollider(collider_.get());
-        }
-        UnregisterObjectNameIndex(object_.get(), object_->GetName());
-    }
-
-    const auto iterator_ = std::remove_if(
-        objects.begin(),
-        objects.end(),
-        [&name_](const std::shared_ptr<GameObject>& object_)
-        {
-            return object_ && object_->GetName() == name_;
-        });
-
-    if (iterator_ == objects.end()) return;
-    if (selectedObject && selectedObject->GetName() == name_) selectedObject = nullptr;
-    objects.erase(iterator_, objects.end());
+    // 更新配列を即時に破壊せず、共通の削除予約へ渡す。
+    Destroy(name_);
 }
 
 size_t GameObjectManager::SetAllCollisionShapeRenderEnabled(bool enabled_)
@@ -1567,7 +1566,7 @@ void GameObjectManager::RenderAll(
     for (auto& object_ : objects)
     {
         auto sr = object_->GetComponent<SpriteRenderer>();
-        if (sr && sr->enabled)
+        if (sr && sr->IsEnabled() && !object_->IsPendingDestroy())
         {
             SpriteRenderSystem::SpriteRenderCommand command_;
             command_.sprite = sr;
@@ -1624,8 +1623,14 @@ void GameObjectManager::UnregisterMotionVelocityComponent(MotionVelocityComponen
 
 void GameObjectManager::Destroy(std::shared_ptr<GameObject> object_)
 {
-    if (!object_) return;
+    if (!object_ || object_->IsPendingDestroy()) return;
     // Update中の配列破壊を避けるため、即座に消さず予約リストに入れる。
+    object_->PrepareForDestroy();
+    if (object_->transform)
+    {
+        const auto children_ = object_->transform->children;
+        for (const auto& child_ : children_) if (child_) Destroy(child_->gameObject.lock());
+    }
     pendingDestroys.push_back(object_);
 }
 
@@ -1951,6 +1956,10 @@ void GameObjectManager::ApplyDestroys(std::shared_ptr<GameObject> object_)
 {
     // Collider登録を外し、子Objectを再帰的に削除してからManagerのリストから外す。
     if (!object_) return;
+    object_->PrepareForDestroy();
+    if (combatObservationSystem) combatObservationSystem->UnregisterObject(object_.get());
+    // Load待ちの個体も再びStart・登録されないよう、削除時に待機リストから外す。
+    pendingStarts.erase(std::remove(pendingStarts.begin(), pendingStarts.end(), object_), pendingStarts.end());
     for (const std::shared_ptr<ColliderComponent>& collider_ :
         object_->GetComponents<ColliderComponent>())
     {
@@ -1961,14 +1970,18 @@ void GameObjectManager::ApplyDestroys(std::shared_ptr<GameObject> object_)
     auto childrenCopy = object_->transform->children;
     for (auto& childTrans : childrenCopy)
     {
-        if (auto childGO = childTrans->gameObject.lock())
+        if (childTrans) if (auto childGO = childTrans->gameObject.lock())
         {
-            ApplyDestroys(Find(childTrans->gameObject.lock()->GetName()));
+            ApplyDestroys(childGO);
         }
     }
 
     // 2. 特殊な参照を外す
     if (selectedObject == object_) selectedObject = nullptr;
+    if (const auto parent_ = object_->transform->parent.lock())
+        parent_->children.erase(std::remove(parent_->children.begin(), parent_->children.end(), object_->transform), parent_->children.end());
+    object_->transform->parent.reset();
+    object_->transform->children.clear();
 
     // 3. マネージャーのメインリストから自分を削除
     auto it = std::remove(objects.begin(), objects.end(), object_);
@@ -1976,6 +1989,7 @@ void GameObjectManager::ApplyDestroys(std::shared_ptr<GameObject> object_)
         UnregisterObjectNameIndex(object_.get(), object_->GetName());
         objects.erase(it, objects.end());
     }
+    object_->SetManager(nullptr);
 }
 
 // プレハブ保存
@@ -2052,7 +2066,7 @@ void GameObjectManager::InitializeAllComponents()
 CameraManager* GameObjectManager::GetCameraManager(){ return cameraManager.get(); }
 
 // プレハブから生成
-std::shared_ptr<GameObject> GameObjectManager::Instantiate(const std::string& prefabName_)
+std::shared_ptr<GameObject> GameObjectManager::Instantiate(const std::string& prefabName_, bool preserveNames_)
 {
     // Prefab JSONを読み込み、Scene内で重複しない名前を付けてObject化する。
     std::string filePath = prefabDirectory + prefabName_ + ".json";
@@ -2079,7 +2093,7 @@ std::shared_ptr<GameObject> GameObjectManager::Instantiate(const std::string& pr
 
         for (const std::string& objectName_ : objectNames_)
         {
-            const std::string baseName_ = (objectName_ == rootName_) ? prefabName_ : objectName_;
+            const std::string baseName_ = preserveNames_ ? objectName_ : ((objectName_ == rootName_) ? prefabName_ : objectName_);
             std::string uniqueName_ = MakeUniqueName(baseName_);
             int suffixIndex_ = 1;
             while (reservedNames_.contains(uniqueName_))

@@ -73,6 +73,7 @@ struct AnimEvent
     std::string attackTemplateId;
     std::string ownerTarget = "Self";
     bool attackTemplateRuntimeActive = false;
+    bool previousCanBeGuarded = true; // 一時的な攻撃属性を終了・中断後に元のHitBox設定へ戻す。
     uint32_t attackTemplateInstanceId = 0u;
     std::vector<bool> spawnedAttackEffects;
     std::string meshVFXAssetPath;
@@ -228,6 +229,7 @@ struct AnimCondition {
 // 遷移（リンク）
 struct AnimTransition 
 {
+    bool blackboardRequestRoute = false; // Blackboard要求用のAny遷移。既存遷移はfalseのまま扱う。
     std::string fromStateName; // 始まりのステート名
     std::string toStateName;   // 行き先のステート名
     float duration = 0.2f;

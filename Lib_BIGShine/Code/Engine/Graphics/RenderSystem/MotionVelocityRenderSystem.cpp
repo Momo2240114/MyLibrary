@@ -209,7 +209,7 @@ void MotionVelocityRenderSystem::DrawModelVelocity(
 {
     const std::shared_ptr<GameObject> owner_ = component_ ? component_->GetGameObject() : nullptr;
     const std::shared_ptr<GltfModelCommponennt> model_ = owner_ ? owner_->GetComponent<GltfModelCommponennt>() : nullptr;
-    if (!model_ || !model_->IsEnabled()) return;
+    if (!model_ || !model_->IsEnabled() || !model_->IsRuntimeVisible()) return;
 
     // Model側のWorld/Bone行列が古い場合に更新してからVelocityを計算する。
     model_->UpdateTransformIfDirty();

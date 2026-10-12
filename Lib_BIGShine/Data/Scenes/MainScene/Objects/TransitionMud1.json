@@ -1,0 +1,483 @@
+{
+    "Name": "TransitionMud1",
+    "ParentName": "",
+    "Layer": 32,
+    "CollisionMask": 0,
+    "RequiredForSceneStart": true,
+    "Transform": {
+        "Pos": [
+            -2.4000000000000004,
+            0.05,
+            0.0
+        ],
+        "Rot": [
+            0,
+            0,
+            0
+        ],
+        "Scale": [
+            1,
+            1,
+            1
+        ]
+    },
+    "Components": [
+        {
+            "TypeName": "MeshVFXComponent",
+            "Data": {
+                "IsPlaying": false,
+                "PlaybackSpeed": 1,
+                "Parts": [
+                    {
+                        "RenderEnabled": false,
+                        "ModelPath": "__InternalMeshDangerArea__",
+                        "MeshIndex": 0,
+                        "Loop": true,
+                        "Duration": 0,
+                        "Color": [
+                            0.02,
+                            0.004,
+                            0.025,
+                            0.95
+                        ],
+                        "Alpha": 0.9,
+                        "AnimateAlpha": false,
+                        "AlphaStart": 1,
+                        "AlphaEnd": 0,
+                        "BlendMode": 0,
+                        "EmissiveStrength": 0.3,
+                        "Position": [
+                            0,
+                            0.025,
+                            0
+                        ],
+                        "Rotation": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "Scale": [
+                            1.2,
+                            1,
+                            1.2
+                        ],
+                        "BaseTexturePath": "",
+                        "UseMaterialBaseTexture": false,
+                        "UseMaterialNormalTexture": false,
+                        "UseGradientTexture": false,
+                        "UseMask": true,
+                        "MaskLayers": [
+                            {
+                                "Path": "Data/Texture/Trail/T_TrailMask_22.PNG",
+                                "BlendMode": 0,
+                                "Invert": false
+                            }
+                        ],
+                        "MaskUVScale": [
+                            1,
+                            1
+                        ],
+                        "MaskUVSpeed": [
+                            1.5,
+                            0
+                        ],
+                        "UseNoise": true,
+                        "NoiseTexturePaths": [
+                            "Data/Texture/VFX/T_Free_Magic_Noise1_normal.PNG"
+                        ],
+                        "NoiseUVScale": [
+                            1,
+                            2
+                        ],
+                        "NoiseUVSpeed": [
+                            3,
+                            0
+                        ],
+                        "NoiseStrength": 0.12,
+                        "UseFresnel": false,
+                        "UseNormal": false,
+                        "UseEdgeHighlight": false,
+                        "UseDissolveEdge": false,
+                        "UseBackFaceBoost": false,
+                        "InternalMeshCylinderRadius": 1,
+                        "InternalMeshSettings": {
+                            "CapsuleLength": 0
+                        },
+                        "AnimateScale": true,
+                        "ScaleStart": [
+                            0.12,
+                            1,
+                            0.12
+                        ],
+                        "ScaleEnd": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "AlphaCurveName": "",
+                        "ScaleCurveName": ""
+                    },
+                    {
+                        "RenderEnabled": false,
+                        "ModelPath": "__InternalMeshDangerArea__",
+                        "MeshIndex": 0,
+                        "Loop": true,
+                        "Duration": 0,
+                        "Color": [
+                            0.02,
+                            0.004,
+                            0.025,
+                            0.95
+                        ],
+                        "Alpha": 0.9,
+                        "AnimateAlpha": false,
+                        "AlphaStart": 1,
+                        "AlphaEnd": 0,
+                        "BlendMode": 0,
+                        "EmissiveStrength": 1.3,
+                        "Position": [
+                            0,
+                            0.025,
+                            0
+                        ],
+                        "Rotation": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "Scale": [
+                            1.2,
+                            1,
+                            1.2
+                        ],
+                        "BaseTexturePath": "",
+                        "UseMaterialBaseTexture": false,
+                        "UseMaterialNormalTexture": false,
+                        "UseGradientTexture": false,
+                        "UseMask": true,
+                        "MaskLayers": [
+                            {
+                                "Path": "Data/Texture/Trail/T_TrailMask_22.PNG",
+                                "BlendMode": 0,
+                                "Invert": false
+                            }
+                        ],
+                        "MaskUVScale": [
+                            1,
+                            1
+                        ],
+                        "MaskUVSpeed": [
+                            1.5,
+                            0
+                        ],
+                        "UseNoise": true,
+                        "NoiseTexturePaths": [
+                            "Data/Texture/VFX/T_Free_Magic_Noise1_normal.PNG"
+                        ],
+                        "NoiseUVScale": [
+                            1,
+                            2
+                        ],
+                        "NoiseUVSpeed": [
+                            3,
+                            0
+                        ],
+                        "NoiseStrength": 0.12,
+                        "UseFresnel": false,
+                        "UseNormal": false,
+                        "UseEdgeHighlight": false,
+                        "UseDissolveEdge": false,
+                        "UseBackFaceBoost": false,
+                        "InternalMeshCylinderRadius": 1,
+                        "InternalMeshSettings": {
+                            "CapsuleLength": 0
+                        },
+                        "AnimateScale": true,
+                        "ScaleStart": [
+                            0.12,
+                            1,
+                            0.12
+                        ],
+                        "ScaleEnd": [
+                            1,
+                            1,
+                            1
+                        ],
+                        "AlphaCurveName": "",
+                        "ScaleCurveName": ""
+                    }
+                ]
+            },
+            "Enabled": true,
+            "UpdateEnabled": true,
+            "LateUpdateEnabled": true,
+            "UpdatePriority": 0,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false
+        },
+        {
+            "TypeName": "ParticleComponent",
+            "Data": {
+                "AssetPath": "Data/Particle/TransitionMudCrawl.json",
+                "AssetType": "ParticleEffect",
+                "AssetVersion": 1,
+                "Emitters": [
+                    {
+                        "Acceleration": [
+                            0,
+                            -0.6,
+                            0
+                        ],
+                        "BlendMode": 0,
+                        "BurstCount": 24,
+                        "Color": [
+                            0.025,
+                            0.008,
+                            0.013,
+                            0.35
+                        ],
+                        "ColorEnd": [
+                            0.07,
+                            0.008,
+                            0.02,
+                            0
+                        ],
+                        "ColorStart": [
+                            0.03,
+                            0.006,
+                            0.012,
+                            0.32
+                        ],
+                        "ConeAngle": [
+                            0.0,
+                            0.0
+                        ],
+                        "Delay": 0.0,
+                        "Drag": 0.8,
+                        "EmissionMode": 0,
+                        "Fade": [
+                            0.5,
+                            1.8
+                        ],
+                        "FresnelPower": 0.10000000149011612,
+                        "FresnelStrength": 0,
+                        "GradientTexturePath": "",
+                        "Gravity": 0,
+                        "LegacyRadius": [
+                            0,
+                            0
+                        ],
+                        "Lifespan": [
+                            0.5,
+                            1.2
+                        ],
+                        "MaskTexturePath": "",
+                        "MaxCount": 512,
+                        "MeshVertexSampleCount": 2048,
+                        "Name": "MudCrawl",
+                        "NoiseFrequency": 0.55,
+                        "NoiseSpeed": 0.45,
+                        "NoiseStrength": 0.35,
+                        "OrbitVelocity": 0.0,
+                        "PosOffset": [
+                            0,
+                            0.15,
+                            0
+                        ],
+                        "RadialVelocity": 0.0,
+                        "RenderType": 0,
+                        "RotationSpeed": [
+                            0.0,
+                            0.0
+                        ],
+                        "ShapeEnd": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "ShapeSize": [
+                            1.5,
+                            0.1,
+                            1.5
+                        ],
+                        "ShapeStart": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "Size": [
+                            0.3,
+                            0.8
+                        ],
+                        "SizeRandomEnd": [
+                            0.8,
+                            1.3
+                        ],
+                        "SizeRandomStart": [
+                            0.75,
+                            1.15
+                        ],
+                        "SpawnDirectionMode": 0,
+                        "SpawnShape": 3,
+                        "SpawnSpace": 0,
+                        "Speed": [
+                            0.05,
+                            0.2
+                        ],
+                        "SpriteAnimationFps": 12.0,
+                        "SpriteAnimationLoop": 1,
+                        "SpriteAnimationRange": [
+                            0,
+                            0
+                        ],
+                        "SpriteSheetIndex": [
+                            0,
+                            0
+                        ],
+                        "StretchMax": 100.0,
+                        "StretchScale": 0.03999999910593033,
+                        "TexturePath": "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/smoke_03.png",
+                        "TextureSplitCount": [
+                            1,
+                            1
+                        ],
+                        "UseColorOverLife": 1,
+                        "UseFresnel": 0,
+                        "UseGradient": 0,
+                        "UseMask": 0,
+                        "UseRandomSize": 1,
+                        "UseSpriteAnimation": 0,
+                        "VerticalSpawnRange": 0.0,
+                        "Wind": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "gradientDirection": 0,
+                        "gradientEndUv": 1.0,
+                        "gradientFixedUv": 0.5,
+                        "gradientSampleMode": 0,
+                        "gradientStartUv": 0.0,
+                        "gradientTexturePath": "",
+                        "maskTexturePath": "",
+                        "shadeGradientDirection": 0,
+                        "shadeGradientEndUv": 1.0,
+                        "shadeGradientFixedUv": 0.5,
+                        "shadeGradientSampleMode": 0,
+                        "shadeGradientStartUv": 0.0,
+                        "shadeGradientTexturePath": "",
+                        "texturePath": "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/smoke_03.png",
+                        "useGradientTexture": 0,
+                        "useShadeGradientTexture": 0,
+                        "MaterialPath": "",
+                        "MaterialPaths": []
+                    }
+                ],
+                "IsPlaying": false
+            },
+            "Enabled": true,
+            "UpdateEnabled": true,
+            "LateUpdateEnabled": true,
+            "UpdatePriority": 0,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false
+        },
+        {
+            "TypeName": "ActorPresentationActionComponent",
+            "Data": {
+                "Presets": [
+                    {
+                        "ActionName": "Crawl",
+                        "ActorName": "TransitionMud1",
+                        "Type": 8,
+                        "StateName": "",
+                        "StateAssetPath": "",
+                        "TargetName": "MudSurroundTransform1",
+                        "Duration": 2.5,
+                        "PositionOffset": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "SmoothMovement": true,
+                        "SwayAmplitude": 0.65,
+                        "SwayCycles": 2
+                    },
+                    {
+                        "ActionName": "Strike",
+                        "ActorName": "TransitionMud1",
+                        "Type": 8,
+                        "StateName": "",
+                        "StateAssetPath": "",
+                        "TargetName": "PlayerEventTransform",
+                        "Duration": 0.4,
+                        "PositionOffset": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "SmoothMovement": true,
+                        "SwayAmplitude": 0,
+                        "SwayCycles": 2
+                    },
+                    {
+                        "ActionName": "Scatter",
+                        "ActorName": "TransitionMud1",
+                        "Type": 8,
+                        "StateName": "",
+                        "StateAssetPath": "",
+                        "TargetName": "MudScatterTransform1",
+                        "Duration": 0.8,
+                        "PositionOffset": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "SmoothMovement": true,
+                        "SwayAmplitude": 0,
+                        "SwayCycles": 2
+                    },
+                    {
+                        "ActionName": "Gather",
+                        "ActorName": "TransitionMud1",
+                        "Type": 8,
+                        "StateName": "",
+                        "StateAssetPath": "",
+                        "TargetName": "HumanBossSpawnTransform",
+                        "Duration": 2,
+                        "PositionOffset": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "SmoothMovement": true,
+                        "SwayAmplitude": 0.5,
+                        "SwayCycles": 2
+                    }
+                ],
+                "SpawnPoints": [
+                    {
+                        "ActorName": "TransitionMud1",
+                        "Position": [
+                            -2.4000000000000004,
+                            0.05,
+                            0.0
+                        ],
+                        "Rotation": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                ]
+            },
+            "Enabled": true,
+            "UpdateEnabled": true,
+            "LateUpdateEnabled": true,
+            "UpdatePriority": -100,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false
+        }
+    ],
+    "ColliderComponents": []
+}

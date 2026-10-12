@@ -1,4 +1,6 @@
 #include "PrecompiledHeader.h"
+#include "Engine/GamePlay/Combat/HealthComponent.h"
+#include "Engine/Physics/CharacterCollider.h"
 
 #include "LockOnTargetComponent.h"
 
@@ -53,6 +55,17 @@ std::shared_ptr<GameObject> LockOnTargetComponent::GetCombatOwner() const
 
     // 指定が無い場合はLockOnTarget自身をCombatOwnerとして扱う。
     return currentObject_;
+}
+
+bool LockOnTargetComponent::IsAvailable() const
+{
+    const auto object_ = gameObject.lock();
+    const auto owner_ = GetCombatOwner();
+    if (!IsEnabled() || !lockOnEnabled || !object_ || !object_->manager || object_->IsPendingDestroy() ||
+        !owner_ || !owner_->manager || !owner_->IsCombatReady()) return false;
+    if (const auto health_ = owner_->GetComponent<HealthComponent>()) if (health_->IsDead()) return false;
+    if (const auto collider_ = owner_->GetComponent<CharacterCollider>()) if (!collider_->IsEnabled()) return false;
+    return true;
 }
 
 void LockOnTargetComponent::Gui()

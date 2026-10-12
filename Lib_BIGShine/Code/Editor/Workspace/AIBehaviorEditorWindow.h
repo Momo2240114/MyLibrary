@@ -10,6 +10,7 @@
 
 class AIControllerComponent;
 class DragonAIComponent;
+class HumanBossAIComponent;
 class GameObject;
 
 namespace ax::NodeEditor
@@ -30,9 +31,10 @@ public:
 private:
     struct BehaviorGraphTarget
     {
-        // AIControllerとDragonAIのどちらを編集しているかを共通に扱うための一時ターゲット情報。
+        // 通常AI、DragonAI、人型ボスAIの編集対象を共通に扱うための一時ターゲット情報。
         AIControllerComponent* aiController = nullptr;
         DragonAIComponent* dragonAI = nullptr;
+        HumanBossAIComponent* humanBossAI = nullptr;
         GameObject* owner = nullptr;
 
         bool IsValid() const { return aiController != nullptr || dragonAI != nullptr; }

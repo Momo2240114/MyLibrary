@@ -176,6 +176,7 @@ bool JustGuardSystem::HandleJustGuard(
     }
 
     guardCollider_.RecordGuardedAttack(hitBox_);
+    if (guardCollider_.GuardsBodyContact()) hitBox_.RegisterHit(defender_.get());
 
     JustGuardEvent event_{};
     event_.defender = defender_;
@@ -320,6 +321,25 @@ void JustGuardSystem::PublishJustGuardToBlackboard(
 void JustGuardSystem::PublishJustGuardToAttacker(const JustGuardEvent& event_)
 {
     BS_PROFILE_SCOPE("JustGuardSystem::PublishJustGuardToAttacker");
+    const auto attacker_ = event_.attacker.lock();
+    // 反射でHitBoxの所有者が変わる前に、発射・攻撃を行った主体を保持する。
+    PublishJustGuardToAttackHitBox(event_);
+    auto receiver_ = attacker_;
+    while (receiver_)
+    {
+        if (const auto reaction_ = receiver_->GetComponent<JustGuardReactionComponent>())
+        {
+            reaction_->RequestAttackerReaction(event_.attackInstanceId, event_.hitGroupId);
+            return;
+        }
+        if (!receiver_->transform) break;
+        const auto parent_ = receiver_->transform->parent.lock();
+        receiver_ = parent_ ? parent_->gameObject.lock() : nullptr;
+    }
+}
+
+void JustGuardSystem::PublishJustGuardToAttackHitBox(const JustGuardEvent& event_)
+{
 
     if (!event_.hitBox || event_.hitBox->justGuardedActionName.empty()) return;
 

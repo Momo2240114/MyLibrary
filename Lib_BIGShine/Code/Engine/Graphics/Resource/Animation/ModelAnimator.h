@@ -57,7 +57,7 @@ public:
     // ノードエディタ側から呼ばれる命令
     // 現在のStateをpreviousへ退避し、新しいStateへduration秒でCrossFadeする。
     // 同じAnimationを続けるPhaseではrestart_で終了処理とEvent初期化をやり直す。
-    void CrossFadeTo(const AnimState* newState, float duration, std::shared_ptr<GameObject> owner = nullptr, bool restart_ = false);
+    void CrossFadeTo(const AnimState* newState, float duration, std::shared_ptr<GameObject> owner = nullptr, bool restart_ = false, float startTime_ = 0.0f);
 
     const std::vector<GltfModelCommponennt::NodePose>& GetCurrentPose() const { return finalPose; }
     float GetCurrentFadeTime() const { return current.time; }

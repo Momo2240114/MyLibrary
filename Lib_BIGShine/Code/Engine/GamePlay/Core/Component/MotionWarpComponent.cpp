@@ -8,10 +8,12 @@
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
 #include "Engine/GamePlay/Serialize/ComponentRegistry.h"
 #include "Engine/GamePlay/Transform/Transform.h"
+#include "Engine/Math/Curve/CurveComponent.h"
 #include "Game/Charcter/Player/PlayerControllerComponent.h"
 
 #include <algorithm>
 #include <cmath>
+#include <utility>
 #include <imgui.h>
 #include <imgui_stdlib.h>
 
@@ -41,6 +43,48 @@ namespace
         return std::sqrt(vector_.x * vector_.x + vector_.z * vector_.z);
     }
 
+    // 水平移動の経路が停止距離へ入り込む場合だけ、RootMotionの接近を制限する。
+    bool LimitRootMotionToStopDistance(
+        DirectX::SimpleMath::Vector3& delta_,
+        const DirectX::XMFLOAT3& ownerPosition_,
+        const DirectX::XMFLOAT3& targetPosition_,
+        float stopDistance_)
+    {
+        const double offsetX_ = static_cast<double>(ownerPosition_.x) - targetPosition_.x;
+        const double offsetZ_ = static_cast<double>(ownerPosition_.z) - targetPosition_.z;
+        const double distanceSquared_ = offsetX_ * offsetX_ + offsetZ_ * offsetZ_;
+        const double movementSquared_ =
+            static_cast<double>(delta_.x) * delta_.x +
+            static_cast<double>(delta_.z) * delta_.z;
+        const double approachDot_ = offsetX_ * delta_.x + offsetZ_ * delta_.z;
+        if (movementSquared_ <= 0.0 || approachDot_ >= 0.0) return false;
+
+        const double radius_ = (std::max)(stopDistance_, 0.0f);
+        const double boundaryDifference_ = distanceSquared_ - radius_ * radius_;
+        if (boundaryDifference_ <= 0.0)
+        {
+            // 境界上や内側では内向き成分だけを除き、横移動と離脱方向の移動を残す。
+            const double inwardScale_ = approachDot_ / distanceSquared_;
+            delta_.x -= static_cast<float>(offsetX_ * inwardScale_);
+            delta_.z -= static_cast<float>(offsetZ_ * inwardScale_);
+            return true;
+        }
+
+        // 終点が外側でも途中で対象を突き抜けるため、線分と停止円の最初の交点を求める。
+        const double discriminant_ =
+            approachDot_ * approachDot_ - movementSquared_ * boundaryDifference_;
+        if (discriminant_ < 0.0 || (discriminant_ == 0.0 && radius_ > 0.0)) return false;
+
+        // 境界付近の桁落ちを避ける形で、移動を許可する割合を計算する。
+        const double movementFraction_ =
+            boundaryDifference_ / (-approachDot_ + std::sqrt(discriminant_));
+        if (movementFraction_ >= 1.0) return false;
+
+        delta_.x = static_cast<float>(delta_.x * movementFraction_);
+        delta_.z = static_cast<float>(delta_.z * movementFraction_);
+        return true;
+    }
+
     float GetYawDegrees(const DirectX::XMFLOAT3& direction_)
     {
         return std::atan2(direction_.x, direction_.z) * RADIANS_TO_DEGREES;
@@ -64,7 +108,7 @@ namespace
         float normalizedTime_,
         const MotionWarpPreset& preset_)
     {
-        // 現状は開始〜終了範囲内だけ1.0で補正する。将来カーブ化する時の入口。
+        // 区間外の補正を止め、追加補正カーブは要求の進行率で別途評価する。
         const float start_ = std::clamp(preset_.startNormalizedTime, 0.0f, 1.0f);
         const float end_ = std::clamp(preset_.endNormalizedTime, start_, 1.0f);
         if (normalizedTime_ < start_ || normalizedTime_ > end_) return 0.0f;
@@ -272,6 +316,58 @@ void MotionWarpComponent::Play(const std::string& presetName_)
     }
 }
 
+void MotionWarpComponent::SetRegisterGlobalActions(bool enabled_)
+{
+    if (registerGlobalActions == enabled_) return;
+    const bool registered_ = actionsRegistered;
+    UnregisterActions();
+    registerGlobalActions = enabled_;
+    if (registered_) RegisterActions();
+}
+
+void MotionWarpComponent::AddPresetIfMissing(const MotionWarpPreset& preset_)
+{
+    if (!FindPreset(preset_.presetName)) presets.push_back(preset_);
+}
+
+bool MotionWarpComponent::PlayForTarget(const std::string& presetName_,
+    const std::shared_ptr<GameObject>& target_, const DirectX::XMFLOAT3& plannedRootMotion_,
+    float stopDistance_, float startNormalizedTime_, float endNormalizedTime_, const DirectX::XMFLOAT3* fixedTargetPosition_,
+    std::function<bool(const DirectX::XMFLOAT3&, const DirectX::XMFLOAT3&)> pathValidator_,
+    float priorRotationCorrectionDegrees_)
+{
+    BS_PROFILE_SCOPE("MotionWarpComponent::PlayForTarget");
+    Stop();
+    const auto owner_ = GetGameObject();
+    const auto preset_ = FindPreset(presetName_);
+    if (!IsEnabled() || !preset_ || !owner_ || !owner_->transform || !target_ || !target_->transform) return false;
+    // 保存プリセットは書き換えず、判定開始時刻とColliderに応じた停止距離だけ要求へ反映する。
+    explicitTargetPreset = *preset_;
+    explicitTargetPreset.startNormalizedTime = (std::max)(preset_->startNormalizedTime, startNormalizedTime_);
+    explicitTargetPreset.rotationStartNormalizedTime = (std::max)(preset_->rotationStartNormalizedTime, startNormalizedTime_);
+    explicitTargetPreset.endNormalizedTime = (std::min)(preset_->endNormalizedTime, endNormalizedTime_);
+    explicitTargetPreset.rotationEndNormalizedTime = (std::min)(preset_->rotationEndNormalizedTime, endNormalizedTime_);
+    explicitTargetPreset.targetDistance = (std::max)(preset_->targetDistance, stopDistance_);
+    if (explicitTargetPreset.endNormalizedTime <= explicitTargetPreset.startNormalizedTime) return false;
+    request = {};
+    request.requestName = presetName_;
+    request.presetName = presetName_;
+    request.targetObject = target_;
+    request.explicitTarget = true;
+    // 予備動作で消費した旋回量も含め、同じ攻撃で最大角度を使い直さない。
+    request.accumulatedRotationCorrectionDegrees = std::clamp(priorRotationCorrectionDegrees_, 0.0f, preset_->maximumRotationDegrees);
+    request.maintainStopDistance = true;
+    request.targetLocked = preset_->lockTargetOnStart || fixedTargetPosition_ != nullptr;
+    request.startPosition = owner_->transform->GetWorldPosition();
+    request.targetPosition = fixedTargetPosition_ ? *fixedTargetPosition_ : target_->transform->GetWorldPosition();
+    request.initialTargetPosition = request.targetPosition;
+    request.plannedRootMotion = plannedRootMotion_;
+    request.pathValidator = std::move(pathValidator_);
+    request.active = true;
+    debugInactiveReason.clear();
+    return true;
+}
+
 void MotionWarpComponent::Stop(const std::string& requestName_)
 {
     if (!requestName_.empty() && request.requestName != requestName_)
@@ -280,6 +376,7 @@ void MotionWarpComponent::Stop(const std::string& requestName_)
     }
 
     request.active = false;
+    request.maintainStopDistance = false;
 }
 
 void MotionWarpComponent::Clear()
@@ -380,14 +477,26 @@ MotionWarpResult MotionWarpComponent::ApplyRootMotionWarp(
     debugAppliedPositionScale = 1.0f;
     debugAppliedYawDegrees = 0.0f;
 
-    if (!request.active)
+    // 追加移動と旋回を終了した後も、同じPhaseの自然なRootMotionに停止円だけを適用する。
+    auto limitCompletedWarp_ = [&]()
     {
+        if (!IsEnabled() || !request.explicitTarget || !request.maintainStopDistance || !explicitTargetPreset.warpPosition || explicitTargetPreset.positionMode == MOTION_WARP_POSITION_MODE::NONE) return;
+        const auto owner_ = GetGameObject();
+        const auto target_ = request.targetObject.lock();
+        if (!owner_ || !owner_->transform || !target_ || !target_->transform) return;
+        result_.positionWarped = LimitRootMotionToStopDistance(result_.rootMotionDelta.deltaPosition,
+            owner_->transform->GetWorldPosition(), target_->transform->GetWorldPosition(), explicitTargetPreset.targetDistance);
+        debugWarpedDelta = result_.rootMotionDelta.deltaPosition;
+    };
+    if (!IsEnabled() || !request.active)
+    {
+        limitCompletedWarp_();
         debugInactiveReason = "Inactive";
         return result_;
     }
 
-    // アニメーション時間がプリセットのワープ区間外なら、RootMotionをそのまま返す。
-    const MotionWarpPreset* preset_ = FindPreset(request.presetName);
+    // アニメーション時間で補正窓を判定し、終了後は必要な停止距離制限だけを残す。
+    const MotionWarpPreset* preset_ = request.explicitTarget ? &explicitTargetPreset : FindPreset(request.presetName);
     if (!preset_)
     {
         request.active = false;
@@ -397,12 +506,17 @@ MotionWarpResult MotionWarpComponent::ApplyRootMotionWarp(
 
     request.normalizedTime = std::clamp(normalizedTime_, 0.0f, 1.0f);
     const float weight_ = CalculateWarpWeight(request.normalizedTime, *preset_);
-    if (weight_ <= 0.0f)
+    const bool facingWindow_ = request.explicitTarget && preset_->warpRotation &&
+        request.normalizedTime >= preset_->rotationStartNormalizedTime &&
+        request.normalizedTime <= preset_->rotationEndNormalizedTime;
+    if (weight_ <= 0.0f && !facingWindow_)
     {
         debugInactiveReason = "Outside time";
         if (request.normalizedTime > preset_->endNormalizedTime)
         {
             request.active = false;
+            request.targetLocked = true;
+            limitCompletedWarp_();
         }
         return result_;
     }
@@ -429,8 +543,28 @@ MotionWarpResult MotionWarpComponent::ApplyRootMotionWarp(
 
     if (target_ && target_->transform)
     {
-        // ターゲットが動く相手でも追従できるよう、毎フレーム現在位置を取り直す。
-        request.targetPosition = target_->transform->GetWorldPosition();
+        if (request.explicitTarget)
+        {
+            // 予備動作中の小さな移動だけを追い、回避で制限を超えた時点で最後の位置を固定する。
+            if (!request.targetLocked && request.normalizedTime >= preset_->lockTargetNormalizedTime) request.targetLocked = true;
+            if (!request.targetLocked)
+            {
+                const auto candidate_ = target_->transform->GetWorldPosition();
+                const DirectX::XMFLOAT3 travel_{ candidate_.x - request.initialTargetPosition.x, 0.0f, candidate_.z - request.initialTargetPosition.z };
+                DirectX::XMFLOAT3 initialDirection_{ request.initialTargetPosition.x - request.startPosition.x, 0.0f, request.initialTargetPosition.z - request.startPosition.z };
+                DirectX::XMFLOAT3 candidateDirection_{ candidate_.x - request.startPosition.x, 0.0f, candidate_.z - request.startPosition.z };
+                const bool hasDirections_ = NormalizeHorizontal(initialDirection_) && NormalizeHorizontal(candidateDirection_);
+                const float angle_ = hasDirections_ ? std::acos(std::clamp(initialDirection_.x * candidateDirection_.x + initialDirection_.z * candidateDirection_.z, -1.0f, 1.0f)) * RADIANS_TO_DEGREES : 180.0f;
+                if (GetHorizontalLength(travel_) <= preset_->maximumTargetTravelDistance && angle_ <= preset_->maximumTargetTravelAngleDegrees)
+                    request.targetPosition = candidate_;
+                else request.targetLocked = true;
+            }
+        }
+        else
+        {
+            // 従来のPlayer要求は既存の追従経路を維持する。
+            request.targetPosition = target_->transform->GetWorldPosition();
+        }
     }
 
     const DirectX::XMFLOAT3 ownerPosition_ = owner_->transform->GetWorldPosition();
@@ -441,11 +575,24 @@ MotionWarpResult MotionWarpComponent::ApplyRootMotionWarp(
         request.targetPosition.z - ownerPosition_.z
     };
     const float targetDistance_ = GetHorizontalLength(toTarget_);
+    const bool limitPosition_ = (!request.explicitTarget || weight_ > 0.0f) && preset_->warpPosition &&
+        preset_->positionMode != MOTION_WARP_POSITION_MODE::NONE;
+    if (targetDistance_ > preset_->maximumWarpTargetDistance)
+    {
+        debugInactiveReason = "Target distance rejected";
+        return result_;
+    }
     if (targetDistance_ < preset_->minimumTargetDistance ||
-        targetDistance_ > preset_->maximumWarpTargetDistance ||
         !NormalizeHorizontal(toTarget_))
     {
-        // 近すぎる/遠すぎる対象への補正は不自然になりやすいため、距離条件で弾く。
+        // 方向補正できない近距離でも、停止距離の内側へ進む成分は制限する。
+        if (limitPosition_)
+        {
+            result_.positionWarped = LimitRootMotionToStopDistance(
+                result_.rootMotionDelta.deltaPosition,
+                ownerPosition_, request.targetPosition, preset_->targetDistance);
+            debugWarpedDelta = result_.rootMotionDelta.deltaPosition;
+        }
         debugInactiveReason = "Target distance rejected";
         return result_;
     }
@@ -458,8 +605,11 @@ MotionWarpResult MotionWarpComponent::ApplyRootMotionWarp(
         request.targetPosition.z - toTarget_.z * preset_->targetDistance
     };
 
-    if (preset_->warpPosition &&
-        preset_->positionMode != MOTION_WARP_POSITION_MODE::NONE)
+    // 後退や横移動を接近方向へ曲げないよう、元のRootMotionが対象へ向かう場合だけ補正する。
+    const float originalApproach_ =
+        rootMotionDelta_.deltaPosition.x * toTarget_.x +
+        rootMotionDelta_.deltaPosition.z * toTarget_.z;
+    if ((!request.explicitTarget || preset_->positionMode != MOTION_WARP_POSITION_MODE::TARGET_END_POSITION) && limitPosition_ && originalApproach_ > 0.0f)
     {
         DirectX::XMFLOAT3 delta_
         {
@@ -549,6 +699,85 @@ MotionWarpResult MotionWarpComponent::ApplyRootMotionWarp(
         }
     }
 
+    if (request.explicitTarget && limitPosition_ && preset_->positionMode == MOTION_WARP_POSITION_MODE::TARGET_END_POSITION)
+    {
+        // 区間全体の予定RootMotionに不足する量だけを足し、元の毎フレーム移動は残す。
+        DirectX::XMFLOAT3 startDirection_{ request.targetPosition.x - request.startPosition.x, 0.0f, request.targetPosition.z - request.startPosition.z };
+        const float startDistance_ = GetHorizontalLength(startDirection_);
+        if (NormalizeHorizontal(startDirection_))
+        {
+            const float neededDistance_ = (std::max)(0.0f, startDistance_ - preset_->targetDistance);
+            const float plannedApproach_ = request.plannedRootMotion.x * startDirection_.x + request.plannedRootMotion.z * startDirection_.z;
+            DirectX::XMFLOAT3 totalCorrection_{ 0.0f, 0.0f, 0.0f };
+            if (startDistance_ > preset_->targetDistance + plannedApproach_)
+            {
+                totalCorrection_ = { startDirection_.x * neededDistance_ - request.plannedRootMotion.x, 0.0f,
+                    startDirection_.z * neededDistance_ - request.plannedRootMotion.z };
+                const float length_ = GetHorizontalLength(totalCorrection_);
+                const float maximum_ = preset_->maximumTotalPositionCorrection * preset_->positionStrength;
+                if (length_ > maximum_ && length_ > 0.0001f)
+                {
+                    totalCorrection_.x *= maximum_ / length_;
+                    totalCorrection_.z *= maximum_ / length_;
+                }
+            }
+            float progress_ = std::clamp((request.normalizedTime - preset_->startNormalizedTime) /
+                (std::max)(preset_->endNormalizedTime - preset_->startNormalizedTime, 0.0001f), 0.0f, 1.0f);
+            const auto curve_ = owner_->GetComponent<CurveComponent>();
+            if (curve_ && !preset_->positionCorrectionCurveName.empty() && curve_->HasTrack(preset_->positionCorrectionCurveName))
+                progress_ = std::clamp(curve_->GetValue(preset_->positionCorrectionCurveName, progress_), 0.0f, 1.0f);
+            DirectX::XMFLOAT3 correction_{ totalCorrection_.x * progress_ - request.appliedPlannedCorrection.x, 0.0f,
+                totalCorrection_.z * progress_ - request.appliedPlannedCorrection.z };
+            const float length_ = GetHorizontalLength(correction_);
+            const float remaining_ = (std::max)(0.0f, preset_->maximumTotalPositionCorrection - request.accumulatedPositionCorrection);
+            const float limit_ = (std::min)(remaining_, (std::min)(preset_->maximumPositionCorrectionPerFrame,
+                preset_->maximumPositionCorrectionPerSecond * (std::max)(deltaTime_, 0.0f)));
+            if (length_ > limit_ && length_ > 0.0001f)
+            {
+                correction_.x *= limit_ / length_;
+                correction_.z *= limit_ / length_;
+            }
+            result_.rootMotionDelta.deltaPosition.x += correction_.x;
+            result_.rootMotionDelta.deltaPosition.z += correction_.z;
+            request.appliedPlannedCorrection.x += correction_.x;
+            request.appliedPlannedCorrection.z += correction_.z;
+            request.accumulatedPositionCorrection += GetHorizontalLength(correction_);
+            result_.positionWarped = GetHorizontalLength(correction_) > 0.0f;
+        }
+    }
+
+    // 吸い付き補正の上限とは独立して最終差分を制限し、大きなDeltaでも停止円を越えさせない。
+    if (limitPosition_ && LimitRootMotionToStopDistance(
+        result_.rootMotionDelta.deltaPosition,
+        ownerPosition_, request.targetPosition, preset_->targetDistance))
+    {
+        result_.positionWarped = true;
+    }
+
+    // 壁や地面のない経路が生じた場合は補正を停止し、実移動は通常のCharacterMovementに任せる。
+    if (request.explicitTarget && request.pathValidator)
+    {
+        const DirectX::XMFLOAT3 destination_{ ownerPosition_.x + result_.rootMotionDelta.deltaPosition.x,
+            ownerPosition_.y, ownerPosition_.z + result_.rootMotionDelta.deltaPosition.z };
+        if (!request.pathValidator(ownerPosition_, destination_))
+        {
+            request.active = false;
+            result_.rootMotionDelta.deltaPosition.x = 0.0f;
+            result_.rootMotionDelta.deltaPosition.z = 0.0f;
+            debugInactiveReason = "Warp path blocked or unsupported";
+            debugWarpedDelta = result_.rootMotionDelta.deltaPosition;
+            return result_;
+        }
+    }
+    float rotationWeight_ = weight_;
+    if (request.explicitTarget)
+    {
+        rotationWeight_ = facingWindow_ ? 1.0f : 0.0f;
+        if (request.normalizedTime > preset_->rotationFullStrengthEndNormalizedTime)
+            rotationWeight_ *= std::clamp((preset_->rotationEndNormalizedTime - request.normalizedTime) /
+                (std::max)(preset_->rotationEndNormalizedTime - preset_->rotationFullStrengthEndNormalizedTime, 0.0001f), 0.0f, 1.0f);
+    }
+
     if (preset_->warpRotation &&
         preset_->rotationMode == MOTION_WARP_ROTATION_MODE::FACE_TARGET)
     {
@@ -571,7 +800,7 @@ MotionWarpResult MotionWarpComponent::ApplyRootMotionWarp(
                 preset_->maximumRotationDegreesPerSecond *
                 (std::max)(deltaTime_, 0.0f) *
                 preset_->rotationStrength *
-                weight_;
+                rotationWeight_;
             const float allowedDegrees_ =
                 (std::min)((std::max)(remainingDegrees_, 0.0f), frameDegrees_);
             const float appliedDegrees_ =
@@ -602,7 +831,9 @@ void MotionWarpComponent::RegisterActions()
 {
     if (actionsRegistered) return;
     // アニメーションイベントや外部スクリプトから、名前指定でワープを開始/停止できるようにする。
-    ActionRegistry& registry_ = ActionRegistry::Instance();
+    const auto owner_ = GetGameObject();
+    if (!owner_) return;
+    ActionRegistry& registry_ = registerGlobalActions ? ActionRegistry::Instance() : owner_->GetLocalRegistry();
     registry_.RegisterAction("MotionWarp", "MotionWarp.Play", [this]() { Play(); });
     registry_.RegisterAction("MotionWarp", "MotionWarp.Stop", [this]() { Stop(); });
     registry_.RegisterAction("MotionWarp", "MotionWarp.Clear", [this]() { Clear(); });
@@ -612,7 +843,9 @@ void MotionWarpComponent::RegisterActions()
 void MotionWarpComponent::UnregisterActions()
 {
     if (!actionsRegistered) return;
-    ActionRegistry& registry_ = ActionRegistry::Instance();
+    const auto owner_ = GetGameObject();
+    if (!registerGlobalActions && !owner_) { actionsRegistered = false; return; }
+    ActionRegistry& registry_ = registerGlobalActions ? ActionRegistry::Instance() : owner_->GetLocalRegistry();
     registry_.RemoveAction("MotionWarp", "MotionWarp.Play");
     registry_.RemoveAction("MotionWarp", "MotionWarp.Stop");
     registry_.RemoveAction("MotionWarp", "MotionWarp.Clear");
@@ -633,6 +866,9 @@ void MotionWarpComponent::Gui()
     ImGui::Text("Yaw Delta: %.3f", debugAppliedYawDegrees);
     ImGui::Text("Accum Position: %.3f", request.accumulatedPositionCorrection);
     ImGui::Text("Accum Rotation: %.3f", request.accumulatedRotationCorrectionDegrees);
+    ImGui::Text("Start: %.3f, %.3f, %.3f", request.startPosition.x, request.startPosition.y, request.startPosition.z);
+    ImGui::Text("Target: %.3f, %.3f, %.3f / Locked: %s", request.targetPosition.x, request.targetPosition.y, request.targetPosition.z, request.targetLocked ? "YES" : "NO");
+    ImGui::Text("Normalized Time: %.3f", request.normalizedTime);
 
     ImGui::SeparatorText("Presets");
     ImGui::InputText("Default Preset", &defaultPresetName);
@@ -661,6 +897,14 @@ void MotionWarpComponent::Gui()
         ImGui::Checkbox("Stop When Target Invalid", &preset_.stopWhenTargetInvalid);
         ImGui::Checkbox("Continue Across Combo", &preset_.continueAcrossCombo);
         ImGui::Checkbox("Use Unscaled Time", &preset_.useUnscaledTime);
+        ImGui::DragFloat("MaximumPositionCorrectionPerSecond", &preset_.maximumPositionCorrectionPerSecond, 0.01f, 0.0f, 180.0f);
+        ImGui::DragFloat("LockTargetNormalizedTime", &preset_.lockTargetNormalizedTime, 0.01f, 0.0f, 1.0f);
+        ImGui::DragFloat("MaximumTargetTravelDistance", &preset_.maximumTargetTravelDistance, 0.01f, 0.0f, 180.0f);
+        ImGui::DragFloat("MaximumTargetTravelAngleDegrees", &preset_.maximumTargetTravelAngleDegrees, 0.01f, 0.0f, 180.0f);
+        ImGui::DragFloat("RotationStartNormalizedTime", &preset_.rotationStartNormalizedTime, 0.01f, 0.0f, 1.0f);
+        ImGui::DragFloat("RotationFullStrengthEndNormalizedTime", &preset_.rotationFullStrengthEndNormalizedTime, 0.01f, 0.0f, 1.0f);
+        ImGui::DragFloat("RotationEndNormalizedTime", &preset_.rotationEndNormalizedTime, 0.01f, 0.0f, 1.0f);
+        ImGui::InputText("Position Correction Curve", &preset_.positionCorrectionCurveName);
         ImGui::TreePop();
     }
 }
@@ -669,6 +913,7 @@ void MotionWarpComponent::Serialize(nlohmann::json& json_) const
 {
     // プリセットはアニメーションごとの調整値なので、コンポーネント設定としてまとめて保存する。
     json_["DefaultPresetName"] = defaultPresetName;
+    json_["RegisterGlobalActions"] = registerGlobalActions;
     nlohmann::json presetsJson_ = nlohmann::json::array();
     for (const MotionWarpPreset& preset_ : presets)
     {
@@ -698,7 +943,15 @@ void MotionWarpComponent::Serialize(nlohmann::json& json_) const
                 { "LockTargetOnStart", preset_.lockTargetOnStart },
                 { "StopWhenTargetInvalid", preset_.stopWhenTargetInvalid },
                 { "ContinueAcrossCombo", preset_.continueAcrossCombo },
-                { "UseUnscaledTime", preset_.useUnscaledTime }
+                { "UseUnscaledTime", preset_.useUnscaledTime },
+                { "MaximumPositionCorrectionPerSecond", preset_.maximumPositionCorrectionPerSecond },
+                { "LockTargetNormalizedTime", preset_.lockTargetNormalizedTime },
+                { "MaximumTargetTravelDistance", preset_.maximumTargetTravelDistance },
+                { "MaximumTargetTravelAngleDegrees", preset_.maximumTargetTravelAngleDegrees },
+                { "RotationStartNormalizedTime", preset_.rotationStartNormalizedTime },
+                { "RotationFullStrengthEndNormalizedTime", preset_.rotationFullStrengthEndNormalizedTime },
+                { "RotationEndNormalizedTime", preset_.rotationEndNormalizedTime },
+                { "PositionCorrectionCurveName", preset_.positionCorrectionCurveName }
             });
     }
     json_["Presets"] = presetsJson_;
@@ -706,7 +959,11 @@ void MotionWarpComponent::Serialize(nlohmann::json& json_) const
 
 void MotionWarpComponent::Deserialize(const nlohmann::json& json_)
 {
+    const bool registered_ = actionsRegistered;
+    UnregisterActions();
+    Clear();
     defaultPresetName = json_.value("DefaultPresetName", defaultPresetName);
+    registerGlobalActions = json_.value("RegisterGlobalActions", true);
     // 保存済みプリセットを読み直し、不正値は範囲内へ丸めてRootMotion補正の暴走を防ぐ。
     presets.clear();
     if (json_.contains("Presets") && json_["Presets"].is_array())
@@ -742,10 +999,19 @@ void MotionWarpComponent::Deserialize(const nlohmann::json& json_)
             preset_.stopWhenTargetInvalid = presetJson_.value("StopWhenTargetInvalid", preset_.stopWhenTargetInvalid);
             preset_.continueAcrossCombo = presetJson_.value("ContinueAcrossCombo", preset_.continueAcrossCombo);
             preset_.useUnscaledTime = presetJson_.value("UseUnscaledTime", preset_.useUnscaledTime);
+            preset_.maximumPositionCorrectionPerSecond = (std::max)(presetJson_.value("MaximumPositionCorrectionPerSecond", 24.0f), 0.0f);
+            preset_.lockTargetNormalizedTime = std::clamp(presetJson_.value("LockTargetNormalizedTime", 0.0f), 0.0f, 1.0f);
+            preset_.maximumTargetTravelDistance = (std::max)(presetJson_.value("MaximumTargetTravelDistance", 0.6f), 0.0f);
+            preset_.maximumTargetTravelAngleDegrees = std::clamp(presetJson_.value("MaximumTargetTravelAngleDegrees", 20.0f), 0.0f, 180.0f);
+            preset_.rotationStartNormalizedTime = std::clamp(presetJson_.value("RotationStartNormalizedTime", 0.0f), 0.0f, 1.0f);
+            preset_.rotationFullStrengthEndNormalizedTime = std::clamp(presetJson_.value("RotationFullStrengthEndNormalizedTime", 0.2f), 0.0f, 1.0f);
+            preset_.rotationEndNormalizedTime = std::clamp(presetJson_.value("RotationEndNormalizedTime", 0.4f), 0.0f, 1.0f);
+            preset_.positionCorrectionCurveName = presetJson_.value("PositionCorrectionCurveName", std::string());
             presets.push_back(preset_);
         }
     }
     EnsureDefaultPresets();
+    if (registered_) RegisterActions();
 }
 
 REGISTER_COMPONENT(MotionWarpComponent, "MotionWarpComponent")

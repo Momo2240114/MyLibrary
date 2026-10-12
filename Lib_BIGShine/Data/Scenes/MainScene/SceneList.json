@@ -183,7 +183,24 @@
         "IntroFogGate",
         "IntroGateMist",
         "IntroGateLight",
-        "IntroRoarAirCone"
+        "IntroRoarAirCone",
+        "DragonDeathTransform",
+        "PlayerEventTransform",
+        "HumanBossSpawnTransform",
+        "HumanBossClashTransform",
+        "PlayerKnockdownTransform",
+        "Phase2Environment",
+        "MudSurroundTransform0",
+        "MudScatterTransform0",
+        "MudSurroundTransform1",
+        "MudScatterTransform1",
+        "MudSurroundTransform2",
+        "MudScatterTransform2",
+        "MudSurroundTransform3",
+        "MudScatterTransform3",
+        "Phase2Music",
+        "PhaseTransition",
+        "MudVortexTransform"
     ],
     "SceneName": "MainScene"
 }

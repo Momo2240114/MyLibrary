@@ -197,6 +197,8 @@ void ColorFilterDirector::RegisterActions()
     // PostProcessカテゴリにColor_0, Color_1...として登録する。
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_) return;
+    // 途中再生を中止した場合も、暗転を残さず通常の色へ戻せるようにする。
+    owner_->RegisterGlobalAction("PostProcess", "ResetColor", [this]() { ResetToDefault(); });
     for (size_t index_ = 0; index_ < editorWaypoints.size(); ++index_)
     {
         owner_->RegisterGlobalAction("PostProcess", "Color_" + std::to_string(index_), [this, index_]()

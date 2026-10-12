@@ -3,6 +3,8 @@
 #include "AIBehaviorGraph.h"
 #include "Engine/GamePlay/Core/Component/ComponentBase.h"
 
+#include <cstdint>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -74,6 +76,10 @@ private:
 
     // 優先的にTargetとして検索するGameObject名。
     std::string targetName = "Player";
+    std::weak_ptr<GameObject> cachedTarget;
+    std::string cachedTargetName;
+    std::uint64_t cachedTargetRegistrationSerial = 0;
+    bool cachedTargetIsNamed = false;
 
     // Graph保存・読み込み結果をImGuiへ表示する文字列。
     std::string statusText;

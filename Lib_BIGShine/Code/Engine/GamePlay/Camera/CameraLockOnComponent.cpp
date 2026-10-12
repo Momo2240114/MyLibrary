@@ -158,6 +158,13 @@ void CameraLockOnComponent::LateUpdate(float deltaTime_)
 
     const std::shared_ptr<GameObject> player_ = playerTarget.lock();
     const std::shared_ptr<GameObject> enemy_ = lockOnTarget.lock();
+    const auto eligibilityTarget_ = lockOnFocusTarget.lock();
+    const auto eligibility_ = eligibilityTarget_ ? eligibilityTarget_->GetComponent<LockOnTargetComponent>() : nullptr;
+    if (enemy_ && (!enemy_->IsCombatReady() || (eligibility_ && !eligibility_->IsAvailable())))
+    {
+        ForgetObject(enemy_);
+        return;
+    }
     // フォーカス部位が無効になった場合は、同じ敵の別LockOnTargetや本体へ自動で戻す。
     if (!ResolveFocusTargetFallback())
     {
@@ -238,6 +245,25 @@ void CameraLockOnComponent::LateUpdate(float deltaTime_)
             : DirectX::XMFLOAT3{ 0.0f, 0.0f, -1.0f };
     }
 
+    if (enableCloseRangeDistanceGuard)
+    {
+        // 敵がPlayerを横切っても、近距離では一度のFrameで背面方向を反転させない。
+        if (hasCloseRangeBackDirection && horizontalDistance_ < closeDistance)
+        {
+            if (horizontalDistance_ <= closeRangeDirectionHoldDistance) backDirection_ = closeRangeBackDirection;
+            else
+            {
+                const float previousYaw_ = std::atan2(closeRangeBackDirection.x, closeRangeBackDirection.z);
+                const float desiredYaw_ = std::atan2(backDirection_.x, backDirection_.z);
+                const float differenceYaw_ = std::remainder(desiredYaw_ - previousYaw_, DirectX::XM_2PI);
+                const float limit_ = (std::max)(0.0f, closeRangeOrbitTurnSpeed) * DirectX::XM_PI / 180.0f * (std::max)(deltaTime_, 0.0f);
+                const float yaw_ = previousYaw_ + std::clamp(differenceYaw_, -limit_, limit_);
+                backDirection_ = { std::sin(yaw_), 0.0f, std::cos(yaw_) };
+            }
+        }
+        closeRangeBackDirection = backDirection_;
+        hasCloseRangeBackDirection = true;
+    }
     const DirectX::XMFLOAT3 sideDirection_
     {
         -backDirection_.z,
@@ -297,6 +323,21 @@ void CameraLockOnComponent::LateUpdate(float deltaTime_)
             ScaleFloat3(
                 SubtractFloat3(enemyPosition_, playerPosition_),
                 compositionCorrection.focusTargetRateOffset * compositionWeight_));
+    }
+    if (enableCloseRangeDistanceGuard)
+    {
+        // 攻撃演出の構図補正後にも最短距離と高さを守り、地面との衝突で視点が潰れるのを防ぐ。
+        const float x_ = desiredPosition_.x - playerPosition_.x;
+        const float z_ = desiredPosition_.z - playerPosition_.z;
+        const float horizontalLength_ = std::sqrt(x_ * x_ + z_ * z_);
+        const float minimum_ = (std::max)(0.1f, minCameraDistance);
+        if (horizontalLength_ < minimum_)
+        {
+            const float scale_ = horizontalLength_ > 0.0001f ? minimum_ / horizontalLength_ : 0.0f;
+            desiredPosition_.x = playerPosition_.x + (scale_ > 0.0f ? x_ * scale_ : backDirection_.x * minimum_);
+            desiredPosition_.z = playerPosition_.z + (scale_ > 0.0f ? z_ * scale_ : backDirection_.z * minimum_);
+        }
+        desiredPosition_.y = (std::max)(desiredPosition_.y, playerPosition_.y + (std::max)(0.0f, closeRangeMinimumHeight));
     }
     DirectX::XMFLOAT3 finalDesiredPosition_ = desiredPosition_;
     DirectX::XMFLOAT3 finalDesiredLookAt_ = desiredLookAt_;
@@ -697,6 +738,17 @@ void CameraLockOnComponent::SetLockOnTarget(
     ResetTracking();
 }
 
+void CameraLockOnComponent::ForgetObject(const std::shared_ptr<GameObject>& object_)
+{
+    if (lockOnTarget.lock() != object_ && lockOnFocusTarget.lock() != object_) return;
+    lockOnTarget.reset();
+    lockOnFocusTarget.reset();
+    lockOnTargetName.clear();
+    lockOnFocusTargetName.clear();
+    SetLockOnEnabled(false);
+    ResetTracking();
+}
+
 void CameraLockOnComponent::SetLockOnFocusTarget(
     const std::shared_ptr<GameObject>& focusTarget_)
 {
@@ -820,7 +872,7 @@ CameraLockOnComponent::CollectLockOnCandidates(
         }
         const std::shared_ptr<LockOnTargetComponent> lockTarget_ =
             candidate_->GetComponent<LockOnTargetComponent>();
-        if (!lockTarget_ || !lockTarget_->IsLockOnEnabled()) continue;
+        if (!lockTarget_ || !lockTarget_->IsAvailable()) continue;
 
         const std::shared_ptr<GameObject> combatOwner_ =
             lockTarget_->GetCombatOwner();
@@ -1577,6 +1629,7 @@ void CameraLockOnComponent::RegisterActions()
 
 void CameraLockOnComponent::ResetTracking()
 {
+    hasCloseRangeBackDirection = false;
     // ターゲットや有効状態が変わったとき、補間履歴、壁カメラ状態、入力ラッチをまとめてリセットする。
     hasTrackingPose = false;
     hasCollisionComposition = false;
@@ -2242,6 +2295,10 @@ void CameraLockOnComponent::Gui()
 
 
     ImGui::DragFloat("Max Distance", &maxDistance, 0.1f, 0.1f, 200.0f);
+    ImGui::Checkbox("Close Range Distance Guard", &enableCloseRangeDistanceGuard);
+    ImGui::DragFloat("Close Range Direction Hold Distance", &closeRangeDirectionHoldDistance, 0.05f, 0.0f, 5.0f);
+    ImGui::DragFloat("Close Range Orbit Turn Speed", &closeRangeOrbitTurnSpeed, 1.0f, 0.0f, 360.0f);
+    ImGui::DragFloat("Close Range Minimum Height", &closeRangeMinimumHeight, 0.05f, 0.0f, 10.0f);
     ImGui::DragFloat("Base Distance", &baseDistance, 0.1f, 0.1f, 100.0f);
     ImGui::DragFloat("Distance Scale", &distanceScale, 0.01f, 0.0f, 5.0f);
     ImGui::DragFloatRange2(
@@ -2433,6 +2490,10 @@ void CameraLockOnComponent::Serialize(nlohmann::json& json_) const
     };
     json_["targetOffset"] = { targetOffset.x, targetOffset.y, targetOffset.z };
     json_["maxDistance"] = maxDistance;
+    json_["enableCloseRangeDistanceGuard"] = enableCloseRangeDistanceGuard;
+    json_["closeRangeDirectionHoldDistance"] = closeRangeDirectionHoldDistance;
+    json_["closeRangeOrbitTurnSpeed"] = closeRangeOrbitTurnSpeed;
+    json_["closeRangeMinimumHeight"] = closeRangeMinimumHeight;
     json_["baseDistance"] = baseDistance;
     json_["distanceScale"] = distanceScale;
     json_["minCameraDistance"] = minCameraDistance;
@@ -2467,8 +2528,10 @@ void CameraLockOnComponent::Serialize(nlohmann::json& json_) const
     json_["collisionFovInterpolationSpeed"] =
         collisionFovInterpolationSpeed;
     json_["enableCircularArenaCamera"] = enableCircularArenaCamera;
-    json_["arenaCenter"] = { arenaCenter.x, arenaCenter.y, arenaCenter.z };
-    json_["arenaRadius"] = arenaRadius;
+    // 演出途中のScene保存でも、通常戦闘用の設定を侵食後の値で上書きしない。
+    const auto& savedArenaCenter_ = hasRuntimeArenaBounds ? originalArenaCenter : arenaCenter;
+    json_["arenaCenter"] = { savedArenaCenter_.x, savedArenaCenter_.y, savedArenaCenter_.z };
+    json_["arenaRadius"] = hasRuntimeArenaBounds ? originalArenaRadius : arenaRadius;
     json_["arenaCameraMargin"] = arenaCameraMargin;
     json_["wallCameraStartDistance"] = wallCameraStartDistance;
     json_["wallCameraDistance"] = wallCameraDistance;
@@ -2506,6 +2569,7 @@ void CameraLockOnComponent::Serialize(nlohmann::json& json_) const
 
 void CameraLockOnComponent::Deserialize(const nlohmann::json& json_)
 {
+    hasRuntimeArenaBounds = false;
     // 旧データや手編集データでも壊れにくいよう、既定値を入れながら読み込み後に範囲をクランプする。
     playerTargetName = json_.value("playerTargetName", std::string{});
     lockOnTargetName = json_.value("lockOnTargetName", std::string{});
@@ -2528,6 +2592,10 @@ void CameraLockOnComponent::Deserialize(const nlohmann::json& json_)
     loadFloat3_("playerBottomOffset", playerBottomOffset);
     loadFloat3_("targetOffset", targetOffset);
     maxDistance = json_.value("maxDistance", 28.0f);
+    enableCloseRangeDistanceGuard = json_.value("enableCloseRangeDistanceGuard", false);
+    closeRangeDirectionHoldDistance = (std::max)(0.0f, json_.value("closeRangeDirectionHoldDistance", 1.5f));
+    closeRangeOrbitTurnSpeed = (std::max)(0.0f, json_.value("closeRangeOrbitTurnSpeed", 90.0f));
+    closeRangeMinimumHeight = (std::max)(0.0f, json_.value("closeRangeMinimumHeight", 1.2f));
     baseDistance = json_.value("baseDistance", 7.0f);
     distanceScale = json_.value("distanceScale", 0.45f);
     minCameraDistance = json_.value("minCameraDistance", 6.0f);

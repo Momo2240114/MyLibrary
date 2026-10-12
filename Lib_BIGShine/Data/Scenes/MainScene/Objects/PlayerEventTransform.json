@@ -1,0 +1,26 @@
+{
+    "Name": "PlayerEventTransform",
+    "ParentName": "",
+    "Layer": 0,
+    "CollisionMask": 0,
+    "RequiredForSceneStart": true,
+    "Transform": {
+        "Pos": [
+            18,
+            -0.122791,
+            -30
+        ],
+        "Rot": [
+            0,
+            0,
+            0
+        ],
+        "Scale": [
+            1,
+            1,
+            1
+        ]
+    },
+    "Components": [],
+    "ColliderComponents": []
+}

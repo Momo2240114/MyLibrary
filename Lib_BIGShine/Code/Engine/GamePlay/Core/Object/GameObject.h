@@ -6,6 +6,7 @@
 #include <d3d11.h>
 #include <vector>
 #include <string>
+#include <utility>
 
 #include "Engine/GamePlay/Transform/Transform.h"
 #include "Engine/GamePlay/Core/Component/NameComponent.h"
@@ -54,7 +55,20 @@ public:
 
     // 自身が属するGameObjectManagerへのポインタ。
     GameObjectManager* manager = nullptr;
+private:
+    bool pendingDestroy = false;
+    bool combatReady = true;
+    std::vector<std::pair<std::string, std::string>> globalActions;
 public:
+    bool IsPendingDestroy() const { return pendingDestroy; }
+    bool IsCombatReady() const { return combatReady && !pendingDestroy; }
+    void SetCombatReady(bool ready_) { combatReady = ready_; }
+    // 削除予約時点で更新・戦闘・物理・Actionを停止する。複数回の通知は無視する。
+    void PrepareForDestroy();
+    // 起動待ちのPrefab階層全体が、演出Actionを受け取れる状態か判定する。
+    bool IsHierarchyReady();
+    // Objectに所属する、接頭辞なしのGlobal Actionも寿命管理の対象にする。
+    void RegisterNamedGlobalAction(const std::string& category_, const std::string& name_, const ActionRegistry::ActionFunc& function_);
     // このObjectを管理しているManagerへのアクセス。
     GameObjectManager& GetManager() const { return *manager; }
 
@@ -125,6 +139,8 @@ public:
         {
             components.push_back(comp);
         }
+
+        NotifyComponentCompositionChanged();
 
         if(collStartFlg)
         {
@@ -240,11 +256,13 @@ public:
     void Load(const nlohmann::json& j);
 
     void SetNoSaveObject() { saveFlg = false; };
-    void SetLayer(LayerType type) { layer = type; }
+    void SetLayer(LayerType type) { if (layer != type) { layer = type; NotifyComponentCompositionChanged(); } }
     LayerType GetLayer() const { return layer; }
     uint32_t GetLayerBit() const { return static_cast<uint32_t>(layer); }
 
 private:
+    // 一個体の構成変更だけを通知し、監視対象の再発見を毎Frameに持ち込まない。
+    void NotifyComponentCompositionChanged();
     void RegisterColliderComponent(const std::shared_ptr<ColliderComponent>& collider_);
     void UnregisterColliderComponent(ColliderComponent* collider_);
     void UnregisterAllColliderComponents();

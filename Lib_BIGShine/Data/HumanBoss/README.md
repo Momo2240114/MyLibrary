@@ -23,6 +23,18 @@ SHADOW / DRAGON_SHADOW / SPECIALは共通Skillの要求先として登録済み�
 
 実ファイルは既存AIと同じCode/Game/AI配下のHumanへ配置。Visual StudioではCode\Game\Logics\AI\Human Filterへ別途登録。実ファイルの移動は行っていない。
 
+## BehaviorTree Editor
+
+HumanBossは既存AIBehaviorGraphを実行する。判断をC++内の重み付き分岐だけで行わず、Data/AI/BehaviorGraph/HumanBoss.jsonの30ノードでCounter → Reaction → Reposition → Approach → Observation → Offense → Neutralの優先順を組んでいる。
+
+既存BehaviorTree EditorでHumanBossを選択すると、ノード・リンク・Blackboard条件・Wait・Action・目的別RandomSelectorを編集できる。実行ノードの強調表示とGraphの保存・読込・リセットに対応する。GraphはScene保存にも含め、外部AssetPathも保持する。保存済みSceneにGraphがあれば、その編集内容を優先する。
+
+ActionノードはHumanBoss Actionリストから選ぶ。終了通知はHumanBossAI / ActionEnded。Counterは成功予約がある場合だけ使用可能。Weightはツリー内の同じ目的の候補選択へ適用し、無効Phase、Cooldown、距離、直前行動、未登録Actionを除外する。
+
+近すぎる状況でも、観察時間が終われば攻撃定義の距離内でOffenseを選べる。最小戦闘距離を理由に後退を継続し続けず、攻撃開始に失敗した場合も観察時間を毎回延長しない。攻撃の有効距離が適正距離より短い場合は、その距離までApproachする。
+
+AI Inspectorには観察・距離調整の残り時間、通常攻撃2種のEnabled/Range/Cooldownと、Animation/Sequence/Collider不足などの具体的な開始不可理由を表示する。
+
 ## シーンへ配置する手順
 
 既存MainSceneのSceneListやObject JSONは変更していない。配置用JSONは通常のGameObject保存形式。
@@ -35,7 +47,7 @@ SHADOW / DRAGON_SHADOW / SPECIALは共通Skillの要求先として登録済み�
 6. ボスの剣はHumanBossWeapon、盾はHumanBossShieldとしてボス階層へ接続済み。ModelAttachmentもHumanBossを参照する。剣HitBoxのActionPrefixはSwordのままなので、既存AttackTemplateがボス自身の子階層から解決できる。
 7. 本体のCharacterCollider、HurtBox、GuardColliderと、カメラ候補用のLockOnTargetComponentは既存Componentを利用する。GuardColliderは初期無効、ボスのLayerはEnemy。HitReactionのDamageActionNameは既存Health_Hit、ReactionActionNameはHumanBossHit。
 
-ボスHPは1000。通常攻撃と反撃は既存WeakAttack01/WeakAttack02を利用するため、ダメージ・衝撃・斬撃色はその設定を引き継ぐ。黒泥マテリアルや影演出の最終見た目は未調整。
+ボスHPは1000。既存CombatStatsComponentのAttackPowerは開発用に10へ設定し、WeakAttack01/WeakAttack02の技倍率1.0／1.25を使って各打撃を10／12.5ダメージにし、追加したWeakAttack03の追撃は15ダメージにする。反撃もWeakAttack02を使用する。攻撃力Componentがない場合は旧Damage値100／125を直接使い、HP100のPlayerが初回被弾で死亡してAIの停止条件に入るため、配置用JSONにも攻撃力を明示する。衝撃・斬撃色は既存テンプレートを引き継ぐ。黒泥マテリアルや影演出の最終見た目は未調整。
 
 ## Player攻撃の検知
 
@@ -54,11 +66,31 @@ REACTION内だけで、BackDodge 40 / SideDodge 15 / Guard 20 / JustGuard 10 / N
 
 JustGuardは攻撃開始予定時刻の前後Just Guard Lead以内だけ候補になる。Phase 1では標準で無効、Phase 2/3で有効。Phase 1でも確認したい場合はJUST_GUARDとCOUNTER_ATTACKのPHASE_1 Enabledを有効にする。
 
-回避は既存CharacterMovementへ速度を予約し、DodgeInputをローカル座標へ変換する。無敵は専用Animationの既存HurtBoxInvincibleOn/Offイベントで受付時間だけ開く。通常Guardは共通SkillのEnter/ExitAction、JustGuardはParry_L_Seq内の既存GuardColliderイベントを利用する。
+回避はDodgeInputをローカル座標へ変換し、SS_Dodgeの水平RootMotionを既存CharacterMovementへ渡す。AIからの固定回避速度は加算しない。無敵は専用Animationの既存HurtBoxInvincibleOn/Offイベントで受付時間だけ開く。通常Guardは共通SkillのEnter/ExitAction、JustGuardはParry_L_Seq内の既存GuardColliderイベントを利用する。
 
-JustGuardSystemが実際の接触を成立させてOwnerのOnJustGuardを呼んだ場合だけ成功を保存する。REACTION正常終了時に、その成功からCOUNTER_ATTACKを開始する。通常攻撃抽選ではCounterを選ばず、外部のHumanBoss_COUNTER_ATTACK要求も受け付けない。
+JustGuardSystemが実際の接触を成立させてOwnerのOnJustGuardを呼んだ場合だけ成功を保存する。REACTION正常終了時に、その成功からCOUNTER_ATTACKを開始する。通常攻撃抽選ではCounterを選ばず、HumanBoss_COUNTER_ATTACK要求は成功通知が予約されている場合だけ受け付ける。
 
 側方回避の左右は現在の周回方向を使用する。壁・Arena中央を使う左右選択は未実装。
+
+## 通常コンボと予備動作
+
+NORMAL_ATTACK_Aは単発ではなく、0.55秒の予備動作 → SS_Attack1 → 0.18秒の間 → SS_Attack2の2連撃。
+NORMAL_ATTACK_Bは、0.8秒の予備動作 → SS_Attack2 → 0.22秒の間 → SS_Attack1 → 0.4秒のディレイ → SS_Attack3由来のHumanBossComboFinisherの3連撃。
+
+予備動作用HumanBossAttackTellは、既存Power_Attack_Start_Seq_0（index 60）を使用する。攻撃イベントは持たず、RootMotion移動は0。追加フィニッシャーはSS_Attack3（index 14）と既存WeakAttack03を使用し、Player専用イベントを除いている。コンボ全体が終了してからBehaviorTreeへ終了を返す。
+
+既存ActionSequenceにHumanBoss_WindupとHumanBoss_StrikeSetupを接続した。予備動作と攻撃間の待機ではPlayerを滑らかに追い、各打撃の開始時に向きを合わせる。振り始めた後は追尾せず、Playerが回避できるよう方向を固定する。中断時はSequenceの予約を止め、WindupEndで追尾とTelegraphActiveを閉じる。
+
+追加Curve Assetは次の5つ。
+
+- HumanBoss.WindupPoseSpeed：構えへ入る速度と溜め。
+- HumanBoss.SlashSpeedA / HumanBoss.SlashSpeedB：振り始めを遅くし、振り抜きを速くする。
+- HumanBoss.FinisherSpeed：追撃のディレイ感を付ける。
+- HumanBoss.AttackRootWeight：予備動作中の移動を0にし、振り抜き区間へRootMotionを集中する。
+
+再生速度カーブの最小値は0.35以上とし、時間が進まなくなる値0を使用していない。RootMotionの移動倍率は0を使用できる。CurveComponentのCurve Editorで調整し、Action DefinitionsのSkill Phaseで予備動作・攻撃間の待機秒数を調整する。Actorへ保存された編集済みTrackとSequenceは維持し、存在しない標準Track/SequenceだけStartで補う。
+
+開発用AttackPower 10の場合、Aは合計22.5、Bは合計37.5ダメージ（全段命中・倍率補正なし）。既存の攻撃テンプレートとPlayer側のデータは変更していない。
 
 ## Cooldownと連発防止
 
@@ -90,9 +122,22 @@ Data/Model/SwordPlayer/CombatGirls_Sword_Shield.gltfの実クリップを確認�
 - Counter: Parry_Counter_Attack_Seq、index 201。
 - 将来のExecution: Execution_03_Seq / Execution_Target_03_Seq、index 125 / 128。
 
-専用ライブラリではPlayerの入力受付、コンボ通知、カメラ操作、Player用JustDodgeイベントを除き、AttackTemplateと防御受付だけを残した。DodgeとCombat WalkのRootMotion移動は無効にし、AIの速度予約と二重加算されないようにしている。Attackは既存のRootMotion方針を引き継ぐ。
+専用ライブラリではPlayerの入力受付、コンボ通知、カメラ操作、Player用JustDodgeイベントを除き、AttackTemplateと防御受付だけを残した。通常攻撃・Counter・Dodgeは水平RootMotionを使う。地上行動のY移動は適用せず、重力や接地は既存Colliderに任せる。Combat Walk、待機、Guard、HitなどはRootMotion Scaleを0にし、移動を適用しない。RootMotionの処理自体とモデル内移動のCutは有効に保ち、見た目の移動がコード移動へ重ならないようにする。
 
 Counterの武器判定は既存WeakAttack02を0.2～0.5秒のイベントへ接続した仮調整値。実際の振りに合わせてSequencerで調整する。Counter用Animation名HumanBossCounterは、確認済みindex 201を指すボス専用State名。
+
+### RootMotionの移動担当
+
+- SS_Attack1 / SS_Attack2 / HumanBossCounter：X/Z移動を適用、Y移動は無効。現在のRootMotion Scaleは0.02を維持する。
+- SS_Dodge：X/Z移動を適用、Y移動は無効。既存Player用Dodgeと同じScale 0.05。AIは方向だけを指定し、標準Dodge Phaseは固定秒数ではなくAnimation終了で完了する。
+- HumanBossCombatWalkと待機・防御・被弾State：Scale 0、移動適用軸は無効、Visual Cutは有効。Walk/Strafeの実移動はAI速度から既存CharacterMovementへ渡す。
+- Shift用Stateを追加する場合もScale 0とVisual Cut有効にし、ShiftのAction/Component側で移動を行う。Shift本体は現在接続点のみ。
+
+Scale 0のStateでrootMotion.enableまでOffにすると、ModelAnimatorのVisual Cutも止まり、モデル内部の移動が残る。ボス専用Stateではenableを維持して移動倍率だけを0にする。保存済みHumanBossCombatWalkの個別State Assetも同じ設定に揃えた。
+
+RootMotionを使うSkill PhaseにForward SpeedやForward Speed Curveを同時指定した場合は、開始不可理由をInspectorへ表示する。片方だけで移動する。Dodgeの距離調整はAnimation EditorのSS_Dodge RootMotion Scaleを使用する。旧DodgeSpeed値は方向入力の作成にのみ残し、移動速度としては使用しない。
+
+ModelAnimatorのCrossFadeToでは、同じStateの再開始もRootMotion差分の基準を初期化する。前回の終端をループ境界として処理せず、再開始直後に残り移動を持ち越さない。
 
 ## 拡張方法
 
@@ -131,3 +176,7 @@ Debug表示はPhase/State/Action/Last Action/Target Distance、Reaction/Attack/D
 
 ビルドおよび実行確認は行っていません。
 コード上で確認可能な範囲の静的確認のみ実施しました。
+
+## 駆け引き拡張
+
+Manager経由のPlayer観測、Intent、Reaction Delay/Budget、空振り反撃、Dodge対策、GuardBreak、Bait/Feintを追加した。調整方法と未実装項目はData/HumanBoss/MindImplementation.mdを参照。

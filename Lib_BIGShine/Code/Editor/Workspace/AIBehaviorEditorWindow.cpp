@@ -8,6 +8,7 @@
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/Platform/WindowsDialogHelper.h"
 #include "Game/AI/Dragon/DragonAIComponent.h"
+#include "Game/AI/Human/HumanBossAIComponent.h"
 #include "imgui_node_editor.h"
 
 #include <algorithm>
@@ -218,7 +219,7 @@ AIBehaviorEditorWindow::BehaviorGraphTarget AIBehaviorEditorWindow::ResolveTarge
     if (!gameObjectManager) return target_;
 
     const std::shared_ptr<GameObject> selectedObject_ = gameObjectManager->GetSelectedObject();
-    // 現在選択中のGameObjectを最優先にし、AIControllerとDragonAIのどちらも編集できるようにする。
+    // 現在選択中のGameObjectを最優先にし、通常AI、DragonAI、人型ボスAIの判断グラフを解決する。
     if (selectedObject_)
     {
         const std::shared_ptr<AIControllerComponent> selectedAI_ =
@@ -227,6 +228,15 @@ AIBehaviorEditorWindow::BehaviorGraphTarget AIBehaviorEditorWindow::ResolveTarge
         {
             targetObject = selectedObject_;
             target_.aiController = selectedAI_.get();
+            target_.owner = selectedObject_.get();
+            return target_;
+        }
+
+        const auto selectedHumanAI_ = selectedObject_->GetComponent<HumanBossAIComponent>();
+        if (selectedHumanAI_)
+        {
+            targetObject = selectedObject_;
+            target_.humanBossAI = selectedHumanAI_.get();
             target_.owner = selectedObject_.get();
             return target_;
         }
@@ -255,6 +265,14 @@ AIBehaviorEditorWindow::BehaviorGraphTarget AIBehaviorEditorWindow::ResolveTarge
             return target_;
         }
 
+        const auto currentHumanAI_ = currentTarget_->GetComponent<HumanBossAIComponent>();
+        if (currentHumanAI_)
+        {
+            target_.humanBossAI = currentHumanAI_.get();
+            target_.owner = currentTarget_.get();
+            return target_;
+        }
+
         const std::shared_ptr<DragonAIComponent> currentDragonAI_ =
             currentTarget_->GetComponent<DragonAIComponent>();
         if (currentDragonAI_)
@@ -275,6 +293,15 @@ AIBehaviorEditorWindow::BehaviorGraphTarget AIBehaviorEditorWindow::ResolveTarge
         {
             targetObject = object_;
             target_.aiController = aiController_.get();
+            target_.owner = object_.get();
+            return target_;
+        }
+
+        const auto humanAI_ = object_->GetComponent<HumanBossAIComponent>();
+        if (humanAI_)
+        {
+            targetObject = object_;
+            target_.humanBossAI = humanAI_.get();
             target_.owner = object_.get();
             return target_;
         }
@@ -312,7 +339,7 @@ void AIBehaviorEditorWindow::DrawToolbar(const BehaviorGraphTarget& target_)
 
 void AIBehaviorEditorWindow::DrawTargetList()
 {
-    // 編集可能なAI/DragonAIコンポーネントだけを一覧化し、クリックで対象グラフを切り替える。
+    // 判断グラフを持つAIコンポーネントを一覧化し、クリックで対象グラフを切り替える。
     ImGui::TextUnformatted("AI Behavior Graph Targets");
     ImGui::Separator();
 
@@ -324,10 +351,11 @@ void AIBehaviorEditorWindow::DrawTargetList()
         if (!object_) continue;
         const bool hasAIController_ = object_->GetComponent<AIControllerComponent>() != nullptr;
         const bool hasDragonAI_ = object_->GetComponent<DragonAIComponent>() != nullptr;
-        if (!hasAIController_ && !hasDragonAI_) continue;
+        const bool hasHumanBossAI_ = object_->GetComponent<HumanBossAIComponent>() != nullptr;
+        if (!hasAIController_ && !hasDragonAI_ && !hasHumanBossAI_) continue;
 
         const bool selected_ = currentTarget_ == object_;
-        const std::string label_ = object_->GetName() + (hasDragonAI_ ? " [Dragon]" : " [AI]");
+        const std::string label_ = object_->GetName() + (hasHumanBossAI_ ? " [HumanBoss]" : hasDragonAI_ ? " [Dragon]" : " [AI]");
         if (ImGui::Selectable(label_.c_str(), selected_))
         {
             targetObject = object_;
@@ -353,7 +381,7 @@ void AIBehaviorEditorWindow::DrawGraph(const BehaviorGraphTarget& target_)
     AIBehaviorGraph* graphPointer_ = GetGraph(target_);
     if (!graphPointer_)
     {
-        ImGui::TextDisabled("Select GameObject with AIControllerComponent or DragonAIComponent.");
+        ImGui::TextDisabled("Select GameObject with AIControllerComponent, DragonAIComponent or HumanBossAIComponent.");
         return;
     }
 
@@ -365,6 +393,8 @@ void AIBehaviorEditorWindow::DrawGraph(const BehaviorGraphTarget& target_)
     {
         activeActionName = "DragonAI_" + std::string(GetDragonActionName(target_.dragonAI->GetCurrentAction()));
     }
+
+    if (target_.humanBossAI) activeActionName = target_.humanBossAI->GetCurrentGraphActionName();
 
     DrawGraphAssetBar(target_);
     ImGui::TextDisabled("Right-click the graph background to create nodes.");
@@ -537,7 +567,7 @@ void AIBehaviorEditorWindow::DrawGraphAssetBar(const BehaviorGraphTarget& target
     if (!graphAssetPathPointer_) return;
 
     std::string& graphAssetPath_ = *graphAssetPathPointer_;
-    // グラフアセットの読込/保存先は対象コンポーネントが保持し、AIControllerとDragonAIで同じUIを使う。
+    // グラフアセットの読込/保存先は対象コンポーネントが保持し、各AIで同じUIを使う。
     ImGui::SetNextItemWidth(340.0f);
     ImGui::InputText("Graph Asset", &graphAssetPath_);
     if (ImGui::BeginDragDropTarget())
@@ -692,6 +722,30 @@ void AIBehaviorEditorWindow::DrawInspector(const BehaviorGraphTarget& target_)
             if (ImGui::Button("DragonAI_TakeOff")) node_->actionName = "DragonAI_TakeOff";
             ImGui::SameLine();
             if (ImGui::Button("DragonAI_Walk")) node_->actionName = "DragonAI_WalkApproach";
+        }
+        else if (target_.humanBossAI && target_.owner)
+        {
+            // 人型ボス自身に登録された判断用Actionを選び、終了通知の参照先も揃える。
+            if (ImGui::BeginCombo("HumanBoss Action", node_->actionName.c_str()))
+            {
+                auto actionNames_ = target_.owner->GetLocalRegistry().GetActionNames("HumanBoss");
+                std::sort(actionNames_.begin(), actionNames_.end());
+                for (const auto& actionName_ : actionNames_)
+                {
+                    if (actionName_.find("_ActionEnd") != std::string::npos || actionName_.find("_OnJustGuard") != std::string::npos ||
+                        actionName_.find("_HumanBossHit") != std::string::npos || actionName_.find("_HumanBossStop") != std::string::npos) continue;
+                    if (ImGui::Selectable(actionName_.c_str(), node_->actionName == actionName_))
+                    {
+                        node_->actionName = actionName_;
+                        node_->actionEndCategory = "HumanBossAI";
+                        node_->actionEndKey = "ActionEnded";
+                        node_->waitForActionEnd = actionName_.find("_Approach") == std::string::npos &&
+                            actionName_.find("_Reposition") == std::string::npos && actionName_.find("_Observe") == std::string::npos &&
+                            actionName_.find("_NoReaction") == std::string::npos;
+                    }
+                }
+                ImGui::EndCombo();
+            }
         }
         else
         {
@@ -856,6 +910,8 @@ bool AIBehaviorEditorWindow::IsRuntimeActiveNode(const AIBehaviorNode& node_) co
             if (aiController_->GetGraph().IsNodeRuntimeActive(node_.id)) return true;
         }
 
+        if (const auto humanAI_ = targetObject_->GetComponent<HumanBossAIComponent>())
+            if (humanAI_->GetBehaviorGraph().IsNodeRuntimeActive(node_.id)) return true;
         if (const std::shared_ptr<DragonAIComponent> dragonAI_ =
             targetObject_->GetComponent<DragonAIComponent>())
         {
@@ -880,6 +936,12 @@ void AIBehaviorEditorWindow::AddNode(
     // 追加直後は新規ノードを選択状態にし、次の追加位置を少しずらすことで連続作成しやすくする。
     if (!node_) return;
 
+    if (target_.humanBossAI)
+    {
+        node_->blackboardCategory = "HumanBossAI";
+        node_->actionEndCategory = "HumanBossAI";
+        node_->actionEndKey = "ActionEnded";
+    }
     nodeToPlaceId = node_->id;
     selectedNodeId = node_->id;
     nextNodePosition.x += 40.0f;
@@ -980,6 +1042,7 @@ AIBehaviorGraph* AIBehaviorEditorWindow::GetGraph(const BehaviorGraphTarget& tar
     // 編集対象の種類を隠蔽し、以降の処理はAIBehaviorGraphとして共通に扱う。
     if (target_.aiController) return &target_.aiController->GetGraph();
     if (target_.dragonAI) return &target_.dragonAI->GetBehaviorGraph();
+    if (target_.humanBossAI) return &target_.humanBossAI->GetBehaviorGraph();
     return nullptr;
 }
 
@@ -987,6 +1050,7 @@ std::string* AIBehaviorEditorWindow::GetGraphAssetPath(const BehaviorGraphTarget
 {
     if (target_.aiController) return &target_.aiController->GetGraphAssetPath();
     if (target_.dragonAI) return &target_.dragonAI->GetBehaviorGraphAssetPath();
+    if (target_.humanBossAI) return &target_.humanBossAI->GetBehaviorGraphAssetPath();
     return nullptr;
 }
 
@@ -1001,6 +1065,7 @@ void AIBehaviorEditorWindow::ResetGraphRuntime(const BehaviorGraphTarget& target
     {
         target_.dragonAI->ResetBehaviorGraphRuntime();
     }
+    if (target_.humanBossAI) target_.humanBossAI->ResetBehaviorGraphRuntime();
 }
 
 bool AIBehaviorEditorWindow::SaveGraphAsset(
@@ -1009,6 +1074,7 @@ bool AIBehaviorEditorWindow::SaveGraphAsset(
 {
     if (target_.aiController) return target_.aiController->SaveGraphAsset(path_);
     if (target_.dragonAI) return target_.dragonAI->SaveBehaviorGraphAsset(path_);
+    if (target_.humanBossAI) return target_.humanBossAI->SaveBehaviorGraphAsset(path_);
     return false;
 }
 
@@ -1018,6 +1084,7 @@ bool AIBehaviorEditorWindow::LoadGraphAsset(
 {
     if (target_.aiController) return target_.aiController->LoadGraphAsset(path_);
     if (target_.dragonAI) return target_.dragonAI->LoadBehaviorGraphAsset(path_);
+    if (target_.humanBossAI) return target_.humanBossAI->LoadBehaviorGraphAsset(path_);
     return false;
 }
 

@@ -223,6 +223,8 @@ void HitBox::Gui()
     ImGui::InputScalar("Hit Group ID", ImGuiDataType_U32, &hitGroupId);
     ImGui::Checkbox("Allow Multi Hit", &allowMultiHit);
     ImGui::Checkbox("Can Hit Owner", &canHitOwner);
+    ImGui::Checkbox("Guard Break", &guardBreak);
+    ImGui::Checkbox("Can Be Guarded", &canBeGuarded);
     ImGui::Text("Hit Targets: %zu", alreadyHitTargets.size());
     ImGui::Text("Owner: %s", ownerObject ? ownerObject->GetName().c_str() : "(Self)");
     ImGui::DragFloat("Impact Power", &impactPower, 0.1f, 0.0f, 99999.0f);
@@ -364,6 +366,8 @@ void HitBox::Serialize(nlohmann::json& j_) const
     j_["HitGroupId"] = hitGroupId;
     j_["AllowMultiHit"] = allowMultiHit;
     j_["CanHitOwner"] = canHitOwner;
+    j_["GuardBreak"] = guardBreak;
+    j_["CanBeGuarded"] = canBeGuarded;
     j_["TeamId"] = teamId;
     j_["SourceAction"] = sourceAction;
     j_["JustGuardedActionName"] = justGuardedActionName;
@@ -430,6 +434,8 @@ void HitBox::Deserialize(const nlohmann::json& j_)
     hitGroupId = j_.value("HitGroupId", 0u);
     allowMultiHit = j_.value("AllowMultiHit", false);
     canHitOwner = j_.value("CanHitOwner", false);
+    guardBreak = j_.value("GuardBreak", false);
+    canBeGuarded = j_.value("CanBeGuarded", true);
     teamId = j_.value("TeamId", 0);
     sourceAction = j_.value("SourceAction", std::string{});
     justGuardedActionName = j_.value("JustGuardedActionName", std::string{});

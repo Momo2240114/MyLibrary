@@ -15,6 +15,9 @@
 #include "Engine/Graphics/VFXMaterial/VFXMaterialSerializer.h"
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
+#include "Engine/GamePlay/Core/Object/GameObjectManager.h"
+#include "Engine/GamePlay/Graphics/ModelDissolveComponent.h"
+#include <imgui_stdlib.h>
 #include "Engine/Debug/TracyProfiler.h"
 #include "Engine/UI/ImGuiColorEditor.h"
 
@@ -116,6 +119,10 @@ void ParticleComponent::Gui()
     // Particle Asset全体、Emitter単体、各EmitterパラメータをこのGUIで編集する。
     RefreshAssetList();
 
+    ImGui::InputText("Mesh Source Object", &meshSourceObjectName);
+    ImGui::InputText("Attraction Target Object", &attractionTargetName);
+    ImGui::Checkbox("Emit Near Dissolve Direction Boundary", &emitDissolveBoundary);
+    ImGui::DragFloat("Boundary Band", &dissolveBoundaryBand, 0.01f, 0.01f, 1.0f);
     ImGui::SeparatorText("Particle Asset");
     ImGui::InputText("Asset Name", assetNameBuffer, IM_ARRAYSIZE(assetNameBuffer));
     ImGui::Text("Current: %s", assetPath.empty() ? "Unsaved" : assetPath.c_str());
@@ -1330,6 +1337,18 @@ bool ParticleComponent::TriggerEmitterAtPosition(
         TriggerEmitter(emitterName_);
 }
 
+void ParticleComponent::SetEmissionScale(float scale_)
+{
+    emissionScale = std::clamp(scale_, 0.0f, 1.0f);
+}
+
+void ParticleComponent::SetRuntimeRingAppearance(float radius_, const DirectX::XMFLOAT4& color_)
+{
+    runtimeRingEnabled = true;
+    runtimeRingRadius = (std::max)(radius_, 0.0f);
+    runtimeRingColor = color_;
+}
+
 void ParticleComponent::Update(float deltaTime)
 {
     // Component再生時間、Emitterのdelay、Owner相対座標、Mesh頂点発生をまとめて処理する。
@@ -1360,6 +1379,15 @@ void ParticleComponent::Update(float deltaTime)
         }
 
         ParticleSystemConstants tempSettings_ = track_.settings;
+        if (!attractionTargetName.empty() && owner_->manager)
+        {
+            const auto target_ = owner_->GetManager().Find(attractionTargetName);
+            if (target_ && target_->transform)
+            {
+                const auto position_ = target_->transform->GetWorldPosition();
+                tempSettings_.targetPosition = {position_.x,position_.y,position_.z,1.0f};
+            }
+        }
         if (track_.spawnSpace == ParticleSpawnSpace::OWNER_RELATIVE)
         {
             // Owner Relativeは保存値をローカルオフセットとして扱い、実行時だけワールド位置へ変換する
@@ -1369,6 +1397,14 @@ void ParticleComponent::Update(float deltaTime)
         }
 
         ApplyEmitterMaterialToSettings(track_, tempSettings_, timer);
+        if (runtimeRingEnabled)
+        {
+            tempSettings_.emissionOffset = { (std::max)(runtimeRingRadius - 0.5f, 0.0f), runtimeRingRadius };
+            tempSettings_.manualColor = runtimeRingColor;
+        }
+        // 既存粒子は消さず、新しく発生する粒子数だけを環境遷移に合わせる。
+        if (tempSettings_.emissionMode == 0)
+            tempSettings_.burstCount = static_cast<uint32_t>(tempSettings_.burstCount * emissionScale);
         track_.emitter->ApplySettings(tempSettings_);
         track_.emitter->SetDepthSortEnabled(track_.runtimeBlendMode == ParticleBlendMode::ALPHA);
         track_.emitter->SetDepthSortInterval(2);
@@ -1473,6 +1509,10 @@ void ParticleComponent::Serialize(nlohmann::json& j) const
 
     j["Emitters"] = emitterList;
     j["IsPlaying"] = isPlaying;
+    j["MeshSourceObjectName"] = meshSourceObjectName;
+    j["AttractionTargetName"] = attractionTargetName;
+    j["EmitDissolveBoundary"] = emitDissolveBoundary;
+    j["DissolveBoundaryBand"] = dissolveBoundaryBand;
     j["AssetPath"] = assetPath;
 }
 
@@ -1481,6 +1521,10 @@ void ParticleComponent::Deserialize(const nlohmann::json& j)
     // JSONからEmitterTrackを復元する古いキーも読めるように一部互換処理を残す
     tracks.clear();
     assetPath = j.value("AssetPath", assetPath);
+    meshSourceObjectName = j.value("MeshSourceObjectName", std::string{});
+    attractionTargetName = j.value("AttractionTargetName", std::string{});
+    emitDissolveBoundary = j.value("EmitDissolveBoundary", false);
+    dissolveBoundaryBand = (std::max)(j.value("DissolveBoundaryBand", 0.15f),0.01f);
 
     if (j.contains("Emitters"))
     {
@@ -1611,10 +1655,36 @@ void ParticleComponent::Deserialize(const nlohmann::json& j)
 
 void ParticleComponent::UpdateMeshSpawnPositions(EmitterTrack& track_)
 {
+    BS_PROFILE_SCOPE("ParticleComponent::UpdateMeshSpawnPositions");
     // 現在のGltfModel頂点をワールド座標へ変換し、Particleの発生候補点としてEmitterへ渡す
     if (!track_.emitter) return;
 
     auto owner_ = GetGameObject();
+    if (owner_ && owner_->manager && !meshSourceObjectName.empty())
+    {
+        const auto source_ = owner_->GetManager().Find(meshSourceObjectName);
+        const auto model_ = source_ ? source_->GetComponent<GltfModelCommponennt>() : nullptr;
+        auto& points_ = track_.emitter->GetMeshSpawnPositions();
+        if (!model_) { points_.clear(); return; }
+        model_->CollectWorldVertexSamples(points_, track_.meshVertexSampleCount);
+        if (emitDissolveBoundary)
+        {
+            if (const auto dissolve_ = source_->GetComponent<ModelDissolveComponent>())
+            {
+                const auto& settings_ = dissolve_->GetSettings();
+                const auto origin_ = source_->transform->GetWorldPosition();
+                const float length_ = std::sqrt(settings_.direction.x*settings_.direction.x+settings_.direction.y*settings_.direction.y+settings_.direction.z*settings_.direction.z);
+                const float extent_ = (std::max)(settings_.directionExtent*length_,0.001f);
+                // GPUのNoiseを読み戻さず、方向分布の近似境界から崩壊粒子を発生させる。
+                points_.erase(std::remove_if(points_.begin(),points_.end(),[&](const DirectX::XMFLOAT3& point_)
+                {
+                    const float height_ = ((point_.x-origin_.x)*settings_.direction.x+(point_.y-origin_.y)*settings_.direction.y+(point_.z-origin_.z)*settings_.direction.z)/extent_;
+                    return std::abs(height_-dissolve_->GetProgress()) > dissolveBoundaryBand;
+                }),points_.end());
+            }
+        }
+        return;
+    }
     auto model_ = owner_ ? owner_->GetComponent<GltfModelCommponennt>() : nullptr;
     if (!owner_ || !owner_->transform || !model_)
     {

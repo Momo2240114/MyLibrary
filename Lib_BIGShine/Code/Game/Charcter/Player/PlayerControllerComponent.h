@@ -34,6 +34,24 @@ struct PlayerCancelTransition
     PLAYER_ACTION to = PLAYER_ACTION::DODGE; // キャンセル先Action。
 };
 
+// 通常ガードの反応と盾演出だけを調整し、判定角度は既存GuardColliderへ任せる。
+struct PlayerGuardSettings
+{
+    float releaseBlendTime = 0.08f;
+    float hitCancelTime = 0.04f;
+    float breakRecoveryTime = 0.65f;
+    float reactionMaximumTime = 2.5f;
+    std::string hitAnimation = "Block_Hit_Seq";
+    std::string breakAnimation = "Block_Hit_Break_Seq";
+    std::string meshVFXAsset = "Data/VFX/PlayerGuardShieldEnergy.json";
+    std::string shieldObjectName = "Shield";
+    DirectX::XMFLOAT3 meshVFXOffset{ 0.0f, 0.0f, 0.0f };
+    DirectX::XMFLOAT3 meshVFXRotation{ 0.0f, 0.0f, 0.0f };
+    DirectX::XMFLOAT3 meshVFXScale{ 1.03f, 1.03f, 1.03f };
+    std::string sparkParticleAsset = "Data/Particle/PlayerGuardSparks.json";
+    float sparkLifeTime = 0.35f;
+};
+
 // 攻撃時にTargetへ向きや位置を補正するための設定。
 struct PlayerAttackAssistSettings
 {
@@ -170,13 +188,14 @@ public:
     void SendMoveInputToBlackboard(const DirectX::XMFLOAT3& input_); // 移動入力をBlackboardへ送る。
     void SendGuardMoveInputToBlackboard(const DirectX::XMFLOAT3& input_);
     void SendGuardInputToBlackboard(bool guardInput_);
+    bool IsGuardBroken() const { return guardBroken; }
     void SendJumpPhaseToBlackboard(PLAYER_LOCOMOTION_PHASE phase_);
     bool TryDodgeCancelInput();
 
     void NotifyJustDodge(); // ジャスト回避成功を現在のDodgeStateへ通知する。
     void GrantJustDodgeCounterTag(); // ジャスト回避成功後の反撃Tagを一定時間付与する。
     void GrantJustGuardCounterTag(); // ジャストガード成功後の反撃Tagと派生用Tagを一定時間付与する。
-
+    bool IsAirborneForAction() const;
     float moveSpeed = 6.0f; // 通常移動速度。
     float guardMoveSpeed = 2.0f;
     float jumpImpulse = 8.5f;
@@ -211,7 +230,7 @@ private:
     void ResetStrongAttackInput();
     bool IsGroundOnlyAction(PLAYER_ACTION action_) const;
     bool IsAirAction(PLAYER_ACTION action_) const;
-    bool IsAirborneForAction() const;
+
     bool IsPlayerControlLockedByGameMode() const;
     bool IsAnimationStateForAction(PLAYER_ACTION action_, const std::string& stateName_) const;
     bool IsDodgeAction(PLAYER_ACTION action_) const;
@@ -231,6 +250,15 @@ private:
     void UpdateAirborneActionContext();
     void UpdateTimelineActionSafety(float deltaTime_);
     void EnsureDefaultCancelTransitions();
+    // 入力・判定・演出を同じガードの開始と終了へ接続する。
+    void SetNormalGuardEnabled(bool enabled_);
+    void StopNormalGuard();
+    void HandleGuardImpact(bool broken_);
+    void UpdateGuardReaction(float deltaTime_);
+    void FinishGuardReaction();
+    void StartGuardVisual();
+    void StopGuardVisual();
+    void PlayGuardSparks();
     std::shared_ptr<CameraLockOnComponent> ResolveCameraLockOnComponent() const;
     void ToggleLockOn();
     void ApplyPendingMovement(); // 予約された水平速度と向きをMovementへ反映する。
@@ -301,6 +329,15 @@ private:
     float runtimeArmor = 5.0f;
     PLAYER_LOCOMOTION_PHASE lastSentLocomotionPhase = PLAYER_LOCOMOTION_PHASE::IDLE;
     std::weak_ptr<GameObject> attackAssistTarget;
+    PlayerGuardSettings guardSettings;
+    std::weak_ptr<GameObject> guardVisual;
+    bool guardReactionActive = false;
+    bool guardReactionEndRequested = false;
+    bool guardAnimationControlled = false;
+    bool guardBroken = false;
+    bool normalGuardActive = false;
+    bool guardRearmRequired = false; // ガードからの派生・GuardBreak後は入力解放で再受付する。
+    float guardReactionTimer = 0.0f;
 
     PLAYER_ACTION debugSelectedAction = PLAYER_ACTION::IDLE; // Debug UIで選択中のAction。
 };

@@ -23,6 +23,16 @@ Texture2D EmissiveMap : register(t2);
 Texture2D AOMap : register(t3);
 Texture2D MetalRoughMap : register(t4);
 
+// 半透明モデルも、不透明モデルと同じ進行度で消滅・形成する。
+cbuffer CbModelDissolve : register(b4)
+{
+    float4 dissolveParams;
+    float4 dissolveEdgeColor;
+    float4 dissolveDirection;
+    float4 dissolveOrigin;
+};
+Texture2D DissolveNoiseMap : register(t18);
+
 TextureCube diffuse_iem : register(t10);
 TextureCube specular_pmrem : register(t11);
 Texture2D lut_ggx : register(t12);
@@ -120,6 +130,18 @@ float3 DirectToonPBR(float3 base, float3 N, float3 V, float3 L, float3 light, fl
 
 PS_OUT main(VS_OUT pin)
 {
+    float dissolveEdge_ = 0.0f;
+    if (dissolveParams.x > 0.0f)
+    {
+        const float noise_ = dissolveOrigin.w > 0.5f
+            ? DissolveNoiseMap.Sample(LinearSampler, pin.texcoord * dissolveParams.w).r
+            : frac(sin(dot(floor(pin.texcoord * dissolveParams.w * 64.0f), float2(12.9898f, 78.233f))) * 43758.5453f);
+        const float direction_ = saturate(dot(pin.position - dissolveOrigin.xyz, dissolveDirection.xyz));
+        const float field_ = lerp(noise_, direction_, dissolveDirection.w);
+        const float threshold_ = dissolveParams.x * (1.0f + dissolveParams.y);
+        clip(field_ - threshold_);
+        dissolveEdge_ = 1.0f - saturate((field_ - threshold_) / max(dissolveParams.y, 0.001f));
+    }
     float4 base = BaseMap.Sample(LinearSampler, pin.texcoord) * baseColor;
     if (base.a < 0.1f)
         discard;
@@ -217,6 +239,7 @@ PS_OUT main(VS_OUT pin)
     float toonAo = lerp(ao, 1.0f, toonPbrBlend * 0.7f);
 
     float3 emissive = EmissiveMap.Sample(LinearSampler, pin.texcoord).rgb * emissiveColor.rgb;
+    emissive += dissolveEdgeColor.rgb * dissolveEdge_ * dissolveParams.z;
 
     float iblDiffuseStrength = lerp(0.2f, 0.05f, toonPbrBlend);
     float iblSpecularStrength = lerp(0.15f, 0.03f * metalness, toonPbrBlend);

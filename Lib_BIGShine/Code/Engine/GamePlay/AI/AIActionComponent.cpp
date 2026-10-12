@@ -7,7 +7,7 @@
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
 #include "Engine/Debug/TracyProfiler.h"
 #include "Engine/GamePlay/Serialize/ComponentRegistry.h"
-#include "Engine/Graphics/Resource/Animation/AnimationControllerComponent.h"
+#include "Engine/Graphics/Resource/Animation/AnimationGraphBridgeComponent.h"
 
 #include <imgui.h>
 #include <imgui_stdlib.h>
@@ -436,29 +436,21 @@ void AIActionComponent::ApplyAnimationActionStart(const AIActionDefinition& defi
     std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_) return;
 
-    std::shared_ptr<AnimationControllerComponent> animation_ = owner_->GetComponent<AnimationControllerComponent>();
-    if (!animation_) return;
-
-    // AnimationControllerの元カテゴリを退避し、一時的にAIアクション用カテゴリへ切り替える。
-    const std::string previousCategory_ = animation_->GetBlackboardCategory();
-    animation_->SetBlackboardCategory(definition_.animationBlackboardCategory);
-
+    const auto animation_ = AnimationGraphBridgeComponent::Acquire(owner_);
+    const auto board_ = owner_->GetOrAddComponent<BlackboardComponent>();
+    if (!animation_ || !board_) return;
+    // 設定されたカテゴリへ条件を書き、ControllerのカテゴリをAI側で切り替えない。
     if (definition_.writeAnimationBlackboard)
     {
-        animation_->SetParam(definition_.animationCurrentActionKey, definition_.aiActionName);
-        animation_->SetParam(definition_.animationActionEndedKey, false);
-        animation_->SetParam(definition_.animationIsActingKey, true);
+        board_->SetString(definition_.animationBlackboardCategory, definition_.animationCurrentActionKey, definition_.aiActionName);
+        board_->SetBool(definition_.animationBlackboardCategory, definition_.animationActionEndedKey, false);
+        board_->SetBool(definition_.animationBlackboardCategory, definition_.animationIsActingKey, true);
     }
     if (!definition_.animationTriggerName.empty())
-    {
-        animation_->SetTrigger(definition_.animationTriggerName);
-    }
+        animation_->RequestTrigger(definition_.animationTriggerName, definition_.animationBlackboardCategory);
     if (!definition_.animationStateName.empty())
-    {
-        animation_->ChangeState(definition_.animationStateName);
-    }
+        animation_->RequestStateTransition(definition_.animationStateName, 0.2f, false, 0.0f, false, definition_.animationBlackboardCategory);
 
-    animation_->SetBlackboardCategory(previousCategory_);
 }
 
 // AIアクション終了時にAnimation Blackboardと終了Triggerを更新する。
@@ -467,23 +459,17 @@ void AIActionComponent::ApplyAnimationActionEnd(const AIActionDefinition& defini
     std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_) return;
 
-    std::shared_ptr<AnimationControllerComponent> animation_ = owner_->GetComponent<AnimationControllerComponent>();
-    if (!animation_) return;
-
-    const std::string previousCategory_ = animation_->GetBlackboardCategory();
-    animation_->SetBlackboardCategory(definition_.animationBlackboardCategory);
-
+    const auto animation_ = AnimationGraphBridgeComponent::Acquire(owner_);
+    const auto board_ = owner_->GetOrAddComponent<BlackboardComponent>();
+    if (!animation_ || !board_) return;
     if (definition_.writeAnimationBlackboard)
     {
-        animation_->SetParam(definition_.animationActionEndedKey, true);
-        animation_->SetParam(definition_.animationIsActingKey, false);
+        board_->SetBool(definition_.animationBlackboardCategory, definition_.animationActionEndedKey, true);
+        board_->SetBool(definition_.animationBlackboardCategory, definition_.animationIsActingKey, false);
     }
     if (!definition_.animationActionEndTriggerName.empty())
-    {
-        animation_->SetTrigger(definition_.animationActionEndTriggerName);
-    }
+        animation_->RequestTrigger(definition_.animationActionEndTriggerName, definition_.animationBlackboardCategory);
 
-    animation_->SetBlackboardCategory(previousCategory_);
 }
 
 // AIアクション名が一致する編集可能な定義を線形検索する。

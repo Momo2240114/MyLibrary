@@ -992,6 +992,42 @@ const std::vector<DirectX::XMFLOAT4X4>& GltfModelCommponennt::GetSkinningTransfo
 	return meshes[meshIndex_].cachedSkinningTransforms;
 }
 
+void GltfModelCommponennt::CollectWorldVertexSamples(std::vector<DirectX::XMFLOAT3>& positions_, std::size_t maximumCount_)
+{
+    BS_PROFILE_SCOPE("GltfModel::CollectWorldVertexSamples");
+    positions_.clear();
+    if (!IsModelReady() || maximumCount_ == 0) return;
+    std::size_t count_ = 0;
+    for (const auto& mesh_ : meshes) count_ += mesh_.vertices.size();
+    const auto stride_ = (std::max)(std::size_t{1}, (count_ + maximumCount_ - 1) / maximumCount_);
+    std::size_t index_ = 0;
+    for (int meshIndex_ = 0; meshIndex_ < static_cast<int>(meshes.size()); ++meshIndex_)
+    {
+        const auto& mesh_ = meshes[meshIndex_];
+        const auto& matrices_ = GetSkinningTransforms(meshIndex_);
+        for (const auto& vertex_ : mesh_.vertices)
+        {
+            if (index_++ % stride_ != 0) continue;
+            const auto local_ = DirectX::XMLoadFloat3(&vertex_.position);
+            auto world_ = DirectX::XMVectorZero();
+            if (!mesh_.bones.empty())
+            {
+                const float weights_[] = {vertex_.boneWeight.x, vertex_.boneWeight.y, vertex_.boneWeight.z, vertex_.boneWeight.w};
+                const uint32_t indices_[] = {vertex_.boneIndex.x, vertex_.boneIndex.y, vertex_.boneIndex.z, vertex_.boneIndex.w};
+                for (int influence_ = 0; influence_ < 4; ++influence_)
+                    if (weights_[influence_] > 0.0f && indices_[influence_] < matrices_.size())
+                        world_ = DirectX::XMVectorAdd(world_, DirectX::XMVectorScale(
+                            DirectX::XMVector3TransformCoord(local_, DirectX::XMLoadFloat4x4(&matrices_[indices_[influence_]])), weights_[influence_]));
+            }
+            else world_ = matrices_.empty() ? local_ : DirectX::XMVector3TransformCoord(local_, DirectX::XMLoadFloat4x4(&matrices_[0]));
+            DirectX::XMFLOAT3 position_;
+            DirectX::XMStoreFloat3(&position_, world_);
+            positions_.push_back(position_);
+            if (positions_.size() >= maximumCount_) return;
+        }
+    }
+}
+
 void GltfModelCommponennt::UpdateSkinningTransforms(int meshIndex_)
 {
 	Mesh& mesh_ = meshes[meshIndex_];

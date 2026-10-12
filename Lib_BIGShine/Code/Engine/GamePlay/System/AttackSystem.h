@@ -109,6 +109,8 @@ public:
     void Clear();
     // 攻撃Actionごとに一意なIDを作り、多段Hitや同一対象への再Hit管理に使う。
     uint32_t CreateAttackInstance();
+    // GuardBreakにも通常Hitと同じ攻撃力・倍率・防御側倍率を適用する。
+    static float CalculateGuardDamage(HitBox& hitBox_, const HurtBox& hurtBox_);
 
     // 攻撃終了時に、その攻撃インスタンスで登録した重複 Hit 履歴を消す。
     void ClearAttackInstance(uint32_t attackInstanceId_);

@@ -13,6 +13,10 @@ cbuffer CbGBufferMaterial : register(b0)
     float2 uvOffset;
     float uvRotation;
     float3 materialPadding;
+    float4 dissolveParams;
+    float4 dissolveEdgeColor;
+    float4 dissolveDirection;
+    float4 dissolveOrigin;
 };
 
 cbuffer CbMaterialOverlay : register(b1)
@@ -40,6 +44,7 @@ Texture2D AOMap : register(t3);
 Texture2D MetalRoughMap : register(t4);
 Texture2D OverlayMaskMap : register(t9);
 Texture2D OverlayNoiseMap : register(t10);
+Texture2D DissolveNoiseMap : register(t18);
 SamplerState LinearSampler : register(s0);
 
 struct GBUFFER_OUT
@@ -52,6 +57,20 @@ struct GBUFFER_OUT
 
 GBUFFER_OUT main(VS_OUT pin)
 {
+    float dissolveEdge_ = 0.0f;
+    if (dissolveParams.x > 0.0f)
+    {
+        // Noiseと高さ方向の分布を混ぜ、モデルを下側から段階的に崩す。
+        const float noise_ = dissolveOrigin.w > 0.5f
+            ? DissolveNoiseMap.Sample(LinearSampler, pin.texcoord * dissolveParams.w).r
+            : frac(sin(dot(floor(pin.texcoord * dissolveParams.w * 64.0f), float2(12.9898f, 78.233f))) * 43758.5453f);
+        const float direction_ = saturate(dot(pin.position - dissolveOrigin.xyz, dissolveDirection.xyz));
+        const float field_ = lerp(noise_, direction_, dissolveDirection.w);
+        // 両端では必ず全表示・全消滅になり、Noiseの極値に欠片を残さない。
+        const float threshold_ = dissolveParams.x * (1.0f + dissolveParams.y);
+        clip(field_ - threshold_);
+        dissolveEdge_ = 1.0f - saturate((field_ - threshold_) / max(dissolveParams.y, 0.001f));
+    }
     float2 materialUV_ = pin.texcoord;
     float overlayAmount_ = 0.0f;
     if (overlayEnabled != 0)
@@ -109,6 +128,7 @@ GBUFFER_OUT main(VS_OUT pin)
     const float pulse_ = 1.0f +
         (sin(pulsePhase_) * 0.5f + 0.5f) * overlayEmissivePulseAmount;
     emissive_ += overlayColor.rgb * overlayAmount_ * overlayEmissiveStrength * pulse_;
+    emissive_ += dissolveEdgeColor.rgb * dissolveEdge_ * dissolveParams.z;
 
     GBUFFER_OUT output_;
     output_.baseColorAndModel = float4(sampledBase_.rgb, shadingModel);

@@ -2,6 +2,7 @@
 
 #include"GameObject.h"
 #include"GameObjectManager.h"
+#include "Engine/GamePlay/System/CombatObservationSystem.h"
 #include"Engine/Physics/ColliderComponent.h"
 
 #include "ImGuizmo.h"
@@ -70,6 +71,8 @@ void GameObject::SetManager(GameObjectManager* manager_)
     // Managerが変わる時は、CollisionSystemへの登録先も付け替える。
     if (manager == manager_) return;
 
+    if (manager)
+        if (const auto observation_ = manager->GetCombatObservationSystem()) observation_->UnregisterObject(this);
     UnregisterAllColliderComponents();
     manager = manager_;
     for (const std::shared_ptr<Component>& component_ : colliderComponents)
@@ -77,6 +80,15 @@ void GameObject::SetManager(GameObjectManager* manager_)
         RegisterColliderComponent(
             std::dynamic_pointer_cast<ColliderComponent>(component_));
     }
+    NotifyComponentCompositionChanged();
+}
+
+void GameObject::NotifyComponentCompositionChanged()
+{
+    if (!manager) return;
+    const auto owner_ = weak_from_this().lock();
+    const auto observation_ = manager->GetCombatObservationSystem();
+    if (owner_ && observation_) observation_->RegisterObject(owner_);
 }
 
 void GameObject::RegisterColliderComponent(
@@ -109,7 +121,12 @@ void GameObject::RegisterAction(
     const ActionRegistry::ActionFunc& func_)
 {
     // Object名付きActionとして登録し、同名Actionが複数Objectで衝突しないようにする。
-    localRegistry.RegisterAction(category_, BuildActionName(name_), func_);
+    const std::weak_ptr<GameObject> weakOwner_ = shared_from_this();
+    localRegistry.RegisterAction(category_, BuildActionName(name_), [weakOwner_, func_]()
+    {
+        const auto owner_ = weakOwner_.lock();
+        if (owner_ && owner_->manager && !owner_->IsPendingDestroy() && func_) func_();
+    });
 }
 
 void GameObject::SetName(const std::string& newName_)
@@ -145,9 +162,62 @@ std::string GameObject::RegisterGlobalAction(
     const std::string resolvedName_ = BuildActionName(actionName_);
     if (!resolvedName_.empty())
     {
-        ActionRegistry::Instance().RegisterAction(category_, resolvedName_, function_);
+        RegisterNamedGlobalAction(category_, resolvedName_, function_);
     }
     return resolvedName_;
+}
+
+void GameObject::RegisterNamedGlobalAction(const std::string& category_, const std::string& name_, const ActionRegistry::ActionFunc& function_)
+{
+    const std::weak_ptr<GameObject> weakOwner_ = shared_from_this();
+    const auto entry_ = std::make_pair(category_, name_);
+    if (std::find(globalActions.begin(), globalActions.end(), entry_) == globalActions.end()) globalActions.push_back(entry_);
+    ActionRegistry::Instance().RegisterAction(category_, name_, [weakOwner_, function_]()
+    {
+        const auto owner_ = weakOwner_.lock();
+        if (owner_ && owner_->manager && !owner_->IsPendingDestroy() && function_) function_();
+    });
+}
+
+bool GameObject::IsHierarchyReady()
+{
+    if (pendingDestroy || HasRuntimeFailure() || !IsReadyToStart()) return false;
+    for (const auto& component_ : components) if (component_ && !component_->IsStarted()) return false;
+    for (const auto& component_ : colliderComponents) if (component_ && !component_->IsStarted()) return false;
+    for (const auto& child_ : transform->children)
+        if (child_) if (const auto actor_ = child_->gameObject.lock()) if (!actor_->IsHierarchyReady()) return false;
+    return IsRuntimeReady();
+}
+
+void GameObject::PrepareForDestroy()
+{
+    BS_PROFILE_SCOPE("GameObject::PrepareForDestroy");
+    if (pendingDestroy) return;
+    pendingDestroy = true;
+    combatReady = false;
+    // コールバックが別Objectの削除を予約しても、走査中のComponent配列を壊さない。
+    const auto components_ = components;
+    for (const auto& component_ : components_)
+    {
+        if (!component_) continue;
+        component_->OnDestroy();
+        component_->SetRuntimeSuppressed(true);
+    }
+    for (const auto& component_ : colliderComponents)
+    {
+        if (!component_) continue;
+        component_->OnDestroy();
+        component_->SetRuntimeSuppressed(true);
+        if (const auto collider_ = std::dynamic_pointer_cast<ColliderComponent>(component_))
+        {
+            collider_->currentTriggers.clear();
+            collider_->m_CollisionMainFolds.clear();
+            collider_->ReleasePhysXActor();
+        }
+    }
+    for (const auto& entry_ : globalActions) ActionRegistry::Instance().RemoveAction(entry_.first, entry_.second);
+    globalActions.clear();
+    localRegistry.Clear();
 }
 
 void GameObject::DrawGizmo(const float* view, const float* projection)
@@ -222,6 +292,9 @@ void GameObject::CallAllComponentStart()
                 }
             }
             collider_->SetStarted(true);
+            // 戦闘禁止で生成されたColliderは、Start後にも物理から除外する。
+            if (!collider_->IsEnabled())
+                if (const auto physics_ = std::dynamic_pointer_cast<ColliderComponent>(collider_)) physics_->ReleasePhysXActor();
         }
     }
 
@@ -630,6 +703,7 @@ void GameObject::Clear()
         transform->localScale = { 1, 1, 1 };
         transform->UpdateWorldMatrix();
     }
+    NotifyComponentCompositionChanged();
 }
 
 void GameObject::TransformGui()
@@ -728,7 +802,7 @@ void GameObject::Gui()
     if (ImGui::Combo(IM_U8("レイヤー##GameObject_LayerCombo"), &currentItem, layerNames, IM_ARRAYSIZE(layerNames)))
     {
         // 選択されたインデックスに対応するEnum値を代入
-        layer = layerValues[currentItem];
+        SetLayer(layerValues[currentItem]);
     }
 
     ImGui::Separator();
@@ -878,6 +952,7 @@ void GameObject::Gui()
                 [&](const auto& collider_) { return collider_.get() == colliderToRemove; }),
             colliderComponents.end());
     }
+    if (componentToRemove || colliderToRemove) NotifyComponentCompositionChanged();
 }
 
 nlohmann::json GameObject::Save() const
@@ -911,7 +986,8 @@ nlohmann::json GameObject::Save() const
         auto& comp = *it;
         nlohmann::json cj;
         cj["TypeName"] = comp->GetName();
-        cj["Enabled"] = comp->IsEnabled();
+        // 演出中の一時停止を、次回Scene開始時の無効設定として保存しない。
+        cj["Enabled"] = comp->IsConfiguredEnabled();
         cj["RequiredForSceneStart"] = comp->IsRequiredForSceneStart();
         cj["UpdateEnabled"] = comp->ShouldUpdate();
         cj["LateUpdateEnabled"] = comp->ShouldLateUpdate();
@@ -930,7 +1006,7 @@ nlohmann::json GameObject::Save() const
     for (const auto& collider_ : colliderComponents) {
         nlohmann::json cj;
         cj["TypeName"] = collider_->GetName();
-        cj["Enabled"] = collider_->IsEnabled();
+        cj["Enabled"] = collider_->IsConfiguredEnabled();
         cj["RequiredForSceneStart"] = collider_->IsRequiredForSceneStart();
         cj["UpdateEnabled"] = collider_->ShouldUpdate();
         cj["LateUpdateEnabled"] = collider_->ShouldLateUpdate();
@@ -1025,4 +1101,5 @@ void GameObject::Load(const nlohmann::json& j)
         }
     }
 
+    NotifyComponentCompositionChanged();
 }

@@ -3,6 +3,7 @@
 #include "Engine/GamePlay/Core/Component/ComponentBase.h"
 #include "Engine/Graphics/Resource/Animation/ModelAnimator.h"
 
+#include <functional>
 #include <memory>
 #include <string>
 #include <vector>
@@ -63,6 +64,7 @@ struct MotionWarpPreset
     // Animationの正規化時間で、Warpを適用する区間。
     float startNormalizedTime = 0.0f;
     float endNormalizedTime = 0.45f;
+    // 目標との水平停止距離。位置補正後のRootMotionにもこの距離を適用する。
     float targetDistance = 1.2f;
 
     // 位置/回転補正の強さ。
@@ -88,6 +90,15 @@ struct MotionWarpPreset
     bool stopWhenTargetInvalid = true;
     bool continueAcrossCombo = false;
     bool useUnscaledTime = false;
+    // 明示Target要求だけで使う制限。旧Playerプリセットの移動方式は維持する。
+    float maximumPositionCorrectionPerSecond = 24.0f;
+    float lockTargetNormalizedTime = 0.0f;
+    float maximumTargetTravelDistance = 0.6f;
+    float maximumTargetTravelAngleDegrees = 20.0f;
+    float rotationStartNormalizedTime = 0.0f;
+    float rotationFullStrengthEndNormalizedTime = 0.2f;
+    float rotationEndNormalizedTime = 0.4f;
+    std::string positionCorrectionCurveName;
 };
 
 struct MotionWarpRequest
@@ -106,6 +117,15 @@ struct MotionWarpRequest
     float accumulatedPositionCorrection = 0.0f;
     float accumulatedRotationCorrectionDegrees = 0.0f;
     bool active = false;
+    // 敵から明示されたTargetと予定RootMotionを保存し、追加補正を時間全体へ分散する。
+    bool explicitTarget = false;
+    bool maintainStopDistance = false; // 補正終了後も同じ攻撃PhaseのRootMotionが対象を突き抜けないよう制限する。
+    bool targetLocked = false;
+    DirectX::XMFLOAT3 startPosition{ 0.0f, 0.0f, 0.0f };
+    DirectX::XMFLOAT3 initialTargetPosition{ 0.0f, 0.0f, 0.0f };
+    DirectX::XMFLOAT3 plannedRootMotion{ 0.0f, 0.0f, 0.0f };
+    DirectX::XMFLOAT3 appliedPlannedCorrection{ 0.0f, 0.0f, 0.0f };
+    std::function<bool(const DirectX::XMFLOAT3&, const DirectX::XMFLOAT3&)> pathValidator;
 };
 
 struct MotionWarpResult
@@ -134,6 +154,17 @@ public:
     void Deserialize(const nlohmann::json& json_) override;
 
     void Play(const std::string& presetName_ = "");
+    // AIの確定Targetと予定移動量を受け取り、既存RootMotion経路上で補正する。
+    bool PlayForTarget(const std::string& presetName_, const std::shared_ptr<GameObject>& target_,
+        const DirectX::XMFLOAT3& plannedRootMotion_, float stopDistance_, float startNormalizedTime_, float endNormalizedTime_,
+        const DirectX::XMFLOAT3* fixedTargetPosition_ = nullptr,
+        std::function<bool(const DirectX::XMFLOAT3&, const DirectX::XMFLOAT3&)> pathValidator_ = {},
+        float priorRotationCorrectionDegrees_ = 0.0f);
+    // 保存済みプリセットを優先し、未登録の敵用初期値だけを補う。
+    void AddPresetIfMissing(const MotionWarpPreset& preset_);
+    const MotionWarpPreset* GetPreset(const std::string& presetName_) const { return FindPreset(presetName_); }
+    const DirectX::XMFLOAT3& GetTargetPosition() const { return request.targetPosition; }
+    void SetRegisterGlobalActions(bool enabled_);
     void Stop(const std::string& requestName_ = "");
     void Clear();
 
@@ -173,4 +204,6 @@ private:
     float debugAppliedPositionScale = 1.0f;
     float debugAppliedYawDegrees = 0.0f;
     bool actionsRegistered = false;
+    bool registerGlobalActions = true; // 敵はLocal Registryだけを使い、PlayerのGlobal Actionを上書きしない。
+    MotionWarpPreset explicitTargetPreset;
 };

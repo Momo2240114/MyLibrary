@@ -1,0 +1,1874 @@
+{
+  "Links": [
+    {
+      "FromNodeId": 1,
+      "FromPinId": 3,
+      "Id": 7,
+      "ToNodeId": 4,
+      "ToPinId": 5
+    },
+    {
+      "FromNodeId": 4,
+      "FromPinId": 6,
+      "Id": 11,
+      "ToNodeId": 8,
+      "ToPinId": 9
+    },
+    {
+      "FromNodeId": 8,
+      "FromPinId": 10,
+      "Id": 15,
+      "ToNodeId": 12,
+      "ToPinId": 13
+    },
+    {
+      "FromNodeId": 4,
+      "FromPinId": 6,
+      "Id": 23,
+      "ToNodeId": 20,
+      "ToPinId": 21
+    },
+    {
+      "FromNodeId": 20,
+      "FromPinId": 22,
+      "Id": 27,
+      "ToNodeId": 24,
+      "ToPinId": 25
+    },
+    {
+      "FromNodeId": 20,
+      "FromPinId": 22,
+      "Id": 31,
+      "ToNodeId": 28,
+      "ToPinId": 29
+    },
+    {
+      "FromNodeId": 28,
+      "FromPinId": 30,
+      "Id": 35,
+      "ToNodeId": 32,
+      "ToPinId": 33
+    },
+    {
+      "FromNodeId": 28,
+      "FromPinId": 30,
+      "Id": 39,
+      "ToNodeId": 36,
+      "ToPinId": 37
+    },
+    {
+      "FromNodeId": 28,
+      "FromPinId": 30,
+      "Id": 43,
+      "ToNodeId": 40,
+      "ToPinId": 41
+    },
+    {
+      "FromNodeId": 28,
+      "FromPinId": 30,
+      "Id": 47,
+      "ToNodeId": 44,
+      "ToPinId": 45
+    },
+    {
+      "FromNodeId": 28,
+      "FromPinId": 30,
+      "Id": 51,
+      "ToNodeId": 48,
+      "ToPinId": 49
+    },
+    {
+      "FromNodeId": 4,
+      "FromPinId": 6,
+      "Id": 55,
+      "ToNodeId": 52,
+      "ToPinId": 53
+    },
+    {
+      "FromNodeId": 52,
+      "FromPinId": 54,
+      "Id": 59,
+      "ToNodeId": 56,
+      "ToPinId": 57
+    },
+    {
+      "FromNodeId": 52,
+      "FromPinId": 54,
+      "Id": 63,
+      "ToNodeId": 60,
+      "ToPinId": 61
+    },
+    {
+      "FromNodeId": 4,
+      "FromPinId": 6,
+      "Id": 67,
+      "ToNodeId": 64,
+      "ToPinId": 65
+    },
+    {
+      "FromNodeId": 64,
+      "FromPinId": 66,
+      "Id": 71,
+      "ToNodeId": 68,
+      "ToPinId": 69
+    },
+    {
+      "FromNodeId": 64,
+      "FromPinId": 66,
+      "Id": 75,
+      "ToNodeId": 72,
+      "ToPinId": 73
+    },
+    {
+      "FromNodeId": 4,
+      "FromPinId": 6,
+      "Id": 79,
+      "ToNodeId": 76,
+      "ToPinId": 77
+    },
+    {
+      "FromNodeId": 76,
+      "FromPinId": 78,
+      "Id": 83,
+      "ToNodeId": 80,
+      "ToPinId": 81
+    },
+    {
+      "FromNodeId": 76,
+      "FromPinId": 78,
+      "Id": 87,
+      "ToNodeId": 84,
+      "ToPinId": 85
+    },
+    {
+      "FromNodeId": 4,
+      "FromPinId": 6,
+      "Id": 91,
+      "ToNodeId": 88,
+      "ToPinId": 89
+    },
+    {
+      "FromNodeId": 88,
+      "FromPinId": 90,
+      "Id": 95,
+      "ToNodeId": 92,
+      "ToPinId": 93
+    },
+    {
+      "FromNodeId": 88,
+      "FromPinId": 90,
+      "Id": 99,
+      "ToNodeId": 96,
+      "ToPinId": 97
+    },
+    {
+      "FromNodeId": 96,
+      "FromPinId": 98,
+      "Id": 103,
+      "ToNodeId": 100,
+      "ToPinId": 101
+    },
+    {
+      "FromNodeId": 96,
+      "FromPinId": 98,
+      "Id": 107,
+      "ToNodeId": 104,
+      "ToPinId": 105
+    },
+    {
+      "FromNodeId": 96,
+      "FromPinId": 98,
+      "Id": 111,
+      "ToNodeId": 108,
+      "ToPinId": 109
+    },
+    {
+      "FromNodeId": 96,
+      "FromPinId": 98,
+      "Id": 115,
+      "ToNodeId": 112,
+      "ToPinId": 113
+    },
+    {
+      "FromNodeId": 4,
+      "FromPinId": 6,
+      "Id": 119,
+      "ToNodeId": 116,
+      "ToPinId": 117
+    },
+    {
+      "Id": 123,
+      "FromNodeId": 8,
+      "ToNodeId": 120,
+      "FromPinId": 10,
+      "ToPinId": 121
+    },
+    {
+      "Id": 124,
+      "FromNodeId": 120,
+      "ToNodeId": 16,
+      "FromPinId": 122,
+      "ToPinId": 17
+    },
+    {
+      "Id": 128,
+      "FromNodeId": 120,
+      "ToNodeId": 125,
+      "FromPinId": 122,
+      "ToPinId": 126
+    },
+    {
+      "Id": 132,
+      "FromNodeId": 96,
+      "ToNodeId": 129,
+      "FromPinId": 98,
+      "ToPinId": 130
+    },
+    {
+      "Id": 136,
+      "FromNodeId": 96,
+      "ToNodeId": 133,
+      "FromPinId": 98,
+      "ToPinId": 134
+    },
+    {
+      "Id": 140,
+      "FromNodeId": 4,
+      "ToNodeId": 137,
+      "FromPinId": 6,
+      "ToPinId": 138
+    },
+    {
+      "Id": 144,
+      "FromNodeId": 137,
+      "ToNodeId": 141,
+      "FromPinId": 139,
+      "ToPinId": 142
+    },
+    {
+      "Id": 148,
+      "FromNodeId": 137,
+      "ToNodeId": 145,
+      "FromPinId": 139,
+      "ToPinId": 146
+    },
+    {
+      "Id": 152,
+      "FromNodeId": 145,
+      "ToNodeId": 149,
+      "FromPinId": 147,
+      "ToPinId": 150
+    },
+    {
+      "Id": 156,
+      "FromNodeId": 145,
+      "ToNodeId": 153,
+      "FromPinId": 147,
+      "ToPinId": 154
+    },
+    {
+      "Id": 160,
+      "FromNodeId": 145,
+      "ToNodeId": 157,
+      "FromPinId": 147,
+      "ToPinId": 158
+    },
+    {
+      "Id": 164,
+      "FromNodeId": 145,
+      "ToNodeId": 161,
+      "FromPinId": 147,
+      "ToPinId": 162
+    },
+    {
+      "FromNodeId": 96,
+      "FromPinId": 98,
+      "Id": 169,
+      "ToNodeId": 166,
+      "ToPinId": 167
+    },
+    {
+      "Id": 173,
+      "FromNodeId": 145,
+      "FromPinId": 147,
+      "ToNodeId": 170,
+      "ToPinId": 171
+    },
+    {
+      "Id": 177,
+      "FromNodeId": 145,
+      "FromPinId": 147,
+      "ToNodeId": 174,
+      "ToPinId": 175
+    },
+    {
+      "Id": 181,
+      "FromNodeId": 145,
+      "FromPinId": 147,
+      "ToNodeId": 178,
+      "ToPinId": 179
+    },
+    {
+      "Id": 185,
+      "FromNodeId": 145,
+      "FromPinId": 147,
+      "ToNodeId": 182,
+      "ToPinId": 183
+    }
+  ],
+  "NextId": 186,
+  "Nodes": [
+    {
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "ActionName": "",
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardKey": "",
+      "BlackboardScope": "Local",
+      "BoolValue": true,
+      "Comment": "",
+      "CompareType": "Equal",
+      "FloatValue": 0.0,
+      "Id": 1,
+      "InputPinId": 2,
+      "IntValue": 0,
+      "Name": "HumanBoss",
+      "OutputPinId": 3,
+      "Position": [
+        305.0,
+        -236.0
+      ],
+      "Priority": 0,
+      "ScopeId": "Root",
+      "StringValue": "",
+      "SubGraphName": "",
+      "Type": "Root",
+      "ValueType": "Bool",
+      "Vector2Value": [
+        0.0,
+        0.0
+      ],
+      "Vector3Value": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "WaitForActionEnd": true,
+      "WaitSeconds": 0.0,
+      "Weight": 1.0
+    },
+    {
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "ActionName": "",
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardKey": "",
+      "BlackboardScope": "Local",
+      "BoolValue": true,
+      "Comment": "",
+      "CompareType": "Equal",
+      "FloatValue": 0.0,
+      "Id": 4,
+      "InputPinId": 5,
+      "IntValue": 0,
+      "Name": "行動の優先判断",
+      "OutputPinId": 6,
+      "Position": [
+        305.0,
+        -92.0
+      ],
+      "Priority": 0,
+      "ScopeId": "Root",
+      "StringValue": "",
+      "SubGraphName": "",
+      "Type": "Selector",
+      "ValueType": "Bool",
+      "Vector2Value": [
+        0.0,
+        0.0
+      ],
+      "Vector3Value": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "WaitForActionEnd": true,
+      "WaitSeconds": 0.0,
+      "Weight": 1.0
+    },
+    {
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "ActionName": "",
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardKey": "",
+      "BlackboardScope": "Local",
+      "BoolValue": true,
+      "Comment": "",
+      "CompareType": "Equal",
+      "FloatValue": 0.0,
+      "Id": 8,
+      "InputPinId": 9,
+      "IntValue": 0,
+      "Name": "ジャストガード後の反撃",
+      "OutputPinId": 10,
+      "Position": [
+        -1599.0,
+        228.0
+      ],
+      "Priority": 0,
+      "ScopeId": "Root",
+      "StringValue": "",
+      "SubGraphName": "",
+      "Type": "Sequence",
+      "ValueType": "Bool",
+      "Vector2Value": [
+        0.0,
+        0.0
+      ],
+      "Vector3Value": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "WaitForActionEnd": true,
+      "WaitSeconds": 0.0,
+      "Weight": 1.0
+    },
+    {
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "ActionName": "",
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardKey": "CounterReady",
+      "BlackboardScope": "Local",
+      "BoolValue": true,
+      "Comment": "",
+      "CompareType": "Equal",
+      "FloatValue": 0.0,
+      "Id": 12,
+      "InputPinId": 13,
+      "IntValue": 0,
+      "Name": "CounterReady",
+      "OutputPinId": 14,
+      "Position": [
+        -1711.0,
+        416.0
+      ],
+      "Priority": 0,
+      "ScopeId": "Root",
+      "StringValue": "",
+      "SubGraphName": "",
+      "Type": "BlackboardCondition",
+      "ValueType": "Bool",
+      "Vector2Value": [
+        0.0,
+        0.0
+      ],
+      "Vector3Value": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "WaitForActionEnd": true,
+      "WaitSeconds": 0.0,
+      "Weight": 1.0
+    },
+    {
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "ActionName": "HumanBoss_COUNTER_ATTACK",
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardKey": "",
+      "BlackboardScope": "Local",
+      "BoolValue": true,
+      "Comment": "",
+      "CompareType": "Equal",
+      "FloatValue": 0.0,
+      "Id": 16,
+      "InputPinId": 17,
+      "IntValue": 0,
+      "Name": "COUNTER_ATTACK",
+      "OutputPinId": 18,
+      "Position": [
+        -1503.0,
+        404.0
+      ],
+      "Priority": 1,
+      "ScopeId": "Root",
+      "StringValue": "",
+      "SubGraphName": "",
+      "Type": "PlayAction",
+      "ValueType": "Bool",
+      "Vector2Value": [
+        0.0,
+        0.0
+      ],
+      "Vector3Value": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "WaitForActionEnd": true,
+      "WaitSeconds": 0.0,
+      "Weight": 1.0
+    },
+    {
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "ActionName": "",
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardKey": "",
+      "BlackboardScope": "Local",
+      "BoolValue": true,
+      "Comment": "",
+      "CompareType": "Equal",
+      "FloatValue": 0.0,
+      "Id": 20,
+      "InputPinId": 21,
+      "IntValue": 0,
+      "Name": "プレイヤー攻撃への反応",
+      "OutputPinId": 22,
+      "Position": [
+        -959.0,
+        212.0
+      ],
+      "Priority": 1,
+      "ScopeId": "Root",
+      "StringValue": "",
+      "SubGraphName": "",
+      "Type": "Sequence",
+      "ValueType": "Bool",
+      "Vector2Value": [
+        0.0,
+        0.0
+      ],
+      "Vector3Value": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "WaitForActionEnd": true,
+      "WaitSeconds": 0.0,
+      "Weight": 1.0
+    },
+    {
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "ActionName": "",
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardKey": "CanReact",
+      "BlackboardScope": "Local",
+      "BoolValue": true,
+      "Comment": "",
+      "CompareType": "Equal",
+      "FloatValue": 0.0,
+      "Id": 24,
+      "InputPinId": 25,
+      "IntValue": 0,
+      "Name": "CanReact",
+      "OutputPinId": 26,
+      "Position": [
+        -1183.0,
+        416.0
+      ],
+      "Priority": 0,
+      "ScopeId": "Root",
+      "StringValue": "",
+      "SubGraphName": "",
+      "Type": "BlackboardCondition",
+      "ValueType": "Bool",
+      "Vector2Value": [
+        0.0,
+        0.0
+      ],
+      "Vector3Value": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "WaitForActionEnd": true,
+      "WaitSeconds": 0.0,
+      "Weight": 1.0
+    },
+    {
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "ActionName": "",
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardKey": "",
+      "BlackboardScope": "Local",
+      "BoolValue": true,
+      "Comment": "",
+      "CompareType": "Equal",
+      "FloatValue": 0.0,
+      "Id": 28,
+      "InputPinId": 29,
+      "IntValue": 0,
+      "Name": "防御と回避の選択",
+      "OutputPinId": 30,
+      "Position": [
+        -815.0,
+        448.0
+      ],
+      "Priority": 1,
+      "ScopeId": "Root",
+      "StringValue": "",
+      "SubGraphName": "",
+      "Type": "RandomSelector",
+      "ValueType": "Bool",
+      "Vector2Value": [
+        0.0,
+        0.0
+      ],
+      "Vector3Value": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "WaitForActionEnd": true,
+      "WaitSeconds": 0.0,
+      "Weight": 1.0
+    },
+    {
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "ActionName": "HumanBoss_BACK_DODGE",
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardKey": "",
+      "BlackboardScope": "Local",
+      "BoolValue": true,
+      "Comment": "",
+      "CompareType": "Equal",
+      "FloatValue": 0.0,
+      "Id": 32,
+      "InputPinId": 33,
+      "IntValue": 0,
+      "Name": "BACK_DODGE",
+      "OutputPinId": 34,
+      "Position": [
+        -783.0,
+        736.0
+      ],
+      "Priority": 2,
+      "ScopeId": "Root",
+      "StringValue": "",
+      "SubGraphName": "",
+      "Type": "PlayAction",
+      "ValueType": "Bool",
+      "Vector2Value": [
+        0.0,
+        0.0
+      ],
+      "Vector3Value": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "WaitForActionEnd": true,
+      "WaitSeconds": 0.0,
+      "Weight": 1.0
+    },
+    {
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "ActionName": "HumanBoss_SIDE_DODGE",
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardKey": "",
+      "BlackboardScope": "Local",
+      "BoolValue": true,
+      "Comment": "",
+      "CompareType": "Equal",
+      "FloatValue": 0.0,
+      "Id": 36,
+      "InputPinId": 37,
+      "IntValue": 0,
+      "Name": "SIDE_DODGE",
+      "OutputPinId": 38,
+      "Position": [
+        -1039.0,
+        740.0
+      ],
+      "Priority": 1,
+      "ScopeId": "Root",
+      "StringValue": "",
+      "SubGraphName": "",
+      "Type": "PlayAction",
+      "ValueType": "Bool",
+      "Vector2Value": [
+        0.0,
+        0.0
+      ],
+      "Vector3Value": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "WaitForActionEnd": true,
+      "WaitSeconds": 0.0,
+      "Weight": 1.0
+    },
+    {
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "ActionName": "HumanBoss_GUARD",
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardKey": "",
+      "BlackboardScope": "Local",
+      "BoolValue": true,
+      "Comment": "",
+      "CompareType": "Equal",
+      "FloatValue": 0.0,
+      "Id": 40,
+      "InputPinId": 41,
+      "IntValue": 0,
+      "Name": "GUARD",
+      "OutputPinId": 42,
+      "Position": [
+        -1311.0,
+        724.0
+      ],
+      "Priority": 0,
+      "ScopeId": "Root",
+      "StringValue": "",
+      "SubGraphName": "",
+      "Type": "PlayAction",
+      "ValueType": "Bool",
+      "Vector2Value": [
+        0.0,
+        0.0
+      ],
+      "Vector3Value": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "WaitForActionEnd": true,
+      "WaitSeconds": 0.0,
+      "Weight": 1.0
+    },
+    {
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "ActionName": "HumanBoss_JUST_GUARD",
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardKey": "",
+      "BlackboardScope": "Local",
+      "BoolValue": true,
+      "Comment": "",
+      "CompareType": "Equal",
+      "FloatValue": 0.0,
+      "Id": 44,
+      "InputPinId": 45,
+      "IntValue": 0,
+      "Name": "JUST_GUARD",
+      "OutputPinId": 46,
+      "Position": [
+        -335.0,
+        736.0
+      ],
+      "Priority": 4,
+      "ScopeId": "Root",
+      "StringValue": "",
+      "SubGraphName": "",
+      "Type": "PlayAction",
+      "ValueType": "Bool",
+      "Vector2Value": [
+        0.0,
+        0.0
+      ],
+      "Vector3Value": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "WaitForActionEnd": true,
+      "WaitSeconds": 0.0,
+      "Weight": 1.0
+    },
+    {
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "ActionName": "HumanBoss_NoReaction",
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardKey": "",
+      "BlackboardScope": "Local",
+      "BoolValue": true,
+      "Comment": "",
+      "CompareType": "Equal",
+      "FloatValue": 0.0,
+      "Id": 48,
+      "InputPinId": 49,
+      "IntValue": 0,
+      "Name": "NoReaction",
+      "OutputPinId": 50,
+      "Position": [
+        -559.0,
+        736.0
+      ],
+      "Priority": 3,
+      "ScopeId": "Root",
+      "StringValue": "",
+      "SubGraphName": "",
+      "Type": "PlayAction",
+      "ValueType": "Bool",
+      "Vector2Value": [
+        0.0,
+        0.0
+      ],
+      "Vector3Value": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "WaitForActionEnd": false,
+      "WaitSeconds": 0.0,
+      "Weight": 1.0
+    },
+    {
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "ActionName": "",
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardKey": "",
+      "BlackboardScope": "Local",
+      "BoolValue": true,
+      "Comment": "",
+      "CompareType": "Equal",
+      "FloatValue": 0.0,
+      "Id": 52,
+      "InputPinId": 53,
+      "IntValue": 0,
+      "Name": "間合いの調整",
+      "OutputPinId": 54,
+      "Position": [
+        113.0,
+        452.0
+      ],
+      "Priority": 3,
+      "ScopeId": "Root",
+      "StringValue": "",
+      "SubGraphName": "",
+      "Type": "Sequence",
+      "ValueType": "Bool",
+      "Vector2Value": [
+        0.0,
+        0.0
+      ],
+      "Vector3Value": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "WaitForActionEnd": true,
+      "WaitSeconds": 0.0,
+      "Weight": 1.0
+    },
+    {
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "ActionName": "",
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardKey": "NeedsReposition",
+      "BlackboardScope": "Local",
+      "BoolValue": true,
+      "Comment": "",
+      "CompareType": "Equal",
+      "FloatValue": 0.0,
+      "Id": 56,
+      "InputPinId": 57,
+      "IntValue": 0,
+      "Name": "NeedsReposition",
+      "OutputPinId": 58,
+      "Position": [
+        -143.0,
+        372.0
+      ],
+      "Priority": 0,
+      "ScopeId": "Root",
+      "StringValue": "",
+      "SubGraphName": "",
+      "Type": "BlackboardCondition",
+      "ValueType": "Bool",
+      "Vector2Value": [
+        0.0,
+        0.0
+      ],
+      "Vector3Value": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "WaitForActionEnd": true,
+      "WaitSeconds": 0.0,
+      "Weight": 1.0
+    },
+    {
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "ActionName": "HumanBoss_Reposition",
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardKey": "",
+      "BlackboardScope": "Local",
+      "BoolValue": true,
+      "Comment": "",
+      "CompareType": "Equal",
+      "FloatValue": 0.0,
+      "Id": 60,
+      "InputPinId": 61,
+      "IntValue": 0,
+      "Name": "Reposition",
+      "OutputPinId": 62,
+      "Position": [
+        257.0,
+        388.0
+      ],
+      "Priority": 1,
+      "ScopeId": "Root",
+      "StringValue": "",
+      "SubGraphName": "",
+      "Type": "PlayAction",
+      "ValueType": "Bool",
+      "Vector2Value": [
+        0.0,
+        0.0
+      ],
+      "Vector3Value": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "WaitForActionEnd": false,
+      "WaitSeconds": 0.0,
+      "Weight": 1.0
+    },
+    {
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "ActionName": "",
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardKey": "",
+      "BlackboardScope": "Local",
+      "BoolValue": true,
+      "Comment": "",
+      "CompareType": "Equal",
+      "FloatValue": 0.0,
+      "Id": 64,
+      "InputPinId": 65,
+      "IntValue": 0,
+      "Name": "攻撃距離への接近",
+      "OutputPinId": 66,
+      "Position": [
+        855.0,
+        488.0
+      ],
+      "Priority": 4,
+      "ScopeId": "Root",
+      "StringValue": "",
+      "SubGraphName": "",
+      "Type": "Sequence",
+      "ValueType": "Bool",
+      "Vector2Value": [
+        0.0,
+        0.0
+      ],
+      "Vector3Value": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "WaitForActionEnd": true,
+      "WaitSeconds": 0.0,
+      "Weight": 1.0
+    },
+    {
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "ActionName": "",
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardKey": "NeedsApproach",
+      "BlackboardScope": "Local",
+      "BoolValue": true,
+      "Comment": "",
+      "CompareType": "Equal",
+      "FloatValue": 0.0,
+      "Id": 68,
+      "InputPinId": 69,
+      "IntValue": 0,
+      "Name": "NeedsApproach",
+      "OutputPinId": 70,
+      "Position": [
+        705.0,
+        420.0
+      ],
+      "Priority": 0,
+      "ScopeId": "Root",
+      "StringValue": "",
+      "SubGraphName": "",
+      "Type": "BlackboardCondition",
+      "ValueType": "Bool",
+      "Vector2Value": [
+        0.0,
+        0.0
+      ],
+      "Vector3Value": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "WaitForActionEnd": true,
+      "WaitSeconds": 0.0,
+      "Weight": 1.0
+    },
+    {
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "ActionName": "HumanBoss_Approach",
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardKey": "",
+      "BlackboardScope": "Local",
+      "BoolValue": true,
+      "Comment": "",
+      "CompareType": "Equal",
+      "FloatValue": 0.0,
+      "Id": 72,
+      "InputPinId": 73,
+      "IntValue": 0,
+      "Name": "Approach",
+      "OutputPinId": 74,
+      "Position": [
+        1057.0,
+        420.0
+      ],
+      "Priority": 1,
+      "ScopeId": "Root",
+      "StringValue": "",
+      "SubGraphName": "",
+      "Type": "PlayAction",
+      "ValueType": "Bool",
+      "Vector2Value": [
+        0.0,
+        0.0
+      ],
+      "Vector3Value": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "WaitForActionEnd": false,
+      "WaitSeconds": 0.0,
+      "Weight": 1.0
+    },
+    {
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "ActionName": "",
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardKey": "",
+      "BlackboardScope": "Local",
+      "BoolValue": true,
+      "Comment": "",
+      "CompareType": "Equal",
+      "FloatValue": 0.0,
+      "Id": 76,
+      "InputPinId": 77,
+      "IntValue": 0,
+      "Name": "プレイヤーの観察",
+      "OutputPinId": 78,
+      "Position": [
+        1613.0,
+        376.0
+      ],
+      "Priority": 5,
+      "ScopeId": "Root",
+      "StringValue": "",
+      "SubGraphName": "",
+      "Type": "Sequence",
+      "ValueType": "Bool",
+      "Vector2Value": [
+        0.0,
+        0.0
+      ],
+      "Vector3Value": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "WaitForActionEnd": true,
+      "WaitSeconds": 0.0,
+      "Weight": 1.0
+    },
+    {
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "ActionName": "",
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardKey": "NeedsObservation",
+      "BlackboardScope": "Local",
+      "BoolValue": true,
+      "Comment": "",
+      "CompareType": "Equal",
+      "FloatValue": 0.0,
+      "Id": 80,
+      "InputPinId": 81,
+      "IntValue": 0,
+      "Name": "NeedsObservation",
+      "OutputPinId": 82,
+      "Position": [
+        1361.0,
+        288.0
+      ],
+      "Priority": 0,
+      "ScopeId": "Root",
+      "StringValue": "",
+      "SubGraphName": "",
+      "Type": "BlackboardCondition",
+      "ValueType": "Bool",
+      "Vector2Value": [
+        0.0,
+        0.0
+      ],
+      "Vector3Value": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "WaitForActionEnd": true,
+      "WaitSeconds": 0.0,
+      "Weight": 1.0
+    },
+    {
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "ActionName": "HumanBoss_Observe",
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardKey": "",
+      "BlackboardScope": "Local",
+      "BoolValue": true,
+      "Comment": "",
+      "CompareType": "Equal",
+      "FloatValue": 0.0,
+      "Id": 84,
+      "InputPinId": 85,
+      "IntValue": 0,
+      "Name": "Observe",
+      "OutputPinId": 86,
+      "Position": [
+        1793.0,
+        320.0
+      ],
+      "Priority": 1,
+      "ScopeId": "Root",
+      "StringValue": "",
+      "SubGraphName": "",
+      "Type": "PlayAction",
+      "ValueType": "Bool",
+      "Vector2Value": [
+        0.0,
+        0.0
+      ],
+      "Vector3Value": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "WaitForActionEnd": false,
+      "WaitSeconds": 0.0,
+      "Weight": 1.0
+    },
+    {
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "ActionName": "",
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardKey": "",
+      "BlackboardScope": "Local",
+      "BoolValue": true,
+      "Comment": "",
+      "CompareType": "Equal",
+      "FloatValue": 0.0,
+      "Id": 88,
+      "InputPinId": 89,
+      "IntValue": 0,
+      "Name": "攻撃の選択",
+      "OutputPinId": 90,
+      "Position": [
+        2465.0,
+        404.0
+      ],
+      "Priority": 6,
+      "ScopeId": "Root",
+      "StringValue": "",
+      "SubGraphName": "",
+      "Type": "Sequence",
+      "ValueType": "Bool",
+      "Vector2Value": [
+        0.0,
+        0.0
+      ],
+      "Vector3Value": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "WaitForActionEnd": true,
+      "WaitSeconds": 0.0,
+      "Weight": 1.0
+    },
+    {
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "ActionName": "",
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardKey": "CanOffense",
+      "BlackboardScope": "Local",
+      "BoolValue": true,
+      "Comment": "",
+      "CompareType": "Equal",
+      "FloatValue": 0.0,
+      "Id": 92,
+      "InputPinId": 93,
+      "IntValue": 0,
+      "Name": "CanOffense",
+      "OutputPinId": 94,
+      "Position": [
+        2145.0,
+        336.0
+      ],
+      "Priority": 0,
+      "ScopeId": "Root",
+      "StringValue": "",
+      "SubGraphName": "",
+      "Type": "BlackboardCondition",
+      "ValueType": "Bool",
+      "Vector2Value": [
+        0.0,
+        0.0
+      ],
+      "Vector3Value": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "WaitForActionEnd": true,
+      "WaitSeconds": 0.0,
+      "Weight": 1.0
+    },
+    {
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "ActionName": "",
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardKey": "",
+      "BlackboardScope": "Local",
+      "BoolValue": true,
+      "Comment": "",
+      "CompareType": "Equal",
+      "FloatValue": 0.0,
+      "Id": 96,
+      "InputPinId": 97,
+      "IntValue": 0,
+      "Name": "攻撃パターンの抽選",
+      "OutputPinId": 98,
+      "Position": [
+        2593.0,
+        324.0
+      ],
+      "Priority": 1,
+      "ScopeId": "Root",
+      "StringValue": "",
+      "SubGraphName": "",
+      "Type": "RandomSelector",
+      "ValueType": "Bool",
+      "Vector2Value": [
+        0.0,
+        0.0
+      ],
+      "Vector3Value": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "WaitForActionEnd": true,
+      "WaitSeconds": 0.0,
+      "Weight": 1.0
+    },
+    {
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "ActionName": "HumanBoss_NORMAL_ATTACK_A",
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardKey": "",
+      "BlackboardScope": "Local",
+      "BoolValue": true,
+      "Comment": "",
+      "CompareType": "Equal",
+      "FloatValue": 0.0,
+      "Id": 100,
+      "InputPinId": 101,
+      "IntValue": 0,
+      "Name": "ComboPattern01 (4 stages)",
+      "OutputPinId": 102,
+      "Position": [
+        2257.0,
+        544.0
+      ],
+      "Priority": 0,
+      "ScopeId": "Root",
+      "StringValue": "",
+      "SubGraphName": "",
+      "Type": "PlayAction",
+      "ValueType": "Bool",
+      "Vector2Value": [
+        0.0,
+        0.0
+      ],
+      "Vector3Value": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "WaitForActionEnd": true,
+      "WaitSeconds": 0.0,
+      "Weight": 1.0
+    },
+    {
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "ActionName": "HumanBoss_NORMAL_ATTACK_B",
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardKey": "",
+      "BlackboardScope": "Local",
+      "BoolValue": true,
+      "Comment": "",
+      "CompareType": "Equal",
+      "FloatValue": 0.0,
+      "Id": 104,
+      "InputPinId": 105,
+      "IntValue": 0,
+      "Name": "ComboPattern02 (4 stages)",
+      "OutputPinId": 106,
+      "Position": [
+        2513.0,
+        548.0
+      ],
+      "Priority": 1,
+      "ScopeId": "Root",
+      "StringValue": "",
+      "SubGraphName": "",
+      "Type": "PlayAction",
+      "ValueType": "Bool",
+      "Vector2Value": [
+        0.0,
+        0.0
+      ],
+      "Vector3Value": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "WaitForActionEnd": true,
+      "WaitSeconds": 0.0,
+      "Weight": 1.0
+    },
+    {
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "ActionName": "HumanBoss_DELAY_ATTACK",
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardKey": "",
+      "BlackboardScope": "Local",
+      "BoolValue": true,
+      "Comment": "",
+      "CompareType": "Equal",
+      "FloatValue": 0.0,
+      "Id": 108,
+      "InputPinId": 109,
+      "IntValue": 0,
+      "Name": "DELAY_ATTACK",
+      "OutputPinId": 110,
+      "Position": [
+        2737.0,
+        548.0
+      ],
+      "Priority": 2,
+      "ScopeId": "Root",
+      "StringValue": "",
+      "SubGraphName": "",
+      "Type": "PlayAction",
+      "ValueType": "Bool",
+      "Vector2Value": [
+        0.0,
+        0.0
+      ],
+      "Vector3Value": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "WaitForActionEnd": true,
+      "WaitSeconds": 0.0,
+      "Weight": 1.0
+    },
+    {
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "ActionName": "HumanBoss_GUARD_BREAK",
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardKey": "",
+      "BlackboardScope": "Local",
+      "BoolValue": true,
+      "Comment": "",
+      "CompareType": "Equal",
+      "FloatValue": 0.0,
+      "Id": 112,
+      "InputPinId": 113,
+      "IntValue": 0,
+      "Name": "GUARD_BREAK",
+      "OutputPinId": 114,
+      "Position": [
+        2961.0,
+        548.0
+      ],
+      "Priority": 3,
+      "ScopeId": "Root",
+      "StringValue": "",
+      "SubGraphName": "",
+      "Type": "PlayAction",
+      "ValueType": "Bool",
+      "Vector2Value": [
+        0.0,
+        0.0
+      ],
+      "Vector3Value": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "WaitForActionEnd": true,
+      "WaitSeconds": 0.0,
+      "Weight": 1.0
+    },
+    {
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "ActionName": "HumanBoss_Observe",
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardKey": "",
+      "BlackboardScope": "Local",
+      "BoolValue": true,
+      "Comment": "",
+      "CompareType": "Equal",
+      "FloatValue": 0.0,
+      "Id": 116,
+      "InputPinId": 117,
+      "IntValue": 0,
+      "Name": "待機と観察",
+      "OutputPinId": 118,
+      "Position": [
+        4049.0,
+        456.0
+      ],
+      "Priority": 7,
+      "ScopeId": "Root",
+      "StringValue": "",
+      "SubGraphName": "",
+      "Type": "PlayAction",
+      "ValueType": "Bool",
+      "Vector2Value": [
+        0.0,
+        0.0
+      ],
+      "Vector3Value": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "WaitForActionEnd": false,
+      "WaitSeconds": 0.0,
+      "Weight": 1.0
+    },
+    {
+      "Id": 120,
+      "InputPinId": 121,
+      "OutputPinId": 122,
+      "Type": "RandomSelector",
+      "Name": "Counter段階",
+      "ScopeId": "Root",
+      "Position": [
+        1250,
+        0
+      ],
+      "Priority": 1,
+      "Weight": 1.0,
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardScope": "Local",
+      "CompareType": "Equal",
+      "ValueType": "Bool",
+      "BoolValue": true,
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "WaitForActionEnd": true
+    },
+    {
+      "Id": 125,
+      "InputPinId": 126,
+      "OutputPinId": 127,
+      "Type": "PlayAction",
+      "Name": "通常Guard／Dodge後の軽反撃",
+      "ScopeId": "Root",
+      "Position": [
+        1550,
+        100
+      ],
+      "Priority": 1,
+      "Weight": 1.0,
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardScope": "Local",
+      "CompareType": "Equal",
+      "ValueType": "Bool",
+      "BoolValue": true,
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "WaitForActionEnd": true,
+      "ActionName": "HumanBoss_LIGHT_COUNTER"
+    },
+    {
+      "Id": 129,
+      "InputPinId": 130,
+      "OutputPinId": 131,
+      "Type": "PlayAction",
+      "Name": "空振り後の反撃",
+      "ScopeId": "Root",
+      "Position": [
+        1550,
+        1900
+      ],
+      "Priority": 4,
+      "Weight": 1.0,
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardScope": "Local",
+      "CompareType": "Equal",
+      "ValueType": "Bool",
+      "BoolValue": true,
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "WaitForActionEnd": true,
+      "ActionName": "HumanBoss_WHIFF_PUNISH"
+    },
+    {
+      "Id": 133,
+      "InputPinId": 134,
+      "OutputPinId": 135,
+      "Type": "PlayAction",
+      "Name": "予兆を見せて攻撃を誘う",
+      "ScopeId": "Root",
+      "Position": [
+        1550,
+        2000
+      ],
+      "Priority": 5,
+      "Weight": 1.0,
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardScope": "Local",
+      "CompareType": "Equal",
+      "ValueType": "Bool",
+      "BoolValue": true,
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "WaitForActionEnd": true,
+      "ActionName": "HumanBoss_ATTACK_FEINT"
+    },
+    {
+      "Id": 137,
+      "InputPinId": 138,
+      "OutputPinId": 139,
+      "Type": "Sequence",
+      "Name": "Intentに応じたShadow接続",
+      "ScopeId": "Root",
+      "Position": [
+        570,
+        520
+      ],
+      "Priority": 2,
+      "Weight": 1.0,
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardScope": "Local",
+      "CompareType": "Equal",
+      "ValueType": "Bool",
+      "BoolValue": true,
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "WaitForActionEnd": true
+    },
+    {
+      "Id": 141,
+      "InputPinId": 142,
+      "OutputPinId": 143,
+      "Type": "BlackboardCondition",
+      "Name": "CanShadow",
+      "ScopeId": "Root",
+      "Position": [
+        900,
+        520
+      ],
+      "Priority": 0,
+      "Weight": 1.0,
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardScope": "Local",
+      "CompareType": "Equal",
+      "ValueType": "Bool",
+      "BoolValue": true,
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "WaitForActionEnd": true,
+      "BlackboardKey": "CanShadow"
+    },
+    {
+      "Id": 145,
+      "InputPinId": 146,
+      "OutputPinId": 147,
+      "Type": "RandomSelector",
+      "Name": "接近／離脱／PunishのShadow",
+      "ScopeId": "Root",
+      "Position": [
+        1200,
+        520
+      ],
+      "Priority": 1,
+      "Weight": 1.0,
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardScope": "Local",
+      "CompareType": "Equal",
+      "ValueType": "Bool",
+      "BoolValue": true,
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "WaitForActionEnd": true
+    },
+    {
+      "Id": 149,
+      "InputPinId": 150,
+      "OutputPinId": 151,
+      "Type": "PlayAction",
+      "Name": "SHADOW_SHIFT_APPROACH",
+      "ScopeId": "Root",
+      "Position": [
+        1550,
+        520
+      ],
+      "Priority": 0,
+      "Weight": 1.0,
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardScope": "Local",
+      "CompareType": "Equal",
+      "ValueType": "Bool",
+      "BoolValue": true,
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "WaitForActionEnd": true,
+      "ActionName": "HumanBoss_SHADOW_SHIFT_APPROACH"
+    },
+    {
+      "Id": 153,
+      "InputPinId": 154,
+      "OutputPinId": 155,
+      "Type": "PlayAction",
+      "Name": "SHADOW_SHIFT_BACK",
+      "ScopeId": "Root",
+      "Position": [
+        1550,
+        620
+      ],
+      "Priority": 1,
+      "Weight": 1.0,
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardScope": "Local",
+      "CompareType": "Equal",
+      "ValueType": "Bool",
+      "BoolValue": true,
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "WaitForActionEnd": true,
+      "ActionName": "HumanBoss_SHADOW_SHIFT_BACK"
+    },
+    {
+      "Id": 157,
+      "InputPinId": 158,
+      "OutputPinId": 159,
+      "Type": "PlayAction",
+      "Name": "SHADOW_SHIFT_SIDE",
+      "ScopeId": "Root",
+      "Position": [
+        1550,
+        720
+      ],
+      "Priority": 2,
+      "Weight": 1.0,
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardScope": "Local",
+      "CompareType": "Equal",
+      "ValueType": "Bool",
+      "BoolValue": true,
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "WaitForActionEnd": true,
+      "ActionName": "HumanBoss_SHADOW_SHIFT_SIDE"
+    },
+    {
+      "Id": 161,
+      "InputPinId": 162,
+      "OutputPinId": 163,
+      "Type": "PlayAction",
+      "Name": "SHADOW_SHIFT_BEHIND",
+      "ScopeId": "Root",
+      "Position": [
+        1550,
+        820
+      ],
+      "Priority": 3,
+      "Weight": 1.0,
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardScope": "Local",
+      "CompareType": "Equal",
+      "ValueType": "Bool",
+      "BoolValue": true,
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "WaitForActionEnd": true,
+      "ActionName": "HumanBoss_SHADOW_SHIFT_BEHIND"
+    },
+    {
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "ActionName": "HumanBoss_HEAVY_SINGLE_ATTACK",
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardKey": "",
+      "BlackboardScope": "Local",
+      "BoolValue": true,
+      "Comment": "",
+      "CompareType": "Equal",
+      "FloatValue": 0.0,
+      "Id": 166,
+      "InputPinId": 167,
+      "IntValue": 0,
+      "Name": "HEAVY_SINGLE_ATTACK",
+      "OutputPinId": 168,
+      "Position": [
+        1450,
+        500
+      ],
+      "Priority": 5,
+      "ScopeId": "Root",
+      "StringValue": "",
+      "SubGraphName": "",
+      "Type": "PlayAction",
+      "ValueType": "Bool",
+      "Vector2Value": [
+        0.0,
+        0.0
+      ],
+      "Vector3Value": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "WaitForActionEnd": true,
+      "WaitSeconds": 0.0,
+      "Weight": 1.0
+    },
+    {
+      "Id": 170,
+      "InputPinId": 171,
+      "OutputPinId": 172,
+      "Type": "PlayAction",
+      "Name": "SHADOW_SLASH",
+      "ScopeId": "Root",
+      "Position": [
+        1500,
+        920
+      ],
+      "Priority": 4,
+      "Weight": 1.0,
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardScope": "Local",
+      "CompareType": "Equal",
+      "ValueType": "Bool",
+      "BoolValue": true,
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "WaitForActionEnd": true,
+      "ActionName": "HumanBoss_SHADOW_SLASH"
+    },
+    {
+      "Id": 174,
+      "InputPinId": 175,
+      "OutputPinId": 176,
+      "Type": "PlayAction",
+      "Name": "SHADOW_DIVE_01",
+      "ScopeId": "Root",
+      "Position": [
+        1680,
+        920
+      ],
+      "Priority": 5,
+      "Weight": 1.0,
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardScope": "Local",
+      "CompareType": "Equal",
+      "ValueType": "Bool",
+      "BoolValue": true,
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "WaitForActionEnd": true,
+      "ActionName": "HumanBoss_SHADOW_DIVE_01"
+    },
+    {
+      "Id": 178,
+      "InputPinId": 179,
+      "OutputPinId": 180,
+      "Type": "PlayAction",
+      "Name": "SHADOW_DIVE_02",
+      "ScopeId": "Root",
+      "Position": [
+        1860,
+        920
+      ],
+      "Priority": 6,
+      "Weight": 1.0,
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardScope": "Local",
+      "CompareType": "Equal",
+      "ValueType": "Bool",
+      "BoolValue": true,
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "WaitForActionEnd": true,
+      "ActionName": "HumanBoss_SHADOW_DIVE_02"
+    },
+    {
+      "Id": 182,
+      "InputPinId": 183,
+      "OutputPinId": 184,
+      "Type": "PlayAction",
+      "Name": "SHADOW_DOMAIN",
+      "ScopeId": "Root",
+      "Position": [
+        2040,
+        920
+      ],
+      "Priority": 7,
+      "Weight": 1.0,
+      "BlackboardCategory": "HumanBossAI",
+      "BlackboardScope": "Local",
+      "CompareType": "Equal",
+      "ValueType": "Bool",
+      "BoolValue": true,
+      "ActionEndCategory": "HumanBossAI",
+      "ActionEndKey": "ActionEnded",
+      "WaitForActionEnd": true,
+      "ActionName": "HumanBoss_SHADOW_DOMAIN"
+    }
+  ],
+  "Version": 1
+}

@@ -24,9 +24,11 @@ public:
     void Start() override;
     void Update(float deltaTime_) override;
     void SetInvincible(bool invincible_);
+    // 行動中の無敵を、通常の回避フラグや報酬Timerと独立して切り替える。
+    void SetTemporaryInvincible(bool invincible_) { temporaryInvincible = invincible_; }
     // 回避などの明示無敵を変更せず、指定時間の被弾拒否を追加する。
     void AddInvincibilityTime(float duration_);
-    bool IsInvincible() const { return invincible || grantedInvincibilityTimer > 0.0f; }
+    bool IsInvincible() const { return invincible || temporaryInvincible || grantedInvincibilityTimer > 0.0f; }
     bool CanReceiveHit(const HitBox& hitBox_) const;
     void RecordHit(const HitBox& hitBox_);
     void ResetHitHistory();
@@ -47,6 +49,7 @@ private:
     float invincibilityDuration = 0.08f; // Hit後に自動で付く短い無敵時間。
     float invincibilityTimer = 0.0f; // 残り無敵時間。
     float grantedInvincibilityTimer = 0.0f; // 成功報酬の無敵。AnimationのON/OFFから独立して保持する。
+    bool temporaryInvincible = false; // 行動終了時に解除し、保存データへ持ち越さない。
     bool invincible = false; // 現在無敵かどうか。
     bool syncCharacterColliderShape = true; // CharacterColliderの形状へ同期するか。
     std::weak_ptr<CharacterCollider> characterCollider;

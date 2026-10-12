@@ -148,6 +148,108 @@
       "TypeName": "GuardCollider",
       "UpdateEnabled": true,
       "UpdatePriority": 0
+    },
+    {
+      "Data": {
+        "ActionPrefix": "Kick",
+        "ActivateActionName": "EnableHitBox",
+        "AllowMultiHit": false,
+        "AttackInstanceId": 0,
+        "AttackSourceType": 0,
+        "AttackTag": "Attack",
+        "AttackerAirLiftPower": 0.0,
+        "BlackboardCategory": "Attack",
+        "CameraShakeAttackScale": 0.5,
+        "CameraShakeEnabled": true,
+        "CameraShakeFrequency": 24.0,
+        "CameraShakePriority": 8,
+        "CameraShakeReceiveDuration": 0.18000000715255737,
+        "CameraShakeReceivePositionStrength": 0.054999999701976776,
+        "CameraShakeReceiveRotationStrength": 0.44999998807907104,
+        "CanBeCharacterGround": true,
+        "CanHitOwner": false,
+        "ColliderName": "",
+        "CollisionOwnerObjectName": "",
+        "CollisionRole": 2,
+        "ContainmentMode": 0,
+        "Damage": 225.0,
+        "DamageApplyType": 0,
+        "DamageHitInterval": 0.0,
+        "DamageKey": "Damage",
+        "DamageRate": 2.25,
+        "DamageRateKey": "DamageRate",
+        "DeactivateActionName": "DisableHitBox",
+        "DebugPrimitiveColor": [
+          1.0,
+          0.20000000298023224,
+          0.20000000298023224,
+          1.0
+        ],
+        "EndNodeName": "ball_r_end",
+        "FixedDamage": 0.0,
+        "FixedDamageKey": "FixedDamage",
+        "GravityScale": 1.0,
+        "GuardBreak": false,
+        "HalfHeight": 0.15,
+        "HitGroupId": 0,
+        "HitImpactEffectAssetPath": "",
+        "HitMeshVFXAssetPath": "",
+        "HitMeshVFXLifeTime": 1.0,
+        "HitMeshVFXNormalOffset": 0.0,
+        "HitOncePerActivation": true,
+        "HitParticleAssetPath": "EnemyMudKickHit",
+        "HitParticleAxisToAttackerBlend": 0.75,
+        "HitParticleEmitterName": "",
+        "HitParticleLifeTime": 0.6499999761581421,
+        "HitParticleNormalOffset": 0.07999999821186066,
+        "HitParticleTargetAttractionFalloff": 1.25,
+        "HitParticleTargetAttractionRange": 3.0,
+        "HitParticleTargetAttractionStrength": 1.399999976158142,
+        "HitParticleUseImpactAxis": true,
+        "HitParticleUseTargetAttraction": true,
+        "HitSoundMuffled": false,
+        "HitSoundMuffledCutoff": 1200.0,
+        "HitSoundPath": "",
+        "HitSoundPathKey": "HitSoundPath",
+        "HitSoundVolume": 1.0,
+        "HitStopDuration": 0.054999999701976776,
+        "HitStopDurationKey": "HitStopDuration",
+        "HitStopLayerMask": 3,
+        "HitStopScale": 0.6000000238418579,
+        "ImpactPower": 4.0,
+        "IsStatic": false,
+        "IsTrigger": true,
+        "JustGuardedActionName": "",
+        "KnockBackPower": 5.5,
+        "KnockBackPowerKey": "KnockBackPower",
+        "Mass": 0.0,
+        "MaxHitCount": 1,
+        "NodeModelObjectName": "HumanBoss",
+        "Offset": [
+          0,
+          0,
+          0
+        ],
+        "PhysicsControlsTransform": false,
+        "Radius": 0.28,
+        "RotateVelocityThreshold": 0.0010000000474974513,
+        "ShapeRenderFlg": false,
+        "SourceAction": "",
+        "StartNodeName": "foot_r",
+        "TargetAirLiftPower": 0.0,
+        "TeamId": 2,
+        "UseGravity": false,
+        "UsePhysicsResponse": false,
+        "VelocityRotationMode": 0,
+        "shapeSizeScale": 1.0
+      },
+      "Enabled": false,
+      "LateUpdateEnabled": true,
+      "LateUpdatePriority": 0,
+      "RequiredForSceneStart": false,
+      "TypeName": "HitBox",
+      "UpdateEnabled": true,
+      "UpdatePriority": 0
     }
   ],
   "CollisionMask": 0,
@@ -1352,6 +1454,582 @@
             ],
             "Type": 3,
             "Visible": true
+          },
+          {
+            "Name": "HumanBoss.WindupPoseSpeed",
+            "Type": 3,
+            "Color": 4282694655,
+            "Visible": true,
+            "Points": [
+              [
+                0.0,
+                1.6
+              ],
+              [
+                0.3,
+                1.6
+              ],
+              [
+                0.65,
+                1.3
+              ],
+              [
+                1.0,
+                1.3
+              ]
+            ],
+            "PointOptions": [
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              }
+            ],
+            "AssetPath": "Data/Curve/HumanBoss.WindupPoseSpeed.json"
+          },
+          {
+            "Name": "HumanBoss.SlashSpeedA",
+            "Type": 3,
+            "Color": 4282694655,
+            "Visible": true,
+            "Points": [
+              [
+                0.0,
+                1.1
+              ],
+              [
+                0.06,
+                1.1
+              ],
+              [
+                0.14,
+                2.4
+              ],
+              [
+                0.65,
+                2.4
+              ],
+              [
+                1.0,
+                1.8
+              ]
+            ],
+            "PointOptions": [
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              }
+            ],
+            "AssetPath": "Data/Curve/HumanBoss.SlashSpeedA.json"
+          },
+          {
+            "Name": "HumanBoss.SlashSpeedB",
+            "Type": 3,
+            "Color": 4282694655,
+            "Visible": true,
+            "Points": [
+              [
+                0.0,
+                1.1
+              ],
+              [
+                0.05,
+                1.1
+              ],
+              [
+                0.12,
+                2.5
+              ],
+              [
+                0.65,
+                2.5
+              ],
+              [
+                1.0,
+                1.8
+              ]
+            ],
+            "PointOptions": [
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              }
+            ],
+            "AssetPath": "Data/Curve/HumanBoss.SlashSpeedB.json"
+          },
+          {
+            "Name": "HumanBoss.FinisherSpeed",
+            "Type": 3,
+            "Color": 4282694655,
+            "Visible": true,
+            "Points": [
+              [
+                0.0,
+                1.2
+              ],
+              [
+                0.08,
+                1.2
+              ],
+              [
+                0.18,
+                2.6
+              ],
+              [
+                0.65,
+                2.4
+              ],
+              [
+                1.0,
+                1.8
+              ]
+            ],
+            "PointOptions": [
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              }
+            ],
+            "AssetPath": "Data/Curve/HumanBoss.FinisherSpeed.json"
+          },
+          {
+            "Name": "HumanBoss.AttackRootWeight",
+            "Type": 3,
+            "Color": 4282694655,
+            "Visible": true,
+            "Points": [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.16,
+                0.0
+              ],
+              [
+                0.25,
+                1.0
+              ],
+              [
+                0.55,
+                1.0
+              ],
+              [
+                0.72,
+                0.3
+              ],
+              [
+                1.0,
+                0.0
+              ]
+            ],
+            "PointOptions": [
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              }
+            ],
+            "AssetPath": "Data/Curve/HumanBoss.AttackRootWeight.json"
+          },
+          {
+            "Name": "HumanBoss.Combo01Speed",
+            "Type": 3,
+            "Color": 4282694655,
+            "Visible": true,
+            "Points": [
+              [
+                0,
+                0.6
+              ],
+              [
+                0.025,
+                0.4
+              ],
+              [
+                0.055,
+                0.4
+              ],
+              [
+                0.08,
+                1.0
+              ],
+              [
+                0.11,
+                1.4
+              ],
+              [
+                0.3,
+                1.3
+              ],
+              [
+                0.6,
+                1.0
+              ],
+              [
+                1,
+                1.0
+              ]
+            ],
+            "PointOptions": [
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              }
+            ],
+            "AssetPath": "Data/Curve/HumanBoss.Combo01Speed.json"
+          },
+          {
+            "Name": "HumanBoss.Combo02Speed",
+            "Type": 3,
+            "Color": 4282694655,
+            "Visible": true,
+            "Points": [
+              [
+                0,
+                0.6
+              ],
+              [
+                0.045,
+                0.4
+              ],
+              [
+                0.08,
+                0.4
+              ],
+              [
+                0.105,
+                1.0
+              ],
+              [
+                0.15,
+                1.4
+              ],
+              [
+                0.35,
+                1.3
+              ],
+              [
+                0.65,
+                1.0
+              ],
+              [
+                1,
+                1.0
+              ]
+            ],
+            "PointOptions": [
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              }
+            ],
+            "AssetPath": "Data/Curve/HumanBoss.Combo02Speed.json"
+          },
+          {
+            "Name": "HumanBoss.HeavySingleSpeed",
+            "Type": 3,
+            "Color": 4282694655,
+            "Visible": true,
+            "Points": [
+              [
+                0,
+                1.0
+              ],
+              [
+                0.08,
+                1.0
+              ],
+              [
+                0.26,
+                1.0
+              ],
+              [
+                0.34,
+                1.0
+              ],
+              [
+                0.38,
+                1.6
+              ],
+              [
+                0.52,
+                1.4
+              ],
+              [
+                0.66,
+                1.0
+              ],
+              [
+                0.8,
+                1.0
+              ],
+              [
+                1,
+                1.0
+              ]
+            ],
+            "PointOptions": [
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              }
+            ],
+            "AssetPath": "Data/Curve/HumanBoss.HeavySingleSpeed.json"
+          },
+          {
+            "Name": "HumanBoss.WarpCorrection",
+            "Type": 3,
+            "Color": 4282694655,
+            "Visible": true,
+            "Points": [
+              [
+                0,
+                0
+              ],
+              [
+                0.75,
+                1
+              ],
+              [
+                1,
+                1
+              ]
+            ],
+            "PointOptions": [
+              {
+                "InterpolationType": 1,
+                "LeftTangent": 0,
+                "RightTangent": 0
+              },
+              {
+                "InterpolationType": 1,
+                "LeftTangent": 0,
+                "RightTangent": 0
+              },
+              {
+                "InterpolationType": 1,
+                "LeftTangent": 0,
+                "RightTangent": 0
+              }
+            ],
+            "AssetPath": "Data/Curve/HumanBoss.WarpCorrection.json"
           }
         ]
       },
@@ -1378,7 +2056,9 @@
         "AssetPath": "HumanBoss",
         "GraphAssetPath": "",
         "UseTransitionGraph": false,
-        "StateAssets": {}
+        "StateAssets": {
+          "Block_Hit_Break_Seq": "Data/Animation/StateData/HumanBoss/States/JustGuardRecoil.json"
+        }
       },
       "Enabled": true,
       "LateUpdateEnabled": true,
@@ -1404,8 +2084,8 @@
     },
     {
       "Data": {
-        "CurrentHealth": 1000.0,
-        "MaxHealth": 1000.0
+        "CurrentHealth": 12000.0,
+        "MaxHealth": 12000.0
       },
       "Enabled": true,
       "LateUpdateEnabled": true,
@@ -1420,11 +2100,11 @@
         "AirHeavyImpactThreshold": 50.0,
         "Armor": 0.0,
         "CommonReactionActionNames": [],
-        "CurrentHealth": 1000.0,
+        "CurrentHealth": 12000.0,
         "DamageActionName": "Health_Hit",
         "HeavyImpactThreshold": 50.0,
         "HitStopLayerMask": 0,
-        "MaxHealth": 1000.0,
+        "MaxHealth": 12000.0,
         "MediumImpactThreshold": 20.0,
         "OverlayDuration": 0.11999999731779099,
         "OverlayStartActionName": "",
@@ -1460,7 +2140,235 @@
     },
     {
       "Data": {
-        "Sequences": [],
+        "Sequences": [
+          {
+            "name": "HumanBoss_Windup",
+            "duration": 1.0,
+            "completionAction": "",
+            "actions": [
+              {
+                "cat": "HumanBoss",
+                "name": "HumanBoss_WindupBegin",
+                "time": 0.0
+              }
+            ]
+          },
+          {
+            "name": "HumanBoss_StrikeSetup",
+            "duration": 0.01,
+            "completionAction": "",
+            "actions": [
+              {
+                "cat": "HumanBoss",
+                "name": "HumanBoss_WindupEnd",
+                "time": 0.0
+              },
+              {
+                "cat": "HumanBoss",
+                "name": "HumanBoss_FaceTarget",
+                "time": 0.0
+              }
+            ]
+          },
+          {
+            "name": "HumanBoss_COMBO_PATTERN_01",
+            "duration": 1.0,
+            "completionAction": "",
+            "actions": [
+              {
+                "cat": "HumanBoss",
+                "name": "HumanBoss_FaceTarget",
+                "time": 0,
+                "animationState": "Combo_Attack_01_01_Seq",
+                "useNormalizedTime": true
+              },
+              {
+                "cat": "HumanBoss",
+                "name": "HumanBoss_WindupBegin",
+                "time": 0,
+                "animationState": "Combo_Attack_01_01_Seq",
+                "useNormalizedTime": true
+              },
+              {
+                "cat": "HumanBoss",
+                "name": "HumanBoss_WindupEnd",
+                "time": 0.065,
+                "animationState": "Combo_Attack_01_01_Seq",
+                "useNormalizedTime": true
+              },
+              {
+                "cat": "HumanBoss",
+                "name": "ActionEnd",
+                "time": 0.3428571195018551,
+                "animationState": "Combo_Attack_01_01_Seq",
+                "useNormalizedTime": true
+              },
+              {
+                "cat": "HumanBoss",
+                "name": "ActionEnd",
+                "time": 0.35142854748940144,
+                "animationState": "Combo_Attack_01_02_Seq",
+                "useNormalizedTime": true
+              },
+              {
+                "cat": "HumanBoss",
+                "name": "ActionEnd",
+                "time": 0.4528301621977244,
+                "animationState": "Combo_Attack_01_03_Seq",
+                "useNormalizedTime": true
+              }
+            ]
+          },
+          {
+            "name": "HumanBoss_COMBO_PATTERN_02",
+            "duration": 1.0,
+            "completionAction": "",
+            "actions": [
+              {
+                "cat": "HumanBoss",
+                "name": "HumanBoss_FaceTarget",
+                "time": 0,
+                "animationState": "Combo_Attack_02_01_Seq",
+                "useNormalizedTime": true
+              },
+              {
+                "cat": "HumanBoss",
+                "name": "HumanBoss_WindupBegin",
+                "time": 0,
+                "animationState": "Combo_Attack_02_01_Seq",
+                "useNormalizedTime": true
+              },
+              {
+                "cat": "HumanBoss",
+                "name": "HumanBoss_WindupEnd",
+                "time": 0.095,
+                "animationState": "Combo_Attack_02_01_Seq",
+                "useNormalizedTime": true
+              },
+              {
+                "cat": "HumanBoss",
+                "name": "ActionEnd",
+                "time": 0.35142854748940144,
+                "animationState": "Combo_Attack_02_01_Seq",
+                "useNormalizedTime": true
+              },
+              {
+                "cat": "HumanBoss",
+                "name": "ActionEnd",
+                "time": 0.5323943375926307,
+                "animationState": "Combo_Attack_02_02_Seq",
+                "useNormalizedTime": true
+              },
+              {
+                "cat": "HumanBoss",
+                "name": "ActionEnd",
+                "time": 0.41,
+                "animationState": "Combo_Attack_02_03_Seq",
+                "useNormalizedTime": true
+              }
+            ]
+          },
+          {
+            "name": "HumanBoss_HEAVY_SINGLE_ATTACK_Sequence",
+            "duration": 1.0,
+            "completionAction": "",
+            "actions": [
+              {
+                "cat": "HumanBoss",
+                "name": "HumanBoss_FaceTarget",
+                "time": 0,
+                "animationState": "SS_Sp_Skill3",
+                "useNormalizedTime": true
+              },
+              {
+                "cat": "HumanBoss",
+                "name": "HumanBoss_WindupBegin",
+                "time": 0,
+                "animationState": "SS_Sp_Skill3",
+                "useNormalizedTime": true
+              },
+              {
+                "cat": "HumanBoss",
+                "name": "HumanBoss_WindupEnd",
+                "time": 0.34,
+                "animationState": "SS_Sp_Skill3",
+                "useNormalizedTime": true
+              }
+            ]
+          },
+          {
+            "name": "HumanBoss_JustGuardRecoil",
+            "duration": 1.05,
+            "completionAction": "HumanBoss_JustGuardRecoilEnd",
+            "actions": [
+              {
+                "cat": "Animation",
+                "name": "Block_Hit_Break_Seq",
+                "time": 0.0
+              }
+            ]
+          },
+          {
+            "name": "HumanBoss_SHADOW_SLASH_Sequence",
+            "duration": 4,
+            "completionAction": "",
+            "actions": [
+              {
+                "cat": "HumanBoss",
+                "name": "HumanBoss_WindupBegin",
+                "time": 0,
+                "animationState": "SS_Sp_Skill1",
+                "useNormalizedTime": true
+              },
+              {
+                "cat": "HumanBoss",
+                "name": "HumanBoss_WindupEnd",
+                "time": 0.23,
+                "animationState": "SS_Sp_Skill1",
+                "useNormalizedTime": true
+              }
+            ]
+          },
+          {
+            "name": "HumanBoss_SHADOW_DIVE_01_Sequence",
+            "duration": 4,
+            "completionAction": "",
+            "actions": [
+              {
+                "cat": "HumanBoss",
+                "name": "HumanBoss_ShadowShowArea",
+                "time": 0,
+                "useNormalizedTime": false
+              }
+            ]
+          },
+          {
+            "name": "HumanBoss_SHADOW_DIVE_02_Sequence",
+            "duration": 4,
+            "completionAction": "",
+            "actions": [
+              {
+                "cat": "HumanBoss",
+                "name": "HumanBoss_ShadowShowArea",
+                "time": 0,
+                "useNormalizedTime": false
+              }
+            ]
+          },
+          {
+            "name": "HumanBoss_SHADOW_DOMAIN_Sequence",
+            "duration": 4,
+            "completionAction": "",
+            "actions": [
+              {
+                "cat": "HumanBoss",
+                "name": "HumanBoss_ShadowShowArea",
+                "time": 0,
+                "useNormalizedTime": false
+              }
+            ]
+          }
+        ],
         "RegisterGlobal": false
       },
       "Enabled": true,
@@ -1479,7 +2387,34 @@
       "UpdatePriority": -10,
       "LateUpdatePriority": 0,
       "RequiredForSceneStart": false,
-      "Data": {}
+      "Data": {
+        "FlinchArmor": 10.0,
+        "AttackAssistEnabled": true,
+        "ShadowSwayEnabled": true,
+        "ShadowSwayWidth": 1.0,
+        "ShadowSwayStrength": [
+          0.2,
+          0.7,
+          0.65,
+          0.4
+        ],
+        "ShadowSwayCycles": 1.25,
+        "ShadowSwayRandomness": 0.2,
+        "ShadowSwayBias": 0.0,
+        "ShadowConvergence": 2.0,
+        "ShadowSwayCurve": "HumanBoss.ShadowSwayEnvelope",
+        "ShadowSpeedCurve": "HumanBoss.ShadowMoveSpeed",
+        "ShadowApproachDistance": 14.0,
+        "ShadowBackDistance": 8.0,
+        "ShadowSideDistance": 7.5,
+        "ShadowMoveSpeed": 32.0,
+        "ShadowMoveStartTime": 0.18,
+        "ShadowMoveEndTime": 1.08,
+        "ShadowMaximumPathDistance": 24.0,
+        "ShadowReappearDuration": 0.3,
+        "ShadowEffectInterval": 0.1,
+        "ShadowEffectSpacing": 1.2
+      }
     },
     {
       "TypeName": "HumanBossAIComponent",
@@ -1490,7 +2425,750 @@
       "LateUpdatePriority": 0,
       "RequiredForSceneStart": false,
       "Data": {
-        "PlayerObjectName": "PlayerModel"
+        "PlayerObjectName": "PlayerModel",
+        "BehaviorGraphAssetPath": "Data/AI/BehaviorGraph/HumanBoss.json",
+        "Actions": [
+          {
+            "Type": 0,
+            "Category": 2,
+            "MinDistance": 0.0,
+            "MaxDistance": 5,
+            "Enabled": [
+              true,
+              true,
+              true
+            ],
+            "Weight": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "Cooldown": [
+              2.5,
+              2.0,
+              1.5
+            ],
+            "Skill": {
+              "Name": "HumanBoss_COMBO_PATTERN_01",
+              "Category": "ATTACK",
+              "Enabled": true,
+              "CleanupAction": "HumanBoss_WindupEnd",
+              "Phases": [
+                {
+                  "Animation": "Combo_Attack_01_01_Seq",
+                  "End": "ACTION_END",
+                  "Duration": 0,
+                  "MaximumDuration": 10,
+                  "BlendDuration": 0.04,
+                  "Sequence": "HumanBoss_COMBO_PATTERN_01",
+                  "ContinueSequence": false,
+                  "EnterAction": "",
+                  "ExitAction": "",
+                  "ForwardSpeed": 0,
+                  "PreventFlinch": true,
+                  "MotionWarpPreset": "HumanBoss.ComboFirst"
+                },
+                {
+                  "Animation": "Combo_Attack_01_02_Seq",
+                  "End": "ACTION_END",
+                  "Duration": 0,
+                  "MaximumDuration": 10,
+                  "BlendDuration": 0.04,
+                  "Sequence": "HumanBoss_COMBO_PATTERN_01",
+                  "ContinueSequence": true,
+                  "EnterAction": "",
+                  "ExitAction": "",
+                  "ForwardSpeed": 0,
+                  "PreventFlinch": true,
+                  "MotionWarpPreset": "HumanBoss.ComboSecond"
+                },
+                {
+                  "Animation": "Combo_Attack_01_03_Seq",
+                  "End": "ACTION_END",
+                  "Duration": 0,
+                  "MaximumDuration": 10,
+                  "BlendDuration": 0.04,
+                  "Sequence": "HumanBoss_COMBO_PATTERN_01",
+                  "ContinueSequence": true,
+                  "EnterAction": "",
+                  "ExitAction": "",
+                  "ForwardSpeed": 0,
+                  "PreventFlinch": true,
+                  "MotionWarpPreset": ""
+                },
+                {
+                  "Animation": "Combo_Attack_01_04_Seq",
+                  "End": "ANIMATION_END",
+                  "Duration": 0,
+                  "MaximumDuration": 10,
+                  "BlendDuration": 0.04,
+                  "Sequence": "HumanBoss_COMBO_PATTERN_01",
+                  "ContinueSequence": true,
+                  "EnterAction": "",
+                  "ExitAction": "",
+                  "ForwardSpeed": 0,
+                  "PreventFlinch": true,
+                  "MotionWarpPreset": ""
+                }
+              ]
+            }
+          },
+          {
+            "Type": 1,
+            "Category": 2,
+            "MinDistance": 0.0,
+            "MaxDistance": 5,
+            "Enabled": [
+              true,
+              true,
+              true
+            ],
+            "Weight": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "Cooldown": [
+              3.0,
+              2.5,
+              2.0
+            ],
+            "Skill": {
+              "Name": "HumanBoss_COMBO_PATTERN_02",
+              "Category": "ATTACK",
+              "Enabled": true,
+              "CleanupAction": "HumanBoss_WindupEnd",
+              "Phases": [
+                {
+                  "Animation": "Combo_Attack_02_01_Seq",
+                  "End": "ACTION_END",
+                  "Duration": 0,
+                  "MaximumDuration": 10,
+                  "BlendDuration": 0.04,
+                  "Sequence": "HumanBoss_COMBO_PATTERN_02",
+                  "ContinueSequence": false,
+                  "EnterAction": "",
+                  "ExitAction": "",
+                  "ForwardSpeed": 0,
+                  "PreventFlinch": true,
+                  "MotionWarpPreset": "HumanBoss.ComboFirst"
+                },
+                {
+                  "Animation": "Combo_Attack_02_02_Seq",
+                  "End": "ACTION_END",
+                  "Duration": 0,
+                  "MaximumDuration": 10,
+                  "BlendDuration": 0.04,
+                  "Sequence": "HumanBoss_COMBO_PATTERN_02",
+                  "ContinueSequence": true,
+                  "EnterAction": "",
+                  "ExitAction": "",
+                  "ForwardSpeed": 0,
+                  "PreventFlinch": true,
+                  "MotionWarpPreset": "HumanBoss.ComboSecond"
+                },
+                {
+                  "Animation": "Combo_Attack_02_03_Seq",
+                  "End": "ACTION_END",
+                  "Duration": 0,
+                  "MaximumDuration": 10,
+                  "BlendDuration": 0.04,
+                  "Sequence": "HumanBoss_COMBO_PATTERN_02",
+                  "ContinueSequence": true,
+                  "EnterAction": "",
+                  "ExitAction": "",
+                  "ForwardSpeed": 0,
+                  "PreventFlinch": true,
+                  "MotionWarpPreset": ""
+                },
+                {
+                  "Animation": "Combo_Attack_02_04_Seq",
+                  "End": "ANIMATION_END",
+                  "Duration": 0,
+                  "MaximumDuration": 10,
+                  "BlendDuration": 0.04,
+                  "Sequence": "HumanBoss_COMBO_PATTERN_02",
+                  "ContinueSequence": true,
+                  "EnterAction": "",
+                  "ExitAction": "",
+                  "ForwardSpeed": 0,
+                  "PreventFlinch": true,
+                  "MotionWarpPreset": ""
+                }
+              ]
+            }
+          },
+          {
+            "Type": 23,
+            "Category": 2,
+            "MinDistance": 0.0,
+            "MaxDistance": 6,
+            "Enabled": [
+              true,
+              true,
+              true
+            ],
+            "Weight": [
+              0.35,
+              0.5,
+              0.65
+            ],
+            "Cooldown": [
+              8,
+              7,
+              6
+            ],
+            "Skill": {
+              "Name": "HumanBoss_HEAVY_SINGLE_ATTACK_Sequence",
+              "Category": "ATTACK",
+              "Enabled": true,
+              "CleanupAction": "HumanBoss_WindupEnd",
+              "Phases": [
+                {
+                  "Animation": "SS_Sp_Skill3",
+                  "End": "ANIMATION_END",
+                  "Duration": 0,
+                  "MaximumDuration": 10,
+                  "BlendDuration": 0.08,
+                  "Sequence": "HumanBoss_HEAVY_SINGLE_ATTACK_Sequence",
+                  "ContinueSequence": false,
+                  "EnterAction": "",
+                  "ExitAction": "",
+                  "ForwardSpeed": 0,
+                  "PreventFlinch": true,
+                  "MotionWarpPreset": "HumanBoss.Heavy"
+                }
+              ]
+            }
+          },
+          {
+            "Type": 9,
+            "Category": 4,
+            "Enabled": [
+              true,
+              true,
+              true
+            ],
+            "Weight": [
+              0.7,
+              1,
+              1.3
+            ],
+            "Cooldown": [
+              6,
+              5,
+              4
+            ],
+            "MinDistance": 0.5,
+            "MaxDistance": 12,
+            "Skill": {
+              "Name": "SHADOW_SHIFT_BACK",
+              "Category": "UTILITY",
+              "Enabled": true,
+              "CanUseOnGround": true,
+              "CanUseInAir": false,
+              "Phases": [
+                {
+                  "Animation": "HumanBossCombatWalk",
+                  "End": "DURATION",
+                  "Duration": 1.5,
+                  "MaximumDuration": 5,
+                  "BlendDuration": 0.04,
+                  "ForwardSpeed": 0,
+                  "PreventFlinch": false
+                }
+              ]
+            }
+          },
+          {
+            "Type": 10,
+            "Category": 4,
+            "Enabled": [
+              true,
+              true,
+              true
+            ],
+            "Weight": [
+              0.7,
+              1,
+              1.3
+            ],
+            "Cooldown": [
+              6,
+              5,
+              4
+            ],
+            "MinDistance": 0.5,
+            "MaxDistance": 12,
+            "Skill": {
+              "Name": "SHADOW_SHIFT_SIDE",
+              "Category": "UTILITY",
+              "Enabled": true,
+              "CanUseOnGround": true,
+              "CanUseInAir": false,
+              "Phases": [
+                {
+                  "Animation": "HumanBossCombatWalk",
+                  "End": "DURATION",
+                  "Duration": 1.5,
+                  "MaximumDuration": 5,
+                  "BlendDuration": 0.04,
+                  "ForwardSpeed": 0,
+                  "PreventFlinch": false
+                }
+              ]
+            }
+          },
+          {
+            "Type": 11,
+            "Category": 4,
+            "Enabled": [
+              true,
+              true,
+              true
+            ],
+            "Weight": [
+              0.7,
+              1,
+              1.3
+            ],
+            "Cooldown": [
+              6,
+              5,
+              4
+            ],
+            "MinDistance": 0.5,
+            "MaxDistance": 12,
+            "Skill": {
+              "Name": "SHADOW_SHIFT_BEHIND",
+              "Category": "UTILITY",
+              "Enabled": true,
+              "CanUseOnGround": true,
+              "CanUseInAir": false,
+              "Phases": [
+                {
+                  "Animation": "HumanBossCombatWalk",
+                  "End": "DURATION",
+                  "Duration": 1.5,
+                  "MaximumDuration": 5,
+                  "BlendDuration": 0.04,
+                  "ForwardSpeed": 0,
+                  "PreventFlinch": false
+                }
+              ]
+            }
+          },
+          {
+            "Type": 12,
+            "Category": 4,
+            "Enabled": [
+              true,
+              true,
+              true
+            ],
+            "Weight": [
+              0.7,
+              1,
+              1.3
+            ],
+            "Cooldown": [
+              6,
+              5,
+              4
+            ],
+            "MinDistance": 3,
+            "MaxDistance": 22,
+            "Skill": {
+              "Name": "SHADOW_SHIFT_APPROACH",
+              "Category": "UTILITY",
+              "Enabled": true,
+              "CanUseOnGround": true,
+              "CanUseInAir": false,
+              "Phases": [
+                {
+                  "Animation": "HumanBossCombatWalk",
+                  "End": "DURATION",
+                  "Duration": 1.5,
+                  "MaximumDuration": 5,
+                  "BlendDuration": 0.04,
+                  "ForwardSpeed": 0,
+                  "PreventFlinch": false
+                }
+              ]
+            }
+          },
+          {
+            "Type": 24,
+            "Category": 4,
+            "Enabled": [
+              true,
+              true,
+              true
+            ],
+            "Weight": [
+              0.35,
+              0.5,
+              0.65
+            ],
+            "Cooldown": [
+              6,
+              6,
+              6
+            ],
+            "MinDistance": 1,
+            "MaxDistance": 22,
+            "ShadowShiftMode": 3,
+            "Skill": {
+              "Name": "SHADOW_SLASH",
+              "Category": "UTILITY",
+              "Enabled": true,
+              "CanUseOnGround": true,
+              "CanUseInAir": false,
+              "CleanupAction": "HumanBoss_ShadowClear",
+              "Phases": [
+                {
+                  "Animation": "HumanBossCombatWalk",
+                  "End": "DURATION",
+                  "Duration": 1.5,
+                  "MaximumDuration": 5,
+                  "BlendDuration": 0.04,
+                  "Sequence": "",
+                  "EnterAction": ""
+                },
+                {
+                  "Animation": "HumanBossAttackTell",
+                  "End": "DURATION",
+                  "Duration": 0.18,
+                  "MaximumDuration": 5,
+                  "BlendDuration": 0.04,
+                  "Sequence": "",
+                  "EnterAction": ""
+                },
+                {
+                  "Animation": "SS_Sp_Skill1",
+                  "End": "ANIMATION_END",
+                  "Duration": 0,
+                  "MaximumDuration": 5,
+                  "BlendDuration": 0.04,
+                  "Sequence": "HumanBoss_SHADOW_SLASH_Sequence",
+                  "EnterAction": "",
+                  "MotionWarpPreset": "HumanBoss.Counter",
+                  "PreventFlinch": true
+                },
+                {
+                  "Animation": "SS_Idle",
+                  "End": "DURATION",
+                  "Duration": 0.25,
+                  "MaximumDuration": 5,
+                  "BlendDuration": 0.04,
+                  "Sequence": "",
+                  "EnterAction": "HumanBoss_ShadowClear"
+                }
+              ]
+            }
+          },
+          {
+            "Type": 25,
+            "Category": 4,
+            "Enabled": [
+              true,
+              true,
+              true
+            ],
+            "Weight": [
+              0.35,
+              0.5,
+              0.65
+            ],
+            "Cooldown": [
+              9,
+              9,
+              9
+            ],
+            "MinDistance": 1,
+            "MaxDistance": 22,
+            "ShadowShiftMode": 2,
+            "Skill": {
+              "Name": "SHADOW_DIVE_01",
+              "Category": "UTILITY",
+              "Enabled": true,
+              "CanUseOnGround": true,
+              "CanUseInAir": false,
+              "CleanupAction": "HumanBoss_ShadowClear",
+              "Phases": [
+                {
+                  "Animation": "HumanBossCombatWalk",
+                  "End": "DURATION",
+                  "Duration": 1.5,
+                  "MaximumDuration": 5,
+                  "BlendDuration": 0.04,
+                  "Sequence": "",
+                  "EnterAction": ""
+                },
+                {
+                  "Animation": "Attack_Air_to_Floor_01_Start_Seq",
+                  "End": "ANIMATION_END",
+                  "Duration": 0,
+                  "MaximumDuration": 5,
+                  "BlendDuration": 0.04,
+                  "Sequence": "",
+                  "EnterAction": "HumanBoss_ShadowDiveStart",
+                  "WarpHeight": 4,
+                  "SuspendGravity": true
+                },
+                {
+                  "Animation": "Attack_Air_to_Floor_01_Loop_Seq",
+                  "End": "DURATION",
+                  "Duration": 0.45,
+                  "MaximumDuration": 5,
+                  "BlendDuration": 0.04,
+                  "Sequence": "HumanBoss_SHADOW_DIVE_01_Sequence",
+                  "EnterAction": "",
+                  "SuspendGravity": true
+                },
+                {
+                  "Animation": "Attack_Air_to_Floor_01_Loop_Seq",
+                  "End": "GROUND_CONTACT",
+                  "Duration": 0.1,
+                  "MaximumDuration": 3,
+                  "BlendDuration": 0.04,
+                  "Sequence": "",
+                  "EnterAction": "",
+                  "SuspendGravity": true,
+                  "VerticalSpeed": -27.6
+                },
+                {
+                  "Animation": "Attack_Air_to_Floor_01_End_Seq",
+                  "End": "ANIMATION_END",
+                  "Duration": 0,
+                  "MaximumDuration": 5,
+                  "BlendDuration": 0.04,
+                  "Sequence": "",
+                  "EnterAction": "HumanBoss_ShadowStrike"
+                },
+                {
+                  "Animation": "SS_Idle",
+                  "End": "DURATION",
+                  "Duration": 0.25,
+                  "MaximumDuration": 5,
+                  "BlendDuration": 0.04,
+                  "Sequence": "",
+                  "EnterAction": "HumanBoss_ShadowClear"
+                }
+              ]
+            }
+          },
+          {
+            "Type": 26,
+            "Category": 4,
+            "Enabled": [
+              true,
+              true,
+              true
+            ],
+            "Weight": [
+              0.35,
+              0.5,
+              0.65
+            ],
+            "Cooldown": [
+              9,
+              9,
+              9
+            ],
+            "MinDistance": 1,
+            "MaxDistance": 22,
+            "ShadowShiftMode": 2,
+            "Skill": {
+              "Name": "SHADOW_DIVE_02",
+              "Category": "UTILITY",
+              "Enabled": true,
+              "CanUseOnGround": true,
+              "CanUseInAir": false,
+              "CleanupAction": "HumanBoss_ShadowClear",
+              "Phases": [
+                {
+                  "Animation": "HumanBossCombatWalk",
+                  "End": "DURATION",
+                  "Duration": 1.5,
+                  "MaximumDuration": 5,
+                  "BlendDuration": 0.04,
+                  "Sequence": "",
+                  "EnterAction": ""
+                },
+                {
+                  "Animation": "Attack_Air_to_Floor_02_Start_Seq",
+                  "End": "ANIMATION_END",
+                  "Duration": 0,
+                  "MaximumDuration": 5,
+                  "BlendDuration": 0.04,
+                  "Sequence": "",
+                  "EnterAction": "HumanBoss_ShadowDiveStart",
+                  "WarpHeight": 6,
+                  "SuspendGravity": true
+                },
+                {
+                  "Animation": "Attack_Air_to_Floor_02_Loop_Seq",
+                  "End": "DURATION",
+                  "Duration": 0.7,
+                  "MaximumDuration": 5,
+                  "BlendDuration": 0.04,
+                  "Sequence": "HumanBoss_SHADOW_DIVE_02_Sequence",
+                  "EnterAction": "",
+                  "SuspendGravity": true
+                },
+                {
+                  "Animation": "Attack_Air_to_Floor_02_Loop_Seq",
+                  "End": "GROUND_CONTACT",
+                  "Duration": 0.1,
+                  "MaximumDuration": 3,
+                  "BlendDuration": 0.04,
+                  "Sequence": "",
+                  "EnterAction": "",
+                  "SuspendGravity": true,
+                  "VerticalSpeed": -23.0
+                },
+                {
+                  "Animation": "Attack_Air_to_Floor_02_End_Seq",
+                  "End": "ANIMATION_END",
+                  "Duration": 0,
+                  "MaximumDuration": 5,
+                  "BlendDuration": 0.04,
+                  "Sequence": "",
+                  "EnterAction": "HumanBoss_ShadowStrike"
+                },
+                {
+                  "Animation": "SS_Idle",
+                  "End": "DURATION",
+                  "Duration": 0.25,
+                  "MaximumDuration": 5,
+                  "BlendDuration": 0.04,
+                  "Sequence": "",
+                  "EnterAction": "HumanBoss_ShadowClear"
+                }
+              ]
+            }
+          },
+          {
+            "Type": 27,
+            "Category": 4,
+            "Enabled": [
+              true,
+              true,
+              true
+            ],
+            "Weight": [
+              0.35,
+              0.5,
+              0.65
+            ],
+            "Cooldown": [
+              12,
+              12,
+              12
+            ],
+            "MinDistance": 1,
+            "MaxDistance": 12,
+            "ShadowShiftMode": 2,
+            "Skill": {
+              "Name": "SHADOW_DOMAIN",
+              "Category": "UTILITY",
+              "Enabled": true,
+              "CanUseOnGround": true,
+              "CanUseInAir": false,
+              "CleanupAction": "HumanBoss_ShadowClear",
+              "Phases": [
+                {
+                  "Animation": "HumanBossCombatWalk",
+                  "End": "DURATION",
+                  "Duration": 1.5,
+                  "MaximumDuration": 5,
+                  "BlendDuration": 0.04,
+                  "Sequence": "",
+                  "EnterAction": ""
+                },
+                {
+                  "Animation": "Buff_Seq",
+                  "End": "DURATION",
+                  "Duration": 1.5,
+                  "MaximumDuration": 5,
+                  "BlendDuration": 0.04,
+                  "Sequence": "HumanBoss_SHADOW_DOMAIN_Sequence",
+                  "EnterAction": ""
+                },
+                {
+                  "Animation": "Buff_Seq",
+                  "End": "DURATION",
+                  "Duration": 0.25,
+                  "MaximumDuration": 5,
+                  "BlendDuration": 0.04,
+                  "Sequence": "",
+                  "EnterAction": "HumanBoss_ShadowStrike",
+                  "AnimationStartTime": 1.25
+                },
+                {
+                  "Animation": "SS_Idle",
+                  "End": "DURATION",
+                  "Duration": 0.8,
+                  "MaximumDuration": 5,
+                  "BlendDuration": 0.04,
+                  "Sequence": "",
+                  "EnterAction": "HumanBoss_ShadowClear"
+                }
+              ]
+            }
+          }
+        ],
+        "Mind": {
+          "ReactionDelay": 0.18,
+          "ReactionBudgetMax": 3.0,
+          "ReactionBudgetRecovery": 0.7,
+          "ReadErrorChance": 0.15,
+          "SameReactionPenalty": 0.35,
+          "DecisionLockTime": 0.3,
+          "PhaseDelay": [
+            1.0,
+            0.85,
+            0.75
+          ],
+          "PhaseObserve": [
+            1.2,
+            1.0,
+            0.7
+          ],
+          "PhaseAggression": [
+            0.8,
+            1.0,
+            1.25
+          ],
+          "HitEscapeProtection": 0.6,
+          "AirHeavyReactionDelayMultiplier": 0.55,
+          "AirHeavyThreatHeightTolerance": 3.5,
+          "AirHeavyPressureWindow": 1.4,
+          "AirHeavyMemoryWindow": 4.0,
+          "AirLandingPressureDistance": 2.3,
+          "AirHeavyChaseSpeedMultiplier": 1.35,
+          "AirHeavyRecoveryArmor": 16.0
+        },
+        "JustGuardReactionSkill": {
+          "Name": "HumanBoss.JustGuardRecoil",
+          "Category": "UTILITY",
+          "Enabled": true,
+          "Phases": [
+            {
+              "Animation": "Block_Hit_Break_Seq",
+              "Sequence": "HumanBoss_JustGuardRecoil",
+              "End": "ACTION_END",
+              "MaximumDuration": 5.0,
+              "BlendDuration": 0.2,
+              "PlayAnimationFromSequence": true,
+              "WaitForAnimationEnd": true,
+              "PreventFlinch": false
+            }
+          ]
+        },
+        "MaxCombatDistance": 6.0,
+        "ShadowEnabled": true
       }
     },
     {
@@ -1511,6 +3189,296 @@
         "LockOnEnabled": true,
         "DefaultTarget": false,
         "Priority": 1.0
+      }
+    },
+    {
+      "TypeName": "CombatStatsComponent",
+      "Enabled": true,
+      "UpdateEnabled": true,
+      "LateUpdateEnabled": false,
+      "UpdatePriority": 0,
+      "LateUpdatePriority": 0,
+      "RequiredForSceneStart": false,
+      "Data": {
+        "AttackPower": 10.0,
+        "DamageRateModifier": 1.0,
+        "FixedDamageModifier": 0.0
+      }
+    },
+    {
+      "Data": {
+        "SelectedActionSource": 0,
+        "SelectedCategory": "Sequence",
+        "SelectedActionName": "",
+        "AttackerReactionEnabled": true,
+        "AttackerReactionActionName": "HumanBoss_OnAttackJustGuarded"
+      },
+      "Enabled": true,
+      "LateUpdateEnabled": true,
+      "LateUpdatePriority": 0,
+      "RequiredForSceneStart": false,
+      "TypeName": "JustGuardReactionComponent",
+      "UpdateEnabled": true,
+      "UpdatePriority": 0
+    },
+    {
+      "TypeName": "MotionWarpComponent",
+      "Enabled": true,
+      "UpdateEnabled": true,
+      "LateUpdateEnabled": true,
+      "UpdatePriority": 0,
+      "LateUpdatePriority": 0,
+      "RequiredForSceneStart": false,
+      "Data": {
+        "DefaultPresetName": "HumanBoss.ComboFirst",
+        "RegisterGlobalActions": false,
+        "Presets": [
+          {
+            "PresetName": "HumanBoss.ComboFirst",
+            "TargetMode": 1,
+            "PositionMode": 4,
+            "RotationMode": 1,
+            "StartNormalizedTime": 0,
+            "EndNormalizedTime": 0.45,
+            "TargetDistance": 1.5,
+            "PositionStrength": 1,
+            "RotationStrength": 0.8,
+            "MinimumPositionScale": 0.75,
+            "MaximumPositionScale": 1.25,
+            "MaximumPositionCorrectionPerFrame": 0.4,
+            "MaximumTotalPositionCorrection": 4.2,
+            "MaximumPositionCorrectionPerSecond": 24,
+            "MaximumRotationDegrees": 90,
+            "MaximumRotationDegreesPerSecond": 600,
+            "MinimumRemainingRootMotionDistance": 0.01,
+            "MaximumWarpTargetDistance": 5,
+            "MinimumTargetDistance": 0.15,
+            "WarpPosition": true,
+            "WarpRotation": true,
+            "HorizontalOnly": true,
+            "LockTargetOnStart": false,
+            "StopWhenTargetInvalid": true,
+            "ContinueAcrossCombo": false,
+            "UseUnscaledTime": false,
+            "LockTargetNormalizedTime": 0.04,
+            "MaximumTargetTravelDistance": 0.6,
+            "MaximumTargetTravelAngleDegrees": 20,
+            "RotationStartNormalizedTime": 0,
+            "RotationFullStrengthEndNormalizedTime": 0.04,
+            "RotationEndNormalizedTime": 0.45,
+            "PositionCorrectionCurveName": "HumanBoss.WarpCorrection"
+          },
+          {
+            "PresetName": "HumanBoss.ComboSecond",
+            "TargetMode": 1,
+            "PositionMode": 4,
+            "RotationMode": 1,
+            "StartNormalizedTime": 0,
+            "EndNormalizedTime": 0.45,
+            "TargetDistance": 1.5,
+            "PositionStrength": 0.45,
+            "RotationStrength": 0.35,
+            "MinimumPositionScale": 0.75,
+            "MaximumPositionScale": 1.25,
+            "MaximumPositionCorrectionPerFrame": 0.08,
+            "MaximumTotalPositionCorrection": 0.45,
+            "MaximumPositionCorrectionPerSecond": 3,
+            "MaximumRotationDegrees": 15,
+            "MaximumRotationDegreesPerSecond": 180,
+            "MinimumRemainingRootMotionDistance": 0.01,
+            "MaximumWarpTargetDistance": 5,
+            "MinimumTargetDistance": 0.15,
+            "WarpPosition": true,
+            "WarpRotation": true,
+            "HorizontalOnly": true,
+            "LockTargetOnStart": true,
+            "StopWhenTargetInvalid": true,
+            "ContinueAcrossCombo": false,
+            "UseUnscaledTime": false,
+            "LockTargetNormalizedTime": 0.04,
+            "MaximumTargetTravelDistance": 0,
+            "MaximumTargetTravelAngleDegrees": 0,
+            "RotationStartNormalizedTime": 0,
+            "RotationFullStrengthEndNormalizedTime": 0.04,
+            "RotationEndNormalizedTime": 0.45,
+            "PositionCorrectionCurveName": "HumanBoss.WarpCorrection"
+          },
+          {
+            "PresetName": "HumanBoss.Heavy",
+            "TargetMode": 1,
+            "PositionMode": 4,
+            "RotationMode": 1,
+            "StartNormalizedTime": 0,
+            "EndNormalizedTime": 0.45,
+            "TargetDistance": 1.6,
+            "PositionStrength": 1,
+            "RotationStrength": 0.8,
+            "MinimumPositionScale": 0.75,
+            "MaximumPositionScale": 1.25,
+            "MaximumPositionCorrectionPerFrame": 0.4,
+            "MaximumTotalPositionCorrection": 4.8,
+            "MaximumPositionCorrectionPerSecond": 24,
+            "MaximumRotationDegrees": 90,
+            "MaximumRotationDegreesPerSecond": 600,
+            "MinimumRemainingRootMotionDistance": 0.01,
+            "MaximumWarpTargetDistance": 6,
+            "MinimumTargetDistance": 0.15,
+            "WarpPosition": true,
+            "WarpRotation": true,
+            "HorizontalOnly": true,
+            "LockTargetOnStart": false,
+            "StopWhenTargetInvalid": true,
+            "ContinueAcrossCombo": false,
+            "UseUnscaledTime": false,
+            "LockTargetNormalizedTime": 0.26,
+            "MaximumTargetTravelDistance": 0.6,
+            "MaximumTargetTravelAngleDegrees": 20,
+            "RotationStartNormalizedTime": 0,
+            "RotationFullStrengthEndNormalizedTime": 0.3,
+            "RotationEndNormalizedTime": 0.45,
+            "PositionCorrectionCurveName": "HumanBoss.WarpCorrection"
+          },
+          {
+            "PresetName": "HumanBoss.GuardBreak",
+            "TargetMode": 1,
+            "PositionMode": 4,
+            "RotationMode": 1,
+            "StartNormalizedTime": 0,
+            "EndNormalizedTime": 0.45,
+            "TargetDistance": 1.6,
+            "PositionStrength": 1,
+            "RotationStrength": 0.8,
+            "MinimumPositionScale": 0.75,
+            "MaximumPositionScale": 1.25,
+            "MaximumPositionCorrectionPerFrame": 0.4,
+            "MaximumTotalPositionCorrection": 2.6,
+            "MaximumPositionCorrectionPerSecond": 24,
+            "MaximumRotationDegrees": 90,
+            "MaximumRotationDegreesPerSecond": 600,
+            "MinimumRemainingRootMotionDistance": 0.01,
+            "MaximumWarpTargetDistance": 4,
+            "MinimumTargetDistance": 0.15,
+            "WarpPosition": true,
+            "WarpRotation": true,
+            "HorizontalOnly": true,
+            "LockTargetOnStart": false,
+            "StopWhenTargetInvalid": true,
+            "ContinueAcrossCombo": false,
+            "UseUnscaledTime": false,
+            "LockTargetNormalizedTime": 0.04,
+            "MaximumTargetTravelDistance": 0.6,
+            "MaximumTargetTravelAngleDegrees": 20,
+            "RotationStartNormalizedTime": 0,
+            "RotationFullStrengthEndNormalizedTime": 0.04,
+            "RotationEndNormalizedTime": 0.45,
+            "PositionCorrectionCurveName": "HumanBoss.WarpCorrection"
+          },
+          {
+            "PresetName": "HumanBoss.Counter",
+            "TargetMode": 1,
+            "PositionMode": 4,
+            "RotationMode": 1,
+            "StartNormalizedTime": 0,
+            "EndNormalizedTime": 0.45,
+            "TargetDistance": 1.5,
+            "PositionStrength": 1,
+            "RotationStrength": 0.8,
+            "MinimumPositionScale": 0.75,
+            "MaximumPositionScale": 1.25,
+            "MaximumPositionCorrectionPerFrame": 0.4,
+            "MaximumTotalPositionCorrection": 2.2,
+            "MaximumPositionCorrectionPerSecond": 24,
+            "MaximumRotationDegrees": 90,
+            "MaximumRotationDegreesPerSecond": 600,
+            "MinimumRemainingRootMotionDistance": 0.01,
+            "MaximumWarpTargetDistance": 3.5,
+            "MinimumTargetDistance": 0.15,
+            "WarpPosition": true,
+            "WarpRotation": true,
+            "HorizontalOnly": true,
+            "LockTargetOnStart": false,
+            "StopWhenTargetInvalid": true,
+            "ContinueAcrossCombo": false,
+            "UseUnscaledTime": false,
+            "LockTargetNormalizedTime": 0.04,
+            "MaximumTargetTravelDistance": 0.6,
+            "MaximumTargetTravelAngleDegrees": 20,
+            "RotationStartNormalizedTime": 0,
+            "RotationFullStrengthEndNormalizedTime": 0.04,
+            "RotationEndNormalizedTime": 0.45,
+            "PositionCorrectionCurveName": "HumanBoss.WarpCorrection"
+          },
+          {
+            "PresetName": "HumanBoss.Punish",
+            "TargetMode": 1,
+            "PositionMode": 4,
+            "RotationMode": 1,
+            "StartNormalizedTime": 0,
+            "EndNormalizedTime": 0.45,
+            "TargetDistance": 1.5,
+            "PositionStrength": 1,
+            "RotationStrength": 0.8,
+            "MinimumPositionScale": 0.75,
+            "MaximumPositionScale": 1.25,
+            "MaximumPositionCorrectionPerFrame": 0.4,
+            "MaximumTotalPositionCorrection": 3,
+            "MaximumPositionCorrectionPerSecond": 24,
+            "MaximumRotationDegrees": 90,
+            "MaximumRotationDegreesPerSecond": 600,
+            "MinimumRemainingRootMotionDistance": 0.01,
+            "MaximumWarpTargetDistance": 4.5,
+            "MinimumTargetDistance": 0.15,
+            "WarpPosition": true,
+            "WarpRotation": true,
+            "HorizontalOnly": true,
+            "LockTargetOnStart": false,
+            "StopWhenTargetInvalid": true,
+            "ContinueAcrossCombo": false,
+            "UseUnscaledTime": false,
+            "LockTargetNormalizedTime": 0.04,
+            "MaximumTargetTravelDistance": 0.6,
+            "MaximumTargetTravelAngleDegrees": 20,
+            "RotationStartNormalizedTime": 0,
+            "RotationFullStrengthEndNormalizedTime": 0.04,
+            "RotationEndNormalizedTime": 0.45,
+            "PositionCorrectionCurveName": "HumanBoss.WarpCorrection"
+          },
+          {
+            "PresetName": "HumanBoss.Delay",
+            "TargetMode": 1,
+            "PositionMode": 4,
+            "RotationMode": 1,
+            "StartNormalizedTime": 0,
+            "EndNormalizedTime": 0.45,
+            "TargetDistance": 1.5,
+            "PositionStrength": 1,
+            "RotationStrength": 0.8,
+            "MinimumPositionScale": 0.75,
+            "MaximumPositionScale": 1.25,
+            "MaximumPositionCorrectionPerFrame": 0.4,
+            "MaximumTotalPositionCorrection": 3,
+            "MaximumPositionCorrectionPerSecond": 24,
+            "MaximumRotationDegrees": 90,
+            "MaximumRotationDegreesPerSecond": 600,
+            "MinimumRemainingRootMotionDistance": 0.01,
+            "MaximumWarpTargetDistance": 4.5,
+            "MinimumTargetDistance": 0.15,
+            "WarpPosition": true,
+            "WarpRotation": true,
+            "HorizontalOnly": true,
+            "LockTargetOnStart": false,
+            "StopWhenTargetInvalid": true,
+            "ContinueAcrossCombo": false,
+            "UseUnscaledTime": false,
+            "LockTargetNormalizedTime": 0.04,
+            "MaximumTargetTravelDistance": 0.6,
+            "MaximumTargetTravelAngleDegrees": 20,
+            "RotationStartNormalizedTime": 0,
+            "RotationFullStrengthEndNormalizedTime": 0.04,
+            "RotationEndNormalizedTime": 0.45,
+            "PositionCorrectionCurveName": "HumanBoss.WarpCorrection"
+          }
+        ]
       }
     }
   ],

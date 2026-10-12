@@ -4,6 +4,7 @@
 
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
 #include "Game/GameMode/GameModeManager.h"
+#include "Engine/GamePlay/Serialize/ActionRegistry.h"
 
 #include <iomanip>
 #include <sstream>
@@ -90,6 +91,29 @@ void GameModeWindow::Draw()
         }
 
         DrawState(*gameModeManager_);
+        // 単体Sequenceを直接再生せず、GameModeのロックと復元を伴う入口Actionを使う。
+        ImGui::SeparatorText("Phase Transition Preview");
+        const bool canPreview_ = gameModeManager_->GetCurrentGameState() == GameProgressState::PHASE_1_BATTLE ||
+            gameModeManager_->IsPhaseTransitionPreview();
+        const char* PREVIEW_PHASES[] = { "DragonDeath", "DragonDissolve", "StageCorruption", "MudAttack",
+            "PlayerCounter", "HumanFormation", "SwordClash", "PlayerKnockdown" };
+        for (const char* phase_ : PREVIEW_PHASES)
+        {
+            const std::string sequence_ = std::string("Preview") + phase_;
+            ImGui::BeginDisabled(!canPreview_ || !ActionRegistry::Instance().HasAction(sequence_));
+            if (ImGui::Button(phase_)) ActionRegistry::Instance().Call(std::string("GameMode.") + sequence_);
+            ImGui::EndDisabled();
+        }
+        ImGui::BeginDisabled(!gameModeManager_->IsPhaseTransitionPreview());
+        if (ImGui::Button("Restore First Form")) ActionRegistry::Instance().Call("GameMode.CancelPhaseTransitionPreview");
+        ImGui::EndDisabled();
+        // 中断時も生成物と予約を復旧Sequenceで整理してから戦闘へ戻す。
+        const bool canSkip_ = gameModeManager_->IsPhaseTransitionPreview() ||
+            gameModeManager_->GetCurrentGameState() == GameProgressState::PHASE_1_DEFEAT ||
+            gameModeManager_->GetCurrentGameState() == GameProgressState::PHASE_2_INTRO;
+        ImGui::BeginDisabled(!canSkip_);
+        if (ImGui::Button("Skip Phase Transition")) ActionRegistry::Instance().Call("GameMode.SkipPhaseTransition");
+        ImGui::EndDisabled();
         ImGui::SeparatorText("Global Blackboard");
         DrawGlobalBlackboard(gameModeManager_->GetGlobalBlackboard());
     }

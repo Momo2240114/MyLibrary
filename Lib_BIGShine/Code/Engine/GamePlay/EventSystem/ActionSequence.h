@@ -27,9 +27,13 @@ struct ActionReference {
     std::string category;
     std::string actionName;
     float executionTime = 0.0f;
+    std::string waitForObject; // 動的生成のStartとGPU準備が終わるまでTimelineを止める。
     int timelineStartFrame = 0;
     int timelineEndFrame = 1;
     std::vector<BlackboardValueWrite> blackboardWrites;
+    // 指定Stateの再生位置を基準に実行し、速度カーブによる時間のずれを防ぐ。
+    std::string animationState;
+    bool useNormalizedTime = false;
 };
 
 // 複数Actionを時間軸でまとめたシーケンスデータ。
@@ -38,6 +42,8 @@ struct SequenceData {
     std::string name = "New Sequence";
     std::vector<ActionReference> actions;
     float duration = 10.0f;
+    bool cleanupObjectsOnCompletion = false;
+    std::string interruptionAction;
     std::string completionAction; // 全Actionの処理後、Sequence終了時に通知するGlobal Action。
     int currentFrame = 0;
     int firstFrame = 0;
@@ -46,12 +52,15 @@ struct SequenceData {
 };
 
 struct PendingAction {
+    std::string waitForObject;
     // StartSequence後、実行までの残り時間。
     float timer;
     // timerが0以下になったときに呼ぶAction名。
     std::string actionName;
     // Action実行直前にBlackboardへ流し込む一時値。
     std::vector<BlackboardValueWrite> blackboardWrites;
+    std::string animationState;
+    bool useNormalizedTime = false;
 };
 
 // Editorで組んだAction列を再生するComponent。
@@ -63,6 +72,11 @@ public:
         return name;
     }
     void Start();
+    void OnDestroy() override;
+    // 既存APIから専用の生成・削除Componentへ処理を委譲する。
+    void TrackSpawnedObject(const std::shared_ptr<GameObject>& object_);
+    void PromoteSpawnedObject(const std::shared_ptr<GameObject>& object_);
+    void CleanupSpawnedObjects(bool includePersistent_ = false);
     void Update(float elapsedTime_) override;
     void StartSequence(int index_);
     // 外部Stateは開始時の世代を保存し、自分の予約だけを停止する。
@@ -76,6 +90,8 @@ public:
 
     // 各Sequenceを開始するActionを、OwnerのLocalRegistryへ登録する。
     void RegisterSequence(const std::string& sequenceName_);
+    // 保存済みの編集内容を優先し、不足する既定Sequenceだけをアセットから補う。
+    bool LoadMissingSequences(const std::string& path_);
 
     void Gui() override;
     void DrawEditorGui();
@@ -90,6 +106,8 @@ private:
     void ExecuteAction(const std::string& actionName_);
 
     // Editorで作成したSequence一覧。
+    bool cleanupObjectsOnCompletion = false;
+    std::string interruptionAction;
     std::vector<SequenceData> sequences;
     // 現在再生中で、まだ実行時間に達していないAction一覧。
     std::vector<PendingAction> pendingActions;

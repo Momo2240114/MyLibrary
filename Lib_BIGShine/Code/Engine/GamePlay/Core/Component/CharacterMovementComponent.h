@@ -27,6 +27,8 @@ public:
     void SetHorizontalVelocity(const DirectX::XMFLOAT3& velocity_);
     void StopHorizontalMovement();
     void StopHorizontalMovementImmediately();
+    // 演出への受け渡し時に、前のRootMotion・Impulse・向きの予約を消す。
+    void ResetMovementRequests();
     // TimeScale中でも物理速度へ正しく変換するため、元のDeltaTimeを渡す。
     void SetUnscaledDeltaTime(float deltaTime_);
     void AddRootMotionDelta(const DirectX::XMFLOAT3& delta_);

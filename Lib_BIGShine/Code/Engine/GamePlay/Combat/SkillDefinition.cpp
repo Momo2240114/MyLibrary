@@ -74,6 +74,10 @@ bool DeserializeSkillDefinition(const nlohmann::json& json_, SkillDefinition& de
             SkillPhase phase_;
             phase_.animationState = phaseJson_.at("Animation").get<std::string>();
             phase_.sequence = phaseJson_.value("Sequence", std::string());
+            phase_.motionWarpPreset = phaseJson_.value("MotionWarpPreset", std::string());
+            phase_.continueSequence = phaseJson_.value("ContinueSequence", false);
+            phase_.playAnimationFromSequence = phaseJson_.value("PlayAnimationFromSequence", false);
+            phase_.waitForAnimationEnd = phaseJson_.value("WaitForAnimationEnd", false);
             phase_.enterAction = phaseJson_.value("EnterAction", std::string());
             phase_.exitAction = phaseJson_.value("ExitAction", std::string());
             const std::string end_ = phaseJson_.value("End", std::string("ANIMATION_END"));
@@ -85,6 +89,7 @@ bool DeserializeSkillDefinition(const nlohmann::json& json_, SkillDefinition& de
             phase_.maximumDuration = ReadSkillTime(phaseJson_, "MaximumDuration", 10.0f);
             if (phase_.maximumDuration <= 0.0f) throw std::runtime_error("MaximumDuration must be positive.");
             phase_.blendDuration = ReadSkillTime(phaseJson_, "BlendDuration", 0.1f);
+            phase_.animationStartTime = ReadSkillTime(phaseJson_, "AnimationStartTime", 0.0f);
             phase_.canDodgeCancel = phaseJson_.value("CanDodgeCancel", false);
             phase_.canActionBranch = phaseJson_.value("CanActionBranch", false);
             phase_.canBufferInput = phaseJson_.value("CanBufferInput", false);
@@ -130,6 +135,10 @@ void SerializeSkillDefinition(const SkillDefinition& definition_, nlohmann::json
             ? previousPhases_[index_] : nlohmann::json::object();
         phaseJson_["Animation"] = phase_.animationState;
         phaseJson_["Sequence"] = phase_.sequence;
+        phaseJson_["MotionWarpPreset"] = phase_.motionWarpPreset;
+        phaseJson_["ContinueSequence"] = phase_.continueSequence;
+        phaseJson_["PlayAnimationFromSequence"] = phase_.playAnimationFromSequence;
+        phaseJson_["WaitForAnimationEnd"] = phase_.waitForAnimationEnd;
         phaseJson_["EnterAction"] = phase_.enterAction;
         phaseJson_["ExitAction"] = phase_.exitAction;
         phaseJson_["End"] = phase_.endCondition == SkillPhaseEnd::DURATION ? "DURATION"
@@ -138,6 +147,7 @@ void SerializeSkillDefinition(const SkillDefinition& definition_, nlohmann::json
         phaseJson_["Duration"] = phase_.duration;
         phaseJson_["MaximumDuration"] = phase_.maximumDuration;
         phaseJson_["BlendDuration"] = phase_.blendDuration;
+        phaseJson_["AnimationStartTime"] = phase_.animationStartTime;
         phaseJson_["CanDodgeCancel"] = phase_.canDodgeCancel;
         phaseJson_["CanActionBranch"] = phase_.canActionBranch;
         phaseJson_["CanBufferInput"] = phase_.canBufferInput;
