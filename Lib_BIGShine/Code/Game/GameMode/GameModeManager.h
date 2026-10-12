@@ -55,6 +55,7 @@ public:
     bool IsEnemyAILocked() const { return enemyAILocked; }
     bool IsPresentationPlaying() const { return presentationPlaying; }
     bool IsBattlePaused() const { return battlePaused; }
+    bool IsPhaseTransitionPreview() const { return phaseTransitionPreview; }
 
     void SetGameplayLocked(bool locked_);
     void SetPlayerControlLocked(bool locked_);
@@ -140,6 +141,7 @@ private:
     bool sequenceStartRequested = false;
     bool sequenceStartAttempted = false;
     bool globalActionsRegistered = false;
+    bool phaseTransitionPreview = false; // 第一形態戦闘中の単体演出プレビューだけを区別する。
 
     // Gameplay全体、Player操作、Enemy AI、演出、戦闘停止のロック状態。
     bool gameplayLocked = false;

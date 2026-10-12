@@ -33,6 +33,8 @@ public:
     bool HasGuardedAttackRecord(const HitBox& hitBox_) const;
     void RecordGuardedAttack(const HitBox& hitBox_);
     void ClearGuardedAttackHistory();
+    bool GuardsBodyContact() const { return guardBodyContact; }
+    float GetGuardBreakDamageRate() const { return guardBreakDamageRate; }
 
     void SetGuardOwner(GameObject* guardOwner_);
     std::shared_ptr<GameObject> GetGuardOwner() const;
@@ -65,6 +67,10 @@ private:
     bool oncePerAttackActivation = true; // 同じ攻撃判定へ1回だけGuardするか。
     int teamId = 0; // Team判定用ID。
     bool justGuardEnabled = false; // 現在JustGuard受付中か。
+    float guardAngle = 360.0f; // 旧データは全方向を維持し、Playerは正面の許容角度を設定する。
+    bool guardBodyContact = false; // 盾と重なる前に本体へ届いた攻撃も、防御方向を満たせば受け止める。
+    bool reactToGuardBreak = false; // Playerの専用リアクションへGuardBreakを渡す。
+    float guardBreakDamageRate = 1.0f; // GuardBreak時のHPダメージ倍率。旧来の通常被弾量を既定値にする。
 
     GameObject* guardOwner = nullptr;
     // HitBoxごとのActivation IDを覚え、同じ攻撃への重複Guardを防ぐ。

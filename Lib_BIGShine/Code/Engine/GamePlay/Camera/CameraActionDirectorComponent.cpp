@@ -13,6 +13,10 @@
 #include "Engine/GamePlay/Serialize/ComponentRegistry.h"
 #include "Engine/GamePlay/Transform/Transform.h"
 #include "Engine/Debug/TracyProfiler.h"
+#include "Engine/Graphics/Resource/GlTFModel.h"
+#include <limits>
+#include <cfloat>
+#include <imgui_stdlib.h>
 
 #include <algorithm>
 #include <cmath>
@@ -211,6 +215,47 @@ namespace
     }
 }
 
+bool CameraActionDirectorComponent::UpdateFraming(const CameraActionPreset& preset_)
+{
+    BS_PROFILE_SCOPE("CameraActionDirector::UpdateFraming");
+    const auto owner_ = GetGameObject();
+    const auto camera_ = camera.lock();
+    if (!owner_ || !camera_) return false;
+    DirectX::XMFLOAT3 minimum_{FLT_MAX, FLT_MAX, FLT_MAX}, maximum_{-FLT_MAX, -FLT_MAX, -FLT_MAX};
+    const auto include_ = [&](const std::string& name_, float radius_) -> bool
+    {
+        const auto actor_ = owner_->GetManager().Find(name_);
+        if (!actor_ || !actor_->transform) return false;
+        std::vector<DirectX::XMFLOAT3> points_;
+        if (preset_.useModelBounds)
+            if (const auto model_ = actor_->GetComponent<GltfModelCommponennt>()) model_->CollectWorldVertexSamples(points_, 1024);
+        if (points_.empty())
+        {
+            const auto point_ = actor_->transform->GetWorldPosition();
+            points_ = {{point_.x-radius_,point_.y-radius_,point_.z-radius_}, {point_.x+radius_,point_.y+radius_,point_.z+radius_}};
+        }
+        for (const auto& point_ : points_)
+        {
+            minimum_.x = (std::min)(minimum_.x, point_.x); minimum_.y = (std::min)(minimum_.y, point_.y); minimum_.z = (std::min)(minimum_.z, point_.z);
+            maximum_.x = (std::max)(maximum_.x, point_.x); maximum_.y = (std::max)(maximum_.y, point_.y); maximum_.z = (std::max)(maximum_.z, point_.z);
+        }
+        return true;
+    };
+    if (!include_(preset_.targetObjectName, preset_.framingRadius)) return false;
+    if (!preset_.secondaryTargetName.empty()) include_(preset_.secondaryTargetName, preset_.secondaryRadius);
+    actionFocusPosition = { (minimum_.x+maximum_.x)*0.5f+preset_.focusOffset.x, (minimum_.y+maximum_.y)*0.5f+preset_.focusOffset.y, (minimum_.z+maximum_.z)*0.5f+preset_.focusOffset.z };
+    const DirectX::XMFLOAT3 half_{(maximum_.x-minimum_.x)*0.5f,(maximum_.y-minimum_.y)*0.5f,(maximum_.z-minimum_.z)*0.5f};
+    const float radius_ = std::sqrt(half_.x*half_.x+half_.y*half_.y+half_.z*half_.z);
+    // 倒れる途中に範囲が縮んでも引きすぎ・寄りすぎを繰り返さず、最大範囲を保持する。
+    framingEnvelope = (std::max)(framingEnvelope, radius_);
+    const float vertical_ = DirectX::XMConvertToRadians(preset_.targetFov)*0.5f;
+    const float horizontal_ = std::atan(std::tan(vertical_)*(std::max)(camera_->GetAspect(),0.1f));
+    const float distance_ = (std::max)(preset_.minimumFramingDistance,
+        framingEnvelope*preset_.framingPadding/(std::max)(std::sin((std::min)(vertical_,horizontal_)),0.01f));
+    actionCameraPosition = AddFloat3(actionFocusPosition, ScaleFloat3(NormalizeOr(preset_.cameraOffset,{0.0f,0.1f,-1.0f}),distance_));
+    return true;
+}
+
 void CameraActionDirectorComponent::Start()
 {
     ResolveReferences();
@@ -274,6 +319,7 @@ void CameraActionDirectorComponent::LateUpdate(float deltaTime_)
         StopAction(false);
         return;
     }
+    if (activePreset.autoFrameTargets && phase != CAMERA_ACTION_PHASE::RETURN) UpdateFraming(activePreset);
     phaseTimer += deltaTime_;
     float duration_ = GetPhaseDuration();
     const float rate_ = duration_ <= 0.0001f
@@ -441,7 +487,7 @@ void CameraActionDirectorComponent::RegisterActions()
     for (const CameraActionPreset& preset_ : presets)
     {
         registry_.RemoveAction("CameraAction", preset_.actionName);
-        registry_.RegisterAction("CameraAction", preset_.actionName, [this, actionName_ = preset_.actionName]()
+        GetGameObject()->RegisterNamedGlobalAction("CameraAction", preset_.actionName, [this, actionName_ = preset_.actionName]()
         {
             PlayActionByName(actionName_);
         });
@@ -518,6 +564,8 @@ void CameraActionDirectorComponent::BeginAction(
         actionFocusPosition,
         attackDirection_);
     activeFov = ClampFov(preset_.targetFov);
+    framingEnvelope = 0.0f;
+    if (preset_.autoFrameTargets) UpdateFraming(preset_);
     actionCameraUp = { 0.0f, 1.0f, 0.0f };
     if (preset_.positionMode == CAMERA_ACTION_POSITION_MODE::TPS_TARGET_RELATIVE)
     {
@@ -877,6 +925,15 @@ void CameraActionDirectorComponent::Gui()
     for (int index_ = 0; index_ < static_cast<int>(presets.size()); ++index_)
     {
         CameraActionPreset& preset_ = presets[index_];
+        ImGui::PushID(index_ + 10000);
+        ImGui::Checkbox("Auto Frame Subjects", &preset_.autoFrameTargets);
+        ImGui::Checkbox("Use Model Bounds", &preset_.useModelBounds);
+        ImGui::InputText("Second Subject", &preset_.secondaryTargetName);
+        ImGui::DragFloat("Subject Radius", &preset_.framingRadius, 0.1f, 0.1f, 100.0f);
+        ImGui::DragFloat("Second Radius", &preset_.secondaryRadius, 0.1f, 0.1f, 100.0f);
+        ImGui::DragFloat("Framing Padding", &preset_.framingPadding, 0.01f, 1.0f, 3.0f);
+        ImGui::DragFloat("Minimum Shot Distance", &preset_.minimumFramingDistance, 0.1f, 0.1f, 200.0f);
+        ImGui::PopID();
         ImGui::PushID(index_);
         if (ImGui::TreeNode(preset_.actionName.c_str()))
         {
@@ -1007,6 +1064,13 @@ void CameraActionDirectorComponent::Serialize(nlohmann::json& json_) const
         presetJson_["targetFov"] = preset_.targetFov;
         presetJson_["useExternalFov"] = preset_.useExternalFov;
         presetJson_["targetObjectName"] = preset_.targetObjectName;
+        presetJson_["autoFrameTargets"] = preset_.autoFrameTargets;
+        presetJson_["useModelBounds"] = preset_.useModelBounds;
+        presetJson_["secondaryTargetName"] = preset_.secondaryTargetName;
+        presetJson_["framingRadius"] = preset_.framingRadius;
+        presetJson_["secondaryRadius"] = preset_.secondaryRadius;
+        presetJson_["framingPadding"] = preset_.framingPadding;
+        presetJson_["minimumFramingDistance"] = preset_.minimumFramingDistance;
         presetJson_["cameraUp"] = { preset_.cameraUp.x, preset_.cameraUp.y, preset_.cameraUp.z };
         presetJson_["shakeStrength"] = preset_.shakeStrength;
         presetJson_["shakeFrequency"] = preset_.shakeFrequency;
@@ -1053,6 +1117,13 @@ void CameraActionDirectorComponent::Deserialize(const nlohmann::json& json_)
             preset_.targetFov = presetJson_.value("targetFov", 45.0f);
             preset_.useExternalFov = presetJson_.value("useExternalFov", false);
             preset_.targetObjectName = presetJson_.value("targetObjectName", std::string{});
+        preset_.autoFrameTargets = presetJson_.value("autoFrameTargets", false);
+        preset_.useModelBounds = presetJson_.value("useModelBounds", true);
+        preset_.secondaryTargetName = presetJson_.value("secondaryTargetName", std::string{});
+        preset_.framingRadius = (std::max)(presetJson_.value("framingRadius", 1.0f), 0.1f);
+        preset_.secondaryRadius = (std::max)(presetJson_.value("secondaryRadius", 1.0f), 0.1f);
+        preset_.framingPadding = (std::max)(presetJson_.value("framingPadding", 1.15f), 1.0f);
+        preset_.minimumFramingDistance = (std::max)(presetJson_.value("minimumFramingDistance", 3.0f), 0.1f);
             preset_.cameraUp = LoadFloat3(presetJson_, "cameraUp", { 0.0f, 1.0f, 0.0f });
             preset_.shakeStrength = presetJson_.value("shakeStrength", 0.0f);
             preset_.shakeFrequency = presetJson_.value("shakeFrequency", 20.0f);

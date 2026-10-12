@@ -27,12 +27,18 @@ struct SkillPhase
 {
     std::string animationState;
     std::string sequence;
+    // 空なら補正なし。敵の実行担当が段ごとの既存MotionWarpプリセットを選ぶ。
+    std::string motionWarpPreset;
+    bool continueSequence = false; // 前段と同じSequenceを継続し、コンボ全段の予約を維持する。
+    bool playAnimationFromSequence = false; // 時刻0のSequence Actionで再生し、Phase側の直接再生を省く。
+    bool waitForAnimationEnd = false; // ACTION_END通知が早くても、反応クリップの終端まで制御を保持する。
     std::string enterAction;
     std::string exitAction;
     SkillPhaseEnd endCondition = SkillPhaseEnd::ANIMATION_END;
     float duration = 0.0f;
     float maximumDuration = 10.0f;
     float blendDuration = 0.1f;
+    float animationStartTime = 0.0f; // ブレンド先クリップの開始位置。シークで補間を解除せず再生を始める。
     bool canDodgeCancel = false;
     bool canActionBranch = false;
     bool canBufferInput = false;

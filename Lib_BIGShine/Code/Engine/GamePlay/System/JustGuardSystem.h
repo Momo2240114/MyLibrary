@@ -87,6 +87,8 @@ private:
     // 成立情報をBlackboardに公開し、OnJustGuardとReactionを呼ぶ。
     void PublishJustGuardToBlackboard(const JustGuardEvent& event_);
     void PublishJustGuardToAttacker(const JustGuardEvent& event_);
+    // Projectile反射など、HitBox側に設定された既存の攻撃別Actionを維持する。
+    void PublishJustGuardToAttackHitBox(const JustGuardEvent& event_);
     std::shared_ptr<GameObject> FindBlackboardReceiver(std::shared_ptr<GameObject> object_) const;
 
 private:

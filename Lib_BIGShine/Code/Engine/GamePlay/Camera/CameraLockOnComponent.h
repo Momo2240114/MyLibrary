@@ -64,6 +64,28 @@ public:
     void SetPlayerTarget(const std::shared_ptr<GameObject>& playerTarget_);
     void SetLockOnTarget(const std::shared_ptr<GameObject>& lockOnTarget_);
     void SetLockOnFocusTarget(const std::shared_ptr<GameObject>& focusTarget_);
+    // 削除予約された対象と、名前からの再解決を解除する。
+    void ForgetObject(const std::shared_ptr<GameObject>& object_);
+    // バリア遷移と同じ中心・半径を壁際カメラの制限にも反映する。
+    void SetArenaBounds(const DirectX::XMFLOAT3& center_, float radius_)
+    {
+        if (!hasRuntimeArenaBounds)
+        {
+            originalArenaCenter = arenaCenter;
+            originalArenaRadius = arenaRadius;
+            hasRuntimeArenaBounds = true;
+        }
+        arenaCenter = center_;
+        arenaRadius = radius_;
+    }
+    // 単体再生の終了時に、演出前の壁際カメラ設定へ戻す。
+    void ClearArenaBounds()
+    {
+        if (!hasRuntimeArenaBounds) return;
+        arenaCenter = originalArenaCenter;
+        arenaRadius = originalArenaRadius;
+        hasRuntimeArenaBounds = false;
+    }
 
     // Playerから見て、画面位置・距離・優先度が最も良いLockOnTargetを探す。
     std::shared_ptr<GameObject> FindBestLockOnTarget(
@@ -246,6 +268,13 @@ private:
     float heightDifferenceScale = 0.35f;
     float sideOffset = 1.25f;
     float currentSide = 1.0f;
+    // 人型戦では接近時の急旋回と、構図補正による過度な寄りを抑える。
+    bool enableCloseRangeDistanceGuard = false;
+    float closeRangeDirectionHoldDistance = 1.5f;
+    float closeRangeOrbitTurnSpeed = 90.0f;
+    float closeRangeMinimumHeight = 1.2f;
+    DirectX::XMFLOAT3 closeRangeBackDirection{ 0.0f, 0.0f, -1.0f };
+    bool hasCloseRangeBackDirection = false;
 
     // 近距離/遠距離で注視点のPlayer寄り/Target寄りを切り替える。
     float closeDistance = 8.0f;
@@ -273,6 +302,9 @@ private:
     bool enableCircularArenaCamera = false;
     DirectX::XMFLOAT3 arenaCenter{ 0.0f, 0.0f, 0.0f };
     float arenaRadius = 15.0f;
+    bool hasRuntimeArenaBounds = false;
+    DirectX::XMFLOAT3 originalArenaCenter{ 0.0f, 0.0f, 0.0f };
+    float originalArenaRadius = 15.0f;
     float arenaCameraMargin = 0.8f;
     float wallCameraStartDistance = 3.0f;
     float wallCameraDistance = 5.5f;

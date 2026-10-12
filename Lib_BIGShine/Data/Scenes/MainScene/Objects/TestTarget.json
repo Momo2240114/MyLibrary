@@ -6497,6 +6497,52 @@
             "TypeName": "DragonAttackControllerComponent",
             "UpdateEnabled": true,
             "UpdatePriority": 0
+        },
+        {
+            "TypeName": "ModelDissolveComponent",
+            "Data": {
+                "StartVisible": true,
+                "DisappearDuration": 4,
+                "RevealDuration": 3,
+                "NoiseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+                "NoiseScale": 3,
+                "EdgeWidth": 0.065,
+                "EdgeEmission": 1.7,
+                "DirectionalWeight": 0.45,
+                "DirectionExtent": 14,
+                "Direction": [
+                    0,
+                    1,
+                    0
+                ],
+                "EdgeColor": [
+                    0.13,
+                    0.008,
+                    0.19,
+                    1
+                ]
+            },
+            "Enabled": true,
+            "UpdateEnabled": true,
+            "LateUpdateEnabled": true,
+            "UpdatePriority": -50,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false
+        },
+        {
+            "TypeName": "GameModeObjectToggleComponent",
+            "Data": {
+                "StartEnabled": true,
+                "IncludeNormalComponents": true,
+                "IncludeColliderComponents": true,
+                "RegisteredGlobalActions": true
+            },
+            "Enabled": true,
+            "UpdateEnabled": true,
+            "LateUpdateEnabled": true,
+            "UpdatePriority": 0,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false
         }
     ],
     "Layer": 2,
@@ -6511,7 +6557,7 @@
         ],
         "Rot": [
             0.0,
-            -151.13589477539063,
+            -151.13589477539062,
             0.0
         ],
         "Scale": [

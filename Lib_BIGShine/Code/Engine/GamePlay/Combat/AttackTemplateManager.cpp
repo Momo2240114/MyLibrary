@@ -408,6 +408,8 @@ bool AttackTemplateManager::LoadTemplate(const std::string& path_)
         attack_.value("damageRate", result_.damage / 100.0f),
         0.0f);
     result_.fixedDamage = attack_.value("fixedDamage", 0.0f);
+    result_.guardBreak = attack_.value("guardBreak", false);
+    result_.canBeGuarded = attack_.value("canBeGuarded", true);
     result_.damageApplyType = ReadEnum(attack_, "damageApplyType", DAMAGE_APPLY_TYPE::SINGLE_HIT);
     result_.damageHitInterval = (std::max)(attack_.value("damageHitInterval", 0.0f), 0.0f);
     result_.maxHitCount = attack_.value("maxHitCount", 1);
@@ -594,6 +596,8 @@ bool AttackTemplateManager::SaveTemplate(const AttackTemplate& attackTemplate_)
             { "canHitOwner", attackTemplate_.canHitOwner } } },
         { "attack", { { "damage", attackTemplate_.damage },
             { "damageRate", attackTemplate_.damageRate },
+            { "guardBreak", attackTemplate_.guardBreak },
+            { "canBeGuarded", attackTemplate_.canBeGuarded },
             { "fixedDamage", attackTemplate_.fixedDamage },
             { "damageApplyType", static_cast<int>(attackTemplate_.damageApplyType) },
             { "damageHitInterval", attackTemplate_.damageHitInterval },
@@ -861,6 +865,8 @@ bool AttackTemplateManager::DrawEditorContent(
         }
 
         ImGui::Checkbox("Can Hit Owner", &attackTemplate_->canHitOwner);
+        ImGui::Checkbox("Guard Break", &attackTemplate_->guardBreak);
+        ImGui::Checkbox("Can Be Guarded", &attackTemplate_->canBeGuarded);
     }
 
     // =========================================================

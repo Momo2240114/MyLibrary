@@ -392,6 +392,7 @@ void SkillWorkspaceWindow::DrawPhaseInspector()
     const auto target_ = targetObject.lock();
     const auto animation_ = target_ ? target_->GetComponent<AnimationControllerComponent>() : nullptr;
     dirty |= ImGui::InputText("Animation", &phase_.animationState);
+    dirty |= ImGui::InputText("Motion Warp Preset", &phase_.motionWarpPreset);
     if (animation_ && ImGui::BeginCombo("Actor Animations", phase_.animationState.c_str()))
     {
         for (const auto& [name_, state_] : animation_->GetStates())

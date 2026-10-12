@@ -320,6 +320,18 @@ std::string AnimationControllerComponent::BuildDefaultStateAssetPath(
         statePath_.filename()).lexically_normal().string();
 }
 
+bool AnimationControllerComponent::LoadMissingStateAsset(const std::string& stateName_, const std::string& assetName_)
+{
+    BS_PROFILE_SCOPE("AnimationControllerComponent::LoadMissingStateAsset");
+    if (stateName_.empty()) return false;
+    const auto existing_ = states.find(stateName_);
+    if (existing_ != states.end() && existing_->second) return true;
+    // 外部からprivateの読込処理へ直接アクセスさせず、追加時のAction登録も共有する。
+    if (!LoadStateAsset(assetName_)) return false;
+    const auto loaded_ = states.find(stateName_);
+    return loaded_ != states.end() && loaded_->second != nullptr;
+}
+
 bool AnimationControllerComponent::LoadStateAsset(const std::string& assetName_)
 {
     BS_PROFILE_SCOPE("AnimationControllerComponent::LoadStateAsset");
@@ -470,6 +482,7 @@ void AnimationControllerComponent::SaveGraphAsset(const std::string& assetName_)
     for (auto& t : graphTransitions)
     {
         nlohmann::json tr;
+        tr["BlackboardRequestRoute"] = t.blackboardRequestRoute;
         tr["from"] = t.fromStateName;
         tr["to"] = t.toStateName;
         tr["duration"] = t.duration;
@@ -643,6 +656,7 @@ bool AnimationControllerComponent::LoadGraphAsset(const std::string& assetName_)
         for (auto& tr : j["GraphTransitions"])
         {
             AnimTransition transition;
+            transition.blackboardRequestRoute = tr.value("BlackboardRequestRoute", false);
             transition.fromStateName = tr.value("from", "");
             transition.toStateName = tr.value("to", "");
             transition.duration = tr.value("duration", 0.2f);

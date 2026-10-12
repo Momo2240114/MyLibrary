@@ -11,10 +11,12 @@
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/Graphics/VFX/MaterialOverlayComponent.h"
 #include "Engine/GamePlay/Graphics/ModelMaterialComponent.h"
+#include "Engine/GamePlay/Graphics/ModelDissolveComponent.h"
 #include "Engine/Debug/TracyProfiler.h"
 #include <algorithm>
 #include <array>
 #include <cctype>
+#include <cmath>
 #include <cstdio>
 #include <cstring>
 #include <initializer_list>
@@ -261,6 +263,10 @@ void ModelRenderSystem::Initialize(ID3D11Device* device)
 		device,
 		sizeof(CbGBufferMaterial),
 		gBufferMaterialConstantBuffer.GetAddressOf());
+	CPUResourceLoader::CreateConstantBuffer(
+		device,
+		sizeof(CbModelDissolve),
+		modelDissolveConstantBuffer.GetAddressOf());
 
 	CPUResourceLoader::CreateConstantBuffer(
 		device,
@@ -662,6 +668,8 @@ void ModelRenderSystem::OutLineSettingGui()
 //---
 void ModelRenderSystem::PushSubmit(ModelShaderID shaderId, std::shared_ptr<GltfModelCommponennt> model)
 {
+    // 非表示モデルをキューへ入れず、通常描画・Overlay・Shadowをまとめて抑止する。
+    if (!model || !model->IsRuntimeVisible()) return;
 	DrawInfo& drawInfo = drawInfos.emplace_back();
 	drawInfo.shaderId = shaderId;
 	drawInfo.model = model;
@@ -1045,8 +1053,8 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 			return true;
 		};
 
-	// 元のマテリアルとメッシュを保持し、所有Objectの差し替えテクスチャだけを優先する。
-	auto bindMaterialTextures_ = [&](GltfModelCommponennt& model_, const GltfModelCommponennt::Mesh& mesh_)
+	// 元のマテリアルとメッシュを保持し、パーツごとの各スロットの差し替えを優先する。
+	auto bindMaterialTextures_ = [&](GltfModelCommponennt& model_, const GltfModelCommponennt::Mesh& mesh_, int meshIndex_)
 		{
 			const auto owner_ = model_.GetGameObject();
 			const auto materialComponent_ = owner_ ? owner_->GetComponent<ModelMaterialComponent>() : nullptr;
@@ -1064,9 +1072,40 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 			for (std::size_t index_ = 0; index_ < ModelMaterial::TEXTURE_SLOT_COUNT; ++index_)
 			{
 				textures_[index_] = materialComponent_->ResolveTexture(
-					mesh_.materialIndex, static_cast<ModelMaterial::TextureSlot>(index_), textures_[index_]);
+					mesh_.materialIndex, static_cast<ModelMaterial::TextureSlot>(index_), textures_[index_], meshIndex_);
 			}
 			dc->PSSetShaderResources(0, static_cast<UINT>(ModelMaterial::TEXTURE_SLOT_COUNT), textures_);
+		};
+
+	// 不透明・半透明の両経路で同じNoiseと方向分布を使用する。
+	auto bindModelDissolve_ = [&](GltfModelCommponennt& model_, bool forward_) -> CbModelDissolve
+		{
+			CbModelDissolve constants_{};
+			const auto owner_ = model_.GetGameObject();
+			const auto dissolve_ = owner_ ? owner_->GetComponent<ModelDissolveComponent>() : nullptr;
+			ID3D11ShaderResourceView* noise_ = nullptr;
+			if (dissolve_ && dissolve_->IsEnabled())
+			{
+				const auto& settings_ = dissolve_->GetSettings();
+				constants_.params = { dissolve_->GetProgress(), settings_.edgeWidth, settings_.edgeEmission, settings_.noiseScale };
+				constants_.edgeColor = settings_.edgeColor;
+				const float extent_ = (std::max)(settings_.directionExtent, 0.01f);
+				const float length_ = std::sqrt(settings_.direction.x * settings_.direction.x +
+					settings_.direction.y * settings_.direction.y + settings_.direction.z * settings_.direction.z);
+				const float scale_ = length_ > 0.0001f ? 1.0f / (length_ * extent_) : 0.0f;
+				constants_.direction = { settings_.direction.x * scale_, settings_.direction.y * scale_,
+					settings_.direction.z * scale_, settings_.directionalWeight };
+				const auto origin_ = owner_->transform->GetWorldPosition();
+				noise_ = dissolve_->GetNoiseTexture();
+				constants_.origin = { origin_.x, origin_.y, origin_.z, noise_ ? 1.0f : 0.0f };
+			}
+			dc->PSSetShaderResources(18, 1, &noise_);
+			if (forward_)
+			{
+				dc->UpdateSubresource(modelDissolveConstantBuffer.Get(), 0, nullptr, &constants_, 0, 0);
+				dc->PSSetConstantBuffers(4, 1, modelDissolveConstantBuffer.GetAddressOf());
+			}
+			return constants_;
 		};
 
 	auto drawMesh = [&](GltfModelCommponennt& model_, const GltfModelCommponennt::Mesh& mesh, int meshIndex_, ModelShader* shader)
@@ -1087,7 +1126,8 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 
 			// 更新
 			shader->Update(rc, mesh);
-			bindMaterialTextures_(model_, mesh);
+			if (dynamic_cast<ToonPBRShader*>(shader)) bindModelDissolve_(model_, true);
+			bindMaterialTextures_(model_, mesh, meshIndex_);
 
 			ID3D11SamplerState* materialSampler_ = rc.renderState->GetSamplerState(
 				mesh.material->uvAddressMode == GltfModelCommponennt::UV_ADDRESS_MODE::CLAMP
@@ -1149,6 +1189,11 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 			material_.uvScale = mesh.material->uvScale;
 			material_.uvOffset = mesh.material->uvOffset;
 			material_.uvRotation = mesh.material->uvRotation;
+			const auto dissolveConstants_ = bindModelDissolve_(model_, false);
+			material_.dissolveParams = dissolveConstants_.params;
+			material_.dissolveEdgeColor = dissolveConstants_.edgeColor;
+			material_.dissolveDirection = dissolveConstants_.direction;
+			material_.dissolveOrigin = dissolveConstants_.origin;
 			dc->UpdateSubresource(gBufferMaterialConstantBuffer.Get(), 0, nullptr, &material_, 0, 0);
 
 			ID3D11ShaderResourceView* materialSrvs_[] =
@@ -1160,7 +1205,7 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 				mesh.material->metalnessRoughnessMap.Get(),
 			};
 			dc->PSSetShaderResources(0, _countof(materialSrvs_), materialSrvs_);
-			bindMaterialTextures_(model_, mesh);
+			bindMaterialTextures_(model_, mesh, meshIndex_);
 
 			ID3D11SamplerState* materialSampler_ = rc.renderState->GetSamplerState(
 				mesh.material->uvAddressMode == GltfModelCommponennt::UV_ADDRESS_MODE::CLAMP
@@ -1256,6 +1301,10 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 
 	auto drawOutlineMesh = [&](GltfModelCommponennt& model_, const GltfModelCommponennt::Mesh& mesh, int meshIndex_)
 		{
+			const auto owner_ = model_.GetGameObject();
+			const auto dissolve_ = owner_ ? owner_->GetComponent<ModelDissolveComponent>() : nullptr;
+			// 消滅中に通常の輪郭だけが残るのを防ぐ。
+			if (dissolve_ && dissolve_->IsEnabled() && dissolve_->GetProgress() > 0.0f) return;
 			if (!mesh.material->disableOutline || mesh.material->outlineThicknessOffset < 0)
 			{
 				return;
@@ -1613,6 +1662,9 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 	dc->PSSetConstantBuffers(8, 1, &nullBuffer);
 	ID3D11ShaderResourceView* nullShadowSRVs[CascadeShadowMap::CascadeCount] = {};
 	dc->PSSetShaderResources(13, CascadeShadowMap::CascadeCount, nullShadowSRVs);
+	ID3D11ShaderResourceView* nullDissolveSRV_ = nullptr;
+	dc->PSSetShaderResources(18, 1, &nullDissolveSRV_);
+	dc->PSSetConstantBuffers(4, 1, &nullBuffer);
 }
 
 void ModelRenderSystem::UpdatePointLightBuffer(ID3D11DeviceContext* dc, const std::vector<PointLight>& lights)
@@ -2033,6 +2085,10 @@ void ModelRenderSystem::RenderShadowCasters(const RenderContext& rc, int cascade
 	for (const DrawInfo& drawInfo : drawInfos)
 	{
 		if (!drawInfo.model) continue;
+		const auto owner_ = drawInfo.model->GetGameObject();
+		const auto dissolve_ = owner_ ? owner_->GetComponent<ModelDissolveComponent>() : nullptr;
+		// Shadow用の完全なモデル影が、形成前の姿を先に表示しないようにする。
+		if (dissolve_ && dissolve_->IsEnabled() && dissolve_->GetProgress() > 0.0f) continue;
 
 		const auto& meshes_ = drawInfo.model->GetMeshes();
 		for (int meshIndex_ = 0; meshIndex_ < static_cast<int>(meshes_.size()); ++meshIndex_)

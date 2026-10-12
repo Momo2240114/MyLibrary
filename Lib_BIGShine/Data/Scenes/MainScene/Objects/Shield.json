@@ -41,7 +41,11 @@
                 "UseGravity": false,
                 "UsePhysicsResponse": false,
                 "VelocityRotationMode": 0,
-                "shapeSizeScale": 1.0
+                "shapeSizeScale": 1.0,
+                "GuardAngle": 160.0,
+                "GuardBodyContact": true,
+                "ReactToGuardBreak": true,
+                "GuardBreakDamageRate": 1.0
             },
             "Enabled": false,
             "LateUpdateEnabled": true,
@@ -498,7 +502,7 @@
                 ],
                 "PlaybackSpeed": 1.0
             },
-            "Enabled": true,
+            "Enabled": false,
             "LateUpdateEnabled": true,
             "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,

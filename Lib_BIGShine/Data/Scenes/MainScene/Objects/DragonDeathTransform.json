@@ -1,0 +1,26 @@
+{
+    "Name": "DragonDeathTransform",
+    "ParentName": "",
+    "Layer": 0,
+    "CollisionMask": 0,
+    "RequiredForSceneStart": true,
+    "Transform": {
+        "Pos": [
+            0,
+            -0.582325,
+            0
+        ],
+        "Rot": [
+            0,
+            180,
+            0
+        ],
+        "Scale": [
+            1,
+            1,
+            1
+        ]
+    },
+    "Components": [],
+    "ColliderComponents": []
+}

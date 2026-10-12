@@ -145,7 +145,9 @@ void ActionRegistry::Call(const std::string& name)
     if (!iterator_->second) return;
 
     BS_LOG_INFO(LOG_CATEGORY::GAME, "Action fired: " + name);
-    iterator_->second();
+    // 呼び出し中のObject破棄で登録が解除されても、実行中のCallbackを保持する。
+    const ActionFunc callback_ = iterator_->second;
+    callback_();
 }
 
 bool ActionRegistry::HasAction(const std::string& name)

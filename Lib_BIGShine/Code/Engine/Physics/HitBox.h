@@ -37,6 +37,9 @@ public:
     uint32_t attackInstanceId = 0u; // 1回の攻撃Actionを識別するID。
     uint32_t hitGroupId = 0u; // 同一攻撃内の判定Group。複数部位や多段判定を分ける。
     bool allowMultiHit = false; // 同じ対象へ複数回Hitさせるか。
+    // 通常Guardを崩す攻撃。JustGuardの受付は残して対処の余地を確保する。
+    bool guardBreak = false;
+    bool canBeGuarded = true; // ガード不能攻撃は通常GuardとJustGuardの両方を通さない。
     bool canHitOwner = false; // 攻撃者自身へHit可能にするか。
     int teamId = 0; // Team判定用ID。
     std::string justGuardedActionName; // JustGuardされた時に攻撃判定側で実行するAction名。

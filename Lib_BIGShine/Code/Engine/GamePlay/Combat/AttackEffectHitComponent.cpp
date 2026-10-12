@@ -210,6 +210,11 @@ void AttackEffectHitComponent::SetHitImpactEffectAssetPath(const std::string& pa
 
 void AttackEffectHitComponent::SetAllowMultiHit(bool allowMultiHit_) { allowMultiHit = allowMultiHit_; }
 void AttackEffectHitComponent::SetCanHitOwner(bool canHitOwner_) { canHitOwner = canHitOwner_; }
+void AttackEffectHitComponent::SetGuardProperties(bool canBeGuarded_, bool guardBreak_)
+{
+    canBeGuarded = canBeGuarded_;
+    guardBreak = guardBreak_;
+}
 void AttackEffectHitComponent::SetSourceAction(const std::string& sourceAction_) { sourceAction = sourceAction_; }
 void AttackEffectHitComponent::SetJustGuardedActionName(const std::string& actionName_) { justGuardedActionName = actionName_; }
 void AttackEffectHitComponent::SetEffectType(ATTACK_EFFECT_TYPE effectType_) { effectType = effectType_; }
@@ -369,6 +374,8 @@ void AttackEffectHitComponent::ConfigureHitBox(
         hitBox_->hitMeshVFXAssetPath.c_str());
     hitBox_->allowMultiHit = allowMultiHit || shape_.allowMultiHit;
     hitBox_->canHitOwner = canHitOwner;
+    hitBox_->canBeGuarded = canBeGuarded;
+    hitBox_->guardBreak = guardBreak;
     hitBox_->radius = (std::max)(shape_.radius, 0.01f);
     const ATTACK_HIT_SHAPE normalizedShape_ = NormalizeAttackHitShape(shape_.shape);
     // Sphereは高さを使わず、Capsule系だけhalfHeightを判定サイズに反映する。
@@ -452,6 +459,8 @@ void AttackEffectHitComponent::Gui()
     ImGui::Text("Elapsed: %.3f", elapsedTime);
     ImGui::Checkbox("Playing", &playing);
     ImGui::DragFloat("Legacy Damage", &damage, 0.1f, 0.0f);
+    ImGui::Checkbox("Can Be Guarded", &canBeGuarded);
+    ImGui::Checkbox("Guard Break", &guardBreak);
     ImGui::DragFloat("Damage Rate", &damageRate, 0.01f, 0.0f);
     ImGui::DragFloat("Fixed Damage", &fixedDamage, 0.1f, -99999.0f, 99999.0f);
     const char* damageApplyTypeNames_[] = { "Single Hit", "Multi Hit", "Damage Over Time" };
@@ -605,6 +614,8 @@ void AttackEffectHitComponent::Serialize(nlohmann::json& json_) const
     json_["HitImpactEffectAssetPath"] = hitImpactEffectAssetPath;
     json_["DestroyOnLifeEnd"] = destroyOnLifeEnd;
     json_["CanHitOwner"] = canHitOwner;
+    json_["CanBeGuarded"] = canBeGuarded;
+    json_["GuardBreak"] = guardBreak;
     json_["AllowMultiHit"] = allowMultiHit;
     json_["SourceAction"] = sourceAction;
     json_["JustGuardedActionName"] = justGuardedActionName;
@@ -673,6 +684,8 @@ void AttackEffectHitComponent::Deserialize(const nlohmann::json& json_)
     hitImpactEffectAssetPath = json_.value("HitImpactEffectAssetPath", std::string{});
     destroyOnLifeEnd = json_.value("DestroyOnLifeEnd", true);
     canHitOwner = json_.value("CanHitOwner", false);
+    canBeGuarded = json_.value("CanBeGuarded", true);
+    guardBreak = json_.value("GuardBreak", false);
     allowMultiHit = json_.value("AllowMultiHit", false);
     sourceAction = json_.value("SourceAction", std::string{});
     justGuardedActionName = json_.value("JustGuardedActionName", std::string{});

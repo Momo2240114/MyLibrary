@@ -38,7 +38,7 @@ void PlayerActionState::Execute(float)
 
     const DirectX::XMFLOAT3 input_ = player_->GetMoveInput();
     player_->SendMoveInputToBlackboard(input_);
-    if (action == PLAYER_ACTION::GUARD)
+    if (action == PLAYER_ACTION::GUARD && !player_->IsGuardBroken())
     {
         // ガード中はTargetを基準にした前後左右入力へ変換して、防御移動を安定させる。
         const DirectX::XMFLOAT3 guardInput_ =
@@ -46,6 +46,11 @@ void PlayerActionState::Execute(float)
         player_->SendGuardMoveInputToBlackboard(guardInput_);
         player_->SetHorizontalVelocity(input_, player_->guardMoveSpeed, false);
         player_->ApplyGuardFacingToTarget();
+    }
+    else if (action == PLAYER_ACTION::GUARD)
+    {
+        // GuardBreak中は入力移動を予約せず、リアクションだけを進める。
+        player_->SetHorizontalVelocity({ 0.0f, 0.0f, 0.0f }, 0.0f, false);
     }
     player_->ProcessActionInput();
 }

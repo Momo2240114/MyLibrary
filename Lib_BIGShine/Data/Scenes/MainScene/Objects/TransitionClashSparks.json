@@ -1,0 +1,206 @@
+{
+    "Name": "TransitionClashSparks",
+    "ParentName": "",
+    "Layer": 32,
+    "CollisionMask": 0,
+    "RequiredForSceneStart": true,
+    "Transform": {
+        "Pos": [
+            0,
+            1.2,
+            -9
+        ],
+        "Rot": [
+            0,
+            0,
+            0
+        ],
+        "Scale": [
+            1,
+            1,
+            1
+        ]
+    },
+    "Components": [
+        {
+            "TypeName": "ParticleComponent",
+            "Data": {
+                "AssetPath": "Data/Particle/PlayerGuardSparks.json",
+                "AssetType": "ParticleEffect",
+                "AssetVersion": 1,
+                "Emitters": [
+                    {
+                        "Acceleration": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "BlendMode": 1,
+                        "BurstCount": 8,
+                        "Color": [
+                            1.0,
+                            0.72,
+                            0.32,
+                            1.0
+                        ],
+                        "ColorEnd": [
+                            1.0,
+                            0.38,
+                            0.08,
+                            0.0
+                        ],
+                        "ColorStart": [
+                            1.0,
+                            0.91,
+                            0.62,
+                            0.85
+                        ],
+                        "ConeAngle": [
+                            15.0,
+                            65.0
+                        ],
+                        "Delay": 0.0,
+                        "Drag": 3.0,
+                        "EmissionMode": 1,
+                        "Fade": [
+                            0.0,
+                            0.16
+                        ],
+                        "FresnelPower": 2.0,
+                        "FresnelStrength": 1.0,
+                        "GradientTexturePath": "",
+                        "Gravity": 0.0,
+                        "LegacyRadius": [
+                            0.0,
+                            0.0
+                        ],
+                        "Lifespan": [
+                            0.16,
+                            0.28
+                        ],
+                        "MaskTexturePath": "Data/Texture/Particle/masks for  particles/masks for  particles/9.png",
+                        "MaxCount": 12,
+                        "MeshVertexSampleCount": 2048,
+                        "Name": "GuardSparks",
+                        "NoiseFrequency": 3.0,
+                        "NoiseSpeed": 8.0,
+                        "NoiseStrength": 0.05,
+                        "OrbitVelocity": 0.0,
+                        "PosOffset": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "RadialVelocity": 0.0,
+                        "RenderType": 1,
+                        "RotationSpeed": [
+                            0.0,
+                            0.0
+                        ],
+                        "ShapeEnd": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "ShapeSize": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "ShapeStart": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "Size": [
+                            0.035,
+                            0.07
+                        ],
+                        "SizeRandomEnd": [
+                            1.0,
+                            1.0
+                        ],
+                        "SizeRandomStart": [
+                            1.0,
+                            1.0
+                        ],
+                        "SpawnDirectionMode": 3,
+                        "EmissionAxis": [
+                            0.0,
+                            1.0,
+                            0.0
+                        ],
+                        "TargetPosition": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "UseTargetAttraction": 0,
+                        "TargetAttractionStrength": 0.0,
+                        "TargetAttractionRange": 0.0,
+                        "TargetAttractionFalloff": 1.0,
+                        "SpawnShape": 0,
+                        "SpawnSpace": 0,
+                        "Speed": [
+                            1.5,
+                            3.0
+                        ],
+                        "SpriteAnimationFps": 12.0,
+                        "SpriteAnimationLoop": 1,
+                        "SpriteAnimationRange": [
+                            0,
+                            0
+                        ],
+                        "SpriteSheetIndex": [
+                            0,
+                            0
+                        ],
+                        "StretchMax": 0.3,
+                        "StretchScale": 0.08,
+                        "TexturePath": "",
+                        "TextureSplitCount": [
+                            1,
+                            1
+                        ],
+                        "UseColorOverLife": 1,
+                        "UseFresnel": 0,
+                        "UseGradient": 0,
+                        "UseMask": 1,
+                        "UseRandomSize": 0,
+                        "UseSpriteAnimation": 0,
+                        "VerticalSpawnRange": 0.0,
+                        "Wind": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "gradientDirection": 0,
+                        "gradientEndUv": 1.0,
+                        "gradientFixedUv": 0.5,
+                        "gradientSampleMode": 0,
+                        "gradientStartUv": 0.0,
+                        "gradientTexturePath": "",
+                        "maskTexturePath": "Data/Texture/Particle/masks for  particles/masks for  particles/9.png",
+                        "shadeGradientDirection": 0,
+                        "shadeGradientEndUv": 1.0,
+                        "shadeGradientFixedUv": 0.5,
+                        "shadeGradientSampleMode": 0,
+                        "shadeGradientStartUv": 0.0,
+                        "shadeGradientTexturePath": "",
+                        "texturePath": "",
+                        "useGradientTexture": 0,
+                        "useShadeGradientTexture": 0
+                    }
+                ],
+                "IsPlaying": false
+            },
+            "Enabled": true,
+            "UpdateEnabled": true,
+            "LateUpdateEnabled": true,
+            "UpdatePriority": 0,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false
+        }
+    ],
+    "ColliderComponents": []
+}

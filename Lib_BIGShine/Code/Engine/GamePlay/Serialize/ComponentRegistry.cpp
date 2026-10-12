@@ -20,6 +20,7 @@
 #include "Engine/UI/UIButton.h"
 #include "Engine/UI/UIAnimationPlayerComponent.h"
 #include "Engine/Graphics/Resource/Animation/AnimationControllerComponent.h"
+#include "Engine/Graphics/Resource/Animation/AnimationGraphBridgeComponent.h"
 #include "Engine/Graphics/Resource/Animation/IKMapComponent.h"
 #include "Engine/Graphics/Resource/Animation/SpringBoneSimulationComponent.h"
 #include "Engine/Graphics/Resource/Animation/ShieldBlockIKComponent.h"
@@ -120,6 +121,7 @@ void RegisterAllComponents()
     registry.Register<ModelAttachmentComponent>("ModelAttachment");
     registry.Register<BoneSegmentAttachmentComponent>("BoneSegmentAttachment");
     registry.Register<AnimationControllerComponent>("AnimationControllerComponent");
+    registry.Register<AnimationGraphBridgeComponent>("AnimationGraphBridgeComponent");
     registry.Register<IKMapComponent>("IKMapComponent");
     registry.Register<SpringBoneSimulationComponent>("SpringBoneSimulationComponent");
     registry.Register<ShieldBlockIKComponent>("ShieldBlockIKComponent");

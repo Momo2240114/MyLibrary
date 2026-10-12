@@ -1,0 +1,77 @@
+{
+  "AssetType": "AttackTemplate",
+  "AssetVersion": 1,
+  "attack": {
+    "allowMultiHit": false,
+    "damage": 225.0,
+    "hitGroupId": 1,
+    "hitStopDuration": 0.055,
+    "hitStopScale": 0.6,
+    "knockBackPower": 5.5,
+    "knockBackType": 0
+  },
+  "cameraShake": {
+    "enabled": true,
+    "powerLevel": 1
+  },
+  "attackEffects": [],
+  "displayName": "HumanBoss Combo Kick",
+  "hitEffect": {
+    "hitMeshVfxAssetPath": "",
+    "hitParticleAssetPath": "EnemyMudKickHit",
+    "hitParticleEmitterName": "",
+    "hitParticleLifeTime": 0.65,
+    "hitParticleNormalOffset": 0.08,
+    "hitParticleUseImpactAxis": true,
+    "hitParticleAxisToAttackerBlend": 0.75,
+    "hitParticleUseTargetAttraction": true,
+    "hitParticleTargetAttractionStrength": 1.4,
+    "hitParticleTargetAttractionRange": 3.0,
+    "hitParticleTargetAttractionFalloff": 1.25,
+    "spawnOnHit": true
+  },
+  "id": "HumanBossComboKick",
+  "owner": {
+    "canHitOwner": false,
+    "ownerTarget": 0
+  },
+  "slashEffects": [
+    {
+      "enabled": true,
+      "vfxPath": "EnemyMudKickArc",
+      "spawnTimeOffset": 0,
+      "lifeTime": 0.18,
+      "localOffset": [
+        0,
+        0,
+        0
+      ],
+      "localRotation": [
+        0,
+        0,
+        0
+      ],
+      "localScale": [
+        32,
+        32,
+        32
+      ],
+      "alpha": 1,
+      "followOwner": true,
+      "followNode": true,
+      "baseNodeName": "foot_r",
+      "hitBox": {
+        "enabled": false
+      }
+    }
+  ],
+  "weaponHitBox": {
+    "activeEndTime": 0.18,
+    "activeStartTime": 0.0,
+    "enabled": true,
+    "endNodeName": "ball_r_end",
+    "hitBoxName": "Kick",
+    "radius": 0.28,
+    "startNodeName": "foot_r"
+  }
+}

@@ -1,13 +1,19 @@
 #include "PrecompiledHeader.h"
 
 #include "ActionSequence.h"
+#include "PrefabSpawnActionComponent.h"
+#include "ObjectDeleteActionComponent.h"
+#include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
+#include "Engine/Graphics/Resource/Animation/AnimationControllerComponent.h"
+#include <imgui_stdlib.h>
 #include "ImSequencer.h"
 
 #include <algorithm>
 #include <cmath>
+#include <fstream>
 
 namespace
 {
@@ -88,6 +94,8 @@ namespace
                 action_.timelineStartFrame = (std::max)(0, action_.timelineStartFrame);
                 action_.timelineEndFrame = action_.timelineStartFrame + 1;
                 action_.executionTime = ToTime(action_.timelineStartFrame);
+                if (!action_.animationState.empty() && action_.useNormalizedTime)
+                    action_.executionTime = (std::min)(1.0f, action_.executionTime);
                 sequence->duration = (std::max)(sequence->duration, action_.executionTime);
             }
         }
@@ -116,7 +124,8 @@ namespace
 
             // 複製直後に完全に重ならないよう、1Frameだけ後ろへずらす。
             auto action_ = sequence->actions[index_];
-            action_.executionTime = (std::min)(sequence->duration, action_.executionTime + (1.0f / SEQUENCE_FPS));
+            const float maximumTime_ = !action_.animationState.empty() && action_.useNormalizedTime ? 1.0f : sequence->duration;
+            action_.executionTime = (std::min)(maximumTime_, action_.executionTime + (1.0f / SEQUENCE_FPS));
             sequence->actions.push_back(action_);
             SyncFrames();
         }
@@ -129,17 +138,75 @@ void ActionSequence::Start()
     RegisterSequence("");
 }
 
+// 中断・Scene破棄では、完了通知を発行せず生成階層を終了する。
+void ActionSequence::OnDestroy()
+{
+    pendingActions.clear();
+    pendingCompletionAction.clear();
+    CleanupSpawnedObjects(true);
+}
+
+// 既存の呼び出し口を維持し、生成物の所有権は専用Componentへ移す。
+void ActionSequence::TrackSpawnedObject(const std::shared_ptr<GameObject>& object_)
+{
+    const auto owner_ = GetGameObject();
+    if (const auto spawner_ = owner_ ? owner_->GetComponent<PrefabSpawnActionComponent>() : nullptr)
+        spawner_->TrackSpawnedObject(object_);
+}
+
+void ActionSequence::PromoteSpawnedObject(const std::shared_ptr<GameObject>& object_)
+{
+    const auto owner_ = GetGameObject();
+    if (const auto spawner_ = owner_ ? owner_->GetComponent<PrefabSpawnActionComponent>() : nullptr)
+        spawner_->CommitActor(object_);
+}
+
+void ActionSequence::CleanupSpawnedObjects(bool includePersistent_)
+{
+    const auto owner_ = GetGameObject();
+    if (const auto deleter_ = owner_ ? owner_->GetComponent<ObjectDeleteActionComponent>() : nullptr)
+        deleter_->CleanupSpawnedObjects(includePersistent_);
+}
+
 void ActionSequence::Update(float elapsedTime_)
 {
     BS_PROFILE_SCOPE("ActionSequence::Update");
     const unsigned int generation_ = playbackGeneration;
     remainingDuration -= (std::max)(elapsedTime_, 0.0f);
-    for (auto& pending_ : pendingActions) pending_.timer -= (std::max)(elapsedTime_, 0.0f);
+    for (auto& pending_ : pendingActions)
+        if (pending_.animationState.empty()) pending_.timer -= (std::max)(elapsedTime_, 0.0f);
+    const auto owner_ = GetGameObject();
+    const auto animation_ = owner_ ? owner_->GetComponent<AnimationControllerComponent>() : nullptr;
     // 呼び出し先がSequenceを再生してもIteratorを壊さないよう、実行前に予約を取り出す。
-    while (!pendingActions.empty() && pendingActions.front().timer <= 0.0f)
+    for (std::size_t index_ = 0; index_ < pendingActions.size();)
     {
-        const PendingAction action_ = pendingActions.front();
-        pendingActions.erase(pendingActions.begin());
+        const auto& pending_ = pendingActions[index_];
+        bool ready_ = pending_.timer <= 0.0f;
+        if (ready_ && !pending_.waitForObject.empty())
+        {
+            const auto awaited_ = owner_ && owner_->manager ? owner_->GetManager().Find(pending_.waitForObject) : nullptr;
+            if (!awaited_ || !awaited_->IsHierarchyReady())
+            {
+                // このFrameで消費した時計を戻し、後続Actionを生成完了より先に実行しない。
+                remainingDuration += (std::max)(elapsedTime_, 0.0f);
+                for (auto& waiting_ : pendingActions)
+                    if (waiting_.animationState.empty()) waiting_.timer += (std::max)(elapsedTime_, 0.0f);
+                return;
+            }
+        }
+        if (!pending_.animationState.empty())
+        {
+            const auto state_ = animation_ ? animation_->GetCurrentState() : nullptr;
+            const float duration_ = animation_ ? animation_->GetCurrentSampleDuration() : 0.0f;
+            const float position_ = animation_ ? animation_->GetAnimatorTime() : 0.0f;
+            // 別段の予約を先に消費せず、そのStateが実際に再生されたときだけ判定する。
+            ready_ = state_ && state_->name == pending_.animationState &&
+                (!pending_.useNormalizedTime || duration_ > 0.0001f) &&
+                position_ >= pending_.timer * (pending_.useNormalizedTime ? duration_ : 1.0f);
+        }
+        if (!ready_) { ++index_; continue; }
+        const PendingAction action_ = pending_;
+        pendingActions.erase(pendingActions.begin() + index_);
         ApplyBlackboardWrites(action_.blackboardWrites);
         ExecuteAction(action_.actionName);
         if (generation_ != playbackGeneration) return;
@@ -148,6 +215,7 @@ void ActionSequence::Update(float elapsedTime_)
     {
         const std::string completionAction_ = pendingCompletionAction;
         pendingCompletionAction.clear();
+        if (cleanupObjectsOnCompletion) CleanupSpawnedObjects();
         ExecuteAction(completionAction_);
     }
 }
@@ -162,11 +230,14 @@ void ActionSequence::StartSequence(int index_)
     ++playbackGeneration;
     remainingDuration = sequences[index_].duration;
     pendingCompletionAction = sequences[index_].completionAction;
+    cleanupObjectsOnCompletion = sequences[index_].cleanupObjectsOnCompletion;
+    interruptionAction = sequences[index_].interruptionAction;
 
     // Editorで並び順を変更しても実行時刻を優先し、同時刻だけ保存順を維持する。
     for (const ActionReference& action_ : sequences[index_].actions) {
-        if (action_.actionName.empty()) continue;
-        pendingActions.push_back({ action_.executionTime, action_.actionName, action_.blackboardWrites });
+        if (action_.actionName.empty() && action_.waitForObject.empty()) continue;
+        pendingActions.push_back({ action_.waitForObject, action_.executionTime, action_.actionName, action_.blackboardWrites,
+            action_.animationState, action_.useNormalizedTime });
     }
     std::stable_sort(pendingActions.begin(), pendingActions.end(),
         [](const PendingAction& left_, const PendingAction& right_) { return left_.timer < right_.timer; });
@@ -216,8 +287,11 @@ void ActionSequence::RegisterSequence(const std::string& sequenceName_)
 
         const int sequenceIndex_ = index_;
         const std::string sequenceName_ = sequences[index_].name;
-        const auto startSequence_ = [this, sequenceIndex_]() {
-            StartSequence(sequenceIndex_);
+        const std::weak_ptr<GameObject> weakOwner_ = owner_;
+        const auto startSequence_ = [weakOwner_, sequenceIndex_]() {
+            const auto owner_ = weakOwner_.lock();
+            if (!owner_ || owner_->IsPendingDestroy() || !owner_->manager) return;
+            if (const auto sequence_ = owner_->GetComponent<ActionSequence>()) sequence_->StartSequence(sequenceIndex_);
             };
         localRegistry_.RegisterAction(
             "Sequence",
@@ -227,7 +301,7 @@ void ActionSequence::RegisterSequence(const std::string& sequenceName_)
         {
             // GameModeなどObjectに依存しない進行制御から呼べるよう、Sequence名そのものもGlobalへ公開する。
             ActionRegistry::Instance().RemoveAction("Sequence", sequenceName_);
-            ActionRegistry::Instance().RegisterAction("Sequence", sequenceName_, startSequence_);
+            owner_->RegisterNamedGlobalAction("Sequence", sequenceName_, startSequence_);
             owner_->RegisterGlobalAction("Sequence", sequenceName_, startSequence_);
         }
     }
@@ -238,6 +312,31 @@ void ActionSequence::Gui()
     ImGui::Checkbox("Register Global", &registerGlobal);
     ImGui::TextDisabled("Sequences are always registered to the owner locally.");
     ImGui::TextDisabled("Edit sequences from Window > Action Sequence Editor.");
+}
+
+bool ActionSequence::LoadMissingSequences(const std::string& path_)
+{
+    BS_PROFILE_SCOPE("ActionSequence::LoadMissingSequences");
+    try
+    {
+        std::ifstream stream_(path_);
+        if (!stream_) return false;
+        // 一時データで既存の復元処理を使い、Owner側の再生予約と編集済みデータを維持する。
+        ActionSequence defaults_;
+        defaults_.Deserialize(nlohmann::json::parse(stream_));
+        for (const auto& sequence_ : defaults_.sequences)
+        {
+            const bool exists_ = std::any_of(sequences.begin(), sequences.end(),
+                [&sequence_](const SequenceData& current_) { return current_.name == sequence_.name; });
+            if (!exists_) sequences.push_back(sequence_);
+        }
+        RegisterSequence("");
+        return true;
+    }
+    catch (const nlohmann::json::exception&)
+    {
+        return false;
+    }
 }
 
 void ActionSequence::ApplyBlackboardWrites(
@@ -326,6 +425,8 @@ void ActionSequence::DrawEditorGui()
             strncpy_s(completionBuffer_, sequence_.completionAction.c_str(), _TRUNCATE);
             if (ImGui::InputText("Completion Action", completionBuffer_, sizeof(completionBuffer_)))
                 sequence_.completionAction = completionBuffer_;
+            ImGui::InputText("Interruption Action", &sequence_.interruptionAction);
+            ImGui::Checkbox("Cleanup Spawned Objects On Completion", &sequence_.cleanupObjectsOnCompletion);
 
             ImGui::SetNextItemWidth(180.0f);
             if (ImGui::DragFloat("Timeline Length", &sequence_.duration, 0.1f, 0.1f, 600.0f, "%.2f sec")) {
@@ -417,9 +518,14 @@ void ActionSequence::DrawEditorGui()
                 }
 
                 ImGui::SetNextItemWidth(180.0f);
-                if (ImGui::DragFloat("Execution Time", &action_.executionTime, 0.01f, 0.0f, sequence_.duration, "%.3f sec")) {
+                ImGui::InputText("Wait For Spawned Object", &action_.waitForObject);
+                ImGui::InputText("Animation State (empty: real time)", &action_.animationState);
+                if (!action_.animationState.empty()) ImGui::Checkbox("Normalized Animation Time", &action_.useNormalizedTime);
+                const float maximumTime_ = !action_.animationState.empty() && action_.useNormalizedTime ? 1.0f : sequence_.duration;
+                if (ImGui::DragFloat("Execution Time", &action_.executionTime, 0.01f, 0.0f, maximumTime_,
+                    !action_.animationState.empty() && action_.useNormalizedTime ? "%.3f normalized" : "%.3f sec")) {
                     // 数値入力で変更した場合も、Timeline表示のFrameへ即反映する。
-                    action_.executionTime = (std::clamp)(action_.executionTime, 0.0f, sequence_.duration);
+                    action_.executionTime = (std::clamp)(action_.executionTime, 0.0f, maximumTime_);
                     adapter_.SyncFrames();
                 }
 
@@ -503,6 +609,8 @@ void ActionSequence::Serialize(nlohmann::json& j) const {
         seqItem["name"] = seq.name;
         seqItem["duration"] = seq.duration;
         seqItem["completionAction"] = seq.completionAction;
+        seqItem["cleanupObjectsOnCompletion"] = seq.cleanupObjectsOnCompletion;
+        seqItem["interruptionAction"] = seq.interruptionAction;
 
         nlohmann::json actArray = nlohmann::json::array();
         for (const auto& act : seq.actions) {
@@ -526,6 +634,9 @@ void ActionSequence::Serialize(nlohmann::json& j) const {
                 });
             }
             actItem_["blackboardWrites"] = writesArray_;
+            actItem_["waitForObject"] = act.waitForObject;
+            actItem_["animationState"] = act.animationState;
+            actItem_["useNormalizedTime"] = act.useNormalizedTime;
             actArray.push_back(actItem_);
         }
         seqItem["actions"] = actArray;
@@ -549,6 +660,8 @@ void ActionSequence::Deserialize(const nlohmann::json& j)
         data.name = seqItem.value("name", "New Sequence");
         data.duration = seqItem.value("duration", 10.0f);
         data.completionAction = seqItem.value("completionAction", std::string{});
+        data.cleanupObjectsOnCompletion = seqItem.value("cleanupObjectsOnCompletion", false);
+        data.interruptionAction = seqItem.value("interruptionAction", std::string{});
 
         if (seqItem.contains("actions") && seqItem["actions"].is_array()) {
             float accumulatedTime_ = 0.0f;
@@ -557,6 +670,9 @@ void ActionSequence::Deserialize(const nlohmann::json& j)
                     ActionReference ref;
                     ref.category = actItem.value("cat", "");
                     ref.actionName = actItem.value("name", "");
+                    ref.waitForObject = actItem.value("waitForObject", std::string{});
+                    ref.animationState = actItem.value("animationState", std::string());
+                    ref.useNormalizedTime = actItem.value("useNormalizedTime", false);
                     if (actItem.contains("time")) {
                         // 現在形式はSequence開始からの絶対秒数。
                         ref.executionTime = actItem.value("time", 0.0f);
@@ -589,7 +705,7 @@ void ActionSequence::Deserialize(const nlohmann::json& j)
                         }
                     }
 
-                    if (!ref.actionName.empty()) {
+                    if (!ref.actionName.empty() || !ref.waitForObject.empty()) {
                         data.actions.push_back(ref);
                     }
                 }
@@ -609,4 +725,8 @@ void ActionSequence::StopPlayback(unsigned int generation_)
     pendingActions.clear();
     pendingCompletionAction.clear();
     remainingDuration = 0.0f;
+    CleanupSpawnedObjects(true);
+    const auto abort_ = interruptionAction;
+    interruptionAction.clear();
+    if (!abort_.empty()) ExecuteAction(abort_);
 }

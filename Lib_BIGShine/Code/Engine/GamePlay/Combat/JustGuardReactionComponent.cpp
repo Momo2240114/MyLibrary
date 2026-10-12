@@ -5,6 +5,9 @@
 #include "Engine/Common/DebugLog.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
+#include "Engine/GamePlay/Combat/HealthComponent.h"
+#include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
+#include <imgui_stdlib.h>
 
 #include <algorithm>
 #include <imgui.h>
@@ -47,6 +50,7 @@ const ActionRegistry* JustGuardReactionComponent::GetSelectedRegistry() const
 
 void JustGuardReactionComponent::ExecuteReaction()
 {
+    if (attackerReactionEnabled && (selectedActionName.empty() || selectedActionName == "---")) return;
     // JustGuardSystem側でBlackboard更新とOnJustGuardが済んだ後に追加反応を呼ぶ。
     BS_LOG_INFO(
         LOG_CATEGORY::GAME,
@@ -71,6 +75,8 @@ void JustGuardReactionComponent::ExecuteReaction()
 
 void JustGuardReactionComponent::Gui()
 {
+    ImGui::Checkbox("React When Attack Is Just Guarded", &attackerReactionEnabled);
+    ImGui::InputText("Attacker Reaction Local Action", &attackerReactionActionName);
     // どのRegistryから反応Actionを選ぶかをEditorで指定する。
     ImGui::TextDisabled("Triggered after the existing OnJustGuard event succeeds.");
 
@@ -178,6 +184,8 @@ void JustGuardReactionComponent::Serialize(nlohmann::json& json_) const
     json_["SelectedActionSource"] = static_cast<int>(selectedActionSource);
     json_["SelectedCategory"] = selectedCategory;
     json_["SelectedActionName"] = selectedActionName;
+    json_["AttackerReactionEnabled"] = attackerReactionEnabled;
+    json_["AttackerReactionActionName"] = attackerReactionActionName;
 }
 
 void JustGuardReactionComponent::Deserialize(const nlohmann::json& json_)
@@ -189,4 +197,29 @@ void JustGuardReactionComponent::Deserialize(const nlohmann::json& json_)
 
     selectedCategory = json_.value("SelectedCategory", std::string("Sequence"));
     selectedActionName = json_.value("SelectedActionName", std::string{});
+    attackerReactionEnabled = json_.value("AttackerReactionEnabled", false);
+    attackerReactionActionName = json_.value("AttackerReactionActionName", std::string{});
+    lastReactedAttackInstanceId = 0u;
+}
+
+void JustGuardReactionComponent::RequestAttackerReaction(uint32_t attackInstanceId_, uint32_t hitGroupId_)
+{
+    BS_PROFILE_SCOPE("JustGuardReactionComponent::RequestAttackerReaction");
+    if (!IsEnabled() || !attackerReactionEnabled || attackerReactionActionName.empty() ||
+        (attackInstanceId_ != 0u && attackInstanceId_ == lastReactedAttackInstanceId)) return;
+    const auto owner_ = GetGameObject();
+    if (!owner_) return;
+    if (const auto health_ = owner_->GetComponent<HealthComponent>()) if (health_->IsDead()) return;
+    auto action_ = owner_->GetLocalRegistry().GetAction(owner_->BuildActionName(attackerReactionActionName));
+    if (!action_) action_ = owner_->GetLocalRegistry().GetAction(attackerReactionActionName);
+    if (!action_) return;
+    // 要求前に記録し、Actionからの再入や別HitBoxの通知で同じ反応を重ねない。
+    lastReactedAttackInstanceId = attackInstanceId_;
+    if (const auto blackboard_ = owner_->GetOrAddComponent<BlackboardComponent>())
+    {
+        blackboard_->SetInt("GuardReaction", "AttackInstanceId", static_cast<int>(attackInstanceId_));
+        blackboard_->SetInt("GuardReaction", "HitGroupId", static_cast<int>(hitGroupId_));
+        blackboard_->SetBool("GuardReaction", "AttackJustGuarded", true);
+    }
+    action_();
 }

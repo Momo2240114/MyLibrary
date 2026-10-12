@@ -31,6 +31,8 @@ public:
     virtual const std::string& GetName() const = 0;
     // GameObjectのLifecycleから呼ばれる基本処理。必要なComponentだけoverrideする。
     virtual void Start() {}
+    // Sceneから外れる前に、予約処理や外部への参照を終了する。
+    virtual void OnDestroy() {}
     virtual void Update(float deltaTime_) {}
     virtual void LateUpdate(float elapsedTime_) {}
     virtual void Submit(ID3D11DeviceContext* context_) {}
@@ -80,8 +82,12 @@ public:
     GameObjectManager& GetManager();
 
 
-    bool IsEnabled() const { return enabled; }
+    bool IsEnabled() const { return enabled && !runtimeSuppressed; }
     void SetEnabled(bool enabled_) { enabled = enabled_; }
+    // 演出の一時停止を、Sceneへ保存する有効設定から分離する。
+    bool IsConfiguredEnabled() const { return enabled; }
+    bool IsRuntimeSuppressed() const { return runtimeSuppressed; }
+    void SetRuntimeSuppressed(bool suppressed_) { runtimeSuppressed = suppressed_; }
 
     bool ShouldUpdate() const { return updateEnabled; }
     void SetUpdateEnabled(bool enabled_) { updateEnabled = enabled_; }
@@ -109,6 +115,7 @@ public:
     void SetRequiredForSceneStart(bool required_) { requiredForSceneStart = required_; }
 
 protected:
+    bool runtimeSuppressed = false; // 演出中だけ使い、Serializeの対象にはしない。
     bool isStarted = false;
     bool requiredForSceneStart = false;
     bool updateEnabled = true; // GameObject::Updateで呼ぶかどうか。

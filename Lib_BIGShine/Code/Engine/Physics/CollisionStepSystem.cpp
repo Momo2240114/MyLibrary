@@ -846,6 +846,39 @@ void CollisionStepSystem::StepCombatPairs()
                     }
                 }
 
+                if (isOverlapping_ && !IsHitSuppressedForTarget(hitBox_.get(), hurtBox_.get(), suppressedHitTargets_) &&
+                    !ShouldSuppressTriggerPair(hitBox_.get(), hurtBox_.get()))
+                {
+                    // 本体へ届いた接触もPlayerの防御方向で判定し、盾の小さな隙間から通常Hitへ抜けるのを防ぐ。
+                    const auto hurtOwner_ = GetHierarchyRoot(hurtBox_->GetGameObject());
+                    for (const auto& guard_ : guardColliders_)
+                    {
+                        if (!guard_->IsEnabled() || !guard_->GuardsBodyContact() ||
+                            GetHierarchyRoot(guard_->GetGuardOwner()) != hurtOwner_) continue;
+                        bool guarded_ = false;
+                        if (guard_->IsJustGuardEnabled() && justGuardSystem)
+                        {
+                            JustGuardContact guardContact_{};
+                            guardContact_.position = contact_.position;
+                            guardContact_.normal = contact_.normal;
+                            guardContact_.isValid = contact_.isValid;
+                            guarded_ = justGuardSystem->HandleJustGuard(*hitBox_, *guard_, guardContact_);
+                        }
+                        if (!guarded_ && !guard_->HasGuardedAttackRecord(*hitBox_) && guardSystem)
+                        {
+                            GuardContact guardContact_{};
+                            guardContact_.position = contact_.position;
+                            guardContact_.normal = contact_.normal;
+                            guardContact_.isValid = contact_.isValid;
+                            guarded_ = guardSystem->HandleGuard(*hitBox_, *guard_, guardContact_);
+                        }
+                        if (guarded_ || guard_->HasGuardedAttackRecord(*hitBox_))
+                        {
+                            AddSuppressedHitTarget(hitBox_.get(), guard_->GetGuardOwner(), suppressedHitTargets_);
+                            break;
+                        }
+                    }
+                }
                 if (isOverlapping_ &&
                     IsHitSuppressedForTarget(
                         hitBox_.get(),

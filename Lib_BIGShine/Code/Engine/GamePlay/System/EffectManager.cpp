@@ -120,6 +120,8 @@ void to_json(nlohmann::json& json_, const SlashEffectSpawnSetting& setting_)
         { "hitEffectPath", setting_.hitEffectPath },
         { "hitGroupId", setting_.hitGroupId },
         { "allowMultiHit", setting_.allowMultiHit },
+        { "canBeGuarded", setting_.canBeGuarded },
+        { "guardBreak", setting_.guardBreak },
         { "cameraShakeEnabled", setting_.cameraShakeEnabled },
         { "cameraShakeReceiveDuration", setting_.cameraShakeReceiveDuration },
         { "cameraShakeReceivePositionStrength", setting_.cameraShakeReceivePositionStrength },
@@ -173,6 +175,8 @@ void from_json(const nlohmann::json& json_, SlashEffectSpawnSetting& setting_)
     setting_.hitEffectPath = json_.value("hitEffectPath", std::string{});
     setting_.hitGroupId = json_.value("hitGroupId", 0u);
     setting_.allowMultiHit = json_.value("allowMultiHit", false);
+    setting_.canBeGuarded = json_.value("canBeGuarded", true);
+    setting_.guardBreak = json_.value("guardBreak", false);
     setting_.cameraShakeEnabled = json_.value("cameraShakeEnabled", true);
     setting_.cameraShakeReceiveDuration =
         (std::max)(json_.value("cameraShakeReceiveDuration", 0.12f), 0.0f);
@@ -235,7 +239,13 @@ void EffectManager::Update(float deltaTime_)
     // 管理中Effectの寿命、Sequence時間、HitBox有効時間を更新する
     for (ManagedEffect& effect_ : managedEffects)
     {
-        effect_.lifeTimer -= safeDeltaTime_;
+        if (effect_.hasLifetimeOwner)
+        {
+            // 持続演出の所有Componentが削除された場合も、Poolへ返して残留を防ぐ。
+            const auto owner_ = effect_.lifetimeOwner.lock();
+            if (!owner_ || !owner_->IsEnabled()) effect_.lifeTimer = 0.0f;
+        }
+        else effect_.lifeTimer -= safeDeltaTime_;
         effect_.elapsedTime += safeDeltaTime_;
         if (effect_.poolType == EFFECT_POOL_TYPE::VFX_SEQUENCE)
         {
@@ -826,6 +836,8 @@ std::shared_ptr<GameObject> EffectManager::SpawnSlashEffect(
             hitBox_->hitStopDuration = request_.setting.hitStopDuration;
             hitBox_->hitStopScale = request_.setting.hitStopScale;
             hitBox_->allowMultiHit = request_.setting.allowMultiHit;
+            hitBox_->canBeGuarded = request_.setting.canBeGuarded;
+            hitBox_->guardBreak = request_.setting.guardBreak;
             hitBox_->cameraShakeEnabled = request_.setting.cameraShakeEnabled;
             hitBox_->cameraShakeReceiveDuration =
                 request_.setting.cameraShakeReceiveDuration;
@@ -1002,6 +1014,7 @@ std::shared_ptr<GameObject> EffectManager::SpawnAttackEffect(
             attackTemplate_.allowMultiHit ||
             attackTemplate_.damageApplyType != DAMAGE_APPLY_TYPE::SINGLE_HIT);
         attackHit_->SetCanHitOwner(attackTemplate_.canHitOwner);
+        attackHit_->SetGuardProperties(attackTemplate_.canBeGuarded, attackTemplate_.guardBreak);
         attackHit_->SetEffectType(effectTemplate_.effectType);
         attackHit_->SetLifeTime(effectTemplate_.lifeTime);
         attackHit_->SetMovement(effectTemplate_.localDirection, effectTemplate_.speed);
@@ -1028,7 +1041,18 @@ std::shared_ptr<GameObject> EffectManager::SpawnMeshVFX(
         ResolveVFXSequencePath(request_.assetPath);
     if (!resolvedSequencePath_.empty())
     {
-        return SpawnVFXSequence(request_, resolvedSequencePath_);
+        const auto object_ = SpawnVFXSequence(request_, resolvedSequencePath_);
+        if (object_ && !request_.lifetimeOwner.expired())
+        {
+            const auto effect_ = std::find_if(managedEffects.begin(), managedEffects.end(),
+                [&object_](const ManagedEffect& current_) { return current_.object.lock() == object_; });
+            if (effect_ != managedEffects.end())
+            {
+                effect_->lifetimeOwner = request_.lifetimeOwner;
+                effect_->hasLifetimeOwner = true;
+            }
+        }
+        return object_;
     }
     const std::string resolvedAssetPath_ = ResolveMeshVFXPath(request_.assetPath);
 
@@ -1064,6 +1088,11 @@ std::shared_ptr<GameObject> EffectManager::SpawnMeshVFX(
         0.0f,
         EFFECT_POOL_TYPE::MESH_VFX,
         resolvedAssetPath_);
+    if (!request_.lifetimeOwner.expired())
+    {
+        managedEffects.back().lifetimeOwner = request_.lifetimeOwner;
+        managedEffects.back().hasLifetimeOwner = true;
+    }
     return object_;
 }
 
@@ -1280,16 +1309,54 @@ void EffectManager::SpawnImpactEffectAsset(
 }
 
 // 管理中Effectを停止し、Pool対象の場合は再利用状態へ戻す
-void EffectManager::StopEffect(const std::shared_ptr<GameObject>& object_)
+bool EffectManager::IsEffectOwnedBy(const std::shared_ptr<GameObject>& object_, const Component* lifetimeOwner_) const
+{
+    return object_ && lifetimeOwner_ && std::any_of(managedEffects.begin(), managedEffects.end(),
+        [&object_, lifetimeOwner_](const ManagedEffect& effect_)
+        {
+            return effect_.object.lock() == object_ && effect_.lifetimeOwner.lock().get() == lifetimeOwner_;
+        });
+}
+
+void EffectManager::StopAttackEffects(const std::shared_ptr<GameObject>& owner_)
+{
+    BS_PROFILE_SCOPE("EffectManager::StopAttackEffects");
+    if (!owner_ || !gameObjectManager) return;
+    scheduledAttackEffects.erase(std::remove_if(scheduledAttackEffects.begin(), scheduledAttackEffects.end(),
+        [&owner_](const ScheduledAttackEffect& effect_) { return effect_.request.ownerObject == owner_.get(); }), scheduledAttackEffects.end());
+    std::vector<std::shared_ptr<GameObject>> managedObjects_;
+    std::vector<std::shared_ptr<GameObject>> attackObjects_;
+    for (const auto& effect_ : managedEffects)
+    {
+        const auto object_ = effect_.object.lock();
+        const auto hitBox_ = effect_.hitBox.lock();
+        const auto attack_ = object_ ? object_->GetComponent<AttackEffectHitComponent>() : nullptr;
+        if (object_ && ((hitBox_ && hitBox_->GetAttackOwner() == owner_) || (attack_ && attack_->IsOwnedBy(owner_.get()))))
+            managedObjects_.push_back(object_);
+    }
+    for (const auto& object_ : gameObjectManager->GetObjects())
+    {
+        const auto attack_ = object_ ? object_->GetComponent<AttackEffectHitComponent>() : nullptr;
+        if (!attack_ || !attack_->IsOwnedBy(owner_.get())) continue;
+        attack_->Stop();
+        if (std::find(managedObjects_.begin(), managedObjects_.end(), object_) == managedObjects_.end()) attackObjects_.push_back(object_);
+    }
+    // 検索中にはManagerの配列を変更せず、Pool返却と通常Object削除を分けて行う。
+    for (const auto& object_ : managedObjects_) StopEffect(object_);
+    for (const auto& object_ : attackObjects_) gameObjectManager->Destroy(object_);
+}
+
+void EffectManager::StopEffect(const std::shared_ptr<GameObject>& object_, const Component* lifetimeOwner_)
 {
     if (!object_) return;
 
     const auto iterator_ = std::find_if(
         managedEffects.begin(),
         managedEffects.end(),
-        [&object_](const ManagedEffect& effect_)
+        [&object_, lifetimeOwner_](const ManagedEffect& effect_)
         {
-            return effect_.object.lock() == object_;
+            return effect_.object.lock() == object_ &&
+                (!lifetimeOwner_ || effect_.lifetimeOwner.lock().get() == lifetimeOwner_);
         });
     if (iterator_ == managedEffects.end()) return;
 

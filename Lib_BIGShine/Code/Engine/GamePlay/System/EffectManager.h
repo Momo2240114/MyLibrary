@@ -15,6 +15,7 @@
 class GameObject;
 class GameObjectManager;
 class HitBox;
+class Component;
 struct AttackEffectSpawnTemplate;
 struct AttackTemplate;
 
@@ -58,6 +59,7 @@ struct MeshVFXSpawnRequest
     DirectX::XMFLOAT3 normal = { 0.0f, 1.0f, 0.0f };
     float lifeTime = 1.0f;
     float normalOffset = 0.0f;
+    std::weak_ptr<Component> lifetimeOwner; // 指定Componentが生存する間だけ持続し、StopEffectで明示的に閉じる。
 };
 
 // Decal生成時に使用するTexture、姿勢、フェード設定をまとめる
@@ -127,6 +129,8 @@ struct SlashEffectSpawnSetting
     int cameraShakePriority = 5;
     bool followOwner = false;
     bool mirror = false;
+    bool canBeGuarded = true; // 元のAttackTemplateの防御属性を生成HitBoxへ渡す。
+    bool guardBreak = false;
 };
 
 // 攻撃演出の生成設定と発生元情報をまとめる
@@ -189,7 +193,11 @@ public:
     std::shared_ptr<GameObject> SpawnEffectWithHitBox(
         const AttackEffectSpawnRequest& request_);
     void SpawnForHit(const AttackHitEvent& event_);
-    void StopEffect(const std::shared_ptr<GameObject>& object_);
+    void StopEffect(const std::shared_ptr<GameObject>& object_, const Component* lifetimeOwner_ = nullptr);
+    // Poolで再利用されたObjectを、古い所有側が別の演出として操作しないよう確認する。
+    bool IsEffectOwnedBy(const std::shared_ptr<GameObject>& object_, const Component* lifetimeOwner_) const;
+    // 行動を中断した攻撃者の生成済み判定と遅延生成予約をまとめて閉じる。
+    void StopAttackEffects(const std::shared_ptr<GameObject>& owner_);
 
     const std::vector<std::string>& GetParticleAssetPaths() const
     {
@@ -279,6 +287,8 @@ private:
         std::string assetPath;
         EFFECT_POOL_TYPE poolType = EFFECT_POOL_TYPE::NONE;
         float lifeTimer = 0.0f;
+        std::weak_ptr<Component> lifetimeOwner;
+        bool hasLifetimeOwner = false;
         float elapsedTime = 0.0f;
         float hitStartTime = 0.0f;
         float hitEndTime = 0.0f;

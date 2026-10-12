@@ -162,6 +162,8 @@ struct AttackTemplate
     KNOCK_BACK_TYPE knockBackType = KNOCK_BACK_TYPE::OWNER_FORWARD;
     uint32_t hitGroupId = 0u;
     bool allowMultiHit = false;
+    bool guardBreak = false; // 通常Guardを崩す。旧Templateはfalseで互換性を維持する。
+    bool canBeGuarded = true; // 旧Templateは通常通りガード可能な攻撃として復元する。
     bool canHitOwner = false;
     WeaponHitBoxTemplate weaponHitBox;
     AttackHitEffectTemplate hitEffect;

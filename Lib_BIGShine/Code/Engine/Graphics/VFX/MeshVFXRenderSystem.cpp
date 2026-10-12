@@ -91,6 +91,13 @@ namespace
         state_.scale.y *= scaleCurveValue_;
         state_.scale.z *= scaleCurveValue_;
         state_.alpha *= component_.EvaluateCurveValue(part_.alphaCurveName, normalizedTime_, 1.0f);
+        if (component_.HasRuntimeAppearance())
+        {
+            const auto& scale_ = component_.GetRuntimeAppearanceScale();
+            state_.scale.x *= scale_.x;
+            state_.scale.y *= scale_.y;
+            state_.scale.z *= scale_.z;
+        }
         return state_;
     }
 
@@ -101,6 +108,11 @@ namespace
     {
         // シェーダへ送るパーツ設定をコピーし、時間カーブでディゾルブやUV速度だけを上書きする。
         MeshVFXPart result_ = part_;
+        if (component_.HasRuntimeAppearance())
+        {
+            result_.color = component_.GetRuntimeAppearanceColor();
+            result_.edgeColor = component_.GetRuntimeAppearanceEdgeColor();
+        }
         result_.dissolveThreshold = component_.EvaluateCurveValue(
             part_.dissolveCurveName,
             normalizedTime_,

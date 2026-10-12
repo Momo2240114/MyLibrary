@@ -77,6 +77,13 @@ enum class CAMERA_ACTION_POSITION_MODE
 struct CameraActionPreset
 {
     std::string actionName = "JustGuard";
+    bool autoFrameTargets = false;
+    bool useModelBounds = true;
+    std::string secondaryTargetName;
+    float framingRadius = 1.0f;
+    float secondaryRadius = 1.0f;
+    float framingPadding = 1.15f;
+    float minimumFramingDistance = 3.0f;
     std::string targetObjectName; // 指定時はScene内のObject位置を注視基準にする。
 
     CAMERA_ACTION_TARGET_MODE targetMode =
@@ -158,6 +165,9 @@ public:
 private:
     // 所有 GameObject から Camera/TPS/LockOn/Blackboard などの参照を取り直す。
     void ResolveReferences();
+    // 被写体の現在の範囲とFOVから、必要な撮影距離を算出する。
+    bool UpdateFraming(const CameraActionPreset& preset_);
+    float framingEnvelope = 0.0f;
 
     // Preset と解決済みターゲットから、ENTER フェーズに必要な始点・終点を確定する。
     void BeginAction(

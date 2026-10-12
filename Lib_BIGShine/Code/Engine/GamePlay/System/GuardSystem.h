@@ -37,6 +37,7 @@ struct GuardEvent
     DirectX::XMFLOAT3 guardPosition = { 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 attackNormal = { 0.0f, 1.0f, 0.0f };
     bool hasContact = false;
+    bool guardBroken = false; // 通常ガード成功と体勢を崩す結果を区別する。
 
     uint32_t attackInstanceId = 0u;
     uint32_t hitGroupId = 0u;

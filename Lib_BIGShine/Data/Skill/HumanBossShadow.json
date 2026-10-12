@@ -1,0 +1,237 @@
+{
+  "Skills": [
+    {
+      "Name": "SHADOW_SLASH",
+      "Category": "UTILITY",
+      "Enabled": true,
+      "CanUseOnGround": true,
+      "CanUseInAir": false,
+      "CleanupAction": "HumanBoss_ShadowClear",
+      "Phases": [
+        {
+          "Animation": "HumanBossCombatWalk",
+          "End": "DURATION",
+          "Duration": 1.5,
+          "MaximumDuration": 5,
+          "BlendDuration": 0.04,
+          "Sequence": "",
+          "EnterAction": ""
+        },
+        {
+          "Animation": "HumanBossAttackTell",
+          "End": "DURATION",
+          "Duration": 0.18,
+          "MaximumDuration": 5,
+          "BlendDuration": 0.04,
+          "Sequence": "",
+          "EnterAction": ""
+        },
+        {
+          "Animation": "SS_Sp_Skill1",
+          "End": "ANIMATION_END",
+          "Duration": 0,
+          "MaximumDuration": 5,
+          "BlendDuration": 0.04,
+          "Sequence": "HumanBoss_SHADOW_SLASH_Sequence",
+          "EnterAction": "",
+          "MotionWarpPreset": "HumanBoss.Counter",
+          "PreventFlinch": true
+        },
+        {
+          "Animation": "SS_Idle",
+          "End": "DURATION",
+          "Duration": 0.25,
+          "MaximumDuration": 5,
+          "BlendDuration": 0.04,
+          "Sequence": "",
+          "EnterAction": "HumanBoss_ShadowClear"
+        }
+      ]
+    },
+    {
+      "Name": "SHADOW_DIVE_01",
+      "Category": "UTILITY",
+      "Enabled": true,
+      "CanUseOnGround": true,
+      "CanUseInAir": false,
+      "CleanupAction": "HumanBoss_ShadowClear",
+      "Phases": [
+        {
+          "Animation": "HumanBossCombatWalk",
+          "End": "DURATION",
+          "Duration": 1.5,
+          "MaximumDuration": 5,
+          "BlendDuration": 0.04,
+          "Sequence": "",
+          "EnterAction": ""
+        },
+        {
+          "Animation": "Attack_Air_to_Floor_01_Start_Seq",
+          "End": "ANIMATION_END",
+          "Duration": 0,
+          "MaximumDuration": 5,
+          "BlendDuration": 0.04,
+          "Sequence": "",
+          "EnterAction": "HumanBoss_ShadowDiveStart",
+          "WarpHeight": 4,
+          "SuspendGravity": true
+        },
+        {
+          "Animation": "Attack_Air_to_Floor_01_Loop_Seq",
+          "End": "DURATION",
+          "Duration": 0.45,
+          "MaximumDuration": 5,
+          "BlendDuration": 0.04,
+          "Sequence": "HumanBoss_SHADOW_DIVE_01_Sequence",
+          "EnterAction": "",
+          "SuspendGravity": true
+        },
+        {
+          "Animation": "Attack_Air_to_Floor_01_Loop_Seq",
+          "End": "GROUND_CONTACT",
+          "Duration": 0.1,
+          "MaximumDuration": 3,
+          "BlendDuration": 0.04,
+          "Sequence": "",
+          "EnterAction": "",
+          "SuspendGravity": true,
+          "VerticalSpeed": -27.6
+        },
+        {
+          "Animation": "Attack_Air_to_Floor_01_End_Seq",
+          "End": "ANIMATION_END",
+          "Duration": 0,
+          "MaximumDuration": 5,
+          "BlendDuration": 0.04,
+          "Sequence": "",
+          "EnterAction": "HumanBoss_ShadowStrike"
+        },
+        {
+          "Animation": "SS_Idle",
+          "End": "DURATION",
+          "Duration": 0.25,
+          "MaximumDuration": 5,
+          "BlendDuration": 0.04,
+          "Sequence": "",
+          "EnterAction": "HumanBoss_ShadowClear"
+        }
+      ]
+    },
+    {
+      "Name": "SHADOW_DIVE_02",
+      "Category": "UTILITY",
+      "Enabled": true,
+      "CanUseOnGround": true,
+      "CanUseInAir": false,
+      "CleanupAction": "HumanBoss_ShadowClear",
+      "Phases": [
+        {
+          "Animation": "HumanBossCombatWalk",
+          "End": "DURATION",
+          "Duration": 1.5,
+          "MaximumDuration": 5,
+          "BlendDuration": 0.04,
+          "Sequence": "",
+          "EnterAction": ""
+        },
+        {
+          "Animation": "Attack_Air_to_Floor_02_Start_Seq",
+          "End": "ANIMATION_END",
+          "Duration": 0,
+          "MaximumDuration": 5,
+          "BlendDuration": 0.04,
+          "Sequence": "",
+          "EnterAction": "HumanBoss_ShadowDiveStart",
+          "WarpHeight": 6,
+          "SuspendGravity": true
+        },
+        {
+          "Animation": "Attack_Air_to_Floor_02_Loop_Seq",
+          "End": "DURATION",
+          "Duration": 0.7,
+          "MaximumDuration": 5,
+          "BlendDuration": 0.04,
+          "Sequence": "HumanBoss_SHADOW_DIVE_02_Sequence",
+          "EnterAction": "",
+          "SuspendGravity": true
+        },
+        {
+          "Animation": "Attack_Air_to_Floor_02_Loop_Seq",
+          "End": "GROUND_CONTACT",
+          "Duration": 0.1,
+          "MaximumDuration": 3,
+          "BlendDuration": 0.04,
+          "Sequence": "",
+          "EnterAction": "",
+          "SuspendGravity": true,
+          "VerticalSpeed": -23.0
+        },
+        {
+          "Animation": "Attack_Air_to_Floor_02_End_Seq",
+          "End": "ANIMATION_END",
+          "Duration": 0,
+          "MaximumDuration": 5,
+          "BlendDuration": 0.04,
+          "Sequence": "",
+          "EnterAction": "HumanBoss_ShadowStrike"
+        },
+        {
+          "Animation": "SS_Idle",
+          "End": "DURATION",
+          "Duration": 0.25,
+          "MaximumDuration": 5,
+          "BlendDuration": 0.04,
+          "Sequence": "",
+          "EnterAction": "HumanBoss_ShadowClear"
+        }
+      ]
+    },
+    {
+      "Name": "SHADOW_DOMAIN",
+      "Category": "UTILITY",
+      "Enabled": true,
+      "CanUseOnGround": true,
+      "CanUseInAir": false,
+      "CleanupAction": "HumanBoss_ShadowClear",
+      "Phases": [
+        {
+          "Animation": "HumanBossCombatWalk",
+          "End": "DURATION",
+          "Duration": 1.5,
+          "MaximumDuration": 5,
+          "BlendDuration": 0.04,
+          "Sequence": "",
+          "EnterAction": ""
+        },
+        {
+          "Animation": "Buff_Seq",
+          "End": "DURATION",
+          "Duration": 1.5,
+          "MaximumDuration": 5,
+          "BlendDuration": 0.04,
+          "Sequence": "HumanBoss_SHADOW_DOMAIN_Sequence",
+          "EnterAction": ""
+        },
+        {
+          "Animation": "Buff_Seq",
+          "End": "DURATION",
+          "Duration": 0.25,
+          "MaximumDuration": 5,
+          "BlendDuration": 0.04,
+          "Sequence": "",
+          "EnterAction": "HumanBoss_ShadowStrike",
+          "AnimationStartTime": 1.25
+        },
+        {
+          "Animation": "SS_Idle",
+          "End": "DURATION",
+          "Duration": 0.8,
+          "MaximumDuration": 5,
+          "BlendDuration": 0.04,
+          "Sequence": "",
+          "EnterAction": "HumanBoss_ShadowClear"
+        }
+      ]
+    }
+  ]
+}

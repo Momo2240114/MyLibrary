@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <imgui_stdlib.h>
 
 #include "Engine/GamePlay/Camera/CameraComponent.h"
 #include "Engine/GamePlay/Camera/CameraLockOnComponent.h"
@@ -24,6 +25,8 @@
 #include "Engine/Physics/CharacterCollider.h"
 #include "Engine/Physics/ColliderComponent.h"
 #include "Engine/Physics/HurtBox.h"
+#include "Engine/Physics/GuardCollider.h"
+#include "Engine/GamePlay/Transform/ModelAttachmentComponent.h"
 #include "Engine/Physics/JustDodgeCollider.h"
 
 #include "Engine/GamePlay/Serialize/ComponentRegistry.h"
@@ -281,9 +284,12 @@ void PlayerControllerComponent::Start()
 
 void PlayerControllerComponent::Update(float dt_)
 {
+    BS_PROFILE_SCOPE("PlayerControllerComponent::Update");
     lastUpdateDeltaTime = (std::max)(dt_, 0.0f);
     if (IsPlayerControlLockedByGameMode())
     {
+        StopNormalGuard();
+        if (GetCurrentAction() == PLAYER_ACTION::GUARD) stateMachine.ChangeState(PLAYER_ACTION::IDLE);
         // 演出中に直前Frameの移動予約や入力が残らないよう、入力由来の値だけを消す。
         pendingHorizontalVelocity = { 0.0f, 0.0f, 0.0f };
         hasPendingHorizontalVelocity = true;
@@ -296,6 +302,18 @@ void PlayerControllerComponent::Update(float dt_)
         SendGroundedToBlackboard();
         return;
     }
+
+    const bool guardHeld_ = KeyConfig::Instance().ActionPressed(PlayerInputAction::GUARD);
+    if (!guardHeld_ && !guardBroken) guardRearmRequired = false;
+    if (GetCurrentAction() == PLAYER_ACTION::GUARD && !guardBroken && !guardHeld_)
+    {
+        // 判定を先に閉じ、解除アニメーションやActionEndを待たずに通常Stateへ戻す。
+        StopNormalGuard();
+        SendGuardInputToBlackboard(false);
+        const auto input_ = GetMoveInput();
+        stateMachine.ChangeState(input_.x != 0.0f || input_.z != 0.0f ? PLAYER_ACTION::MOVE : PLAYER_ACTION::IDLE);
+    }
+    UpdateGuardReaction(dt_);
 
     // State更新後に、キャンセル受付・空中状態・Blackboard・移動反映をまとめて後処理する。
     UpdateSkillCooldowns(dt_);
@@ -726,6 +744,7 @@ void PlayerControllerComponent::ApplyPendingMovement()
 
 bool PlayerControllerComponent::RequestAction(PLAYER_ACTION nextAction_)
 {
+    if (guardBroken || (nextAction_ == PLAYER_ACTION::GUARD && guardRearmRequired)) return false;
     // 既存の未定義SkillA/Bは維持し、データ定義があるスキルのみ共通検証を行う。
     if ((PlayerSkillLoadout::GetSlotIndex(nextAction_) >= 0) &&
         !CanExecuteSkill(nextAction_)) return false;
@@ -1309,6 +1328,10 @@ void PlayerControllerComponent::HandleHitReaction()
     const auto* skillState_ = stateMachine.GetCurrentStateAs<PlayerSkillState>();
     const auto owner_ = GetGameObject();
     const auto health_ = owner_ ? owner_->GetComponent<HealthComponent>() : nullptr;
+    bool reacted_ = true;
+    if (blackboard) blackboard->GetBool("Hit", "ImpactReacted", reacted_);
+    // Armorで反応を抑えたHitはHP処理だけを維持し、弱い衝撃でHitStateへ移さない。
+    if (!reacted_ && health_ && !health_->IsDead()) return;
     if (skillState_ && skillState_->PreventsHitReaction() && health_ && !health_->IsDead()) return;
     // 被弾時は受付状態と予約移動をすべて閉じ、HitStateへ強制的に移す。
     actionRuntime.canDodgeCancel = false;
@@ -1393,6 +1416,11 @@ void PlayerControllerComponent::EnterAction(PLAYER_ACTION action_)
 {
     // StateMachineからAction開始時に呼ばれ、Runtime受付状態とBlackboard値を初期化する。
     const PLAYER_ACTION previousAction_ = previousAction;
+    if (previousAction_ == PLAYER_ACTION::GUARD && action_ != PLAYER_ACTION::GUARD)
+    {
+        guardRearmRequired = KeyConfig::Instance().ActionPressed(PlayerInputAction::GUARD);
+        StopNormalGuard();
+    }
     previousAction = action_;
     if (previousAction_ == PLAYER_ACTION::DODGE &&
         action_ != PLAYER_ACTION::DODGE)
@@ -1440,6 +1468,27 @@ void PlayerControllerComponent::EnterAction(PLAYER_ACTION action_)
     timelineActionSafetyTimer = 0.0f;
 
     SendActionToBlackboard(action_);
+    if (action_ != PLAYER_ACTION::GUARD && blackboard) blackboard->SetBool("Guard", "Active", false);
+    if (action_ == PLAYER_ACTION::GUARD)
+    {
+        guardBroken = false;
+        SetNormalGuardEnabled(true);
+        StartGuardVisual();
+        const auto owner_ = GetGameObject();
+        const auto animation_ = owner_ ? owner_->GetComponent<AnimationControllerComponent>() : nullptr;
+        if (animation_ && !animation_->IsSkillControlled() && animation_->GetStates().count("Block_Walk_Start_Blend"))
+            animation_->ChangeState("Block_Walk_Start_Blend", guardSettings.releaseBlendTime, true);
+    }
+    else if (previousAction_ == PLAYER_ACTION::GUARD &&
+        (action_ == PLAYER_ACTION::IDLE || action_ == PLAYER_ACTION::MOVE))
+    {
+        const auto owner_ = GetGameObject();
+        const auto animation_ = owner_ ? owner_->GetComponent<AnimationControllerComponent>() : nullptr;
+        const std::string state_ = action_ == PLAYER_ACTION::MOVE ? "SS_Run" : "SS_Idle";
+        // 見た目だけを補間し、Block_Endの終了待ちをゲームプレイへ持ち込まない。
+        if (animation_ && !animation_->IsSkillControlled() && animation_->GetStates().count(state_))
+            animation_->ChangeState(state_, guardSettings.releaseBlendTime);
+    }
 }
 
 int PlayerControllerComponent::GetRequestedComboIndex(PLAYER_ACTION nextAction_) const
@@ -1599,6 +1648,7 @@ bool PlayerControllerComponent::CanStartDodgeAction(PLAYER_ACTION action_) const
 
 bool PlayerControllerComponent::ShouldEnterGuardAfterActionEnd() const
 {
+    if (guardRearmRequired) return false;
     if (IsPlayerControlLockedByGameMode())
     {
         return false;
@@ -1677,6 +1727,9 @@ void PlayerControllerComponent::ProcessActionInput()
         ResetStrongAttackInput();
         return;
     }
+    if (guardBroken) return;
+    // Guard中は回避を複合Skillより先に判定し、既存のCooldownとキャンセル条件を使う。
+    if (GetCurrentAction() == PLAYER_ACTION::GUARD && TryDodgeCancelInput()) return;
 
     auto& keyConfig_ = KeyConfig::Instance();
     const int skillSlot_ = PlayerInputResolver::ResolveSkillSlot(keyConfig_, skillInputs);
@@ -1762,6 +1815,20 @@ void PlayerControllerComponent::RegisterPlayerAnimationActions()
 
     // 演出の種類をStateへ埋め込まず、イベントから指定されたParticleを既存Managerへ渡す。
     const std::weak_ptr<GameObject> weakOwner_ = owner_;
+    // 撃破直前の攻撃や先行入力を終了し、演出後に古いActionを再開させない。
+    owner_->RegisterGlobalAction("ActorPresentation", "PlayerPresentation_Reset", [weakOwner_]()
+    {
+        BS_PROFILE_SCOPE("PlayerControllerComponent::PresentationReset");
+        const auto actor_ = weakOwner_.lock();
+        const auto controller_ = actor_ ? actor_->GetComponent<PlayerControllerComponent>() : nullptr;
+        if (!controller_) return;
+        controller_->StopNormalGuard();
+        controller_->StopSkill();
+        controller_->actionRuntime.bufferedAction = PLAYER_ACTION::NONE;
+        controller_->stateMachine.ChangeState(PLAYER_ACTION::IDLE);
+        controller_->ClearAttackAssistTarget();
+        controller_->ResetStrongAttackInput();
+    });
     owner_->RegisterAction("SkillEffect", "SkillEffect.PlayParticle", [weakOwner_]()
     {
         BS_PROFILE_SCOPE("PlayerSkillEffect::PlayParticle");
@@ -1819,7 +1886,23 @@ void PlayerControllerComponent::RegisterPlayerAnimationActions()
     });
     owner_->RegisterAction("PlayerReaction", "OnJustGuard", [this]()
     {
+        StopGuardVisual();
         GrantJustGuardCounterTag();
+    });
+    const std::weak_ptr<PlayerControllerComponent> weakPlayer_ = owner_->GetComponent<PlayerControllerComponent>();
+    owner_->RegisterAction("PlayerReaction", "OnGuardSucceeded", [weakPlayer_]()
+    {
+        if (const auto player_ = weakPlayer_.lock()) player_->HandleGuardImpact(false);
+    });
+    owner_->RegisterAction("PlayerReaction", "OnGuardBreak", [weakPlayer_]()
+    {
+        if (const auto player_ = weakPlayer_.lock()) player_->HandleGuardImpact(true);
+    });
+    owner_->RegisterAction("PlayerReaction", "Player_GuardReactionEnd", [weakPlayer_]()
+    {
+        if (const auto player_ = weakPlayer_.lock())
+            if (player_->GetCurrentAction() == PLAYER_ACTION::GUARD && player_->guardReactionActive)
+                player_->guardReactionEndRequested = true;
     });
     owner_->RegisterAction("PlayerCancel", "CanCancelOn", [this]()
         {
@@ -2476,6 +2559,32 @@ void PlayerControllerComponent::Gui()
     ImGui::TextUnformatted("Input: KeyConfig Player.* actions / axes");
     ImGui::DragFloat("Move Speed", &moveSpeed, 0.1f, 0.0f, 100.0f);
     ImGui::DragFloat("Guard Move Speed", &guardMoveSpeed, 0.1f, 0.0f, 100.0f);
+    if (ImGui::TreeNode("Normal Guard / Effects"))
+    {
+        ImGui::DragFloat("Guard Release Blend Time", &guardSettings.releaseBlendTime, 0.01f, 0.0f, 1.0f);
+        ImGui::DragFloat("Guard Hit Cancel Time", &guardSettings.hitCancelTime, 0.01f, 0.0f, 1.0f);
+        ImGui::DragFloat("Guard Break Recovery Time", &guardSettings.breakRecoveryTime, 0.01f, 0.0f, 10.0f);
+        ImGui::DragFloat("Guard Reaction Maximum Time", &guardSettings.reactionMaximumTime, 0.05f, 0.05f, 20.0f);
+        ImGui::InputText("Guard Hit Animation", &guardSettings.hitAnimation);
+        ImGui::InputText("Guard Break Animation", &guardSettings.breakAnimation);
+        ImGui::InputText("Shield Object Name", &guardSettings.shieldObjectName);
+        ImGui::InputText("Guard MeshVFX Asset", &guardSettings.meshVFXAsset);
+        const auto owner_ = GetGameObject();
+        if (owner_ && owner_->manager && ImGui::BeginCombo("Select Guard MeshVFX", guardSettings.meshVFXAsset.c_str()))
+        {
+            for (const auto& path_ : owner_->GetManager().GetEffectManager().GetMeshVFXAssetPaths())
+                if (ImGui::Selectable(path_.c_str(), guardSettings.meshVFXAsset == path_)) guardSettings.meshVFXAsset = path_;
+            ImGui::EndCombo();
+        }
+        ImGui::DragFloat3("Guard MeshVFX Offset", &guardSettings.meshVFXOffset.x, 0.01f);
+        ImGui::DragFloat3("Guard MeshVFX Rotation", &guardSettings.meshVFXRotation.x, 0.5f);
+        ImGui::DragFloat3("Guard MeshVFX Scale", &guardSettings.meshVFXScale.x, 0.01f, 0.01f, 100.0f);
+        ImGui::InputText("Guard Spark Particle Asset", &guardSettings.sparkParticleAsset);
+        ImGui::DragFloat("Guard Spark Life Time", &guardSettings.sparkLifeTime, 0.01f, 0.01f, 5.0f);
+        ImGui::Text("Reaction: %s / Break: %s / Rearm required: %s", guardReactionActive ? "ON" : "OFF", guardBroken ? "ON" : "OFF", guardRearmRequired ? "YES" : "NO");
+        ImGui::TreePop();
+    }
+
     ImGui::DragFloat("Just Dodge Success Invincibility", &justDodgeInvincibilityDuration, 0.01f, 0.0f, 10.0f);
     ImGui::DragFloat("Jump Impulse", &jumpImpulse, 0.1f, 0.0f, 100.0f);
     ImGui::DragFloat("Double Jump Impulse", &doubleJumpImpulse, 0.1f, 0.0f, 100.0f);
@@ -2666,6 +2775,22 @@ void PlayerControllerComponent::Serialize(nlohmann::json& j_) const
     skillLoadout.Serialize(j_["SkillLoadout"]);
     j_["MoveSpeed"] = moveSpeed;
     j_["GuardMoveSpeed"] = guardMoveSpeed;
+    j_["GuardSettings"] = {
+        { "GuardReleaseBlendTime", guardSettings.releaseBlendTime },
+        { "GuardHitCancelTime", guardSettings.hitCancelTime },
+        { "GuardBreakRecoveryTime", guardSettings.breakRecoveryTime },
+        { "GuardReactionMaximumTime", guardSettings.reactionMaximumTime },
+        { "GuardHitAnimation", guardSettings.hitAnimation },
+        { "GuardBreakAnimation", guardSettings.breakAnimation },
+        { "GuardMeshVFXAsset", guardSettings.meshVFXAsset },
+        { "ShieldObjectName", guardSettings.shieldObjectName },
+        { "GuardMeshVFXOffset", { guardSettings.meshVFXOffset.x, guardSettings.meshVFXOffset.y, guardSettings.meshVFXOffset.z } },
+        { "GuardMeshVFXRotation", { guardSettings.meshVFXRotation.x, guardSettings.meshVFXRotation.y, guardSettings.meshVFXRotation.z } },
+        { "GuardMeshVFXScale", { guardSettings.meshVFXScale.x, guardSettings.meshVFXScale.y, guardSettings.meshVFXScale.z } },
+        { "GuardSparkParticleAsset", guardSettings.sparkParticleAsset },
+        { "GuardSparkLifeTime", guardSettings.sparkLifeTime }
+    };
+
     j_["JustDodgeInvincibilityDuration"] = justDodgeInvincibilityDuration;
     j_["JumpImpulse"] = jumpImpulse;
     j_["DoubleJumpImpulse"] = doubleJumpImpulse;
@@ -2737,6 +2862,30 @@ void PlayerControllerComponent::Deserialize(const nlohmann::json& j_)
     hasExplicitSkillLoadout = j_.contains("SkillLoadout") && skillLoadout.Deserialize(j_.at("SkillLoadout"));
     moveSpeed = (std::max)(j_.value("MoveSpeed", moveSpeed), 0.0f);
     guardMoveSpeed = (std::max)(j_.value("GuardMoveSpeed", guardMoveSpeed), 0.0f);
+    StopNormalGuard();
+    guardRearmRequired = false;
+    const auto guardJson_ = j_.value("GuardSettings", nlohmann::json::object());
+    // 旧Sceneに項目がなくても既定設定で読み、実行中の反応やPool参照は復元しない。
+    guardSettings.releaseBlendTime = (std::max)(0.0f, guardJson_.value("GuardReleaseBlendTime", 0.08f));
+    guardSettings.hitCancelTime = (std::max)(0.0f, guardJson_.value("GuardHitCancelTime", 0.04f));
+    guardSettings.breakRecoveryTime = (std::max)(0.0f, guardJson_.value("GuardBreakRecoveryTime", 0.65f));
+    guardSettings.reactionMaximumTime = (std::max)(0.05f, guardJson_.value("GuardReactionMaximumTime", 2.5f));
+    guardSettings.hitAnimation = guardJson_.value("GuardHitAnimation", std::string("Block_Hit_Seq"));
+    guardSettings.breakAnimation = guardJson_.value("GuardBreakAnimation", std::string("Block_Hit_Break_Seq"));
+    guardSettings.meshVFXAsset = guardJson_.value("GuardMeshVFXAsset", std::string("Data/VFX/PlayerGuardShieldEnergy.json"));
+    guardSettings.shieldObjectName = guardJson_.value("ShieldObjectName", std::string("Shield"));
+    guardSettings.sparkParticleAsset = guardJson_.value("GuardSparkParticleAsset", std::string("Data/Particle/PlayerGuardSparks.json"));
+    guardSettings.sparkLifeTime = (std::max)(0.01f, guardJson_.value("GuardSparkLifeTime", 0.35f));
+    const auto readVector_ = [&guardJson_](const char* key_, const DirectX::XMFLOAT3& fallback_)
+    {
+        const auto item_ = guardJson_.find(key_);
+        if (item_ == guardJson_.end() || !item_->is_array() || item_->size() != 3) return fallback_;
+        return DirectX::XMFLOAT3{ (*item_)[0].get<float>(), (*item_)[1].get<float>(), (*item_)[2].get<float>() };
+    };
+    guardSettings.meshVFXOffset = readVector_("GuardMeshVFXOffset", { 0.0f, 0.0f, 0.0f });
+    guardSettings.meshVFXRotation = readVector_("GuardMeshVFXRotation", { 0.0f, 0.0f, 0.0f });
+    guardSettings.meshVFXScale = readVector_("GuardMeshVFXScale", { 1.03f, 1.03f, 1.03f });
+
     justDodgeInvincibilityDuration = (std::max)(j_.value("JustDodgeInvincibilityDuration", 0.5f), 0.0f);
     jumpImpulse = (std::max)(j_.value("JumpImpulse", jumpImpulse), 0.0f);
     doubleJumpImpulse = (std::max)(j_.value("DoubleJumpImpulse", doubleJumpImpulse), 0.0f);
@@ -3063,4 +3212,234 @@ void PlayerControllerComponent::DrawSkillLoadoutGui()
         ImGui::PopID();
     }
     ImGui::EndDisabled();
+}
+
+// 子の盾Colliderも含め、通常ガードの受付を入力Stateへ同期する。
+void PlayerControllerComponent::SetNormalGuardEnabled(bool enabled_)
+{
+    BS_PROFILE_SCOPE("PlayerControllerComponent::SetNormalGuardEnabled");
+    const auto owner_ = GetGameObject();
+    if (!owner_) return;
+    const auto visit_ = [enabled_](const auto& self_, const std::shared_ptr<GameObject>& object_) -> void
+    {
+        if (!object_) return;
+        for (const auto& guard_ : object_->GetComponents<GuardCollider>())
+        {
+            guard_->SetJustGuardEnabled(false);
+            if (enabled_ && !guard_->IsEnabled()) guard_->Activate();
+            else if (!enabled_ && guard_->IsEnabled()) guard_->Deactivate();
+        }
+        if (object_->transform)
+            for (const auto& child_ : object_->transform->children)
+                if (child_) self_(self_, child_->gameObject.lock());
+    };
+    visit_(visit_, owner_);
+    normalGuardActive = enabled_;
+    if (blackboard) blackboard->SetBool("Guard", "Active", enabled_);
+}
+
+// 判定と表示の終了を一か所へまとめ、攻撃・回避・被弾への遷移でも残留を防ぐ。
+void PlayerControllerComponent::StopNormalGuard()
+{
+    if (normalGuardActive) SetNormalGuardEnabled(false);
+    StopGuardVisual();
+    const auto owner_ = GetGameObject();
+    const auto animation_ = owner_ ? owner_->GetComponent<AnimationControllerComponent>() : nullptr;
+    if (guardAnimationControlled && animation_) animation_->SetSkillControlled(false);
+    guardAnimationControlled = false;
+    guardReactionActive = false;
+    guardReactionEndRequested = false;
+    guardBroken = false;
+    guardReactionTimer = 0.0f;
+    if (blackboard)
+    {
+        blackboard->SetBool("Guard", "ReactionActive", false);
+        blackboard->SetBool("Guard", "GuardBroken", false);
+        blackboard->SetBool("Guard", "GuardSucceeded", false);
+    }
+}
+
+// 通常GuardとGuardBreakの成功通知だけを受け、通常HitReactionを経由せず反応する。
+void PlayerControllerComponent::HandleGuardImpact(bool broken_)
+{
+    BS_PROFILE_SCOPE("PlayerControllerComponent::HandleGuardImpact");
+    if (GetCurrentAction() != PLAYER_ACTION::GUARD || !normalGuardActive || guardBroken) return;
+    const auto owner_ = GetGameObject();
+    const auto health_ = owner_ ? owner_->GetComponent<HealthComponent>() : nullptr;
+    PlayGuardSparks();
+    if (health_ && health_->IsDead())
+    {
+        // 致死のGuardBreakでも、以前の被弾情報で死亡時の反応を選ばない。
+        if (blackboard)
+        {
+            float impact_ = 0.0f;
+            Vector3 direction_{ 0.0f, 0.0f, 0.0f };
+            blackboard->GetFloat("Guard", "ReceivedImpactPower", impact_);
+            blackboard->GetVector3("Guard", "Normal", direction_);
+            blackboard->SetFloat("Hit", "ImpactPower", impact_);
+            blackboard->SetFloat("Hit", "Armor", GetCurrentArmor());
+            blackboard->SetVector2("Hit", "Direction", { direction_.x, direction_.z });
+            blackboard->SetBool("Hit", "ImpactReacted", true);
+        }
+        HandleHitReaction();
+        return;
+    }
+    guardBroken = broken_;
+    guardReactionActive = true;
+    guardReactionEndRequested = false;
+    guardReactionTimer = 0.0f;
+    if (broken_)
+    {
+        guardRearmRequired = true;
+        SetNormalGuardEnabled(false);
+        StopGuardVisual();
+        SendGuardInputToBlackboard(false);
+        if (blackboard)
+        {
+            blackboard->SetBool(PlayerBlackboardCategory::PLAYER, PlayerBlackboardKey::IS_GUARD, false);
+            blackboard->SetBool(PlayerBlackboardCategory::ANIM, PlayerBlackboardKey::IS_GUARD, false);
+        }
+    }
+    actionRuntime.canDodgeCancel = !broken_ && guardSettings.hitCancelTime <= 0.0f;
+    actionRuntime.canActionBranch = actionRuntime.canDodgeCancel;
+    actionRuntime.bufferedAction = PLAYER_ACTION::NONE;
+    actionRuntime.bufferedComboIndex = 0;
+    SyncCancelGateBlackboard();
+    if (blackboard) blackboard->SetBool("Guard", "ReactionActive", true);
+    const auto animation_ = owner_ ? owner_->GetComponent<AnimationControllerComponent>() : nullptr;
+    const std::string& state_ = broken_ ? guardSettings.breakAnimation : guardSettings.hitAnimation;
+    if (animation_ && (!animation_->IsSkillControlled() || guardAnimationControlled) && animation_->GetStates().count(state_))
+    {
+        // 反応中だけ通常グラフのGuard遷移を止め、同じフレームの上書きを防ぐ。
+        guardAnimationControlled = true;
+        animation_->SetSkillControlled(true);
+        animation_->ChangeState(state_, guardSettings.releaseBlendTime, true);
+    }
+}
+
+// 終了通知と再生位置を優先し、素材不足でも設定された上限時間で操作を返す。
+void PlayerControllerComponent::UpdateGuardReaction(float deltaTime_)
+{
+    if (!guardReactionActive || GetCurrentAction() != PLAYER_ACTION::GUARD) return;
+    BS_PROFILE_SCOPE("PlayerControllerComponent::UpdateGuardReaction");
+    guardReactionTimer += (std::max)(0.0f, deltaTime_);
+    if (!guardBroken && guardReactionTimer >= guardSettings.hitCancelTime)
+    {
+        actionRuntime.canDodgeCancel = true;
+        actionRuntime.canActionBranch = true;
+        SyncCancelGateBlackboard();
+    }
+    const auto owner_ = GetGameObject();
+    const auto animation_ = owner_ ? owner_->GetComponent<AnimationControllerComponent>() : nullptr;
+    const auto state_ = animation_ ? animation_->GetCurrentState() : nullptr;
+    const std::string& expected_ = guardBroken ? guardSettings.breakAnimation : guardSettings.hitAnimation;
+    const float duration_ = animation_ ? animation_->GetCurrentSampleDuration() : 0.0f;
+    const bool ended_ = guardReactionEndRequested || (state_ && state_->name == expected_ &&
+        duration_ > 0.0001f && animation_->GetAnimatorTime() >= duration_);
+    if ((ended_ && (!guardBroken || guardReactionTimer >= guardSettings.breakRecoveryTime)) ||
+        guardReactionTimer >= (std::max)(guardSettings.reactionMaximumTime, guardBroken ? guardSettings.breakRecoveryTime : 0.0f))
+        FinishGuardReaction();
+}
+
+// 通常の受け止めはGuardへ、GuardBreakは入力を再受付する通常Stateへ戻す。
+void PlayerControllerComponent::FinishGuardReaction()
+{
+    const bool broken_ = guardBroken;
+    const auto owner_ = GetGameObject();
+    const auto animation_ = owner_ ? owner_->GetComponent<AnimationControllerComponent>() : nullptr;
+    if (guardAnimationControlled && animation_) animation_->SetSkillControlled(false);
+    guardAnimationControlled = false;
+    guardReactionActive = false;
+    guardReactionEndRequested = false;
+    if (blackboard) blackboard->SetBool("Guard", "ReactionActive", false);
+    if (broken_)
+    {
+        guardRearmRequired = KeyConfig::Instance().ActionPressed(PlayerInputAction::GUARD);
+        guardBroken = false;
+        const auto input_ = GetMoveInput();
+        stateMachine.ChangeState(input_.x != 0.0f || input_.z != 0.0f ? PLAYER_ACTION::MOVE : PLAYER_ACTION::IDLE);
+    }
+    else
+    {
+        actionRuntime.canDodgeCancel = true;
+        actionRuntime.canActionBranch = true;
+        SyncCancelGateBlackboard();
+        if (animation_ && animation_->GetStates().count("Block_Walk_Loop_Blend"))
+            animation_->ChangeState("Block_Walk_Loop_Blend", guardSettings.releaseBlendTime);
+    }
+}
+
+// ガード開始時だけPoolから一つ生成し、既存の盾AttachmentのTransformへ追従させる。
+void PlayerControllerComponent::StartGuardVisual()
+{
+    BS_PROFILE_SCOPE("PlayerControllerComponent::StartGuardVisual");
+    if (const auto visual_ = guardVisual.lock())
+        if (visual_->manager && visual_->GetManager().GetEffectManager().IsEffectOwnedBy(visual_, this)) return;
+    guardVisual.reset();
+    if (guardSettings.meshVFXAsset.empty()) return;
+    const auto owner_ = GetGameObject();
+    const auto shield_ = owner_ && owner_->manager ? owner_->GetManager().Find(guardSettings.shieldObjectName) : nullptr;
+    if (!owner_ || !shield_ || !shield_->transform || !owner_->transform) return;
+    // 同名の別キャラクターの盾へ演出を付けないよう、親階層の所属を確認する。
+    auto parent_ = shield_->transform->parent.lock();
+    bool belongs_ = false;
+    while (parent_)
+    {
+        if (parent_ == owner_->transform) { belongs_ = true; break; }
+        parent_ = parent_->parent.lock();
+    }
+    if (!belongs_) return;
+    if (const auto attachment_ = shield_->GetComponent<ModelAttachmentComponent>()) attachment_->SyncAttachment();
+    MeshVFXSpawnRequest request_{};
+    request_.assetPath = guardSettings.meshVFXAsset;
+    request_.lifetimeOwner = owner_->GetComponent<PlayerControllerComponent>();
+    const auto visual_ = owner_->GetManager().GetEffectManager().SpawnMeshVFX(request_);
+    if (!visual_ || !visual_->transform) return;
+    visual_->transform->SetParent(shield_->transform);
+    visual_->transform->localPosition = guardSettings.meshVFXOffset;
+    visual_->transform->localRotation = guardSettings.meshVFXRotation;
+    visual_->transform->localScale = guardSettings.meshVFXScale;
+    visual_->transform->MarkDirty();
+    visual_->UpdateTransform();
+    guardVisual = visual_;
+}
+
+// 明示終了をManagerへ渡し、ガードの出入りでPoolのインスタンスを増殖させない。
+void PlayerControllerComponent::StopGuardVisual()
+{
+    const auto visual_ = guardVisual.lock();
+    guardVisual.reset();
+    if (!visual_ || !visual_->manager) return;
+    // 設定した盾名が変更されても自分の演出は閉じ、再利用済みの別演出は停止しない。
+    visual_->GetManager().GetEffectManager().StopEffect(visual_, this);
+}
+
+// 成立した接触点から少量の火花を一度だけ出し、JustGuardの専用演出とは分ける。
+void PlayerControllerComponent::PlayGuardSparks()
+{
+    BS_PROFILE_SCOPE("PlayerControllerComponent::PlayGuardSparks");
+    const auto owner_ = GetGameObject();
+    if (!owner_ || !owner_->manager || !blackboard || guardSettings.sparkParticleAsset.empty()) return;
+    ParticleSpawnRequest request_{};
+    request_.assetPath = guardSettings.sparkParticleAsset;
+    request_.lifeTime = guardSettings.sparkLifeTime;
+    // BlackboardのVector3で取得し、Particle用のXMFLOAT3へ成分を渡す。
+    DirectX::SimpleMath::Vector3 position_{ 0.0f, 0.0f, 0.0f };
+    DirectX::SimpleMath::Vector3 normal_{ 0.0f, 1.0f, 0.0f };
+    blackboard->GetVector3("Guard", "Position", position_);
+    blackboard->GetVector3("Guard", "Normal", normal_);
+    request_.position = { position_.x, position_.y, position_.z };
+    request_.normal = { normal_.x, normal_.y, normal_.z };
+    bool hasContact_ = false;
+    blackboard->GetBool("Guard", "HasContact", hasContact_);
+    if (!hasContact_)
+    {
+        const auto shield_ = owner_->GetManager().Find(guardSettings.shieldObjectName);
+        if (shield_ && shield_->transform) request_.position = shield_->transform->GetWorldPosition();
+        else if (owner_->transform) request_.position = owner_->transform->GetWorldPosition();
+    }
+    request_.overrideAxis = true;
+    request_.axis = request_.normal;
+    request_.normalOffset = 0.02f;
+    owner_->GetManager().GetEffectManager().SpawnParticle(request_);
 }

@@ -50,6 +50,19 @@ public:
 
     float GetTime() const { return time; }
     bool IsPlaying() const { return isPlaying; }
+    // Assetを上書きせず、環境演出中だけ大きさと色を差し替える。
+    void SetRuntimeAppearance(const DirectX::XMFLOAT3& scale_, const DirectX::XMFLOAT4& color_, const DirectX::XMFLOAT4& edgeColor_)
+    {
+        runtimeAppearanceEnabled = true;
+        runtimeAppearanceScale = scale_;
+        runtimeAppearanceColor = color_;
+        runtimeAppearanceEdgeColor = edgeColor_;
+    }
+    void ClearRuntimeAppearance() { runtimeAppearanceEnabled = false; }
+    bool HasRuntimeAppearance() const { return runtimeAppearanceEnabled; }
+    const DirectX::XMFLOAT3& GetRuntimeAppearanceScale() const { return runtimeAppearanceScale; }
+    const DirectX::XMFLOAT4& GetRuntimeAppearanceColor() const { return runtimeAppearanceColor; }
+    const DirectX::XMFLOAT4& GetRuntimeAppearanceEdgeColor() const { return runtimeAppearanceEdgeColor; }
     virtual bool UsesOwnerModel() const { return false; }
     virtual bool UsesModelPoses() const { return false; }
     virtual bool HasModelPoses() const { return false; }
@@ -89,4 +102,8 @@ private:
     float time = 0.0f;                           // Component全体の再生時間。
     float playbackSpeed = 1.0f;                  // Component全体の再生速度。
     bool isPlaying = true;                       // trueならUpdateでtimeを進める。
+    bool runtimeAppearanceEnabled = false;
+    DirectX::XMFLOAT3 runtimeAppearanceScale{ 1.0f, 1.0f, 1.0f };
+    DirectX::XMFLOAT4 runtimeAppearanceColor{ 1.0f, 1.0f, 1.0f, 1.0f };
+    DirectX::XMFLOAT4 runtimeAppearanceEdgeColor{ 1.0f, 1.0f, 1.0f, 1.0f };
 };

@@ -170,19 +170,25 @@ void TrailMeshComponent::RegisterActions()
 
         auto& parentRegistry_ = parentObject_->GetLocalRegistry();
 
-        parentRegistry_.RegisterAction("Trail", ownerName_ + "_Trail_Start", [this]()
+        parentRegistry_.RegisterAction("Trail", ownerName_ + "_Trail_Start", [weakTrail_ = std::weak_ptr<TrailMeshComponent>(owner_->GetComponent<TrailMeshComponent>())]()
             {
-                StartTrail();
+                const auto trail_ = weakTrail_.lock();
+                const auto actor_ = trail_ ? trail_->GetGameObject() : nullptr;
+                if (actor_ && actor_->manager && !actor_->IsPendingDestroy()) trail_->StartTrail();
             });
 
-        parentRegistry_.RegisterAction("Trail", ownerName_ + "_Trail_Stop", [this]()
+        parentRegistry_.RegisterAction("Trail", ownerName_ + "_Trail_Stop", [weakTrail_ = std::weak_ptr<TrailMeshComponent>(owner_->GetComponent<TrailMeshComponent>())]()
             {
-                StopTrail();
+                const auto trail_ = weakTrail_.lock();
+                const auto actor_ = trail_ ? trail_->GetGameObject() : nullptr;
+                if (actor_ && actor_->manager && !actor_->IsPendingDestroy()) trail_->StopTrail();
             });
 
-        parentRegistry_.RegisterAction("Trail", ownerName_ + "_Trail_Clear", [this]()
+        parentRegistry_.RegisterAction("Trail", ownerName_ + "_Trail_Clear", [weakTrail_ = std::weak_ptr<TrailMeshComponent>(owner_->GetComponent<TrailMeshComponent>())]()
             {
-                ClearTrail();
+                const auto trail_ = weakTrail_.lock();
+                const auto actor_ = trail_ ? trail_->GetGameObject() : nullptr;
+                if (actor_ && actor_->manager && !actor_->IsPendingDestroy()) trail_->ClearTrail();
             });
 
         registeredActionNames.push_back(ownerName_ + "_Trail_Start");

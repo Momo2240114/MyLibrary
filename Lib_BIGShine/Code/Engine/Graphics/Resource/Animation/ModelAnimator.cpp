@@ -1302,7 +1302,7 @@ void ModelAnimator::UpdateBlend(float et, GltfModelCommponennt* model, int index
     }
 }
 
-void ModelAnimator::CrossFadeTo(const AnimState* newState, float duration, std::shared_ptr<GameObject> owner, bool restart_)
+void ModelAnimator::CrossFadeTo(const AnimState* newState, float duration, std::shared_ptr<GameObject> owner, bool restart_, float startTime_)
 {
     if (!newState) return;
     if (current.state == newState && !restart_) return;
@@ -1312,8 +1312,17 @@ void ModelAnimator::CrossFadeTo(const AnimState* newState, float duration, std::
     previousRootMotionBaseRotation = rootMotionBaseRotation;
     previous = current;
 
+    // 同じStateの再開始も新しい移動区間として扱い、前回の終端からの差分を持ち越さない。
+    isFirstFrame = true;
+    _prevRootMotionState = nullptr;
+    previousRootMotionNodeIndex = -1;
+    prevTime = 0.0f;
+    currentRootMotionDelta.deltaPosition = DirectX::SimpleMath::Vector3::Zero;
+    currentRootMotionDelta.deltaRotation = DirectX::SimpleMath::Quaternion::Identity;
+
     current.state = newState;
-    current.time = 0.0f;
+    // 再生開始位置は新しい区間の基準とし、前段の移動差分や補間解除を持ち込まない。
+    current.time = (std::max)(0.0f, startTime_);
     current.weight = 1.0f;
     current.sampleDuration = 0.0f;
 

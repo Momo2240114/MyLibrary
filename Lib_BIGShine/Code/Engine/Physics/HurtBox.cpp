@@ -99,6 +99,7 @@ void HurtBox::Gui()
     // 被弾倍率、無敵時間、CharacterCollider同期の状態をEditor上で確認・調整する。
     CapsuleCollider::Gui();
     ImGui::SeparatorText("Damage Reception");
+    ImGui::Text("Temporary Invincibility: %s", temporaryInvincible ? "ON" : "OFF");
     ImGui::Text("Granted Invincibility: %.3f sec", grantedInvincibilityTimer);
     ImGui::Checkbox(
         "Sync Character Collider Shape",
@@ -144,6 +145,7 @@ void HurtBox::Deserialize(const nlohmann::json& j_)
         0.0f);
     syncCharacterColliderShape =
         j_.value("SyncCharacterColliderShape", true);
+    temporaryInvincible = false;
     ResetHitHistory();
     EnforceHurtBoxSettings();
 }

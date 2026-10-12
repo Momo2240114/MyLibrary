@@ -142,6 +142,8 @@ public:
     void SetHitImpactEffectAssetPath(const std::string& path_);
     void SetAllowMultiHit(bool allowMultiHit_);
     void SetCanHitOwner(bool canHitOwner_);
+    // 派生エフェクトのHitBoxにも、元の攻撃のガード属性を引き継ぐ。
+    void SetGuardProperties(bool canBeGuarded_, bool guardBreak_);
     void SetSourceAction(const std::string& sourceAction_);
     void SetJustGuardedActionName(const std::string& actionName_);
     void SetRuntimeHitOwner(GameObject* owner_);
@@ -159,6 +161,8 @@ public:
     // 判定再生を開始する。
     void Play();
     void Stop();
+    // 反射で所有者が変わった攻撃を、元の攻撃者の中断対象から除外する。
+    bool IsOwnedBy(const GameObject* owner_) const { return ownerObject == owner_; }
     void ResetRuntime();
 
     // Editor/Debug描画用に、現在のHitShape情報を提出する。
@@ -239,6 +243,8 @@ private:
     bool playing = false;
     bool destroyOnLifeEnd = true;
     bool canHitOwner = false;
+    bool canBeGuarded = true;
+    bool guardBreak = false;
     bool allowMultiHit = false;
     std::string sourceAction;
     std::string justGuardedActionName;

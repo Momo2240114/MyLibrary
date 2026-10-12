@@ -1,0 +1,140 @@
+{
+    "Name": "TransitionMudScatter",
+    "ParentName": "",
+    "Layer": 32,
+    "CollisionMask": 0,
+    "RequiredForSceneStart": true,
+    "Transform": {
+        "Pos": [
+            0,
+            1.177209,
+            -10
+        ],
+        "Rot": [
+            0,
+            0,
+            0
+        ],
+        "Scale": [
+            1,
+            1,
+            1
+        ]
+    },
+    "Components": [
+        {
+            "TypeName": "ParticleComponent",
+            "Data": {
+                "AssetType": "ParticleEffect",
+                "AssetVersion": 1,
+                "AssetPath": "Data/Particle/EnemyShadowMudBurst.json",
+                "IsPlaying": false,
+                "Emitters": [
+                    {
+                        "Name": "EnemyShadowMudBurst",
+                        "EmissionMode": 1,
+                        "BurstCount": 38,
+                        "MaxCount": 76,
+                        "SpawnShape": 3,
+                        "SpawnSpace": 0,
+                        "ShapeSize": [
+                            0.05,
+                            0.05,
+                            0.05
+                        ],
+                        "LegacyRadius": [
+                            0.03,
+                            0.08
+                        ],
+                        "PosOffset": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "Speed": [
+                            1.2,
+                            3.4
+                        ],
+                        "Lifespan": [
+                            0.25,
+                            0.45
+                        ],
+                        "Size": [
+                            0.065,
+                            0.16
+                        ],
+                        "UseRandomSize": 1,
+                        "SizeRandomStart": [
+                            0.65,
+                            1.15
+                        ],
+                        "SizeRandomEnd": [
+                            0.2,
+                            0.45
+                        ],
+                        "Color": [
+                            0.28,
+                            0.1,
+                            0.4,
+                            0.9
+                        ],
+                        "ColorStart": [
+                            0.65,
+                            0.36,
+                            0.86,
+                            0.9
+                        ],
+                        "ColorEnd": [
+                            0.063,
+                            0.043,
+                            0.094,
+                            0
+                        ],
+                        "UseColorOverLife": 1,
+                        "BlendMode": 0,
+                        "RenderType": 0,
+                        "Gravity": -1.2,
+                        "Acceleration": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "Drag": 2.5,
+                        "Fade": [
+                            0.015,
+                            0.15
+                        ],
+                        "NoiseStrength": 0.12,
+                        "NoiseFrequency": 2,
+                        "NoiseSpeed": 1,
+                        "TexturePath": "",
+                        "MaskTexturePath": "Data/Texture/Particle/masks for  particles/masks for  particles/9.png",
+                        "UseMask": 1,
+                        "UseGradient": 0,
+                        "useGradientTexture": 0,
+                        "useShadeGradientTexture": 0,
+                        "UseFresnel": 0,
+                        "UseSpriteAnimation": 0,
+                        "SpawnDirectionMode": 0,
+                        "ConeAngle": [
+                            0,
+                            0
+                        ],
+                        "EmissionAxis": [
+                            0,
+                            1,
+                            0
+                        ]
+                    }
+                ]
+            },
+            "Enabled": true,
+            "UpdateEnabled": true,
+            "LateUpdateEnabled": true,
+            "UpdatePriority": 0,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false
+        }
+    ],
+    "ColliderComponents": []
+}

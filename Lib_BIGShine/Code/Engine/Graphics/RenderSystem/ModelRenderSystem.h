@@ -194,8 +194,22 @@ private:
 		DirectX::XMFLOAT2 uvOffset;
 		float uvRotation;
 		float padding[3];
+		// モデル単位のDissolve設定。未使用モデルではprogressを0にする。
+		DirectX::XMFLOAT4 dissolveParams;
+		DirectX::XMFLOAT4 dissolveEdgeColor;
+		DirectX::XMFLOAT4 dissolveDirection;
+		DirectX::XMFLOAT4 dissolveOrigin;
 	};
 	static_assert(sizeof(CbGBufferMaterial) % 16 == 0);
+	// 半透明ToonPBRにも同じDissolve設定を渡すための描画単位の定数。
+	struct CbModelDissolve
+	{
+		DirectX::XMFLOAT4 params;
+		DirectX::XMFLOAT4 edgeColor;
+		DirectX::XMFLOAT4 direction;
+		DirectX::XMFLOAT4 origin;
+	};
+	static_assert(sizeof(CbModelDissolve) == 64);
 
 	struct CbMaterialOverlay
 	{
@@ -264,6 +278,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> gBufferSimplePixelShader;
 	Microsoft::WRL::ComPtr<ID3D11InputLayout> gBufferInputLayout;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> gBufferMaterialConstantBuffer;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> modelDissolveConstantBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> materialOverlayConstantBuffer;
 	std::shared_ptr<LightingShader> lightingShader;
 	RenderInvestigationSettings renderInvestigationSettings;

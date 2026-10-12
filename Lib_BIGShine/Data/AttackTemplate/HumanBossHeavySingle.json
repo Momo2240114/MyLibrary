@@ -1,0 +1,103 @@
+{
+  "AssetType": "AttackTemplate",
+  "AssetVersion": 1,
+  "attack": {
+    "allowMultiHit": false,
+    "attackerAirLiftPower": 0.0,
+    "damage": 400.0,
+    "damageApplyType": 0,
+    "damageHitInterval": 0.0,
+    "damageRate": 4.0,
+    "fixedDamage": 0.0,
+    "hitGroupId": 0,
+    "hitStopDuration": 0.20000000298023224,
+    "hitStopScale": 0.30000001192092896,
+    "guardBreak": true,
+    "impactPower": 400.0,
+    "knockBackPower": 6.0,
+    "knockBackType": 0,
+    "maxHitCount": 1,
+    "targetAirLiftPower": 0.0
+  },
+  "attackEffects": [],
+  "cameraShake": {
+    "attackScale": 0.5,
+    "enabled": true,
+    "frequency": 24.0,
+    "powerLevel": 1,
+    "priority": 8,
+    "receiveDuration": 0.18000000715255737,
+    "receivePositionStrength": 0.054999999701976776,
+    "receiveRotationStrength": 0.44999998807907104
+  },
+  "displayName": "HumanBoss Heavy Single",
+  "hitEffect": {
+    "hitMeshVfxAssetPath": "",
+    "hitMeshVfxLifeTime": 1.0,
+    "hitMeshVfxNormalOffset": 0.0,
+    "hitParticleAssetPath": "EnemyMudHeavyHit",
+    "hitParticleAxisToAttackerBlend": 0.8500000238418579,
+    "hitParticleEmitterName": "",
+    "hitParticleLifeTime": 0.44999998807907104,
+    "hitParticleNormalOffset": 0.05000000074505806,
+    "hitParticleTargetAttractionFalloff": 1.25,
+    "hitParticleTargetAttractionRange": 3.0,
+    "hitParticleTargetAttractionStrength": 1.399999976158142,
+    "hitParticleUseImpactAxis": true,
+    "hitParticleUseTargetAttraction": true,
+    "spawnOnHit": true
+  },
+  "id": "HumanBossHeavySingle",
+  "owner": {
+    "canHitOwner": false,
+    "ownerTarget": 0
+  },
+  "slashEffects": [
+    {
+      "alpha": 1,
+      "baseNodeName": "hand_r",
+      "enabled": true,
+      "followNode": true,
+      "followOwner": true,
+      "hitBox": {
+        "activeEndTime": 0.07999999821186066,
+        "activeStartTime": 0.0,
+        "enabled": false,
+        "halfHeight": 1.0,
+        "hitBoxName": "EffectHitBox",
+        "localOffset": [0.0, 0.0, 0.0],
+        "localRotation": [0.0, 0.0, 0.0],
+        "localScale": [1.0, 1.0, 1.0],
+        "radius": 0.5,
+        "shape": 1
+      },
+      "lifeTime": 0.24,
+      "localOffset": [
+        -6.4,
+        2.8,
+        3.1
+      ],
+      "localRotation": [
+        -25,
+        0.0,
+        0
+      ],
+      "localScale": [
+        78,
+        78,
+        78
+      ],
+      "spawnTimeOffset": 0.0,
+      "vfxPath": "EnemyMudSwordArcHeavy"
+    }
+  ],
+  "weaponHitBox": {
+    "activeEndTime": 0.26,
+    "activeStartTime": 0.0,
+    "enabled": true,
+    "endNodeName": "TrailEnd",
+    "hitBoxName": "Sword",
+    "radius": 26.0,
+    "startNodeName": "TrailStart"
+  }
+}

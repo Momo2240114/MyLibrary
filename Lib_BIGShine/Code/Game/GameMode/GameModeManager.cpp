@@ -53,6 +53,8 @@ void GameModeManager::ResetBattleState()
     sequenceStartRequested = false;
     sequenceStartAttempted = false;
 
+    phaseTransitionPreview = false;
+
     currentBattlePhase = 0;
     playerHpRate = 1.0f;
     bossHpRate = 1.0f;
@@ -309,17 +311,50 @@ void GameModeManager::RegisterGlobalActions()
     registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, ACTION_BEGIN_PHASE_1_DEFEAT, [this]() { BeginPhase1Defeat(); });
     registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, ACTION_BEGIN_PHASE_2_INTRO, [this]() { BeginPhase2Intro(); });
     registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, ACTION_BEGIN_BOSS_DEFEATED, [this]() { BeginBossDefeated(); });
-    registry_.RemoveAction("Sequence", SEQUENCE_PHASE_1_DEFEAT);
-    registry_.RemoveAction("Sequence", SEQUENCE_PHASE_2_INTRO);
     registry_.RemoveAction("Sequence", SEQUENCE_BOSS_DEFEATED);
     // BossIntroはScene上のActionSequenceから登録されるまで待ち、仮Actionで戦闘へ進めない。
     registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, "DisablePlayerControl", [this]() { SetPlayerControlLocked(true); });
     registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, "EnablePlayerControl", [this]() { SetPlayerControlLocked(false); });
     registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, "DisableEnemyAI", [this]() { SetEnemyAILocked(true); });
     registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, "EnableEnemyAI", [this]() { SetEnemyAILocked(false); });
-    registry_.RegisterAction("Sequence", SEQUENCE_PHASE_1_DEFEAT, [this]() { NotifySequenceFinished(); });
-    registry_.RegisterAction("Sequence", SEQUENCE_PHASE_2_INTRO, [this]() { NotifySequenceFinished(); });
+    // 形態移行はSceneのSequence登録を待ち、演出を飛ばして戦闘を再開しない。
     registry_.RegisterAction("Sequence", SEQUENCE_BOSS_DEFEATED, [this]() { NotifySequenceFinished(); });
+    // 単体再生もSequenceへ委ね、Managerはプレビューのロックと終了状態だけを管理する。
+    const char* PREVIEW_PHASES[] = { "DragonDeath", "DragonDissolve", "StageCorruption", "MudAttack",
+        "PlayerCounter", "HumanFormation", "SwordClash", "PlayerKnockdown" };
+    for (const char* phase_ : PREVIEW_PHASES)
+    {
+        const std::string sequence_ = std::string("Preview") + phase_;
+        registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, std::string("GameMode.") + sequence_, [this, sequence_]()
+        {
+            if (currentGameState != GameProgressState::PHASE_1_BATTLE && !phaseTransitionPreview) return;
+            if (!ActionRegistry::Instance().HasAction(sequence_)) return;
+            phaseTransitionPreview = true;
+            SetGameState(GameProgressState::PHASE_1_DEFEAT);
+            RequestSequence(sequence_);
+        });
+    }
+    registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, "GameMode.CancelPhaseTransitionPreview", [this]()
+    {
+        if (phaseTransitionPreview) RequestSequence("PhaseTransitionRestore");
+    });
+    registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, "GameMode.EndPhaseTransitionPreview", [this]()
+    {
+        if (!phaseTransitionPreview) return;
+        phaseTransitionPreview = false;
+        TransitionToPhase1Battle();
+    });
+    registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, "GameMode.SkipPhaseTransition", [this]()
+    {
+        if (phaseTransitionPreview)
+        {
+            RequestSequence("PhaseTransitionRestore");
+            return;
+        }
+        if (currentGameState != GameProgressState::PHASE_1_DEFEAT && currentGameState != GameProgressState::PHASE_2_INTRO) return;
+        SetGameState(GameProgressState::PHASE_2_INTRO);
+        RequestSequence("PhaseTransitionBattleResume");
+    });
     globalActionsRegistered = true;
 }
 
@@ -328,6 +363,7 @@ void GameModeManager::UnregisterGlobalActions()
     if (!globalActionsRegistered) return;
 
     ActionRegistry& registry_ = ActionRegistry::Instance();
+    registry_.RemoveAction(ACTION_CATEGORY_GAME_MODE, "GameMode.SkipPhaseTransition");
     registry_.RemoveAction(ACTION_CATEGORY_GAME_MODE, ACTION_SEQUENCE_FINISHED);
     registry_.RemoveAction(ACTION_CATEGORY_GAME_MODE, ACTION_NOTIFY_PHASE_1_BOSS_DEFEATED);
     registry_.RemoveAction(ACTION_CATEGORY_GAME_MODE, ACTION_NOTIFY_PHASE_2_BOSS_DEFEATED);
@@ -339,6 +375,12 @@ void GameModeManager::UnregisterGlobalActions()
     registry_.RemoveAction(ACTION_CATEGORY_GAME_MODE, "EnablePlayerControl");
     registry_.RemoveAction(ACTION_CATEGORY_GAME_MODE, "DisableEnemyAI");
     registry_.RemoveAction(ACTION_CATEGORY_GAME_MODE, "EnableEnemyAI");
+    const char* PREVIEW_PHASES[] = { "DragonDeath", "DragonDissolve", "StageCorruption", "MudAttack",
+        "PlayerCounter", "HumanFormation", "SwordClash", "PlayerKnockdown" };
+    for (const char* phase_ : PREVIEW_PHASES)
+        registry_.RemoveAction(ACTION_CATEGORY_GAME_MODE, std::string("GameMode.Preview") + phase_);
+    registry_.RemoveAction(ACTION_CATEGORY_GAME_MODE, "GameMode.CancelPhaseTransitionPreview");
+    registry_.RemoveAction(ACTION_CATEGORY_GAME_MODE, "GameMode.EndPhaseTransitionPreview");
     registry_.RemoveAction("Sequence", SEQUENCE_BOSS_INTRO);
     registry_.RemoveAction("Sequence", SEQUENCE_PHASE_1_DEFEAT);
     registry_.RemoveAction("Sequence", SEQUENCE_PHASE_2_INTRO);

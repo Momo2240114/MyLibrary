@@ -7,6 +7,7 @@
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 
 #include <algorithm>
+#include <cmath>
 #include <imgui.h>
 
 GuardCollider::GuardCollider()
@@ -54,6 +55,7 @@ void GuardCollider::Deactivate()
 
 bool GuardCollider::CanGuardAttack(const HitBox& hitBox_) const
 {
+    if (!IsEnabled() || !hitBox_.canBeGuarded) return false;
     // Guard/JustGuardのSystemへ渡す前に、所有者攻撃、Team、同一activationの重複Guardを除外する。
     const std::shared_ptr<GameObject> owner_ = GetGuardOwner();
     const std::shared_ptr<GameObject> attackOwner_ =
@@ -70,6 +72,32 @@ bool GuardCollider::CanGuardAttack(const HitBox& hitBox_) const
     if (teamId != 0 && hitBox_.teamId != 0 && teamId == hitBox_.teamId)
     {
         return false;
+    }
+
+    // GuardBreakには回避かJustGuardで対処でき、通常Guardだけでは防げない。
+    bool handlesBreak_ = reactToGuardBreak;
+    if (guardBodyContact && owner_)
+        if (const auto blackboard_ = owner_->GetComponent<BlackboardComponent>())
+        {
+            bool normalGuard_ = false;
+            // Skillの防御Phaseは従来の被弾経路を維持し、通常Guardだけを専用反応へ渡す。
+            if (blackboard_->GetBool("Guard", "Active", normalGuard_)) handlesBreak_ = handlesBreak_ && normalGuard_;
+        }
+    if (hitBox_.guardBreak && !justGuardEnabled && !handlesBreak_) return false;
+    auto directionSource_ = attackOwner_;
+    if (hitBox_.attackSourceType != ATTACK_SOURCE_TYPE::MELEE)
+        if (const auto projectile_ = const_cast<HitBox&>(hitBox_).GetGameObject()) directionSource_ = projectile_;
+    if (guardAngle < 360.0f && owner_ && owner_->transform && directionSource_ && directionSource_->transform)
+    {
+        // 近接は攻撃者、飛翔体は現在位置を使い、剣の軌道で変わる接触法線に依存しない。
+        const auto position_ = owner_->transform->GetWorldPosition();
+        const auto attackPosition_ = directionSource_->transform->GetWorldPosition();
+        const auto forward_ = owner_->transform->GetFront();
+        const float x_ = attackPosition_.x - position_.x;
+        const float z_ = attackPosition_.z - position_.z;
+        const float length_ = std::sqrt((x_ * x_ + z_ * z_) * (forward_.x * forward_.x + forward_.z * forward_.z));
+        if (length_ > 0.0001f && (forward_.x * x_ + forward_.z * z_) / length_ <
+            std::cos(guardAngle * 0.5f * DirectX::XM_PI / 180.0f)) return false;
     }
 
     const auto iterator_ = guardedAttackActivationIds.find(&hitBox_);
@@ -153,6 +181,10 @@ void GuardCollider::Gui()
     ImGui::Checkbox("Can Guard Owner Attack", &canGuardOwnerAttack);
     ImGui::Checkbox("Once Per Attack Activation", &oncePerAttackActivation);
     ImGui::DragInt("Team ID", &teamId, 1, 0, 999);
+    ImGui::DragFloat("Guard Angle", &guardAngle, 1.0f, 0.0f, 360.0f);
+    ImGui::Checkbox("Guard Body Contact", &guardBodyContact);
+    ImGui::Checkbox("React To Guard Break", &reactToGuardBreak);
+    ImGui::DragFloat("Guard Break Damage Rate", &guardBreakDamageRate, 0.05f, 0.0f, 10.0f);
 
     ImGui::SeparatorText("Actions");
     char actionPrefixBuffer_[64];
@@ -187,6 +219,10 @@ void GuardCollider::Serialize(nlohmann::json& json_) const
     json_["CanGuardOwnerAttack"] = canGuardOwnerAttack;
     json_["OncePerAttackActivation"] = oncePerAttackActivation;
     json_["TeamId"] = teamId;
+    json_["GuardAngle"] = guardAngle;
+    json_["GuardBodyContact"] = guardBodyContact;
+    json_["ReactToGuardBreak"] = reactToGuardBreak;
+    json_["GuardBreakDamageRate"] = guardBreakDamageRate;
 }
 
 void GuardCollider::Deserialize(const nlohmann::json& json_)
@@ -211,6 +247,10 @@ void GuardCollider::Deserialize(const nlohmann::json& json_)
     canGuardOwnerAttack = json_.value("CanGuardOwnerAttack", false);
     oncePerAttackActivation = json_.value("OncePerAttackActivation", true);
     teamId = json_.value("TeamId", 0);
+    guardAngle = (std::clamp)(json_.value("GuardAngle", 360.0f), 0.0f, 360.0f);
+    guardBodyContact = json_.value("GuardBodyContact", false);
+    reactToGuardBreak = json_.value("ReactToGuardBreak", false);
+    guardBreakDamageRate = (std::max)(0.0f, json_.value("GuardBreakDamageRate", 1.0f));
 
     justGuardEnabled = false;
     ClearGuardedAttackHistory();

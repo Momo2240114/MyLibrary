@@ -1,0 +1,147 @@
+{
+  "AssetType": "VFXMaterial",
+  "Version": 1,
+  "MaterialName": "HumanBossShadowDanger",
+  "Color": {
+    "BaseColor": [
+      0.5,
+      0.16,
+      0.75,
+      0.95
+    ],
+    "Alpha": 0.95,
+    "EmissiveColor": [
+      1.05,
+      0.5,
+      1.5
+    ],
+    "EmissiveIntensity": 6
+  },
+  "MainUV": {
+    "Offset": [
+      0.0,
+      0.0
+    ],
+    "Scale": [
+      1.0,
+      1.0
+    ],
+    "ScrollSpeed": [
+      0.0,
+      -0.12
+    ],
+    "Rotation": 0.0,
+    "RotationSpeed": 0.0,
+    "Pivot": [
+      0.5,
+      0.5
+    ]
+  },
+  "NoiseUV": {
+    "Offset": [
+      0.0,
+      0.0
+    ],
+    "Scale": [
+      1.0,
+      1.0
+    ],
+    "ScrollSpeed": [
+      0.05,
+      -0.05
+    ],
+    "Rotation": 0.0,
+    "RotationSpeed": 0.0,
+    "Pivot": [
+      0.5,
+      0.5
+    ]
+  },
+  "Textures": {
+    "BaseTexturePath": "",
+    "NormalTexturePath": "",
+    "MaskTexturePath": "Data/Texture/VFX/T_Free_Magic_Trail_Fire.PNG",
+    "NoiseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise1.PNG",
+    "DistortionTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG"
+  },
+  "ColorRamp": {
+    "Enabled": true,
+    "SampleSource": "LIFE",
+    "BlendMode": "OVERRIDE",
+    "Interpolation": "LINEAR",
+    "WrapMode": "CLAMP",
+    "Influence": 1.0,
+    "AffectAlpha": true,
+    "FixedPosition": 0.0,
+    "ScrollSpeed": 0.0,
+    "Stops": [
+      {
+        "Position": 0,
+        "Color": [
+          0.48,
+          0.12,
+          0.72,
+          0.8
+        ]
+      },
+      {
+        "Position": 0.65,
+        "Color": [
+          0.85,
+          0.38,
+          1.15,
+          0.92
+        ]
+      },
+      {
+        "Position": 1,
+        "Color": [
+          1.1,
+          0.8,
+          1.4,
+          1
+        ]
+      }
+    ]
+  },
+  "RandomColor": {
+    "Enabled": false,
+    "Mode": "MULTIPLY",
+    "Influence": 1.0,
+    "AffectAlpha": false,
+    "Seed": 0,
+    "MinColor": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "MaxColor": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ]
+  },
+  "Dissolve": {
+    "Enabled": false,
+    "Threshold": 0.0,
+    "EdgeWidth": 0.05,
+    "EdgeColor": [
+      1.0,
+      0.2,
+      0.05,
+      1.0
+    ]
+  },
+  "Distortion": {
+    "Enabled": false,
+    "Strength": 1.5
+  },
+  "RenderState": {
+    "BlendMode": "ALPHA",
+    "CullMode": "NONE",
+    "DepthTest": true,
+    "DepthWrite": false
+  }
+}

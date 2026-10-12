@@ -5,6 +5,7 @@
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
 #include "Engine/GamePlay/EventSystem/ActionSequence.h"
 #include "Engine/Graphics/Resource/Animation/AnimationControllerComponent.h"
+#include "Engine/Graphics/Resource/Animation/AnimationGraphBridgeComponent.h"
 #include <algorithm>
 #include <cmath>
 #include "Engine/GamePlay/Core/Component/CharacterMovementComponent.h"
@@ -42,12 +43,40 @@ bool SkillExecution::CanExecute(const std::shared_ptr<GameObject>& owner_,
         return false;
     }
     const auto movement_ = owner_->GetComponent<CharacterMovementComponent>();
+    for (std::size_t index_ = 0; index_ < definition_.phases.size(); ++index_)
+    {
+        const auto& phase_ = definition_.phases[index_];
+        // 継続指定は同じSequenceを持つ直前のPhaseがある場合だけ許可する。
+        if (phase_.continueSequence && (index_ == 0 || phase_.sequence.empty() ||
+            phase_.sequence != definition_.phases[index_ - 1].sequence))
+        {
+            error_ = "ContinueSequence requires the same sequence in the preceding phase.";
+            return false;
+        }
+    }
     for (const auto& phase_ : definition_.phases)
     {
+        if (phase_.playAnimationFromSequence && (phase_.sequence.empty() || phase_.continueSequence))
+        {
+            error_ = "Sequence animation requires a new sequence with a time-zero animation action.";
+            return false;
+        }
         const auto state_ = animation_->GetStates().find(phase_.animationState);
         if (phase_.animationState.empty() || state_ == animation_->GetStates().end() || !state_->second)
         {
             error_ = "Animation State not found: " + phase_.animationState;
+            return false;
+        }
+        if (phase_.playAnimationFromSequence &&
+            !owner_->GetLocalRegistry().HasAction(owner_->BuildActionName(phase_.animationState)) &&
+            !owner_->GetLocalRegistry().HasAction(phase_.animationState))
+        {
+            error_ = "Owner local animation action not found: " + phase_.animationState;
+            return false;
+        }
+        if (phase_.waitForAnimationEnd && phase_.endCondition == SkillPhaseEnd::ACTION_END && state_->second->isLoop)
+        {
+            error_ = "WaitForAnimationEnd requires a non-loop animation.";
             return false;
         }
         if ((HasSkillMovement(phase_) || phase_.endCondition == SkillPhaseEnd::GROUND_CONTACT) &&
@@ -68,7 +97,7 @@ bool SkillExecution::CanExecute(const std::shared_ptr<GameObject>& owner_,
 }
 
 bool SkillExecution::Start(const std::shared_ptr<GameObject>& owner_, const SkillDefinition& definition_,
-    PhaseCallback phaseCallback_)
+    PhaseCallback phaseCallback_, PhaseTransitionCheck phaseTransitionCheck_, bool useAnimationGraph_)
 {
     BS_PROFILE_SCOPE("SkillExecution::Start");
     if (active || stopping)
@@ -85,8 +114,10 @@ bool SkillExecution::Start(const std::shared_ptr<GameObject>& owner_, const Skil
     }
     owner_->GetOrAddComponent<BlackboardComponent>();
     owner = owner_;
+    animationGraphPlayback = useAnimationGraph_;
     definition = definition_;
     phaseCallback = std::move(phaseCallback_);
+    phaseTransitionCheck = std::move(phaseTransitionCheck_);
     ownsMovement = std::any_of(definition.phases.begin(), definition.phases.end(), HasSkillMovement);
     if (ownsMovement)
     {
@@ -144,6 +175,12 @@ void SkillExecution::Update(float deltaTime_)
         ended_ = phaseTime >= phase_.duration && groundedTime >= GROUND_CONTACT_CONFIRM_TIME;
     }
     else ended_ = phaseEndRequested;
+    if (ended_ && phase_.endCondition == SkillPhaseEnd::ACTION_END && phase_.waitForAnimationEnd)
+    {
+        // Sequenceが短く編集されても、クリップ終了前にAIへ制御を返さない。
+        const float duration_ = animation_->GetCurrentSampleDuration();
+        ended_ = duration_ > 0.0001f && animation_->GetAnimatorTime() >= duration_;
+    }
     // 正常終了が同時に成立した場合は、時間上限よりそちらを優先する。
     if (!ended_ && phaseTime >= phase_.maximumDuration)
     {
@@ -154,7 +191,20 @@ void SkillExecution::Update(float deltaTime_)
     if (ended_)
     {
         const unsigned int generation_ = generation;
-        EndPhase();
+        if (phaseIndex + 1 < static_cast<int>(definition.phases.size()))
+        {
+            // 次のAnimationやEnter Actionを開始する前に、現在のTargetで継続できるか確認する。
+            const PhaseTransitionCheck check_ = phaseTransitionCheck;
+            if (check_)
+            {
+                const bool allowed_ = check_(definition.phases[phaseIndex + 1]);
+                if (!active || generation_ != generation) return;
+                if (!allowed_) { Stop(SkillExecutionResult::FOLLOW_UP_REJECTED); return; }
+            }
+        }
+        const bool continueSequence_ = phaseIndex + 1 < static_cast<int>(definition.phases.size()) &&
+            definition.phases[phaseIndex + 1].continueSequence;
+        EndPhase(continueSequence_);
         if (!active || generation_ != generation) return;
         ++phaseIndex;
         if (phaseIndex >= static_cast<int>(definition.phases.size()))
@@ -191,7 +241,18 @@ bool SkillExecution::BeginPhase()
     const unsigned int generation_ = generation;
     // Warpを先に適用し、移動後の位置でStartの遷移・姿勢初期化を行う。
     BeginPhaseMovement(phase_);
-    animation_->ChangeState(phase_.animationState, phase_.blendDuration, true);
+    if (!phase_.playAnimationFromSequence)
+    {
+        if (animationGraphPlayback)
+        {
+            // AIのPhaseもグラフ条件に従い、再生を拒否された場合は開始を失敗として閉じる。
+            const auto graph_ = AnimationGraphBridgeComponent::Acquire(owner_);
+            if (!graph_ || !graph_->RequestStateTransition(phase_.animationState, phase_.blendDuration, true,
+                phase_.animationStartTime, true))
+            { error = "Animation graph rejected phase: " + phase_.animationState; return false; }
+        }
+        else animation_->ChangeState(phase_.animationState, phase_.blendDuration, true, phase_.animationStartTime);
+    }
     if (!active || generation_ != generation) return false;
     phaseStarted = true;
     const PhaseCallback callback_ = phaseCallback;
@@ -202,6 +263,16 @@ bool SkillExecution::BeginPhase()
     if (!phase_.sequence.empty())
     {
         const auto sequence_ = owner_->GetComponent<ActionSequence>();
+        if (phase_.continueSequence)
+        {
+            if (!ownsSequence || !sequence_ || sequenceGeneration != sequence_->GetPlaybackGeneration())
+            {
+                error = "The combo sequence was replaced outside the skill.";
+                return false;
+            }
+            SyncBlackboard();
+            return true;
+        }
         const auto action_ = owner_->GetLocalRegistry().GetAction(phase_.sequence);
         if (!sequence_ || !action_) { error = "Phase Sequence not found: " + phase_.sequence; return false; }
         // 時刻0のActionで中断される場合も、開始直後の予約をExitから停止できるようにする。
@@ -212,14 +283,20 @@ bool SkillExecution::BeginPhase()
         ownsSequence = sequenceGeneration == sequence_->GetPlaybackGeneration();
         if (!ownsSequence) { error = "Phase Sequence did not start: " + phase_.sequence; return false; }
     }
+    if (phase_.playAnimationFromSequence &&
+        (!animation_->GetCurrentState() || animation_->GetCurrentState()->name != phase_.animationState))
+    {
+        error = "Sequence did not play the required animation at time zero: " + phase_.animationState;
+        return false;
+    }
     SyncBlackboard();
     return true;
 }
 
-void SkillExecution::EndPhase()
+void SkillExecution::EndPhase(bool continueSequence_)
 {
     BS_PROFILE_SCOPE("SkillExecution::EndPhase");
-    if (ownsSequence)
+    if (ownsSequence && !continueSequence_)
     {
         const auto owner_ = owner.lock();
         const auto sequence_ = owner_ ? owner_->GetComponent<ActionSequence>() : nullptr;
@@ -248,6 +325,7 @@ void SkillExecution::Stop(SkillExecutionResult result_)
     stopping = false;
     result = result_;
     phaseCallback = {};
+    phaseTransitionCheck = {};
     SyncBlackboard();
 }
 
@@ -379,4 +457,16 @@ void SkillExecution::RestoreMovement()
     ownsMovement = false;
     gravitySuspended = false;
     pendingVerticalImpulse = 0.0f;
+}
+
+bool SkillExecution::ExtendCurrentDuration(float extension_, float maximum_)
+{
+    if (!active || stopping || phaseIndex < 0 || phaseIndex >= static_cast<int>(definition.phases.size()) || !std::isfinite(extension_) || !std::isfinite(maximum_)) return false;
+    auto& phase_ = definition.phases[phaseIndex];
+    if (phase_.endCondition != SkillPhaseEnd::DURATION || extension_ <= 0.0f) return false;
+    const float cap_ = (std::min)(maximum_, phase_.maximumDuration);
+    const float duration_ = (std::min)(phase_.duration + extension_, cap_);
+    if (duration_ <= phase_.duration) return false;
+    phase_.duration = duration_;
+    return true;
 }

@@ -268,6 +268,18 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Code\Engine\GamePlay\EventSystem\ObjectDeleteActionComponent.cpp">
+      <Filter>Code\Engine\GamePlay\EventSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\EventSystem\PrefabSpawnActionComponent.cpp">
+      <Filter>Code\Engine\GamePlay\EventSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Game\GameMode\StageCorruptionComponent.cpp">
+      <Filter>Code\Game\Logics\GameMode</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\Graphics\ModelDissolveComponent.cpp">
+      <Filter>Code\Engine\GamePlay\Graphics</Filter>
+    </ClCompile>
     <ClCompile Include="External\ImGuizmo\ImCurveEdit.cpp">
       <Filter>Code\Editor\ImGui\imgui</Filter>
     </ClCompile>
@@ -344,6 +356,9 @@
       <Filter>Code\Engine\GamePlay\Core\Component</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\GamePlay\Core\Object\GameObject.cpp">
+      <Filter>Code\Engine\GamePlay\Core\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\Core\Object\GameObjectManager.Observation.cpp">
       <Filter>Code\Engine\GamePlay\Core\Object</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\GamePlay\Core\Object\GameObjectManager.cpp">
@@ -886,6 +901,9 @@
     <ClCompile Include="Code\Engine\GamePlay\System\AttackSystem.cpp">
       <Filter>Code\Engine\GamePlay\System</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\System\CombatObservationSystem.cpp">
+      <Filter>Code\Engine\GamePlay\System</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\GamePlay\System\JustDodgeSystem.cpp">
       <Filter>Code\Engine\GamePlay\System</Filter>
     </ClCompile>
@@ -940,10 +958,19 @@
     <ClCompile Include="Code\Engine\GamePlay\Core\Component\MotionWarpComponent.cpp">
       <Filter>Code\Engine\GamePlay\Core\Component</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\Core\Component\CombatObservationComponent.cpp">
+      <Filter>Code\Engine\GamePlay\Core\Component</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\GamePlay\Core\Component\PrefabSpawnComponent.cpp">
       <Filter>Code\Engine\GamePlay\Core\Component</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationControllerComponent.Asset.cpp">
+      <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationGraphBridgeComponent.cpp">
+      <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationControllerComponent.Blackboard.cpp">
       <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationControllerComponent.Gui.cpp">
@@ -1018,6 +1045,9 @@
     <ClCompile Include="Code\Game\AI\Director\AIDirectorComponent.cpp">
       <Filter>Code\Game\Logics\AI\Director</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Game\AI\Human\HumanBossAIComponent.Mind.cpp">
+      <Filter>Code\Game\Logics\AI\Human</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Game\AI\Human\HumanBossAIComponent.cpp">
       <Filter>Code\Game\Logics\AI\Human</Filter>
     </ClCompile>
@@ -1050,6 +1080,18 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Code\Engine\GamePlay\EventSystem\ObjectDeleteActionComponent.h">
+      <Filter>Code\Engine\GamePlay\EventSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\EventSystem\PrefabSpawnActionComponent.h">
+      <Filter>Code\Engine\GamePlay\EventSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Game\GameMode\StageCorruptionComponent.h">
+      <Filter>Code\Game\Logics\GameMode</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\Graphics\ModelDissolveComponent.h">
+      <Filter>Code\Engine\GamePlay\Graphics</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Wip.hpp">
       <Filter>Code\Editor\ImGui\imgui</Filter>
     </ClInclude>
@@ -1099,6 +1141,9 @@
       <Filter>Code\Engine\GamePlay\Core\Component</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\GamePlay\Core\Object\GameObject.h">
+      <Filter>Code\Engine\GamePlay\Core\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\Core\Object\PlayerActionObservation.h">
       <Filter>Code\Engine\GamePlay\Core\Object</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\GamePlay\Core\Object\GameObjectManager.h">
@@ -1222,6 +1267,12 @@
       <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationControllerComponent.h">
+      <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationGraphBridgeComponent.h">
+      <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationGraphBlackboardKeys.h">
       <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
     </ClInclude>
     <ClInclude Include="External\imgui-docking\imgui_stdlib.h">
@@ -1734,6 +1785,9 @@
     <ClInclude Include="Code\Engine\GamePlay\System\AttackSystem.h">
       <Filter>Code\Engine\GamePlay\System</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\System\CombatObservationSystem.h">
+      <Filter>Code\Engine\GamePlay\System</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Engine\GamePlay\System\JustDodgeSystem.h">
       <Filter>Code\Engine\GamePlay\System</Filter>
     </ClInclude>
@@ -1789,6 +1843,9 @@
       <Filter>Code\Engine\GamePlay\Core\Component</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\GamePlay\Core\Component\MotionWarpComponent.h">
+      <Filter>Code\Engine\GamePlay\Core\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\Core\Component\CombatObservationComponent.h">
       <Filter>Code\Engine\GamePlay\Core\Component</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\GamePlay\Core\Component\PrefabSpawnComponent.h">
@@ -1898,6 +1955,9 @@
     </ClInclude>
     <ClInclude Include="Code\Game\AI\Director\AIDirectorComponent.h">
       <Filter>Code\Game\Logics\AI\Director</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Game\AI\Human\HumanBossMind.h">
+      <Filter>Code\Game\Logics\AI\Human</Filter>
     </ClInclude>
     <ClInclude Include="Code\Game\AI\Human\HumanBossAIComponent.h">
       <Filter>Code\Game\Logics\AI\Human</Filter>

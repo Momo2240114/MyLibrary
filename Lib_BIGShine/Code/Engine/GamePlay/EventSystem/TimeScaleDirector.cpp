@@ -78,12 +78,25 @@ void TimeScaleDirector::Play(size_t index_)
         wayPoint_.defaultScale);
 }
 
+void TimeScaleDirector::ResetTimeScale()
+{
+    BS_PROFILE_SCOPE("TimeScaleDirector::ResetTimeScale");
+    const auto owner_ = GetGameObject();
+    if (!owner_ || !owner_->manager) return;
+    const auto timeManager_ = owner_->GetManager().GetTimeManager();
+    if (!timeManager_) return;
+    uint32_t layerMask_ = 0u;
+    for (const auto& waypoint_ : editorWaypoints) layerMask_ |= SanitizeTimeScaleLayerMask(waypoint_.layerMask);
+    if (layerMask_ != 0u) timeManager_->ResetToDefaults(layerMask_);
+}
+
 void TimeScaleDirector::RegisterActions()
 {
     // Waypointごとに TimeScale_0, TimeScale_1... のGlobalActionを登録する。
     // Timelineや他Componentから名前でTimeScale演出を呼び出せるようにする。
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_) return;
+    owner_->RegisterGlobalAction("TimeScale", "ResetTimeScale", [this]() { ResetTimeScale(); });
     for (size_t index_ = 0; index_ < editorWaypoints.size(); ++index_)
     {
         owner_->RegisterGlobalAction(

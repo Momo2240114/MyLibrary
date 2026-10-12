@@ -1,4 +1,5 @@
 #include "PrecompiledHeader.h"
+#include "Engine/GamePlay/System/CombatObservationSystem.h"
 
 #include "DragonAIComponent.h"
 
@@ -11,7 +12,8 @@
 #include "Engine/GamePlay/Serialize/ComponentRegistry.h"
 #include "Engine/GamePlay/Transform/Transform.h"
 #include "Engine/Debug/TracyProfiler.h"
-#include "Engine/Graphics/Resource/Animation/AnimationControllerComponent.h"
+#include "Engine/Graphics/Resource/Animation/AnimationGraphBridgeComponent.h"
+#include "Engine/Graphics/Resource/Animation/AnimationGraphBlackboardKeys.h"
 #include "Engine/Graphics/Resource/Animation/DragonNeckCommandIKComponent.h"
 #include "Engine/Graphics/Resource/Animation/DragonTailCommandIKComponent.h"
 #include "Engine/Physics/ColliderComponent.h"
@@ -380,8 +382,8 @@ void DragonAIComponent::Gui()
         ImGui::Text("Wait Idle Animation: %s", ShouldWaitForIdleAnimation() ? "true" : "false");
         ImGui::Text("Last Started: %s  Count: %d", GetDragonActionName(lastStartedAction), actionStartCount);
         ImGui::Text("Last Rejected: %s", GetDragonActionName(lastRejectedAction));
-        const std::shared_ptr<AnimationControllerComponent> animationController_ = animationController.lock();
-        const AnimState* currentAnimationState_ = animationController_ ? animationController_->GetCurrentState() : nullptr;
+        const std::shared_ptr<AnimationGraphBridgeComponent> animationGraph_ = animationGraph.lock();
+        const AnimState* currentAnimationState_ = animationGraph_ ? animationGraph_->GetActiveState() : nullptr;
         const char* currentAnimationStateName_ = currentAnimationState_ ? currentAnimationState_->name.c_str() : "None";
         std::string animCurrentAction_ = GetDragonActionName(runtime.currentAction);
         std::string animActionTrigger_;
@@ -1460,11 +1462,11 @@ void DragonAIComponent::EnsureDependencies()
     blackboard = blackboardComponent_.get();
 
     health = owner_->GetComponent<HealthComponent>().get();
-    animationController = owner_->GetComponent<AnimationControllerComponent>();
+    animationGraph = AnimationGraphBridgeComponent::Acquire(owner_);
     movement = owner_->GetComponent<CharacterMovementComponent>();
     neckIK = owner_->GetComponent<DragonNeckCommandIKComponent>();
     tailIK = owner_->GetComponent<DragonTailCommandIKComponent>();
-    hasAnimationController = !animationController.expired();
+    hasAnimationController = !animationGraph.expired();
     hasMovementComponent = !movement.expired();
     hasNeckIK = !neckIK.expired();
     hasTailIK = !tailIK.expired();
@@ -1475,7 +1477,12 @@ void DragonAIComponent::EnsureDependencies()
         hasPlayerTarget = false;
         return;
     }
-    playerObject = owner_->GetManager().Find(playerObjectName);
+    const auto observation_ = owner_->GetManager().GetCombatObservationSystem();
+    const auto cachedPlayer_ = playerObject.lock();
+    if (!observation_) { playerObject.reset(); hasPlayerTarget = false; return; }
+    // Playerが有効な間は保持した参照を使い、破棄・名前変更時だけ登録索引から再取得する。
+    if (!cachedPlayer_ || cachedPlayer_->GetName() != playerObjectName || !observation_->IsRegisteredObject(cachedPlayer_))
+        playerObject = observation_->FindObject(playerObjectName);
     hasPlayerTarget = !playerObject.expired();
 }
 
@@ -2042,11 +2049,11 @@ bool DragonAIComponent::ShouldWaitForIdleAnimation() const
         return false;
     }
 
-    const std::shared_ptr<AnimationControllerComponent> animationController_ =
-        animationController.lock();
-    if (!animationController_) return false;
+    const std::shared_ptr<AnimationGraphBridgeComponent> animationGraph_ =
+        animationGraph.lock();
+    if (!animationGraph_) return false;
 
-    const AnimState* currentState_ = animationController_->GetCurrentState();
+    const AnimState* currentState_ = animationGraph_->GetActiveState();
     if (!currentState_) return false;
 
     return currentState_->name != "PlainsDragon_IdleBreathe";
@@ -2254,20 +2261,20 @@ void DragonAIComponent::BeginTurnRootMotionLimit(DRAGON_ACTION_TYPE action_)
     turnRootMotionLimitRemainingDegrees = targetAngleDegrees_ + signedPaddingDegrees_;
     turnRootMotionLimitActive = true;
 
-    if (const std::shared_ptr<AnimationControllerComponent> animationController_ =
-        animationController.lock())
+    if (const std::shared_ptr<AnimationGraphBridgeComponent> animationGraph_ =
+        animationGraph.lock())
     {
         // 90度ターンRootMotionが目標角度を超えて回らないよう、消費できるYaw量を渡す。
-        animationController_->SetRootMotionYawLimit(turnRootMotionLimitRemainingDegrees);
+        animationGraph_->RequestYawLimit(turnRootMotionLimitRemainingDegrees);
     }
 }
 
 void DragonAIComponent::ClearTurnRootMotionLimit()
 {
-    if (const std::shared_ptr<AnimationControllerComponent> animationController_ =
-        animationController.lock())
+    if (const std::shared_ptr<AnimationGraphBridgeComponent> animationGraph_ =
+        animationGraph.lock())
     {
-        animationController_->ClearRootMotionYawLimit();
+        animationGraph_->ClearYawLimit();
     }
     turnRootMotionLimitRemainingDegrees = 0.0f;
     turnRootMotionLimitActive = false;
@@ -2750,28 +2757,19 @@ void DragonAIComponent::ApplyAnimationBlackboard(
     if (blackboard)
     {
         // BehaviorGraphや外部デバッグからも読めるよう、同じ値をBlackboardへミラーする。
-        blackboard->SetString("Anim", "CurrentAction", animationActionName_);
-        blackboard->SetString("Anim", "ActionTrigger", actionTrigger_ ? animationActionName_ : "");
-        blackboard->SetBool("Anim", "ActionEnded", runtime.actionEnded);
-        blackboard->SetBool("Anim", "ReturnToIdle", returnToIdle_);
-        blackboard->SetBool("Anim", "ReturnToAirIdle", returnToAirIdle_);
-        blackboard->SetBool("Anim", "IsActing", isActing_);
-        blackboard->SetString("Anim", "CurrentAnimationState", animationStateName_);
+        blackboard->SetString(AnimationGraphBlackboardKeys::ANIMATION_CATEGORY, AnimationGraphBlackboardKeys::CURRENT_ACTION, animationActionName_);
+        blackboard->SetString(AnimationGraphBlackboardKeys::ANIMATION_CATEGORY, AnimationGraphBlackboardKeys::ACTION_TRIGGER, actionTrigger_ ? animationActionName_ : "");
+        blackboard->SetBool(AnimationGraphBlackboardKeys::ANIMATION_CATEGORY, AnimationGraphBlackboardKeys::ACTION_ENDED, runtime.actionEnded);
+        blackboard->SetBool(AnimationGraphBlackboardKeys::ANIMATION_CATEGORY, AnimationGraphBlackboardKeys::RETURN_TO_IDLE, returnToIdle_);
+        blackboard->SetBool(AnimationGraphBlackboardKeys::ANIMATION_CATEGORY, AnimationGraphBlackboardKeys::RETURN_TO_AIR_IDLE, returnToAirIdle_);
+        blackboard->SetBool(AnimationGraphBlackboardKeys::ANIMATION_CATEGORY, AnimationGraphBlackboardKeys::IS_ACTING, isActing_);
+        blackboard->SetString(AnimationGraphBlackboardKeys::ANIMATION_CATEGORY, AnimationGraphBlackboardKeys::DESIRED_STATE, animationStateName_);
     }
 
-    if (const std::shared_ptr<AnimationControllerComponent> animationController_ =
-        animationController.lock())
-    {
-        // AnimationControllerへは直接Paramとしても渡し、グラフ遷移評価に即反映できるようにする。
-        animationController_->SetBlackboardCategory("Anim");
-        animationController_->SetParam("CurrentAction", animationActionName_);
-        animationController_->SetParam("ActionTrigger", actionTrigger_ ? animationActionName_ : std::string());
-        animationController_->SetParam("ActionEnded", runtime.actionEnded);
-        animationController_->SetParam("ReturnToIdle", returnToIdle_);
-        animationController_->SetParam("ReturnToAirIdle", returnToAirIdle_);
-        animationController_->SetParam("IsActing", isActing_);
-        animationController_->SetParam("CurrentAnimationState", animationStateName_);
-    }
+    // 従来のAnimカテゴリへの接続を維持し、Controllerへ直接設定を渡さない。
+    if (const auto animationGraph_ = animationGraph.lock())
+        animationGraph_->RequestInputCategory(AnimationGraphBlackboardKeys::ANIMATION_CATEGORY);
+
 }
 
 void DragonAIComponent::PlayAnimationState(const std::string& stateName_)
@@ -2779,13 +2777,12 @@ void DragonAIComponent::PlayAnimationState(const std::string& stateName_)
     if (stateName_.empty()) return;
 
     // 遷移グラフを使う場合はステート名からTo_トリガーを作り、他トリガーをリセットしてから発火する。
-    if (const std::shared_ptr<AnimationControllerComponent> animationController_ =
-        animationController.lock())
+    if (const std::shared_ptr<AnimationGraphBridgeComponent> animationGraph_ =
+        animationGraph.lock())
     {
-        animationController_->SetUseTransitionGraph(true);
         const std::string triggerName_ = "To_" + stateName_;
         ResetAnimationActionTriggers(triggerName_);
-        animationController_->SetTrigger(triggerName_);
+        animationGraph_->RequestTrigger(triggerName_);
     }
 }
 
@@ -2803,12 +2800,11 @@ void DragonAIComponent::PlaySequencerLinkedState(const std::string& stateName_)
     // 連続攻撃の途中遷移ではAI行動を完了させず、Animation側の現在ステートだけを次段へ同期する。
     ApplyAnimationBlackboard(animationActionName_, stateName_, true);
 
-    if (const std::shared_ptr<AnimationControllerComponent> animationController_ =
-        animationController.lock())
+    if (const std::shared_ptr<AnimationGraphBridgeComponent> animationGraph_ =
+        animationGraph.lock())
     {
-        animationController_->SetUseTransitionGraph(true);
         ResetAnimationActionTriggers("");
-        animationController_->ChangeState(stateName_, 0.079999998f);
+        animationGraph_->RequestStateTransition(stateName_, 0.079999998f);
     }
 }
 
@@ -2817,17 +2813,15 @@ void DragonAIComponent::RequestIdleGraphTransition()
     BS_PROFILE_SCOPE("DragonAIComponent::RequestIdleGraphTransition");
 
     // 地上Idleへ戻る時はReturnToIdleと専用トリガーを立て、待機アニメーションへ確実に戻す。
-    if (const std::shared_ptr<AnimationControllerComponent> animationController_ =
-        animationController.lock())
+    if (const std::shared_ptr<AnimationGraphBridgeComponent> animationGraph_ =
+        animationGraph.lock())
     {
-        animationController_->SetBlackboardCategory("Anim");
-        animationController_->SetUseTransitionGraph(true);
         const std::string triggerName_ = "To_PlainsDragon_IdleBreathe";
         ResetAnimationActionTriggers(triggerName_);
-        animationController_->SetParam("ReturnToIdle", true);
-        animationController_->SetParam("ReturnToAirIdle", false);
-        animationController_->SetTrigger(triggerName_);
-        animationController_->EvaluateGraphTransitions();
+        if (blackboard) blackboard->SetBool(AnimationGraphBlackboardKeys::ANIMATION_CATEGORY, AnimationGraphBlackboardKeys::RETURN_TO_IDLE, true);
+        if (blackboard) blackboard->SetBool(AnimationGraphBlackboardKeys::ANIMATION_CATEGORY, AnimationGraphBlackboardKeys::RETURN_TO_AIR_IDLE, false);
+        animationGraph_->RequestTrigger(triggerName_);
+        animationGraph_->RequestEvaluation();
     }
 }
 
@@ -2836,17 +2830,15 @@ void DragonAIComponent::RequestAirIdleGraphTransition()
     BS_PROFILE_SCOPE("DragonAIComponent::RequestAirIdleGraphTransition");
 
     // 空中待機へ戻る時はReturnToAirIdleを立て、遷移評価まで行って即座にFly系へ寄せる。
-    if (const std::shared_ptr<AnimationControllerComponent> animationController_ =
-        animationController.lock())
+    if (const std::shared_ptr<AnimationGraphBridgeComponent> animationGraph_ =
+        animationGraph.lock())
     {
-        animationController_->SetBlackboardCategory("Anim");
-        animationController_->SetUseTransitionGraph(true);
         const std::string triggerName_ = "To_PlainsDragon_Fly";
         ResetAnimationActionTriggers(triggerName_);
-        animationController_->SetParam("ReturnToIdle", false);
-        animationController_->SetParam("ReturnToAirIdle", true);
-        animationController_->SetTrigger(triggerName_);
-        animationController_->EvaluateGraphTransitions();
+        if (blackboard) blackboard->SetBool(AnimationGraphBlackboardKeys::ANIMATION_CATEGORY, AnimationGraphBlackboardKeys::RETURN_TO_IDLE, false);
+        if (blackboard) blackboard->SetBool(AnimationGraphBlackboardKeys::ANIMATION_CATEGORY, AnimationGraphBlackboardKeys::RETURN_TO_AIR_IDLE, true);
+        animationGraph_->RequestTrigger(triggerName_);
+        animationGraph_->RequestEvaluation();
     }
 }
 
@@ -2855,9 +2847,9 @@ void DragonAIComponent::ResetAnimationActionTriggers(const std::string& keepTrig
     BS_PROFILE_SCOPE("DragonAIComponent::ResetAnimationActionTriggers");
 
     // 同時に複数のTo_トリガーが残ると意図しない遷移になるため、使う1つ以外を落とす。
-    const std::shared_ptr<AnimationControllerComponent> animationController_ =
-        animationController.lock();
-    if (!animationController_) return;
+    const std::shared_ptr<AnimationGraphBridgeComponent> animationGraph_ =
+        animationGraph.lock();
+    if (!animationGraph_) return;
 
     const char* graphStateNames_[] =
     {
@@ -2899,7 +2891,7 @@ void DragonAIComponent::ResetAnimationActionTriggers(const std::string& keepTrig
             continue;
         }
 
-        animationController_->ResetTrigger(triggerName_);
+        animationGraph_->ClearTrigger(triggerName_);
     }
 }
 
@@ -3097,8 +3089,8 @@ void DragonAIComponent::SendRuntimeToBlackboard()
     blackboard->SetBool(blackboardCategory, "IsAirIdle", aiState == DRAGON_AI_STATE::AIR && runtime.currentAction == DRAGON_ACTION_TYPE::AIR_HOLD && runtime.actionEnded);
     blackboard->SetInt(blackboardCategory, "CurrentAction", static_cast<int>(runtime.currentAction));
     blackboard->SetInt(blackboardCategory, "LastCompletedAttackAction", static_cast<int>(lastCompletedAttackAction));
-    blackboard->SetBool(blackboardCategory, "ActionEnded", runtime.actionEnded);
-    blackboard->SetBool(blackboardCategory, "IsActing", isActing_);
+    blackboard->SetBool(blackboardCategory, AnimationGraphBlackboardKeys::ACTION_ENDED, runtime.actionEnded);
+    blackboard->SetBool(blackboardCategory, AnimationGraphBlackboardKeys::IS_ACTING, isActing_);
     blackboard->SetFloat(blackboardCategory, "HpRate", context.hpRate);
     blackboard->SetFloat(blackboardCategory, "AggressionMultiplier", CalculateAggressionMultiplier(context));
     blackboard->SetInt(blackboardCategory, "DamagePhase", static_cast<int>(damagePhase));
@@ -3329,6 +3321,19 @@ void DragonAIComponent::RegisterRuntimeActions()
         {
             ActionRegistry::Instance().Call("GameMode.NotifyPhase1BossDefeated");
         });
+    // 移行演出へ渡す前にSkillと攻撃判定を閉じ、旧Actionの予約を残さない。
+    const std::weak_ptr<GameObject> presentationOwner_ = owner_;
+    owner_->RegisterGlobalAction("ActorPresentation", "DragonPresentation_Stop", [presentationOwner_]()
+    {
+        BS_PROFILE_SCOPE("DragonAIComponent::PresentationStop");
+        const auto owner_ = presentationOwner_.lock();
+        const auto dragon_ = owner_ ? owner_->GetComponent<DragonAIComponent>() : nullptr;
+        if (!dragon_) return;
+        dragon_->StopSkill();
+        dragon_->DisableSequencerHitBoxes();
+        dragon_->ClearTailIK();
+        dragon_->StopMovement();
+    });
     registerAction_("DragonAI_GetHit", [this]() { ForceAction(DRAGON_ACTION_TYPE::GET_HIT); });
     registerAction_("DragonAI_AirGetHit", [this]() { ForceAction(DRAGON_ACTION_TYPE::AIR_GET_HIT); });
     registerAction_("DragonAI_FaceTarget", [this]() { FaceTargetFromAnimationEvent(); });

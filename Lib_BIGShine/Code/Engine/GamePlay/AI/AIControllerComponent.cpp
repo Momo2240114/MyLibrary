@@ -1,4 +1,5 @@
 #include "PrecompiledHeader.h"
+#include "Engine/GamePlay/System/CombatObservationSystem.h"
 
 #include "AIControllerComponent.h"
 
@@ -311,36 +312,30 @@ void AIControllerComponent::UpdateAIContext(float deltaTime_)
     context.toSpawnDirection = DirectionTo(context.ownerPosition, context.spawnPosition, context.spawnDistance);
 }
 
-// Target名を優先して検索し、見つからない場合はPlayerレイヤーのObjectを対象にする。
+// 登録済み参照を使い、対象失効や名前指定の変更時だけ監視Systemから取得し直す。
 void AIControllerComponent::ResolveTarget()
 {
     context.target = nullptr;
-
-    std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
-
-    // 明示的な名前指定がある場合は、レイヤー検索より優先して対象を確定する。
-    if (!targetName.empty())
+    const auto owner_ = GetGameObject();
+    if (!owner_ || !owner_->manager) return;
+    const auto observation_ = owner_->GetManager().GetCombatObservationSystem();
+    if (!observation_) return;
+    const auto cached_ = cachedTarget.lock();
+    const bool namedValid_ = cachedTargetIsNamed && cached_ && cached_->GetName() == targetName;
+    const bool fallbackValid_ = !cachedTargetIsNamed && cached_ && cached_ != owner_ && cached_->GetLayer() == LayerType::Player &&
+        (targetName.empty() || cachedTargetRegistrationSerial == observation_->GetRegistrationSerial());
+    if (cachedTargetName == targetName && cached_ && observation_->IsRegisteredObject(cached_) && (namedValid_ || fallbackValid_))
     {
-        std::shared_ptr<GameObject> namedTarget_ = owner_->GetManager().Find(targetName);
-        if (namedTarget_)
-        {
-            context.target = namedTarget_.get();
-            return;
-        }
+        context.target = cached_.get();
+        return;
     }
-
-    // 名前検索で見つからなかった場合のFallbackとしてPlayerレイヤーを走査する。
-    for (const std::shared_ptr<GameObject>& object_ : owner_->GetManager().GetObjects())
-    {
-        if (!object_ || object_.get() == owner_.get()) continue;
-
-        if (object_->layer == LayerType::Player)
-        {
-            context.target = object_.get();
-            return;
-        }
-    }
+    const auto named_ = targetName.empty() ? nullptr : observation_->FindObject(targetName);
+    const auto target_ = named_ ? named_ : observation_->FindPlayerObject(owner_);
+    cachedTarget = target_;
+    cachedTargetName = targetName;
+    cachedTargetIsNamed = named_ != nullptr;
+    cachedTargetRegistrationSerial = observation_->GetRegistrationSerial();
+    context.target = target_.get();
 }
 
 // 距離や範囲判定などのContext情報を、Conditionノードから読めるBlackboard値へ変換する。

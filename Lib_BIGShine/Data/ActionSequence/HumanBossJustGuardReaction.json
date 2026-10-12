@@ -1,0 +1,17 @@
+{
+  "RegisterGlobal": false,
+  "Sequences": [
+    {
+      "name": "HumanBoss_JustGuardRecoil",
+      "duration": 1.05,
+      "completionAction": "HumanBoss_JustGuardRecoilEnd",
+      "actions": [
+        {
+          "cat": "Animation",
+          "name": "Block_Hit_Break_Seq",
+          "time": 0.0
+        }
+      ]
+    }
+  ]
+}

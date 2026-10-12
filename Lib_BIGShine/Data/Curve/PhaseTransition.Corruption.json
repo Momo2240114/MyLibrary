@@ -1,0 +1,33 @@
+{
+    "AssetType": "CurveTrack",
+    "AssetVersion": 1,
+    "Curve": {
+        "Name": "PhaseTransition.Corruption",
+        "AssetPath": "Data/Curve/PhaseTransition.Corruption.json",
+        "Type": 3,
+        "Color": 4282654975,
+        "Visible": true,
+        "Points": [
+            [
+                0,
+                0
+            ],
+            [
+                1,
+                1
+            ]
+        ],
+        "PointOptions": [
+            {
+                "InterpolationType": 2,
+                "LeftTangent": 0,
+                "RightTangent": 0
+            },
+            {
+                "InterpolationType": 2,
+                "LeftTangent": 0,
+                "RightTangent": 0
+            }
+        ]
+    }
+}

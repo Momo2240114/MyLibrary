@@ -35,6 +35,8 @@ public:
     void RegisterActions() override;
     // 指定IndexのWaypointをTimeManagerへ渡して一時的なTimeScale演出を再生する。
     void Play(size_t index_);
+    // このDirectorの対象Layerに残った一時Scaleを終了する。
+    void ResetTimeScale();
 
 private:
     // Editorで調整するTimeScale演出リスト。各要素が1つのGlobalActionになる。

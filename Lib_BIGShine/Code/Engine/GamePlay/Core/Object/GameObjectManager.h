@@ -23,6 +23,7 @@ class TimeManager;
 class CameraManager;
 class CameraComponent;
 class MotionVelocityComponent;
+class CombatObservationSystem;
 struct ID3D11RenderTargetView;
 
 enum class SCENE_RUNTIME_STATE
@@ -49,6 +50,8 @@ class GameObjectManager
 {
 public:
     void Initialize();
+    // 独立した監視サービスを公開する。観測値・履歴・戦闘結果の処理はSystemが担当する。
+    std::shared_ptr<CombatObservationSystem> GetCombatObservationSystem() const;
 
     template<typename... Args>
     std::shared_ptr<GameObject> Create(const std::string& name_, Args&&... args_)
@@ -189,7 +192,7 @@ public:
     CameraManager* GetCameraManager();
 
     // プレハブからオブジェクトを生成
-    std::shared_ptr<GameObject> Instantiate(const std::string& prefabName_);
+    std::shared_ptr<GameObject> Instantiate(const std::string& prefabName_, bool preserveNames_ = false);
     // Prefabsフォルダ内のファイル一覧を更新
     void RefreshPrefabList();
     const std::vector<std::string>& GetPrefabFiles() const { return prefabFiles; }
@@ -290,6 +293,10 @@ private:
     std::unique_ptr<MotionVelocityRenderSystem> motionVelocityRenderSystem;
     // ParticleComponentだけを弱参照で保持し、失効したものはFrame終端で掃除する。
     std::vector<std::weak_ptr<ParticleComponent>> particleComponents;
+    // 監視サービスと専用ObjectはBossの親子階層・寿命から独立させる。
+    std::shared_ptr<CombatObservationSystem> combatObservationSystem;
+    std::weak_ptr<GameObject> combatObservationObject;
+    void EnsureCombatObservationRuntime();
     // 現在のScene。
     Scene* currentScene = nullptr;
     std::vector<std::string> prefabFiles; // プレハブ名のリスト

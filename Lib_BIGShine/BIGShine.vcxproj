@@ -337,6 +337,10 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Code\Engine\GamePlay\EventSystem\ObjectDeleteActionComponent.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\EventSystem\PrefabSpawnActionComponent.cpp" />
+    <ClCompile Include="Code\Game\GameMode\StageCorruptionComponent.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Graphics\ModelDissolveComponent.cpp" />
     <ClCompile Include="Code\Engine\Core\PrecompiledHeader\PrecompiledHeader.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
       <PrecompiledHeaderFile>PrecompiledHeader.h</PrecompiledHeaderFile>
@@ -409,12 +413,14 @@
     <ClCompile Include="Code\Engine\GamePlay\Core\Component\BlackboardComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Core\Component\CharacterMovementComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Core\Component\MotionWarpComponent.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Core\Component\CombatObservationComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Core\Component\PrefabSpawnComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Core\Component\ComponentBase.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Core\Component\Movement.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Core\Component\MovementComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Core\Component\SpinComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Core\Object\GameObject.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Core\Object\GameObjectManager.Observation.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Core\Object\GameObjectManager.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\EventSystem\ActionSequence.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\EventSystem\ActorPresentationActionComponent.cpp" />
@@ -474,6 +480,8 @@
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\ShapeRenderer.cpp" />
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\SpriteRenderSystem.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationControllerComponent.Asset.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationGraphBridgeComponent.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationControllerComponent.Blackboard.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationControllerComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationControllerComponent.Gui.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationControllerComponent.NodeEditor.cpp" />
@@ -532,6 +540,7 @@
     <ClCompile Include="Code\Engine\Physics\ColliderComponent.cpp" />
     <ClCompile Include="Code\Engine\Physics\CollisionStepSystem.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\System\AttackSystem.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\System\CombatObservationSystem.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Combat\AttackTemplateManager.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Combat\AttackEffectHitComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Combat\AttackTemplateRuntime.cpp" />
@@ -563,6 +572,7 @@
     <ClCompile Include="Code\Engine\UI\UIWidgetComponent.cpp" />
     <ClCompile Include="Code\Engine\UI\UIWorldAnchorComponent.cpp" />
     <ClCompile Include="Code\Engine\UI\WidgetBoardComponent.cpp" />
+    <ClCompile Include="Code\Game\AI\Human\HumanBossAIComponent.Mind.cpp" />
     <ClCompile Include="Code\Game\AI\Human\HumanBossAIComponent.cpp" />
     <ClCompile Include="Code\Game\AI\Human\HumanBossActionComponent.cpp" />
     <ClCompile Include="Code\Game\AI\Dragon\DragonAIComponent.cpp" />
@@ -655,6 +665,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Code\Engine\GamePlay\EventSystem\ObjectDeleteActionComponent.h" />
+    <ClInclude Include="Code\Engine\GamePlay\EventSystem\PrefabSpawnActionComponent.h" />
+    <ClInclude Include="Code\Game\GameMode\StageCorruptionComponent.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Graphics\ModelDissolveComponent.h" />
     <ClInclude Include="Code\Engine\Core\PrecompiledHeader\PrecompiledHeaderConfig.h" />
     <ClInclude Include="Code\Engine\Core\PrecompiledHeader\PrecompiledHeader.h" />
     <ClInclude Include="Code\Editor\EditorCameraData.h" />
@@ -821,9 +835,11 @@
     <ClInclude Include="Code\Engine\GamePlay\Core\Component\BlackboardComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Core\Component\CharacterMovementComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Core\Component\MotionWarpComponent.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Core\Component\CombatObservationComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Core\Component\PrefabSpawnComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Core\Component\ComponentBase.h" />
     <ClInclude Include="Code\Engine\GamePlay\Core\Object\GameObject.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Core\Object\PlayerActionObservation.h" />
     <ClInclude Include="Code\Engine\GamePlay\Core\Object\GameObjectManager.h" />
     <ClInclude Include="Code\Engine\GamePlay\Graphics\LightBlinkerComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Graphics\MotionVelocityComponent.h" />
@@ -847,6 +863,8 @@
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationDataAsset.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationState.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationControllerComponent.h" />
+    <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationGraphBridgeComponent.h" />
+    <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationGraphBlackboardKeys.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\IKMapComponent.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\FootIKComponent.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\HumanLookAtIKComponent.h" />
@@ -887,6 +905,7 @@
     <ClInclude Include="Code\Engine\Physics\Collision.h" />
     <ClInclude Include="Code\Engine\Physics\CollisionStepSystem.h" />
     <ClInclude Include="Code\Engine\GamePlay\System\AttackSystem.h" />
+    <ClInclude Include="Code\Engine\GamePlay\System\CombatObservationSystem.h" />
     <ClInclude Include="Code\Engine\GamePlay\Combat\AttackTemplateManager.h" />
     <ClInclude Include="Code\Engine\GamePlay\Combat\AttackEffectHitComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Combat\AttackTemplateRuntime.h" />
@@ -903,6 +922,7 @@
     <ClInclude Include="Code\Engine\Physics\SphereCollider.h" />
     <ClInclude Include="Code\Engine\Platform\WindowsDialogHelper.h" />
     <ClInclude Include="Code\Engine\UI\UIButton.h" />
+    <ClInclude Include="Code\Game\AI\Human\HumanBossMind.h" />
     <ClInclude Include="Code\Game\AI\Human\HumanBossAIComponent.h" />
     <ClInclude Include="Code\Game\AI\Human\HumanBossActionComponent.h" />
     <ClInclude Include="Code\Game\AI\Dragon\DragonAIComponent.h" />
