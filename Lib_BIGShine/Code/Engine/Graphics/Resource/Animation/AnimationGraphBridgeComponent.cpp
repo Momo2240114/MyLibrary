@@ -17,9 +17,14 @@ std::shared_ptr<AnimationGraphBridgeComponent> AnimationGraphBridgeComponent::Ac
 {
     if (!owner_) return nullptr;
     if (const auto bridge_ = owner_->GetComponent<AnimationGraphBridgeComponent>())
-        return bridge_->ResolveController() ? bridge_ : nullptr;
+    {
+        if (!bridge_->ResolveController()) return nullptr;
+        // Start中に追加されたFacadeも準備済みにし、階層の生成待ちを阻害しない。
+        if (!bridge_->IsStarted()) { bridge_->Start(); bridge_->SetStarted(true); }
+        return bridge_;
+    }
     if (!owner_->GetComponent<AnimationControllerComponent>()) return nullptr;
-    const auto bridge_ = owner_->GetOrAddComponent<AnimationGraphBridgeComponent>(false);
+    const auto bridge_ = owner_->GetOrAddComponent<AnimationGraphBridgeComponent>(true);
     return bridge_->ResolveController() ? bridge_ : nullptr;
 }
 

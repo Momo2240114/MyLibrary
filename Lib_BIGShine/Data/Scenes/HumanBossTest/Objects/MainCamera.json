@@ -191,7 +191,8 @@
                 "wallCameraStartDistance": 3.0,
                 "wallCenterWeight": 0.75,
                 "wallCombatWeight": 0.25,
-                "wallLookAtPlayerBias": 0.41999998688697815
+                "wallLookAtPlayerBias": 0.41999998688697815,
+                "enableCollisionVerticalCorrection": false
             },
             "Enabled": true,
             "LateUpdateEnabled": true,

@@ -1042,6 +1042,7 @@ void GameObjectManager::Gui()
 
 void GameObjectManager::DrawHierarchyGui()
 {
+    BS_PROFILE_SCOPE("GameObjectManager::DrawHierarchyGui");
     // Scene内Objectの作成、選択、階層表示、Prefab生成を行うHierarchy UI。
     static char createName_[64] = "GameObject";
 
@@ -1105,14 +1106,20 @@ void GameObjectManager::DrawHierarchyGui()
 
     ImGui::Separator();
 
+    // 保存しない人型ボスも表示できるよう、保存可否と表示可否を分ける。
+    ImGui::Checkbox("Show Runtime Objects", &showRuntimeObjects);
+
     GameObject* objectToDelete_ = nullptr;
 
     // 内部IDなので英語のまま
     ImGui::BeginChild("HierarchyRegion", ImVec2(0, 0), true);
 
-    for (auto& object_ : objects)
+    // 削除の終了処理でPool返却が発生しても、表示中の走査を無効化しない。
+    const auto hierarchyObjects_ = objects;
+    for (const auto& object_ : hierarchyObjects_)
     {
-        if (!object_ || !object_->saveFlg) continue;
+        if (!object_ || object_->IsPendingDestroy() ||
+            (!object_->saveFlg && !object_->IsRuntimeHierarchyVisible() && !showRuntimeObjects)) continue;
         if (object_->transform->parent.expired())
         {
             DrawHierarchyNode(object_, &objectToDelete_);
@@ -1302,8 +1309,9 @@ void GameObjectManager::DrawHierarchyNode(std::shared_ptr<GameObject> object_, G
     bool opened_ = ImGui::TreeNodeEx(
         (void*)(uintptr_t)object_.get(),
         flags_,
-        "%s",
-        object_->GetName().c_str());
+        "%s%s",
+        object_->GetName().c_str(),
+        object_->saveFlg ? "" : " [Runtime]");
 
     static std::weak_ptr<GameObject> pressedObject_;
     static ImVec2 pressedMousePos_ = ImVec2(0.0f, 0.0f);
@@ -1376,11 +1384,13 @@ void GameObjectManager::DrawHierarchyNode(std::shared_ptr<GameObject> object_, G
 
     if (opened_)
     {
-        for (auto& childTransform_ : object_->transform->children)
+        const auto children_ = object_->transform->children;
+        for (const auto& childTransform_ : children_)
         {
             if (auto childObject_ = childTransform_->gameObject.lock())
             {
-                if (!childObject_->saveFlg) continue;
+                if (childObject_->IsPendingDestroy() ||
+                    (!childObject_->saveFlg && !childObject_->IsRuntimeHierarchyVisible() && !showRuntimeObjects)) continue;
                 DrawHierarchyNode(childObject_, objectToDelete_);
             }
         }

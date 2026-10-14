@@ -100,6 +100,7 @@ void CapsuleCollider::Gui()
     ImGui::DragFloat("Half Height", &halfHeight, 0.01f, 0.001f, 10.0f);
 
     ImGui::SeparatorText("Node Segment");
+    ImGui::DragFloat("Node Segment Scale", &nodeSegmentScale, 0.01f, 0.1f, 5.0f);
     const std::shared_ptr<GltfModelCommponennt> model_ = ResolveNodeModel();
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     std::vector<std::shared_ptr<GameObject>> parentModelObjects_;
@@ -224,6 +225,7 @@ void CapsuleCollider::Serialize(nlohmann::json& json_) const
     // 基本形状に加えて、Node追従に必要なModel Object名とNode名を保存する。
     // Node IndexはModel読み込み後に解決するCacheなので保存しない。
     ColliderComponent::Serialize(json_);
+    json_["NodeSegmentScale"] = nodeSegmentScale;
     json_["Radius"] = radius;
     json_["HalfHeight"] = halfHeight;
     json_["NodeModelObjectName"] = nodeModelObjectName;
@@ -235,6 +237,7 @@ void CapsuleCollider::Deserialize(const nlohmann::json& json_)
 {
     // 保存されたNode名を復元し、Index CacheはModel再読み込みに備えて無効化する。
     ColliderComponent::Deserialize(json_);
+    nodeSegmentScale = std::clamp(json_.value("NodeSegmentScale", 1.0f), 0.1f, 5.0f);
     radius = json_.value("Radius", 0.5f);
     halfHeight = json_.value("HalfHeight", 1.0f);
     nodeModelObjectName = json_.value("NodeModelObjectName", std::string{});
@@ -322,6 +325,10 @@ bool CapsuleCollider::TryGetNodeSegment(
     const auto& endTransform_ = nodes_[endNodeIndex].worldTransform;
     startPosition_ = { startTransform_._41, startTransform_._42, startTransform_._43 };
     endPosition_ = { endTransform_._41, endTransform_._42, endTransform_._43 };
+    // 物理形状・Debug・CPU判定が同じ拡張済みの終点を使用する。
+    endPosition_ = { startPosition_.x + (endPosition_.x - startPosition_.x) * nodeSegmentScale,
+        startPosition_.y + (endPosition_.y - startPosition_.y) * nodeSegmentScale,
+        startPosition_.z + (endPosition_.z - startPosition_.z) * nodeSegmentScale };
 
     const float deltaX_ = endPosition_.x - startPosition_.x;
     const float deltaY_ = endPosition_.y - startPosition_.y;

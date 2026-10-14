@@ -25,6 +25,10 @@ public:
     void Gui() override;
     void Serialize(nlohmann::json& json_) const override;
     void Deserialize(const nlohmann::json& json_) override;
+    // 第二形態の設定を実行時だけ使用し、保存時は元の設定を維持する。
+    void ApplyRuntimeSettings(const nlohmann::json& settings_);
+    // プレビュー終了時に、切替前の設定へ戻す。
+    void ClearRuntimeSettings();
 
     // CutSceneや特殊Camera中に衝突補正を一時停止する。
     void SetCollisionSuppressed(bool suppressed_);
@@ -84,4 +88,6 @@ private:
     mutable std::string debugLastHitColliderName;
     mutable uint32_t debugLastHitLayer = 0u;
     mutable bool debugLastHitAccepted = false;
+    bool runtimeSettingsActive = false;
+    nlohmann::json originalRuntimeSettings;
 };

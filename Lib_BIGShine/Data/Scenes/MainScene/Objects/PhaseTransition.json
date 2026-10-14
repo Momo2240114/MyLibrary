@@ -91,7 +91,8 @@
                         ],
                         "SmoothMovement": true,
                         "SwayAmplitude": 0,
-                        "SwayCycles": 2
+                        "SwayCycles": 2,
+                        "RefreshStateAssetOnPlay": true
                     },
                     {
                         "ActionName": "DragonDeath",
@@ -108,7 +109,8 @@
                         ],
                         "SmoothMovement": true,
                         "SwayAmplitude": 0,
-                        "SwayCycles": 2
+                        "SwayCycles": 2,
+                        "RefreshStateAssetOnPlay": true
                     },
                     {
                         "ActionName": "PlayerCounter",
@@ -125,7 +127,8 @@
                         ],
                         "SmoothMovement": true,
                         "SwayAmplitude": 0,
-                        "SwayCycles": 2
+                        "SwayCycles": 2,
+                        "RefreshStateAssetOnPlay": true
                     },
                     {
                         "ActionName": "PlayerBlock",
@@ -134,7 +137,7 @@
                         "StateName": "TransitionPlayerBlock",
                         "StateAssetPath": "Data/Animation/StateData/PhaseTransition/States/TransitionPlayerBlock.json",
                         "TargetName": "",
-                        "Duration": 0.08,
+                        "Duration": 0.04,
                         "PositionOffset": [
                             0,
                             0,
@@ -142,7 +145,8 @@
                         ],
                         "SmoothMovement": true,
                         "SwayAmplitude": 0,
-                        "SwayCycles": 2
+                        "SwayCycles": 2,
+                        "RefreshStateAssetOnPlay": true
                     },
                     {
                         "ActionName": "PlayerParry",
@@ -151,7 +155,7 @@
                         "StateName": "TransitionPlayerParry",
                         "StateAssetPath": "Data/Animation/StateData/PhaseTransition/States/TransitionPlayerParry.json",
                         "TargetName": "",
-                        "Duration": 0.08,
+                        "Duration": 0.04,
                         "PositionOffset": [
                             0,
                             0,
@@ -159,7 +163,8 @@
                         ],
                         "SmoothMovement": true,
                         "SwayAmplitude": 0,
-                        "SwayCycles": 2
+                        "SwayCycles": 2,
+                        "RefreshStateAssetOnPlay": true
                     },
                     {
                         "ActionName": "HumanIdle",
@@ -176,7 +181,8 @@
                         ],
                         "SmoothMovement": true,
                         "SwayAmplitude": 0,
-                        "SwayCycles": 2
+                        "SwayCycles": 2,
+                        "RefreshStateAssetOnPlay": true
                     },
                     {
                         "ActionName": "HumanSword1",
@@ -185,7 +191,7 @@
                         "StateName": "TransitionHumanSword1",
                         "StateAssetPath": "Data/Animation/StateData/PhaseTransition/States/TransitionHumanSword1.json",
                         "TargetName": "",
-                        "Duration": 0.08,
+                        "Duration": 0.04,
                         "PositionOffset": [
                             0,
                             0,
@@ -193,7 +199,8 @@
                         ],
                         "SmoothMovement": true,
                         "SwayAmplitude": 0,
-                        "SwayCycles": 2
+                        "SwayCycles": 2,
+                        "RefreshStateAssetOnPlay": true
                     },
                     {
                         "ActionName": "HumanSword2",
@@ -202,7 +209,7 @@
                         "StateName": "TransitionHumanSword2",
                         "StateAssetPath": "Data/Animation/StateData/PhaseTransition/States/TransitionHumanSword2.json",
                         "TargetName": "",
-                        "Duration": 0.08,
+                        "Duration": 0.04,
                         "PositionOffset": [
                             0,
                             0,
@@ -210,7 +217,8 @@
                         ],
                         "SmoothMovement": true,
                         "SwayAmplitude": 0,
-                        "SwayCycles": 2
+                        "SwayCycles": 2,
+                        "RefreshStateAssetOnPlay": true
                     },
                     {
                         "ActionName": "HumanSword3",
@@ -219,7 +227,7 @@
                         "StateName": "TransitionHumanSword3",
                         "StateAssetPath": "Data/Animation/StateData/PhaseTransition/States/TransitionHumanSword3.json",
                         "TargetName": "",
-                        "Duration": 0.08,
+                        "Duration": 0.04,
                         "PositionOffset": [
                             0,
                             0,
@@ -227,7 +235,8 @@
                         ],
                         "SmoothMovement": true,
                         "SwayAmplitude": 0,
-                        "SwayCycles": 2
+                        "SwayCycles": 2,
+                        "RefreshStateAssetOnPlay": true
                     },
                     {
                         "ActionName": "HumanKick",
@@ -244,7 +253,8 @@
                         ],
                         "SmoothMovement": true,
                         "SwayAmplitude": 0,
-                        "SwayCycles": 2
+                        "SwayCycles": 2,
+                        "RefreshStateAssetOnPlay": true
                     },
                     {
                         "ActionName": "KnockdownStart",
@@ -261,7 +271,8 @@
                         ],
                         "SmoothMovement": true,
                         "SwayAmplitude": 0,
-                        "SwayCycles": 2
+                        "SwayCycles": 2,
+                        "RefreshStateAssetOnPlay": true
                     },
                     {
                         "ActionName": "KnockdownLoop",
@@ -278,7 +289,8 @@
                         ],
                         "SmoothMovement": true,
                         "SwayAmplitude": 0,
-                        "SwayCycles": 2
+                        "SwayCycles": 2,
+                        "RefreshStateAssetOnPlay": true
                     },
                     {
                         "ActionName": "KnockdownEnd",
@@ -295,7 +307,8 @@
                         ],
                         "SmoothMovement": true,
                         "SwayAmplitude": 0,
-                        "SwayCycles": 2
+                        "SwayCycles": 2,
+                        "RefreshStateAssetOnPlay": true
                     },
                     {
                         "ActionName": "FreezePlayerModel",
@@ -610,7 +623,7 @@
                         "StateName": "",
                         "StateAssetPath": "",
                         "TargetName": "HumanBossClashTransform",
-                        "Duration": 2.4,
+                        "Duration": 0.55,
                         "PositionOffset": [
                             0,
                             0,
@@ -1880,7 +1893,7 @@
                         "StateName": "TransitionHumanApproach",
                         "StateAssetPath": "Data/Animation/StateData/PhaseTransition/States/TransitionHumanApproach.json",
                         "TargetName": "",
-                        "Duration": 0.05,
+                        "Duration": 0.04,
                         "PositionOffset": [
                             0,
                             0,
@@ -1893,7 +1906,8 @@
                         "SkipInPreview": false,
                         "TrailWidth": 2.0,
                         "SwayAmplitude": 0,
-                        "SwayCycles": 2
+                        "SwayCycles": 2,
+                        "RefreshStateAssetOnPlay": true
                     },
                     {
                         "ActionName": "RecoveryPlayer",
@@ -1930,6 +1944,74 @@
                         "SwayAmplitude": 0,
                         "SwayCycles": 2,
                         "MatchTargetRotation": true
+                    },
+                    {
+                        "ActionName": "MeshPlayTransitionClashSlash",
+                        "ActorName": "TransitionClashSlash",
+                        "Type": 4,
+                        "StateName": "",
+                        "StateAssetPath": "",
+                        "TargetName": "",
+                        "Duration": 0,
+                        "PositionOffset": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "SmoothMovement": true,
+                        "SwayAmplitude": 0,
+                        "SwayCycles": 2
+                    },
+                    {
+                        "ActionName": "MeshStopTransitionClashSlash",
+                        "ActorName": "TransitionClashSlash",
+                        "Type": 5,
+                        "StateName": "",
+                        "StateAssetPath": "",
+                        "TargetName": "",
+                        "Duration": 0,
+                        "PositionOffset": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "SmoothMovement": true,
+                        "SwayAmplitude": 0,
+                        "SwayCycles": 2
+                    },
+                    {
+                        "ActionName": "HumanAuraPlay",
+                        "ActorName": "HumanBoss",
+                        "Type": 6,
+                        "StateName": "",
+                        "StateAssetPath": "",
+                        "TargetName": "",
+                        "Duration": 0,
+                        "PositionOffset": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "SmoothMovement": true,
+                        "SwayAmplitude": 0,
+                        "SwayCycles": 2
+                    },
+                    {
+                        "ActionName": "HumanAuraStop",
+                        "ActorName": "HumanBoss",
+                        "Type": 7,
+                        "StateName": "",
+                        "StateAssetPath": "",
+                        "TargetName": "",
+                        "Duration": 0,
+                        "PositionOffset": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "SmoothMovement": true,
+                        "SwayAmplitude": 0,
+                        "SwayCycles": 2
                     }
                 ],
                 "SpawnPoints": []
@@ -1983,7 +2065,9 @@
                     0.025,
                     0.035,
                     1
-                ]
+                ],
+                "CameraObjectName": "MainCamera",
+                "TargetCameraAssetPath": "Data/Scenes/HumanBossTest/Objects/MainCamera.json"
             },
             "Enabled": true,
             "UpdateEnabled": true,
@@ -2010,14 +2094,16 @@
                         "PrefabName": "PhaseTransitionEffects",
                         "ActorName": "PhaseTransitionEffects",
                         "SuspendGameplay": true,
-                        "SaveSpawnedObjects": false
+                        "SaveSpawnedObjects": false,
+                        "ShowInHierarchy": false
                     },
                     {
                         "ActionName": "SpawnHuman",
                         "PrefabName": "Phase2HumanBoss",
                         "ActorName": "HumanBoss",
                         "SuspendGameplay": true,
-                        "SaveSpawnedObjects": false
+                        "SaveSpawnedObjects": false,
+                        "ShowInHierarchy": true
                     }
                 ]
             }
@@ -2188,26 +2274,26 @@
                             },
                             {
                                 "cat": "CameraShake",
-                                "name": "TransitionHeavyShake",
-                                "time": 2.5,
+                                "name": "TransitionDragonFallShake",
+                                "time": 3.25,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ParticlePlayTransitionGroundImpact",
-                                "time": 2.5,
+                                "time": 3.25,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ImpactSound",
-                                "time": 2.5,
+                                "time": 3.25,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ParticleStopTransitionGroundImpact",
-                                "time": 3.7,
+                                "time": 3.95,
                                 "blackboardWrites": []
                             },
                             {
@@ -2292,9 +2378,15 @@
                     },
                     {
                         "name": "Phase2Intro",
-                        "duration": 20.8,
+                        "duration": 17.9,
                         "completionAction": "GameMode.SequenceFinished",
                         "actions": [
+                            {
+                                "cat": "StageCorruption",
+                                "name": "PhaseTransition_ApplyCameraProfile",
+                                "time": 0,
+                                "blackboardWrites": []
+                            },
                             {
                                 "cat": "CameraAction",
                                 "name": "TransitionMudAttack",
@@ -2399,6 +2491,24 @@
                             },
                             {
                                 "cat": "ActorPresentation",
+                                "name": "PhaseTransition_MeshStopTransitionMudPool",
+                                "time": 0,
+                                "blackboardWrites": []
+                            },
+                            {
+                                "cat": "ActorPresentation",
+                                "name": "PhaseTransition_MeshStopTransitionMudVortex",
+                                "time": 0,
+                                "blackboardWrites": []
+                            },
+                            {
+                                "cat": "ActorPresentation",
+                                "name": "PhaseTransition_ParticleResetTransitionMudVortex",
+                                "time": 0,
+                                "blackboardWrites": []
+                            },
+                            {
+                                "cat": "ActorPresentation",
                                 "name": "TransitionMud0_Strike",
                                 "time": 2.5,
                                 "blackboardWrites": []
@@ -2430,79 +2540,79 @@
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_MeshPlayWeapon",
-                                "time": 3.133,
+                                "time": 3.0387,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_MeshPlayTransitionCounterRing",
-                                "time": 3.183,
+                                "time": 3.072,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_SlashSound",
-                                "time": 3.183,
+                                "time": 3.072,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "CameraShake",
-                                "name": "TransitionClashShake",
-                                "time": 3.183,
-                                "blackboardWrites": []
-                            },
-                            {
-                                "cat": "TimeScale",
-                                "name": "PhaseTransition_TimeScale_0",
-                                "time": 3.183,
+                                "name": "TransitionCounterShake",
+                                "time": 3.072,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ParticlePlayTransitionMudScatter",
-                                "time": 3.183,
+                                "time": 3.072,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "TransitionMud0_Scatter",
-                                "time": 3.183,
+                                "time": 3.072,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "TransitionMud1_Scatter",
-                                "time": 3.183,
+                                "time": 3.072,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "TransitionMud2_Scatter",
-                                "time": 3.183,
+                                "time": 3.072,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "TransitionMud3_Scatter",
-                                "time": 3.183,
+                                "time": 3.072,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_MeshStopWeapon",
-                                "time": 3.83,
+                                "time": 3.5033,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_MeshStopTransitionCounterRing",
-                                "time": 3.83,
+                                "time": 3.5033,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ParticleStopTransitionMudScatter",
-                                "time": 3.85,
+                                "time": 3.5167,
+                                "blackboardWrites": []
+                            },
+                            {
+                                "cat": "ActorPresentation",
+                                "name": "PhaseTransition_PlayerIdle",
+                                "time": 3.97,
                                 "blackboardWrites": []
                             },
                             {
@@ -2611,6 +2721,18 @@
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_PlaceHumanSlough",
+                                "time": 4.2,
+                                "blackboardWrites": []
+                            },
+                            {
+                                "cat": "ActorPresentation",
+                                "name": "PhaseTransition_MeshPlayTransitionMudVortex",
+                                "time": 4.2,
+                                "blackboardWrites": []
+                            },
+                            {
+                                "cat": "ActorPresentation",
+                                "name": "PhaseTransition_ParticlePlayTransitionMudVortex",
                                 "time": 4.2,
                                 "blackboardWrites": []
                             },
@@ -2749,6 +2871,12 @@
                                 "blackboardWrites": []
                             },
                             {
+                                "cat": "ActorPresentation",
+                                "name": "PhaseTransition_HumanAuraPlay",
+                                "time": 8.1,
+                                "blackboardWrites": []
+                            },
+                            {
                                 "cat": "CameraAction",
                                 "name": "TransitionSwordClash",
                                 "time": 9.3,
@@ -2769,379 +2897,415 @@
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_HumanSword1",
-                                "time": 11.7,
+                                "time": 9.85,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_MeshPlayHumanBossWeapon",
-                                "time": 11.7,
+                                "time": 9.85,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "CameraAction",
                                 "name": "TransitionSwordStrike",
-                                "time": 11.7,
+                                "time": 9.85,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_PlayerBlock",
-                                "time": 11.85,
+                                "time": 9.9437,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ParticlePlayTransitionClashSparks",
-                                "time": 11.85,
+                                "time": 9.9437,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "CameraShake",
                                 "name": "TransitionClashShake",
-                                "time": 11.85,
+                                "time": 9.9437,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_SlashSound",
-                                "time": 11.85,
+                                "time": 9.9437,
+                                "blackboardWrites": []
+                            },
+                            {
+                                "cat": "ActorPresentation",
+                                "name": "PhaseTransition_MeshPlayTransitionClashSlash",
+                                "time": 9.9437,
+                                "blackboardWrites": []
+                            },
+                            {
+                                "cat": "ActorPresentation",
+                                "name": "PhaseTransition_MeshStopTransitionClashSlash",
+                                "time": 10.1037,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ParticleStopTransitionClashSparks",
-                                "time": 12.25,
+                                "time": 10.1937,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_HumanSword2",
-                                "time": 12.7,
+                                "time": 10.475,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_PlayerParry",
-                                "time": 12.85,
+                                "time": 10.5687,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ParticlePlayTransitionClashSparks",
-                                "time": 12.85,
+                                "time": 10.5687,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "CameraShake",
                                 "name": "TransitionClashShake",
-                                "time": 12.85,
+                                "time": 10.5687,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_SlashSound",
-                                "time": 12.85,
+                                "time": 10.5687,
+                                "blackboardWrites": []
+                            },
+                            {
+                                "cat": "ActorPresentation",
+                                "name": "PhaseTransition_MeshPlayTransitionClashSlash",
+                                "time": 10.5687,
+                                "blackboardWrites": []
+                            },
+                            {
+                                "cat": "ActorPresentation",
+                                "name": "PhaseTransition_MeshStopTransitionClashSlash",
+                                "time": 10.7287,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ParticleStopTransitionClashSparks",
-                                "time": 13.25,
+                                "time": 10.8187,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_HumanSword3",
-                                "time": 13.7,
+                                "time": 11.1,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_PlayerBlock",
-                                "time": 13.89,
+                                "time": 11.2188,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ParticlePlayTransitionClashSparks",
-                                "time": 13.89,
+                                "time": 11.2188,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "CameraShake",
                                 "name": "TransitionClashShake",
-                                "time": 13.89,
+                                "time": 11.2188,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_SlashSound",
-                                "time": 13.89,
+                                "time": 11.2188,
+                                "blackboardWrites": []
+                            },
+                            {
+                                "cat": "ActorPresentation",
+                                "name": "PhaseTransition_MeshPlayTransitionClashSlash",
+                                "time": 11.2188,
+                                "blackboardWrites": []
+                            },
+                            {
+                                "cat": "ActorPresentation",
+                                "name": "PhaseTransition_MeshStopTransitionClashSlash",
+                                "time": 11.3788,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ParticleStopTransitionClashSparks",
-                                "time": 14.25,
+                                "time": 11.4437,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_MeshStopHumanBossWeapon",
-                                "time": 14.5,
+                                "time": 11.6,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_HumanKick",
-                                "time": 15.0,
+                                "time": 12.1,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_KnockdownStart",
-                                "time": 15.72,
+                                "time": 12.82,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_Knockback",
-                                "time": 15.72,
+                                "time": 12.82,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ParticlePlayTransitionKickImpact",
-                                "time": 15.72,
+                                "time": 12.82,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "CameraShake",
                                 "name": "TransitionHeavyShake",
-                                "time": 15.72,
+                                "time": 12.82,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "TimeScale",
                                 "name": "PhaseTransition_TimeScale_0",
-                                "time": 15.72,
+                                "time": 12.82,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ImpactSound",
-                                "time": 15.72,
+                                "time": 12.82,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "CameraAction",
                                 "name": "TransitionKnockdown",
-                                "time": 15.72,
+                                "time": 12.82,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ParticleStopTransitionKickImpact",
-                                "time": 16.42,
+                                "time": 13.52,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_KnockdownLoop",
-                                "time": 16.82,
+                                "time": 13.92,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_KnockdownEnd",
-                                "time": 17.92,
+                                "time": 15.02,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_BossName",
-                                "time": 19.5,
+                                "time": 16.6,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_Music",
-                                "time": 19.5,
+                                "time": 16.6,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "Camera",
                                 "name": "EventCamera_RestorePriority",
-                                "time": 19.5,
+                                "time": 16.6,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "CameraAction",
                                 "name": "EventCamera_ReturnToGameplay",
-                                "time": 19.5,
+                                "time": 16.6,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "StageCorruption",
                                 "name": "PhaseTransition_Complete",
-                                "time": 19.5,
+                                "time": 16.6,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "HumanBoss_HumanPresentation_Stop",
-                                "time": 19.5,
+                                "time": 16.6,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ReleasePlayerAnimation",
-                                "time": 20.6,
+                                "time": 17.7,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ReleaseHumanAnimation",
-                                "time": 20.6,
+                                "time": 17.7,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ReleasePlayerModel",
-                                "time": 20.6,
+                                "time": 17.7,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ReleaseWeapon",
-                                "time": 20.6,
+                                "time": 17.7,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ReleaseShield",
-                                "time": 20.6,
+                                "time": 17.7,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ReleaseHumanBoss",
-                                "time": 20.6,
+                                "time": 17.7,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ReleaseHumanBossWeapon",
-                                "time": 20.6,
+                                "time": 17.7,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ReleaseHumanBossShield",
-                                "time": 20.6,
+                                "time": 17.7,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "GameModeObject",
                                 "name": "UI_GameModeObject_Show",
-                                "time": 20.6,
+                                "time": 17.7,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_CloseHitBoxes",
-                                "time": 20.6,
+                                "time": 17.7,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ParticleResetTransitionDragonMud",
-                                "time": 20.6,
+                                "time": 17.7,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ParticleResetTransitionClashSparks",
-                                "time": 20.6,
+                                "time": 17.7,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ParticleResetTransitionKickImpact",
-                                "time": 20.6,
+                                "time": 17.7,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ParticleResetTransitionMudScatter",
-                                "time": 20.6,
+                                "time": 17.7,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ParticleResetTransitionGroundImpact",
-                                "time": 20.6,
+                                "time": 17.7,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ParticleResetTransitionHumanMudSlough",
-                                "time": 20.6,
+                                "time": 17.7,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ParticleResetTransitionMud0",
-                                "time": 20.6,
+                                "time": 17.7,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ParticleResetTransitionMud1",
-                                "time": 20.6,
+                                "time": 17.7,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ParticleResetTransitionMud2",
-                                "time": 20.6,
+                                "time": 17.7,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ParticleResetTransitionMud3",
-                                "time": 20.6,
+                                "time": 17.7,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_StopImpactSound",
-                                "time": 20.6,
+                                "time": 17.7,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_StopSlashSound",
-                                "time": 20.6,
+                                "time": 17.7,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ObjectSpawn",
                                 "name": "PhaseTransition_CommitHuman",
-                                "time": 20.6,
+                                "time": 17.7,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_LockOnHuman",
-                                "time": 20.6,
+                                "time": 17.7,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "Camera",
                                 "name": "LockOn_Enable",
-                                "time": 20.6,
+                                "time": 17.7,
                                 "blackboardWrites": []
                             }
                         ],
@@ -3462,6 +3626,12 @@
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_StopSlashSound",
+                                "time": 0,
+                                "blackboardWrites": []
+                            },
+                            {
+                                "cat": "ActorPresentation",
+                                "name": "PhaseTransition_MeshStopTransitionClashSlash",
                                 "time": 0,
                                 "blackboardWrites": []
                             },
@@ -3945,26 +4115,26 @@
                             },
                             {
                                 "cat": "CameraShake",
-                                "name": "TransitionHeavyShake",
-                                "time": 2.6,
+                                "name": "TransitionDragonFallShake",
+                                "time": 3.35,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ParticlePlayTransitionGroundImpact",
-                                "time": 2.6,
+                                "time": 3.35,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ImpactSound",
-                                "time": 2.6,
+                                "time": 3.35,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ParticleStopTransitionGroundImpact",
-                                "time": 3.8,
+                                "time": 4.05,
                                 "blackboardWrites": []
                             }
                         ],
@@ -5355,12 +5525,6 @@
                             },
                             {
                                 "cat": "ActorPresentation",
-                                "name": "PhaseTransition_MeshPlayTransitionMudPool",
-                                "time": 0,
-                                "blackboardWrites": []
-                            },
-                            {
-                                "cat": "ActorPresentation",
                                 "name": "PhaseTransition_DragonDeath",
                                 "time": 0,
                                 "blackboardWrites": []
@@ -5391,13 +5555,19 @@
                             },
                             {
                                 "cat": "ActorPresentation",
-                                "name": "PhaseTransition_MeshPlayTransitionMudVortex",
+                                "name": "PhaseTransition_MeshStopTransitionMudPool",
                                 "time": 0,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
-                                "name": "PhaseTransition_ParticlePlayTransitionMudVortex",
+                                "name": "PhaseTransition_MeshStopTransitionMudVortex",
+                                "time": 0,
+                                "blackboardWrites": []
+                            },
+                            {
+                                "cat": "ActorPresentation",
+                                "name": "PhaseTransition_ParticleResetTransitionMudVortex",
                                 "time": 0,
                                 "blackboardWrites": []
                             },
@@ -5671,12 +5841,6 @@
                             },
                             {
                                 "cat": "ActorPresentation",
-                                "name": "PhaseTransition_ParticleStopTransitionMudScatter",
-                                "time": 0,
-                                "blackboardWrites": []
-                            },
-                            {
-                                "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ParticleStopTransitionGroundImpact",
                                 "time": 0,
                                 "blackboardWrites": []
@@ -5708,18 +5872,6 @@
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_MeshStopTransitionMudPool",
-                                "time": 0,
-                                "blackboardWrites": []
-                            },
-                            {
-                                "cat": "ActorPresentation",
-                                "name": "PhaseTransition_MeshStopTransitionCounterRing",
-                                "time": 0,
-                                "blackboardWrites": []
-                            },
-                            {
-                                "cat": "ActorPresentation",
-                                "name": "PhaseTransition_MeshStopWeapon",
                                 "time": 0,
                                 "blackboardWrites": []
                             },
@@ -5935,12 +6087,6 @@
                             },
                             {
                                 "cat": "ActorPresentation",
-                                "name": "PhaseTransition_MeshPlayTransitionMudPool",
-                                "time": 0,
-                                "blackboardWrites": []
-                            },
-                            {
-                                "cat": "ActorPresentation",
                                 "name": "PhaseTransition_DragonDeath",
                                 "time": 0,
                                 "blackboardWrites": []
@@ -6043,14 +6189,38 @@
                             },
                             {
                                 "cat": "ActorPresentation",
-                                "name": "PhaseTransition_MeshPlayTransitionMudVortex",
+                                "name": "PhaseTransition_MeshStopTransitionMudPool",
                                 "time": 0,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
-                                "name": "PhaseTransition_ParticlePlayTransitionMudVortex",
+                                "name": "PhaseTransition_MeshStopTransitionMudVortex",
                                 "time": 0,
+                                "blackboardWrites": []
+                            },
+                            {
+                                "cat": "ActorPresentation",
+                                "name": "PhaseTransition_ParticleResetTransitionMudVortex",
+                                "time": 0,
+                                "blackboardWrites": []
+                            },
+                            {
+                                "cat": "ActorPresentation",
+                                "name": "PhaseTransition_ParticleStopTransitionMudScatter",
+                                "time": 0.0333,
+                                "blackboardWrites": []
+                            },
+                            {
+                                "cat": "ActorPresentation",
+                                "name": "PhaseTransition_MeshStopTransitionCounterRing",
+                                "time": 0.0333,
+                                "blackboardWrites": []
+                            },
+                            {
+                                "cat": "ActorPresentation",
+                                "name": "PhaseTransition_MeshStopWeapon",
+                                "time": 0.0333,
                                 "blackboardWrites": []
                             },
                             {
@@ -6062,79 +6232,79 @@
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_MeshPlayWeapon",
-                                "time": 0.383,
+                                "time": 0.2887,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_MeshPlayTransitionCounterRing",
-                                "time": 0.433,
+                                "time": 0.322,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_SlashSound",
-                                "time": 0.433,
+                                "time": 0.322,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "CameraShake",
-                                "name": "TransitionClashShake",
-                                "time": 0.433,
-                                "blackboardWrites": []
-                            },
-                            {
-                                "cat": "TimeScale",
-                                "name": "PhaseTransition_TimeScale_0",
-                                "time": 0.433,
+                                "name": "TransitionCounterShake",
+                                "time": 0.322,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ParticlePlayTransitionMudScatter",
-                                "time": 0.433,
+                                "time": 0.322,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "TransitionMud0_Scatter",
-                                "time": 0.433,
+                                "time": 0.322,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "TransitionMud1_Scatter",
-                                "time": 0.433,
+                                "time": 0.322,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "TransitionMud2_Scatter",
-                                "time": 0.433,
+                                "time": 0.322,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "TransitionMud3_Scatter",
-                                "time": 0.433,
+                                "time": 0.322,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_MeshStopWeapon",
-                                "time": 1.08,
+                                "time": 0.7533,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_MeshStopTransitionCounterRing",
-                                "time": 1.08,
+                                "time": 0.7533,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ParticleStopTransitionMudScatter",
-                                "time": 1.1,
+                                "time": 0.7667,
+                                "blackboardWrites": []
+                            },
+                            {
+                                "cat": "ActorPresentation",
+                                "name": "PhaseTransition_PlayerIdle",
+                                "time": 1.22,
                                 "blackboardWrites": []
                             }
                         ],
@@ -6145,6 +6315,12 @@
                         "duration": 4.8,
                         "completionAction": "PhaseTransitionRestore",
                         "actions": [
+                            {
+                                "cat": "StageCorruption",
+                                "name": "PhaseTransition_ApplyCameraProfile",
+                                "time": 0,
+                                "blackboardWrites": []
+                            },
                             {
                                 "cat": "ObjectDelete",
                                 "name": "PhaseTransition_CleanupEffects",
@@ -6737,6 +6913,12 @@
                             },
                             {
                                 "cat": "ActorPresentation",
+                                "name": "PhaseTransition_HumanAuraPlay",
+                                "time": 3.1,
+                                "blackboardWrites": []
+                            },
+                            {
+                                "cat": "ActorPresentation",
                                 "name": "PhaseTransition_MeshStopTransitionMud0",
                                 "time": 4.0,
                                 "blackboardWrites": []
@@ -6806,9 +6988,15 @@
                     },
                     {
                         "name": "PreviewSwordClash",
-                        "duration": 5.8,
+                        "duration": 2.9,
                         "completionAction": "PhaseTransitionRestore",
                         "actions": [
+                            {
+                                "cat": "StageCorruption",
+                                "name": "PhaseTransition_ApplyCameraProfile",
+                                "time": 0,
+                                "blackboardWrites": []
+                            },
                             {
                                 "cat": "ObjectDelete",
                                 "name": "PhaseTransition_CleanupEffects",
@@ -7277,6 +7465,12 @@
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ParticlePlayTransitionMudVortex",
                                 "time": 0,
+                                "blackboardWrites": []
+                            },
+                            {
+                                "cat": "ActorPresentation",
+                                "name": "PhaseTransition_HumanAuraPlay",
+                                "time": 0.01,
                                 "blackboardWrites": []
                             },
                             {
@@ -7300,121 +7494,163 @@
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_HumanSword1",
-                                "time": 2.5,
+                                "time": 0.65,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_MeshPlayHumanBossWeapon",
-                                "time": 2.5,
+                                "time": 0.65,
+                                "blackboardWrites": []
+                            },
+                            {
+                                "cat": "CameraAction",
+                                "name": "TransitionSwordStrike",
+                                "time": 0.65,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_PlayerBlock",
-                                "time": 2.65,
+                                "time": 0.7437,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ParticlePlayTransitionClashSparks",
-                                "time": 2.65,
+                                "time": 0.7437,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "CameraShake",
                                 "name": "TransitionClashShake",
-                                "time": 2.65,
+                                "time": 0.7437,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_SlashSound",
-                                "time": 2.65,
+                                "time": 0.7437,
+                                "blackboardWrites": []
+                            },
+                            {
+                                "cat": "ActorPresentation",
+                                "name": "PhaseTransition_MeshPlayTransitionClashSlash",
+                                "time": 0.7437,
+                                "blackboardWrites": []
+                            },
+                            {
+                                "cat": "ActorPresentation",
+                                "name": "PhaseTransition_MeshStopTransitionClashSlash",
+                                "time": 0.9037,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ParticleStopTransitionClashSparks",
-                                "time": 3.05,
+                                "time": 0.9937,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_HumanSword2",
-                                "time": 3.5,
+                                "time": 1.275,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_PlayerParry",
-                                "time": 3.65,
+                                "time": 1.3687,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ParticlePlayTransitionClashSparks",
-                                "time": 3.65,
+                                "time": 1.3687,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "CameraShake",
                                 "name": "TransitionClashShake",
-                                "time": 3.65,
+                                "time": 1.3687,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_SlashSound",
-                                "time": 3.65,
+                                "time": 1.3687,
+                                "blackboardWrites": []
+                            },
+                            {
+                                "cat": "ActorPresentation",
+                                "name": "PhaseTransition_MeshPlayTransitionClashSlash",
+                                "time": 1.3687,
+                                "blackboardWrites": []
+                            },
+                            {
+                                "cat": "ActorPresentation",
+                                "name": "PhaseTransition_MeshStopTransitionClashSlash",
+                                "time": 1.5287,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ParticleStopTransitionClashSparks",
-                                "time": 4.05,
+                                "time": 1.6187,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_HumanSword3",
-                                "time": 4.5,
+                                "time": 1.9,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_PlayerBlock",
-                                "time": 4.69,
+                                "time": 2.0188,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ParticlePlayTransitionClashSparks",
-                                "time": 4.69,
+                                "time": 2.0188,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "CameraShake",
                                 "name": "TransitionClashShake",
-                                "time": 4.69,
+                                "time": 2.0188,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_SlashSound",
-                                "time": 4.69,
+                                "time": 2.0188,
+                                "blackboardWrites": []
+                            },
+                            {
+                                "cat": "ActorPresentation",
+                                "name": "PhaseTransition_MeshPlayTransitionClashSlash",
+                                "time": 2.0188,
+                                "blackboardWrites": []
+                            },
+                            {
+                                "cat": "ActorPresentation",
+                                "name": "PhaseTransition_MeshStopTransitionClashSlash",
+                                "time": 2.1788,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ParticleStopTransitionClashSparks",
-                                "time": 5.05,
+                                "time": 2.2437,
                                 "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_MeshStopHumanBossWeapon",
-                                "time": 5.3,
+                                "time": 2.4,
                                 "blackboardWrites": []
                             }
                         ],
@@ -7425,6 +7661,12 @@
                         "duration": 4.6,
                         "completionAction": "PhaseTransitionRestore",
                         "actions": [
+                            {
+                                "cat": "StageCorruption",
+                                "name": "PhaseTransition_ApplyCameraProfile",
+                                "time": 0,
+                                "blackboardWrites": []
+                            },
                             {
                                 "cat": "ObjectDelete",
                                 "name": "PhaseTransition_CleanupEffects",
@@ -7893,6 +8135,12 @@
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ParticlePlayTransitionMudVortex",
                                 "time": 0,
+                                "blackboardWrites": []
+                            },
+                            {
+                                "cat": "ActorPresentation",
+                                "name": "PhaseTransition_HumanAuraPlay",
+                                "time": 0.01,
                                 "blackboardWrites": []
                             },
                             {
@@ -7971,6 +8219,12 @@
                         "cleanupObjectsOnCompletion": true,
                         "interruptionAction": "",
                         "actions": [
+                            {
+                                "cat": "StageCorruption",
+                                "name": "PhaseTransition_ApplyCameraProfile",
+                                "time": 0,
+                                "blackboardWrites": []
+                            },
                             {
                                 "cat": "PostProcess",
                                 "name": "BossIntro_ResetColor",
@@ -8105,6 +8359,12 @@
                                 "cat": "StageCorruption",
                                 "name": "PhaseTransition_Complete",
                                 "time": 0.08
+                            },
+                            {
+                                "cat": "ActorPresentation",
+                                "name": "PhaseTransition_HumanAuraPlay",
+                                "time": 0.08,
+                                "blackboardWrites": []
                             },
                             {
                                 "cat": "ActorPresentation",

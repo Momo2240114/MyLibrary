@@ -17,7 +17,7 @@ bool RadialBlurSystem::Initialize(ID3D11Device* device, int width, int height)
     // FullScreenVSは頂点Bufferなしで全画面Triangleを生成する共通Shader。
     CPUResourceLoader::LoadVertexShader(
         device,
-        "Shader/FullScreenVS.cso",
+        "Data/Shader/FullScreenVS.cso",
         nullptr, 0,
         nullptr,
         fullScreenVS.GetAddressOf());
@@ -25,7 +25,7 @@ bool RadialBlurSystem::Initialize(ID3D11Device* device, int width, int height)
     // RadialBlur専用のPixel Shaderを読み込む。
     CPUResourceLoader::LoadPixelShader(
         device,
-        "Shader/RadialBlur_PS.cso",
+        "Data/Shader/RadialBlur_PS.cso",
         radialBlurPS.GetAddressOf());
 
     // Blurパラメータは毎Frame変わる可能性があるためDynamic ConstantBufferにする。

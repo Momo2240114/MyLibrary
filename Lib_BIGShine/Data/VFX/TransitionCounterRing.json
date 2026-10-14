@@ -3,10 +3,10 @@
     "AssetVersion": 1,
     "MeshVFX": {
         "IsPlaying": false,
-        "PlaybackSpeed": 1.0,
+        "PlaybackSpeed": 1.5,
         "Parts": [
             {
-                "RenderEnabled": true,
+                "RenderEnabled": false,
                 "ModelPath": "__InternalMeshSlashArcRibbon__",
                 "MeshIndex": 0,
                 "Position": [
@@ -114,7 +114,7 @@
                 }
             },
             {
-                "RenderEnabled": true,
+                "RenderEnabled": false,
                 "ModelPath": "__InternalMeshSlashArcRibbon__",
                 "MeshIndex": 0,
                 "Position": [
@@ -222,7 +222,7 @@
                 }
             },
             {
-                "RenderEnabled": true,
+                "RenderEnabled": false,
                 "ModelPath": "__InternalMeshSlashArcRibbon__",
                 "MeshIndex": 0,
                 "Position": [

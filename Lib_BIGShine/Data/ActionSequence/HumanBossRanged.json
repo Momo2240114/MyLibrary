@@ -1,0 +1,45 @@
+{
+    "RegisterGlobal": false,
+    "Sequences": [
+        {
+            "name": "HumanBoss_SHADOW_CHARGE_Sequence",
+            "duration": 2.0,
+            "completionAction": "",
+            "actions": [
+                {
+                    "cat": "HumanBoss",
+                    "name": "HumanBoss_ChargeShowArea",
+                    "time": 0,
+                    "useNormalizedTime": false
+                }
+            ]
+        },
+        {
+            "name": "HumanBoss_SHADOW_ORB_Sequence",
+            "duration": 3.0,
+            "completionAction": "",
+            "actions": [
+                {
+                    "cat": "HumanBoss",
+                    "name": "HumanBoss_OrbSpawn",
+                    "time": 0.3,
+                    "useNormalizedTime": true,
+                    "animationState": "Buff_Seq"
+                }
+            ]
+        },
+        {
+            "name": "HumanBoss_SHADOW_RAGNAROK_Sequence",
+            "duration": 10.0,
+            "completionAction": "",
+            "actions": [
+                {
+                    "cat": "HumanBoss",
+                    "name": "HumanBoss_RagnarokShowArea",
+                    "time": 0,
+                    "useNormalizedTime": false
+                }
+            ]
+        }
+    ]
+}

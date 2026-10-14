@@ -222,7 +222,7 @@ void ModelRenderSystem::Initialize(ID3D11Device* device)
 
 	CPUResourceLoader::LoadVertexShader(
 		device,
-		"Shader/OutlineVS.cso",
+		"Data/Shader/OutlineVS.cso",
 		GltfModelCommponennt::InputElementDescs.data(),
 		static_cast<UINT>(GltfModelCommponennt::InputElementDescs.size()),
 		outlineInputLayout.GetAddressOf(),
@@ -230,12 +230,12 @@ void ModelRenderSystem::Initialize(ID3D11Device* device)
 
 	CPUResourceLoader::LoadPixelShader(
 		device,
-		"Shader/OutlinePS.cso",
+		"Data/Shader/OutlinePS.cso",
 		outlinePixelShader.GetAddressOf());
 
 	CPUResourceLoader::LoadVertexShader(
 		device,
-		"Shader/ToonPBRStaticVS.cso",
+		"Data/Shader/ToonPBRStaticVS.cso",
 		GltfModelCommponennt::InputElementDescs.data(),
 		static_cast<UINT>(GltfModelCommponennt::InputElementDescs.size()),
 		gBufferInputLayout.GetAddressOf(),
@@ -243,7 +243,7 @@ void ModelRenderSystem::Initialize(ID3D11Device* device)
 
 	CPUResourceLoader::LoadVertexShader(
 		device,
-		"Shader/ToonPBRSkinnedVS.cso",
+		"Data/Shader/ToonPBRSkinnedVS.cso",
 		GltfModelCommponennt::InputElementDescs.data(),
 		static_cast<UINT>(GltfModelCommponennt::InputElementDescs.size()),
 		nullptr,
@@ -251,12 +251,12 @@ void ModelRenderSystem::Initialize(ID3D11Device* device)
 
 	CPUResourceLoader::LoadPixelShader(
 		device,
-		"Shader/GBufferPS.cso",
+		"Data/Shader/GBufferPS.cso",
 		gBufferPixelShader.GetAddressOf());
 
 	CPUResourceLoader::LoadPixelShader(
 		device,
-		"Shader/GpuDebugSimpleGBufferPS.cso",
+		"Data/Shader/GpuDebugSimpleGBufferPS.cso",
 		gBufferSimplePixelShader.GetAddressOf());
 
 	CPUResourceLoader::CreateConstantBuffer(

@@ -1358,9 +1358,10 @@ bool AttackTemplateManager::DrawEditorContent(
                             ATTACK_HIT_SHAPE::NONE,
                             ATTACK_HIT_SHAPE::SPHERE,
                             ATTACK_HIT_SHAPE::CAPSULE,
-                            ATTACK_HIT_SHAPE::SPHERE_GROUP
+                            ATTACK_HIT_SHAPE::SPHERE_GROUP,
+                ATTACK_HIT_SHAPE::FAN
                         };
-                        const char* shapeNames_[] = { "None", "Sphere", "Capsule", "Sphere Group" };
+                        const char* shapeNames_[] = { "None", "Sphere", "Capsule", "Sphere Group", "Fan" };
                         int shapeType_ = 0;
                         for (int index_ = 0; index_ < IM_ARRAYSIZE(supportedShapes_); ++index_)
                         {
@@ -1376,6 +1377,12 @@ bool AttackTemplateManager::DrawEditorContent(
                         DrawVector3("Hit Rotation", shape_.localRotation);
                         DrawVector3("Hit Scale", shape_.localScale);
                         ImGui::DragFloat("Radius", &shape_.radius, 0.01f, 0.01f);
+                        if (shape_.shape == ATTACK_HIT_SHAPE::FAN)
+                        {
+                            ImGui::DragFloat("Fan Range", &shape_.range, .1f, .01f, 100.0f);
+                            ImGui::DragFloat("Fan Angle", &shape_.angle, .5f, .1f, 360.0f);
+                            ImGui::DragFloat("Fan Half Height", &shape_.halfHeight, .1f, 0.0f, 10.0f);
+                        }
                         if (shape_.shape == ATTACK_HIT_SHAPE::CAPSULE)
                             ImGui::DragFloat("Half Height", &shape_.halfHeight, 0.01f, 0.0f);
                         ImGui::DragFloat("Active Start", &shape_.activeStartTime, 0.01f, 0.0f);

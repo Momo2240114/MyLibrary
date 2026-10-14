@@ -15,8 +15,8 @@ bool MotionVelocityRenderSystem::Initialize(ID3D11Device* device_)
 {
     if (device_ == nullptr) return false;
     // Shaderが無い環境ではMotionBlurを無効化し、通常描画だけ継続できるようにする。
-    if (!std::filesystem::exists("Shader/MotionObjectVelocityVS.cso") ||
-        !std::filesystem::exists("Shader/MotionObjectVelocityPS.cso"))
+    if (!std::filesystem::exists("Data/Shader/MotionObjectVelocityVS.cso") ||
+        !std::filesystem::exists("Data/Shader/MotionObjectVelocityPS.cso"))
     {
         initialized = false;
         return false;
@@ -25,7 +25,7 @@ bool MotionVelocityRenderSystem::Initialize(ID3D11Device* device_)
     // GltfModelと同じ頂点LayoutでVelocity用Vertex Shaderを読み込む。
     if (FAILED(CPUResourceLoader::LoadVertexShader(
         device_,
-        "Shader/MotionObjectVelocityVS.cso",
+        "Data/Shader/MotionObjectVelocityVS.cso",
         GltfModelCommponennt::InputElementDescs.data(),
         static_cast<UINT>(GltfModelCommponennt::InputElementDescs.size()),
         inputLayout.GetAddressOf(),
@@ -38,7 +38,7 @@ bool MotionVelocityRenderSystem::Initialize(ID3D11Device* device_)
     // Velocity RTへ速度値を書き込むPixel Shader。
     if (FAILED(CPUResourceLoader::LoadPixelShader(
         device_,
-        "Shader/MotionObjectVelocityPS.cso",
+        "Data/Shader/MotionObjectVelocityPS.cso",
         pixelShader.GetAddressOf())))
     {
         initialized = false;

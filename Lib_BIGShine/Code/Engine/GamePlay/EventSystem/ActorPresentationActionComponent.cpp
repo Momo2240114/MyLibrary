@@ -381,8 +381,9 @@ void ActorPresentationActionComponent::ExecutePreset(int index_)
     }
     const auto animation_ = actor_->GetComponent<AnimationControllerComponent>();
     if (!animation_) return;
-    if (!preset_.stateAssetPath.empty() &&
-        animation_->GetStates().find(preset_.stateName) == animation_->GetStates().end())
+    // 明示した演出だけAssetを再反映し、既存のScene内Stateを優先する設定は維持する。
+    if (!preset_.stateAssetPath.empty() && (preset_.refreshStateAssetOnPlay ||
+        animation_->GetStates().find(preset_.stateName) == animation_->GetStates().end()))
     {
         // 演出側でAssetを復元し、既存のpublic APIでStateと再生Actionを登録する。
         std::ifstream file_(preset_.stateAssetPath);
@@ -425,7 +426,8 @@ void ActorPresentationActionComponent::ExecutePreset(int index_)
         return;
     }
     animation_->SetPresentationControlled(true);
-    animation_->ChangeState(preset_.stateName, (std::max)(preset_.duration, 0.0f));
+    // Asset再反映を選んだ演出は、同じStateも先頭から再開始する。
+    animation_->ChangeState(preset_.stateName, (std::max)(preset_.duration, 0.0f), preset_.refreshStateAssetOnPlay);
 }
 
 void ActorPresentationActionComponent::Update(float deltaTime_)
@@ -618,6 +620,7 @@ void ActorPresentationActionComponent::Gui()
         if (ImGui::Combo("Type", &type_, TYPES, IM_ARRAYSIZE(TYPES))) preset_.type = static_cast<ActorPresentationActionType>(type_);
         ImGui::InputText("Animation State", &preset_.stateName);
         ImGui::InputText("State Asset Path", &preset_.stateAssetPath);
+        ImGui::Checkbox("Refresh Asset And Restart On Play", &preset_.refreshStateAssetOnPlay);
         ImGui::InputText("Look Target", &preset_.targetName);
         ImGui::DragFloat("Blend / Turn / Move Duration", &preset_.duration, 0.01f, 0.0f, 60.0f);
         if (preset_.type == ActorPresentationActionType::FREEZE_ACTOR ||
@@ -654,7 +657,7 @@ void ActorPresentationActionComponent::Serialize(nlohmann::json& json_) const
     json_["Presets"] = nlohmann::json::array();
     for (const auto& preset_ : presets)
         json_["Presets"].push_back({ {"ActionName", preset_.actionName}, {"ActorName", preset_.actorName},
-            {"StateName", preset_.stateName}, {"StateAssetPath", preset_.stateAssetPath}, {"TargetName", preset_.targetName}, {"PrefabName", preset_.prefabName}, {"SkipInPreview", preset_.skipInPreview}, {"TrailWidth", preset_.trailWidth},
+            {"StateName", preset_.stateName}, {"StateAssetPath", preset_.stateAssetPath}, {"RefreshStateAssetOnPlay", preset_.refreshStateAssetOnPlay}, {"TargetName", preset_.targetName}, {"PrefabName", preset_.prefabName}, {"SkipInPreview", preset_.skipInPreview}, {"TrailWidth", preset_.trailWidth},
             {"Type", static_cast<int>(preset_.type)}, {"Duration", preset_.duration},
             {"SmoothMovement", preset_.smoothMovement}, {"SwayAmplitude", preset_.swayAmplitude}, {"SwayCycles", preset_.swayCycles},
             {"MatchTargetRotation", preset_.matchTargetRotation},
@@ -693,6 +696,7 @@ void ActorPresentationActionComponent::Deserialize(const nlohmann::json& json_)
         preset_.actorName = item_.value("ActorName", std::string{});
         preset_.stateName = item_.value("StateName", std::string{});
         preset_.stateAssetPath = item_.value("StateAssetPath", std::string{});
+        preset_.refreshStateAssetOnPlay = item_.value("RefreshStateAssetOnPlay", false);
         preset_.targetName = item_.value("TargetName", std::string{});
         preset_.prefabName = item_.value("PrefabName", std::string{});
         preset_.skipInPreview = item_.value("SkipInPreview", false);

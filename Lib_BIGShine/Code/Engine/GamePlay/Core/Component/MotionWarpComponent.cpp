@@ -357,6 +357,7 @@ bool MotionWarpComponent::PlayForTarget(const std::string& presetName_,
     // 予備動作で消費した旋回量も含め、同じ攻撃で最大角度を使い直さない。
     request.accumulatedRotationCorrectionDegrees = std::clamp(priorRotationCorrectionDegrees_, 0.0f, preset_->maximumRotationDegrees);
     request.maintainStopDistance = true;
+    request.freezeAfterWarp = fixedTargetPosition_ != nullptr && explicitTargetPreset.targetDistance <= 0.0001f;
     request.targetLocked = preset_->lockTargetOnStart || fixedTargetPosition_ != nullptr;
     request.startPosition = owner_->transform->GetWorldPosition();
     request.targetPosition = fixedTargetPosition_ ? *fixedTargetPosition_ : target_->transform->GetWorldPosition();
@@ -484,8 +485,46 @@ MotionWarpResult MotionWarpComponent::ApplyRootMotionWarp(
         const auto owner_ = GetGameObject();
         const auto target_ = request.targetObject.lock();
         if (!owner_ || !owner_->transform || !target_ || !target_->transform) return;
+        if (request.freezeAfterWarp)
+        {
+            // 突進や中央移動の確定経路を、補正終了後の自然RootMotionで越えないようにする。
+            result_.rootMotionDelta.deltaPosition.x = 0.0f;
+            result_.rootMotionDelta.deltaPosition.z = 0.0f;
+            result_.positionWarped = true;
+            debugWarpedDelta = result_.rootMotionDelta.deltaPosition;
+            return;
+        }
         result_.positionWarped = LimitRootMotionToStopDistance(result_.rootMotionDelta.deltaPosition,
             owner_->transform->GetWorldPosition(), target_->transform->GetWorldPosition(), explicitTargetPreset.targetDistance);
+        debugWarpedDelta = result_.rootMotionDelta.deltaPosition;
+    };
+    auto limitFixedPath_ = [&]()
+    {
+        if (!request.explicitTarget || !request.freezeAfterWarp) return;
+        const auto owner_ = GetGameObject();
+        if (!owner_ || !owner_->transform) return;
+        DirectX::XMFLOAT3 direction_{ request.targetPosition.x - request.startPosition.x, 0.0f,
+            request.targetPosition.z - request.startPosition.z };
+        const float length_ = GetHorizontalLength(direction_);
+        // 開始地点が終点と同じ場合も、移動クリップの自然RootMotionで離れないようにする。
+        if (!NormalizeHorizontal(direction_))
+        {
+            result_.rootMotionDelta.deltaPosition.x = 0.0f;
+            result_.rootMotionDelta.deltaPosition.z = 0.0f;
+        }
+        else
+        {
+            const auto position_ = owner_->transform->GetWorldPosition();
+            const float progress_ = (position_.x - request.startPosition.x) * direction_.x +
+                (position_.z - request.startPosition.z) * direction_.z;
+            const float remaining_ = (std::max)(0.0f, length_ - progress_);
+            const float advance_ = std::clamp(result_.rootMotionDelta.deltaPosition.x * direction_.x +
+                result_.rootMotionDelta.deltaPosition.z * direction_.z, 0.0f, remaining_);
+            // 停止距離0の固定終点要求だけを直線へ制限し、横揺れや終点の通過を防ぐ。
+            result_.rootMotionDelta.deltaPosition.x = direction_.x * advance_;
+            result_.rootMotionDelta.deltaPosition.z = direction_.z * advance_;
+        }
+        result_.positionWarped = true;
         debugWarpedDelta = result_.rootMotionDelta.deltaPosition;
     };
     if (!IsEnabled() || !request.active)
@@ -504,8 +543,12 @@ MotionWarpResult MotionWarpComponent::ApplyRootMotionWarp(
         return result_;
     }
 
-    request.normalizedTime = std::clamp(normalizedTime_, 0.0f, 1.0f);
-    const float weight_ = CalculateWarpWeight(request.normalizedTime, *preset_);
+    const float sampleNormalizedTime_ = std::clamp(normalizedTime_, 0.0f, 1.0f);
+    const bool finishExplicitWarp_ = request.explicitTarget && request.normalizedTime < preset_->endNormalizedTime &&
+        sampleNormalizedTime_ >= preset_->endNormalizedTime;
+    // 終端をまたいだフレームも最後の補正を適用し、FPSの違いで届かない分を残さない。
+    request.normalizedTime = finishExplicitWarp_ ? preset_->endNormalizedTime : sampleNormalizedTime_;
+    const float weight_ = finishExplicitWarp_ ? 1.0f : CalculateWarpWeight(request.normalizedTime, *preset_);
     const bool facingWindow_ = request.explicitTarget && preset_->warpRotation &&
         request.normalizedTime >= preset_->rotationStartNormalizedTime &&
         request.normalizedTime <= preset_->rotationEndNormalizedTime;
@@ -518,6 +561,7 @@ MotionWarpResult MotionWarpComponent::ApplyRootMotionWarp(
             request.targetLocked = true;
             limitCompletedWarp_();
         }
+        else limitFixedPath_();
         return result_;
     }
 
@@ -746,6 +790,7 @@ MotionWarpResult MotionWarpComponent::ApplyRootMotionWarp(
         }
     }
 
+    limitFixedPath_();
     // 吸い付き補正の上限とは独立して最終差分を制限し、大きなDeltaでも停止円を越えさせない。
     if (limitPosition_ && LimitRootMotionToStopDistance(
         result_.rootMotionDelta.deltaPosition,
@@ -823,6 +868,12 @@ MotionWarpResult MotionWarpComponent::ApplyRootMotionWarp(
         result_.rootMotionDelta.deltaPosition.y,
         result_.rootMotionDelta.deltaPosition.z
     };
+    if (finishExplicitWarp_)
+    {
+        request.active = false;
+        request.targetLocked = true;
+        request.normalizedTime = sampleNormalizedTime_;
+    }
     debugInactiveReason.clear();
     return result_;
 }

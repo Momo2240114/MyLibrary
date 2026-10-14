@@ -44,3 +44,4 @@ private:
     int selectedMaterialIndex = -1; // GUIで編集中のマテリアル番号。保存対象には含めない。
     int selectedMeshIndex = -1; // -1はマテリアル番号別の編集、それ以外はパーツ別の編集。
 };
+

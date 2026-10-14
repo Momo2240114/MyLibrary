@@ -17,7 +17,7 @@ void ShapeRenderSystem::Initialize(ID3D11Device* device)
 	// 頂点シェーダー
 	CPUResourceLoader::LoadVertexShader(
 		device,
-		"Shader/ShapeRendererVS.cso",
+		"Data/Shader/ShapeRendererVS.cso",
 		inputElementDesc,
 		_countof(inputElementDesc),
 		inputLayout.GetAddressOf(),
@@ -26,7 +26,7 @@ void ShapeRenderSystem::Initialize(ID3D11Device* device)
 	// ピクセルシェーダー
 	CPUResourceLoader::LoadPixelShader(
 		device,
-		"Shader/ShapeRendererPS.cso",
+		"Data/Shader/ShapeRendererPS.cso",
 		pixelShader.GetAddressOf());
 
 	// 定数バッファ

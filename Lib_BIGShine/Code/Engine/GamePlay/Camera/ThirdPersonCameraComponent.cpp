@@ -299,6 +299,7 @@ void ThirdPersonCameraComponent::Gui()
 
 void ThirdPersonCameraComponent::Serialize(nlohmann::json& json_) const
 {
+    if (runtimeSettingsActive) { json_ = originalRuntimeSettings; return; }
     // RuntimeのBlend状態は保存せず、Camera設定とTarget名だけを保存する。
     json_["targetName"] = targetName;
     json_["baseDistance"] = baseDistance;
@@ -318,6 +319,9 @@ void ThirdPersonCameraComponent::Serialize(nlohmann::json& json_) const
 
 void ThirdPersonCameraComponent::Deserialize(const nlohmann::json& json_)
 {
+    runtimeSettingsActive = false;
+    target.reset();
+    originalRuntimeSettings = nlohmann::json{};
     // 旧distance KeyもbaseDistanceとして読み、過去Sceneとの互換性を保つ。
     targetName = json_.value("targetName", std::string{});
     baseDistance = json_.value("baseDistance", json_.value("distance", 6.0f));
@@ -446,3 +450,21 @@ void ThirdPersonCameraComponent::SetTarget(std::shared_ptr<GameObject> target_)
 }
 
 REGISTER_COMPONENT(ThirdPersonCameraComponent, "ThirdPersonCameraComponent")
+
+// 元の設定は一度だけ保存し、第二形態のカメラ設定を実行時へ適用する。
+void ThirdPersonCameraComponent::ApplyRuntimeSettings(const nlohmann::json& settings_)
+{
+    BS_PROFILE_SCOPE("ThirdPersonCameraComponent::ApplyRuntimeSettings");
+    nlohmann::json original_;
+    Serialize(original_);
+    Deserialize(settings_);
+    originalRuntimeSettings = std::move(original_);
+    runtimeSettingsActive = true;
+}
+
+void ThirdPersonCameraComponent::ClearRuntimeSettings()
+{
+    if (!runtimeSettingsActive) return;
+    const auto original_ = originalRuntimeSettings;
+    Deserialize(original_);
+}

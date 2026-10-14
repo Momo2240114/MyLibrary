@@ -2,6 +2,7 @@
 #include "Engine/GamePlay/System/CombatObservationSystem.h"
 
 #include "DragonAIComponent.h"
+#include "DragonAttackControllerComponent.h"
 
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
 #include "Engine/GamePlay/Core/Component/CharacterMovementComponent.h"
@@ -3330,6 +3331,8 @@ void DragonAIComponent::RegisterRuntimeActions()
         const auto dragon_ = owner_ ? owner_->GetComponent<DragonAIComponent>() : nullptr;
         if (!dragon_) return;
         dragon_->StopSkill();
+        // Skill終了Actionに依存せず、予告だけの攻撃と生成済みEffectも確実に停止する。
+        if (const auto attacks_ = owner_->GetComponent<DragonAttackControllerComponent>()) attacks_->StopAttack();
         dragon_->DisableSequencerHitBoxes();
         dragon_->ClearTailIK();
         dragon_->StopMovement();

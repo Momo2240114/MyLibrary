@@ -16,7 +16,7 @@ bool PostDistortionSystem::Initialize(ID3D11Device* device_, int width_, int hei
     // 頂点バッファを使わず、SV_VertexID から画面全体の三角形を生成する VS。
     if (FAILED(CPUResourceLoader::LoadVertexShader(
         device_,
-        "Shader/FullScreenVS.cso",
+        "Data/Shader/FullScreenVS.cso",
         nullptr,
         0,
         nullptr,
@@ -28,7 +28,7 @@ bool PostDistortionSystem::Initialize(ID3D11Device* device_, int width_, int hei
     // 歪み用 SRV を参照して、シーンカラーのサンプリング位置をずらす PS。
     if (FAILED(CPUResourceLoader::LoadPixelShader(
         device_,
-        "Shader/PostDistortionPS.cso",
+        "Data/Shader/PostDistortionPS.cso",
         pixelShader.GetAddressOf())))
     {
         return false;

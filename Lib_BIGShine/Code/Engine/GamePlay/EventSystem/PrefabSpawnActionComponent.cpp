@@ -205,18 +205,29 @@ std::shared_ptr<GameObject> PrefabSpawnActionComponent::SpawnPrefab(const std::s
 {
     BS_PROFILE_SCOPE("PrefabSpawnAction::SpawnPrefab");
     const auto owner_ = GetGameObject();
-    if (!owner_ || !owner_->manager || !IsLoadReady()) return nullptr;
+    lastSpawnStatus = "Spawn requested: " + prefabName_;
+    if (!owner_ || !owner_->manager || owner_->IsPendingDestroy()) { lastSpawnStatus = "Spawn failed: owner is not registered"; BS_LOG_WARNING(LOG_CATEGORY::GAME, lastSpawnStatus); return nullptr; }
+    if (!IsLoadReady())
+    {
+        lastSpawnStatus = "Spawn blocked: prefab cache not ready / " + cacheError;
+        BS_LOG_WARNING(LOG_CATEGORY::GAME, lastSpawnStatus);
+        return nullptr;
+    }
     const auto entry_ = std::find_if(entries.begin(), entries.end(), [&](const PrefabSpawnActionEntry& entry_)
         { return entry_.prefabName == prefabName_ && entry_.actorName == actorName_; });
-    if (entry_ == entries.end()) return nullptr;
+    if (entry_ == entries.end()) { lastSpawnStatus = "Spawn failed: entry not registered / " + prefabName_; BS_LOG_WARNING(LOG_CATEGORY::GAME, lastSpawnStatus); return nullptr; }
     const auto index_ = static_cast<std::size_t>(std::distance(entries.begin(), entry_));
     // 名前参照を維持するため、同名の階層を重複生成しない。
     const auto& definition_ = cachedPrefabs[index_].definition;
     const auto rootName_ = definition_.value("RootName", prefabName_);
-    if (const auto existing_ = owner_->GetManager().Find(rootName_)) return existing_;
+    if (const auto existing_ = owner_->GetManager().Find(rootName_))
+    {
+        lastSpawnStatus = "Existing object: " + rootName_;
+        return existing_;
+    }
     for (const auto& name_ : definition_["ObjectList"])
         if (owner_->GetManager().Find(name_.get<std::string>()))
-        { BS_LOG_WARNING(LOG_CATEGORY::GAME, "Prefab child name already exists: " + name_.get<std::string>()); return nullptr; }
+        { lastSpawnStatus = "Spawn failed: child name already exists / " + name_.get<std::string>(); BS_LOG_WARNING(LOG_CATEGORY::GAME, lastSpawnStatus); return nullptr; }
     std::vector<std::shared_ptr<GameObject>> created_;
     std::shared_ptr<GameObject> root_;
     try
@@ -230,6 +241,7 @@ std::shared_ptr<GameObject> PrefabSpawnActionComponent::SpawnPrefab(const std::s
             const nlohmann::json objectDefinition_ = definition_["Objects"][objectName_];
             object_->Load(objectDefinition_);
             object_->saveFlg = entry_->saveSpawnedObjects;
+            object_->SetRuntimeHierarchyVisible(entry_->showInHierarchy);
             if (objectName_ == rootName_) root_ = object_;
         }
         owner_->GetManager().ResolveHierarchy();
@@ -242,9 +254,12 @@ std::shared_ptr<GameObject> PrefabSpawnActionComponent::SpawnPrefab(const std::s
     {
         // 一部の実体化が失敗しても、作成途中のObjectをSceneに残さない。
         for (const auto& object_ : created_) owner_->GetManager().Destroy(object_);
-        BS_LOG_ERROR(LOG_CATEGORY::GAME, std::string("Prefab spawn failed: ") + exception_.what());
+        lastSpawnStatus = std::string("Prefab spawn failed: ") + exception_.what();
+        BS_LOG_ERROR(LOG_CATEGORY::GAME, lastSpawnStatus);
         return nullptr;
     }
+    lastSpawnStatus = "Object registered: " + rootName_ + " / hierarchy size=" + std::to_string(created_.size());
+    BS_LOG_INFO(LOG_CATEGORY::GAME, lastSpawnStatus);
     return root_;
 }
 
@@ -303,10 +318,12 @@ void PrefabSpawnActionComponent::OnDestroy()
 
 void PrefabSpawnActionComponent::Gui()
 {
+    BS_PROFILE_SCOPE("PrefabSpawnActionComponent::Gui");
     if (ImGui::Checkbox("Preload Models", &preloadModels)) cachePrepared = false;
     if (ImGui::Button("Reload Prefab Copies")) PreparePrefabCache();
     if (!cacheError.empty()) ImGui::TextWrapped("%s", cacheError.c_str());
     ImGui::Text("Cache Ready: %s", IsLoadReady() ? "yes" : "no");
+    ImGui::TextWrapped("%s", lastSpawnStatus.c_str());
     ImGui::InputText("Commit Action", &commitActionName);
     ImGui::InputText("Commit Actor", &commitActorName);
     for (std::size_t index_ = 0; index_ < entries.size(); ++index_)
@@ -318,8 +335,35 @@ void PrefabSpawnActionComponent::Gui()
         changed_ |= ImGui::InputText("Prefab Root Name", &entry_.actorName);
         changed_ |= ImGui::Checkbox("Suspend Gameplay", &entry_.suspendGameplay);
         changed_ |= ImGui::Checkbox("Save Spawned Objects", &entry_.saveSpawnedObjects);
+        const bool visibilityChanged_ = ImGui::Checkbox("Show In Hierarchy", &entry_.showInHierarchy);
         if (changed_) cachePrepared = false;
         if (ImGui::Button("Spawn")) SpawnPrefab(entry_.prefabName, entry_.actorName);
+        const auto owner_ = GetGameObject();
+        const auto object_ = owner_ && owner_->manager ? owner_->GetManager().Find(entry_.actorName) : nullptr;
+        ImGui::Text("Object registered: %s", object_ ? "yes" : "no");
+        if (object_)
+        {
+            if (visibilityChanged_)
+            {
+                const auto show_ = [&](auto&& self_, const std::shared_ptr<GameObject>& actor_) -> void
+                {
+                    actor_->SetRuntimeHierarchyVisible(entry_.showInHierarchy);
+                    for (const auto& child_ : actor_->transform->children) if (child_) if (const auto childActor_ = child_->gameObject.lock()) self_(self_, childActor_);
+                };
+                show_(show_, object_);
+            }
+            ImGui::Text("Hierarchy ready: %s / Combat ready: %s", object_->IsHierarchyReady() ? "yes" : "no", object_->IsCombatReady() ? "yes" : "no");
+            bool hasAi_ = false;
+            for (const auto& component_ : object_->components)
+                if (component_ && component_->GetName().find("AI") != std::string::npos)
+                {
+                    hasAi_ = true;
+                    ImGui::Text("%s: started=%s / enabled=%s", component_->GetName().c_str(),
+                        component_->IsStarted() ? "yes" : "no", component_->IsEnabled() ? "yes" : "no");
+                }
+            if (!hasAi_) ImGui::TextDisabled("AI component: none");
+            if (ImGui::Button("Select Spawned Object")) owner_->GetManager().SetSelectedObject(object_);
+        }
         ImGui::SameLine();
         if (ImGui::Button("Remove")) { entries.erase(entries.begin() + index_); cachePrepared = false; ImGui::PopID(); break; }
         ImGui::Separator();
@@ -337,7 +381,7 @@ void PrefabSpawnActionComponent::Serialize(nlohmann::json& json_) const
     json_["Entries"] = nlohmann::json::array();
     for (const auto& entry_ : entries)
         json_["Entries"].push_back({{"ActionName",entry_.actionName},{"PrefabName",entry_.prefabName},
-            {"ActorName",entry_.actorName},{"SuspendGameplay",entry_.suspendGameplay},{"SaveSpawnedObjects",entry_.saveSpawnedObjects}});
+            {"ActorName",entry_.actorName},{"SuspendGameplay",entry_.suspendGameplay},{"SaveSpawnedObjects",entry_.saveSpawnedObjects},{"ShowInHierarchy",entry_.showInHierarchy}});
 }
 
 void PrefabSpawnActionComponent::Deserialize(const nlohmann::json& json_)
@@ -354,6 +398,7 @@ void PrefabSpawnActionComponent::Deserialize(const nlohmann::json& json_)
         entry_.actorName = item_.value("ActorName", std::string{});
         entry_.suspendGameplay = item_.value("SuspendGameplay", false);
         entry_.saveSpawnedObjects = item_.value("SaveSpawnedObjects", false);
+        entry_.showInHierarchy = item_.value("ShowInHierarchy", false);
         entries.push_back(entry_);
     }
     cachePrepared = false;

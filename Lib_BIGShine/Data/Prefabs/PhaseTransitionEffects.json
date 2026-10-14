@@ -18,7 +18,8 @@
         "TransitionMudPool",
         "TransitionMudScatter",
         "TransitionSlashSound",
-        "TransitionMudVortex"
+        "TransitionMudVortex",
+        "TransitionClashSlash"
     ],
     "Objects": {
         "PhaseTransitionEffects": {
@@ -55,7 +56,7 @@
             "RequiredForSceneStart": true,
             "Transform": {
                 "Pos": [
-                    18,
+                    0,
                     1.2,
                     -29
                 ],
@@ -74,7 +75,7 @@
                 {
                     "TypeName": "ParticleComponent",
                     "Data": {
-                        "AssetPath": "Data/Particle/PlayerGuardSparks.json",
+                        "AssetPath": "Data/Particle/TransitionClashSparks.json",
                         "AssetType": "ParticleEffect",
                         "AssetVersion": 1,
                         "Emitters": [
@@ -85,7 +86,7 @@
                                     0.0
                                 ],
                                 "BlendMode": 1,
-                                "BurstCount": 8,
+                                "BurstCount": 36,
                                 "Color": [
                                     1.0,
                                     0.72,
@@ -105,30 +106,30 @@
                                     0.85
                                 ],
                                 "ConeAngle": [
-                                    15.0,
-                                    65.0
+                                    20,
+                                    100
                                 ],
                                 "Delay": 0.0,
-                                "Drag": 3.0,
+                                "Drag": 3.5,
                                 "EmissionMode": 1,
                                 "Fade": [
-                                    0.0,
-                                    0.16
+                                    0,
+                                    0.2
                                 ],
                                 "FresnelPower": 2.0,
                                 "FresnelStrength": 1.0,
                                 "GradientTexturePath": "",
-                                "Gravity": 0.0,
+                                "Gravity": -1.5,
                                 "LegacyRadius": [
                                     0.0,
                                     0.0
                                 ],
                                 "Lifespan": [
-                                    0.16,
-                                    0.28
+                                    0.12,
+                                    0.32
                                 ],
                                 "MaskTexturePath": "Data/Texture/Particle/masks for  particles/masks for  particles/9.png",
-                                "MaxCount": 12,
+                                "MaxCount": 96,
                                 "MeshVertexSampleCount": 2048,
                                 "Name": "GuardSparks",
                                 "NoiseFrequency": 3.0,
@@ -162,8 +163,8 @@
                                     0.0
                                 ],
                                 "Size": [
-                                    0.035,
-                                    0.07
+                                    0.04,
+                                    0.085
                                 ],
                                 "SizeRandomEnd": [
                                     1.0,
@@ -191,8 +192,8 @@
                                 "SpawnShape": 0,
                                 "SpawnSpace": 0,
                                 "Speed": [
-                                    1.5,
-                                    3.0
+                                    4,
+                                    8
                                 ],
                                 "SpriteAnimationFps": 12.0,
                                 "SpriteAnimationLoop": 1,
@@ -204,8 +205,8 @@
                                     0,
                                     0
                                 ],
-                                "StretchMax": 0.3,
-                                "StretchScale": 0.08,
+                                "StretchMax": 0.65,
+                                "StretchScale": 0.12,
                                 "TexturePath": "",
                                 "TextureSplitCount": [
                                     1,
@@ -295,7 +296,7 @@
                     "TypeName": "MeshVFXComponent",
                     "Data": {
                         "IsPlaying": false,
-                        "PlaybackSpeed": 1.0,
+                        "PlaybackSpeed": 1.5,
                         "Parts": [
                             {
                                 "RenderEnabled": false,
@@ -652,7 +653,7 @@
                                     0
                                 ],
                                 "BlendMode": 0,
-                                "BurstCount": 90,
+                                "BurstCount": 180,
                                 "Color": [
                                     0.025,
                                     0.008,
@@ -695,7 +696,7 @@
                                     3
                                 ],
                                 "MaskTexturePath": "",
-                                "MaxCount": 512,
+                                "MaxCount": 1024,
                                 "MeshVertexSampleCount": 512,
                                 "Name": "DragonMudLeak",
                                 "NoiseFrequency": 0.55,
@@ -729,8 +730,8 @@
                                     0.0
                                 ],
                                 "Size": [
-                                    0.32,
-                                    0.65
+                                    0.45,
+                                    0.85
                                 ],
                                 "SizeRandomEnd": [
                                     0.8,
@@ -1014,7 +1015,7 @@
             "Transform": {
                 "Pos": [
                     0,
-                    0,
+                    -0.122791,
                     0
                 ],
                 "Rot": [
@@ -1043,7 +1044,7 @@
                                     0
                                 ],
                                 "BlendMode": 0,
-                                "BurstCount": 28,
+                                "BurstCount": 56,
                                 "Color": [
                                     0.025,
                                     0.008,
@@ -1086,7 +1087,7 @@
                                     1.1
                                 ],
                                 "MaskTexturePath": "",
-                                "MaxCount": 512,
+                                "MaxCount": 768,
                                 "MeshVertexSampleCount": 2048,
                                 "Name": "HumanMudSlough",
                                 "NoiseFrequency": 0.55,
@@ -1251,7 +1252,7 @@
             "RequiredForSceneStart": true,
             "Transform": {
                 "Pos": [
-                    18,
+                    0,
                     1.2,
                     -30
                 ],
@@ -1592,10 +1593,12 @@
                                 "ScaleCurveName": ""
                             }
                         ],
-                        "TrailLifeTime": 2.4,
+                        "TrailLifeTime": 3.1,
                         "TrailMaxSampleCount": 128,
                         "TrailMinSampleDistance": 0.06,
-                        "TrailEmitting": false
+                        "TrailEmitting": false,
+                        "TrailCrossSectionHeight": 0.75,
+                        "TrailMinimumSampleDistance": 0.06
                     },
                     "Enabled": true,
                     "UpdateEnabled": true,
@@ -1618,7 +1621,7 @@
                                     0
                                 ],
                                 "BlendMode": 0,
-                                "BurstCount": 24,
+                                "BurstCount": 84,
                                 "Color": [
                                     0.025,
                                     0.008,
@@ -1657,23 +1660,23 @@
                                     0
                                 ],
                                 "Lifespan": [
-                                    0.5,
-                                    1.2
+                                    0.7,
+                                    1.5
                                 ],
                                 "MaskTexturePath": "",
-                                "MaxCount": 512,
+                                "MaxCount": 1024,
                                 "MeshVertexSampleCount": 2048,
                                 "Name": "MudCrawl",
                                 "NoiseFrequency": 0.55,
                                 "NoiseSpeed": 0.45,
                                 "NoiseStrength": 0.35,
-                                "OrbitVelocity": 0.0,
+                                "OrbitVelocity": 3,
                                 "PosOffset": [
                                     0,
-                                    0.15,
+                                    0.45,
                                     0
                                 ],
-                                "RadialVelocity": 0.0,
+                                "RadialVelocity": 0.4,
                                 "RenderType": 0,
                                 "RotationSpeed": [
                                     0.0,
@@ -1685,9 +1688,9 @@
                                     0.0
                                 ],
                                 "ShapeSize": [
-                                    1.5,
-                                    0.1,
-                                    1.5
+                                    2.5,
+                                    1.2,
+                                    2.5
                                 ],
                                 "ShapeStart": [
                                     0.0,
@@ -1695,8 +1698,8 @@
                                     0.0
                                 ],
                                 "Size": [
-                                    0.3,
-                                    0.8
+                                    0.5,
+                                    1.1
                                 ],
                                 "SizeRandomEnd": [
                                     0.8,
@@ -1712,6 +1715,306 @@
                                 "Speed": [
                                     0.05,
                                     0.2
+                                ],
+                                "SpriteAnimationFps": 12.0,
+                                "SpriteAnimationLoop": 1,
+                                "SpriteAnimationRange": [
+                                    0,
+                                    0
+                                ],
+                                "SpriteSheetIndex": [
+                                    0,
+                                    0
+                                ],
+                                "StretchMax": 100.0,
+                                "StretchScale": 0.03999999910593033,
+                                "TexturePath": "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/smoke_03.png",
+                                "TextureSplitCount": [
+                                    1,
+                                    1
+                                ],
+                                "UseColorOverLife": 1,
+                                "UseFresnel": 0,
+                                "UseGradient": 0,
+                                "UseMask": 0,
+                                "UseRandomSize": 1,
+                                "UseSpriteAnimation": 0,
+                                "VerticalSpawnRange": 0.0,
+                                "Wind": [
+                                    0,
+                                    0,
+                                    0
+                                ],
+                                "gradientDirection": 0,
+                                "gradientEndUv": 1.0,
+                                "gradientFixedUv": 0.5,
+                                "gradientSampleMode": 0,
+                                "gradientStartUv": 0.0,
+                                "gradientTexturePath": "",
+                                "maskTexturePath": "",
+                                "shadeGradientDirection": 0,
+                                "shadeGradientEndUv": 1.0,
+                                "shadeGradientFixedUv": 0.5,
+                                "shadeGradientSampleMode": 0,
+                                "shadeGradientStartUv": 0.0,
+                                "shadeGradientTexturePath": "",
+                                "texturePath": "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/smoke_03.png",
+                                "useGradientTexture": 0,
+                                "useShadeGradientTexture": 0,
+                                "MaterialPath": "",
+                                "MaterialPaths": []
+                            },
+                            {
+                                "Acceleration": [
+                                    0,
+                                    -0.6,
+                                    0
+                                ],
+                                "BlendMode": 0,
+                                "BurstCount": 110,
+                                "Color": [
+                                    0.02,
+                                    0.006,
+                                    0.04,
+                                    0.88
+                                ],
+                                "ColorEnd": [
+                                    0.01,
+                                    0.003,
+                                    0.018,
+                                    0
+                                ],
+                                "ColorStart": [
+                                    0.025,
+                                    0.008,
+                                    0.045,
+                                    0.9
+                                ],
+                                "ConeAngle": [
+                                    0.0,
+                                    0.0
+                                ],
+                                "Delay": 0.0,
+                                "Drag": 0.8,
+                                "EmissionMode": 0,
+                                "Fade": [
+                                    0.5,
+                                    1.8
+                                ],
+                                "FresnelPower": 0.10000000149011612,
+                                "FresnelStrength": 0,
+                                "GradientTexturePath": "",
+                                "Gravity": -1.2,
+                                "LegacyRadius": [
+                                    0,
+                                    0
+                                ],
+                                "Lifespan": [
+                                    0.5,
+                                    1.2
+                                ],
+                                "MaskTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+                                "MaxCount": 768,
+                                "MeshVertexSampleCount": 2048,
+                                "Name": "MudVolumeChunks",
+                                "NoiseFrequency": 0.55,
+                                "NoiseSpeed": 0.45,
+                                "NoiseStrength": 0.6,
+                                "OrbitVelocity": 3,
+                                "PosOffset": [
+                                    0,
+                                    0.6,
+                                    0
+                                ],
+                                "RadialVelocity": 0.4,
+                                "RenderType": 0,
+                                "RotationSpeed": [
+                                    0.0,
+                                    0.0
+                                ],
+                                "ShapeEnd": [
+                                    0.0,
+                                    0.0,
+                                    0.0
+                                ],
+                                "ShapeSize": [
+                                    3,
+                                    1.6,
+                                    3
+                                ],
+                                "ShapeStart": [
+                                    0.0,
+                                    0.0,
+                                    0.0
+                                ],
+                                "Size": [
+                                    0.22,
+                                    0.45
+                                ],
+                                "SizeRandomEnd": [
+                                    0.8,
+                                    1.3
+                                ],
+                                "SizeRandomStart": [
+                                    0.75,
+                                    1.15
+                                ],
+                                "SpawnDirectionMode": 0,
+                                "SpawnShape": 3,
+                                "SpawnSpace": 0,
+                                "Speed": [
+                                    0.5,
+                                    1.6
+                                ],
+                                "SpriteAnimationFps": 12.0,
+                                "SpriteAnimationLoop": 1,
+                                "SpriteAnimationRange": [
+                                    0,
+                                    0
+                                ],
+                                "SpriteSheetIndex": [
+                                    0,
+                                    0
+                                ],
+                                "StretchMax": 100.0,
+                                "StretchScale": 0.03999999910593033,
+                                "TexturePath": "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/smoke_03.png",
+                                "TextureSplitCount": [
+                                    1,
+                                    1
+                                ],
+                                "UseColorOverLife": 1,
+                                "UseFresnel": 0,
+                                "UseGradient": 0,
+                                "UseMask": 1,
+                                "UseRandomSize": 1,
+                                "UseSpriteAnimation": 0,
+                                "VerticalSpawnRange": 0.0,
+                                "Wind": [
+                                    0,
+                                    0,
+                                    0
+                                ],
+                                "gradientDirection": 0,
+                                "gradientEndUv": 1.0,
+                                "gradientFixedUv": 0.5,
+                                "gradientSampleMode": 0,
+                                "gradientStartUv": 0.0,
+                                "gradientTexturePath": "",
+                                "maskTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+                                "shadeGradientDirection": 0,
+                                "shadeGradientEndUv": 1.0,
+                                "shadeGradientFixedUv": 0.5,
+                                "shadeGradientSampleMode": 0,
+                                "shadeGradientStartUv": 0.0,
+                                "shadeGradientTexturePath": "",
+                                "texturePath": "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/smoke_03.png",
+                                "useGradientTexture": 0,
+                                "useShadeGradientTexture": 0,
+                                "MaterialPath": "",
+                                "MaterialPaths": []
+                            },
+                            {
+                                "Acceleration": [
+                                    0,
+                                    -0.6,
+                                    0
+                                ],
+                                "BlendMode": 0,
+                                "BurstCount": 36,
+                                "Color": [
+                                    0.045,
+                                    0.012,
+                                    0.07,
+                                    0.22
+                                ],
+                                "ColorEnd": [
+                                    0.01,
+                                    0.003,
+                                    0.025,
+                                    0
+                                ],
+                                "ColorStart": [
+                                    0.045,
+                                    0.012,
+                                    0.07,
+                                    0.22
+                                ],
+                                "ConeAngle": [
+                                    0.0,
+                                    0.0
+                                ],
+                                "Delay": 0.0,
+                                "Drag": 0.8,
+                                "EmissionMode": 0,
+                                "Fade": [
+                                    0.08,
+                                    0.6
+                                ],
+                                "FresnelPower": 0.10000000149011612,
+                                "FresnelStrength": 0,
+                                "GradientTexturePath": "",
+                                "Gravity": 0.15,
+                                "LegacyRadius": [
+                                    0,
+                                    0
+                                ],
+                                "Lifespan": [
+                                    0.7,
+                                    1.8
+                                ],
+                                "MaskTexturePath": "",
+                                "MaxCount": 384,
+                                "MeshVertexSampleCount": 2048,
+                                "Name": "MudRisingMist",
+                                "NoiseFrequency": 0.55,
+                                "NoiseSpeed": 0.45,
+                                "NoiseStrength": 0.35,
+                                "OrbitVelocity": 1.2,
+                                "PosOffset": [
+                                    0,
+                                    0.5,
+                                    0
+                                ],
+                                "RadialVelocity": 0.4,
+                                "RenderType": 0,
+                                "RotationSpeed": [
+                                    0.0,
+                                    0.0
+                                ],
+                                "ShapeEnd": [
+                                    0.0,
+                                    0.0,
+                                    0.0
+                                ],
+                                "ShapeSize": [
+                                    2.8,
+                                    2.4,
+                                    2.8
+                                ],
+                                "ShapeStart": [
+                                    0.0,
+                                    0.0,
+                                    0.0
+                                ],
+                                "Size": [
+                                    0.65,
+                                    1.4
+                                ],
+                                "SizeRandomEnd": [
+                                    0.8,
+                                    1.3
+                                ],
+                                "SizeRandomStart": [
+                                    0.75,
+                                    1.15
+                                ],
+                                "SpawnDirectionMode": 0,
+                                "SpawnShape": 3,
+                                "SpawnSpace": 0,
+                                "Speed": [
+                                    0.7,
+                                    1.3
                                 ],
                                 "SpriteAnimationFps": 12.0,
                                 "SpriteAnimationLoop": 1,
@@ -1791,7 +2094,7 @@
                                 "SmoothMovement": true,
                                 "SwayAmplitude": 1.2,
                                 "SwayCycles": 2,
-                                "TrailWidth": 2
+                                "TrailWidth": 3.4
                             },
                             {
                                 "ActionName": "Strike",
@@ -1809,7 +2112,7 @@
                                 "SmoothMovement": true,
                                 "SwayAmplitude": 0,
                                 "SwayCycles": 2,
-                                "TrailWidth": 2
+                                "TrailWidth": 3.4
                             },
                             {
                                 "ActionName": "Scatter",
@@ -1818,16 +2121,16 @@
                                 "StateName": "",
                                 "StateAssetPath": "",
                                 "TargetName": "MudScatterTransform0",
-                                "Duration": 0.8,
+                                "Duration": 0.38,
                                 "PositionOffset": [
                                     0,
                                     0,
                                     0
                                 ],
-                                "SmoothMovement": true,
+                                "SmoothMovement": false,
                                 "SwayAmplitude": 0,
                                 "SwayCycles": 2,
-                                "TrailWidth": 2
+                                "TrailWidth": 3.4
                             },
                             {
                                 "ActionName": "Gather",
@@ -1845,7 +2148,7 @@
                                 "SmoothMovement": true,
                                 "SwayAmplitude": 0.5,
                                 "SwayCycles": 2,
-                                "TrailWidth": 2
+                                "TrailWidth": 3.4
                             }
                         ],
                         "SpawnPoints": [
@@ -2083,10 +2386,12 @@
                                 "ScaleCurveName": ""
                             }
                         ],
-                        "TrailLifeTime": 2.4,
+                        "TrailLifeTime": 3.1,
                         "TrailMaxSampleCount": 128,
                         "TrailMinSampleDistance": 0.06,
-                        "TrailEmitting": false
+                        "TrailEmitting": false,
+                        "TrailCrossSectionHeight": 0.75,
+                        "TrailMinimumSampleDistance": 0.06
                     },
                     "Enabled": true,
                     "UpdateEnabled": true,
@@ -2109,7 +2414,7 @@
                                     0
                                 ],
                                 "BlendMode": 0,
-                                "BurstCount": 24,
+                                "BurstCount": 84,
                                 "Color": [
                                     0.025,
                                     0.008,
@@ -2148,23 +2453,23 @@
                                     0
                                 ],
                                 "Lifespan": [
-                                    0.5,
-                                    1.2
+                                    0.7,
+                                    1.5
                                 ],
                                 "MaskTexturePath": "",
-                                "MaxCount": 512,
+                                "MaxCount": 1024,
                                 "MeshVertexSampleCount": 2048,
                                 "Name": "MudCrawl",
                                 "NoiseFrequency": 0.55,
                                 "NoiseSpeed": 0.45,
                                 "NoiseStrength": 0.35,
-                                "OrbitVelocity": 0.0,
+                                "OrbitVelocity": 3,
                                 "PosOffset": [
                                     0,
-                                    0.15,
+                                    0.45,
                                     0
                                 ],
-                                "RadialVelocity": 0.0,
+                                "RadialVelocity": 0.4,
                                 "RenderType": 0,
                                 "RotationSpeed": [
                                     0.0,
@@ -2176,9 +2481,9 @@
                                     0.0
                                 ],
                                 "ShapeSize": [
-                                    1.5,
-                                    0.1,
-                                    1.5
+                                    2.5,
+                                    1.2,
+                                    2.5
                                 ],
                                 "ShapeStart": [
                                     0.0,
@@ -2186,8 +2491,8 @@
                                     0.0
                                 ],
                                 "Size": [
-                                    0.3,
-                                    0.8
+                                    0.5,
+                                    1.1
                                 ],
                                 "SizeRandomEnd": [
                                     0.8,
@@ -2203,6 +2508,306 @@
                                 "Speed": [
                                     0.05,
                                     0.2
+                                ],
+                                "SpriteAnimationFps": 12.0,
+                                "SpriteAnimationLoop": 1,
+                                "SpriteAnimationRange": [
+                                    0,
+                                    0
+                                ],
+                                "SpriteSheetIndex": [
+                                    0,
+                                    0
+                                ],
+                                "StretchMax": 100.0,
+                                "StretchScale": 0.03999999910593033,
+                                "TexturePath": "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/smoke_03.png",
+                                "TextureSplitCount": [
+                                    1,
+                                    1
+                                ],
+                                "UseColorOverLife": 1,
+                                "UseFresnel": 0,
+                                "UseGradient": 0,
+                                "UseMask": 0,
+                                "UseRandomSize": 1,
+                                "UseSpriteAnimation": 0,
+                                "VerticalSpawnRange": 0.0,
+                                "Wind": [
+                                    0,
+                                    0,
+                                    0
+                                ],
+                                "gradientDirection": 0,
+                                "gradientEndUv": 1.0,
+                                "gradientFixedUv": 0.5,
+                                "gradientSampleMode": 0,
+                                "gradientStartUv": 0.0,
+                                "gradientTexturePath": "",
+                                "maskTexturePath": "",
+                                "shadeGradientDirection": 0,
+                                "shadeGradientEndUv": 1.0,
+                                "shadeGradientFixedUv": 0.5,
+                                "shadeGradientSampleMode": 0,
+                                "shadeGradientStartUv": 0.0,
+                                "shadeGradientTexturePath": "",
+                                "texturePath": "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/smoke_03.png",
+                                "useGradientTexture": 0,
+                                "useShadeGradientTexture": 0,
+                                "MaterialPath": "",
+                                "MaterialPaths": []
+                            },
+                            {
+                                "Acceleration": [
+                                    0,
+                                    -0.6,
+                                    0
+                                ],
+                                "BlendMode": 0,
+                                "BurstCount": 110,
+                                "Color": [
+                                    0.02,
+                                    0.006,
+                                    0.04,
+                                    0.88
+                                ],
+                                "ColorEnd": [
+                                    0.01,
+                                    0.003,
+                                    0.018,
+                                    0
+                                ],
+                                "ColorStart": [
+                                    0.025,
+                                    0.008,
+                                    0.045,
+                                    0.9
+                                ],
+                                "ConeAngle": [
+                                    0.0,
+                                    0.0
+                                ],
+                                "Delay": 0.0,
+                                "Drag": 0.8,
+                                "EmissionMode": 0,
+                                "Fade": [
+                                    0.5,
+                                    1.8
+                                ],
+                                "FresnelPower": 0.10000000149011612,
+                                "FresnelStrength": 0,
+                                "GradientTexturePath": "",
+                                "Gravity": -1.2,
+                                "LegacyRadius": [
+                                    0,
+                                    0
+                                ],
+                                "Lifespan": [
+                                    0.5,
+                                    1.2
+                                ],
+                                "MaskTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+                                "MaxCount": 768,
+                                "MeshVertexSampleCount": 2048,
+                                "Name": "MudVolumeChunks",
+                                "NoiseFrequency": 0.55,
+                                "NoiseSpeed": 0.45,
+                                "NoiseStrength": 0.6,
+                                "OrbitVelocity": 3,
+                                "PosOffset": [
+                                    0,
+                                    0.6,
+                                    0
+                                ],
+                                "RadialVelocity": 0.4,
+                                "RenderType": 0,
+                                "RotationSpeed": [
+                                    0.0,
+                                    0.0
+                                ],
+                                "ShapeEnd": [
+                                    0.0,
+                                    0.0,
+                                    0.0
+                                ],
+                                "ShapeSize": [
+                                    3,
+                                    1.6,
+                                    3
+                                ],
+                                "ShapeStart": [
+                                    0.0,
+                                    0.0,
+                                    0.0
+                                ],
+                                "Size": [
+                                    0.22,
+                                    0.45
+                                ],
+                                "SizeRandomEnd": [
+                                    0.8,
+                                    1.3
+                                ],
+                                "SizeRandomStart": [
+                                    0.75,
+                                    1.15
+                                ],
+                                "SpawnDirectionMode": 0,
+                                "SpawnShape": 3,
+                                "SpawnSpace": 0,
+                                "Speed": [
+                                    0.5,
+                                    1.6
+                                ],
+                                "SpriteAnimationFps": 12.0,
+                                "SpriteAnimationLoop": 1,
+                                "SpriteAnimationRange": [
+                                    0,
+                                    0
+                                ],
+                                "SpriteSheetIndex": [
+                                    0,
+                                    0
+                                ],
+                                "StretchMax": 100.0,
+                                "StretchScale": 0.03999999910593033,
+                                "TexturePath": "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/smoke_03.png",
+                                "TextureSplitCount": [
+                                    1,
+                                    1
+                                ],
+                                "UseColorOverLife": 1,
+                                "UseFresnel": 0,
+                                "UseGradient": 0,
+                                "UseMask": 1,
+                                "UseRandomSize": 1,
+                                "UseSpriteAnimation": 0,
+                                "VerticalSpawnRange": 0.0,
+                                "Wind": [
+                                    0,
+                                    0,
+                                    0
+                                ],
+                                "gradientDirection": 0,
+                                "gradientEndUv": 1.0,
+                                "gradientFixedUv": 0.5,
+                                "gradientSampleMode": 0,
+                                "gradientStartUv": 0.0,
+                                "gradientTexturePath": "",
+                                "maskTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+                                "shadeGradientDirection": 0,
+                                "shadeGradientEndUv": 1.0,
+                                "shadeGradientFixedUv": 0.5,
+                                "shadeGradientSampleMode": 0,
+                                "shadeGradientStartUv": 0.0,
+                                "shadeGradientTexturePath": "",
+                                "texturePath": "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/smoke_03.png",
+                                "useGradientTexture": 0,
+                                "useShadeGradientTexture": 0,
+                                "MaterialPath": "",
+                                "MaterialPaths": []
+                            },
+                            {
+                                "Acceleration": [
+                                    0,
+                                    -0.6,
+                                    0
+                                ],
+                                "BlendMode": 0,
+                                "BurstCount": 36,
+                                "Color": [
+                                    0.045,
+                                    0.012,
+                                    0.07,
+                                    0.22
+                                ],
+                                "ColorEnd": [
+                                    0.01,
+                                    0.003,
+                                    0.025,
+                                    0
+                                ],
+                                "ColorStart": [
+                                    0.045,
+                                    0.012,
+                                    0.07,
+                                    0.22
+                                ],
+                                "ConeAngle": [
+                                    0.0,
+                                    0.0
+                                ],
+                                "Delay": 0.0,
+                                "Drag": 0.8,
+                                "EmissionMode": 0,
+                                "Fade": [
+                                    0.08,
+                                    0.6
+                                ],
+                                "FresnelPower": 0.10000000149011612,
+                                "FresnelStrength": 0,
+                                "GradientTexturePath": "",
+                                "Gravity": 0.15,
+                                "LegacyRadius": [
+                                    0,
+                                    0
+                                ],
+                                "Lifespan": [
+                                    0.7,
+                                    1.8
+                                ],
+                                "MaskTexturePath": "",
+                                "MaxCount": 384,
+                                "MeshVertexSampleCount": 2048,
+                                "Name": "MudRisingMist",
+                                "NoiseFrequency": 0.55,
+                                "NoiseSpeed": 0.45,
+                                "NoiseStrength": 0.35,
+                                "OrbitVelocity": 1.2,
+                                "PosOffset": [
+                                    0,
+                                    0.5,
+                                    0
+                                ],
+                                "RadialVelocity": 0.4,
+                                "RenderType": 0,
+                                "RotationSpeed": [
+                                    0.0,
+                                    0.0
+                                ],
+                                "ShapeEnd": [
+                                    0.0,
+                                    0.0,
+                                    0.0
+                                ],
+                                "ShapeSize": [
+                                    2.8,
+                                    2.4,
+                                    2.8
+                                ],
+                                "ShapeStart": [
+                                    0.0,
+                                    0.0,
+                                    0.0
+                                ],
+                                "Size": [
+                                    0.65,
+                                    1.4
+                                ],
+                                "SizeRandomEnd": [
+                                    0.8,
+                                    1.3
+                                ],
+                                "SizeRandomStart": [
+                                    0.75,
+                                    1.15
+                                ],
+                                "SpawnDirectionMode": 0,
+                                "SpawnShape": 3,
+                                "SpawnSpace": 0,
+                                "Speed": [
+                                    0.7,
+                                    1.3
                                 ],
                                 "SpriteAnimationFps": 12.0,
                                 "SpriteAnimationLoop": 1,
@@ -2282,7 +2887,7 @@
                                 "SmoothMovement": true,
                                 "SwayAmplitude": 1.2,
                                 "SwayCycles": 2,
-                                "TrailWidth": 2
+                                "TrailWidth": 3.4
                             },
                             {
                                 "ActionName": "Strike",
@@ -2300,7 +2905,7 @@
                                 "SmoothMovement": true,
                                 "SwayAmplitude": 0,
                                 "SwayCycles": 2,
-                                "TrailWidth": 2
+                                "TrailWidth": 3.4
                             },
                             {
                                 "ActionName": "Scatter",
@@ -2309,16 +2914,16 @@
                                 "StateName": "",
                                 "StateAssetPath": "",
                                 "TargetName": "MudScatterTransform1",
-                                "Duration": 0.8,
+                                "Duration": 0.38,
                                 "PositionOffset": [
                                     0,
                                     0,
                                     0
                                 ],
-                                "SmoothMovement": true,
+                                "SmoothMovement": false,
                                 "SwayAmplitude": 0,
                                 "SwayCycles": 2,
-                                "TrailWidth": 2
+                                "TrailWidth": 3.4
                             },
                             {
                                 "ActionName": "Gather",
@@ -2336,7 +2941,7 @@
                                 "SmoothMovement": true,
                                 "SwayAmplitude": 0.5,
                                 "SwayCycles": 2,
-                                "TrailWidth": 2
+                                "TrailWidth": 3.4
                             }
                         ],
                         "SpawnPoints": [
@@ -2574,10 +3179,12 @@
                                 "ScaleCurveName": ""
                             }
                         ],
-                        "TrailLifeTime": 2.4,
+                        "TrailLifeTime": 3.1,
                         "TrailMaxSampleCount": 128,
                         "TrailMinSampleDistance": 0.06,
-                        "TrailEmitting": false
+                        "TrailEmitting": false,
+                        "TrailCrossSectionHeight": 0.75,
+                        "TrailMinimumSampleDistance": 0.06
                     },
                     "Enabled": true,
                     "UpdateEnabled": true,
@@ -2600,7 +3207,7 @@
                                     0
                                 ],
                                 "BlendMode": 0,
-                                "BurstCount": 24,
+                                "BurstCount": 84,
                                 "Color": [
                                     0.025,
                                     0.008,
@@ -2639,23 +3246,23 @@
                                     0
                                 ],
                                 "Lifespan": [
-                                    0.5,
-                                    1.2
+                                    0.7,
+                                    1.5
                                 ],
                                 "MaskTexturePath": "",
-                                "MaxCount": 512,
+                                "MaxCount": 1024,
                                 "MeshVertexSampleCount": 2048,
                                 "Name": "MudCrawl",
                                 "NoiseFrequency": 0.55,
                                 "NoiseSpeed": 0.45,
                                 "NoiseStrength": 0.35,
-                                "OrbitVelocity": 0.0,
+                                "OrbitVelocity": 3,
                                 "PosOffset": [
                                     0,
-                                    0.15,
+                                    0.45,
                                     0
                                 ],
-                                "RadialVelocity": 0.0,
+                                "RadialVelocity": 0.4,
                                 "RenderType": 0,
                                 "RotationSpeed": [
                                     0.0,
@@ -2667,9 +3274,9 @@
                                     0.0
                                 ],
                                 "ShapeSize": [
-                                    1.5,
-                                    0.1,
-                                    1.5
+                                    2.5,
+                                    1.2,
+                                    2.5
                                 ],
                                 "ShapeStart": [
                                     0.0,
@@ -2677,8 +3284,8 @@
                                     0.0
                                 ],
                                 "Size": [
-                                    0.3,
-                                    0.8
+                                    0.5,
+                                    1.1
                                 ],
                                 "SizeRandomEnd": [
                                     0.8,
@@ -2694,6 +3301,306 @@
                                 "Speed": [
                                     0.05,
                                     0.2
+                                ],
+                                "SpriteAnimationFps": 12.0,
+                                "SpriteAnimationLoop": 1,
+                                "SpriteAnimationRange": [
+                                    0,
+                                    0
+                                ],
+                                "SpriteSheetIndex": [
+                                    0,
+                                    0
+                                ],
+                                "StretchMax": 100.0,
+                                "StretchScale": 0.03999999910593033,
+                                "TexturePath": "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/smoke_03.png",
+                                "TextureSplitCount": [
+                                    1,
+                                    1
+                                ],
+                                "UseColorOverLife": 1,
+                                "UseFresnel": 0,
+                                "UseGradient": 0,
+                                "UseMask": 0,
+                                "UseRandomSize": 1,
+                                "UseSpriteAnimation": 0,
+                                "VerticalSpawnRange": 0.0,
+                                "Wind": [
+                                    0,
+                                    0,
+                                    0
+                                ],
+                                "gradientDirection": 0,
+                                "gradientEndUv": 1.0,
+                                "gradientFixedUv": 0.5,
+                                "gradientSampleMode": 0,
+                                "gradientStartUv": 0.0,
+                                "gradientTexturePath": "",
+                                "maskTexturePath": "",
+                                "shadeGradientDirection": 0,
+                                "shadeGradientEndUv": 1.0,
+                                "shadeGradientFixedUv": 0.5,
+                                "shadeGradientSampleMode": 0,
+                                "shadeGradientStartUv": 0.0,
+                                "shadeGradientTexturePath": "",
+                                "texturePath": "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/smoke_03.png",
+                                "useGradientTexture": 0,
+                                "useShadeGradientTexture": 0,
+                                "MaterialPath": "",
+                                "MaterialPaths": []
+                            },
+                            {
+                                "Acceleration": [
+                                    0,
+                                    -0.6,
+                                    0
+                                ],
+                                "BlendMode": 0,
+                                "BurstCount": 110,
+                                "Color": [
+                                    0.02,
+                                    0.006,
+                                    0.04,
+                                    0.88
+                                ],
+                                "ColorEnd": [
+                                    0.01,
+                                    0.003,
+                                    0.018,
+                                    0
+                                ],
+                                "ColorStart": [
+                                    0.025,
+                                    0.008,
+                                    0.045,
+                                    0.9
+                                ],
+                                "ConeAngle": [
+                                    0.0,
+                                    0.0
+                                ],
+                                "Delay": 0.0,
+                                "Drag": 0.8,
+                                "EmissionMode": 0,
+                                "Fade": [
+                                    0.5,
+                                    1.8
+                                ],
+                                "FresnelPower": 0.10000000149011612,
+                                "FresnelStrength": 0,
+                                "GradientTexturePath": "",
+                                "Gravity": -1.2,
+                                "LegacyRadius": [
+                                    0,
+                                    0
+                                ],
+                                "Lifespan": [
+                                    0.5,
+                                    1.2
+                                ],
+                                "MaskTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+                                "MaxCount": 768,
+                                "MeshVertexSampleCount": 2048,
+                                "Name": "MudVolumeChunks",
+                                "NoiseFrequency": 0.55,
+                                "NoiseSpeed": 0.45,
+                                "NoiseStrength": 0.6,
+                                "OrbitVelocity": 3,
+                                "PosOffset": [
+                                    0,
+                                    0.6,
+                                    0
+                                ],
+                                "RadialVelocity": 0.4,
+                                "RenderType": 0,
+                                "RotationSpeed": [
+                                    0.0,
+                                    0.0
+                                ],
+                                "ShapeEnd": [
+                                    0.0,
+                                    0.0,
+                                    0.0
+                                ],
+                                "ShapeSize": [
+                                    3,
+                                    1.6,
+                                    3
+                                ],
+                                "ShapeStart": [
+                                    0.0,
+                                    0.0,
+                                    0.0
+                                ],
+                                "Size": [
+                                    0.22,
+                                    0.45
+                                ],
+                                "SizeRandomEnd": [
+                                    0.8,
+                                    1.3
+                                ],
+                                "SizeRandomStart": [
+                                    0.75,
+                                    1.15
+                                ],
+                                "SpawnDirectionMode": 0,
+                                "SpawnShape": 3,
+                                "SpawnSpace": 0,
+                                "Speed": [
+                                    0.5,
+                                    1.6
+                                ],
+                                "SpriteAnimationFps": 12.0,
+                                "SpriteAnimationLoop": 1,
+                                "SpriteAnimationRange": [
+                                    0,
+                                    0
+                                ],
+                                "SpriteSheetIndex": [
+                                    0,
+                                    0
+                                ],
+                                "StretchMax": 100.0,
+                                "StretchScale": 0.03999999910593033,
+                                "TexturePath": "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/smoke_03.png",
+                                "TextureSplitCount": [
+                                    1,
+                                    1
+                                ],
+                                "UseColorOverLife": 1,
+                                "UseFresnel": 0,
+                                "UseGradient": 0,
+                                "UseMask": 1,
+                                "UseRandomSize": 1,
+                                "UseSpriteAnimation": 0,
+                                "VerticalSpawnRange": 0.0,
+                                "Wind": [
+                                    0,
+                                    0,
+                                    0
+                                ],
+                                "gradientDirection": 0,
+                                "gradientEndUv": 1.0,
+                                "gradientFixedUv": 0.5,
+                                "gradientSampleMode": 0,
+                                "gradientStartUv": 0.0,
+                                "gradientTexturePath": "",
+                                "maskTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+                                "shadeGradientDirection": 0,
+                                "shadeGradientEndUv": 1.0,
+                                "shadeGradientFixedUv": 0.5,
+                                "shadeGradientSampleMode": 0,
+                                "shadeGradientStartUv": 0.0,
+                                "shadeGradientTexturePath": "",
+                                "texturePath": "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/smoke_03.png",
+                                "useGradientTexture": 0,
+                                "useShadeGradientTexture": 0,
+                                "MaterialPath": "",
+                                "MaterialPaths": []
+                            },
+                            {
+                                "Acceleration": [
+                                    0,
+                                    -0.6,
+                                    0
+                                ],
+                                "BlendMode": 0,
+                                "BurstCount": 36,
+                                "Color": [
+                                    0.045,
+                                    0.012,
+                                    0.07,
+                                    0.22
+                                ],
+                                "ColorEnd": [
+                                    0.01,
+                                    0.003,
+                                    0.025,
+                                    0
+                                ],
+                                "ColorStart": [
+                                    0.045,
+                                    0.012,
+                                    0.07,
+                                    0.22
+                                ],
+                                "ConeAngle": [
+                                    0.0,
+                                    0.0
+                                ],
+                                "Delay": 0.0,
+                                "Drag": 0.8,
+                                "EmissionMode": 0,
+                                "Fade": [
+                                    0.08,
+                                    0.6
+                                ],
+                                "FresnelPower": 0.10000000149011612,
+                                "FresnelStrength": 0,
+                                "GradientTexturePath": "",
+                                "Gravity": 0.15,
+                                "LegacyRadius": [
+                                    0,
+                                    0
+                                ],
+                                "Lifespan": [
+                                    0.7,
+                                    1.8
+                                ],
+                                "MaskTexturePath": "",
+                                "MaxCount": 384,
+                                "MeshVertexSampleCount": 2048,
+                                "Name": "MudRisingMist",
+                                "NoiseFrequency": 0.55,
+                                "NoiseSpeed": 0.45,
+                                "NoiseStrength": 0.35,
+                                "OrbitVelocity": 1.2,
+                                "PosOffset": [
+                                    0,
+                                    0.5,
+                                    0
+                                ],
+                                "RadialVelocity": 0.4,
+                                "RenderType": 0,
+                                "RotationSpeed": [
+                                    0.0,
+                                    0.0
+                                ],
+                                "ShapeEnd": [
+                                    0.0,
+                                    0.0,
+                                    0.0
+                                ],
+                                "ShapeSize": [
+                                    2.8,
+                                    2.4,
+                                    2.8
+                                ],
+                                "ShapeStart": [
+                                    0.0,
+                                    0.0,
+                                    0.0
+                                ],
+                                "Size": [
+                                    0.65,
+                                    1.4
+                                ],
+                                "SizeRandomEnd": [
+                                    0.8,
+                                    1.3
+                                ],
+                                "SizeRandomStart": [
+                                    0.75,
+                                    1.15
+                                ],
+                                "SpawnDirectionMode": 0,
+                                "SpawnShape": 3,
+                                "SpawnSpace": 0,
+                                "Speed": [
+                                    0.7,
+                                    1.3
                                 ],
                                 "SpriteAnimationFps": 12.0,
                                 "SpriteAnimationLoop": 1,
@@ -2773,7 +3680,7 @@
                                 "SmoothMovement": true,
                                 "SwayAmplitude": 1.2,
                                 "SwayCycles": 2,
-                                "TrailWidth": 2
+                                "TrailWidth": 3.4
                             },
                             {
                                 "ActionName": "Strike",
@@ -2791,7 +3698,7 @@
                                 "SmoothMovement": true,
                                 "SwayAmplitude": 0,
                                 "SwayCycles": 2,
-                                "TrailWidth": 2
+                                "TrailWidth": 3.4
                             },
                             {
                                 "ActionName": "Scatter",
@@ -2800,16 +3707,16 @@
                                 "StateName": "",
                                 "StateAssetPath": "",
                                 "TargetName": "MudScatterTransform2",
-                                "Duration": 0.8,
+                                "Duration": 0.38,
                                 "PositionOffset": [
                                     0,
                                     0,
                                     0
                                 ],
-                                "SmoothMovement": true,
+                                "SmoothMovement": false,
                                 "SwayAmplitude": 0,
                                 "SwayCycles": 2,
-                                "TrailWidth": 2
+                                "TrailWidth": 3.4
                             },
                             {
                                 "ActionName": "Gather",
@@ -2827,7 +3734,7 @@
                                 "SmoothMovement": true,
                                 "SwayAmplitude": 0.5,
                                 "SwayCycles": 2,
-                                "TrailWidth": 2
+                                "TrailWidth": 3.4
                             }
                         ],
                         "SpawnPoints": [
@@ -3065,10 +3972,12 @@
                                 "ScaleCurveName": ""
                             }
                         ],
-                        "TrailLifeTime": 2.4,
+                        "TrailLifeTime": 3.1,
                         "TrailMaxSampleCount": 128,
                         "TrailMinSampleDistance": 0.06,
-                        "TrailEmitting": false
+                        "TrailEmitting": false,
+                        "TrailCrossSectionHeight": 0.75,
+                        "TrailMinimumSampleDistance": 0.06
                     },
                     "Enabled": true,
                     "UpdateEnabled": true,
@@ -3091,7 +4000,7 @@
                                     0
                                 ],
                                 "BlendMode": 0,
-                                "BurstCount": 24,
+                                "BurstCount": 84,
                                 "Color": [
                                     0.025,
                                     0.008,
@@ -3130,23 +4039,23 @@
                                     0
                                 ],
                                 "Lifespan": [
-                                    0.5,
-                                    1.2
+                                    0.7,
+                                    1.5
                                 ],
                                 "MaskTexturePath": "",
-                                "MaxCount": 512,
+                                "MaxCount": 1024,
                                 "MeshVertexSampleCount": 2048,
                                 "Name": "MudCrawl",
                                 "NoiseFrequency": 0.55,
                                 "NoiseSpeed": 0.45,
                                 "NoiseStrength": 0.35,
-                                "OrbitVelocity": 0.0,
+                                "OrbitVelocity": 3,
                                 "PosOffset": [
                                     0,
-                                    0.15,
+                                    0.45,
                                     0
                                 ],
-                                "RadialVelocity": 0.0,
+                                "RadialVelocity": 0.4,
                                 "RenderType": 0,
                                 "RotationSpeed": [
                                     0.0,
@@ -3158,9 +4067,9 @@
                                     0.0
                                 ],
                                 "ShapeSize": [
-                                    1.5,
-                                    0.1,
-                                    1.5
+                                    2.5,
+                                    1.2,
+                                    2.5
                                 ],
                                 "ShapeStart": [
                                     0.0,
@@ -3168,8 +4077,8 @@
                                     0.0
                                 ],
                                 "Size": [
-                                    0.3,
-                                    0.8
+                                    0.5,
+                                    1.1
                                 ],
                                 "SizeRandomEnd": [
                                     0.8,
@@ -3185,6 +4094,306 @@
                                 "Speed": [
                                     0.05,
                                     0.2
+                                ],
+                                "SpriteAnimationFps": 12.0,
+                                "SpriteAnimationLoop": 1,
+                                "SpriteAnimationRange": [
+                                    0,
+                                    0
+                                ],
+                                "SpriteSheetIndex": [
+                                    0,
+                                    0
+                                ],
+                                "StretchMax": 100.0,
+                                "StretchScale": 0.03999999910593033,
+                                "TexturePath": "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/smoke_03.png",
+                                "TextureSplitCount": [
+                                    1,
+                                    1
+                                ],
+                                "UseColorOverLife": 1,
+                                "UseFresnel": 0,
+                                "UseGradient": 0,
+                                "UseMask": 0,
+                                "UseRandomSize": 1,
+                                "UseSpriteAnimation": 0,
+                                "VerticalSpawnRange": 0.0,
+                                "Wind": [
+                                    0,
+                                    0,
+                                    0
+                                ],
+                                "gradientDirection": 0,
+                                "gradientEndUv": 1.0,
+                                "gradientFixedUv": 0.5,
+                                "gradientSampleMode": 0,
+                                "gradientStartUv": 0.0,
+                                "gradientTexturePath": "",
+                                "maskTexturePath": "",
+                                "shadeGradientDirection": 0,
+                                "shadeGradientEndUv": 1.0,
+                                "shadeGradientFixedUv": 0.5,
+                                "shadeGradientSampleMode": 0,
+                                "shadeGradientStartUv": 0.0,
+                                "shadeGradientTexturePath": "",
+                                "texturePath": "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/smoke_03.png",
+                                "useGradientTexture": 0,
+                                "useShadeGradientTexture": 0,
+                                "MaterialPath": "",
+                                "MaterialPaths": []
+                            },
+                            {
+                                "Acceleration": [
+                                    0,
+                                    -0.6,
+                                    0
+                                ],
+                                "BlendMode": 0,
+                                "BurstCount": 110,
+                                "Color": [
+                                    0.02,
+                                    0.006,
+                                    0.04,
+                                    0.88
+                                ],
+                                "ColorEnd": [
+                                    0.01,
+                                    0.003,
+                                    0.018,
+                                    0
+                                ],
+                                "ColorStart": [
+                                    0.025,
+                                    0.008,
+                                    0.045,
+                                    0.9
+                                ],
+                                "ConeAngle": [
+                                    0.0,
+                                    0.0
+                                ],
+                                "Delay": 0.0,
+                                "Drag": 0.8,
+                                "EmissionMode": 0,
+                                "Fade": [
+                                    0.5,
+                                    1.8
+                                ],
+                                "FresnelPower": 0.10000000149011612,
+                                "FresnelStrength": 0,
+                                "GradientTexturePath": "",
+                                "Gravity": -1.2,
+                                "LegacyRadius": [
+                                    0,
+                                    0
+                                ],
+                                "Lifespan": [
+                                    0.5,
+                                    1.2
+                                ],
+                                "MaskTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+                                "MaxCount": 768,
+                                "MeshVertexSampleCount": 2048,
+                                "Name": "MudVolumeChunks",
+                                "NoiseFrequency": 0.55,
+                                "NoiseSpeed": 0.45,
+                                "NoiseStrength": 0.6,
+                                "OrbitVelocity": 3,
+                                "PosOffset": [
+                                    0,
+                                    0.6,
+                                    0
+                                ],
+                                "RadialVelocity": 0.4,
+                                "RenderType": 0,
+                                "RotationSpeed": [
+                                    0.0,
+                                    0.0
+                                ],
+                                "ShapeEnd": [
+                                    0.0,
+                                    0.0,
+                                    0.0
+                                ],
+                                "ShapeSize": [
+                                    3,
+                                    1.6,
+                                    3
+                                ],
+                                "ShapeStart": [
+                                    0.0,
+                                    0.0,
+                                    0.0
+                                ],
+                                "Size": [
+                                    0.22,
+                                    0.45
+                                ],
+                                "SizeRandomEnd": [
+                                    0.8,
+                                    1.3
+                                ],
+                                "SizeRandomStart": [
+                                    0.75,
+                                    1.15
+                                ],
+                                "SpawnDirectionMode": 0,
+                                "SpawnShape": 3,
+                                "SpawnSpace": 0,
+                                "Speed": [
+                                    0.5,
+                                    1.6
+                                ],
+                                "SpriteAnimationFps": 12.0,
+                                "SpriteAnimationLoop": 1,
+                                "SpriteAnimationRange": [
+                                    0,
+                                    0
+                                ],
+                                "SpriteSheetIndex": [
+                                    0,
+                                    0
+                                ],
+                                "StretchMax": 100.0,
+                                "StretchScale": 0.03999999910593033,
+                                "TexturePath": "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/smoke_03.png",
+                                "TextureSplitCount": [
+                                    1,
+                                    1
+                                ],
+                                "UseColorOverLife": 1,
+                                "UseFresnel": 0,
+                                "UseGradient": 0,
+                                "UseMask": 1,
+                                "UseRandomSize": 1,
+                                "UseSpriteAnimation": 0,
+                                "VerticalSpawnRange": 0.0,
+                                "Wind": [
+                                    0,
+                                    0,
+                                    0
+                                ],
+                                "gradientDirection": 0,
+                                "gradientEndUv": 1.0,
+                                "gradientFixedUv": 0.5,
+                                "gradientSampleMode": 0,
+                                "gradientStartUv": 0.0,
+                                "gradientTexturePath": "",
+                                "maskTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+                                "shadeGradientDirection": 0,
+                                "shadeGradientEndUv": 1.0,
+                                "shadeGradientFixedUv": 0.5,
+                                "shadeGradientSampleMode": 0,
+                                "shadeGradientStartUv": 0.0,
+                                "shadeGradientTexturePath": "",
+                                "texturePath": "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/smoke_03.png",
+                                "useGradientTexture": 0,
+                                "useShadeGradientTexture": 0,
+                                "MaterialPath": "",
+                                "MaterialPaths": []
+                            },
+                            {
+                                "Acceleration": [
+                                    0,
+                                    -0.6,
+                                    0
+                                ],
+                                "BlendMode": 0,
+                                "BurstCount": 36,
+                                "Color": [
+                                    0.045,
+                                    0.012,
+                                    0.07,
+                                    0.22
+                                ],
+                                "ColorEnd": [
+                                    0.01,
+                                    0.003,
+                                    0.025,
+                                    0
+                                ],
+                                "ColorStart": [
+                                    0.045,
+                                    0.012,
+                                    0.07,
+                                    0.22
+                                ],
+                                "ConeAngle": [
+                                    0.0,
+                                    0.0
+                                ],
+                                "Delay": 0.0,
+                                "Drag": 0.8,
+                                "EmissionMode": 0,
+                                "Fade": [
+                                    0.08,
+                                    0.6
+                                ],
+                                "FresnelPower": 0.10000000149011612,
+                                "FresnelStrength": 0,
+                                "GradientTexturePath": "",
+                                "Gravity": 0.15,
+                                "LegacyRadius": [
+                                    0,
+                                    0
+                                ],
+                                "Lifespan": [
+                                    0.7,
+                                    1.8
+                                ],
+                                "MaskTexturePath": "",
+                                "MaxCount": 384,
+                                "MeshVertexSampleCount": 2048,
+                                "Name": "MudRisingMist",
+                                "NoiseFrequency": 0.55,
+                                "NoiseSpeed": 0.45,
+                                "NoiseStrength": 0.35,
+                                "OrbitVelocity": 1.2,
+                                "PosOffset": [
+                                    0,
+                                    0.5,
+                                    0
+                                ],
+                                "RadialVelocity": 0.4,
+                                "RenderType": 0,
+                                "RotationSpeed": [
+                                    0.0,
+                                    0.0
+                                ],
+                                "ShapeEnd": [
+                                    0.0,
+                                    0.0,
+                                    0.0
+                                ],
+                                "ShapeSize": [
+                                    2.8,
+                                    2.4,
+                                    2.8
+                                ],
+                                "ShapeStart": [
+                                    0.0,
+                                    0.0,
+                                    0.0
+                                ],
+                                "Size": [
+                                    0.65,
+                                    1.4
+                                ],
+                                "SizeRandomEnd": [
+                                    0.8,
+                                    1.3
+                                ],
+                                "SizeRandomStart": [
+                                    0.75,
+                                    1.15
+                                ],
+                                "SpawnDirectionMode": 0,
+                                "SpawnShape": 3,
+                                "SpawnSpace": 0,
+                                "Speed": [
+                                    0.7,
+                                    1.3
                                 ],
                                 "SpriteAnimationFps": 12.0,
                                 "SpriteAnimationLoop": 1,
@@ -3264,7 +4473,7 @@
                                 "SmoothMovement": true,
                                 "SwayAmplitude": 1.2,
                                 "SwayCycles": 2,
-                                "TrailWidth": 2
+                                "TrailWidth": 3.4
                             },
                             {
                                 "ActionName": "Strike",
@@ -3282,7 +4491,7 @@
                                 "SmoothMovement": true,
                                 "SwayAmplitude": 0,
                                 "SwayCycles": 2,
-                                "TrailWidth": 2
+                                "TrailWidth": 3.4
                             },
                             {
                                 "ActionName": "Scatter",
@@ -3291,16 +4500,16 @@
                                 "StateName": "",
                                 "StateAssetPath": "",
                                 "TargetName": "MudScatterTransform3",
-                                "Duration": 0.8,
+                                "Duration": 0.38,
                                 "PositionOffset": [
                                     0,
                                     0,
                                     0
                                 ],
-                                "SmoothMovement": true,
+                                "SmoothMovement": false,
                                 "SwayAmplitude": 0,
                                 "SwayCycles": 2,
-                                "TrailWidth": 2
+                                "TrailWidth": 3.4
                             },
                             {
                                 "ActionName": "Gather",
@@ -3318,7 +4527,7 @@
                                 "SmoothMovement": true,
                                 "SwayAmplitude": 0.5,
                                 "SwayCycles": 2,
-                                "TrailWidth": 2
+                                "TrailWidth": 3.4
                             }
                         ],
                         "SpawnPoints": [
@@ -3554,6 +4763,315 @@
                                 ],
                                 "AlphaCurveName": "",
                                 "ScaleCurveName": ""
+                            },
+                            {
+                                "RenderEnabled": false,
+                                "ModelPath": "Data/Model/VFX/Sphere.glb",
+                                "MeshIndex": 0,
+                                "Loop": true,
+                                "Duration": 3,
+                                "Color": [
+                                    0.025,
+                                    0.006,
+                                    0.04,
+                                    0.86
+                                ],
+                                "Alpha": 0.9,
+                                "AnimateAlpha": false,
+                                "AlphaStart": 1,
+                                "AlphaEnd": 0,
+                                "BlendMode": 0,
+                                "EmissiveStrength": 0.045,
+                                "Position": [
+                                    -3,
+                                    0.55,
+                                    0
+                                ],
+                                "Rotation": [
+                                    0,
+                                    0,
+                                    0
+                                ],
+                                "Scale": [
+                                    4.5,
+                                    0.7,
+                                    4
+                                ],
+                                "BaseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+                                "UseMaterialBaseTexture": false,
+                                "UseMaterialNormalTexture": false,
+                                "UseGradientTexture": false,
+                                "UseMask": true,
+                                "MaskLayers": [
+                                    {
+                                        "Path": "Data/Texture/Trail/T_TrailMask_22.PNG",
+                                        "BlendMode": 0,
+                                        "Invert": false
+                                    }
+                                ],
+                                "MaskUVScale": [
+                                    1,
+                                    1
+                                ],
+                                "MaskUVSpeed": [
+                                    1.5,
+                                    0
+                                ],
+                                "UseNoise": true,
+                                "NoiseTexturePaths": [
+                                    "Data/Texture/VFX/T_Free_Magic_Noise1_normal.PNG"
+                                ],
+                                "NoiseUVScale": [
+                                    1,
+                                    2
+                                ],
+                                "NoiseUVSpeed": [
+                                    0.11,
+                                    -0.14
+                                ],
+                                "NoiseStrength": 0.12,
+                                "UseFresnel": false,
+                                "UseNormal": false,
+                                "UseEdgeHighlight": false,
+                                "UseDissolveEdge": false,
+                                "UseBackFaceBoost": false,
+                                "InternalMeshCylinderRadius": 1,
+                                "InternalMeshSettings": {
+                                    "CapsuleLength": 0
+                                },
+                                "AnimateScale": false,
+                                "ScaleStart": [
+                                    0.12,
+                                    1,
+                                    0.12
+                                ],
+                                "ScaleEnd": [
+                                    1,
+                                    1,
+                                    1
+                                ],
+                                "AlphaCurveName": "",
+                                "ScaleCurveName": "",
+                                "MaterialPath": "",
+                                "MaterialPaths": [],
+                                "NoiseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+                                "MeshRotationSpeed": [
+                                    0,
+                                    17,
+                                    0
+                                ],
+                                "EmissiveCurveName": "",
+                                "RotationSpeed": [
+                                    0,
+                                    0,
+                                    0
+                                ]
+                            },
+                            {
+                                "RenderEnabled": false,
+                                "ModelPath": "Data/Model/VFX/Sphere.glb",
+                                "MeshIndex": 0,
+                                "Loop": true,
+                                "Duration": 3,
+                                "Color": [
+                                    0.025,
+                                    0.006,
+                                    0.04,
+                                    0.86
+                                ],
+                                "Alpha": 0.9,
+                                "AnimateAlpha": false,
+                                "AlphaStart": 1,
+                                "AlphaEnd": 0,
+                                "BlendMode": 0,
+                                "EmissiveStrength": 0.045,
+                                "Position": [
+                                    2.5,
+                                    0.6,
+                                    -2
+                                ],
+                                "Rotation": [
+                                    0,
+                                    0,
+                                    0
+                                ],
+                                "Scale": [
+                                    3.5,
+                                    0.8,
+                                    3.5
+                                ],
+                                "BaseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+                                "UseMaterialBaseTexture": false,
+                                "UseMaterialNormalTexture": false,
+                                "UseGradientTexture": false,
+                                "UseMask": true,
+                                "MaskLayers": [
+                                    {
+                                        "Path": "Data/Texture/Trail/T_TrailMask_22.PNG",
+                                        "BlendMode": 0,
+                                        "Invert": false
+                                    }
+                                ],
+                                "MaskUVScale": [
+                                    1,
+                                    1
+                                ],
+                                "MaskUVSpeed": [
+                                    1.5,
+                                    0
+                                ],
+                                "UseNoise": true,
+                                "NoiseTexturePaths": [
+                                    "Data/Texture/VFX/T_Free_Magic_Noise1_normal.PNG"
+                                ],
+                                "NoiseUVScale": [
+                                    1,
+                                    2
+                                ],
+                                "NoiseUVSpeed": [
+                                    0.11,
+                                    -0.14
+                                ],
+                                "NoiseStrength": 0.12,
+                                "UseFresnel": false,
+                                "UseNormal": false,
+                                "UseEdgeHighlight": false,
+                                "UseDissolveEdge": false,
+                                "UseBackFaceBoost": false,
+                                "InternalMeshCylinderRadius": 1,
+                                "InternalMeshSettings": {
+                                    "CapsuleLength": 0
+                                },
+                                "AnimateScale": false,
+                                "ScaleStart": [
+                                    0.12,
+                                    1,
+                                    0.12
+                                ],
+                                "ScaleEnd": [
+                                    1,
+                                    1,
+                                    1
+                                ],
+                                "AlphaCurveName": "",
+                                "ScaleCurveName": "",
+                                "MaterialPath": "",
+                                "MaterialPaths": [],
+                                "NoiseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+                                "MeshRotationSpeed": [
+                                    0,
+                                    17,
+                                    0
+                                ],
+                                "EmissiveCurveName": "",
+                                "RotationSpeed": [
+                                    0,
+                                    0,
+                                    0
+                                ]
+                            },
+                            {
+                                "RenderEnabled": false,
+                                "ModelPath": "Data/Model/VFX/Sphere.glb",
+                                "MeshIndex": 0,
+                                "Loop": true,
+                                "Duration": 3,
+                                "Color": [
+                                    0.025,
+                                    0.006,
+                                    0.04,
+                                    0.86
+                                ],
+                                "Alpha": 0.9,
+                                "AnimateAlpha": false,
+                                "AlphaStart": 1,
+                                "AlphaEnd": 0,
+                                "BlendMode": 0,
+                                "EmissiveStrength": 0.045,
+                                "Position": [
+                                    0,
+                                    0.45,
+                                    3
+                                ],
+                                "Rotation": [
+                                    0,
+                                    0,
+                                    0
+                                ],
+                                "Scale": [
+                                    4,
+                                    0.65,
+                                    3
+                                ],
+                                "BaseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+                                "UseMaterialBaseTexture": false,
+                                "UseMaterialNormalTexture": false,
+                                "UseGradientTexture": false,
+                                "UseMask": true,
+                                "MaskLayers": [
+                                    {
+                                        "Path": "Data/Texture/Trail/T_TrailMask_22.PNG",
+                                        "BlendMode": 0,
+                                        "Invert": false
+                                    }
+                                ],
+                                "MaskUVScale": [
+                                    1,
+                                    1
+                                ],
+                                "MaskUVSpeed": [
+                                    1.5,
+                                    0
+                                ],
+                                "UseNoise": true,
+                                "NoiseTexturePaths": [
+                                    "Data/Texture/VFX/T_Free_Magic_Noise1_normal.PNG"
+                                ],
+                                "NoiseUVScale": [
+                                    1,
+                                    2
+                                ],
+                                "NoiseUVSpeed": [
+                                    0.11,
+                                    -0.14
+                                ],
+                                "NoiseStrength": 0.12,
+                                "UseFresnel": false,
+                                "UseNormal": false,
+                                "UseEdgeHighlight": false,
+                                "UseDissolveEdge": false,
+                                "UseBackFaceBoost": false,
+                                "InternalMeshCylinderRadius": 1,
+                                "InternalMeshSettings": {
+                                    "CapsuleLength": 0
+                                },
+                                "AnimateScale": false,
+                                "ScaleStart": [
+                                    0.12,
+                                    1,
+                                    0.12
+                                ],
+                                "ScaleEnd": [
+                                    1,
+                                    1,
+                                    1
+                                ],
+                                "AlphaCurveName": "",
+                                "ScaleCurveName": "",
+                                "MaterialPath": "",
+                                "MaterialPaths": [],
+                                "NoiseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+                                "MeshRotationSpeed": [
+                                    0,
+                                    17,
+                                    0
+                                ],
+                                "EmissiveCurveName": "",
+                                "RotationSpeed": [
+                                    0,
+                                    0,
+                                    0
+                                ]
                             }
                         ]
                     },
@@ -3575,7 +5093,7 @@
             "RequiredForSceneStart": true,
             "Transform": {
                 "Pos": [
-                    18,
+                    0,
                     1.2,
                     -30
                 ],
@@ -3596,20 +5114,20 @@
                     "Data": {
                         "AssetType": "ParticleEffect",
                         "AssetVersion": 1,
-                        "AssetPath": "Data/Particle/EnemyShadowMudBurst.json",
+                        "AssetPath": "Data/Particle/TransitionMudScatter.json",
                         "IsPlaying": false,
                         "Emitters": [
                             {
-                                "Name": "EnemyShadowMudBurst",
+                                "Name": "CounterMudChunks",
                                 "EmissionMode": 1,
-                                "BurstCount": 38,
-                                "MaxCount": 76,
+                                "BurstCount": 160,
+                                "MaxCount": 512,
                                 "SpawnShape": 3,
                                 "SpawnSpace": 0,
                                 "ShapeSize": [
-                                    0.05,
-                                    0.05,
-                                    0.05
+                                    2,
+                                    2.4,
+                                    2
                                 ],
                                 "LegacyRadius": [
                                     0.03,
@@ -3621,16 +5139,16 @@
                                     0
                                 ],
                                 "Speed": [
-                                    1.2,
-                                    3.4
+                                    8,
+                                    15
                                 ],
                                 "Lifespan": [
-                                    0.25,
-                                    0.45
+                                    0.45,
+                                    1
                                 ],
                                 "Size": [
-                                    0.065,
-                                    0.16
+                                    0.18,
+                                    0.4
                                 ],
                                 "UseRandomSize": 1,
                                 "SizeRandomStart": [
@@ -3642,49 +5160,49 @@
                                     0.45
                                 ],
                                 "Color": [
-                                    0.28,
-                                    0.1,
-                                    0.4,
+                                    0.045,
+                                    0.014,
+                                    0.065,
                                     0.9
                                 ],
                                 "ColorStart": [
-                                    0.65,
-                                    0.36,
-                                    0.86,
-                                    0.9
+                                    0.06,
+                                    0.02,
+                                    0.09,
+                                    0.95
                                 ],
                                 "ColorEnd": [
-                                    0.063,
-                                    0.043,
-                                    0.094,
+                                    0.015,
+                                    0.004,
+                                    0.025,
                                     0
                                 ],
                                 "UseColorOverLife": 1,
                                 "BlendMode": 0,
                                 "RenderType": 0,
-                                "Gravity": -1.2,
+                                "Gravity": -8,
                                 "Acceleration": [
                                     0,
                                     0,
                                     0
                                 ],
-                                "Drag": 2.5,
+                                "Drag": 1,
                                 "Fade": [
                                     0.015,
-                                    0.15
+                                    0.3
                                 ],
                                 "NoiseStrength": 0.12,
                                 "NoiseFrequency": 2,
                                 "NoiseSpeed": 1,
-                                "TexturePath": "",
-                                "MaskTexturePath": "Data/Texture/Particle/masks for  particles/masks for  particles/9.png",
+                                "TexturePath": "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/smoke_03.png",
+                                "MaskTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
                                 "UseMask": 1,
                                 "UseGradient": 0,
                                 "useGradientTexture": 0,
                                 "useShadeGradientTexture": 0,
                                 "UseFresnel": 0,
                                 "UseSpriteAnimation": 0,
-                                "SpawnDirectionMode": 0,
+                                "SpawnDirectionMode": 1,
                                 "ConeAngle": [
                                     0,
                                     0
@@ -3693,7 +5211,109 @@
                                     0,
                                     1,
                                     0
-                                ]
+                                ],
+                                "texturePath": "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/smoke_03.png",
+                                "maskTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG"
+                            },
+                            {
+                                "Name": "CounterMudDroplets",
+                                "EmissionMode": 1,
+                                "BurstCount": 100,
+                                "MaxCount": 384,
+                                "SpawnShape": 3,
+                                "SpawnSpace": 0,
+                                "ShapeSize": [
+                                    2.2,
+                                    1.4,
+                                    2.2
+                                ],
+                                "LegacyRadius": [
+                                    0.03,
+                                    0.08
+                                ],
+                                "PosOffset": [
+                                    0,
+                                    0,
+                                    0
+                                ],
+                                "Speed": [
+                                    12,
+                                    22
+                                ],
+                                "Lifespan": [
+                                    0.3,
+                                    0.65
+                                ],
+                                "Size": [
+                                    0.04,
+                                    0.1
+                                ],
+                                "UseRandomSize": 1,
+                                "SizeRandomStart": [
+                                    0.65,
+                                    1.15
+                                ],
+                                "SizeRandomEnd": [
+                                    0.2,
+                                    0.45
+                                ],
+                                "Color": [
+                                    0.045,
+                                    0.014,
+                                    0.065,
+                                    0.9
+                                ],
+                                "ColorStart": [
+                                    0.06,
+                                    0.02,
+                                    0.09,
+                                    0.95
+                                ],
+                                "ColorEnd": [
+                                    0.015,
+                                    0.004,
+                                    0.025,
+                                    0
+                                ],
+                                "UseColorOverLife": 1,
+                                "BlendMode": 0,
+                                "RenderType": 1,
+                                "Gravity": -10,
+                                "Acceleration": [
+                                    0,
+                                    0,
+                                    0
+                                ],
+                                "Drag": 0.9,
+                                "Fade": [
+                                    0.015,
+                                    0.3
+                                ],
+                                "NoiseStrength": 0.12,
+                                "NoiseFrequency": 2,
+                                "NoiseSpeed": 1,
+                                "TexturePath": "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/smoke_03.png",
+                                "MaskTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+                                "UseMask": 1,
+                                "UseGradient": 0,
+                                "useGradientTexture": 0,
+                                "useShadeGradientTexture": 0,
+                                "UseFresnel": 0,
+                                "UseSpriteAnimation": 0,
+                                "SpawnDirectionMode": 1,
+                                "ConeAngle": [
+                                    0,
+                                    0
+                                ],
+                                "EmissionAxis": [
+                                    0,
+                                    1,
+                                    0
+                                ],
+                                "texturePath": "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/smoke_03.png",
+                                "maskTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+                                "StretchScale": 0.13,
+                                "StretchMax": 1
                             }
                         ]
                     },
@@ -3927,9 +5547,9 @@
                                     0
                                 ],
                                 "Scale": [
-                                    6.3,
-                                    6.3,
-                                    6.3
+                                    7.4,
+                                    7.4,
+                                    7.4
                                 ],
                                 "BaseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
                                 "UseMaterialBaseTexture": false,
@@ -4025,9 +5645,9 @@
                                     10
                                 ],
                                 "Scale": [
-                                    5.5,
-                                    5.5,
-                                    5.5
+                                    6.7,
+                                    6.7,
+                                    6.7
                                 ],
                                 "BaseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
                                 "UseMaterialBaseTexture": false,
@@ -4127,9 +5747,9 @@
                                     -30
                                 ],
                                 "Scale": [
-                                    5.5,
-                                    5.5,
-                                    5.5
+                                    6.7,
+                                    6.7,
+                                    6.7
                                 ],
                                 "BaseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
                                 "UseMaterialBaseTexture": false,
@@ -4229,9 +5849,9 @@
                                     40
                                 ],
                                 "Scale": [
-                                    5.5,
-                                    5.5,
-                                    5.5
+                                    6.7,
+                                    6.7,
+                                    6.7
                                 ],
                                 "BaseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
                                 "UseMaterialBaseTexture": false,
@@ -4325,7 +5945,7 @@
                                     0
                                 ],
                                 "BlendMode": 0,
-                                "BurstCount": 55,
+                                "BurstCount": 110,
                                 "Color": [
                                     0.025,
                                     0.008,
@@ -4364,11 +5984,11 @@
                                     0
                                 ],
                                 "Lifespan": [
-                                    2,
-                                    3
+                                    2.5,
+                                    3.8
                                 ],
                                 "MaskTexturePath": "",
-                                "MaxCount": 256,
+                                "MaxCount": 768,
                                 "MeshVertexSampleCount": 512,
                                 "Name": "VortexChunks0",
                                 "NoiseFrequency": 0.55,
@@ -4392,9 +6012,9 @@
                                     0.0
                                 ],
                                 "ShapeSize": [
-                                    12,
-                                    12,
-                                    12
+                                    14,
+                                    14,
+                                    14
                                 ],
                                 "ShapeStart": [
                                     0.0,
@@ -4402,8 +6022,8 @@
                                     0.0
                                 ],
                                 "Size": [
-                                    0.4,
-                                    0.18
+                                    0.6,
+                                    0.3
                                 ],
                                 "SizeRandomEnd": [
                                     0.8,
@@ -4479,7 +6099,7 @@
                                     0
                                 ],
                                 "BlendMode": 0,
-                                "BurstCount": 55,
+                                "BurstCount": 110,
                                 "Color": [
                                     0.025,
                                     0.008,
@@ -4518,11 +6138,11 @@
                                     0
                                 ],
                                 "Lifespan": [
-                                    2,
-                                    3
+                                    2.5,
+                                    3.8
                                 ],
                                 "MaskTexturePath": "",
-                                "MaxCount": 256,
+                                "MaxCount": 768,
                                 "MeshVertexSampleCount": 512,
                                 "Name": "VortexChunks1",
                                 "NoiseFrequency": 0.55,
@@ -4546,9 +6166,9 @@
                                     0.0
                                 ],
                                 "ShapeSize": [
-                                    12,
-                                    12,
-                                    12
+                                    14,
+                                    14,
+                                    14
                                 ],
                                 "ShapeStart": [
                                     0.0,
@@ -4556,8 +6176,8 @@
                                     0.0
                                 ],
                                 "Size": [
-                                    0.4,
-                                    0.18
+                                    0.6,
+                                    0.3
                                 ],
                                 "SizeRandomEnd": [
                                     0.8,
@@ -4673,6 +6293,264 @@
                     "UpdateEnabled": true,
                     "LateUpdateEnabled": true,
                     "UpdatePriority": -100,
+                    "LateUpdatePriority": 0,
+                    "RequiredForSceneStart": false
+                }
+            ],
+            "ColliderComponents": []
+        },
+        "TransitionClashSlash": {
+            "Name": "TransitionClashSlash",
+            "ParentName": "PhaseTransitionEffects",
+            "Layer": 32,
+            "CollisionMask": 0,
+            "RequiredForSceneStart": true,
+            "Transform": {
+                "Pos": [
+                    0,
+                    1.2,
+                    -29
+                ],
+                "Rot": [
+                    0,
+                    0,
+                    0
+                ],
+                "Scale": [
+                    1,
+                    1,
+                    1
+                ]
+            },
+            "Components": [
+                {
+                    "TypeName": "MeshVFXComponent",
+                    "Data": {
+                        "IsPlaying": false,
+                        "PlaybackSpeed": 1.0,
+                        "Parts": [
+                            {
+                                "RenderEnabled": false,
+                                "ModelPath": "__InternalMeshSlashArcRibbon__",
+                                "MeshIndex": 0,
+                                "Position": [
+                                    0,
+                                    0,
+                                    0
+                                ],
+                                "Rotation": [
+                                    65,
+                                    0,
+                                    35
+                                ],
+                                "Scale": [
+                                    1.1,
+                                    0.35,
+                                    1.1
+                                ],
+                                "Duration": 0.14,
+                                "Loop": false,
+                                "AnimateAlpha": true,
+                                "AlphaStart": 1,
+                                "AlphaEnd": 0,
+                                "Alpha": 0.9,
+                                "BlendMode": 1,
+                                "Color": [
+                                    1,
+                                    0.82,
+                                    0.42,
+                                    0.9
+                                ],
+                                "EmissiveStrength": 10,
+                                "EmissivePulseSpeed": 0.0,
+                                "EmissivePulseAmount": 0.0,
+                                "EmissiveTexturePath": "Data/Texture/Trail/T_TrailMask_21.PNG",
+                                "UseMask": true,
+                                "MaskLayers": [
+                                    {
+                                        "Path": "Data/Texture/Trail/T_TrailMask_22.PNG",
+                                        "BlendMode": 0,
+                                        "Invert": false
+                                    }
+                                ],
+                                "MaskUVScale": [
+                                    1.0,
+                                    1.0
+                                ],
+                                "MaskUVSpeed": [
+                                    3.5,
+                                    0.0
+                                ],
+                                "UseNoise": true,
+                                "NoiseTexturePaths": [
+                                    "Data/Texture/VFX/T_Free_Magic_Noise1_normal.PNG"
+                                ],
+                                "NoiseUVScale": [
+                                    1.3,
+                                    2.0
+                                ],
+                                "NoiseUVSpeed": [
+                                    7.0,
+                                    0.0
+                                ],
+                                "NoiseStrength": 0.018,
+                                "UseMaskDistortion": true,
+                                "DistortionNoiseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise1.PNG",
+                                "DistortionNoiseUVScale": [
+                                    1.2,
+                                    1.2
+                                ],
+                                "MaskDistortionStrength": 0.3,
+                                "MaskDistortionOpacity": 0.65,
+                                "UseFresnel": false,
+                                "FresnelPower": 2.2,
+                                "FresnelStrength": 1.6,
+                                "UseMaterialBaseTexture": false,
+                                "UseMaterialNormalTexture": false,
+                                "BaseSamplerMode": 1,
+                                "NormalSamplerMode": 1,
+                                "MaskSamplerMode": 1,
+                                "NoiseSamplerMode": 0,
+                                "DistortionSamplerMode": 0,
+                                "EdgePatternSamplerMode": 1,
+                                "EmissiveSamplerMode": 1,
+                                "GradientSamplerMode": 1,
+                                "AlphaCurveName": "",
+                                "ScaleCurveName": "",
+                                "DissolveCurveName": "",
+                                "EmissiveCurveName": "",
+                                "MaterialPath": "",
+                                "MaterialPaths": [],
+                                "AnimateScale": true,
+                                "ScaleStart": [
+                                    0.45,
+                                    0.3,
+                                    0.45
+                                ],
+                                "ScaleEnd": [
+                                    1.5,
+                                    0.4,
+                                    1.5
+                                ],
+                                "InternalMeshSettings": {
+                                    "StartAngleDegrees": -55,
+                                    "EndAngleDegrees": 55
+                                }
+                            },
+                            {
+                                "RenderEnabled": false,
+                                "ModelPath": "__InternalMeshSlashArcRibbon__",
+                                "MeshIndex": 0,
+                                "Position": [
+                                    0,
+                                    0,
+                                    0
+                                ],
+                                "Rotation": [
+                                    65,
+                                    0,
+                                    -35
+                                ],
+                                "Scale": [
+                                    1.1,
+                                    0.35,
+                                    1.1
+                                ],
+                                "Duration": 0.14,
+                                "Loop": false,
+                                "AnimateAlpha": true,
+                                "AlphaStart": 1,
+                                "AlphaEnd": 0,
+                                "Alpha": 0.9,
+                                "BlendMode": 1,
+                                "Color": [
+                                    0.7,
+                                    0.85,
+                                    1,
+                                    0.8
+                                ],
+                                "EmissiveStrength": 6,
+                                "EmissivePulseSpeed": 0.0,
+                                "EmissivePulseAmount": 0.0,
+                                "EmissiveTexturePath": "Data/Texture/Trail/T_TrailMask_21.PNG",
+                                "UseMask": true,
+                                "MaskLayers": [
+                                    {
+                                        "Path": "Data/Texture/Trail/T_TrailMask_09.PNG",
+                                        "BlendMode": 0,
+                                        "Invert": false
+                                    }
+                                ],
+                                "MaskUVScale": [
+                                    0.85,
+                                    1.0
+                                ],
+                                "MaskUVSpeed": [
+                                    1.8,
+                                    0.0
+                                ],
+                                "UseNoise": true,
+                                "NoiseTexturePaths": [
+                                    "Data/Texture/Trail/T_TrailMask_06.PNG"
+                                ],
+                                "NoiseUVScale": [
+                                    1.0,
+                                    1.8
+                                ],
+                                "NoiseUVSpeed": [
+                                    4.0,
+                                    -0.15
+                                ],
+                                "NoiseStrength": 0.035,
+                                "UseMaskDistortion": true,
+                                "DistortionNoiseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise1.PNG",
+                                "DistortionNoiseUVScale": [
+                                    1.5,
+                                    1.5
+                                ],
+                                "MaskDistortionStrength": 0.3,
+                                "MaskDistortionOpacity": 0.38,
+                                "UseFresnel": false,
+                                "FresnelPower": 1.7,
+                                "FresnelStrength": 0.7,
+                                "UseMaterialBaseTexture": false,
+                                "UseMaterialNormalTexture": false,
+                                "BaseSamplerMode": 1,
+                                "NormalSamplerMode": 1,
+                                "MaskSamplerMode": 1,
+                                "NoiseSamplerMode": 0,
+                                "DistortionSamplerMode": 0,
+                                "EdgePatternSamplerMode": 1,
+                                "EmissiveSamplerMode": 1,
+                                "GradientSamplerMode": 1,
+                                "AlphaCurveName": "",
+                                "ScaleCurveName": "",
+                                "DissolveCurveName": "",
+                                "EmissiveCurveName": "",
+                                "MaterialPath": "",
+                                "MaterialPaths": [],
+                                "AnimateScale": true,
+                                "ScaleStart": [
+                                    0.45,
+                                    0.3,
+                                    0.45
+                                ],
+                                "ScaleEnd": [
+                                    1.5,
+                                    0.4,
+                                    1.5
+                                ],
+                                "InternalMeshSettings": {
+                                    "StartAngleDegrees": -55,
+                                    "EndAngleDegrees": 55
+                                }
+                            }
+                        ]
+                    },
+                    "Enabled": true,
+                    "UpdateEnabled": true,
+                    "LateUpdateEnabled": true,
+                    "UpdatePriority": 0,
                     "LateUpdatePriority": 0,
                     "RequiredForSceneStart": false
                 }

@@ -12,7 +12,7 @@ DecalShader::DecalShader(ID3D11Device* device)
 
     CPUResourceLoader::LoadVertexShader(
         device,
-        "Shader/Decal_VS.cso",
+        "Data/Shader/Decal_VS.cso",
         layout,
         _countof(layout),
         inputLayout.GetAddressOf(),
@@ -21,7 +21,7 @@ DecalShader::DecalShader(ID3D11Device* device)
     // 2. ピクセルシェーダー
     CPUResourceLoader::LoadPixelShader(
         device,
-        "Shader/Decal_PS.cso",
+        "Data/Shader/Decal_PS.cso",
         pixelShader.GetAddressOf());
 
     // 3. 深度サンプリング用 (Point)

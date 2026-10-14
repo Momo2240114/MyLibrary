@@ -21,13 +21,13 @@ bool XeGtaoSystem::Initialize(ID3D11Device* device_, int width_, int height_)
     }
 
     // Depth/NormalからAOを書き出すCompute Shader。
-    if (FAILED(CPUResourceLoader::LoadComputeShader(device_, "Shader/XeGTAO_Post_CS.cso", xeGtaoCs.GetAddressOf())))
+    if (FAILED(CPUResourceLoader::LoadComputeShader(device_, "Data/Shader/XeGTAO_Post_CS.cso", xeGtaoCs.GetAddressOf())))
     {
         return false;
     }
 
     // AO TextureをScene Colorへ合成するPixel Shader。
-    if (FAILED(CPUResourceLoader::LoadPixelShader(device_, "Shader/XeGTAO_CompositePS.cso", compositePs.GetAddressOf())))
+    if (FAILED(CPUResourceLoader::LoadPixelShader(device_, "Data/Shader/XeGTAO_CompositePS.cso", compositePs.GetAddressOf())))
     {
         return false;
     }
@@ -35,7 +35,7 @@ bool XeGtaoSystem::Initialize(ID3D11Device* device_, int width_, int height_)
     // 合成Pass用の全画面三角形VS。
     if (FAILED(CPUResourceLoader::LoadVertexShader(
         device_,
-        "Shader/FullScreenVS.cso",
+        "Data/Shader/FullScreenVS.cso",
         nullptr,
         0,
         nullptr,

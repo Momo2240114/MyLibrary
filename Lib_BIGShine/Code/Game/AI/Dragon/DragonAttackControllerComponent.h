@@ -21,6 +21,8 @@ class DragonAttackControllerComponent : public Component
 public:
     const std::string& GetName() const override;
     void Start() override;
+    // 本体の破棄時にも独立した攻撃Objectと予告範囲を終了する。
+    void OnDestroy() override;
     void Update(float deltaTime_) override;
     void Gui() override;
     void Serialize(nlohmann::json& json_) const override;
@@ -62,6 +64,9 @@ public:
     void ShowStampDangerArea();
 
 private:
+    // 無効化・撃破・破棄済みのドラゴンから予告や攻撃を再生成しない。
+    bool CanSpawnAttack() const;
+
     struct RuntimeAttack
     {
         std::shared_ptr<GameObject> object;

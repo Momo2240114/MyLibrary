@@ -40,6 +40,8 @@ struct AnimBlackboardWrite
 
 struct RootMotionSettings {
     bool enable = false;        // この処理を起動するか否か
+    // RootMotionを適用しない演出でも、抽出元ノードの見た目の移動を除去する。
+    bool cutVisualWhenDisabled = false;
     std::string sourceNodeName; // 空の場合はモデル側のRootMotionNameを使用
     bool applyPositionX = true; // X軸の移動を許すか
     bool applyPositionY = true; // Y軸の移動を許すか
@@ -265,6 +267,7 @@ void from_json(const nlohmann::json& j, AnimState& s);
 inline void to_json(nlohmann::json& j, const RootMotionSettings& r) {
     j = nlohmann::json{
         {"enable", r.enable},
+        {"cutVisualWhenDisabled", r.cutVisualWhenDisabled},
         {"sourceNodeName", r.sourceNodeName},
         {"applyPositionX", r.applyPositionX},
         {"applyPositionY", r.applyPositionY},
@@ -280,6 +283,7 @@ inline void to_json(nlohmann::json& j, const RootMotionSettings& r) {
 
 inline void from_json(const nlohmann::json& j, RootMotionSettings& r) {
     r.enable = j.value("enable", false);
+    r.cutVisualWhenDisabled = j.value("cutVisualWhenDisabled", false);
     r.sourceNodeName = j.value("sourceNodeName", "");
     r.applyPositionX = j.value("applyPositionX", true);
     r.applyPositionY = j.value("applyPositionY", true);
