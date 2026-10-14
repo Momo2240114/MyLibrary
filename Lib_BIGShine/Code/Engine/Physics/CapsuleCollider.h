@@ -17,6 +17,8 @@ public:
         return name_;
     }
 
+    // Node始点を維持したまま武器判定の長さを調整する。既存Colliderは等倍。
+    float nodeSegmentScale = 1.0f;
     float radius = 0.5f; // Capsule半径。
     float halfHeight = 1.0f; // 中心から上下球中心までの距離。
     std::string nodeModelObjectName; // Node追従時に参照するModel Object名。

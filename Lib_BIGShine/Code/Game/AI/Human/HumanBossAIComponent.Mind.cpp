@@ -95,7 +95,7 @@ void HumanBossMindSettings::Deserialize(const nlohmann::json& json_)
     phaseObserve = json_.value("PhaseObserve", phaseObserve);
     phaseAggression = json_.value("PhaseAggression", phaseAggression);
     for (auto* values_ : { &phaseDelay, &phaseObserve, &phaseAggression }) for (auto& value_ : *values_) value_ = std::clamp(value_, 0.1f, 3.0f);
-}
+}   
 
 float HumanBossAIComponent::GetReactionCost(HumanBossActionType type_) const
 {
@@ -262,6 +262,13 @@ float HumanBossAIComponent::GetIntentActionModifier(std::size_t index_) const
     if (type_ == HumanBossActionType::DELAY_ATTACK) return intent == HumanBossIntent::PUNISH_DODGE ? 1.0f + dodgeFrequency * mindSettings.dodgeReadBoost : 0.0f;
     if (type_ == HumanBossActionType::GUARD_BREAK) return intent == HumanBossIntent::BREAK_GUARD && guardProbeCount > 0 && playerObservation.guarding ? 1.0f + guardFrequency * mindSettings.guardReadBoost : 0.0f;
     if (type_ == HumanBossActionType::ATTACK_FEINT) return intent == HumanBossIntent::BAIT && baitTimer <= 0.0f && feintTimer <= 0.0f ? mindSettings.feintChance * (lastAction == static_cast<int>(index_) ? mindSettings.feintRecentPenalty : 1.0f) : 0.0f;
+    if (type_ == HumanBossActionType::SHADOW_CHARGE || type_ == HumanBossActionType::SHADOW_ORB)
+    {
+        if (intent == HumanBossIntent::DEFEND || intent == HumanBossIntent::COUNTER_ATTACK || intent == HumanBossIntent::OBSERVE) return 0.0f;
+        // 距離だけで強制せず、退避傾向と遠距離の維持時間を既存Weightへ加える。
+        return 1.0f + retreatTendency * 2.0f + rangedPressureTime * 0.3f;
+    }
+    if (type_ == HumanBossActionType::SHADOW_RAGNAROK) return 1.0f;
     if (definition_.category == HumanBossState::SHADOW)
     {
         if (type_ >= HumanBossActionType::SHADOW_SLASH)
@@ -293,6 +300,8 @@ void HumanBossAIComponent::DrawMindGui()
     ImGui::Text("Air heavy pattern: %d / Pressure %.2f / Memory %.2f", airHeavyAttackChain, airHeavyPressureTimer, airHeavyMemoryTimer);
     ImGui::Text("Budget %.2f / Delay %.2f / Lock %.2f", reactionBudget, reactionDelayRemaining, intentLockTimer);
     ImGui::Text("Approach %.2f / Retreat %.2f / Whiff %.2f / Feint %.2f", approachTendency, retreatTendency, whiffTimer, feintTimer);
+    ImGui::Text("Ranged pressure %.2f / Charge weight %.2f / Orb weight %.2f", rangedPressureTime,
+        GetGraphActionWeight("HumanBoss_SHADOW_CHARGE"), GetGraphActionWeight("HumanBoss_SHADOW_ORB"));
     std::array<int, 5> directions_{};
     for (const auto& action_ : playerObservation.history)
         if (action_.dodge) ++directions_[std::clamp(static_cast<int>(action_.dodgeDirection), 0, 4)];

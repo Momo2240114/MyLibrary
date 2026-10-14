@@ -18,7 +18,7 @@ bool MeshVFXShader::Initialize(ID3D11Device* device_)
 
     HRESULT result_ = CPUResourceLoader::LoadVertexShader(
         device_,
-        "Shader/MeshVFXVS.cso",
+        "Data/Shader/MeshVFXVS.cso",
         GltfModelCommponennt::InputElementDescs.data(),
         static_cast<UINT>(GltfModelCommponennt::InputElementDescs.size()),
         inputLayout.GetAddressOf(),
@@ -27,7 +27,7 @@ bool MeshVFXShader::Initialize(ID3D11Device* device_)
 
     result_ = CPUResourceLoader::LoadVertexShader(
         device_,
-        "Shader/MaterialOverlayVS.cso",
+        "Data/Shader/MaterialOverlayVS.cso",
         GltfModelCommponennt::InputElementDescs.data(),
         static_cast<UINT>(GltfModelCommponennt::InputElementDescs.size()),
         nullptr,
@@ -36,7 +36,7 @@ bool MeshVFXShader::Initialize(ID3D11Device* device_)
 
     result_ = CPUResourceLoader::LoadVertexShader(
         device_,
-        "Shader/AfterimageInstancedVS.cso",
+        "Data/Shader/AfterimageInstancedVS.cso",
         GltfModelCommponennt::InputElementDescs.data(),
         static_cast<UINT>(GltfModelCommponennt::InputElementDescs.size()),
         nullptr,
@@ -44,11 +44,11 @@ bool MeshVFXShader::Initialize(ID3D11Device* device_)
     if (FAILED(result_)) return false;
 
     result_ = CPUResourceLoader::LoadPixelShader(
-        device_, "Shader/MeshVFXPS.cso", pixelShader.GetAddressOf());
+        device_, "Data/Shader/MeshVFXPS.cso", pixelShader.GetAddressOf());
     if (FAILED(result_)) return false;
 
     result_ = CPUResourceLoader::LoadPixelShader(
-        device_, "Shader/MeshVFXDistortionPS.cso", distortionPixelShader.GetAddressOf());
+        device_, "Data/Shader/MeshVFXDistortionPS.cso", distortionPixelShader.GetAddressOf());
     if (FAILED(result_)) return false;
 
     result_ = CPUResourceLoader::CreateConstantBuffer(

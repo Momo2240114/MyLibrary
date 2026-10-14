@@ -43,6 +43,8 @@ struct ActorPresentationActionPreset
     std::string actorName;
     std::string stateName;
     std::string stateAssetPath;
+    // 演出の再生時にAssetを反映し、同じStateも先頭から再開始する。
+    bool refreshStateAssetOnPlay = false;
     std::string targetName;
     std::string prefabName;
     bool skipInPreview = false;

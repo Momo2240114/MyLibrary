@@ -15,7 +15,7 @@ bool OutlineSystem::Initialize(ID3D11Device* device_, int width_, int height_)
     // PostEffect共通のFullScreen Vertex Shaderを使う。
     CPUResourceLoader::LoadVertexShader(
         device_,
-        "Shader/FullScreenVS.cso",
+        "Data/Shader/FullScreenVS.cso",
         nullptr,
         0,
         nullptr,
@@ -24,7 +24,7 @@ bool OutlineSystem::Initialize(ID3D11Device* device_, int width_, int height_)
     // Normal/Depth差分からOutlineを検出するPixel Shaderを読み込む。
     CPUResourceLoader::LoadPixelShader(
         device_,
-        "Shader/PostOutlinePS.cso",
+        "Data/Shader/PostOutlinePS.cso",
         outlinePS.GetAddressOf());
 
     // Outline設定はEditorや演出で変わるためDynamic Bufferにする。

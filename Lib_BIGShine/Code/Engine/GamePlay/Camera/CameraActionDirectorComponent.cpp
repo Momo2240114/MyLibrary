@@ -253,6 +253,21 @@ bool CameraActionDirectorComponent::UpdateFraming(const CameraActionPreset& pres
     const float distance_ = (std::max)(preset_.minimumFramingDistance,
         framingEnvelope*preset_.framingPadding/(std::max)(std::sin((std::min)(vertical_,horizontal_)),0.01f));
     actionCameraPosition = AddFloat3(actionFocusPosition, ScaleFloat3(NormalizeOr(preset_.cameraOffset,{0.0f,0.1f,-1.0f}),distance_));
+    if (preset_.useFramingEyeHeight)
+    {
+        const auto subject_ = owner_->GetManager().Find(preset_.targetObjectName);
+        if (subject_ && subject_->transform)
+        {
+            const float eyeHeight_ = subject_->transform->GetWorldPosition().y + preset_.framingEyeHeight;
+            const float heightDifference_ = eyeHeight_ - actionFocusPosition.y;
+            // 高さを固定しても必要な距離が減らないよう、残りを水平距離へ配分する。
+            const float horizontalDistance_ = std::sqrt((std::max)(distance_ * distance_ - heightDifference_ * heightDifference_,
+                preset_.minimumFramingDistance * preset_.minimumFramingDistance));
+            const auto direction_ = NormalizeOr({preset_.cameraOffset.x,0.0f,preset_.cameraOffset.z},{0.0f,0.0f,-1.0f});
+            actionCameraPosition = {actionFocusPosition.x + direction_.x * horizontalDistance_,eyeHeight_,
+                actionFocusPosition.z + direction_.z * horizontalDistance_};
+        }
+    }
     return true;
 }
 
@@ -927,6 +942,8 @@ void CameraActionDirectorComponent::Gui()
         CameraActionPreset& preset_ = presets[index_];
         ImGui::PushID(index_ + 10000);
         ImGui::Checkbox("Auto Frame Subjects", &preset_.autoFrameTargets);
+        ImGui::Checkbox("Use Subject Eye Height", &preset_.useFramingEyeHeight);
+        ImGui::DragFloat("Eye Height Above Subject", &preset_.framingEyeHeight, 0.05f, 0.1f, 50.0f);
         ImGui::Checkbox("Use Model Bounds", &preset_.useModelBounds);
         ImGui::InputText("Second Subject", &preset_.secondaryTargetName);
         ImGui::DragFloat("Subject Radius", &preset_.framingRadius, 0.1f, 0.1f, 100.0f);
@@ -1071,6 +1088,8 @@ void CameraActionDirectorComponent::Serialize(nlohmann::json& json_) const
         presetJson_["secondaryRadius"] = preset_.secondaryRadius;
         presetJson_["framingPadding"] = preset_.framingPadding;
         presetJson_["minimumFramingDistance"] = preset_.minimumFramingDistance;
+        presetJson_["useFramingEyeHeight"] = preset_.useFramingEyeHeight;
+        presetJson_["framingEyeHeight"] = preset_.framingEyeHeight;
         presetJson_["cameraUp"] = { preset_.cameraUp.x, preset_.cameraUp.y, preset_.cameraUp.z };
         presetJson_["shakeStrength"] = preset_.shakeStrength;
         presetJson_["shakeFrequency"] = preset_.shakeFrequency;
@@ -1124,6 +1143,8 @@ void CameraActionDirectorComponent::Deserialize(const nlohmann::json& json_)
         preset_.secondaryRadius = (std::max)(presetJson_.value("secondaryRadius", 1.0f), 0.1f);
         preset_.framingPadding = (std::max)(presetJson_.value("framingPadding", 1.15f), 1.0f);
         preset_.minimumFramingDistance = (std::max)(presetJson_.value("minimumFramingDistance", 3.0f), 0.1f);
+        preset_.useFramingEyeHeight = presetJson_.value("useFramingEyeHeight", false);
+        preset_.framingEyeHeight = (std::max)(presetJson_.value("framingEyeHeight", 1.6f), 0.1f);
             preset_.cameraUp = LoadFloat3(presetJson_, "cameraUp", { 0.0f, 1.0f, 0.0f });
             preset_.shakeStrength = presetJson_.value("shakeStrength", 0.0f);
             preset_.shakeFrequency = presetJson_.value("shakeFrequency", 20.0f);

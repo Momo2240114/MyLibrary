@@ -19,6 +19,7 @@
 #include "Engine/GamePlay/Graphics/ModelDissolveComponent.h"
 #include <imgui_stdlib.h>
 #include "Engine/Debug/TracyProfiler.h"
+#include "Engine/GamePlay/Combat/HealthComponent.h"
 #include "Engine/UI/ImGuiColorEditor.h"
 
 #include <algorithm>
@@ -119,6 +120,13 @@ void ParticleComponent::Gui()
     // Particle Asset全体、Emitter単体、各EmitterパラメータをこのGUIで編集する。
     RefreshAssetList();
 
+    ImGui::Checkbox("Scale Emission By Health", &scaleEmissionByHealth);
+    if (scaleEmissionByHealth)
+    {
+        ImGui::InputText("Health Owner (empty = self)", &healthOwnerName);
+        ImGui::DragFloat("Full HP Emission Multiplier", &healthyEmissionMultiplier, 0.05f, 0.0f, 10.0f);
+        ImGui::DragFloat("Low HP Emission Multiplier", &lowHealthEmissionMultiplier, 0.05f, 0.0f, 10.0f);
+    }
     ImGui::InputText("Mesh Source Object", &meshSourceObjectName);
     ImGui::InputText("Attraction Target Object", &attractionTargetName);
     ImGui::Checkbox("Emit Near Dissolve Direction Boundary", &emitDissolveBoundary);
@@ -1351,6 +1359,7 @@ void ParticleComponent::SetRuntimeRingAppearance(float radius_, const DirectX::X
 
 void ParticleComponent::Update(float deltaTime)
 {
+    BS_PROFILE_SCOPE("ParticleComponent::Update");
     // Component再生時間、Emitterのdelay、Owner相対座標、Mesh頂点発生をまとめて処理する。
     if (isPlaying) timer += deltaTime;
 
@@ -1359,6 +1368,22 @@ void ParticleComponent::Update(float deltaTime)
     if (!owner_) return;
 
     const Vector3 worldPosition_ = owner_->transform->GetWorldPosition();
+    float healthEmissionMultiplier_ = 1.0f;
+    bool healthAllowsEmission_ = true;
+    if (scaleEmissionByHealth)
+    {
+        const auto healthOwner_ = healthOwnerName.empty() ? owner_ : owner_->manager ? owner_->GetManager().Find(healthOwnerName) : nullptr;
+        const auto health_ = healthOwner_ ? healthOwner_->GetComponent<HealthComponent>() : nullptr;
+        if (health_ && health_->GetMaxHealth() > 0.0f)
+        {
+            const float missingHealthRate_ = 1.0f - std::clamp(health_->GetCurrentHealth() / health_->GetMaxHealth(), 0.0f, 1.0f);
+            healthEmissionMultiplier_ = std::clamp(healthyEmissionMultiplier +
+                (lowHealthEmissionMultiplier - healthyEmissionMultiplier) * missingHealthRate_, 0.0f, 10.0f);
+            // 撃破後は新規発生だけを止め、既存の煙は寿命まで自然に消す。
+            healthAllowsEmission_ = !health_->IsDead();
+        }
+    }
+
 
     for (EmitterTrack& track_ : tracks)
     {
@@ -1405,6 +1430,12 @@ void ParticleComponent::Update(float deltaTime)
         // 既存粒子は消さず、新しく発生する粒子数だけを環境遷移に合わせる。
         if (tempSettings_.emissionMode == 0)
             tempSettings_.burstCount = static_cast<uint32_t>(tempSettings_.burstCount * emissionScale);
+        if (scaleEmissionByHealth)
+        {
+            // 環境の発生量補正とHP補正を合成し、補正後も発生要求の上限を守る。
+            tempSettings_.burstCount = static_cast<uint32_t>((std::min)(static_cast<double>(tempSettings_.burstCount) * healthEmissionMultiplier_, 20000.0));
+            track_.emitter->SetEmissionEnabled(isPlaying && track_.isPlaybackEnabled && healthAllowsEmission_);
+        }
         track_.emitter->ApplySettings(tempSettings_);
         track_.emitter->SetDepthSortEnabled(track_.runtimeBlendMode == ParticleBlendMode::ALPHA);
         track_.emitter->SetDepthSortInterval(2);
@@ -1509,6 +1540,10 @@ void ParticleComponent::Serialize(nlohmann::json& j) const
 
     j["Emitters"] = emitterList;
     j["IsPlaying"] = isPlaying;
+    j["ScaleEmissionByHealth"] = scaleEmissionByHealth;
+    j["HealthOwnerName"] = healthOwnerName;
+    j["HealthyEmissionMultiplier"] = healthyEmissionMultiplier;
+    j["LowHealthEmissionMultiplier"] = lowHealthEmissionMultiplier;
     j["MeshSourceObjectName"] = meshSourceObjectName;
     j["AttractionTargetName"] = attractionTargetName;
     j["EmitDissolveBoundary"] = emitDissolveBoundary;
@@ -1521,6 +1556,10 @@ void ParticleComponent::Deserialize(const nlohmann::json& j)
     // JSONからEmitterTrackを復元する古いキーも読めるように一部互換処理を残す
     tracks.clear();
     assetPath = j.value("AssetPath", assetPath);
+    scaleEmissionByHealth = j.value("ScaleEmissionByHealth", false);
+    healthOwnerName = j.value("HealthOwnerName", std::string{});
+    healthyEmissionMultiplier = std::clamp(j.value("HealthyEmissionMultiplier", 1.0f), 0.0f, 10.0f);
+    lowHealthEmissionMultiplier = std::clamp(j.value("LowHealthEmissionMultiplier", 3.0f), 0.0f, 10.0f);
     meshSourceObjectName = j.value("MeshSourceObjectName", std::string{});
     attractionTargetName = j.value("AttractionTargetName", std::string{});
     emitDissolveBoundary = j.value("EmitDissolveBoundary", false);

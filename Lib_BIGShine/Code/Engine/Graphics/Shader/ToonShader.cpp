@@ -18,12 +18,12 @@ namespace
 
 ToonShader::ToonShader(ID3D11Device* device)
 {
-    CPUResourceLoader::LoadVertexShader(device, "Shader/ToonVS.cso",
+    CPUResourceLoader::LoadVertexShader(device, "Data/Shader/ToonVS.cso",
         GltfModelCommponennt::InputElementDescs.data(),
         static_cast<UINT>(GltfModelCommponennt::InputElementDescs.size()),
         inputLayout.GetAddressOf(), vertexShader.GetAddressOf());
 
-    CPUResourceLoader::LoadPixelShader(device, "Shader/ToonPS.cso", pixelShader.GetAddressOf());
+    CPUResourceLoader::LoadPixelShader(device, "Data/Shader/ToonPS.cso", pixelShader.GetAddressOf());
 
     CPUResourceLoader::CreateConstantBuffer(device, sizeof(CbMesh), meshConstantBuffer.GetAddressOf());
 

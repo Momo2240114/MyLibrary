@@ -4,6 +4,7 @@
 #include "DragonAIComponent.h"
 
 #include "Engine/GamePlay/Combat/AttackEffectHitComponent.h"
+#include "Engine/GamePlay/Combat/HealthComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
@@ -207,8 +208,17 @@ void DragonAttackControllerComponent::Update(float deltaTime_)
     UpdatePendingStampRocks(deltaTime_);
 }
 
+bool DragonAttackControllerComponent::CanSpawnAttack() const
+{
+    const auto owner_ = gameObject.lock();
+    if (!IsEnabled() || !owner_ || !owner_->manager || !owner_->IsCombatReady()) return false;
+    const auto health_ = owner_->GetComponent<HealthComponent>();
+    return !health_ || !health_->IsDead();
+}
+
 void DragonAttackControllerComponent::PlayBreath()
 {
+    if (!CanSpawnAttack()) return;
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::PlayBreath");
 
     // 旧Action名はシーケンサー互換の入口として残し、実体はProjectileテンプレート生成へ寄せる。
@@ -217,6 +227,7 @@ void DragonAttackControllerComponent::PlayBreath()
 
 void DragonAttackControllerComponent::PlayBreathProjectileSingle()
 {
+    if (!CanSpawnAttack()) return;
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::PlayBreathProjectileSingle");
 
     SpawnBreathProjectile("DragonBreathLightSingle");
@@ -224,6 +235,7 @@ void DragonAttackControllerComponent::PlayBreathProjectileSingle()
 
 void DragonAttackControllerComponent::PlayBreathProjectileBeam()
 {
+    if (!CanSpawnAttack()) return;
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::PlayBreathProjectileBeam");
 
     SpawnBreathProjectile("DragonBreathLightBeam", BREATH_BEAM_TARGET_AIM_BLEND);
@@ -231,6 +243,7 @@ void DragonAttackControllerComponent::PlayBreathProjectileBeam()
 
 void DragonAttackControllerComponent::PlayBreathProjectileFan()
 {
+    if (!CanSpawnAttack()) return;
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::PlayBreathProjectileFan");
 
     SpawnBreathProjectile("DragonBreathLightFan");
@@ -238,6 +251,7 @@ void DragonAttackControllerComponent::PlayBreathProjectileFan()
 
 void DragonAttackControllerComponent::PlayBite()
 {
+    if (!CanSpawnAttack()) return;
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::PlayBite");
 
     SpawnAttackHit(
@@ -260,6 +274,7 @@ void DragonAttackControllerComponent::PlayBite()
 
 void DragonAttackControllerComponent::PlayTailSweep()
 {
+    if (!CanSpawnAttack()) return;
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::PlayTailSweep");
 
     SpawnAttackHit(
@@ -281,6 +296,7 @@ void DragonAttackControllerComponent::PlayTailSweep()
 
 void DragonAttackControllerComponent::PlaySpinSweep()
 {
+    if (!CanSpawnAttack()) return;
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::PlaySpinSweep");
 
     SpawnAttackHit(
@@ -302,6 +318,7 @@ void DragonAttackControllerComponent::PlaySpinSweep()
 
 void DragonAttackControllerComponent::PlayStamp()
 {
+    if (!CanSpawnAttack()) return;
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::PlayStamp");
 
     SpawnStampHit();
@@ -309,6 +326,7 @@ void DragonAttackControllerComponent::PlayStamp()
 
 void DragonAttackControllerComponent::ShowBreathDangerArea()
 {
+    if (!CanSpawnAttack()) return;
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::ShowBreathDangerArea");
 
     ShowBreathProjectileBeamDangerArea();
@@ -316,6 +334,7 @@ void DragonAttackControllerComponent::ShowBreathDangerArea()
 
 void DragonAttackControllerComponent::ShowBreathProjectileSingleDangerArea()
 {
+    if (!CanSpawnAttack()) return;
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::ShowBreathProjectileSingleDangerArea");
 
     SpawnBreathChargeEffect();
@@ -333,6 +352,7 @@ void DragonAttackControllerComponent::ShowBreathProjectileSingleDangerArea()
 
 void DragonAttackControllerComponent::ShowBreathProjectileBeamDangerArea()
 {
+    if (!CanSpawnAttack()) return;
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::ShowBreathProjectileBeamDangerArea");
 
     SpawnBreathChargeEffect();
@@ -380,6 +400,7 @@ void DragonAttackControllerComponent::ShowBreathProjectileBeamDangerArea()
 
 void DragonAttackControllerComponent::ShowBreathProjectileFanDangerArea()
 {
+    if (!CanSpawnAttack()) return;
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::ShowBreathProjectileFanDangerArea");
     BS_PROFILE_PLOT("DragonAttack::FanDangerAreaObjectCount", 1.0f);
 
@@ -396,6 +417,7 @@ void DragonAttackControllerComponent::ShowBreathProjectileFanDangerArea()
 
 void DragonAttackControllerComponent::ShowBiteDangerArea()
 {
+    if (!CanSpawnAttack()) return;
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::ShowBiteDangerArea");
 
     SpawnDangerArea(
@@ -411,6 +433,7 @@ void DragonAttackControllerComponent::ShowBiteDangerArea()
 
 void DragonAttackControllerComponent::ShowTailSweepDangerArea()
 {
+    if (!CanSpawnAttack()) return;
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::ShowTailSweepDangerArea");
 
     SpawnDangerArea(
@@ -426,12 +449,14 @@ void DragonAttackControllerComponent::ShowTailSweepDangerArea()
 
 void DragonAttackControllerComponent::ShowSpinSweepDangerArea()
 {
+    if (!CanSpawnAttack()) return;
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::ShowSpinSweepDangerArea");
     SpawnSpinSweepDangerArea(spinSweepLifeTime);
 }
 
 void DragonAttackControllerComponent::ShowStampDangerArea()
 {
+    if (!CanSpawnAttack()) return;
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::ShowStampDangerArea");
 
     if (!dangerAreaEnabled) return;
@@ -452,6 +477,12 @@ void DragonAttackControllerComponent::ShowStampDangerArea()
     }
 }
 
+void DragonAttackControllerComponent::OnDestroy()
+{
+    StopAttack();
+    UnregisterActions();
+}
+
 void DragonAttackControllerComponent::StopAttack()
 {
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::StopAttack");
@@ -465,6 +496,22 @@ void DragonAttackControllerComponent::StopAttack()
     }
     runtimeAttacks.clear();
     pendingStampRocks.clear();
+    const auto owner_ = GetGameObject();
+    if (owner_ && owner_->manager)
+    {
+        // 口元など子Emitterを含めて所有者を集め、検索後にPool返却を行う。
+        std::vector<std::shared_ptr<GameObject>> owners_;
+        const auto collect_ = [&](auto&& self_, const std::shared_ptr<GameObject>& actor_) -> void
+        {
+            owners_.push_back(actor_);
+            for (const auto& child_ : actor_->transform->children) if (child_) if (const auto object_ = child_->gameObject.lock()) self_(self_, object_);
+        };
+        collect_(collect_, owner_);
+        if (!breathEmitterObjectName.empty())
+            if (const auto emitterOwner_ = owner_->GetManager().Find(breathEmitterObjectName))
+                if (std::find(owners_.begin(), owners_.end(), emitterOwner_) == owners_.end()) owners_.push_back(emitterOwner_);
+        for (const auto& actor_ : owners_) owner_->GetManager().GetEffectManager().StopAttackEffects(actor_);
+    }
 }
 
 void DragonAttackControllerComponent::RegisterActions()
@@ -1145,7 +1192,8 @@ void DragonAttackControllerComponent::SpawnBreathVFX()
     request_.normal = forward_;
     request_.lifeTime = breathVFXLifeTime;
     request_.normalOffset = 0.0f;
-    owner_->GetManager().GetEffectManager().SpawnMeshVFX(request_);
+    auto& effects_ = owner_->GetManager().GetEffectManager();
+    effects_.RegisterAttackEffectOwner(effects_.SpawnMeshVFX(request_), owner_);
 }
 
 void DragonAttackControllerComponent::SpawnBreathChargeEffect()
@@ -1499,7 +1547,8 @@ void DragonAttackControllerComponent::SpawnBiteVFX()
     request_.normal = forward_;
     request_.lifeTime = biteVFXLifeTime;
     request_.normalOffset = 0.0f;
-    owner_->GetManager().GetEffectManager().SpawnMeshVFX(request_);
+    auto& effects_ = owner_->GetManager().GetEffectManager();
+    effects_.RegisterAttackEffectOwner(effects_.SpawnMeshVFX(request_), owner_);
 }
 
 // カプセルのY軸を尻尾の根元から先端へ向け、長さだけを伸縮させる。
@@ -1736,8 +1785,9 @@ void DragonAttackControllerComponent::SpawnStampRockVFXAt(
     request_.normal = { 0.0f, 1.0f, 0.0f };
     request_.lifeTime = stampRockLifeTime;
     request_.normalOffset = 0.0f;
-    std::shared_ptr<GameObject> rockObject_ =
-        owner_->GetManager().GetEffectManager().SpawnMeshVFX(request_);
+    auto& effects_ = owner_->GetManager().GetEffectManager();
+    const auto rockObject_ = effects_.SpawnMeshVFX(request_);
+    effects_.RegisterAttackEffectOwner(rockObject_, owner_);
     if (rockObject_ && rockObject_->transform)
     {
         rockObject_->transform->localScale =
@@ -1773,11 +1823,11 @@ void DragonAttackControllerComponent::StopRuntimeAttack(RuntimeAttack& runtime_)
     {
         hitComponent_->Stop();
     }
-    if (runtime_.object)
+    if (runtime_.object && runtime_.object->manager)
     {
         runtime_.object->GetManager().Destroy(runtime_.object);
     }
-    if (runtime_.dangerAreaObject)
+    if (runtime_.dangerAreaObject && runtime_.dangerAreaObject->manager)
     {
         runtime_.dangerAreaObject->GetManager().Destroy(runtime_.dangerAreaObject);
     }

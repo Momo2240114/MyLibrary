@@ -119,6 +119,8 @@ struct MotionWarpRequest
     bool active = false;
     // 敵から明示されたTargetと予定RootMotionを保存し、追加補正を時間全体へ分散する。
     bool explicitTarget = false;
+    // 停止距離0の明示的な固定終点では、補正終了後の移動を持ち越さない。
+    bool freezeAfterWarp = false;
     bool maintainStopDistance = false; // 補正終了後も同じ攻撃PhaseのRootMotionが対象を突き抜けないよう制限する。
     bool targetLocked = false;
     DirectX::XMFLOAT3 startPosition{ 0.0f, 0.0f, 0.0f };

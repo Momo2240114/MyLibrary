@@ -85,6 +85,8 @@ bool GuardSystem::HandleGuard(
         BS_LOG_WARNING(LOG_CATEGORY::GAME, "[Guard] Rejected: attacker or defender missing.");
         return false;
     }
+    // 扇形の安全側では広域Sphereが重なってもガード成立にしない。
+    if (!hitBox_.IsWithinAttackSector(defender_.get())) return false;
     if (!hitBox_.IsEnabled() || !guardCollider_.IsEnabled())
     {
         return false;

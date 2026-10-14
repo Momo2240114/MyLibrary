@@ -52,9 +52,9 @@
         0
       ],
       "localScale": [
-        32,
-        32,
-        32
+        70.4,
+        70.4,
+        70.4
       ],
       "alpha": 1,
       "followOwner": true,
@@ -71,7 +71,7 @@
     "enabled": true,
     "endNodeName": "ball_r_end",
     "hitBoxName": "Kick",
-    "radius": 0.28,
+    "radius": 0.616,
     "startNodeName": "foot_r"
   }
 }

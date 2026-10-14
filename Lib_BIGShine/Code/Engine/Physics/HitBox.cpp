@@ -8,6 +8,8 @@
 #include "Engine/Debug/TracyProfiler.h"
 
 #include <algorithm>
+#include <cmath>
+#include "Engine/GamePlay/Transform/Transform.h"
 
 
 HitBox::HitBox()
@@ -110,11 +112,35 @@ void HitBox::ClearHitTargets()
     hitTargetCounts.clear();
 }
 
+void HitBox::SetAttackSector(float range_, float angle_, float halfHeight_)
+{
+    sectorRange = (std::max)(0.0f, range_);
+    sectorAngle = std::clamp(angle_, 0.1f, 360.0f);
+    sectorHalfHeight = (std::max)(0.0f, halfHeight_);
+}
+
+bool HitBox::IsWithinAttackSector(GameObject* target_) const
+{
+    if (sectorRange <= 0.0f) return true;
+    const auto owner_ = gameObject.lock();
+    if (!owner_ || !owner_->transform || !target_ || !target_->transform) return false;
+    const auto center_ = owner_->transform->GetWorldPosition();
+    const auto position_ = target_->transform->GetWorldPosition();
+    const float dx_ = position_.x - center_.x;
+    const float dz_ = position_.z - center_.z;
+    const float distance_ = std::sqrt(dx_ * dx_ + dz_ * dz_);
+    if (distance_ > sectorRange || std::abs(position_.y - center_.y) > sectorHalfHeight) return false;
+    if (distance_ < 0.0001f) return true;
+    const float yaw_ = DirectX::XMConvertToRadians(owner_->transform->GetWorldRotation().y);
+    const float dot_ = (dx_ * std::sin(yaw_) + dz_ * std::cos(yaw_)) / distance_;
+    return dot_ >= std::cos(DirectX::XMConvertToRadians(sectorAngle * 0.5f));
+}
+
 bool HitBox::CanHit(GameObject* target_) const
 {
     // ownerへの自爆判定と、同一Activation内の多重Hitをここで止める。
     // AttackSystem側のattackInstanceId履歴とあわせて、HitBox単体でも最低限の重複防止を持つ。
-    if (target_ == nullptr) return false;
+    if (target_ == nullptr || !IsWithinAttackSector(target_)) return false;
     if (!canHitOwner && ownerObject == target_) return false;
     if (!allowMultiHit) return alreadyHitTargets.count(target_) == 0u;
     if (maxHitCount <= 0) return true;
@@ -200,6 +226,9 @@ void HitBox::Gui()
     // 攻撃判定のDamage、HitStop、VFX、SE、CameraShake、Action名、Blackboard参照先をEditorで調整する。
     CapsuleCollider::Gui();
     ImGui::SeparatorText("Attack");
+    ImGui::DragFloat("Sector Range (0 = disabled)", &sectorRange, 0.1f, 0.0f, 100.0f);
+    ImGui::DragFloat("Sector Angle", &sectorAngle, 0.5f, 0.1f, 360.0f);
+    ImGui::DragFloat("Sector Half Height", &sectorHalfHeight, 0.1f, 0.0f, 10.0f);
     ImGui::DragFloat("Legacy Damage", &damage, 0.1f, 0.0f, 99999.0f);
     ImGui::DragFloat("Damage Rate", &damageRate, 0.01f, 0.0f, 100.0f);
     ImGui::DragFloat("Fixed Damage", &fixedDamage, 0.1f, -99999.0f, 99999.0f);
@@ -365,6 +394,9 @@ void HitBox::Serialize(nlohmann::json& j_) const
     j_["AttackInstanceId"] = attackInstanceId;
     j_["HitGroupId"] = hitGroupId;
     j_["AllowMultiHit"] = allowMultiHit;
+    j_["SectorRange"] = sectorRange;
+    j_["SectorAngle"] = sectorAngle;
+    j_["SectorHalfHeight"] = sectorHalfHeight;
     j_["CanHitOwner"] = canHitOwner;
     j_["GuardBreak"] = guardBreak;
     j_["CanBeGuarded"] = canBeGuarded;
@@ -433,6 +465,7 @@ void HitBox::Deserialize(const nlohmann::json& j_)
     attackInstanceId = j_.value("AttackInstanceId", 0u);
     hitGroupId = j_.value("HitGroupId", 0u);
     allowMultiHit = j_.value("AllowMultiHit", false);
+    SetAttackSector(j_.value("SectorRange", 0.0f), j_.value("SectorAngle", 360.0f), j_.value("SectorHalfHeight", 1.0f));
     canHitOwner = j_.value("CanHitOwner", false);
     guardBreak = j_.value("GuardBreak", false);
     canBeGuarded = j_.value("CanBeGuarded", true);

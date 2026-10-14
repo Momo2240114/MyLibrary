@@ -37,7 +37,7 @@ bool EditorPrimitiveRenderer::Initialize(ID3D11Device* device_)
 
     CPUResourceLoader::LoadVertexShader(
         device_,
-        "Shader/PrimitiveRendererVS.cso",
+        "Data/Shader/PrimitiveRendererVS.cso",
         inputElementDesc_,
         _countof(inputElementDesc_),
         inputLayout.GetAddressOf(),
@@ -45,7 +45,7 @@ bool EditorPrimitiveRenderer::Initialize(ID3D11Device* device_)
 
     CPUResourceLoader::LoadPixelShader(
         device_,
-        "Shader/PrimitiveRendererPS.cso",
+        "Data/Shader/PrimitiveRendererPS.cso",
         pixelShader.GetAddressOf());
 
     CPUResourceLoader::CreateConstantBuffer(

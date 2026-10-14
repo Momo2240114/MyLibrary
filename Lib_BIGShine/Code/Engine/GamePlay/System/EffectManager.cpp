@@ -1,4 +1,5 @@
 #include "PrecompiledHeader.h"
+#include "Engine/GamePlay/Combat/HealthComponent.h"
 
 #include "EffectManager.h"
 
@@ -720,6 +721,12 @@ std::shared_ptr<GameObject> EffectManager::SpawnSlashEffect(
     const AttackEffectSpawnRequest& request_)
 {
     if (!gameObjectManager || request_.setting.vfxPath.empty()) return nullptr;
+    if (request_.ownerObject)
+    {
+        const auto health_ = request_.ownerObject->GetComponent<HealthComponent>();
+        // 撃破後に古いAnimation Eventが走っても、斬撃VFXや遅延予約を作らない。
+        if (request_.ownerObject->IsPendingDestroy() || (health_ && health_->IsDead())) return nullptr;
+    }
     if (request_.setting.spawnTime > 0.0f)
     {
         ScheduledAttackEffect scheduledEffect_{};
@@ -867,6 +874,7 @@ std::shared_ptr<GameObject> EffectManager::SpawnSlashEffect(
             break;
         }
     }
+    if (request_.ownerObject) RegisterAttackEffectOwner(object_, request_.ownerObject->weak_from_this().lock());
     return object_;
 }
 
@@ -1160,7 +1168,7 @@ void EffectManager::SpawnForHit(const AttackHitEvent& event_)
             request_.targetAttractionRange = event_.hitParticleTargetAttractionRange;
             request_.targetAttractionFalloff = event_.hitParticleTargetAttractionFalloff;
         }
-        SpawnParticle(request_);
+        RegisterAttackEffectOwner(SpawnParticle(request_), event_.attacker.lock());
     }
 
     if (!event_.hitMeshVFXAssetPath.empty())
@@ -1171,12 +1179,12 @@ void EffectManager::SpawnForHit(const AttackHitEvent& event_)
         request_.normal = event_.hitNormal;
         request_.lifeTime = event_.hitMeshVFXLifeTime;
         request_.normalOffset = event_.hitMeshVFXNormalOffset;
-        SpawnMeshVFX(request_);
+        RegisterAttackEffectOwner(SpawnMeshVFX(request_), event_.attacker.lock());
     }
     if (!event_.hitImpactEffectAssetPath.empty())
     {
         // 複数のParticle/Mesh/DecalをまとめたImpactEffectを、Hit位置と法線に合わせて再生する。
-        SpawnImpactEffectAsset(event_.hitImpactEffectAssetPath, event_.hitPosition, event_.hitNormal);
+        SpawnImpactEffectAsset(event_.hitImpactEffectAssetPath, event_.hitPosition, event_.hitNormal, event_.attacker.lock());
     }
 }
 
@@ -1236,21 +1244,21 @@ void EffectManager::SpawnImpactEffect(const ImpactEffectSpawnRequest& request_)
         ParticleSpawnRequest particle_ = request_.particle;
         particle_.position = request_.position;
         particle_.normal = request_.normal;
-        SpawnParticle(particle_);
+        RegisterAttackEffectOwner(SpawnParticle(particle_), request_.attackOwner.lock());
     }
     if (request_.spawnMeshVFX && !request_.meshVFX.assetPath.empty())
     {
         MeshVFXSpawnRequest meshVFX_ = request_.meshVFX;
         meshVFX_.position = request_.position;
         meshVFX_.normal = request_.normal;
-        SpawnMeshVFX(meshVFX_);
+        RegisterAttackEffectOwner(SpawnMeshVFX(meshVFX_), request_.attackOwner.lock());
     }
     if (request_.spawnDecal && !request_.decal.texturePath.empty())
     {
         DecalSpawnRequest decal_ = request_.decal;
         decal_.position = request_.position;
         decal_.normal = request_.normal;
-        SpawnDecal(decal_);
+        RegisterAttackEffectOwner(SpawnDecal(decal_), request_.attackOwner.lock());
     }
 }
 
@@ -1258,7 +1266,8 @@ void EffectManager::SpawnImpactEffect(const ImpactEffectSpawnRequest& request_)
 void EffectManager::SpawnImpactEffectAsset(
     const std::string& assetNameOrPath_,
     const DirectX::XMFLOAT3& position_,
-    const DirectX::XMFLOAT3& normal_)
+    const DirectX::XMFLOAT3& normal_,
+    const std::shared_ptr<GameObject>& attackOwner_)
 {
     const std::string resolvedPath_ = ResolveImpactEffectPath(assetNameOrPath_);
     const std::string assetKey_ = BuildAssetNameFromPath(
@@ -1277,6 +1286,7 @@ void EffectManager::SpawnImpactEffectAsset(
     {
         if (!entry_.enabled || entry_.assetPath.empty()) continue;
         ImpactEffectSpawnRequest request_{};
+        request_.attackOwner = attackOwner_;
         request_.position = position_;
         request_.normal = normal_;
         if (entry_.type == IMPACT_EFFECT_ENTRY_TYPE::PARTICLE)
@@ -1318,6 +1328,13 @@ bool EffectManager::IsEffectOwnedBy(const std::shared_ptr<GameObject>& object_, 
         });
 }
 
+void EffectManager::RegisterAttackEffectOwner(const std::shared_ptr<GameObject>& object_, const std::shared_ptr<GameObject>& owner_)
+{
+    if (!object_ || !owner_) return;
+    for (auto& effect_ : managedEffects)
+        if (effect_.object.lock() == object_) { effect_.attackOwner = owner_; return; }
+}
+
 void EffectManager::StopAttackEffects(const std::shared_ptr<GameObject>& owner_)
 {
     BS_PROFILE_SCOPE("EffectManager::StopAttackEffects");
@@ -1331,7 +1348,7 @@ void EffectManager::StopAttackEffects(const std::shared_ptr<GameObject>& owner_)
         const auto object_ = effect_.object.lock();
         const auto hitBox_ = effect_.hitBox.lock();
         const auto attack_ = object_ ? object_->GetComponent<AttackEffectHitComponent>() : nullptr;
-        if (object_ && ((hitBox_ && hitBox_->GetAttackOwner() == owner_) || (attack_ && attack_->IsOwnedBy(owner_.get()))))
+        if (object_ && (effect_.attackOwner.lock() == owner_ || (hitBox_ && hitBox_->GetAttackOwner() == owner_) || (attack_ && attack_->IsOwnedBy(owner_.get()))))
             managedObjects_.push_back(object_);
     }
     for (const auto& object_ : gameObjectManager->GetObjects())

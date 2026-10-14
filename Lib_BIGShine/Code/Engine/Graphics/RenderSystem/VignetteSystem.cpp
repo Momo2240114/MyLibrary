@@ -16,7 +16,7 @@ bool VignetteSystem::Initialize(ID3D11Device* device_, int width_, int height_)
     // PostEffect共通のFullScreen Vertex Shaderを使う。
     if (FAILED(CPUResourceLoader::LoadVertexShader(
         device_,
-        "Shader/FullScreenVS.cso",
+        "Data/Shader/FullScreenVS.cso",
         nullptr,
         0,
         nullptr,
@@ -28,7 +28,7 @@ bool VignetteSystem::Initialize(ID3D11Device* device_, int width_, int height_)
     // Vignette合成専用のPixel Shaderを読み込む。
     if (FAILED(CPUResourceLoader::LoadPixelShader(
         device_,
-        "Shader/VignettePS.cso",
+        "Data/Shader/VignettePS.cso",
         pixelShader.GetAddressOf())))
     {
         return false;

@@ -265,6 +265,7 @@ private:
     std::shared_ptr<GameModeManager> gameModeManager;
     std::unique_ptr<ResourceManager> resourceManager;
     std::vector<std::shared_ptr<GameObject>> objects;
+    bool showRuntimeObjects = false; // 一時VFXを含む、非保存ObjectもHierarchyで調査する。
     std::unordered_map<StringId, std::vector<std::weak_ptr<GameObject>>> objectNameIndex;
     // 更新ループ中の追加・削除を安全に反映するための待機リスト。
     std::vector<std::shared_ptr<GameObject>> pendingStarts;

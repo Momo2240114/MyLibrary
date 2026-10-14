@@ -7,12 +7,12 @@
 ShadowCasterShader::ShadowCasterShader(ID3D11Device* device)
 {
     // VSだけ読み込む。PSは不要なのでnullptrでよい
-    CPUResourceLoader::LoadVertexShader(device, "Shader/ShadowStaticVS.cso",
+    CPUResourceLoader::LoadVertexShader(device, "Data/Shader/ShadowStaticVS.cso",
         GltfModelCommponennt::InputElementDescs.data(),
         static_cast<UINT>(GltfModelCommponennt::InputElementDescs.size()),
         inputLayout.GetAddressOf(), staticVertexShader.GetAddressOf());
 
-    CPUResourceLoader::LoadVertexShader(device, "Shader/ShadowSkinnedVS.cso",
+    CPUResourceLoader::LoadVertexShader(device, "Data/Shader/ShadowSkinnedVS.cso",
         GltfModelCommponennt::InputElementDescs.data(),
         static_cast<UINT>(GltfModelCommponennt::InputElementDescs.size()),
         nullptr, skinnedVertexShader.GetAddressOf());

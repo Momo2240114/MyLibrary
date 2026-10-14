@@ -178,12 +178,12 @@ bool GraphicsDeviceManager::InitializeSkyBox()
     };
 
     // ---- CSO パスをプロジェクトに合わせて変更してください ----
-    CPUResourceLoader::CreateVSFromCSO(device.Get(), "Shader/SkyBoxVS.cso",
+    CPUResourceLoader::CreateVSFromCSO(device.Get(), "Data/Shader/SkyBoxVS.cso",
         skyBoxVertexShader.GetAddressOf(),
         skyBoxInputLayout.GetAddressOf(),
         inputElementDescription_, _countof(inputElementDescription_));
 
-    CPUResourceLoader::CreatePSFromCSO(device.Get(), "Shader/SkyBoxPS.cso",
+    CPUResourceLoader::CreatePSFromCSO(device.Get(), "Data/Shader/SkyBoxPS.cso",
         skyBoxPixelShader.GetAddressOf());
     // ----------------------------------------------------------
 

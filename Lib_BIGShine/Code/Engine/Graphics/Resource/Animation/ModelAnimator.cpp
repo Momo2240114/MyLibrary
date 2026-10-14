@@ -1012,7 +1012,8 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
     // ステート指定のRootMotionノードを優先し、未指定時はモデル設定または"root"ノードを使用する。
     auto resolveRootNodeIndex_ = [&](const AnimState* state_)
         {
-            if (!state_ || !state_->rootMotion.enable) return -1;
+            // 演出の移動固定は、GameObjectへのRootMotion適用とは独立して処理する。
+            if (!state_ || (!state_->rootMotion.enable && !state_->rootMotion.cutVisualWhenDisabled)) return -1;
 
             const std::string rootName_ = state_->rootMotion.sourceNodeName.empty()
                 ? model->GetRootMotionName()
@@ -1078,7 +1079,7 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
         const bool sourceNodeChanged_ = (previousRootMotionNodeIndex != currentRootNodeIndex_);
         const bool resetBasePosition_ = isFirstFrame || stateChanged_ || sourceNodeChanged_;
         // ステート固有倍率にカーブ値を掛け、時間帯ごとのRootMotion強度を決定する。
-        float rootMotionScale_ = current.state->rootMotionScale;
+        float rootMotionScale_ = current.state->rootMotion.enable ? current.state->rootMotionScale : 0.0f;
         if (curvecomp && !current.state->rootMotionScaleCurveName.empty())
         {
             float normalizedTime_ = (baseDuration > 0.0f) ? (current.time / baseDuration) : 0.0f;

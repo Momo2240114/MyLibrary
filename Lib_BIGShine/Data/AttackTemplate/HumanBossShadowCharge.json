@@ -1,0 +1,92 @@
+{
+    "AssetType": "AttackTemplate",
+    "AssetVersion": 1,
+    "attack": {
+        "allowMultiHit": false,
+        "damage": 50.0,
+        "hitGroupId": 0,
+        "hitStopDuration": 0.06,
+        "hitStopScale": 0.35,
+        "knockBackPower": 2.0,
+        "knockBackType": 0,
+        "damageRate": 5.0
+    },
+    "cameraShake": {
+        "enabled": true,
+        "powerLevel": 1
+    },
+    "attackEffects": [
+        {
+            "enabled": true,
+            "effectType": 0,
+            "particlePath": "EnemyShadowMudBurst",
+            "localOffset": [
+                0,
+                1,
+                1
+            ],
+            "lifeTime": 0.45,
+            "followOwner": false,
+            "hitShapes": []
+        }
+    ],
+    "displayName": "HumanBoss Shadow Charge",
+    "hitEffect": {
+        "hitMeshVfxAssetPath": "",
+        "hitParticleAssetPath": "EnemyShadowMudBurst",
+        "hitParticleEmitterName": "",
+        "hitParticleLifeTime": 0.5,
+        "hitParticleNormalOffset": 0.06,
+        "hitParticleUseImpactAxis": true,
+        "hitParticleAxisToAttackerBlend": 0.85,
+        "hitParticleUseTargetAttraction": true,
+        "hitParticleTargetAttractionStrength": 1.4,
+        "hitParticleTargetAttractionRange": 3.0,
+        "hitParticleTargetAttractionFalloff": 1.25,
+        "spawnOnHit": true
+    },
+    "id": "HumanBossShadowCharge",
+    "owner": {
+        "canHitOwner": false,
+        "ownerTarget": 0
+    },
+    "slashEffects": [
+        {
+            "enabled": true,
+            "vfxPath": "EnemyShadowSlash",
+            "spawnTimeOffset": 0,
+            "lifeTime": 0.17,
+            "localOffset": [
+                -6.4,
+                2.8,
+                3.1
+            ],
+            "localRotation": [
+                -25,
+                0,
+                0
+            ],
+            "localScale": [
+                121.0,
+                121.0,
+                121.0
+            ],
+            "alpha": 1,
+            "followOwner": true,
+            "followNode": true,
+            "baseNodeName": "hand_r",
+            "hitBox": {
+                "enabled": false
+            }
+        }
+    ],
+    "weaponHitBox": {
+        "activeEndTime": 0.13,
+        "activeStartTime": 0.0,
+        "enabled": true,
+        "endNodeName": "TrailEnd",
+        "hitBoxName": "Sword",
+        "radius": 70.4,
+        "startNodeName": "TrailStart"
+    }
+}

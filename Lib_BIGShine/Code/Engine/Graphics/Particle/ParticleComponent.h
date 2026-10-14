@@ -137,6 +137,11 @@ private:
     const EmitterTrack* FindEmitterTrack(const std::string& emitterName_) const;
 
 private:
+    // HP連動は発生量だけを実行時に補正し、保存済みEmitter設定を変更しない。
+    bool scaleEmissionByHealth = false;
+    std::string healthOwnerName;
+    float healthyEmissionMultiplier = 1.0f;
+    float lowHealthEmissionMultiplier = 3.0f;
     std::string meshSourceObjectName;
     std::string attractionTargetName;
     bool emitDissolveBoundary = false;

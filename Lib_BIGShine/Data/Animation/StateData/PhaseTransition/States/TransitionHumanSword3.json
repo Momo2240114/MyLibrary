@@ -62,16 +62,17 @@
             "applyRotationY": false,
             "applyRotationZ": false,
             "cutVisualPositionX": true,
-            "cutVisualPositionY": true,
+            "cutVisualPositionY": false,
             "cutVisualPositionZ": true,
-            "enable": true,
-            "sourceNodeName": "pelvis"
+            "enable": false,
+            "sourceNodeName": "pelvis",
+            "cutVisualWhenDisabled": true
         },
         "rootMotionScale": 0,
         "rootMotionScaleCurveName": "",
         "sequenceClips": [],
         "sequencer": "",
-        "speed": 1,
+        "speed": 1.6,
         "speedCurveName": "",
         "type": 0
     }

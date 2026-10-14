@@ -123,7 +123,16 @@ public:
         attackDataBlackboardOverrideEnabled = enabled_;
     }
     void ClearHitTargets();
+    // 広域Sphereに入った対象を、実際の扇形の角度・高さで絞る。
+    bool IsWithinAttackSector(GameObject* target_) const;
+    void SetAttackSector(float range_, float angle_, float halfHeight_);
+    bool HasRegisteredHit() const { return !alreadyHitTargets.empty(); }
     bool CanHit(GameObject* target_) const;
+private:
+    float sectorRange = 0.0f; // 0なら既存のCapsule判定のみ。
+    float sectorAngle = 360.0f;
+    float sectorHalfHeight = 1.0f;
+public:
     void RegisterHit(GameObject* target_);
     std::shared_ptr<GameObject> GetAttackOwner();
     void Gui() override;

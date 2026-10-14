@@ -205,7 +205,7 @@
                         "FixedDamageKey": "FixedDamage",
                         "GravityScale": 1.0,
                         "GuardBreak": false,
-                        "HalfHeight": 0.15000000596046448,
+                        "HalfHeight": 0.33,
                         "HitGroupId": 1,
                         "HitImpactEffectAssetPath": "",
                         "HitMeshVFXAssetPath": "",
@@ -246,7 +246,7 @@
                             0.0
                         ],
                         "PhysicsControlsTransform": false,
-                        "Radius": 0.2800000011920929,
+                        "Radius": 0.616,
                         "RotateVelocityThreshold": 0.0010000000474974513,
                         "ShapeRenderFlg": false,
                         "SourceAction": "",
@@ -256,7 +256,8 @@
                         "UseGravity": false,
                         "UsePhysicsResponse": false,
                         "VelocityRotationMode": 0,
-                        "shapeSizeScale": 1.0
+                        "shapeSizeScale": 1.0,
+                        "NodeSegmentScale": 2.2
                     },
                     "Enabled": false,
                     "LateUpdateEnabled": true,
@@ -6086,6 +6087,192 @@
                                     "speed": 1,
                                     "speedCurveName": "",
                                     "type": 0
+                                },
+                                {
+                                    "animIndexA": -1,
+                                    "animIndexB": -1,
+                                    "animationIndex": 30,
+                                    "blend2DBackwardAnimationIndex": -1,
+                                    "blend2DBackwardLeft90AnimationIndex": -1,
+                                    "blend2DBackwardLeft90PhaseOffset": 0.0,
+                                    "blend2DBackwardLeftAnimationIndex": -1,
+                                    "blend2DBackwardLeftPhaseOffset": 0.0,
+                                    "blend2DBackwardPhaseOffset": 0.0,
+                                    "blend2DBackwardRight90AnimationIndex": -1,
+                                    "blend2DBackwardRight90PhaseOffset": 0.0,
+                                    "blend2DBackwardRightAnimationIndex": -1,
+                                    "blend2DBackwardRightPhaseOffset": 0.0,
+                                    "blend2DDefaultInput": [
+                                        0.0,
+                                        1.0
+                                    ],
+                                    "blend2DForwardAnimationIndex": -1,
+                                    "blend2DForwardLeft90AnimationIndex": -1,
+                                    "blend2DForwardLeft90PhaseOffset": 0.0,
+                                    "blend2DForwardLeftAnimationIndex": -1,
+                                    "blend2DForwardLeftPhaseOffset": 0.0,
+                                    "blend2DForwardPhaseOffset": 0.0,
+                                    "blend2DForwardRight90AnimationIndex": -1,
+                                    "blend2DForwardRight90PhaseOffset": 0.0,
+                                    "blend2DForwardRightAnimationIndex": -1,
+                                    "blend2DForwardRightPhaseOffset": 0.0,
+                                    "blend2DIdleAnimationIndex": -1,
+                                    "blend2DIdlePhaseOffset": 0.0,
+                                    "blend2DIdleThreshold": 0.05000000074505806,
+                                    "blend2DLeftAnimationIndex": -1,
+                                    "blend2DLeftPhaseOffset": 0.0,
+                                    "blend2DParamName": "MoveInput",
+                                    "blend2DRightAnimationIndex": -1,
+                                    "blend2DRightPhaseOffset": 0.0,
+                                    "blend2DSyncNormalizedTime": true,
+                                    "blend2DUseEightDirections": false,
+                                    "blend2DUseForwardBackwardLateral": false,
+                                    "blend2DUseIdleStop": false,
+                                    "blendDefaultWeight": 0.5,
+                                    "blendMaskRootNodes": [],
+                                    "blendParamName": "BlendAlpha",
+                                    "blendParameterMax": 1.0,
+                                    "blendParameterMin": 0.0,
+                                    "blendPhaseOffsetA": 0.0,
+                                    "blendPhaseOffsetB": 0.0,
+                                    "blendSyncNormalizedTime": true,
+                                    "blendUseMask": false,
+                                    "customAnimIndex": -1,
+                                    "events": [
+                                        {
+                                            "actionEnd": "",
+                                            "actionStart": "",
+                                            "actionUpdate": "",
+                                            "attachNodeName": "",
+                                            "attachToOwner": false,
+                                            "attackTemplateId": "HumanBossShadowCharge",
+                                            "blackboardWrites": [],
+                                            "callEndOnStateExit": true,
+                                            "endTime": 1.8,
+                                            "eventTemplateType": "ATTACK_TEMPLATE",
+                                            "label": "Shadow Charge Slash",
+                                            "localPosition": [
+                                                0.0,
+                                                0.0,
+                                                0.0
+                                            ],
+                                            "localRotation": [
+                                                0.0,
+                                                0.0,
+                                                0.0
+                                            ],
+                                            "localScale": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "meshVFXAssetPath": "",
+                                            "meshVFXLifeTime": 1.0,
+                                            "meshVFXPlaybackSpeed": 1.0,
+                                            "mirrorMeshVFX": false,
+                                            "overridePlaybackSpeed": false,
+                                            "ownerTarget": "Self",
+                                            "playbackSpeed": 1.0,
+                                            "startTime": 1.55
+                                        }
+                                    ],
+                                    "loop": false,
+                                    "name": "Run_Attack_01_Seq_0",
+                                    "rootMotion": {
+                                        "applyPositionX": true,
+                                        "applyPositionY": false,
+                                        "applyPositionZ": true,
+                                        "applyRotationX": false,
+                                        "applyRotationY": false,
+                                        "applyRotationZ": false,
+                                        "cutVisualPositionX": true,
+                                        "cutVisualPositionY": false,
+                                        "cutVisualPositionZ": true,
+                                        "enable": true,
+                                        "sourceNodeName": "pelvis"
+                                    },
+                                    "rootMotionScale": 1.0,
+                                    "rootMotionScaleCurveName": "",
+                                    "sequenceClips": [],
+                                    "sequencer": "",
+                                    "speed": 1.3,
+                                    "speedCurveName": "",
+                                    "type": 0
+                                },
+                                {
+                                    "animIndexA": -1,
+                                    "animIndexB": -1,
+                                    "animationIndex": 253,
+                                    "blend2DBackwardAnimationIndex": -1,
+                                    "blend2DBackwardLeft90AnimationIndex": -1,
+                                    "blend2DBackwardLeft90PhaseOffset": 0.0,
+                                    "blend2DBackwardLeftAnimationIndex": -1,
+                                    "blend2DBackwardLeftPhaseOffset": 0.0,
+                                    "blend2DBackwardPhaseOffset": 0.0,
+                                    "blend2DBackwardRight90AnimationIndex": -1,
+                                    "blend2DBackwardRight90PhaseOffset": 0.0,
+                                    "blend2DBackwardRightAnimationIndex": -1,
+                                    "blend2DBackwardRightPhaseOffset": 0.0,
+                                    "blend2DDefaultInput": [
+                                        0.0,
+                                        1.0
+                                    ],
+                                    "blend2DForwardAnimationIndex": -1,
+                                    "blend2DForwardLeft90AnimationIndex": -1,
+                                    "blend2DForwardLeft90PhaseOffset": 0.0,
+                                    "blend2DForwardLeftAnimationIndex": -1,
+                                    "blend2DForwardLeftPhaseOffset": 0.0,
+                                    "blend2DForwardPhaseOffset": 0.0,
+                                    "blend2DForwardRight90AnimationIndex": -1,
+                                    "blend2DForwardRight90PhaseOffset": 0.0,
+                                    "blend2DForwardRightAnimationIndex": -1,
+                                    "blend2DForwardRightPhaseOffset": 0.0,
+                                    "blend2DIdleAnimationIndex": -1,
+                                    "blend2DIdlePhaseOffset": 0.0,
+                                    "blend2DIdleThreshold": 0.05000000074505806,
+                                    "blend2DLeftAnimationIndex": -1,
+                                    "blend2DLeftPhaseOffset": 0.0,
+                                    "blend2DParamName": "MoveInput",
+                                    "blend2DRightAnimationIndex": -1,
+                                    "blend2DRightPhaseOffset": 0.0,
+                                    "blend2DSyncNormalizedTime": true,
+                                    "blend2DUseEightDirections": false,
+                                    "blend2DUseForwardBackwardLateral": false,
+                                    "blend2DUseIdleStop": false,
+                                    "blendDefaultWeight": 0.5,
+                                    "blendMaskRootNodes": [],
+                                    "blendParamName": "BlendAlpha",
+                                    "blendParameterMax": 1.0,
+                                    "blendParameterMin": 0.0,
+                                    "blendPhaseOffsetA": 0.0,
+                                    "blendPhaseOffsetB": 0.0,
+                                    "blendSyncNormalizedTime": true,
+                                    "blendUseMask": false,
+                                    "customAnimIndex": -1,
+                                    "events": [],
+                                    "loop": true,
+                                    "name": "HumanBossRagnarokAdvance",
+                                    "rootMotion": {
+                                        "applyPositionX": false,
+                                        "applyPositionY": false,
+                                        "applyPositionZ": false,
+                                        "applyRotationX": false,
+                                        "applyRotationY": false,
+                                        "applyRotationZ": false,
+                                        "cutVisualPositionX": true,
+                                        "cutVisualPositionY": false,
+                                        "cutVisualPositionZ": true,
+                                        "enable": false,
+                                        "sourceNodeName": "pelvis",
+                                        "cutVisualWhenDisabled": true
+                                    },
+                                    "rootMotionScale": 0.0,
+                                    "rootMotionScaleCurveName": "",
+                                    "sequenceClips": [],
+                                    "sequencer": "",
+                                    "speed": 1.0,
+                                    "speedCurveName": "",
+                                    "type": 0
                                 }
                             ]
                         },
@@ -6120,8 +6307,8 @@
                 },
                 {
                     "Data": {
-                        "CurrentHealth": 12000.0,
-                        "MaxHealth": 12000.0
+                        "CurrentHealth": 8000.0,
+                        "MaxHealth": 8000.0
                     },
                     "Enabled": true,
                     "LateUpdateEnabled": true,
@@ -6431,6 +6618,46 @@
                                         "useNormalizedTime": false
                                     }
                                 ]
+                            },
+                            {
+                                "name": "HumanBoss_SHADOW_CHARGE_Sequence",
+                                "duration": 2.0,
+                                "completionAction": "",
+                                "actions": [
+                                    {
+                                        "cat": "HumanBoss",
+                                        "name": "HumanBoss_ChargeShowArea",
+                                        "time": 0,
+                                        "useNormalizedTime": false
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "HumanBoss_SHADOW_ORB_Sequence",
+                                "duration": 3.0,
+                                "completionAction": "",
+                                "actions": [
+                                    {
+                                        "cat": "HumanBoss",
+                                        "name": "HumanBoss_OrbSpawn",
+                                        "time": 0.3,
+                                        "useNormalizedTime": true,
+                                        "animationState": "Buff_Seq"
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "HumanBoss_SHADOW_RAGNAROK_Sequence",
+                                "duration": 10.0,
+                                "completionAction": "",
+                                "actions": [
+                                    {
+                                        "cat": "HumanBoss",
+                                        "name": "HumanBoss_RagnarokShowArea",
+                                        "time": 0,
+                                        "useNormalizedTime": false
+                                    }
+                                ]
                             }
                         ]
                     },
@@ -6469,7 +6696,31 @@
                         "ShadowMaximumPathDistance": 24.0,
                         "ShadowReappearDuration": 0.3,
                         "ShadowEffectInterval": 0.1,
-                        "ShadowEffectSpacing": 1.2
+                        "ShadowEffectSpacing": 1.2,
+                        "ChargeMaximumDistance": 12.0,
+                        "ChargeWidth": 2.0,
+                        "ChargeGrowthTime": 1.0,
+                        "OrbCount": 3,
+                        "OrbMaximumCount": 6,
+                        "OrbWaitTime": 1.5,
+                        "OrbInterval": 0.4,
+                        "OrbSpeed": 3.0,
+                        "OrbTurnSpeed": 25.0,
+                        "OrbLifeTime": 8.0,
+                        "RagnarokEnabled": true,
+                        "RagnarokHpThreshold": 0.5,
+                        "RagnarokAttackCount": 4,
+                        "RagnarokRadius": 48.0,
+                        "RagnarokAngle": 180.0,
+                        "RagnarokRotationTime": 1.0,
+                        "RagnarokHitDuration": 0.2,
+                        "RangedStageCenter": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "RangedStageRadius": 50.0,
+                        "RagnarokAdvanceSpeed": 8.0
                     },
                     "Enabled": true,
                     "LateUpdateEnabled": false,
@@ -6575,7 +6826,7 @@
                                             "ForwardSpeed": 0.0,
                                             "ForwardSpeedCurve": "",
                                             "MaximumDuration": 10.0,
-                                            "MotionWarpPreset": "",
+                                            "MotionWarpPreset": "HumanBoss.ComboSecond",
                                             "PlayAnimationFromSequence": false,
                                             "PreventFlinch": true,
                                             "Sequence": "HumanBoss_COMBO_PATTERN_01",
@@ -6602,7 +6853,7 @@
                                             "ForwardSpeed": 0.0,
                                             "ForwardSpeedCurve": "",
                                             "MaximumDuration": 10.0,
-                                            "MotionWarpPreset": "",
+                                            "MotionWarpPreset": "HumanBoss.ComboSecond",
                                             "PlayAnimationFromSequence": false,
                                             "PreventFlinch": true,
                                             "Sequence": "HumanBoss_COMBO_PATTERN_01",
@@ -6715,7 +6966,7 @@
                                             "ForwardSpeed": 0.0,
                                             "ForwardSpeedCurve": "",
                                             "MaximumDuration": 10.0,
-                                            "MotionWarpPreset": "",
+                                            "MotionWarpPreset": "HumanBoss.ComboSecond",
                                             "PlayAnimationFromSequence": false,
                                             "PreventFlinch": true,
                                             "Sequence": "HumanBoss_COMBO_PATTERN_02",
@@ -6742,7 +6993,7 @@
                                             "ForwardSpeed": 0.0,
                                             "ForwardSpeedCurve": "",
                                             "MaximumDuration": 10.0,
-                                            "MotionWarpPreset": "",
+                                            "MotionWarpPreset": "HumanBoss.ComboSecond",
                                             "PlayAnimationFromSequence": false,
                                             "PreventFlinch": true,
                                             "Sequence": "HumanBoss_COMBO_PATTERN_02",
@@ -8239,6 +8490,254 @@
                                         }
                                     ]
                                 }
+                            },
+                            {
+                                "Type": 28,
+                                "Category": 2,
+                                "Enabled": [
+                                    true,
+                                    true,
+                                    true
+                                ],
+                                "Weight": [
+                                    1.0,
+                                    1.2,
+                                    1.4
+                                ],
+                                "Cooldown": [
+                                    10.0,
+                                    10.0,
+                                    10.0
+                                ],
+                                "MinDistance": 6.0,
+                                "MaxDistance": 14.0,
+                                "ShadowShiftMode": 2,
+                                "Skill": {
+                                    "Name": "SHADOW_CHARGE",
+                                    "Category": "RUSH",
+                                    "Enabled": true,
+                                    "CanUseOnGround": true,
+                                    "CanUseInAir": false,
+                                    "CleanupAction": "HumanBoss_RangedClear",
+                                    "Phases": [
+                                        {
+                                            "Animation": "HumanBossAttackTell",
+                                            "End": "ACTION_END",
+                                            "Duration": 1.2,
+                                            "MaximumDuration": 10.0,
+                                            "BlendDuration": 0.04,
+                                            "Sequence": "HumanBoss_SHADOW_CHARGE_Sequence",
+                                            "EnterAction": "",
+                                            "ExitAction": "",
+                                            "MotionWarpPreset": "",
+                                            "AnimationStartTime": 0.0,
+                                            "ForwardSpeed": 0.0,
+                                            "SuspendGravity": false,
+                                            "VerticalSpeed": 0.0,
+                                            "WarpHeight": 0.0,
+                                            "ContinueSequence": false,
+                                            "PlayAnimationFromSequence": false,
+                                            "WaitForAnimationEnd": false
+                                        },
+                                        {
+                                            "Animation": "Run_Attack_01_Seq_0",
+                                            "End": "ANIMATION_END",
+                                            "Duration": 0,
+                                            "MaximumDuration": 10.0,
+                                            "BlendDuration": 0.04,
+                                            "Sequence": "",
+                                            "EnterAction": "",
+                                            "ExitAction": "HumanBoss_RangedClear",
+                                            "MotionWarpPreset": "",
+                                            "AnimationStartTime": 0.0,
+                                            "ForwardSpeed": 0.0,
+                                            "SuspendGravity": false,
+                                            "VerticalSpeed": 0.0,
+                                            "WarpHeight": 0.0,
+                                            "ContinueSequence": false,
+                                            "PlayAnimationFromSequence": false,
+                                            "WaitForAnimationEnd": false
+                                        },
+                                        {
+                                            "Animation": "SS_Idle",
+                                            "End": "DURATION",
+                                            "Duration": 0.7,
+                                            "MaximumDuration": 10.0,
+                                            "BlendDuration": 0.04,
+                                            "Sequence": "",
+                                            "EnterAction": "",
+                                            "ExitAction": "",
+                                            "MotionWarpPreset": "",
+                                            "AnimationStartTime": 0.0,
+                                            "ForwardSpeed": 0.0,
+                                            "SuspendGravity": false,
+                                            "VerticalSpeed": 0.0,
+                                            "WarpHeight": 0.0,
+                                            "ContinueSequence": false,
+                                            "PlayAnimationFromSequence": false,
+                                            "WaitForAnimationEnd": false
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "Type": 29,
+                                "Category": 2,
+                                "Enabled": [
+                                    true,
+                                    true,
+                                    true
+                                ],
+                                "Weight": [
+                                    0.8,
+                                    1.0,
+                                    1.2
+                                ],
+                                "Cooldown": [
+                                    12.0,
+                                    12.0,
+                                    12.0
+                                ],
+                                "MinDistance": 8.0,
+                                "MaxDistance": 100.0,
+                                "ShadowShiftMode": 2,
+                                "Skill": {
+                                    "Name": "SHADOW_ORB",
+                                    "Category": "PROJECTILE",
+                                    "Enabled": true,
+                                    "CanUseOnGround": true,
+                                    "CanUseInAir": false,
+                                    "CleanupAction": "",
+                                    "Phases": [
+                                        {
+                                            "Animation": "Buff_Seq",
+                                            "End": "ANIMATION_END",
+                                            "Duration": 0,
+                                            "MaximumDuration": 10.0,
+                                            "BlendDuration": 0.04,
+                                            "Sequence": "HumanBoss_SHADOW_ORB_Sequence",
+                                            "EnterAction": "",
+                                            "ExitAction": "",
+                                            "MotionWarpPreset": "",
+                                            "AnimationStartTime": 0.0,
+                                            "ForwardSpeed": 0.0,
+                                            "SuspendGravity": false,
+                                            "VerticalSpeed": 0.0,
+                                            "WarpHeight": 0.0,
+                                            "ContinueSequence": false,
+                                            "PlayAnimationFromSequence": false,
+                                            "WaitForAnimationEnd": false
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "Type": 30,
+                                "Category": 6,
+                                "Enabled": [
+                                    true,
+                                    true,
+                                    true
+                                ],
+                                "Weight": [
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                ],
+                                "Cooldown": [
+                                    35.0,
+                                    35.0,
+                                    35.0
+                                ],
+                                "MinDistance": 0.0,
+                                "MaxDistance": 1000.0,
+                                "ShadowShiftMode": 2,
+                                "Skill": {
+                                    "Name": "SHADOW_RAGNAROK",
+                                    "Category": "UTILITY",
+                                    "Enabled": true,
+                                    "CanUseOnGround": true,
+                                    "CanUseInAir": false,
+                                    "CleanupAction": "HumanBoss_RangedClear",
+                                    "Phases": [
+                                        {
+                                            "Animation": "HumanBossRagnarokAdvance",
+                                            "End": "ACTION_END",
+                                            "Duration": 0,
+                                            "MaximumDuration": 15.0,
+                                            "BlendDuration": 0.04,
+                                            "Sequence": "",
+                                            "EnterAction": "",
+                                            "ExitAction": "",
+                                            "MotionWarpPreset": "",
+                                            "AnimationStartTime": 0.0,
+                                            "ForwardSpeed": 0.0,
+                                            "SuspendGravity": false,
+                                            "VerticalSpeed": 0.0,
+                                            "WarpHeight": 0.0,
+                                            "ContinueSequence": false,
+                                            "PlayAnimationFromSequence": false,
+                                            "WaitForAnimationEnd": false
+                                        },
+                                        {
+                                            "Animation": "Buff_Seq",
+                                            "End": "DURATION",
+                                            "Duration": 1.5,
+                                            "MaximumDuration": 10.0,
+                                            "BlendDuration": 0.04,
+                                            "Sequence": "HumanBoss_SHADOW_RAGNAROK_Sequence",
+                                            "EnterAction": "",
+                                            "ExitAction": "",
+                                            "MotionWarpPreset": "",
+                                            "AnimationStartTime": 0.0,
+                                            "ForwardSpeed": 0.0,
+                                            "SuspendGravity": false,
+                                            "VerticalSpeed": 0.0,
+                                            "WarpHeight": 0.0,
+                                            "ContinueSequence": false,
+                                            "PlayAnimationFromSequence": false,
+                                            "WaitForAnimationEnd": false
+                                        },
+                                        {
+                                            "Animation": "Buff_Seq",
+                                            "End": "DURATION",
+                                            "Duration": 0.2,
+                                            "MaximumDuration": 10.0,
+                                            "BlendDuration": 0.04,
+                                            "Sequence": "",
+                                            "EnterAction": "HumanBoss_RagnarokStrike",
+                                            "ExitAction": "",
+                                            "MotionWarpPreset": "",
+                                            "AnimationStartTime": 0.0,
+                                            "ForwardSpeed": 0.0,
+                                            "SuspendGravity": false,
+                                            "VerticalSpeed": 0.0,
+                                            "WarpHeight": 0.0,
+                                            "ContinueSequence": false,
+                                            "PlayAnimationFromSequence": false,
+                                            "WaitForAnimationEnd": false
+                                        },
+                                        {
+                                            "Animation": "SS_Idle",
+                                            "End": "DURATION",
+                                            "Duration": 0.8,
+                                            "MaximumDuration": 10.0,
+                                            "BlendDuration": 0.04,
+                                            "Sequence": "",
+                                            "EnterAction": "HumanBoss_RangedClear",
+                                            "ExitAction": "",
+                                            "MotionWarpPreset": "",
+                                            "AnimationStartTime": 0.0,
+                                            "ForwardSpeed": 0.0,
+                                            "SuspendGravity": false,
+                                            "VerticalSpeed": 0.0,
+                                            "WarpHeight": 0.0,
+                                            "ContinueSequence": false,
+                                            "PlayAnimationFromSequence": false,
+                                            "WaitForAnimationEnd": false
+                                        }
+                                    ]
+                                }
                             }
                         ],
                         "AttackCooldown": 1.0,
@@ -8530,9 +9029,100 @@
                                     "Id": 169,
                                     "ToNodeId": 166,
                                     "ToPinId": 167
+                                },
+                                {
+                                    "Id": 173,
+                                    "FromNodeId": 4,
+                                    "FromPinId": 6,
+                                    "ToNodeId": 170,
+                                    "ToPinId": 171
+                                },
+                                {
+                                    "Id": 177,
+                                    "FromNodeId": 170,
+                                    "FromPinId": 172,
+                                    "ToNodeId": 174,
+                                    "ToPinId": 175
+                                },
+                                {
+                                    "Id": 181,
+                                    "FromNodeId": 170,
+                                    "FromPinId": 172,
+                                    "ToNodeId": 178,
+                                    "ToPinId": 179
+                                },
+                                {
+                                    "Id": 185,
+                                    "FromNodeId": 4,
+                                    "FromPinId": 6,
+                                    "ToNodeId": 182,
+                                    "ToPinId": 183
+                                },
+                                {
+                                    "Id": 189,
+                                    "FromNodeId": 182,
+                                    "FromPinId": 184,
+                                    "ToNodeId": 186,
+                                    "ToPinId": 187
+                                },
+                                {
+                                    "Id": 193,
+                                    "FromNodeId": 182,
+                                    "FromPinId": 184,
+                                    "ToNodeId": 190,
+                                    "ToPinId": 191
+                                },
+                                {
+                                    "Id": 197,
+                                    "FromNodeId": 190,
+                                    "FromPinId": 192,
+                                    "ToNodeId": 194,
+                                    "ToPinId": 195
+                                },
+                                {
+                                    "Id": 201,
+                                    "FromNodeId": 190,
+                                    "FromPinId": 192,
+                                    "ToNodeId": 198,
+                                    "ToPinId": 199
+                                },
+                                {
+                                    "Id": 205,
+                                    "FromNodeId": 190,
+                                    "FromPinId": 192,
+                                    "ToNodeId": 202,
+                                    "ToPinId": 203
+                                },
+                                {
+                                    "Id": 209,
+                                    "FromNodeId": 190,
+                                    "FromPinId": 192,
+                                    "ToNodeId": 206,
+                                    "ToPinId": 207
+                                },
+                                {
+                                    "Id": 213,
+                                    "FromNodeId": 4,
+                                    "FromPinId": 6,
+                                    "ToNodeId": 210,
+                                    "ToPinId": 211
+                                },
+                                {
+                                    "Id": 217,
+                                    "FromNodeId": 210,
+                                    "FromPinId": 212,
+                                    "ToNodeId": 214,
+                                    "ToPinId": 215
+                                },
+                                {
+                                    "Id": 221,
+                                    "FromNodeId": 210,
+                                    "FromPinId": 212,
+                                    "ToNodeId": 218,
+                                    "ToPinId": 219
                                 }
                             ],
-                            "NextId": 170,
+                            "NextId": 222,
                             "Nodes": [
                                 {
                                     "ActionEndCategory": "HumanBossAI",
@@ -9061,7 +9651,7 @@
                                         113.0,
                                         452.0
                                     ],
-                                    "Priority": 3,
+                                    "Priority": 5,
                                     "ScopeId": "Root",
                                     "StringValue": "",
                                     "SubGraphName": "",
@@ -9178,7 +9768,7 @@
                                         855.0,
                                         488.0
                                     ],
-                                    "Priority": 4,
+                                    "Priority": 6,
                                     "ScopeId": "Root",
                                     "StringValue": "",
                                     "SubGraphName": "",
@@ -9295,7 +9885,7 @@
                                         1613.0,
                                         376.0
                                     ],
-                                    "Priority": 5,
+                                    "Priority": 7,
                                     "ScopeId": "Root",
                                     "StringValue": "",
                                     "SubGraphName": "",
@@ -9412,7 +10002,7 @@
                                         2465.0,
                                         404.0
                                     ],
-                                    "Priority": 6,
+                                    "Priority": 8,
                                     "ScopeId": "Root",
                                     "StringValue": "",
                                     "SubGraphName": "",
@@ -9685,7 +10275,7 @@
                                         4049.0,
                                         456.0
                                     ],
-                                    "Priority": 7,
+                                    "Priority": 9,
                                     "ScopeId": "Root",
                                     "StringValue": "",
                                     "SubGraphName": "",
@@ -9880,7 +10470,7 @@
                                         570.0,
                                         520.0
                                     ],
-                                    "Priority": 2,
+                                    "Priority": 4,
                                     "ScopeId": "Root",
                                     "StringValue": "",
                                     "SubGraphName": "",
@@ -10154,6 +10744,513 @@
                                         500.0
                                     ],
                                     "Priority": 5,
+                                    "ScopeId": "Root",
+                                    "StringValue": "",
+                                    "SubGraphName": "",
+                                    "Type": "PlayAction",
+                                    "ValueType": "Bool",
+                                    "Vector2Value": [
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "Vector3Value": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "WaitForActionEnd": true,
+                                    "WaitSeconds": 0.0,
+                                    "Weight": 1.0
+                                },
+                                {
+                                    "ActionEndCategory": "HumanBossAI",
+                                    "ActionEndKey": "ActionEnded",
+                                    "ActionName": "",
+                                    "BlackboardCategory": "HumanBossAI",
+                                    "BlackboardKey": "",
+                                    "BlackboardScope": "Local",
+                                    "BoolValue": true,
+                                    "Comment": "",
+                                    "CompareType": "Equal",
+                                    "FloatValue": 0.0,
+                                    "Id": 170,
+                                    "InputPinId": 171,
+                                    "IntValue": 0,
+                                    "Name": "HP50%以下の特殊攻撃",
+                                    "OutputPinId": 172,
+                                    "Position": [
+                                        1060,
+                                        400
+                                    ],
+                                    "Priority": 2,
+                                    "ScopeId": "Root",
+                                    "StringValue": "",
+                                    "SubGraphName": "",
+                                    "Type": "Sequence",
+                                    "ValueType": "Bool",
+                                    "Vector2Value": [
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "Vector3Value": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "WaitForActionEnd": true,
+                                    "WaitSeconds": 0.0,
+                                    "Weight": 1.0
+                                },
+                                {
+                                    "ActionEndCategory": "HumanBossAI",
+                                    "ActionEndKey": "ActionEnded",
+                                    "ActionName": "",
+                                    "BlackboardCategory": "HumanBossAI",
+                                    "BlackboardKey": "CanUseSpecialAttack",
+                                    "BlackboardScope": "Local",
+                                    "BoolValue": true,
+                                    "Comment": "",
+                                    "CompareType": "Equal",
+                                    "FloatValue": 0.0,
+                                    "Id": 174,
+                                    "InputPinId": 175,
+                                    "IntValue": 0,
+                                    "Name": "CanUseSpecialAttack",
+                                    "OutputPinId": 176,
+                                    "Position": [
+                                        700,
+                                        400
+                                    ],
+                                    "Priority": 0,
+                                    "ScopeId": "Root",
+                                    "StringValue": "",
+                                    "SubGraphName": "",
+                                    "Type": "BlackboardCondition",
+                                    "ValueType": "Bool",
+                                    "Vector2Value": [
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "Vector3Value": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "WaitForActionEnd": true,
+                                    "WaitSeconds": 0.0,
+                                    "Weight": 1.0
+                                },
+                                {
+                                    "ActionEndCategory": "HumanBossAI",
+                                    "ActionEndKey": "ActionEnded",
+                                    "ActionName": "HumanBoss_SHADOW_RAGNAROK",
+                                    "BlackboardCategory": "HumanBossAI",
+                                    "BlackboardKey": "",
+                                    "BlackboardScope": "Local",
+                                    "BoolValue": true,
+                                    "Comment": "",
+                                    "CompareType": "Equal",
+                                    "FloatValue": 0.0,
+                                    "Id": 178,
+                                    "InputPinId": 179,
+                                    "IntValue": 0,
+                                    "Name": "SHADOW_RAGNAROK",
+                                    "OutputPinId": 180,
+                                    "Position": [
+                                        880,
+                                        400
+                                    ],
+                                    "Priority": 1,
+                                    "ScopeId": "Root",
+                                    "StringValue": "",
+                                    "SubGraphName": "",
+                                    "Type": "PlayAction",
+                                    "ValueType": "Bool",
+                                    "Vector2Value": [
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "Vector3Value": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "WaitForActionEnd": true,
+                                    "WaitSeconds": 0.0,
+                                    "Weight": 1.0
+                                },
+                                {
+                                    "ActionEndCategory": "HumanBossAI",
+                                    "ActionEndKey": "ActionEnded",
+                                    "ActionName": "",
+                                    "BlackboardCategory": "HumanBossAI",
+                                    "BlackboardKey": "",
+                                    "BlackboardScope": "Local",
+                                    "BoolValue": true,
+                                    "Comment": "",
+                                    "CompareType": "Equal",
+                                    "FloatValue": 0.0,
+                                    "Id": 182,
+                                    "InputPinId": 183,
+                                    "IntValue": 0,
+                                    "Name": "遠距離の攻撃選択",
+                                    "OutputPinId": 184,
+                                    "Position": [
+                                        1240,
+                                        400
+                                    ],
+                                    "Priority": 3,
+                                    "ScopeId": "Root",
+                                    "StringValue": "",
+                                    "SubGraphName": "",
+                                    "Type": "Sequence",
+                                    "ValueType": "Bool",
+                                    "Vector2Value": [
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "Vector3Value": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "WaitForActionEnd": true,
+                                    "WaitSeconds": 0.0,
+                                    "Weight": 1.0
+                                },
+                                {
+                                    "ActionEndCategory": "HumanBossAI",
+                                    "ActionEndKey": "ActionEnded",
+                                    "ActionName": "",
+                                    "BlackboardCategory": "HumanBossAI",
+                                    "BlackboardKey": "CanRangedOffense",
+                                    "BlackboardScope": "Local",
+                                    "BoolValue": true,
+                                    "Comment": "",
+                                    "CompareType": "Equal",
+                                    "FloatValue": 0.0,
+                                    "Id": 186,
+                                    "InputPinId": 187,
+                                    "IntValue": 0,
+                                    "Name": "CanRangedOffense",
+                                    "OutputPinId": 188,
+                                    "Position": [
+                                        700,
+                                        400
+                                    ],
+                                    "Priority": 0,
+                                    "ScopeId": "Root",
+                                    "StringValue": "",
+                                    "SubGraphName": "",
+                                    "Type": "BlackboardCondition",
+                                    "ValueType": "Bool",
+                                    "Vector2Value": [
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "Vector3Value": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "WaitForActionEnd": true,
+                                    "WaitSeconds": 0.0,
+                                    "Weight": 1.0
+                                },
+                                {
+                                    "ActionEndCategory": "HumanBossAI",
+                                    "ActionEndKey": "ActionEnded",
+                                    "ActionName": "",
+                                    "BlackboardCategory": "HumanBossAI",
+                                    "BlackboardKey": "",
+                                    "BlackboardScope": "Local",
+                                    "BoolValue": true,
+                                    "Comment": "",
+                                    "CompareType": "Equal",
+                                    "FloatValue": 0.0,
+                                    "Id": 190,
+                                    "InputPinId": 191,
+                                    "IntValue": 0,
+                                    "Name": "RangedAttackSelector",
+                                    "OutputPinId": 192,
+                                    "Position": [
+                                        880,
+                                        400
+                                    ],
+                                    "Priority": 1,
+                                    "ScopeId": "Root",
+                                    "StringValue": "",
+                                    "SubGraphName": "",
+                                    "Type": "RandomSelector",
+                                    "ValueType": "Bool",
+                                    "Vector2Value": [
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "Vector3Value": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "WaitForActionEnd": true,
+                                    "WaitSeconds": 0.0,
+                                    "Weight": 1.0
+                                },
+                                {
+                                    "ActionEndCategory": "HumanBossAI",
+                                    "ActionEndKey": "ActionEnded",
+                                    "ActionName": "HumanBoss_SHADOW_CHARGE",
+                                    "BlackboardCategory": "HumanBossAI",
+                                    "BlackboardKey": "",
+                                    "BlackboardScope": "Local",
+                                    "BoolValue": true,
+                                    "Comment": "",
+                                    "CompareType": "Equal",
+                                    "FloatValue": 0.0,
+                                    "Id": 194,
+                                    "InputPinId": 195,
+                                    "IntValue": 0,
+                                    "Name": "SHADOW_CHARGE",
+                                    "OutputPinId": 196,
+                                    "Position": [
+                                        700,
+                                        400
+                                    ],
+                                    "Priority": 0,
+                                    "ScopeId": "Root",
+                                    "StringValue": "",
+                                    "SubGraphName": "",
+                                    "Type": "PlayAction",
+                                    "ValueType": "Bool",
+                                    "Vector2Value": [
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "Vector3Value": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "WaitForActionEnd": true,
+                                    "WaitSeconds": 0.0,
+                                    "Weight": 1.0
+                                },
+                                {
+                                    "ActionEndCategory": "HumanBossAI",
+                                    "ActionEndKey": "ActionEnded",
+                                    "ActionName": "HumanBoss_SHADOW_ORB",
+                                    "BlackboardCategory": "HumanBossAI",
+                                    "BlackboardKey": "",
+                                    "BlackboardScope": "Local",
+                                    "BoolValue": true,
+                                    "Comment": "",
+                                    "CompareType": "Equal",
+                                    "FloatValue": 0.0,
+                                    "Id": 198,
+                                    "InputPinId": 199,
+                                    "IntValue": 0,
+                                    "Name": "SHADOW_ORB",
+                                    "OutputPinId": 200,
+                                    "Position": [
+                                        880,
+                                        400
+                                    ],
+                                    "Priority": 1,
+                                    "ScopeId": "Root",
+                                    "StringValue": "",
+                                    "SubGraphName": "",
+                                    "Type": "PlayAction",
+                                    "ValueType": "Bool",
+                                    "Vector2Value": [
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "Vector3Value": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "WaitForActionEnd": true,
+                                    "WaitSeconds": 0.0,
+                                    "Weight": 1.0
+                                },
+                                {
+                                    "ActionEndCategory": "HumanBossAI",
+                                    "ActionEndKey": "ActionEnded",
+                                    "ActionName": "HumanBoss_SHADOW_SHIFT_APPROACH",
+                                    "BlackboardCategory": "HumanBossAI",
+                                    "BlackboardKey": "",
+                                    "BlackboardScope": "Local",
+                                    "BoolValue": true,
+                                    "Comment": "",
+                                    "CompareType": "Equal",
+                                    "FloatValue": 0.0,
+                                    "Id": 202,
+                                    "InputPinId": 203,
+                                    "IntValue": 0,
+                                    "Name": "SHADOW_SHIFT_APPROACH",
+                                    "OutputPinId": 204,
+                                    "Position": [
+                                        1060,
+                                        400
+                                    ],
+                                    "Priority": 2,
+                                    "ScopeId": "Root",
+                                    "StringValue": "",
+                                    "SubGraphName": "",
+                                    "Type": "PlayAction",
+                                    "ValueType": "Bool",
+                                    "Vector2Value": [
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "Vector3Value": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "WaitForActionEnd": true,
+                                    "WaitSeconds": 0.0,
+                                    "Weight": 1.0
+                                },
+                                {
+                                    "ActionEndCategory": "HumanBossAI",
+                                    "ActionEndKey": "ActionEnded",
+                                    "ActionName": "HumanBoss_Approach",
+                                    "BlackboardCategory": "HumanBossAI",
+                                    "BlackboardKey": "",
+                                    "BlackboardScope": "Local",
+                                    "BoolValue": true,
+                                    "Comment": "",
+                                    "CompareType": "Equal",
+                                    "FloatValue": 0.0,
+                                    "Id": 206,
+                                    "InputPinId": 207,
+                                    "IntValue": 0,
+                                    "Name": "Approach",
+                                    "OutputPinId": 208,
+                                    "Position": [
+                                        1240,
+                                        400
+                                    ],
+                                    "Priority": 3,
+                                    "ScopeId": "Root",
+                                    "StringValue": "",
+                                    "SubGraphName": "",
+                                    "Type": "PlayAction",
+                                    "ValueType": "Bool",
+                                    "Vector2Value": [
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "Vector3Value": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "WaitForActionEnd": true,
+                                    "WaitSeconds": 0.0,
+                                    "Weight": 0.35
+                                },
+                                {
+                                    "ActionEndCategory": "HumanBossAI",
+                                    "ActionEndKey": "ActionEnded",
+                                    "ActionName": "",
+                                    "BlackboardCategory": "HumanBossAI",
+                                    "BlackboardKey": "",
+                                    "BlackboardScope": "Local",
+                                    "BoolValue": true,
+                                    "Comment": "",
+                                    "CompareType": "Equal",
+                                    "FloatValue": 0.0,
+                                    "Id": 210,
+                                    "InputPinId": 211,
+                                    "IntValue": 0,
+                                    "Name": "初回特殊攻撃の優先選択",
+                                    "OutputPinId": 212,
+                                    "Position": [
+                                        -700,
+                                        250
+                                    ],
+                                    "Priority": 0,
+                                    "ScopeId": "Root",
+                                    "StringValue": "",
+                                    "SubGraphName": "",
+                                    "Type": "Sequence",
+                                    "ValueType": "Bool",
+                                    "Vector2Value": [
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "Vector3Value": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "WaitForActionEnd": true,
+                                    "WaitSeconds": 0.0,
+                                    "Weight": 1.0
+                                },
+                                {
+                                    "ActionEndCategory": "HumanBossAI",
+                                    "ActionEndKey": "ActionEnded",
+                                    "ActionName": "",
+                                    "BlackboardCategory": "HumanBossAI",
+                                    "BlackboardKey": "InitialSpecialReady",
+                                    "BlackboardScope": "Local",
+                                    "BoolValue": true,
+                                    "Comment": "",
+                                    "CompareType": "Equal",
+                                    "FloatValue": 0.0,
+                                    "Id": 214,
+                                    "InputPinId": 215,
+                                    "IntValue": 0,
+                                    "Name": "InitialSpecialReady",
+                                    "OutputPinId": 216,
+                                    "Position": [
+                                        -700,
+                                        250
+                                    ],
+                                    "Priority": 0,
+                                    "ScopeId": "Root",
+                                    "StringValue": "",
+                                    "SubGraphName": "",
+                                    "Type": "BlackboardCondition",
+                                    "ValueType": "Bool",
+                                    "Vector2Value": [
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "Vector3Value": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "WaitForActionEnd": true,
+                                    "WaitSeconds": 0.0,
+                                    "Weight": 1.0
+                                },
+                                {
+                                    "ActionEndCategory": "HumanBossAI",
+                                    "ActionEndKey": "ActionEnded",
+                                    "ActionName": "HumanBoss_SHADOW_RAGNAROK",
+                                    "BlackboardCategory": "HumanBossAI",
+                                    "BlackboardKey": "",
+                                    "BlackboardScope": "Local",
+                                    "BoolValue": true,
+                                    "Comment": "",
+                                    "CompareType": "Equal",
+                                    "FloatValue": 0.0,
+                                    "Id": 218,
+                                    "InputPinId": 219,
+                                    "IntValue": 0,
+                                    "Name": "Initial Shadow Ragnarok",
+                                    "OutputPinId": 220,
+                                    "Position": [
+                                        -700,
+                                        250
+                                    ],
+                                    "Priority": 1,
                                     "ScopeId": "Root",
                                     "StringValue": "",
                                     "SubGraphName": "",
@@ -10532,27 +11629,27 @@
                                 "HorizontalOnly": true,
                                 "LockTargetNormalizedTime": 0.03999999910593033,
                                 "LockTargetOnStart": true,
-                                "MaximumPositionCorrectionPerFrame": 0.07999999821186066,
-                                "MaximumPositionCorrectionPerSecond": 3.0,
+                                "MaximumPositionCorrectionPerFrame": 0.35,
+                                "MaximumPositionCorrectionPerSecond": 24.0,
                                 "MaximumPositionScale": 1.25,
-                                "MaximumRotationDegrees": 15.0,
-                                "MaximumRotationDegreesPerSecond": 180.0,
+                                "MaximumRotationDegrees": 45.0,
+                                "MaximumRotationDegreesPerSecond": 600.0,
                                 "MaximumTargetTravelAngleDegrees": 0.0,
                                 "MaximumTargetTravelDistance": 0.0,
-                                "MaximumTotalPositionCorrection": 0.44999998807907104,
+                                "MaximumTotalPositionCorrection": 3.0,
                                 "MaximumWarpTargetDistance": 5.0,
                                 "MinimumPositionScale": 0.75,
                                 "MinimumRemainingRootMotionDistance": 0.009999999776482582,
                                 "MinimumTargetDistance": 0.15000000596046448,
                                 "PositionCorrectionCurveName": "HumanBoss.WarpCorrection",
                                 "PositionMode": 4,
-                                "PositionStrength": 0.44999998807907104,
+                                "PositionStrength": 1.0,
                                 "PresetName": "HumanBoss.ComboSecond",
                                 "RotationEndNormalizedTime": 0.44999998807907104,
                                 "RotationFullStrengthEndNormalizedTime": 0.03999999910593033,
                                 "RotationMode": 1,
                                 "RotationStartNormalizedTime": 0.0,
-                                "RotationStrength": 0.3499999940395355,
+                                "RotationStrength": 0.7,
                                 "StartNormalizedTime": 0.0,
                                 "StopWhenTargetInvalid": true,
                                 "TargetDistance": 1.5,
@@ -10964,6 +12061,347 @@
                     "UpdatePriority": 0,
                     "LateUpdatePriority": 0,
                     "RequiredForSceneStart": false
+                },
+                {
+                    "TypeName": "ParticleComponent",
+                    "Enabled": true,
+                    "UpdateEnabled": true,
+                    "LateUpdateEnabled": false,
+                    "UpdatePriority": 20,
+                    "LateUpdatePriority": 0,
+                    "RequiredForSceneStart": false,
+                    "Data": {
+                        "AssetType": "ParticleEffect",
+                        "AssetVersion": 1,
+                        "AssetPath": "Data/Particle/HumanBossDarkAura.json",
+                        "IsPlaying": false,
+                        "MeshSourceObjectName": "HumanBoss",
+                        "EmitDissolveBoundary": false,
+                        "DissolveBoundaryBand": 0.15,
+                        "AttractionTargetName": "",
+                        "ScaleEmissionByHealth": true,
+                        "HealthOwnerName": "",
+                        "HealthyEmissionMultiplier": 1.0,
+                        "LowHealthEmissionMultiplier": 3.0,
+                        "Emitters": [
+                            {
+                                "Name": "DarkAuraSmoke",
+                                "EmissionMode": 0,
+                                "BurstCount": 40,
+                                "MaxCount": 384,
+                                "SpawnShape": 5,
+                                "SpawnSpace": 0,
+                                "ShapeSize": [
+                                    0.85,
+                                    0.8,
+                                    0.85
+                                ],
+                                "LegacyRadius": [
+                                    0.03,
+                                    0.08
+                                ],
+                                "PosOffset": [
+                                    0,
+                                    0,
+                                    0
+                                ],
+                                "Speed": [
+                                    0.25,
+                                    0.65
+                                ],
+                                "Lifespan": [
+                                    0.8,
+                                    1.7
+                                ],
+                                "Size": [
+                                    0.22,
+                                    0.45
+                                ],
+                                "UseRandomSize": 1,
+                                "SizeRandomStart": [
+                                    0.65,
+                                    1.15
+                                ],
+                                "SizeRandomEnd": [
+                                    1.1,
+                                    1.7
+                                ],
+                                "Color": [
+                                    0.04,
+                                    0.012,
+                                    0.07,
+                                    0.32
+                                ],
+                                "ColorStart": [
+                                    0.04,
+                                    0.012,
+                                    0.07,
+                                    0.32
+                                ],
+                                "ColorEnd": [
+                                    0.01,
+                                    0.005,
+                                    0.03,
+                                    0
+                                ],
+                                "UseColorOverLife": 1,
+                                "BlendMode": 0,
+                                "RenderType": 0,
+                                "Gravity": 0.1,
+                                "Acceleration": [
+                                    0,
+                                    0,
+                                    0
+                                ],
+                                "Drag": 1,
+                                "Fade": [
+                                    0.12,
+                                    0.4
+                                ],
+                                "NoiseStrength": 0.35,
+                                "NoiseFrequency": 1.6,
+                                "NoiseSpeed": 0.8,
+                                "TexturePath": "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/smoke_03.png",
+                                "MaskTexturePath": "",
+                                "UseMask": 0,
+                                "UseGradient": 0,
+                                "useGradientTexture": 0,
+                                "useShadeGradientTexture": 0,
+                                "UseFresnel": 0,
+                                "UseSpriteAnimation": 0,
+                                "SpawnDirectionMode": 0,
+                                "ConeAngle": [
+                                    5,
+                                    35
+                                ],
+                                "EmissionAxis": [
+                                    0,
+                                    1,
+                                    0
+                                ],
+                                "MeshVertexSampleCount": 192,
+                                "Delay": 0,
+                                "texturePath": "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/smoke_03.png",
+                                "maskTexturePath": "",
+                                "UseTargetAttraction": 0,
+                                "TargetAttractionStrength": 0,
+                                "OrbitVelocity": 0.6,
+                                "RadialVelocity": 0.12
+                            },
+                            {
+                                "Name": "DarkAuraVioletWisps",
+                                "EmissionMode": 0,
+                                "BurstCount": 24,
+                                "MaxCount": 192,
+                                "SpawnShape": 5,
+                                "SpawnSpace": 0,
+                                "ShapeSize": [
+                                    0.85,
+                                    0.8,
+                                    0.85
+                                ],
+                                "LegacyRadius": [
+                                    0.03,
+                                    0.08
+                                ],
+                                "PosOffset": [
+                                    0,
+                                    0,
+                                    0
+                                ],
+                                "Speed": [
+                                    0.6,
+                                    1.2
+                                ],
+                                "Lifespan": [
+                                    0.4,
+                                    0.9
+                                ],
+                                "Size": [
+                                    0.07,
+                                    0.16
+                                ],
+                                "UseRandomSize": 1,
+                                "SizeRandomStart": [
+                                    0.65,
+                                    1.15
+                                ],
+                                "SizeRandomEnd": [
+                                    1.1,
+                                    1.7
+                                ],
+                                "Color": [
+                                    0.35,
+                                    0.025,
+                                    0.65,
+                                    0.4
+                                ],
+                                "ColorStart": [
+                                    0.35,
+                                    0.025,
+                                    0.65,
+                                    0.4
+                                ],
+                                "ColorEnd": [
+                                    0.12,
+                                    0.005,
+                                    0.3,
+                                    0
+                                ],
+                                "UseColorOverLife": 1,
+                                "BlendMode": 1,
+                                "RenderType": 1,
+                                "Gravity": 0.1,
+                                "Acceleration": [
+                                    0,
+                                    0,
+                                    0
+                                ],
+                                "Drag": 0.7,
+                                "Fade": [
+                                    0.08,
+                                    0.22
+                                ],
+                                "NoiseStrength": 0.35,
+                                "NoiseFrequency": 1.6,
+                                "NoiseSpeed": 0.8,
+                                "TexturePath": "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/smoke_03.png",
+                                "MaskTexturePath": "",
+                                "UseMask": 0,
+                                "UseGradient": 0,
+                                "useGradientTexture": 0,
+                                "useShadeGradientTexture": 0,
+                                "UseFresnel": 0,
+                                "UseSpriteAnimation": 0,
+                                "SpawnDirectionMode": 0,
+                                "ConeAngle": [
+                                    5,
+                                    35
+                                ],
+                                "EmissionAxis": [
+                                    0,
+                                    1,
+                                    0
+                                ],
+                                "MeshVertexSampleCount": 192,
+                                "Delay": 0,
+                                "texturePath": "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/smoke_03.png",
+                                "maskTexturePath": "",
+                                "UseTargetAttraction": 0,
+                                "TargetAttractionStrength": 0,
+                                "OrbitVelocity": 2.5,
+                                "RadialVelocity": 0.2,
+                                "StretchScale": 0.35,
+                                "StretchMax": 0.85
+                            },
+                            {
+                                "Name": "DarkAuraMotes",
+                                "EmissionMode": 0,
+                                "BurstCount": 10,
+                                "MaxCount": 96,
+                                "SpawnShape": 5,
+                                "SpawnSpace": 0,
+                                "ShapeSize": [
+                                    0.85,
+                                    0.8,
+                                    0.85
+                                ],
+                                "LegacyRadius": [
+                                    0.03,
+                                    0.08
+                                ],
+                                "PosOffset": [
+                                    0,
+                                    0,
+                                    0
+                                ],
+                                "Speed": [
+                                    0.4,
+                                    1.1
+                                ],
+                                "Lifespan": [
+                                    0.3,
+                                    0.65
+                                ],
+                                "Size": [
+                                    0.025,
+                                    0.05
+                                ],
+                                "UseRandomSize": 1,
+                                "SizeRandomStart": [
+                                    0.65,
+                                    1.15
+                                ],
+                                "SizeRandomEnd": [
+                                    1.1,
+                                    1.7
+                                ],
+                                "Color": [
+                                    0.65,
+                                    0.12,
+                                    1,
+                                    0.8
+                                ],
+                                "ColorStart": [
+                                    0.65,
+                                    0.12,
+                                    1,
+                                    0.8
+                                ],
+                                "ColorEnd": [
+                                    0.2,
+                                    0.015,
+                                    0.5,
+                                    0
+                                ],
+                                "UseColorOverLife": 1,
+                                "BlendMode": 1,
+                                "RenderType": 0,
+                                "Gravity": 0.1,
+                                "Acceleration": [
+                                    0,
+                                    0,
+                                    0
+                                ],
+                                "Drag": 0.7,
+                                "Fade": [
+                                    0.03,
+                                    0.2
+                                ],
+                                "NoiseStrength": 0.35,
+                                "NoiseFrequency": 1.6,
+                                "NoiseSpeed": 0.8,
+                                "TexturePath": "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/smoke_03.png",
+                                "MaskTexturePath": "",
+                                "UseMask": 0,
+                                "UseGradient": 0,
+                                "useGradientTexture": 0,
+                                "useShadeGradientTexture": 0,
+                                "UseFresnel": 0,
+                                "UseSpriteAnimation": 0,
+                                "SpawnDirectionMode": 0,
+                                "ConeAngle": [
+                                    5,
+                                    35
+                                ],
+                                "EmissionAxis": [
+                                    0,
+                                    1,
+                                    0
+                                ],
+                                "MeshVertexSampleCount": 192,
+                                "Delay": 0,
+                                "texturePath": "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/smoke_03.png",
+                                "maskTexturePath": "",
+                                "UseTargetAttraction": 0,
+                                "TargetAttractionStrength": 0,
+                                "OrbitVelocity": 1.2,
+                                "RadialVelocity": 0.2,
+                                "StretchScale": 0.35,
+                                "StretchMax": 0.85
+                            }
+                        ]
+                    }
                 }
             ],
             "Layer": 2,
@@ -11032,7 +12470,7 @@
                         "FixedDamageKey": "FixedDamage",
                         "GravityScale": 1.0,
                         "GuardBreak": false,
-                        "HalfHeight": 1.0,
+                        "HalfHeight": 2.2,
                         "HitGroupId": 0,
                         "HitImpactEffectAssetPath": "",
                         "HitMeshVFXAssetPath": "",
@@ -11073,7 +12511,7 @@
                             0.0
                         ],
                         "PhysicsControlsTransform": false,
-                        "Radius": 30.0,
+                        "Radius": 66.0,
                         "RotateVelocityThreshold": 0.0010000000474974513,
                         "ShapeRenderFlg": false,
                         "SourceAction": "",
@@ -11083,7 +12521,8 @@
                         "UseGravity": false,
                         "UsePhysicsResponse": false,
                         "VelocityRotationMode": 0,
-                        "shapeSizeScale": 1.0
+                        "shapeSizeScale": 1.0,
+                        "NodeSegmentScale": 2.2
                     },
                     "Enabled": false,
                     "LateUpdateEnabled": true,

@@ -55,6 +55,8 @@ public:
     bool IsEmitting() const { return emitting; }
 
     void SetLifeTime(float lifeTime_);
+    // 泥の帯を盛り上げる。0なら従来の平面Trailを使用する。
+    void SetCrossSectionHeight(float height_);
     void SetMaxSampleCount(size_t maxSampleCount_);
     void SetMinimumSampleDistance(float distance_);
 
@@ -117,6 +119,7 @@ private:
 
     // サンプルの寿命と追加判定。寿命切れや近すぎる点はメッシュから外す。
     float lifeTime = 0.35f;
+    float crossSectionHeight = 0.0f; // 世界座標のY方向へ加える断面の厚み。
     float minimumSampleDistance = 0.01f;
     int smoothStep = 2;
 

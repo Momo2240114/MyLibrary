@@ -1054,6 +1054,9 @@
     <ClCompile Include="Code\Game\AI\Human\HumanBossActionComponent.cpp">
       <Filter>Code\Game\Logics\AI\Human</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Game\AI\Human\HumanBossActionComponent.Ranged.cpp">
+      <Filter>Code\Game\Logics\AI\Human</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Game\AI\Dragon\DragonAIComponent.cpp">
       <Filter>Code\Game\Logics\AI\Dragon</Filter>
     </ClCompile>

@@ -6,7 +6,7 @@
         "PlaybackSpeed": 1,
         "Parts": [
             {
-                "RenderEnabled": true,
+                "RenderEnabled": false,
                 "ModelPath": "__InternalMeshDangerArea__",
                 "MeshIndex": 0,
                 "Loop": true,
@@ -95,7 +95,7 @@
                 "ScaleCurveName": ""
             },
             {
-                "RenderEnabled": true,
+                "RenderEnabled": false,
                 "ModelPath": "__InternalMeshDangerArea__",
                 "MeshIndex": 0,
                 "Loop": true,
@@ -182,6 +182,315 @@
                 ],
                 "AlphaCurveName": "",
                 "ScaleCurveName": ""
+            },
+            {
+                "RenderEnabled": false,
+                "ModelPath": "Data/Model/VFX/Sphere.glb",
+                "MeshIndex": 0,
+                "Loop": true,
+                "Duration": 3,
+                "Color": [
+                    0.025,
+                    0.006,
+                    0.04,
+                    0.86
+                ],
+                "Alpha": 0.9,
+                "AnimateAlpha": false,
+                "AlphaStart": 1,
+                "AlphaEnd": 0,
+                "BlendMode": 0,
+                "EmissiveStrength": 0.045,
+                "Position": [
+                    -3,
+                    0.55,
+                    0
+                ],
+                "Rotation": [
+                    0,
+                    0,
+                    0
+                ],
+                "Scale": [
+                    4.5,
+                    0.7,
+                    4
+                ],
+                "BaseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+                "UseMaterialBaseTexture": false,
+                "UseMaterialNormalTexture": false,
+                "UseGradientTexture": false,
+                "UseMask": true,
+                "MaskLayers": [
+                    {
+                        "Path": "Data/Texture/Trail/T_TrailMask_22.PNG",
+                        "BlendMode": 0,
+                        "Invert": false
+                    }
+                ],
+                "MaskUVScale": [
+                    1,
+                    1
+                ],
+                "MaskUVSpeed": [
+                    1.5,
+                    0
+                ],
+                "UseNoise": true,
+                "NoiseTexturePaths": [
+                    "Data/Texture/VFX/T_Free_Magic_Noise1_normal.PNG"
+                ],
+                "NoiseUVScale": [
+                    1,
+                    2
+                ],
+                "NoiseUVSpeed": [
+                    0.11,
+                    -0.14
+                ],
+                "NoiseStrength": 0.12,
+                "UseFresnel": false,
+                "UseNormal": false,
+                "UseEdgeHighlight": false,
+                "UseDissolveEdge": false,
+                "UseBackFaceBoost": false,
+                "InternalMeshCylinderRadius": 1,
+                "InternalMeshSettings": {
+                    "CapsuleLength": 0
+                },
+                "AnimateScale": false,
+                "ScaleStart": [
+                    0.12,
+                    1,
+                    0.12
+                ],
+                "ScaleEnd": [
+                    1,
+                    1,
+                    1
+                ],
+                "AlphaCurveName": "",
+                "ScaleCurveName": "",
+                "MaterialPath": "",
+                "MaterialPaths": [],
+                "NoiseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+                "MeshRotationSpeed": [
+                    0,
+                    17,
+                    0
+                ],
+                "EmissiveCurveName": "",
+                "RotationSpeed": [
+                    0,
+                    0,
+                    0
+                ]
+            },
+            {
+                "RenderEnabled": false,
+                "ModelPath": "Data/Model/VFX/Sphere.glb",
+                "MeshIndex": 0,
+                "Loop": true,
+                "Duration": 3,
+                "Color": [
+                    0.025,
+                    0.006,
+                    0.04,
+                    0.86
+                ],
+                "Alpha": 0.9,
+                "AnimateAlpha": false,
+                "AlphaStart": 1,
+                "AlphaEnd": 0,
+                "BlendMode": 0,
+                "EmissiveStrength": 0.045,
+                "Position": [
+                    2.5,
+                    0.6,
+                    -2
+                ],
+                "Rotation": [
+                    0,
+                    0,
+                    0
+                ],
+                "Scale": [
+                    3.5,
+                    0.8,
+                    3.5
+                ],
+                "BaseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+                "UseMaterialBaseTexture": false,
+                "UseMaterialNormalTexture": false,
+                "UseGradientTexture": false,
+                "UseMask": true,
+                "MaskLayers": [
+                    {
+                        "Path": "Data/Texture/Trail/T_TrailMask_22.PNG",
+                        "BlendMode": 0,
+                        "Invert": false
+                    }
+                ],
+                "MaskUVScale": [
+                    1,
+                    1
+                ],
+                "MaskUVSpeed": [
+                    1.5,
+                    0
+                ],
+                "UseNoise": true,
+                "NoiseTexturePaths": [
+                    "Data/Texture/VFX/T_Free_Magic_Noise1_normal.PNG"
+                ],
+                "NoiseUVScale": [
+                    1,
+                    2
+                ],
+                "NoiseUVSpeed": [
+                    0.11,
+                    -0.14
+                ],
+                "NoiseStrength": 0.12,
+                "UseFresnel": false,
+                "UseNormal": false,
+                "UseEdgeHighlight": false,
+                "UseDissolveEdge": false,
+                "UseBackFaceBoost": false,
+                "InternalMeshCylinderRadius": 1,
+                "InternalMeshSettings": {
+                    "CapsuleLength": 0
+                },
+                "AnimateScale": false,
+                "ScaleStart": [
+                    0.12,
+                    1,
+                    0.12
+                ],
+                "ScaleEnd": [
+                    1,
+                    1,
+                    1
+                ],
+                "AlphaCurveName": "",
+                "ScaleCurveName": "",
+                "MaterialPath": "",
+                "MaterialPaths": [],
+                "NoiseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+                "MeshRotationSpeed": [
+                    0,
+                    17,
+                    0
+                ],
+                "EmissiveCurveName": "",
+                "RotationSpeed": [
+                    0,
+                    0,
+                    0
+                ]
+            },
+            {
+                "RenderEnabled": false,
+                "ModelPath": "Data/Model/VFX/Sphere.glb",
+                "MeshIndex": 0,
+                "Loop": true,
+                "Duration": 3,
+                "Color": [
+                    0.025,
+                    0.006,
+                    0.04,
+                    0.86
+                ],
+                "Alpha": 0.9,
+                "AnimateAlpha": false,
+                "AlphaStart": 1,
+                "AlphaEnd": 0,
+                "BlendMode": 0,
+                "EmissiveStrength": 0.045,
+                "Position": [
+                    0,
+                    0.45,
+                    3
+                ],
+                "Rotation": [
+                    0,
+                    0,
+                    0
+                ],
+                "Scale": [
+                    4,
+                    0.65,
+                    3
+                ],
+                "BaseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+                "UseMaterialBaseTexture": false,
+                "UseMaterialNormalTexture": false,
+                "UseGradientTexture": false,
+                "UseMask": true,
+                "MaskLayers": [
+                    {
+                        "Path": "Data/Texture/Trail/T_TrailMask_22.PNG",
+                        "BlendMode": 0,
+                        "Invert": false
+                    }
+                ],
+                "MaskUVScale": [
+                    1,
+                    1
+                ],
+                "MaskUVSpeed": [
+                    1.5,
+                    0
+                ],
+                "UseNoise": true,
+                "NoiseTexturePaths": [
+                    "Data/Texture/VFX/T_Free_Magic_Noise1_normal.PNG"
+                ],
+                "NoiseUVScale": [
+                    1,
+                    2
+                ],
+                "NoiseUVSpeed": [
+                    0.11,
+                    -0.14
+                ],
+                "NoiseStrength": 0.12,
+                "UseFresnel": false,
+                "UseNormal": false,
+                "UseEdgeHighlight": false,
+                "UseDissolveEdge": false,
+                "UseBackFaceBoost": false,
+                "InternalMeshCylinderRadius": 1,
+                "InternalMeshSettings": {
+                    "CapsuleLength": 0
+                },
+                "AnimateScale": false,
+                "ScaleStart": [
+                    0.12,
+                    1,
+                    0.12
+                ],
+                "ScaleEnd": [
+                    1,
+                    1,
+                    1
+                ],
+                "AlphaCurveName": "",
+                "ScaleCurveName": "",
+                "MaterialPath": "",
+                "MaterialPaths": [],
+                "NoiseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+                "MeshRotationSpeed": [
+                    0,
+                    17,
+                    0
+                ],
+                "EmissiveCurveName": "",
+                "RotationSpeed": [
+                    0,
+                    0,
+                    0
+                ]
             }
         ]
     }

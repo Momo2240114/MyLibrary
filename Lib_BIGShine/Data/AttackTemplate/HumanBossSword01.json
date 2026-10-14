@@ -63,9 +63,9 @@
         0
       ],
       "localScale": [
-        55,
-        55,
-        55
+        121.0,
+        121.0,
+        121.0
       ],
       "alpha": 1,
       "followOwner": true,
@@ -82,7 +82,7 @@
     "enabled": true,
     "endNodeName": "TrailEnd",
     "hitBoxName": "Sword",
-    "radius": 26.0,
+    "radius": 57.2,
     "startNodeName": "TrailStart"
   }
 }

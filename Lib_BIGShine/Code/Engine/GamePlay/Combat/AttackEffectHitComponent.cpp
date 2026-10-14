@@ -23,9 +23,9 @@ ATTACK_HIT_SHAPE NormalizeAttackHitShape(ATTACK_HIT_SHAPE shape_)
     case ATTACK_HIT_SHAPE::SPHERE:
     case ATTACK_HIT_SHAPE::CAPSULE:
     case ATTACK_HIT_SHAPE::SPHERE_GROUP:
+    case ATTACK_HIT_SHAPE::FAN:
         return shape_;
     case ATTACK_HIT_SHAPE::BOX:
-    case ATTACK_HIT_SHAPE::FAN:
     case ATTACK_HIT_SHAPE::CONE:
     case ATTACK_HIT_SHAPE::RAY:
     default:
@@ -52,6 +52,15 @@ void AttackEffectHitComponent::Update(float deltaTime_)
     BS_PROFILE_SCOPE("AttackEffectHitComponent::Update");
 
     if (!playing) return;
+    // 命中履歴は次のフレームにも残るため、FrameHitEventsの更新順へ依存せず弾を閉じる。
+    for (const auto& runtime_ : runtimeHitShapes)
+        if (runtime_.templateIndex < hitShapes.size() && hitShapes[runtime_.templateIndex].destroyOnHit)
+            if (const auto hitBox_ = runtime_.hitBox; hitBox_ && hitBox_->HasRegisteredHit())
+            {
+                Stop();
+                if (const auto object_ = GetGameObject()) object_->GetManager().Destroy(object_);
+                return;
+            }
     BS_PROFILE_PLOT(
         "AttackEffectHitComponent::RuntimeHitShapeCount",
         runtimeHitShapes.size());
@@ -379,7 +388,13 @@ void AttackEffectHitComponent::ConfigureHitBox(
     hitBox_->radius = (std::max)(shape_.radius, 0.01f);
     const ATTACK_HIT_SHAPE normalizedShape_ = NormalizeAttackHitShape(shape_.shape);
     // Sphereは高さを使わず、Capsule系だけhalfHeightを判定サイズに反映する。
-    hitBox_->halfHeight = normalizedShape_ == ATTACK_HIT_SHAPE::SPHERE ? 0.0f : (std::max)(shape_.halfHeight, 0.0f);
+    hitBox_->halfHeight = normalizedShape_ == ATTACK_HIT_SHAPE::SPHERE || normalizedShape_ == ATTACK_HIT_SHAPE::FAN ? 0.0f : (std::max)(shape_.halfHeight, 0.0f);
+    if (normalizedShape_ == ATTACK_HIT_SHAPE::FAN)
+    {
+        // 球を広域判定に使い、ダメージとGuardは同じ扇形条件で絞る。
+        hitBox_->radius = (std::max)(shape_.range, 0.01f);
+        hitBox_->SetAttackSector(shape_.range, shape_.angle, shape_.halfHeight);
+    }
     hitBox_->Deactivate();
     hitBox_->RecreatePhysXActor();
 }
@@ -513,9 +528,10 @@ void AttackEffectHitComponent::Gui()
                 ATTACK_HIT_SHAPE::NONE,
                 ATTACK_HIT_SHAPE::SPHERE,
                 ATTACK_HIT_SHAPE::CAPSULE,
-                ATTACK_HIT_SHAPE::SPHERE_GROUP
+                ATTACK_HIT_SHAPE::SPHERE_GROUP,
+                ATTACK_HIT_SHAPE::FAN
             };
-            const char* shapeNames_[] = { "None", "Sphere", "Capsule", "Sphere Group" };
+            const char* shapeNames_[] = { "None", "Sphere", "Capsule", "Sphere Group", "Fan" };
             int shapeType_ = 0;
             for (int index_ = 0; index_ < IM_ARRAYSIZE(supportedShapes_); ++index_)
             {
@@ -534,6 +550,12 @@ void AttackEffectHitComponent::Gui()
             rebuild_ |= ImGui::DragFloat3("Local Rotation", &shape_.localRotation.x, 0.1f);
             rebuild_ |= ImGui::DragFloat3("Local Scale", &shape_.localScale.x, 0.01f);
             rebuild_ |= ImGui::DragFloat("Radius", &shape_.radius, 0.01f, 0.01f);
+            if (shape_.shape == ATTACK_HIT_SHAPE::FAN)
+            {
+                rebuild_ |= ImGui::DragFloat("Fan Range", &shape_.range, .1f, .01f, 100.0f);
+                rebuild_ |= ImGui::DragFloat("Fan Angle", &shape_.angle, .5f, .1f, 360.0f);
+                rebuild_ |= ImGui::DragFloat("Fan Half Height", &shape_.halfHeight, .1f, 0.0f, 10.0f);
+            }
             if (shape_.shape == ATTACK_HIT_SHAPE::CAPSULE)
                 rebuild_ |= ImGui::DragFloat("Half Height", &shape_.halfHeight, 0.01f, 0.0f);
             ImGui::DragFloat("Active Start", &shape_.activeStartTime, 0.01f, 0.0f);

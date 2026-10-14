@@ -39,34 +39,34 @@
     "ownerTarget": 0
   },
   "slashEffects": [
-      {
-          "enabled": true,
-          "vfxPath": "EnemyMudSwordArcHeavy",
-          "spawnTimeOffset": 0,
-          "lifeTime": 0.24,
-          "localOffset": [
-              -6.4,
-              2.8,
-              3.1
-          ],
-          "localRotation": [
-              -25,
-              0,
-              0
-          ],
-          "localScale": [
-              62,
-              62,
-              62
-          ],
-          "alpha": 1,
-          "followOwner": true,
-          "followNode": true,
-          "baseNodeName": "hand_r",
-          "hitBox": {
-              "enabled": false
-          }
+    {
+      "enabled": true,
+      "vfxPath": "EnemyMudSwordArcHeavy",
+      "spawnTimeOffset": 0,
+      "lifeTime": 0.24,
+      "localOffset": [
+        -6.4,
+        2.8,
+        3.1
+      ],
+      "localRotation": [
+        -25,
+        0,
+        0
+      ],
+      "localScale": [
+        136.4,
+        136.4,
+        136.4
+      ],
+      "alpha": 1,
+      "followOwner": true,
+      "followNode": true,
+      "baseNodeName": "hand_r",
+      "hitBox": {
+        "enabled": false
       }
+    }
   ],
   "weaponHitBox": {
     "activeEndTime": 0.13,
@@ -74,7 +74,7 @@
     "enabled": true,
     "endNodeName": "TrailEnd",
     "hitBoxName": "Sword",
-    "radius": 32.0,
+    "radius": 70.4,
     "startNodeName": "TrailStart"
   }
 }

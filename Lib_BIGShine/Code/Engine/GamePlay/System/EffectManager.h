@@ -86,6 +86,7 @@ struct ImpactEffectSpawnRequest
     MeshVFXSpawnRequest meshVFX;
     bool spawnDecal = false;
     DecalSpawnRequest decal;
+    std::weak_ptr<GameObject> attackOwner; // 判定なしのHit演出も攻撃者と一緒に停止する。
 };
 
 // 攻撃演出のVFX、追従、HitBox設定をまとめる
@@ -180,7 +181,8 @@ public:
     void SpawnImpactEffectAsset(
         const std::string& assetNameOrPath_,
         const DirectX::XMFLOAT3& position_,
-        const DirectX::XMFLOAT3& normal_);
+        const DirectX::XMFLOAT3& normal_,
+        const std::shared_ptr<GameObject>& attackOwner_ = nullptr);
     std::shared_ptr<GameObject> SpawnSlashEffect(
         const AttackEffectSpawnRequest& request_);
     std::shared_ptr<GameObject> SpawnAttackEffect(
@@ -198,6 +200,8 @@ public:
     bool IsEffectOwnedBy(const std::shared_ptr<GameObject>& object_, const Component* lifetimeOwner_) const;
     // 行動を中断した攻撃者の生成済み判定と遅延生成予約をまとめて閉じる。
     void StopAttackEffects(const std::shared_ptr<GameObject>& owner_);
+    // 判定を持たない攻撃VFXにも所有者を記録し、寿命やPool再利用とは独立して停止する。
+    void RegisterAttackEffectOwner(const std::shared_ptr<GameObject>& object_, const std::shared_ptr<GameObject>& owner_);
 
     const std::vector<std::string>& GetParticleAssetPaths() const
     {
@@ -284,6 +288,7 @@ private:
     {
         std::weak_ptr<GameObject> object;
         std::weak_ptr<HitBox> hitBox;
+        std::weak_ptr<GameObject> attackOwner;
         std::string assetPath;
         EFFECT_POOL_TYPE poolType = EFFECT_POOL_TYPE::NONE;
         float lifeTimer = 0.0f;

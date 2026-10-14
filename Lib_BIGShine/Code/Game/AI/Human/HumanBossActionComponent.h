@@ -43,6 +43,15 @@ public:
     void ProtectRecovery(float duration_, float minimumArmor_ = 0.0f);
     // AIから一度だけ進め、共通SkillExecutionと更新を重複させない。
     void Tick(float deltaTime_);
+    // 死亡・Scene終了時に独立弾と予兆も所有者ごとに解除する。
+    void OnDestroy() override;
+    // 素材・経路・同時弾数を確認し、追加行動の開始可否を返す。
+    bool CanStartRanged(const std::string& skillName_, const std::shared_ptr<GameObject>& target_) const;
+    // 既存HP Phaseとは別に、HP条件と中央への安全な経路を確認する。
+    bool CanUseRagnarok() const;
+    bool WasRagnarokUsed() const { return ragnarokUsed; }
+    const std::string& GetRagnarokBlockReason() const { return ragnarokBlockReason; }
+    float GetRagnarokHpThreshold() const { return ragnarokHpThreshold; }
     // 行動を開始できない理由を、AI Inspectorと実行担当へ返す。
     const std::string& GetValidationError() const { return validationError; }
     // 実行に必要なAnimation、Sequence、防御Colliderの存在を確認する。
@@ -75,6 +84,67 @@ public:
     // 注視方向を既存Movementへ予約する。
     void FaceTarget(const DirectX::XMFLOAT3& direction_, bool immediate_ = false);
 private:
+    // 共通SkillのPhase切替に合わせ、固定経路と独立弾を開始する。
+    SkillDefinition PrepareRangedSkill(const SkillDefinition& skill_) const;
+    void BeginRangedPhase(const SkillPhase& phase_);
+    void UpdateRangedAttack();
+    // CharacterやCombat Volumeを除外し、予兆を載せる実際の地面を取得する。
+    bool ResolveRangedGround(const DirectX::XMFLOAT3& position_, DirectX::XMFLOAT3& ground_) const;
+    void ShowChargeArea();
+    void SpawnShadowOrbs();
+    void ShowRagnarokArea();
+    void StrikeRagnarokArea();
+    void ClearRangedArea();
+    void RegisterRangedActions();
+    void DrawRangedGui();
+    void SerializeRanged(nlohmann::json& json_) const;
+    void DeserializeRanged(const nlohmann::json& json_);
+    bool PlanCharge(const std::shared_ptr<GameObject>& target_, DirectX::XMFLOAT3& end_) const;
+    bool StartFixedWarp(const SkillPhase& phase_, const DirectX::XMFLOAT3& end_);
+    std::string rangedSkill;
+    std::weak_ptr<GameObject> rangedDanger;
+    std::vector<std::weak_ptr<GameObject>> shadowOrbs; // 弾は行動終了後も寿命まで継続する。
+    DirectX::XMFLOAT3 chargeStart{};
+    DirectX::XMFLOAT3 chargeGroundStart{};
+    bool chargeWarningReady = false;
+    float chargeWarningVisibleStartTime = -1.0f; // 描画準備後の予兆表示時間を管理する。
+    std::string rangedProgress; // 実行中と直前の追加行動の到達段階を表示する。
+    DirectX::XMFLOAT3 ragnarokGroundCenter{};
+    DirectX::XMFLOAT3 chargeEnd{};
+    float chargeYaw = 0.0f;
+    float chargeLength = 0.0f;
+    float chargeMaximumDistance = 12.0f;
+    float chargeWidth = 2.0f;
+    float chargeGrowthTime = 1.0f;
+    std::string chargeGrowthCurve = "HumanBoss.ChargeGrowth";
+    std::string rangedAttackSoundPath; // 専用SEが未設定の場合は再生しない。
+    int orbCount = 3;
+    int orbMaximumCount = 6;
+    float orbSideOffset = 1.5f;
+    float orbHeight = 3.0f;
+    float orbBackOffset = 1.5f;
+    float orbWaitTime = 1.5f;
+    float orbInterval = 0.4f;
+    float orbSpeed = 3.0f;
+    float orbAcceleration = 0.5f;
+    float orbTurnSpeed = 25.0f;
+    float orbLifeTime = 8.0f;
+    bool ragnarokEnabled = true;
+    mutable std::string ragnarokBlockReason; // 他行動の検証に上書きされない特殊攻撃の開始不可理由。
+    bool ragnarokUsed = false; // HP Phaseとは独立した初回使用履歴。
+    float ragnarokHpThreshold = 0.5f;
+    int ragnarokAttackCount = 4;
+    int ragnarokRound = 0;
+    float ragnarokAdvanceSpeed = 8.0f; // 中央への準備移動はCharacterMovementで行う。
+    float ragnarokRadius = 48.0f;
+    float ragnarokAngle = 180.0f;
+    float ragnarokRotationSpeed = 120.0f;
+    float ragnarokRotationTime = 1.0f;
+    float ragnarokHitDuration = 0.2f;
+    float ragnarokYaw = 0.0f;
+    float ragnarokRoundStartYaw = 0.0f;
+    DirectX::XMFLOAT3 rangedStageCenter{};
+    float rangedStageRadius = 50.0f;
     // 予兆とHitBoxは同じAttackTemplateの半径を使用する。
     void ShowShadowArea();
     // 予兆で固定した中心へ一度だけ範囲攻撃を発生させる。
@@ -108,7 +178,7 @@ private:
     bool BuildAttackAssistPlan(const SkillPhase& phase_, const std::shared_ptr<GameObject>& target_,
         DirectX::XMFLOAT3& plannedMotion_, float& stopDistance_, float& endNormalizedTime_,
         float& playbackDuration_, bool checkReachability_ = true, float reachMargin_ = 0.0f) const;
-    // Phase切替時だけWarpを開始し、後段は初段で固定したTarget位置を引き継ぐ。
+    // Phase切替時だけWarpを開始し、選択したTarget位置を振り終わるまで固定する。
     void BeginAttackAssist(const SkillPhase& phase_);
     // 段終了時に実Targetと固定した狙いを調べ、届かない次の打撃は開始しない。
     bool CanContinueAttack(const SkillPhase& phase_);

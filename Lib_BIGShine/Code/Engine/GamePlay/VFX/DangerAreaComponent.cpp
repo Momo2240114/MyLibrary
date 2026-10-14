@@ -194,16 +194,16 @@ void DangerAreaComponent::Show(size_t templateIndex_)
     instances.push_back(instance_);
 }
 
-void DangerAreaComponent::ShowAt(const DangerAreaTemplate& template_, const DirectX::XMFLOAT3& position_)
+std::shared_ptr<GameObject> DangerAreaComponent::ShowAt(const DangerAreaTemplate& template_, const DirectX::XMFLOAT3& position_, float yawDegrees_)
 {
     BS_PROFILE_SCOPE("DangerAreaComponent::ShowAt");
     const auto owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_) return nullptr;
     const auto object_ = GetManager().Create("RuntimeDangerArea");
-    if (!object_) return;
+    if (!object_) return nullptr;
     object_->SetNoSaveObject();
     const auto mesh_ = object_->AddComponent<MeshVFXComponent>();
-    if (!mesh_) { GetManager().Destroy(object_); return; }
+    if (!mesh_) { GetManager().Destroy(object_); return nullptr; }
     auto asset_ = BuildDangerAreaAsset(template_);
     // 確定地点の予兆では残り時間で色を変え、所有者が消えても表示を終了する。
     for (auto& part_ : asset_.parts) { part_.duration = template_.lifeTime; part_.loop = false; }
@@ -211,7 +211,7 @@ void DangerAreaComponent::ShowAt(const DangerAreaTemplate& template_, const Dire
     mesh_->SetPlaybackSpeed(template_.playbackSpeed);
     mesh_->Reset();
     mesh_->Play();
-    object_->transform->ApplyWorldMatrix(DirectX::XMMatrixTranslation(position_.x,
+    object_->transform->ApplyWorldMatrix(DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(yawDegrees_)) * DirectX::XMMatrixTranslation(position_.x,
         position_.y + template_.groundOffset, position_.z));
     object_->UpdateTransform();
     DangerAreaInstance instance_;
@@ -219,9 +219,24 @@ void DangerAreaComponent::ShowAt(const DangerAreaTemplate& template_, const Dire
     instance_.meshVFX = mesh_;
     // Templateの追従更新から外し、予兆開始後の着地点を固定する。
     instance_.templateIndex = templates.size();
+    instance_.groundOffset = template_.groundOffset;
     instance_.fixedPosition = true;
     instance_.lifeTimer = template_.lifeTime;
     instances.push_back(instance_);
+    return object_;
+}
+
+void DangerAreaComponent::UpdateAt(const std::shared_ptr<GameObject>& object_,
+    const DirectX::XMFLOAT3& position_, float yawDegrees_, float lengthScale_)
+{
+    BS_PROFILE_SCOPE("DangerAreaComponent::UpdateAt");
+    const auto found_ = std::find_if(instances.begin(), instances.end(),
+        [&object_](const DangerAreaInstance& instance_) { return instance_.object == object_; });
+    if (found_ == instances.end() || !object_ || !object_->transform) return;
+    object_->transform->ApplyWorldMatrix(DirectX::XMMatrixScaling(1.0f, 1.0f, (std::max)(0.001f, lengthScale_)) *
+        DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(yawDegrees_)) *
+        DirectX::XMMatrixTranslation(position_.x, position_.y + found_->groundOffset, position_.z));
+    object_->UpdateTransform();
 }
 
 void DangerAreaComponent::StopAll()

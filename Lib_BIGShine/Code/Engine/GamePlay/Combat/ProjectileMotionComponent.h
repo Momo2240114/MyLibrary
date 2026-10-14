@@ -24,7 +24,19 @@ public:
         float gravity_,
         float maxSpeed_);
 
+    // 通常の直進弾は維持し、必要な弾だけ待機後の制限付き追尾を設定する。
+    void ConfigureHoming(const std::shared_ptr<GameObject>& target_, const std::shared_ptr<GameObject>& attacker_,
+        float waitTime_, float turnDegreesPerSecond_, float collisionRadius_);
 private:
+    bool UpdateHoming(float deltaTime_);
+    std::weak_ptr<GameObject> homingTarget;
+    std::weak_ptr<GameObject> homingAttacker;
+    bool homingEnabled = false;
+    float homingWaitTime = 0.0f;
+    float homingElapsed = 0.0f;
+    float homingTurnSpeed = 25.0f;
+    float homingCollisionRadius = 0.65f;
+    DirectX::XMFLOAT3 hoverPosition{};
     DirectX::XMFLOAT3 NormalizeDirection(const DirectX::XMFLOAT3& direction_) const;
     DirectX::XMFLOAT3 ReadFloat3(
         const nlohmann::json& json_,

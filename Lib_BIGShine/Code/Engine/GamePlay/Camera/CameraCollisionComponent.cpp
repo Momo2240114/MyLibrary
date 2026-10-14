@@ -665,6 +665,7 @@ void CameraCollisionComponent::Gui()
 
 void CameraCollisionComponent::Serialize(nlohmann::json& json_) const
 {
+    if (runtimeSettingsActive) { json_ = originalRuntimeSettings; return; }
     // Debug値や現在Lift量はRuntime状態なので保存しない。
     json_["ignoreTargetName"] = ignoreTargetName;
     json_["ignoreLockOnTargetName"] = ignoreLockOnTargetName;
@@ -685,6 +686,8 @@ void CameraCollisionComponent::Serialize(nlohmann::json& json_) const
 
 void CameraCollisionComponent::Deserialize(const nlohmann::json& json_)
 {
+    runtimeSettingsActive = false;
+    originalRuntimeSettings = nlohmann::json{};
     // 旧collisionLayerMask Keyにも対応し、過去Sceneから設定を引き継ぐ。
     ignoreTargetName = json_.value("ignoreTargetName", std::string{});
     ignoreLockOnTargetName = json_.value("ignoreLockOnTargetName", std::string{});
@@ -728,3 +731,21 @@ void CameraCollisionComponent::Deserialize(const nlohmann::json& json_)
 }
 
 REGISTER_COMPONENT(CameraCollisionComponent, "CameraCollisionComponent")
+
+// 元の設定は一度だけ保存し、第二形態のカメラ設定を実行時へ適用する。
+void CameraCollisionComponent::ApplyRuntimeSettings(const nlohmann::json& settings_)
+{
+    BS_PROFILE_SCOPE("CameraCollisionComponent::ApplyRuntimeSettings");
+    nlohmann::json original_;
+    Serialize(original_);
+    Deserialize(settings_);
+    originalRuntimeSettings = std::move(original_);
+    runtimeSettingsActive = true;
+}
+
+void CameraCollisionComponent::ClearRuntimeSettings()
+{
+    if (!runtimeSettingsActive) return;
+    const auto original_ = originalRuntimeSettings;
+    Deserialize(original_);
+}

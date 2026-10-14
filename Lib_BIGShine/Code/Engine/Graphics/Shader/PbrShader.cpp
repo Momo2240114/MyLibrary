@@ -10,7 +10,7 @@ PbrShader::PbrShader(ID3D11Device* device)
     // 頂点シェーダー（PBR用のVSがあればそちらを読み込む）
     CPUResourceLoader::LoadVertexShader(
         device,
-        "Shader/PBRVS.cso", // または共通のVSがあればそれを指定
+        "Data/Shader/PBRVS.cso", // または共通のVSがあればそれを指定
         GltfModelCommponennt::InputElementDescs.data(),
         static_cast<UINT>(GltfModelCommponennt::InputElementDescs.size()),
         inputLayout.GetAddressOf(),
@@ -19,7 +19,7 @@ PbrShader::PbrShader(ID3D11Device* device)
     // ピクセルシェーダー
     CPUResourceLoader::LoadPixelShader(
         device,
-        "Shader/PBRPS.cso", // 先ほど作成したPBR用HLSLをコンパイルしたもの
+        "Data/Shader/PBRPS.cso", // 先ほど作成したPBR用HLSLをコンパイルしたもの
         pixelShader.GetAddressOf());
 
     // メッシュ用定数バッファ (PBR用の構造体サイズで作成)

@@ -9,7 +9,7 @@ LightingShader::LightingShader(ID3D11Device* device)
     // ※ 頂点レイアウト(InputLayout)は不要（VS内部でIDから頂点を生成するため）
     CPUResourceLoader::LoadVertexShader(
         device,
-        "Shader/FullScreenVS.cso",
+        "Data/Shader/FullScreenVS.cso",
         nullptr, 0, // InputLayoutはnullptrでよい
         nullptr,
         vertexShader.GetAddressOf());
@@ -17,7 +17,7 @@ LightingShader::LightingShader(ID3D11Device* device)
     // 2. ピクセルシェーダーの読み込み (計算ロジックが入ったもの)
     CPUResourceLoader::LoadPixelShader(
         device,
-        "Shader/LightingPS.cso",
+        "Data/Shader/LightingPS.cso",
         pixelShader.GetAddressOf());
 
     CPUResourceLoader::CreateConstantBuffer(

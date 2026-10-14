@@ -84,6 +84,9 @@ struct CameraActionPreset
     float secondaryRadius = 1.0f;
     float framingPadding = 1.15f;
     float minimumFramingDistance = 3.0f;
+    // 低い構図では、主対象の原点からの高さを保ちつつ全体を画面内へ収める。
+    bool useFramingEyeHeight = false;
+    float framingEyeHeight = 1.6f;
     std::string targetObjectName; // 指定時はScene内のObject位置を注視基準にする。
 
     CAMERA_ACTION_TARGET_MODE targetMode =

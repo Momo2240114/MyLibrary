@@ -92,7 +92,7 @@ void SpriteRenderSystem::Initialize(ID3D11Device* device_, ID3D11DeviceContext* 
     const UINT numElements_ = _countof(inputElementDesc);
 
     // スプライト描画は基本シェーダを1つ登録し、必要に応じてshaderIDで差し替えられる形にしている。
-    CreateShader(device_, SpriteShaderID::Default, "Shader/sprite_VS.cso", "Shader/sprite_PS.cso", inputElementDesc, numElements_);
+    CreateShader(device_, SpriteShaderID::Default, "Data/Shader/sprite_VS.cso", "Data/Shader/sprite_PS.cso", inputElementDesc, numElements_);
 
     D3D11_BUFFER_DESC cbd_{};
     cbd_.Usage = D3D11_USAGE_DEFAULT;

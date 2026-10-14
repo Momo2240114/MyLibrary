@@ -3,9 +3,10 @@
     "AssetVersion": 1,
     "MeshVFX": {
         "IsPlaying": false,
+        "PlaybackSpeed": 1,
         "Parts": [
             {
-                "RenderEnabled": true,
+                "RenderEnabled": false,
                 "ModelPath": "Data/Model/VFX/Sphere.glb",
                 "MeshIndex": 0,
                 "Loop": true,
@@ -33,9 +34,9 @@
                     0
                 ],
                 "Scale": [
-                    6.3,
-                    6.3,
-                    6.3
+                    7.4,
+                    7.4,
+                    7.4
                 ],
                 "BaseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
                 "UseMaterialBaseTexture": false,
@@ -103,7 +104,7 @@
                 "EmissiveCurveName": ""
             },
             {
-                "RenderEnabled": true,
+                "RenderEnabled": false,
                 "ModelPath": "__InternalMeshSlashArcRibbon__",
                 "MeshIndex": 0,
                 "Loop": true,
@@ -131,9 +132,9 @@
                     10
                 ],
                 "Scale": [
-                    5.5,
-                    5.5,
-                    5.5
+                    6.7,
+                    6.7,
+                    6.7
                 ],
                 "BaseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
                 "UseMaterialBaseTexture": false,
@@ -205,7 +206,7 @@
                 "EmissiveCurveName": "VortexPulse"
             },
             {
-                "RenderEnabled": true,
+                "RenderEnabled": false,
                 "ModelPath": "__InternalMeshSlashArcRibbon__",
                 "MeshIndex": 0,
                 "Loop": true,
@@ -233,9 +234,9 @@
                     -30
                 ],
                 "Scale": [
-                    5.5,
-                    5.5,
-                    5.5
+                    6.7,
+                    6.7,
+                    6.7
                 ],
                 "BaseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
                 "UseMaterialBaseTexture": false,
@@ -307,7 +308,7 @@
                 "EmissiveCurveName": "VortexPulse"
             },
             {
-                "RenderEnabled": true,
+                "RenderEnabled": false,
                 "ModelPath": "__InternalMeshSlashArcRibbon__",
                 "MeshIndex": 0,
                 "Loop": true,
@@ -335,9 +336,9 @@
                     40
                 ],
                 "Scale": [
-                    5.5,
-                    5.5,
-                    5.5
+                    6.7,
+                    6.7,
+                    6.7
                 ],
                 "BaseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
                 "UseMaterialBaseTexture": false,

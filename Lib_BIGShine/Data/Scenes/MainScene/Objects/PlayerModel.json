@@ -16215,8 +16215,8 @@
         },
         {
             "Data": {
-                "CurrentHealth": 0.0,
-                "MaxHealth": 100.0
+                "CurrentHealth": 500.0,
+                "MaxHealth": 500.0
             },
             "Enabled": true,
             "LateUpdateEnabled": true,
