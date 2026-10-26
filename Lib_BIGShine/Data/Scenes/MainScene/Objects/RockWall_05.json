@@ -31,8 +31,16 @@
                         "normalScale": 1.0,
                         "occlusionStrength": 1.0,
                         "outlineThicknessOffset": 0.2590000033378601,
+                        "rimStrength": 0.05999999865889549,
                         "roughness": 0.5527864098548889,
                         "shaderId": 3,
+                        "shadowTint": [
+                            0.3824999928474426,
+                            0.414000004529953,
+                            0.44999998807907104
+                        ],
+                        "specularStrength": 1.0,
+                        "specularToonBlend": 0.25,
                         "toonPbrBlend": 0.800000011920929,
                         "uvAddressMode": 0,
                         "uvOffset": [

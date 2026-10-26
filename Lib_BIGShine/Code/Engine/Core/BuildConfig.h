@@ -112,6 +112,20 @@
 #define BS_ENABLE_EDITOR_FILE_OUTPUT 1
 #endif
 
+// Game_Debugでもゲーム用UIを維持し、Editorと開発用の描画・保存だけを止める。
+#if defined(BS_APP_GAME)
+#undef BS_ENABLE_EDITOR
+#undef BS_ENABLE_IMGUI
+#undef BS_ENABLE_DEVELOPER_GUI
+#undef BS_ENABLE_DEBUG_DRAW
+#undef BS_ENABLE_EDITOR_FILE_OUTPUT
+#define BS_ENABLE_EDITOR 0
+#define BS_ENABLE_IMGUI 0
+#define BS_ENABLE_DEVELOPER_GUI 0
+#define BS_ENABLE_DEBUG_DRAW 0
+#define BS_ENABLE_EDITOR_FILE_OUTPUT 0
+#endif
+
 #if BS_ENABLE_TRACY && !defined(TRACY_ON_DEMAND)
 // Viewer未接続時は計測イベントを蓄積せず、通常起動中のメモリ増加を抑える。
 #define TRACY_ON_DEMAND

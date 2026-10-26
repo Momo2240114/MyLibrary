@@ -4,7 +4,7 @@
     "State": {
         "animIndexA": -1,
         "animIndexB": -1,
-        "animationIndex": 7,
+        "animationIndex": 53,
         "blend2DBackwardAnimationIndex": -1,
         "blend2DBackwardLeft90AnimationIndex": -1,
         "blend2DBackwardLeft90PhaseOffset": 0.0,
@@ -52,9 +52,9 @@
         "customAnimIndex": -1,
         "events": [
             {
-                "label": "仮回復Particle",
-                "startTime": 0.35,
-                "endTime": 0.36,
+                "label": "回復の緑光",
+                "startTime": 0.5,
+                "endTime": 0.51,
                 "eventTemplateType": "NONE",
                 "actionStart": "SkillEffect.PlayParticle",
                 "blackboardWrites": [
@@ -62,13 +62,13 @@
                         "category": "SkillEffect",
                         "key": "ParticleAsset",
                         "type": 3,
-                        "stringValue": "Data/Particle/ParryStar.json"
+                        "stringValue": "Data/Particle/PlayerHeal.json"
                     },
                     {
                         "category": "SkillEffect",
                         "key": "ParticleLifeTime",
                         "type": 0,
-                        "floatValue": 1.0
+                        "floatValue": 1.4
                     },
                     {
                         "category": "SkillEffect",
@@ -79,7 +79,7 @@
                 ]
             },
             {
-                "label": "仮HP回復25",
+                "label": "HP回復25",
                 "startTime": 0.5,
                 "endTime": 0.51,
                 "eventTemplateType": "NONE",
@@ -128,9 +128,9 @@
         "rootMotionScaleCurveName": "",
         "sequencer": "",
         "speed": 1.0,
-        "speedCurveName": "Skill.HeavyCast",
+        "speedCurveName": "",
         "type": 0
     },
-    "PrototypeClipName": "SS_Sp_Skill2",
-    "EditorNotes": "ロードアウト確認用の回復Skill。攻撃イベントは持たない。"
+    "PrototypeClipName": "Buff_Seq",
+    "EditorNotes": "地上回復用のBuff_Seq。回復イベントと緑の粒子を同時に発生させる。"
 }

@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 #include <DirectXMath.h>
+#include "Engine/GamePlay/Combat/AttackTelegraphSettings.h"
 
 #include "imgui_node_editor.h"
 #include "imgui_node_editor_internal.h"
@@ -73,6 +74,10 @@ struct AnimEvent
     std::vector<AnimBlackboardWrite> blackboardWrites;
     ANIMATION_EVENT_TEMPLATE_TYPE eventTemplateType = ANIMATION_EVENT_TEMPLATE_TYPE::NONE;
     std::string attackTemplateId;
+    // 従来のHitBox有効化Action用。AttackTemplateイベントではTemplate側の設定を使う。
+    AttackTelegraphSettings telegraph;
+    // 動的Actionでも、このイベントが判定を直接開始する場合に明示して予兆の基準にする。
+    bool telegraphHitStart = false;
     std::string ownerTarget = "Self";
     bool attackTemplateRuntimeActive = false;
     bool previousCanBeGuarded = true; // 一時的な攻撃属性を終了・中断後に元のHitBox設定へ戻す。

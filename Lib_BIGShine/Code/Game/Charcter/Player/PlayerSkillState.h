@@ -4,6 +4,7 @@
 
 class GuardCollider;
 class HitReactionComponent;
+class MotionWarpComponent;
 
 // 共通SkillExecutionと、PlayerのState終了・キャンセル受付を接続する。
 class PlayerSkillState : public PlayerState
@@ -31,11 +32,19 @@ public:
     const std::string& GetSkillName() const { return execution.GetSkillName(); }
 
 private:
+    // Phaseのプリセットを使い、対象までの不足分だけを既存MotionWarpへ渡す。
+    void StartPhaseMotionWarp(const SkillPhase& phase_);
+    // 自分が開始した補正だけを停止し、中断や次段へ要求を持ち越さない。
+    void StopPhaseMotionWarp();
+    std::weak_ptr<MotionWarpComponent> motionWarp;
+    std::string motionWarpRequestName;
     // Player固有の状態は既存Playerカテゴリへミラーする。
     void SyncBlackboard();
     // GuardとArmorは開始前の値を保持し、Phase切替・終了・中断で復元する。
     void ApplyPhaseDefence(const SkillPhase& phase_);
+    // 防御を使わないPhaseとして処理し、保存したガードと耐性の設定へ戻す。
     void RestoreDefence();
+    // 子オブジェクトを含む各ガード判定の、スキル適用前の状態を保存する。
     struct GuardSnapshot
     {
         std::weak_ptr<GuardCollider> collider;
@@ -51,6 +60,8 @@ private:
     float previousReactionArmor = 0.0f;
     PLAYER_ACTION action;
     SkillExecution execution;
+    // Stateとしての実行期間を示し、SkillExecution終了後の終了通知まで保持する。
     bool active = false;
+    // Phase終了通知とスキル全体の終了通知を区別し、終了処理の再入を防ぐ。
     bool finishing = false;
 };

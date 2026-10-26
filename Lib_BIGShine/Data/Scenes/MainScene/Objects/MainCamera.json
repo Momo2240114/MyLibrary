@@ -47,23 +47,23 @@
                 "aspect": 1.7777777910232544,
                 "eventPriority": 8,
                 "eye": [
-                    -30.170656204223633,
-                    0.7477843165397644,
-                    -54.58600997924805
+                    1.5804381370544434,
+                    0.8079259991645813,
+                    -68.21732330322266
                 ],
                 "farZ": 1000.0,
                 "focus": [
-                    -6.861567974090576,
-                    0.706824541091919,
-                    -42.527862548828125
+                    1.2532650232315063,
+                    0.8485139608383179,
+                    -67.27323150634766
                 ],
                 "fovY": 60.0,
                 "nearZ": 0.10000000149011612,
                 "priority": 0,
                 "up": [
-                    0.0,
-                    1.0,
-                    0.0
+                    0.013290232978761196,
+                    0.9991757869720459,
+                    -0.03835035860538483
                 ],
                 "useEventPriority": false
             },
@@ -78,8 +78,8 @@
         {
             "Data": {
                 "baseDistance": 14.0,
-                "currentPitch": -0.08942538499832153,
-                "currentYaw": 27.353214263916016,
+                "currentPitch": 2.326159954071045,
+                "currentYaw": 109.11370086669922,
                 "distance": 14.0,
                 "horizontalFollowSpeed": 5.0,
                 "lookSpeedX": 500.0,
@@ -118,6 +118,9 @@
                 "centerDistanceWeight": 0.3499999940395355,
                 "closeDistance": 8.0,
                 "closeFocusBias": 0.18000000715255737,
+                "closeRangeDirectionHoldDistance": 1.5,
+                "closeRangeMinimumHeight": 1.2000000476837158,
+                "closeRangeOrbitTurnSpeed": 90.0,
                 "collisionFovInterpolationSpeed": 10.0,
                 "collisionFovMaxAddition": 22.0,
                 "collisionLookAtInterpolationSpeed": 18.0,
@@ -127,14 +130,16 @@
                 "directionalDotThreshold": 0.3499999940395355,
                 "distanceScale": 0.44999998807907104,
                 "enableCircularArenaCamera": true,
+                "enableCloseRangeDistanceGuard": false,
+                "enableCollisionVerticalCorrection": true,
                 "farFocusBias": 0.3400000035762787,
                 "framingSmoothSpeed": 16.0,
                 "heightDifferenceScale": 1.0,
                 "horizontalSafeMax": 0.8999999761581421,
                 "horizontalSafeMin": 0.10000000149011612,
                 "lockOnEnabled": true,
-                "lockOnFocusTargetName": "TestTarget",
-                "lockOnTargetName": "TestTarget",
+                "lockOnFocusTargetName": "",
+                "lockOnTargetName": "",
                 "lookAtInterpolationSpeed": 12.5,
                 "maxCameraDistance": 14.0,
                 "maxDistance": 255.0,
@@ -227,6 +232,7 @@
                     {
                         "actionName": "JustGuard",
                         "attackDirectionKey": "Normal",
+                        "autoFrameTargets": false,
                         "blackboardCategory": "Guard",
                         "cameraOffset": [
                             -7.5,
@@ -245,10 +251,16 @@
                             0.0
                         ],
                         "focusPositionKey": "Position",
+                        "framingEyeHeight": 1.600000023841858,
+                        "framingPadding": 1.149999976158142,
+                        "framingRadius": 1.0,
                         "holdDuration": 0.20000000298023224,
+                        "minimumFramingDistance": 3.0,
                         "positionMode": "TPS_TARGET_RELATIVE",
                         "priority": 20,
                         "returnDuration": 0.17499999701976776,
+                        "secondaryRadius": 1.0,
+                        "secondaryTargetName": "",
                         "shakeFrequency": 20.0,
                         "shakeStrength": 0.03500000014901161,
                         "suppressCameraCollision": false,
@@ -258,11 +270,14 @@
                         "targetMode": "PLAYER",
                         "targetObjectName": "",
                         "useExternalFov": false,
+                        "useFramingEyeHeight": false,
+                        "useModelBounds": true,
                         "useUnscaledTime": true
                     },
                     {
                         "actionName": "JustDodgeT",
                         "attackDirectionKey": "Normal",
+                        "autoFrameTargets": false,
                         "blackboardCategory": "Dodge",
                         "cameraOffset": [
                             0.0,
@@ -281,10 +296,16 @@
                             0.0
                         ],
                         "focusPositionKey": "Position",
+                        "framingEyeHeight": 1.600000023841858,
+                        "framingPadding": 1.149999976158142,
+                        "framingRadius": 1.0,
                         "holdDuration": 0.15000000596046448,
+                        "minimumFramingDistance": 3.0,
                         "positionMode": "TPS_TARGET_RELATIVE",
                         "priority": 15,
                         "returnDuration": 0.09000000357627869,
+                        "secondaryRadius": 1.0,
+                        "secondaryTargetName": "",
                         "shakeFrequency": 20.0,
                         "shakeStrength": 0.014999999664723873,
                         "suppressCameraCollision": false,
@@ -294,6 +315,53 @@
                         "targetMode": "PLAYER",
                         "targetObjectName": "",
                         "useExternalFov": false,
+                        "useFramingEyeHeight": false,
+                        "useModelBounds": true,
+                        "useUnscaledTime": true
+                    },
+                    {
+                        "actionName": "EnemyExecution",
+                        "attackDirectionKey": "Normal",
+                        "autoFrameTargets": false,
+                        "blackboardCategory": "Guard",
+                        "cameraOffset": [
+                            2.0,
+                            0.675000011920929,
+                            5.625
+                        ],
+                        "cameraUp": [
+                            0.0,
+                            1.0,
+                            0.0
+                        ],
+                        "enterDuration": 0.11999999731779099,
+                        "focusOffset": [
+                            0.0,
+                            1.2999999523162842,
+                            0.0
+                        ],
+                        "focusPositionKey": "Position",
+                        "framingEyeHeight": 1.600000023841858,
+                        "framingPadding": 1.149999976158142,
+                        "framingRadius": 1.0,
+                        "holdDuration": 3.0,
+                        "minimumFramingDistance": 3.0,
+                        "positionMode": "TARGET_LOCAL_RELATIVE",
+                        "priority": 30,
+                        "returnDuration": 0.2800000011920929,
+                        "secondaryRadius": 1.0,
+                        "secondaryTargetName": "",
+                        "shakeFrequency": 20.0,
+                        "shakeStrength": 0.0,
+                        "suppressCameraCollision": false,
+                        "suppressLockOnControl": true,
+                        "suppressThirdPersonControl": true,
+                        "targetFov": 48.0,
+                        "targetMode": "WORLD_POSITION",
+                        "targetObjectName": "",
+                        "useExternalFov": false,
+                        "useFramingEyeHeight": false,
+                        "useModelBounds": true,
                         "useUnscaledTime": true
                     }
                 ]
@@ -411,19 +479,19 @@
     "RequiredForSceneStart": true,
     "Transform": {
         "Pos": [
-            -30.170654296875,
-            0.7477843165397644,
-            -54.58601379394531
+            1.5804381370544434,
+            0.8079259991645813,
+            -68.21732330322266
         ],
         "Rot": [
-            0.0894317626953125,
-            62.64678955078125,
+            -2.3261566162109375,
+            -19.1136474609375,
             0.0
         ],
         "Scale": [
-            1.0,
-            1.0,
-            1.0
+            0.9999998807907104,
+            0.9999998211860657,
+            0.9999998807907104
         ]
     }
 }

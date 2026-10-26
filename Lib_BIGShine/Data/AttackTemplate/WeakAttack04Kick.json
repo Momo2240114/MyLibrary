@@ -3,12 +3,20 @@
     "AssetVersion": 1,
     "attack": {
         "allowMultiHit": false,
-        "damage": 225.0,
+        "damage": 80.0,
+        "impactPower": 30.0,
+        "damageRate": 0.8,
         "hitGroupId": 1,
         "hitStopDuration": 0.055,
         "hitStopScale": 0.6,
         "knockBackPower": 5.5,
         "knockBackType": 0
+    },
+    "feedback": {
+        "hitSoundPath": "Data/Audio/SE/Sonniss/Combat/LightHit.wav",
+        "volume": 0.6,
+        "minDistance": 8.0,
+        "maxDistance": 100.0
     },
     "cameraShake": {
         "enabled": true,

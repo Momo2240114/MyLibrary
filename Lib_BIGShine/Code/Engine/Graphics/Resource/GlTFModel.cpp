@@ -115,6 +115,30 @@ void GltfModelCommponennt::Node::serialize(Archive& archive)
 	);
 }
 
+// 材質のセル調反射、影色、輪郭光をJSONへ保存する。
+void GltfModelCommponennt::Material::SerializeStyleSettings(nlohmann::json& json_) const
+{
+    json_["specularToonBlend"] = specularToonBlend;
+    json_["specularStrength"] = specularStrength;
+    json_["rimStrength"] = rimStrength;
+    json_["shadowTint"] = { shadowTint.x, shadowTint.y, shadowTint.z };
+}
+
+// 古い保存データの互換性を保ち、Shaderへ渡す値を有効範囲に収める。
+void GltfModelCommponennt::Material::DeserializeStyleSettings(const nlohmann::json& json_)
+{
+    specularToonBlend = std::clamp(json_.value("specularToonBlend", specularToonBlend), 0.0f, 1.0f);
+    specularStrength = std::clamp(json_.value("specularStrength", specularStrength), 0.0f, 4.0f);
+    rimStrength = std::clamp(json_.value("rimStrength", rimStrength), 0.0f, 1.0f);
+    if (json_.contains("shadowTint") && json_["shadowTint"].is_array() && json_["shadowTint"].size() == 3)
+    {
+        const auto& tint_ = json_["shadowTint"];
+        shadowTint = { std::clamp(tint_[0].get<float>(), 0.0f, 1.0f),
+            std::clamp(tint_[1].get<float>(), 0.0f, 1.0f),
+            std::clamp(tint_[2].get<float>(), 0.0f, 1.0f) };
+    }
+}
+
 template<class Archive>
 void GltfModelCommponennt::Material::serialize(Archive& archive)
 {
@@ -369,6 +393,7 @@ void GltfModelCommponennt::ApplyLoadedResource(const std::shared_ptr<ModelResour
                 if (item_.contains("occlusionStrength")) mat_.occlusionStrength = item_["occlusionStrength"].get<float>();
                 if (item_.contains("alphaCutoff")) mat_.alphaCutoff = item_["alphaCutoff"].get<float>();
                 if (item_.contains("normalScale")) mat_.normalScale = item_["normalScale"].get<float>();
+                mat_.DeserializeStyleSettings(item_);
                 if (item_.contains("uvScale"))
                 {
                     const auto& uvScale_ = item_["uvScale"];
@@ -1421,6 +1446,7 @@ void GltfModelCommponennt::Serialize(nlohmann::json& j) const
 	{"disableOutline", mat.disableOutline},
 	{"outlineThicknessOffset", mat.outlineThicknessOffset}
 			});
+        mat.SerializeStyleSettings(materialSettings.back());
 	}
 	j["MaterialOverrides"] = materialSettings;
 
@@ -1526,6 +1552,7 @@ void GltfModelCommponennt::Deserialize(const nlohmann::json& j)
 					{
 						mat.normalScale = item["normalScale"].get<float>();
 					}
+					mat.DeserializeStyleSettings(item);
 
 					if (item.contains("uvScale"))
 					{
@@ -1709,6 +1736,47 @@ void GltfModelCommponennt::ShowMeshDetailsUI()
 
 				ImGui::DragFloat("Toon PBR Blend", &material.toonPbrBlend, 0.001f, 0.0f, 1.0f);
 				material.toonPbrBlend = std::clamp(material.toonPbrBlend, 0.0f, 1.0f);
+                // 拡散光と反射のToon化を分け、金属の光沢を残す。
+                ImGui::SliderFloat("Specular Toon Blend", &material.specularToonBlend, 0.0f, 1.0f);
+                ImGui::SliderFloat("Specular Strength", &material.specularStrength, 0.0f, 4.0f);
+                ImGui::SliderFloat("Rim Strength", &material.rimStrength, 0.0f, 1.0f);
+                ImGui::ColorEdit3("Shadow Tint", &material.shadowTint.x);
+                // テクスチャや物性値を保ち、反射と影色の調整開始点だけを切り替える。
+                if (ImGui::Button("Soft Toon"))
+                {
+                    material.toonPbrBlend = 1.0f;
+                    material.specularToonBlend = 0.6f;
+                    material.specularStrength = 0.35f;
+                    material.rimStrength = 0.04f;
+                    material.shadowTint = { 0.45f, 0.40f, 0.50f };
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Metal"))
+                {
+                    material.toonPbrBlend = 1.0f;
+                    material.specularToonBlend = 0.15f;
+                    material.specularStrength = 1.2f;
+                    material.rimStrength = 0.04f;
+                    material.shadowTint = { 0.38f, 0.42f, 0.50f };
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Scales"))
+                {
+                    material.toonPbrBlend = 0.9f;
+                    material.specularToonBlend = 0.35f;
+                    material.specularStrength = 0.8f;
+                    material.rimStrength = 0.08f;
+                    material.shadowTint = { 0.38f, 0.42f, 0.48f };
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Wet"))
+                {
+                    material.toonPbrBlend = 0.85f;
+                    material.specularToonBlend = 0.05f;
+                    material.specularStrength = 1.4f;
+                    material.rimStrength = 0.03f;
+                    material.shadowTint = { 0.32f, 0.28f, 0.38f };
+                }
 			}
 
 			if (material.shaderId == ModelShaderID::ToonPBR ||
@@ -1765,6 +1833,7 @@ void GltfModelCommponennt::ShowNodeTransformEditor()
 // シリアライズ
 void GltfModelCommponennt::Serialize(const char* filename)
 {
+    BS_PROFILE_SCOPE("GltfModelCommponennt::SerializeCerealFile");
 	std::ofstream ostream(filename, std::ios::binary);
 	if (ostream.is_open())
 	{
@@ -1778,6 +1847,16 @@ void GltfModelCommponennt::Serialize(const char* filename)
 				CEREAL_NVP(meshes),
 				CEREAL_NVP(animations)
 			);
+			// 既存バイナリの末尾へ追加し、古いモデルキャッシュの読み込みを維持する。
+			nlohmann::json styleSettings_ = nlohmann::json::array();
+			for (const auto& material_ : materials)
+			{
+			    nlohmann::json style_;
+			    material_.SerializeStyleSettings(style_);
+			    styleSettings_.push_back(style_);
+			}
+			const std::string styleText_ = styleSettings_.dump();
+			archive(styleText_);
 		}
 		catch (...)
 		{
@@ -1803,6 +1882,20 @@ void GltfModelCommponennt::Deserialize(const char* filename)
 				CEREAL_NVP(meshes),
 				CEREAL_NVP(animations)
 			);
+			// 末尾設定のない旧形式ではMaterialの初期値をそのまま使う。
+			if (istream.peek() != std::char_traits<char>::eof())
+			{
+			    std::string styleText_;
+			    archive(styleText_);
+			    const auto styleSettings_ = nlohmann::json::parse(styleText_);
+			    if (styleSettings_.is_array())
+			    {
+			        for (size_t index_ = 0; index_ < materials.size() && index_ < styleSettings_.size(); ++index_)
+			        {
+			            materials[index_].DeserializeStyleSettings(styleSettings_[index_]);
+			        }
+			    }
+			}
 		}
 		catch (...)
 		{

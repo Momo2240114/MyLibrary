@@ -2,6 +2,9 @@
 
 #include "PlayerControllerComponent.h"
 
+#include "Engine/Audio/AudioManager.h"
+#include "Engine/GamePlay/System/TimeManager.h"
+
 #include <algorithm>
 #include <cmath>
 #include <imgui_stdlib.h>
@@ -11,6 +14,7 @@
 #include "Engine/GamePlay/Camera/CameraManager.h"
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
 #include "Engine/GamePlay/Core/Component/CharacterMovementComponent.h"
+#include "Engine/GamePlay/Core/Component/MotionWarpComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/GamePlay/Combat/HealthComponent.h"
@@ -25,6 +29,7 @@
 #include "Engine/Physics/CharacterCollider.h"
 #include "Engine/Physics/ColliderComponent.h"
 #include "Engine/Physics/HurtBox.h"
+#include "Engine/Physics/HitBox.h"
 #include "Engine/Physics/GuardCollider.h"
 #include "Engine/GamePlay/Transform/ModelAttachmentComponent.h"
 #include "Engine/Physics/JustDodgeCollider.h"
@@ -38,6 +43,7 @@
 #include "PlayerAttackState.h"
 #include "PlayerDodgeState.h"
 #include "PlayerHitState.h"
+#include "PlayerDeathState.h"
 #include "PlayerIdleState.h"
 #include "PlayerJumpState.h"
 #include "PlayerMoveState.h"
@@ -61,6 +67,7 @@ namespace
         inline constexpr const char* SKILL_A = "Player.SkillA";
         inline constexpr const char* SKILL_B = "Player.SkillB";
         inline constexpr const char* SKILL_C = "Player.SkillC";
+        inline constexpr const char* SKILL_D = "Player.SkillD";
     }
 
     DirectX::XMFLOAT3 NormalizeHorizontalDirection(
@@ -164,6 +171,12 @@ void PlayerControllerComponent::EnsurePlayerInputBindings()
         keyConfig_.SetBinds("Player.SkillModifier",
             { { { DeviceType::Gamepad, static_cast<int>(PadCode::L1) } } });
     }
+    // 4枠目は既存設定を優先し、入力がない場合だけYキーで回復スキルを使えるようにする。
+    if (keyConfig_.GetActionMap().count(PlayerInputAction::SKILL_D) == 0)
+    {
+        keyConfig_.SetBinds(PlayerInputAction::SKILL_D,
+            { { { DeviceType::KBM, KeyInput::K_Y } } });
+    }
     if (keyConfig_.GetActionMap().count(PlayerInputAction::JUST_GUARD) == 0)
     {
         // 既存の割り当てを維持し、未設定の場合だけCキーをパリィに割り当てる。
@@ -205,6 +218,8 @@ void PlayerControllerComponent::Start()
 
     ApplyLegacySkillLoadout();
     ResetSkillCooldowns();
+    hudObservationTime = 0.0f;
+    skillHudAssetCache = {};
     owner_->SetLayer(LayerType::Player);
     collider = owner_->GetOrAddComponent<CharacterCollider>();
     movement = owner_->GetOrAddComponent<CharacterMovementComponent>();
@@ -277,6 +292,10 @@ void PlayerControllerComponent::Start()
     stateMachine.AddState<PlayerSkillState>(PLAYER_ACTION::SKILL_B, PLAYER_ACTION::SKILL_B);
     stateMachine.AddState<PlayerAttackState>(PLAYER_ACTION::COUNTER_ATTACK, PLAYER_ACTION::COUNTER_ATTACK);
     stateMachine.AddState<PlayerSkillState>(PLAYER_ACTION::SKILL_C, PLAYER_ACTION::SKILL_C);
+    // 回復も共通SkillStateへ接続し、既存のPhase実行と終了処理を使用する。
+    stateMachine.AddState<PlayerSkillState>(PLAYER_ACTION::SKILL_D, PLAYER_ACTION::SKILL_D);
+    stateMachine.AddState<PlayerDeathState>(PLAYER_ACTION::DEAD);
+    stateMachine.AddState<PlayerReviveState>(PLAYER_ACTION::REVIVING);
     EnsureDefaultCancelTransitions();
 
     stateMachine.ChangeState(PLAYER_ACTION::IDLE);
@@ -286,6 +305,21 @@ void PlayerControllerComponent::Update(float dt_)
 {
     BS_PROFILE_SCOPE("PlayerControllerComponent::Update");
     lastUpdateDeltaTime = (std::max)(dt_, 0.0f);
+    hudObservationTime += lastUpdateDeltaTime;
+    // 死亡・復帰中はPlayerステートだけを進め、操作ロック中もグラフの終了を確認する。
+    if (GetCurrentAction() == PLAYER_ACTION::DEAD || GetCurrentAction() == PLAYER_ACTION::REVIVING)
+    {
+        stateMachine.Update(dt_);
+        return;
+    }
+    // 拘束・復帰の専用再生を通常Stateより優先し、この間は通常入力と移動更新へ進まない。
+    if ((enemyExecutionCaptured || enemyExecutionRecovering) && IsPlayerControlLockedByGameMode()) CancelEnemyExecution(false);
+    if (UpdateEnemyExecution(dt_))
+    {
+        UpdateSkillCooldowns(dt_);
+        SendGroundedToBlackboard();
+        return;
+    }
     if (IsPlayerControlLockedByGameMode())
     {
         StopNormalGuard();
@@ -336,7 +370,10 @@ bool PlayerControllerComponent::IsGrounded() const
 bool PlayerControllerComponent::IsJumpInputPressed() const
 {
     if (IsPlayerControlLockedByGameMode()) return false;
-    return KeyConfig::Instance().ActionPressedIn(PlayerInputAction::JUMP);
+    // 回復に使う複合入力は二段ジャンプ側でも消費済みとして扱う。
+    const auto& keyConfig_ = KeyConfig::Instance();
+    return !PlayerInputResolver::IsActionConsumed(keyConfig_, skillInputs, PlayerInputAction::JUMP) &&
+        keyConfig_.ActionPressedIn(PlayerInputAction::JUMP);
 }
 
 bool PlayerControllerComponent::IsCurrentAnimationState(const std::string& stateName_)
@@ -380,6 +417,7 @@ bool PlayerControllerComponent::IsAnimationStateForAction(
 
 void PlayerControllerComponent::UpdateTimelineActionSafety(float deltaTime_)
 {
+    // 共通スキルは自身のPhase終了条件を持つため、通常行動の保険時間では終了させない。
     const auto* skillState_ = stateMachine.GetCurrentStateAs<PlayerSkillState>();
     if (skillState_ && skillState_->IsActive()) return;
     const PLAYER_ACTION currentAction_ = GetCurrentAction();
@@ -463,6 +501,7 @@ void PlayerControllerComponent::EndAirborneActionContext()
     jumpLoopResumeRequested = false;
 }
 
+// 空中行動からの復帰要求を一度だけ取り出し、新規ジャンプとの区別に使う。
 bool PlayerControllerComponent::ConsumeJumpLoopResumeRequest()
 {
     const bool requested_ = jumpLoopResumeRequested;
@@ -535,6 +574,7 @@ DirectX::XMFLOAT3 PlayerControllerComponent::GetGuardMoveInput(
         worldMoveInput_,
         { 0.0f, 0.0f, 0.0f });
     const float inputLength_ = (std::min)(std::sqrt(inputLengthSquared_), 1.0f);
+    // 向きだけを基底へ射影し、アナログ入力の大きさは変換後も保持する。
     return
     {
         (normalizedInput_.x * right_.x + normalizedInput_.z * right_.z) * inputLength_,
@@ -635,6 +675,45 @@ void PlayerControllerComponent::SetAttackAssistTarget(
     attackAssistTarget = target_;
 }
 
+std::shared_ptr<GameObject> PlayerControllerComponent::ResolveSkillMotionWarpTarget() const
+{
+    BS_PROFILE_SCOPE("PlayerControllerComponent::ResolveSkillMotionWarpTarget");
+    const auto owner_ = gameObject.lock();
+    if (!owner_ || !owner_->transform || !owner_->manager) return nullptr;
+    constexpr float MAXIMUM_DISTANCE = 6.0f;
+    constexpr float MAXIMUM_HEIGHT = 4.0f;
+    const auto position_ = owner_->transform->GetWorldPosition();
+    const auto isValid_ = [&owner_, &position_](const std::shared_ptr<GameObject>& target_)
+    {
+        if (!target_ || target_ == owner_ || !target_->transform || target_->layer != LayerType::Enemy ||
+            target_->IsPendingDestroy() || !target_->IsCombatReady()) return false;
+        if (const auto health_ = target_->GetComponent<HealthComponent>()) if (health_->IsDead()) return false;
+        const auto targetPosition_ = target_->transform->GetWorldPosition();
+        const float x_ = targetPosition_.x - position_.x;
+        const float z_ = targetPosition_.z - position_.z;
+        return x_ * x_ + z_ * z_ <= MAXIMUM_DISTANCE * MAXIMUM_DISTANCE &&
+            std::abs(targetPosition_.y - position_.y) <= MAXIMUM_HEIGHT;
+    };
+    if (const auto lockOn_ = ResolveCameraLockOnComponent())
+        if (lockOn_->IsLockOnEnabled() && isValid_(lockOn_->GetLockOnTarget())) return lockOn_->GetLockOnTarget();
+    // ロックオンしていない場合は、前方の敵だけを近い順で選ぶ。
+    auto target_ = std::shared_ptr<GameObject>();
+    float bestDistanceSquared_ = MAXIMUM_DISTANCE * MAXIMUM_DISTANCE;
+    const auto forward_ = owner_->transform->GetFront();
+    for (const auto& candidate_ : owner_->GetManager().GetObjects())
+    {
+        if (!isValid_(candidate_)) continue;
+        const auto candidatePosition_ = candidate_->transform->GetWorldPosition();
+        const float x_ = candidatePosition_.x - position_.x;
+        const float z_ = candidatePosition_.z - position_.z;
+        const float distanceSquared_ = x_ * x_ + z_ * z_;
+        if (distanceSquared_ > bestDistanceSquared_ || x_ * forward_.x + z_ * forward_.z <= 0.0f) continue;
+        target_ = candidate_;
+        bestDistanceSquared_ = distanceSquared_;
+    }
+    return target_;
+}
+
 void PlayerControllerComponent::SetHorizontalVelocity(
     const DirectX::XMFLOAT3& dir_,
     float speed_,
@@ -666,6 +745,7 @@ void PlayerControllerComponent::SetHorizontalVelocity(
     }
 }
 
+// 向きの予約を変えず、既存の水平移動へ攻撃補正分の速度だけを加える。
 void PlayerControllerComponent::AddHorizontalVelocityAssist(
     const DirectX::XMFLOAT3& dir_,
     float speed_)
@@ -744,6 +824,7 @@ void PlayerControllerComponent::ApplyPendingMovement()
 
 bool PlayerControllerComponent::RequestAction(PLAYER_ACTION nextAction_)
 {
+    if (enemyExecutionCaptured || enemyExecutionRecovering) return false;
     if (guardBroken || (nextAction_ == PLAYER_ACTION::GUARD && guardRearmRequired)) return false;
     // 既存の未定義SkillA/Bは維持し、データ定義があるスキルのみ共通検証を行う。
     if ((PlayerSkillLoadout::GetSlotIndex(nextAction_) >= 0) &&
@@ -797,6 +878,8 @@ bool PlayerControllerComponent::RequestAction(PLAYER_ACTION nextAction_)
     const bool canChangeImmediately_ =
         currentAction_ == PLAYER_ACTION::NONE ||
         isLocomotion_ ||
+        // 通常ガードからの受け流しは、アニメーションのキャンセル受付窓を待たずに開始する。
+        (currentAction_ == PLAYER_ACTION::GUARD && nextAction_ == PLAYER_ACTION::JUST_GUARD) ||
         canUseCancelTransition_;
 
     if (!canChangeImmediately_)
@@ -1204,6 +1287,10 @@ void PlayerControllerComponent::NotifyComboTransition()
 
 void PlayerControllerComponent::NotifyActionEnd()
 {
+    // 中断した攻撃の終了イベントで、死亡・復帰ステートを通常待機へ戻さない。
+    if (GetCurrentAction() == PLAYER_ACTION::DEAD || GetCurrentAction() == PLAYER_ACTION::REVIVING) return;
+    // 拘束と復帰の終了は専用グラフの状態で判定し、通常Actionの終了通知では解除しない。
+    if (enemyExecutionCaptured || enemyExecutionRecovering) return;
     auto* skillState_ = stateMachine.GetCurrentStateAs<PlayerSkillState>();
     if (skillState_ && skillState_->IsActive() && !skillState_->IsFinishing())
     {
@@ -1222,6 +1309,7 @@ void PlayerControllerComponent::NotifyActionEnd()
 
     if (IsPlayerActionTimelineDriven(currentAction_) && !(skillState_ && skillState_->IsFinishing()))
     {
+        // 遷移前の再生から届いた終了通知で、新しい行動まで終了しないよう対応名を確認する。
         const auto owner_ = GetGameObject();
         const auto animationController_ = owner_ ? owner_->GetComponent<AnimationControllerComponent>() : nullptr;
         const AnimState* currentState_ = animationController_ ? animationController_->GetCurrentState() : nullptr;
@@ -1249,6 +1337,7 @@ void PlayerControllerComponent::NotifyActionEnd()
     if (GetPlayerAttackType(currentAction_) == PLAYER_ATTACK_TYPE::WEAK &&
         actionRuntime.bufferedAction == currentAction_)
     {
+        // 同じ弱攻撃の予約はコンボ通知でのみ進め、行動終了後の新規攻撃としては消費しない。
         actionRuntime.bufferedAction = PLAYER_ACTION::NONE;
         actionRuntime.bufferedComboIndex = 0;
     }
@@ -1322,8 +1411,92 @@ void PlayerControllerComponent::NotifyJumpImpulse()
     jumpState_->ApplyJumpImpulseFromSequence();
 }
 
+void PlayerControllerComponent::ResetDeathPresentationState()
+{
+    BS_PROFILE_SCOPE("PlayerControllerComponent::ResetDeathPresentationState");
+    CancelEnemyExecution(false);
+    StopSkill();
+    StopNormalGuard();
+    stateMachine.ChangeState(PLAYER_ACTION::IDLE);
+    actionRuntime = PlayerActionRuntime{};
+    pendingComboIndex = 0;
+    comboIndex = 0;
+    hasPendingHorizontalVelocity = false;
+    hasPendingFacingDirection = false;
+    pendingHorizontalVelocity = {0.0f, 0.0f, 0.0f};
+    SendMoveInputToBlackboard({0.0f, 0.0f, 0.0f});
+    SendGuardInputToBlackboard(false);
+    ResetStrongAttackInput();
+    ClearCounterTags();
+    ResetRuntimeArmor();
+    if (movement)
+    {
+        movement->ResetMovementRequests();
+        movement->ResetVerticalVelocity();
+        movement->StopHorizontalMovementImmediately();
+    }
+    if (blackboard)
+    {
+        blackboard->SetBool("Anim", "DeathSequenceActive", false);
+        blackboard->ResetTrigger("Anim", "PlayerDied");
+        blackboard->ResetTrigger("Anim", "PlayerContinue");
+        blackboard->ResetTrigger(PlayerBlackboardCategory::ANIM, PlayerBlackboardKey::ATTACK_ENTER);
+        blackboard->ResetTrigger(PlayerBlackboardCategory::PLAYER, PlayerBlackboardKey::ATTACK_ENTER);
+    }
+    const auto owner_ = GetGameObject();
+    // 中断した攻撃のHitBoxを閉じ、起き上がり後に以前の攻撃判定が復活しないようにする。
+    const auto stopAttack_ = [&](const auto& self_, const std::shared_ptr<GameObject>& object_) -> void
+    {
+        if (!object_) return;
+        for (const auto& hit_ : object_->GetComponents<HitBox>()) if (hit_) hit_->Deactivate();
+        if (object_->transform)
+            for (const auto& child_ : object_->transform->children)
+                if (child_) self_(self_, child_->gameObject.lock());
+    };
+    stopAttack_(stopAttack_, owner_);
+    if (const auto animation_ = owner_ ? owner_->GetComponent<AnimationControllerComponent>() : nullptr)
+    {
+        // SkillやGuardの制御権だけを返し、再生先の選択はグラフへ任せる。
+        animation_->SetSkillControlled(false);
+        animation_->SetPresentationControlled(false);
+    }
+}
+
+void PlayerControllerComponent::BeginDeathState()
+{
+    BS_PROFILE_SCOPE("PlayerControllerComponent::BeginDeathState");
+    ResetDeathPresentationState();
+    stateMachine.ChangeState(PLAYER_ACTION::DEAD);
+}
+
+void PlayerControllerComponent::BeginReviveState()
+{
+    if (GetCurrentAction() == PLAYER_ACTION::DEAD && IsDeathAnimationFinished())
+        stateMachine.ChangeState(PLAYER_ACTION::REVIVING);
+}
+
+bool PlayerControllerComponent::IsDeathAnimationFinished() const
+{
+    const auto state_ = stateMachine.GetCurrentStateAs<PlayerDeathState>();
+    return state_ && state_->IsAnimationFinished();
+}
+
+bool PlayerControllerComponent::IsReviveAnimationFinished() const
+{
+    const auto state_ = stateMachine.GetCurrentStateAs<PlayerReviveState>();
+    return state_ && state_->IsAnimationFinished();
+}
+
 void PlayerControllerComponent::HandleHitReaction()
 {
+    if (GetCurrentAction() == PLAYER_ACTION::DEAD || GetCurrentAction() == PLAYER_ACTION::REVIVING) return;
+    if (enemyExecutionCaptured || enemyExecutionRecovering)
+    {
+        const auto actor_ = GetGameObject();
+        const auto health_ = actor_ ? actor_->GetComponent<HealthComponent>() : nullptr;
+        if (health_ && health_->IsDead()) CancelEnemyExecution(false);
+        else return; // HPの減少は維持し、拘束中の被弾で再生と位置固定を上書きしない。
+    }
     // 突進の防御PhaseではHitStateへの強制遷移を止めるが、死亡時の処理は妨げない。
     const auto* skillState_ = stateMachine.GetCurrentStateAs<PlayerSkillState>();
     const auto owner_ = GetGameObject();
@@ -1350,6 +1523,7 @@ void PlayerControllerComponent::HandleHitReaction()
     stateMachine.ChangeState(PLAYER_ACTION::HIT);
 }
 
+// 基本設定を変更せず耐性を上書きし、実際の被弾判定を担うComponentにも同期する。
 void PlayerControllerComponent::SetRuntimeArmor(float armor_)
 {
     runtimeArmor = (std::max)(armor_, 0.0f);
@@ -1365,6 +1539,7 @@ void PlayerControllerComponent::SetRuntimeArmor(float armor_)
     }
 }
 
+// 一時的な耐性の上書きを閉じ、現在の基本設定を被弾判定へ戻す。
 void PlayerControllerComponent::ResetRuntimeArmor()
 {
     runtimeArmor = armor;
@@ -1458,6 +1633,7 @@ void PlayerControllerComponent::EnterAction(PLAYER_ACTION action_)
 
     comboIndex = GetPlayerAttackType(action_) == PLAYER_ATTACK_TYPE::WEAK ? pendingComboIndex : 0;
     pendingComboIndex = 0;
+    // 通知で進む行動の派生受付は閉じて開始し、アニメーション側の受付開始通知を待つ。
     actionRuntime.canDodgeCancel = !IsPlayerActionTimelineDriven(action_);
     actionRuntime.canActionBranch = !IsPlayerActionTimelineDriven(action_);
     actionRuntime.canBufferInput = false;
@@ -1569,6 +1745,7 @@ bool PlayerControllerComponent::IsGroundOnlyAction(PLAYER_ACTION action_) const
     case PLAYER_ACTION::SKILL_A:
     case PLAYER_ACTION::SKILL_B:
     case PLAYER_ACTION::SKILL_C:
+    case PLAYER_ACTION::SKILL_D:
         return true;
     default:
         return false;
@@ -1631,6 +1808,7 @@ bool PlayerControllerComponent::IsDodgeCancelAction(PLAYER_ACTION action_) const
         action_ == PLAYER_ACTION::JUST_GUARD;
 }
 
+// 地上回避の連続使用と、着地するまでの空中回避の再使用を別条件で制限する。
 bool PlayerControllerComponent::CanStartDodgeAction(PLAYER_ACTION action_) const
 {
     if (action_ == PLAYER_ACTION::DODGE)
@@ -1680,6 +1858,7 @@ bool PlayerControllerComponent::ShouldEnterGuardAfterActionEnd() const
     return KeyConfig::Instance().ActionPressed(PlayerInputAction::GUARD);
 }
 
+// 時間で地上回避を再解禁し、接地で空中回避の使用回数を回復する。
 void PlayerControllerComponent::UpdateDodgeRestrictions(float deltaTime_)
 {
     groundDodgeCooldownTimer = (std::max)(
@@ -1758,11 +1937,14 @@ void PlayerControllerComponent::ProcessActionInput()
     if (!PlayerInputResolver::IsActionConsumed(keyConfig_, skillInputs, PlayerInputAction::DODGE) &&
         keyConfig_.ActionPressedIn(PlayerInputAction::DODGE) &&
         RequestAction(isAirborne_ ? PLAYER_ACTION::AIR_DODGE : PLAYER_ACTION::DODGE)) return;
-    if (keyConfig_.ActionPressedIn(PlayerInputAction::JUMP) && RequestAction(PLAYER_ACTION::JUMP)) return;
+    // 修飾中のジャンプ入力はスキルへ消費し、回復とジャンプの二重受付を防ぐ。
+    if (!PlayerInputResolver::IsActionConsumed(keyConfig_, skillInputs, PlayerInputAction::JUMP) &&
+        keyConfig_.ActionPressedIn(PlayerInputAction::JUMP) && RequestAction(PLAYER_ACTION::JUMP)) return;
     if (keyConfig_.ActionPressedIn(PlayerInputAction::SKILL_A) && RequestAction(PLAYER_ACTION::SKILL_A)) return;
     if (keyConfig_.ActionPressedIn(PlayerInputAction::SKILL_B) && RequestAction(PLAYER_ACTION::SKILL_B)) return;
     // KeyConfigに登録された単独SkillC入力も、複合入力と同じSlot2へ渡す。
     if (keyConfig_.ActionPressedIn(PlayerInputAction::SKILL_C) && RequestSkillSlot(2)) return;
+    if (keyConfig_.ActionPressedIn(PlayerInputAction::SKILL_D) && RequestSkillSlot(3)) return;
     if (!PlayerInputResolver::IsActionConsumed(keyConfig_, skillInputs, PlayerInputAction::WEAK_ATTACK) &&
         keyConfig_.ActionPressedIn(PlayerInputAction::WEAK_ATTACK))
     {
@@ -2049,7 +2231,7 @@ void PlayerControllerComponent::SendActionToBlackboard(PLAYER_ACTION action_)
         blackboard->SetBool(category_, PlayerBlackboardKey::IS_AIR_DODGE, action_ == PLAYER_ACTION::AIR_DODGE);
         blackboard->SetBool(category_, PlayerBlackboardKey::IS_SKILL,
             attackType_ == PLAYER_ATTACK_TYPE::SKILL_A || attackType_ == PLAYER_ATTACK_TYPE::SKILL_B ||
-            attackType_ == PLAYER_ATTACK_TYPE::SKILL_C);
+            attackType_ == PLAYER_ATTACK_TYPE::SKILL_C || attackType_ == PLAYER_ATTACK_TYPE::SKILL_D);
         const bool legacyCanCancel_ = actionRuntime.canActionBranch;
         blackboard->SetBool(category_, PlayerBlackboardKey::CAN_CANCEL, legacyCanCancel_);
         blackboard->SetBool(category_, PlayerBlackboardKey::CAN_DODGE_CANCEL, actionRuntime.canDodgeCancel);
@@ -2241,9 +2423,27 @@ void PlayerControllerComponent::SendGuardInputToBlackboard(bool guardInput_)
     blackboard->SetBool(PlayerBlackboardCategory::ANIM, PlayerBlackboardKey::GUARD_INPUT, guardInput_);
 }
 
+// 成功確定後だけ演出を開始し、復帰は既存TimeManagerと音声Mixerに任せる。
+void PlayerControllerComponent::PlayJustSuccessPresentation()
+{
+    BS_PROFILE_SCOPE("PlayerControllerComponent::PlayJustSuccessPresentation");
+    const auto owner_ = GetGameObject();
+    if (!justSuccessPresentationEnabled || !owner_ || !owner_->manager) return;
+    // プレイヤーの操作速度を保ちながら、敵と弾の動きを短時間だけ遅くする。
+    constexpr uint32_t SLOW_LAYERS = static_cast<uint32_t>(TarGetLayerType::Enemy) |
+        static_cast<uint32_t>(TarGetLayerType::EnemyBullet) | static_cast<uint32_t>(TarGetLayerType::PlayerBullet) |
+        static_cast<uint32_t>(TarGetLayerType::Environment);
+    if (const auto time_ = owner_->GetManager().GetTimeManager())
+        time_->PlayTimedScale(SLOW_LAYERS, justSuccessTimeScale, 0.025f,
+            justSuccessHoldDuration, justSuccessReturnDuration);
+    AudioManager::Instance().PlayTimedMuffle(0.025f + justSuccessHoldDuration + justSuccessReturnDuration,
+        justSuccessMuffleCutoff);
+}
+
 void PlayerControllerComponent::GrantJustDodgeCounterTag()
 {
     // ジャスト回避成功後、通常攻撃入力を反撃へ差し替えるための短時間Tagを付与する。
+    PlayJustSuccessPresentation();
     justDodgeCounterTagTimer = (std::max)(counterTagDuration, 0.0f);
     PromoteBufferedAttackToCounterAttack();
     SyncCounterTagsToBlackboard();
@@ -2252,6 +2452,7 @@ void PlayerControllerComponent::GrantJustDodgeCounterTag()
 void PlayerControllerComponent::GrantJustGuardCounterTag()
 {
     // ジャストガード成功後、反撃Tagと回避派生用の受付状態を同時に開く。
+    PlayJustSuccessPresentation();
     justGuardCounterTagTimer = (std::max)(counterTagDuration, 0.0f);
     SetCanDodgeCancel(true);
     PromoteBufferedAttackToCounterAttack();
@@ -2287,6 +2488,7 @@ void PlayerControllerComponent::PromoteBufferedAttackToCounterAttack()
     }
 }
 
+// 反撃の受付時間を進め、有効・無効が切り替わったときだけBlackboardを更新する。
 void PlayerControllerComponent::UpdateCounterTags(float deltaTime_)
 {
     const float previousJustDodgeTimer_ = justDodgeCounterTagTimer;
@@ -2309,6 +2511,7 @@ void PlayerControllerComponent::UpdateCounterTags(float deltaTime_)
     }
 }
 
+// 回避・ガード別の反撃受付を、通常入力とアニメーションが参照するカテゴリへ同期する。
 void PlayerControllerComponent::SyncCounterTagsToBlackboard()
 {
     if (!blackboard) return;
@@ -2316,6 +2519,7 @@ void PlayerControllerComponent::SyncCounterTagsToBlackboard()
     const bool hasJustDodgeCounterTag_ = justDodgeCounterTagTimer > 0.0f;
     const bool hasJustGuardCounterTag_ = justGuardCounterTagTimer > 0.0f;
     const bool hasCounterTag_ = hasJustDodgeCounterTag_ || hasJustGuardCounterTag_;
+    // 両方の受付が残っている場合も個別フラグは保持し、表示元の名前はガードを優先する。
     const std::string source_ = hasJustGuardCounterTag_
         ? "JustGuard"
         : (hasJustDodgeCounterTag_ ? "JustDodge" : "");
@@ -2343,6 +2547,7 @@ void PlayerControllerComponent::SyncCounterTagsToBlackboard()
     blackboard->SetBool("Guard", PlayerBlackboardKey::JUST_GUARD_COUNTER_TAG, hasJustGuardCounterTag_);
 }
 
+// 反撃の開始・予約時に両方の受付を消費し、同じ成功通知の使い回しを防ぐ。
 void PlayerControllerComponent::ClearCounterTags()
 {
     justDodgeCounterTagTimer = 0.0f;
@@ -2445,6 +2650,7 @@ bool PlayerControllerComponent::IsJustDodgeColliderActive() const
 
 void PlayerControllerComponent::Gui()
 {
+    ImGui::Text("Enemy execution: %s / %.2f sec", enemyExecutionRecoilActive ? "RECOIL" : enemyExecutionCaptured ? "CAPTURED" : enemyExecutionRecovering ? "RECOVERING" : "OFF", enemyExecutionElapsed);
     // Runtime状態と調整値をEditor上で確認・変更するためのDebug UI。
     ImGui::Text("State: %s", stateMachine.GetCurrentStateName());
     ImGui::Text("Current Action: %s", GetPlayerActionName(GetCurrentAction()));
@@ -2459,6 +2665,8 @@ void PlayerControllerComponent::Gui()
     const auto animation_ = owner_ ? owner_->GetComponent<AnimationControllerComponent>() : nullptr;
     const auto* currentAnimation_ = animation_ ? animation_->GetCurrentState() : nullptr;
     ImGui::Text("Current Animation: %s", currentAnimation_ ? currentAnimation_->name.c_str() : "None");
+    // プレイヤーのInspectorから、通常攻撃とスキルの補正を同じスイッチで比較する。
+    if (const auto warp_ = owner_ ? owner_->GetComponent<MotionWarpComponent>() : nullptr) warp_->DrawComparisonGui();
     for (const auto& binding_ : skillInputs)
         ImGui::Text("Skill Input: %s + %s -> SkillSlot%d (priority %d)", binding_.modifierAction.c_str(),
             binding_.triggerAction.c_str(), binding_.slotIndex, binding_.priority);
@@ -2508,6 +2716,7 @@ void PlayerControllerComponent::Gui()
             PLAYER_ACTION::SKILL_A,
             PLAYER_ACTION::SKILL_B,
             PLAYER_ACTION::SKILL_C,
+            PLAYER_ACTION::SKILL_D,
             PLAYER_ACTION::COUNTER_ATTACK
         };
 
@@ -2599,6 +2808,11 @@ void PlayerControllerComponent::Gui()
     ImGui::DragFloat("Jump Impulse Fallback", &jumpImpulseFallbackDuration, 0.01f, 0.0f, 5.0f, "%.2f");
     ImGui::DragFloat("Timeline Action Fallback", &timelineActionFallbackDuration, 0.01f, 0.0f, 10.0f, "%.2f");
     ImGui::DragFloat("Ground Dodge Cooldown", &groundDodgeCooldownDuration, 0.01f, 0.0f, 5.0f, "%.2f");
+    ImGui::Checkbox("Just Success Presentation", &justSuccessPresentationEnabled);
+    ImGui::DragFloat("Just Success Time Scale", &justSuccessTimeScale, 0.01f, 0.05f, 1.0f);
+    ImGui::DragFloat("Just Success Hold", &justSuccessHoldDuration, 0.01f, 0.0f, 2.0f);
+    ImGui::DragFloat("Just Success Return", &justSuccessReturnDuration, 0.01f, 0.01f, 2.0f);
+    ImGui::DragFloat("Just Success Muffle Cutoff", &justSuccessMuffleCutoff, 10.0f, 100.0f, 22000.0f);
     ImGui::DragFloat("Counter Tag Duration", &counterTagDuration, 0.01f, 0.0f, 10.0f, "%.2f");
     if (ImGui::DragFloat("Base Armor", &armor, 0.1f, 0.0f, 99999.0f))
     {
@@ -2687,6 +2901,8 @@ void PlayerControllerComponent::InitializeBlackboardValues()
     }
 
     if (!blackboard) return;
+    blackboard->SetBool("Anim", "EnemyExecutionActive", false);
+    blackboard->SetBool("Anim", "DeathSequenceActive", false);
 
     blackboard->SetString(PlayerBlackboardCategory::PLAYER, PlayerBlackboardKey::CURRENT_SKILL, "");
     blackboard->SetInt(PlayerBlackboardCategory::PLAYER, PlayerBlackboardKey::SKILL_PHASE, -1);
@@ -2805,6 +3021,11 @@ void PlayerControllerComponent::Serialize(nlohmann::json& j_) const
     j_["JumpImpulseFallbackDuration"] = jumpImpulseFallbackDuration;
     j_["TimelineActionFallbackDuration"] = timelineActionFallbackDuration;
     j_["GroundDodgeCooldownDuration"] = groundDodgeCooldownDuration;
+    j_["JustSuccessPresentationEnabled"] = justSuccessPresentationEnabled;
+    j_["JustSuccessTimeScale"] = justSuccessTimeScale;
+    j_["JustSuccessHoldDuration"] = justSuccessHoldDuration;
+    j_["JustSuccessReturnDuration"] = justSuccessReturnDuration;
+    j_["JustSuccessMuffleCutoff"] = justSuccessMuffleCutoff;
     j_["CounterTagDuration"] = counterTagDuration;
     j_["Armor"] = armor;
     j_["HitMediumImpactThreshold"] = hitMediumImpactThreshold;
@@ -2856,6 +3077,7 @@ void PlayerControllerComponent::Serialize(nlohmann::json& j_) const
 
 void PlayerControllerComponent::Deserialize(const nlohmann::json& j_)
 {
+    CancelEnemyExecution(false);
     // Scene JSONからPlayer調整値を復元し、範囲外の値は安全な範囲へ丸める。
     skillDefinitionsPath = j_.value("SkillDefinitionsPath", skillDefinitionsPath);
     skillLoadout = PlayerSkillLoadout();
@@ -2906,6 +3128,11 @@ void PlayerControllerComponent::Deserialize(const nlohmann::json& j_)
     groundDodgeCooldownDuration = (std::max)(
         j_.value("GroundDodgeCooldownDuration", groundDodgeCooldownDuration),
         0.0f);
+    justSuccessPresentationEnabled = j_.value("JustSuccessPresentationEnabled", true);
+    justSuccessTimeScale = std::clamp(j_.value("JustSuccessTimeScale", 0.25f), 0.05f, 1.0f);
+    justSuccessHoldDuration = std::clamp(j_.value("JustSuccessHoldDuration", 0.25f), 0.0f, 2.0f);
+    justSuccessReturnDuration = std::clamp(j_.value("JustSuccessReturnDuration", 0.2f), 0.01f, 2.0f);
+    justSuccessMuffleCutoff = std::clamp(j_.value("JustSuccessMuffleCutoff", 1200.0f), 100.0f, 22000.0f);
     counterTagDuration = (std::max)(
         j_.value("CounterTagDuration", counterTagDuration),
         0.0f);
@@ -3003,12 +3230,13 @@ void PlayerControllerComponent::Deserialize(const nlohmann::json& j_)
     }
     auto readTransitions_ = [this](const nlohmann::json& transitionsJson_)
     {
+        // 保存値をActionへ変換する前に、有効範囲と未選択値を検査する。
         for (const auto& transitionJson_ : transitionsJson_)
         {
             const int from_ = transitionJson_.value("From", static_cast<int>(PLAYER_ACTION::NONE));
             const int to_ = transitionJson_.value("To", static_cast<int>(PLAYER_ACTION::NONE));
-            if (from_ < 0 || from_ > static_cast<int>(PLAYER_ACTION::SKILL_C) || from_ == static_cast<int>(PLAYER_ACTION::NONE) ||
-                to_ < 0 || to_ > static_cast<int>(PLAYER_ACTION::SKILL_C) || to_ == static_cast<int>(PLAYER_ACTION::NONE))
+            if (from_ < 0 || from_ > static_cast<int>(PLAYER_ACTION::SKILL_D) || from_ == static_cast<int>(PLAYER_ACTION::NONE) ||
+                to_ < 0 || to_ > static_cast<int>(PLAYER_ACTION::SKILL_D) || to_ == static_cast<int>(PLAYER_ACTION::NONE))
             {
                 continue;
             }
@@ -3032,6 +3260,7 @@ void PlayerControllerComponent::Deserialize(const nlohmann::json& j_)
 
     if (j_.contains("CancelTransitions") && j_["CancelTransitions"].is_array())
     {
+        // 旧形式の共通リストも読み込み、既存の分類処理を通して遷移ルールへ追加する。
         readTransitions_(j_["CancelTransitions"]);
     }
 
@@ -3063,6 +3292,54 @@ bool PlayerControllerComponent::CanExecuteSkill(PLAYER_ACTION action_) const
     return SkillExecution::CanExecute(gameObject.lock(), *definition_, error_);
 }
 
+// RequestActionの受付条件を副作用なしで表示へ渡し、先行入力やコンボ予約を変更しない。
+bool PlayerControllerComponent::CanDisplayActionReady(PLAYER_ACTION action_) const
+{
+    if (enemyExecutionCaptured || enemyExecutionRecovering || guardBroken || action_ == PLAYER_ACTION::NONE) return false;
+    if (action_ == PLAYER_ACTION::GUARD && guardRearmRequired) return false;
+    if (action_ == PLAYER_ACTION::JUMP && !IsGrounded()) return false;
+    if (IsAirAction(action_) && !IsAirborneForAction()) return false;
+    if (IsDodgeAction(action_) && !CanStartDodgeAction(action_)) return false;
+    if (PlayerSkillLoadout::GetSlotIndex(action_) >= 0)
+    {
+        if (!CanDisplaySkillReady(action_)) return false;
+    }
+    else if (IsAirborneForAction() && IsGroundOnlyAction(action_)) return false;
+
+    const PLAYER_ACTION currentAction_ = GetCurrentAction();
+    if (currentAction_ == action_)
+        return (action_ == PLAYER_ACTION::WEAK_ATTACK || action_ == PLAYER_ACTION::AIR_WEAK_ATTACK) &&
+            (actionRuntime.canCombo || actionRuntime.canBufferInput);
+    if (currentAction_ == PLAYER_ACTION::NONE || GetPlayerActionGroup(currentAction_) == PLAYER_ACTION_GROUP::LOCOMOTION) return true;
+    // 実際の即時派生とHUDの受付表示を一致させる。
+    if (currentAction_ == PLAYER_ACTION::GUARD && action_ == PLAYER_ACTION::JUST_GUARD) return true;
+    return IsDodgeCancelAction(action_)
+        ? actionRuntime.canDodgeCancel && HasDodgeCancelTransition(currentAction_, action_)
+        : actionRuntime.canActionBranch && HasActionBranchTransition(currentAction_, action_);
+}
+
+// 表示の問い合わせから毎フレーム同じ素材を検証せず、実際の発動時の検証は従来どおり行う。
+bool PlayerControllerComponent::CanDisplaySkillReady(PLAYER_ACTION action_) const
+{
+    const int slotIndex_ = PlayerSkillLoadout::GetSlotIndex(action_);
+    const auto* definition_ = GetSkillDefinition(action_);
+    if (slotIndex_ < 0 || !definition_ || !definition_->enabled) return false;
+    if (GetRemainingSkillCooldown(definition_->name) > 0.0f) return false;
+    if (IsAirborneForAction() ? !definition_->canUseInAir : !definition_->canUseOnGround) return false;
+
+    auto& cache_ = skillHudAssetCache[static_cast<std::size_t>(slotIndex_)];
+    if (cache_.skillName != definition_->name || cache_.recheckTime <= hudObservationTime)
+    {
+        BS_PROFILE_SCOPE("PlayerControllerComponent::ValidateHudSkillAssets");
+        constexpr float HUD_ASSET_RECHECK_INTERVAL = 0.25f;
+        std::string error_;
+        cache_.available = SkillExecution::CanExecute(gameObject.lock(), *definition_, error_);
+        cache_.skillName = definition_->name;
+        cache_.recheckTime = hudObservationTime + HUD_ASSET_RECHECK_INTERVAL;
+    }
+    return cache_.available;
+}
+
 // 保存後の共通ライブラリをPlayer入力表へ反映する。
 bool PlayerControllerComponent::ReloadSkillDefinitions(const std::string& path_)
 {
@@ -3072,6 +3349,8 @@ bool PlayerControllerComponent::ReloadSkillDefinitions(const std::string& path_)
     if (!LoadPlayerSkillDefinitions(path_, skillInputs, skillDefinitions)) return false;
     skillDefinitionsPath = path_;
     ApplyLegacySkillLoadout();
+    // 定義の再読込では、同名スキルのPhaseや参照素材が変わるため表示用の検証も破棄する。
+    skillHudAssetCache = {};
     return true;
 }
 // Skill Actionに対応する定義を取得する。
@@ -3081,6 +3360,7 @@ const PlayerSkillDefinition* PlayerControllerComponent::GetSkillDefinition(PLAYE
     return slotIndex_ >= 0 ? GetSkillDefinitionByName(skillLoadout.GetSkillName(static_cast<std::size_t>(slotIndex_))) : nullptr;
 }
 
+// 現在のSkillStateへ中断を通知し、通常行動と同じ終了経路へ接続する。
 void PlayerControllerComponent::StopSkill()
 {
     BS_PROFILE_SCOPE("PlayerControllerComponent::StopSkill");
@@ -3106,6 +3386,7 @@ bool PlayerControllerComponent::IsSkillCooldownReady(PLAYER_ACTION action_) cons
     return GetSkillDefinition(action_) && GetRemainingSkillCooldown(action_) <= 0.0f;
 }
 
+// 入力を受け付けた時点ではなく、Stateで開始が成立したスキルの待ち時間を設定する。
 void PlayerControllerComponent::NotifySkillStarted(PLAYER_ACTION action_)
 {
     BS_PROFILE_SCOPE("PlayerControllerComponent::NotifySkillStarted");
@@ -3142,12 +3423,14 @@ float PlayerControllerComponent::GetRemainingSkillCooldown(const std::string& sk
     return iterator_ != skillCooldowns.end() ? iterator_->second : 0.0f;
 }
 
+// 実行中のスキルと装備定義の食い違いを避けるため、SkillStateが非実行中のときだけ許可する。
 bool PlayerControllerComponent::CanEditSkillLoadout() const
 {
     const auto* state_ = stateMachine.GetCurrentStateAs<PlayerSkillState>();
     return !state_ || !state_->IsActive();
 }
 
+// カタログ内のスキルまたは空欄を装備し、以降は旧形式からの自動装備移行を行わない。
 bool PlayerControllerComponent::SetEquippedSkill(std::size_t slotIndex_, const std::string& skillName_)
 {
     BS_PROFILE_SCOPE("PlayerControllerComponent::SetEquippedSkill");
@@ -3163,6 +3446,7 @@ const std::string& PlayerControllerComponent::GetEquippedSkillName(std::size_t s
     return skillLoadout.GetSkillName(slotIndex_);
 }
 
+// 枠番号を既存のActionへ変換し、直接Stateを変えず共通の受付条件へ渡す。
 bool PlayerControllerComponent::RequestSkillSlot(std::size_t slotIndex_)
 {
     return RequestAction(PlayerSkillLoadout::GetSlotAction(slotIndex_));
@@ -3215,6 +3499,7 @@ void PlayerControllerComponent::DrawSkillLoadoutGui()
 }
 
 // 子の盾Colliderも含め、通常ガードの受付を入力Stateへ同期する。
+// 盾を含む子階層のガード判定を通常ガードとして切り替え、受付状態を公開する。
 void PlayerControllerComponent::SetNormalGuardEnabled(bool enabled_)
 {
     BS_PROFILE_SCOPE("PlayerControllerComponent::SetNormalGuardEnabled");
@@ -3290,6 +3575,7 @@ void PlayerControllerComponent::HandleGuardImpact(bool broken_)
     guardReactionTimer = 0.0f;
     if (broken_)
     {
+        // 崩れ中は判定を閉じ、押しっぱなしのガード入力だけで復帰直後に再開させない。
         guardRearmRequired = true;
         SetNormalGuardEnabled(false);
         StopGuardVisual();

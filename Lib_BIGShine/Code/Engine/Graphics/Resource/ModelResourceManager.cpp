@@ -275,7 +275,7 @@ std::shared_ptr<ModelResource> ModelResourceManager::GetOrCreateResource(ID3D11D
         // MetalnessRoughnessマップ：材質の特性を決める極めて重要な「データ」である
         if (material.metalnessRoughnessMap == nullptr) {
             if (material.metalnessRoughnessTextureFileName.empty()) {
-                CPUResourceLoader::CreateDummyTexture(device, 0x008080FF, material.metalnessRoughnessMap.GetAddressOf());
+                CPUResourceLoader::CreateDummyTexture(device, 0xFFFFFFFF, material.metalnessRoughnessMap.GetAddressOf());
             }
             else {
                 std::filesystem::path path = dirpath / material.metalnessRoughnessTextureFileName;
@@ -437,18 +437,26 @@ std::shared_ptr<ModelResource> ModelResourceManager::LoadOrBuildCpuResource(
 bool ModelResourceManager::CreateGpuResource(
     ID3D11Device* device_,
     const std::string& filename_,
-    const std::shared_ptr<ModelResource>& resource_)
+    const std::shared_ptr<ModelResource>& resource_,
+    ModelLoadEntry& progress_, bool& completed_, float budgetMs_)
 {
     BS_PROFILE_SCOPE("AsyncModel::CreateGpuResource");
     if (!device_ || !resource_) return false;
+    completed_ = false;
+    const auto uploadStart_ = std::chrono::steady_clock::now();
+    const auto budgetExpired_ = [&]()
+    {
+        return std::chrono::duration<float, std::milli>(std::chrono::steady_clock::now() - uploadStart_).count() >= budgetMs_;
+    };
 
     std::filesystem::path filePath_(filename_);
     std::filesystem::path dirpath_(filePath_.parent_path());
 
     {
         BS_PROFILE_SCOPE("AsyncModel::CreateMaterialGpuResources");
-        for (GltfModelCommponennt::Material& material_ : resource_->materials)
+        for (; progress_.gpuMaterialCursor < resource_->materials.size(); )
         {
+            auto& material_ = resource_->materials[progress_.gpuMaterialCursor];
             auto loadFileTexture_ = [&](const std::string& fileName_, ID3D11ShaderResourceView** srv_, TextureType type_)
             {
                 BS_PROFILE_SCOPE("AsyncModel::LoadTextureFile");
@@ -493,13 +501,16 @@ bool ModelResourceManager::CreateGpuResource(
             {
                 BS_PROFILE_SCOPE("AsyncModel::CreateMetalnessRoughnessTexture");
                 hr_ = material_.metalnessRoughnessTextureFileName.empty()
-                    ? CPUResourceLoader::CreateDummyTexture(device_, 0x008080FF, material_.metalnessRoughnessMap.GetAddressOf())
+                    ? CPUResourceLoader::CreateDummyTexture(device_, 0xFFFFFFFF, material_.metalnessRoughnessMap.GetAddressOf())
                     : loadFileTexture_(material_.metalnessRoughnessTextureFileName, material_.metalnessRoughnessMap.GetAddressOf(), TextureType::Data);
                 if (FAILED(hr_)) return false;
             }
+            ++progress_.gpuMaterialCursor;
+            if (budgetExpired_()) return true;
         }
     }
 
+    if (!progress_.gpuNodesBound)
     {
         BS_PROFILE_SCOPE("AsyncModel::RebindGpuNodes");
         for (size_t nodeIndex_ = 0; nodeIndex_ < resource_->nodes.size(); ++nodeIndex_)
@@ -509,12 +520,14 @@ bool ModelResourceManager::CreateGpuResource(
             node_.parent = node_.parentIndex >= 0 ? &resource_->nodes.at(node_.parentIndex) : nullptr;
             if (node_.parent != nullptr) node_.parent->children.emplace_back(&node_);
         }
+        progress_.gpuNodesBound = true;
     }
 
     {
         BS_PROFILE_SCOPE("AsyncModel::CreateMeshGpuResources");
-        for (GltfModelCommponennt::Mesh& mesh_ : resource_->meshes)
+        for (; progress_.gpuMeshCursor < resource_->meshes.size(); )
         {
+            auto& mesh_ = resource_->meshes[progress_.gpuMeshCursor];
             mesh_.material = &resource_->materials.at(mesh_.materialIndex);
             mesh_.node = &resource_->nodes.at(mesh_.nodeIndex);
 
@@ -551,9 +564,12 @@ bool ModelResourceManager::CreateGpuResource(
                     bone_.node = &resource_->nodes.at(bone_.nodeIndex);
                 }
             }
+            ++progress_.gpuMeshCursor;
+            if (budgetExpired_()) return true;
         }
     }
 
+    completed_ = true;
     return true;
 }
 
@@ -614,11 +630,15 @@ ModelLoadHandle ModelResourceManager::RequestResourceAsync(
         if (state_ == MODEL_LOAD_STATE::UNLOADED || state_ == MODEL_LOAD_STATE::FAILED)
         {
             BS_PROFILE_SCOPE("AsyncModel::EnqueueTask");
+            std::lock_guard<std::mutex> entryLock_(entry_->mutex);
             {
                 BS_PROFILE_SCOPE_DYNAMIC(entry_->normalizedPath.c_str());
                 entry_->state = MODEL_LOAD_STATE::WAITING;
                 entry_->errorMessage.clear();
                 entry_->completedLoadMilliseconds = 0.0;
+                entry_->gpuMaterialCursor = 0;
+                entry_->gpuMeshCursor = 0;
+                entry_->gpuNodesBound = false;
                 entry_->loadStartTime = std::chrono::steady_clock::now();
                 pendingJobs.push_back(
                     {
@@ -931,6 +951,7 @@ void ModelResourceManager::UpdateAsyncLoads(
             cpuResource_ = entry_->cpuResource;
         }
 
+        bool uploadCompleted_ = false;
         {
             BS_PROFILE_SCOPE("AsyncModel::GpuUpload::CreateGpuResource");
             BS_PROFILE_PLOT("ModelLoad.GpuCreateThread", GetCurrentThreadPlotValue());
@@ -938,7 +959,18 @@ void ModelResourceManager::UpdateAsyncLoads(
             bool createdGpuResource_ = false;
             {
                 BS_PROFILE_SCOPE_DYNAMIC(modelPath_.c_str());
-                createdGpuResource_ = CreateGpuResource(device_, entry_->normalizedPath, cpuResource_);
+                try
+                {
+                    createdGpuResource_ = CreateGpuResource(device_, entry_->normalizedPath, cpuResource_,
+                        *entry_, uploadCompleted_, gpuUploadBudgetMs_);
+                }
+                catch (const std::exception& exception_)
+                {
+                    std::lock_guard<std::mutex> entryLock_(entry_->mutex);
+                    entry_->errorMessage = exception_.what();
+                    entry_->state = MODEL_LOAD_STATE::FAILED;
+                    continue;
+                }
             }
             if (!createdGpuResource_)
             {
@@ -949,6 +981,13 @@ void ModelResourceManager::UpdateAsyncLoads(
             }
         }
 
+        if (!uploadCompleted_)
+        {
+            // CPU側データはEntryが保持したまま再投入し、次フレームも描画へ制御を返す。
+            std::lock_guard<std::mutex> lock_(asyncMutex);
+            pendingGpuUploads.push_front(entry_);
+            break;
+        }
         {
             BS_PROFILE_SCOPE("AsyncModel::GpuUpload::RegisterModelCache");
             std::lock_guard<std::mutex> lock_(asyncMutex);
@@ -1187,6 +1226,16 @@ bool ModelResourceManager::SaveToCereal(const std::string& cerealPath, const std
             CEREAL_NVP(resource->meshes),
             CEREAL_NVP(resource->animations)
         );
+        // 既存バイナリの末尾へ追加し、古いモデルキャッシュの読み込みを維持する。
+        nlohmann::json styleSettings_ = nlohmann::json::array();
+        for (const auto& material_ : resource->materials)
+        {
+            nlohmann::json style_;
+            material_.SerializeStyleSettings(style_);
+            styleSettings_.push_back(style_);
+        }
+        const std::string styleText_ = styleSettings_.dump();
+        archive(styleText_);
         return true;
     }
     catch (...) {
@@ -1212,6 +1261,20 @@ bool ModelResourceManager::LoadFromCereal(const std::string& cerealPath, std::sh
             resource->meshes,
             resource->animations
         );
+        // 末尾設定のない旧形式ではMaterialの初期値をそのまま使う。
+        if (istream.peek() != std::char_traits<char>::eof())
+        {
+            std::string styleText_;
+            archive(styleText_);
+            const auto styleSettings_ = nlohmann::json::parse(styleText_);
+            if (styleSettings_.is_array())
+            {
+                for (size_t index_ = 0; index_ < resource->materials.size() && index_ < styleSettings_.size(); ++index_)
+                {
+                    resource->materials[index_].DeserializeStyleSettings(styleSettings_[index_]);
+                }
+            }
+        }
         return true;
     }
     catch (...) {

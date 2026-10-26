@@ -39,7 +39,7 @@ private:
 
 private:
     // Workspaceを使わない場合に直接再生する音声ファイルパス。
-    std::string audioPath = "Data/Audio/SE/TitleSelect.wav";
+    std::string audioPath = "Data/Audio/SE/Sword-Fight-1.wav";
     // プリセット情報を読み込むAudioWorkspace JSONのパス。
     std::string workspacePath = "Data/Audio/AudioWorkspace.json";
     // 再生対象として選択しているWorkspaceプリセット名またはAction名。

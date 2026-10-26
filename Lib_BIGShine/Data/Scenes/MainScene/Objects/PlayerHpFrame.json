@@ -4,20 +4,20 @@
         {
             "Data": {
                 "InputEnabled": false,
-                "ParentWidgetId": "PlayerStatusRoot",
+                "ParentWidgetId": "PlayerHpBar",
                 "RaycastTarget": false,
                 "RectTransform": {
                     "AnchorMax": [
-                        0.0,
-                        0.0
+                        0.5,
+                        0.5
                     ],
                     "AnchorMin": [
-                        0.0,
-                        0.0
+                        0.5,
+                        0.5
                     ],
                     "AnchoredPosition": [
-                        116.0,
-                        50.0
+                        0.0,
+                        0.0
                     ],
                     "LocalRotation": 0.0,
                     "LocalScale": [
@@ -25,18 +25,18 @@
                         1.0
                     ],
                     "Pivot": [
-                        0.0,
-                        0.0
+                        0.5,
+                        0.5
                     ],
                     "SizeDelta": [
-                        388.0,
-                        36.0
+                        468.0,
+                        28.0
                     ]
                 },
                 "Version": 1,
                 "Visible": true,
                 "WidgetId": "PlayerHpFrame",
-                "ZOrder": 1
+                "ZOrder": 36
             },
             "Enabled": true,
             "LateUpdateEnabled": true,
@@ -53,21 +53,23 @@
                     0.0
                 ],
                 "CatSize": [
+                    549.0,
+                    23.0
+                ],
+                "Color": [
+                    1.0,
+                    1.0,
                     1.0,
                     1.0
                 ],
-                "Color": [
-                    0.07999999821186066,
-                    0.10000000149011612,
-                    0.1599999964237213,
-                    0.9200000166893005
-                ],
+                "LinearSampling": true,
                 "LocalSize": [
-                    388.0,
-                    36.0
+                    1.0,
+                    1.0
                 ],
+                "SdrTexture": true,
                 "ShaderID": 0,
-                "TexturePath": "",
+                "TexturePath": "./Data/Sprite/UI/Hud/Player/PlayerBar_Frame.png",
                 "Visible": true,
                 "pivotType": 0
             },
@@ -82,7 +84,7 @@
     ],
     "Layer": 16,
     "Name": "PlayerHpFrame",
-    "ParentName": "PlayerStatusRoot",
+    "ParentName": "PlayerHpBar",
     "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [

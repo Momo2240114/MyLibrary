@@ -4,6 +4,11 @@
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include "Engine/Debug/TracyProfiler.h"
+#include "Engine/GamePlay/Camera/CameraManager.h"
+#include "Editor/GamePackageExporter.h"
+#include "Engine/GamePlay/Scene/SceneManager.h"
+#include "Engine/GamePlay/Serialize/ActionRegistry.h"
+#include "Engine/Platform/WindowsDialogHelper.h"
 
 #include <algorithm>
 #include <string>
@@ -107,6 +112,7 @@ void EditorWindowManager::DrawSceneView()
     ImGuiWindowFlags flags_ = ImGuiWindowFlags_NoCollapse;
     if (ImGui::Begin("Scene", nullptr, flags_))
     {
+        DrawPlayModeToolbar();
         auto& graphicsDeviceManager_ = GraphicsDeviceManager::Instance();
         ID3D11ShaderResourceView* sceneSRV_ = graphicsDeviceManager_.GetSceneViewSRV();
         const ImVec2 available_ = ImGui::GetContentRegionAvail();
@@ -135,9 +141,55 @@ void EditorWindowManager::DrawSceneView()
                 cursorPos_.x + (available_.x - imageSize_.x) * 0.5f,
                 cursorPos_.y + (available_.y - imageSize_.y) * 0.5f));
             ImGui::Image(reinterpret_cast<void*>(sceneSRV_), imageSize_);
+            if (gameObjectManager && gameObjectManager->SupportsEditorPlayMode())
+            {
+                if (gameObjectManager->GetEditorPlayMode() == EditorPlayMode::EDITOR)
+                {
+                    if (const auto camera_ = gameObjectManager->GetCameraManager()->GetEditorCamera())
+                    {
+                        if (!sceneEditorCameraCaptured || (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)))
+                        {
+                            sceneEditorCameraData.CaptureFromCamera(*camera_);
+                            sceneEditorCameraCaptured = true;
+                        }
+                        sceneEditorCameraData.UpdatePreviewFreeCamera(*camera_, ImGui::GetIO().DeltaTime, ImGui::IsItemHovered());
+                    }
+                }
+                else
+                {
+                    sceneEditorCameraCaptured = false;
+                }
+            }
         }
     }
     ImGui::End();
+}
+
+void EditorWindowManager::DrawPlayModeToolbar()
+{
+    BS_PROFILE_SCOPE("EditorPlayMode::Toolbar");
+    if (!gameObjectManager) return;
+    const bool supported_ = gameObjectManager->SupportsEditorPlayMode();
+    const auto mode_ = gameObjectManager->GetEditorPlayMode();
+    constexpr float BUTTON_WIDTH = 72.0f;
+    const float toolbarWidth_ = BUTTON_WIDTH * 3.0f + ImGui::GetStyle().ItemSpacing.x * 2.0f;
+    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (std::max)(0.0f, (ImGui::GetContentRegionAvail().x - toolbarWidth_) * 0.5f));
+    ImGui::BeginDisabled(!supported_ || !gameObjectManager->CanStartEditorPlay());
+    if (ImGui::Button("Play", ImVec2(BUTTON_WIDTH, 0))) gameObjectManager->RequestEditorPlayCommand(EditorPlayCommand::PLAY);
+    ImGui::EndDisabled();
+    ImGui::SameLine();
+    ImGui::BeginDisabled(!supported_ || mode_ == EditorPlayMode::EDITOR);
+    if (ImGui::Button(mode_ == EditorPlayMode::PAUSED ? "Resume" : "Pause", ImVec2(BUTTON_WIDTH, 0)))
+        gameObjectManager->RequestEditorPlayCommand(EditorPlayCommand::PAUSE);
+    ImGui::SameLine();
+    if (ImGui::Button("Stop", ImVec2(BUTTON_WIDTH, 0))) gameObjectManager->RequestEditorPlayCommand(EditorPlayCommand::STOP);
+    ImGui::EndDisabled();
+    const char* status_ = !supported_ ? "Runtime" : mode_ == EditorPlayMode::EDITOR ? "Editor" :
+        mode_ == EditorPlayMode::PAUSED ? "Paused - mouse released" :
+        gameObjectManager->IsPlayInputCaptured() ? "Play - mouse captured / F2 or Esc to release" :
+        "Play - F2 to capture mouse";
+    ImGui::TextDisabled("%s", status_);
+    ImGui::Separator();
 }
 
 const char* EditorWindowManager::GetWindowMenuCategory(
@@ -187,13 +239,71 @@ const char* EditorWindowManager::GetWindowMenuCategory(
     return "Tools";
 }
 
+// 書き出しは明示操作だけで実行し、処理結果と保存先を同じWindowに残す。
+void EditorWindowManager::DrawGameExport()
+{
+    if (!showGameExport) return;
+    BS_PROFILE_SCOPE("EditorWindowManager::DrawGameExport");
+    ImGui::SetNextWindowSize(ImVec2(620.0f, 380.0f), ImGuiCond_FirstUseEver);
+    if (ImGui::Begin("Export Game", &showGameExport))
+    {
+        ImGui::TextWrapped("Export the scene used when Play started, with Data, runtime DLLs and ReadMe.txt.");
+        ImGui::TextWrapped("Build the updated project as Shipping | x64 first, then select that EXE. This tool does not build or run it.");
+        ImGui::TextWrapped("Output: Exports/ReviewGame_<date and time>/Game.exe. Copying all Data may take time.");
+        ImGui::Separator();
+        ImGui::TextUnformatted("Game EXE Icon (.ico)");
+        ImGui::TextWrapped("Saved icon: Data/Icons/ANATHEMA/ANATHEMA.ico");
+        ImGui::TextWrapped("After saving, build Game_Debug, Game_Release or Shipping to embed the icon. Engine keeps its own icon. Existing EXEs are unchanged until rebuilt.");
+        // ファイル自体をプロジェクト内へ保存するため、再起動後も同じICOがビルドに使われる。
+        if (ImGui::Button("Select ICO and save for Game"))
+        {
+            const auto icon_ = WindowsDialogHelper::OpenFileDialog(
+                L"Select Game EXE icon", {{L"Windows icon", L"*.ico"}}, "Data/Icons");
+            if (!icon_.empty())
+            {
+                std::string error_;
+                const bool success_ = GamePackageExporter::SaveGameIcon(
+                    WindowsDialogHelper::Utf8ToPath(icon_), error_);
+                gameExportStatus = success_ ? "Game icon saved. Build a Game configuration or Shipping, then export the rebuilt EXE."
+                    : "Game icon save failed: " + error_;
+            }
+        }
+        ImGui::Separator();
+        if (ImGui::Button("Select built EXE and export"))
+        {
+            const auto executable_ = WindowsDialogHelper::OpenFileDialog(
+                L"Select a built Shipping / Release EXE", {{L"Game executable", L"*.exe"}}, "x64/Shipping");
+            if (!executable_.empty())
+            {
+                std::string output_;
+                std::string error_;
+                const bool success_ = GamePackageExporter::Export(*gameObjectManager,
+                    WindowsDialogHelper::Utf8ToPath(executable_), output_, error_);
+                gameExportStatus = success_ ? "Export complete: " + output_ : "Export failed: " + error_;
+            }
+        }
+        ImGui::Separator();
+        ImGui::TextWrapped("%s", gameExportStatus.c_str());
+    }
+    ImGui::End();
+}
+
 void EditorWindowManager::DrawMenuBar()
 {
+    BS_PROFILE_SCOPE("EditorWindowManager::DrawMenuBar");
+    DrawGameExport();
+    bool requestTitle_ = false;
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("Scene")) {
             // 状態を直接書き換える
             if (ImGui::MenuItem("Save Scene")) { gameObjectManager->GetSceneState().showSavePopup = true; }
             if (ImGui::MenuItem("Load Scene")) { gameObjectManager->GetSceneState().showLoadPopup = true; }
+            if (ImGui::MenuItem("Export Game...")) showGameExport = true;
+            ImGui::Separator();
+            // Play中の一時状態を編集Sceneへ保存しないよう、Stop後だけ離脱を受け付ける。
+            const bool canReturn_ = gameObjectManager && gameObjectManager->CanStartEditorPlay() &&
+                !gameObjectManager->IsCinematicSequencePreview() && !SceneManager::IsTransitionActive() && !SceneManager::IsEditorPlaySessionActive();
+            if (ImGui::MenuItem("Return to Title...", nullptr, false, canReturn_)) requestTitle_ = true;
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Window")) {
@@ -259,6 +369,27 @@ void EditorWindowManager::DrawMenuBar()
             ImGui::EndMenu();
         }
         ImGui::EndMainMenuBar();
+    }
+    if (requestTitle_) ImGui::OpenPopup("Return to Title##Editor");
+    if (ImGui::BeginPopupModal("Return to Title##Editor", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::TextUnformatted("Unsaved scene changes will be lost.");
+        ImGui::TextUnformatted("Use Save Scene before returning if you want to keep your edits.");
+        if (ImGui::Button("Save Scene..."))
+        {
+            gameObjectManager->GetSceneState().showSavePopup = true;
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Return Without Saving"))
+        {
+            // Sceneの具象型へ依存せず、既存Actionにタイトルへの通常遷移を委ねる。
+            ActionRegistry::Instance().Call("GoSceneTitle");
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Cancel")) ImGui::CloseCurrentPopup();
+        ImGui::EndPopup();
     }
 }
 
@@ -344,6 +475,14 @@ std::string EditorWindowManager::GetActiveWorkspaceName() const
 }
 void EditorWindowManager::Update(float deltaTime_)
 {
+    // 他Workspaceが対象を取得する前に試写Sceneを戻し、生成物の参照を引き継がせない。
+    if (gameObjectManager && gameObjectManager->HasCinematicSequenceStopRequest()) gameObjectManager->Update(0.0f);
+    // ComponentのGUI走査中にWorkspaceを切り替えず、次の更新開始時に対象を渡す。
+    std::string ownerName_;
+    int sequenceIndex_ = -1;
+    if (gameObjectManager && gameObjectManager->ConsumeCinematicEditorRequest(ownerName_, sequenceIndex_))
+        for (int index_ = 0; index_ < static_cast<int>(windows.size()); ++index_)
+            if (windows[index_]->OpenCinematicSequence(ownerName_, sequenceIndex_)) { SetActiveWorkspace(index_); break; }
     if (activeWorkspaceIndex < 0 || activeWorkspaceIndex >= static_cast<int>(windows.size())) return;
     if (!windows[activeWorkspaceIndex]->IsEditorWorkspace()) return;
 

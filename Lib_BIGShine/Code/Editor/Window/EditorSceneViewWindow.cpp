@@ -45,6 +45,9 @@ void EditorSceneViewWindow::Draw()
 
     const bool previewHovered_ =
         ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
+    // カメラ設定の変更後も、操作開始時に現在の視点を引き継ぐ。
+    if (previewHovered_ && ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+        editorCameraData.CaptureFromCamera(*editorCamera_);
     editorCameraData.UpdatePreviewFreeCamera(
         *editorCamera_,
         ImGui::GetIO().DeltaTime,
@@ -93,8 +96,9 @@ std::shared_ptr<CameraComponent> EditorSceneViewWindow::ResolveEditorCamera()
 
     if (!initializedFromRuntimeCamera)
     {
-        // 初回だけ現在のゲームカメラ位置から開始し、以後はEditor専用カメラとして独立して動かす。
-        cameraManager_->CopyActiveCameraToEditorCamera();
+        // Editorでは中央ビューの視点を維持し、実行中だけゲームカメラを初期値にする。
+        if (!gameObjectManager->SupportsEditorPlayMode() || gameObjectManager->GetEditorPlayMode() != EditorPlayMode::EDITOR)
+            cameraManager_->CopyActiveCameraToEditorCamera();
         editorCameraData.CaptureFromCamera(*editorCamera_);
         initializedFromRuntimeCamera = true;
     }

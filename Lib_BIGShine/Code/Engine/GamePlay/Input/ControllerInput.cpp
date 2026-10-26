@@ -1,8 +1,10 @@
 #include "PrecompiledHeader.h"
 
 #include "ControllerInput.h"
+#include "Engine/Debug/TracyProfiler.h"
 
 #include <SDL3/SDL_events.h>
+#include <SDL3/SDL_timer.h>
 
 #include <algorithm>
 #include <cmath>
@@ -16,6 +18,31 @@ ControllerInput& ControllerInput::Instance()
 ControllerInput::~ControllerInput()
 {
     Shutdown();
+}
+
+void ControllerInput::PlayRumble(float lowStrength_, float highStrength_, float duration_, int priority_)
+{
+    BS_PROFILE_SCOPE("ControllerInput::PlayRumble");
+    if (!gamepad || !connected || !std::isfinite(lowStrength_) ||
+        !std::isfinite(highStrength_) || !std::isfinite(duration_) || duration_ <= 0.0f) return;
+    const Uint64 now_ = SDL_GetTicks();
+    if (now_ < rumbleEndTime && priority_ < rumblePriority) return;
+    const Uint32 durationMs_ = static_cast<Uint32>(std::clamp(duration_, 0.001f, 10.0f) * 1000.0f);
+    if (SDL_RumbleGamepad(gamepad,
+        static_cast<Uint16>(std::clamp(lowStrength_, 0.0f, 1.0f) * 65535.0f),
+        static_cast<Uint16>(std::clamp(highStrength_, 0.0f, 1.0f) * 65535.0f),
+        durationMs_))
+    {
+        rumbleEndTime = now_ + durationMs_;
+        rumblePriority = priority_;
+    }
+}
+
+void ControllerInput::StopRumble()
+{
+    rumbleEndTime = 0;
+    rumblePriority = 0;
+    if (gamepad) SDL_RumbleGamepad(gamepad, 0, 0, 0);
 }
 
 bool ControllerInput::Initialize()
@@ -116,6 +143,7 @@ bool ControllerInput::TryOpenGamepad()
         // デバッグ表示用にデバイス名を保持し、取得できない場合はUnknownとして扱う。
         const char* name_ = SDL_GetGamepadName(gamepad);
         gamepadName = name_ != nullptr ? name_ : "Unknown Gamepad";
+        gamepadType = SDL_GetGamepadType(gamepad);
     }
 
     return connected;
@@ -125,12 +153,31 @@ void ControllerInput::CloseGamepad()
 {
     if (gamepad != nullptr)
     {
+        StopRumble();
         SDL_CloseGamepad(gamepad);
         gamepad = nullptr;
     }
 
     connected = false;
     gamepadName.clear();
+    gamepadType = SDL_GAMEPAD_TYPE_UNKNOWN;
+}
+
+bool ControllerInput::HasMeaningfulInput() const
+{
+    BS_PROFILE_SCOPE("ControllerInput::HasMeaningfulInput");
+    if (!connected) return false;
+    for (std::size_t index_ = 0; index_ < state.buttons.size(); ++index_)
+        if (state.buttons[index_] && !previousState.buttons[index_]) return true;
+    // 軸の絶対量とフレーム間変化の両方を条件にして、静止中の微小変動を除外する。
+    for (std::size_t index_ = 0; index_ < state.axes.size(); ++index_)
+    {
+        const float value_ = static_cast<float>(state.axes[index_]) / 32767.0f;
+        const float previous_ = static_cast<float>(previousState.axes[index_]) / 32767.0f;
+        const float threshold_ = index_ >= SDL_GAMEPAD_AXIS_LEFT_TRIGGER ? triggerThreshold : stickDeadZone + 0.08f;
+        if (std::abs(value_) > threshold_ && (std::abs(previous_) <= threshold_ || std::abs(value_ - previous_) > 0.04f)) return true;
+    }
+    return false;
 }
 
 void ControllerInput::CaptureState()

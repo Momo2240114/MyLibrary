@@ -9,6 +9,10 @@
 #include "Engine/Graphics/Resource/Animation/AnimationState.h"
 #include "Engine/Physics/HitBox.h"
 
+#include "Engine/Debug/TracyProfiler.h"
+#include "Engine/Audio/AudioManager.h"
+#include "Engine/GamePlay/Input/ControllerInput.h"
+
 #include <cstdio>
 
 namespace
@@ -117,6 +121,7 @@ namespace
             : std::string{};
         hitBox_->hitMeshVFXLifeTime = attackTemplate_.hitEffect.hitMeshVfxLifeTime;
         hitBox_->hitMeshVFXNormalOffset = attackTemplate_.hitEffect.hitMeshVfxNormalOffset;
+        hitBox_->feedback = attackTemplate_.feedback;
         hitBox_->cameraShakeEnabled = attackTemplate_.cameraShake.enabled;
         hitBox_->cameraShakeReceiveDuration = attackTemplate_.cameraShake.receiveDuration;
         hitBox_->cameraShakeReceivePositionStrength =
@@ -147,6 +152,17 @@ void AttackTemplateRuntime::Start(
     if (!owner_) return;
     const AttackTemplate* attackTemplate_ = GetTemplate(event_);
     if (!attackTemplate_) return;
+
+    BS_PROFILE_SCOPE("AttackTemplateRuntime::StartFeedback");
+    const auto actor_ = GetRoot(owner_);
+    // 敵の空振りでPadを揺らさず、プレイヤー自身の攻撃開始だけを通知する。
+    if (actor_ && actor_->GetLayer() == LayerType::Player && attackTemplate_->feedback.rumbleEnabled)
+        ControllerInput::Instance().PlayRumble(attackTemplate_->feedback.startStrength,
+            attackTemplate_->feedback.startStrength * 0.5f, attackTemplate_->feedback.duration);
+    if (owner_->transform)
+        AudioManager::Instance().PlaySpatialAttackSound(attackTemplate_->feedback.startSoundPath,
+            owner_->transform->GetWorldPosition(), attackTemplate_->feedback.volume,
+            attackTemplate_->feedback.minDistance, attackTemplate_->feedback.maxDistance);
 
     // AnimEvent側にRuntime状態を持たせ、Update/Endで同じ攻撃インスタンスを追跡する。
     event_.attackTemplateRuntimeActive = true;
@@ -199,6 +215,7 @@ void AttackTemplateRuntime::Start(
         request_.setting.allowMultiHit =
             attackTemplate_->allowMultiHit ||
             attackTemplate_->damageApplyType != DAMAGE_APPLY_TYPE::SINGLE_HIT;
+        request_.setting.feedback = attackTemplate_->feedback;
         request_.setting.cameraShakeEnabled = attackTemplate_->cameraShake.enabled;
         request_.setting.cameraShakeReceiveDuration = attackTemplate_->cameraShake.receiveDuration;
         request_.setting.cameraShakeReceivePositionStrength =

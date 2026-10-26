@@ -9,6 +9,7 @@
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
+#include "Engine/GamePlay/System/TimeManager.h"
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
 #include "Engine/GamePlay/Serialize/ComponentRegistry.h"
 #include "Engine/GamePlay/Transform/Transform.h"
@@ -335,7 +336,15 @@ void CameraActionDirectorComponent::LateUpdate(float deltaTime_)
         return;
     }
     if (activePreset.autoFrameTargets && phase != CAMERA_ACTION_PHASE::RETURN) UpdateFraming(activePreset);
-    phaseTimer += deltaTime_;
+    float phaseDelta_ = deltaTime_;
+    if (activePreset.useUnscaledTime)
+    {
+        // カメラObjectがPlayerレイヤーでも、拘束時のスローで構図の切替まで遅くしない。
+        const auto owner_ = GetGameObject();
+        const auto time_ = owner_ && owner_->manager ? owner_->GetManager().GetTimeManager() : nullptr;
+        if (time_) phaseDelta_ = time_->GetLastRawDeltaTime();
+    }
+    phaseTimer += (std::max)(phaseDelta_, 0.0f);
     float duration_ = GetPhaseDuration();
     const float rate_ = duration_ <= 0.0001f
         ? 1.0f
@@ -484,6 +493,11 @@ void CameraActionDirectorComponent::StopAction(bool immediate_)
     phase = CAMERA_ACTION_PHASE::RETURN;
     phaseTimer = 0.0f;
     ReleaseSuppression();
+}
+
+void CameraActionDirectorComponent::StopActionByName(const std::string& actionName_, bool immediate_)
+{
+    if (phase != CAMERA_ACTION_PHASE::IDLE && activePreset.actionName == actionName_) StopAction(immediate_);
 }
 
 void CameraActionDirectorComponent::RegisterActions()

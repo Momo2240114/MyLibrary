@@ -1,11 +1,11 @@
-// PBRPS.hlsl  ---- IBL‘Î‰”Å ----
+// PBRPS.hlsl  ---- IBLå¯¾å¿œç‰ˆ ----
 #include "ModelCommon.hlsli"
 #include "bidirectional_reflectance_distribution_function.hlsli"
 
 static const float PI = 3.14159265f;
 
 // -----------------------------------------------
-// ƒƒbƒVƒ…—p’è”ƒoƒbƒtƒ@ib0j
+// ãƒ¡ãƒƒã‚·ãƒ¥ç”¨å®šæ•°ãƒãƒƒãƒ•ã‚¡ï¼ˆb0ï¼‰
 // -----------------------------------------------
 cbuffer CbMesh : register(b0)
 {
@@ -18,7 +18,7 @@ cbuffer CbMesh : register(b0)
 };
 
 // -----------------------------------------------
-// ACESƒg[ƒ“ƒ}ƒbƒsƒ“ƒOŠÖ”
+// ACESãƒˆãƒ¼ãƒ³ãƒãƒƒãƒ”ãƒ³ã‚°é–¢æ•°
 // -----------------------------------------------
 float3 ACESFilm(float3 x)
 {
@@ -31,7 +31,7 @@ float3 ACESFilm(float3 x)
 }
 
 // -----------------------------------------------
-// ƒeƒNƒXƒ`ƒƒit0`t4Fƒ}ƒeƒŠƒAƒ‹At10`t12FIBL—pj
+// ãƒ†ã‚¯ã‚¹ãƒãƒ£ï¼ˆt0ï½t4ï¼šãƒãƒ†ãƒªã‚¢ãƒ«ã€t10ï½t12ï¼šIBLç”¨ï¼‰
 // -----------------------------------------------
 Texture2D BaseMap : register(t0);
 Texture2D NormalMap : register(t1);
@@ -39,30 +39,30 @@ Texture2D EmissiveMap : register(t2);
 Texture2D AOMap : register(t3);
 Texture2D MetalRoughMap : register(t4);
 
-// IBLƒeƒNƒXƒ`ƒƒ
-// register”Ô†‚ÍGraphicsDeviceManager‘¤‚Ìİ’è‚Æˆê’v‚³‚¹‚é‚±‚Æ
-TextureCube diffuse_iem : register(t10); // ŠgU”½Ë—pIrradiance Map
-TextureCube specular_pmrem : register(t11); // ‹¾–Ê”½Ë—pRadiance Map
-Texture2D lut_ggx : register(t12); // GGX BRDFQÆƒe[ƒuƒ‹
+// IBLãƒ†ã‚¯ã‚¹ãƒãƒ£
+// registerç•ªå·ã¯GraphicsDeviceManagerå´ã®è¨­å®šã¨ä¸€è‡´ã•ã›ã‚‹ã“ã¨
+TextureCube diffuse_iem : register(t10); // æ‹¡æ•£åå°„ç”¨Irradiance Map
+TextureCube specular_pmrem : register(t11); // é¡é¢åå°„ç”¨Radiance Map
+Texture2D lut_ggx : register(t12); // GGX BRDFå‚ç…§ãƒ†ãƒ¼ãƒ–ãƒ«
 
 // -----------------------------------------------
-// ƒTƒ“ƒvƒ‰[
+// ã‚µãƒ³ãƒ—ãƒ©ãƒ¼
 // -----------------------------------------------
 SamplerState LinearSampler : register(s0);
 
 
 // -----------------------------------------------
-// IBLƒwƒ‹ƒp[ŠÖ”
+// IBLãƒ˜ãƒ«ãƒ‘ãƒ¼é–¢æ•°
 // -----------------------------------------------
 
-// ‘e‚³‚ğl—¶‚µ‚½ƒtƒŒƒlƒ‹”½Ë—¦‚ğŒvZ‚·‚é
+// ç²—ã•ã‚’è€ƒæ…®ã—ãŸãƒ•ãƒ¬ãƒãƒ«åå°„ç‡ã‚’è¨ˆç®—ã™ã‚‹
 float3 CalcFresnelRoughness(float3 f0, float NdotV, float roughness)
 {
     return f0 + (max((float3) (1.0f - roughness), f0) - f0)
                * pow(saturate(1.0f - NdotV), 5.0f);
 }
 
-// ŠgU”½ËIBL
+// æ‹¡æ•£åå°„IBL
 float3 DiffuseIBL(float3 N, float3 V, float roughness,
                   float3 diffuse_reflectance, float3 f0)
 {
@@ -72,19 +72,19 @@ float3 DiffuseIBL(float3 N, float3 V, float roughness,
     return diffuse_reflectance * irrad * kD;
 }
 
-// ‹¾–Ê”½ËIBLiSplit Sum‹ß—j
+// é¡é¢åå°„IBLï¼ˆSplit Sumè¿‘ä¼¼ï¼‰
 float3 SpecularIBL(float3 N, float3 V, float roughness, float3 f0)
 {
     float NdotV = max(0.0001f, dot(N, V));
     float3 R = normalize(reflect(-V, N));
 
-    // roughness‚É‰‚¶‚½ƒ~ƒbƒvƒŒƒxƒ‹‚ÅƒTƒ“ƒvƒŠƒ“ƒO‚·‚é
+    // roughnessã«å¿œã˜ãŸãƒŸãƒƒãƒ—ãƒ¬ãƒ™ãƒ«ã§ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ã™ã‚‹
     uint width, height, mipMaps;
     specular_pmrem.GetDimensions(0, width, height, mipMaps);
     float lod = roughness * float(mipMaps - 1);
     float3 specLight = specular_pmrem.SampleLevel(LinearSampler, R, lod).rgb;
 
-    // BRDF LUT‚©‚çF_scale‚ÆF_bias‚ğæ“¾‚·‚é
+    // BRDF LUTã‹ã‚‰F_scaleã¨F_biasã‚’å–å¾—ã™ã‚‹
     float2 brdfUV = saturate(float2(NdotV, roughness));
     float2 envBRDF = lut_ggx.Sample(LinearSampler, brdfUV).rg;
 
@@ -92,40 +92,43 @@ float3 SpecularIBL(float3 N, float3 V, float roughness, float3 f0)
 }
 
 // -----------------------------------------------
-// ƒƒCƒ“ˆ—
+// ãƒ¡ã‚¤ãƒ³å‡¦ç†
 // -----------------------------------------------
 PS_OUT main(VS_OUT pin)
 {
-    // --- 1. ƒeƒNƒXƒ`ƒƒ‚ÌƒTƒ“ƒvƒŠƒ“ƒO ---
+    // --- 1. ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚° ---
     float4 base = BaseMap.Sample(LinearSampler, pin.texcoord) * baseColor * 0.8f;
     if (base.a < 0.1f)
         discard;
 
     float3 N = normalize(pin.normal);
-    float3 T = normalize(pin.tangent);
-    float3 B = cross(N, T);
+    float3 T = normalize(pin.tangent.xyz);
+    T = normalize(T - N * dot(N, T));
+    float3 B = normalize(cross(N, T)) * pin.tangent.w;
     float3x3 TBN = float3x3(T, B, N);
     float3 normalSample = NormalMap.Sample(LinearSampler, pin.texcoord).xyz * 2.0f - 1.0f;
     N = normalize(mul(normalSample, TBN));
 
     float3 V = normalize(cameraPosition.xyz - pin.position);
 
-    // --- 2. PBRƒpƒ‰ƒ[ƒ^[ ---
-    float2 metalRoughSample = MetalRoughMap.Sample(LinearSampler, pin.texcoord).gr;
-    float metalness = metalRoughSample.r * metalnessParam;
-    float roughness = metalRoughSample.g * roughnessParam;
+    // --- 2. PBRãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ãƒ¼ ---
+    float4 metalRoughSample = MetalRoughMap.Sample(LinearSampler, pin.texcoord);
+    float2 materialValues_ = ApplySeparateMaterialMaps(
+        metalRoughSample, float2(metalnessParam, roughnessParam), LinearSampler, pin.texcoord);
+    float metalness = materialValues_.r;
+    float roughness = materialValues_.g;
     float alphaRoughness = roughness * roughness;
 
     float3 f0 = lerp(float3(0.04f, 0.04f, 0.04f), base.rgb, metalness);
     float3 f90 = float3(1.0f, 1.0f, 1.0f);
 
-    // ŠgU”½Ë—¦i‹à‘®‚Ìê‡‚Í0j
+    // æ‹¡æ•£åå°„ç‡ï¼ˆé‡‘å±ã®å ´åˆã¯0ï¼‰
     float3 diffuse_reflectance = base.rgb * (1.0f - metalness);
 
-    // --- 3. ’¼Úƒ‰ƒCƒeƒBƒ“ƒO ---
+    // --- 3. ç›´æ¥ãƒ©ã‚¤ãƒ†ã‚£ãƒ³ã‚° ---
     float3 totalDirectLighting = 0;
 
-    // A. •½sŒõŒ¹
+    // A. å¹³è¡Œå…‰æº
     {
         float3 L = normalize(-lightDirection.xyz);
         float3 H = normalize(L + V);
@@ -142,7 +145,7 @@ PS_OUT main(VS_OUT pin)
         totalDirectLighting += (diff + spec) * (lightColor.rgb * directionalIntensity) * NdotL * shadow;
     }
 
-    // B. “_ŒõŒ¹
+    // B. ç‚¹å…‰æº
     [loop]
     for (int i = 0; i < numPointLights; i++)
     {
@@ -168,7 +171,7 @@ PS_OUT main(VS_OUT pin)
         totalDirectLighting += (diff + spec) * (pl.color * pl.intensity) * NdotL * att;
     }
 
-    // C. ƒXƒ|ƒbƒgƒ‰ƒCƒg
+    // C. ã‚¹ãƒãƒƒãƒˆãƒ©ã‚¤ãƒˆ
     [loop]
     for (int j = 0; j < numSpotLights; j++)
     {
@@ -202,27 +205,32 @@ PS_OUT main(VS_OUT pin)
         totalDirectLighting += (diff + spec) * (sl.color * sl.intensity) * NdotL * att;
     }
 
-    // IBL‚ÌŒvZ
+    // IBLã®è¨ˆç®—
     float3 iblDiffuse = DiffuseIBL(N, V, roughness, diffuse_reflectance, f0);
     float3 iblSpecular = SpecularIBL(N, V, roughness, f0);
 
     // AO / Emissive
-    float ao = AOMap.Sample(LinearSampler, pin.texcoord).r * occlusionStrength;
+    float ao = lerp(1.0f, AOMap.Sample(LinearSampler, pin.texcoord).r, occlusionStrength);
     float3 emissive = EmissiveMap.Sample(LinearSampler, pin.texcoord).rgb * emissiveColor.rgb;
 
-    // --- AO‚ğŠgU”½ËIBL‚Ö“K—p ---
+    // --- AOã‚’æ‹¡æ•£åå°„IBLã¸é©ç”¨ ---
     float3 finalColor = (totalDirectLighting + (iblDiffuse * ao) + iblSpecular) + emissive;
 
-    // --- ƒg[ƒ“ƒ}ƒbƒsƒ“ƒO‚ğ“K—p ---
-    finalColor = ACESFilm(finalColor);
+    // Bloomã¨åŠé€æ˜åˆæˆã¸ç·šå½¢HDRã‚’æ¸¡ã—ã€è¡¨ç¤ºå¤‰æ›ã¯æœ€çµ‚åˆæˆã§è¡Œã†ã€‚
+    finalColor = max(finalColor, 0.0f);
 
-    // ƒKƒ“ƒ}•â³
-    finalColor = pow(max(finalColor, 0.0f), 1.0f / 2.2f);
+
+
+    // PostEffectã®ãªã„Editorãƒ—ãƒ¬ãƒ“ãƒ¥ãƒ¼ã ã‘ã€ã“ã“ã§è¡¨ç¤ºç”¨ã®è‰²ã¸å¤‰æ›ã™ã‚‹ã€‚
+    if (outputLinearColor < 0.5f)
+    {
+        finalColor = pow(max(ACESFilm(finalColor), 0.0f), 1.0f / 2.2f);
+    }
 
     PS_OUT output; 
-    // ƒJƒ‰[‚ğo—Í
+    // ã‚«ãƒ©ãƒ¼ã‚’å‡ºåŠ›
     output.color = float4(finalColor, base.a);   
-    // –@ü‚ğo—Íi–@üƒ}ƒbƒv“K—pŒã‚ÌƒxƒNƒgƒ‹‚ğm0, 1n‚Ö•ÏŠ·j
+    // æ³•ç·šã‚’å‡ºåŠ›ï¼ˆæ³•ç·šãƒãƒƒãƒ—é©ç”¨å¾Œã®ãƒ™ã‚¯ãƒˆãƒ«ã‚’ï¼»0, 1ï¼½ã¸å¤‰æ›ï¼‰
     output.normal = float4(N * 0.5f + 0.5f, 1.0f);
     return output;
 }

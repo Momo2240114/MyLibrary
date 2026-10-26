@@ -1,0 +1,758 @@
+{
+  "source": "Data\\Sprite\\UI\\幻想アクションゲームHUD設計図.png",
+  "assets": [
+    {
+      "file": "Boss/BossBar_DragonDecoration.png",
+      "size": [
+        150,
+        120
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "method": "source contour / dark-matte reconstruction",
+      "sourceRect": [
+        35,
+        55,
+        185,
+        175
+      ]
+    },
+    {
+      "file": "Boss/BossBar_HumanDecoration.png",
+      "size": [
+        150,
+        104
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "method": "source contour / dark-matte reconstruction",
+      "sourceRect": [
+        34,
+        190,
+        184,
+        294
+      ]
+    },
+    {
+      "file": "Player/PlayerBar_Decoration.png",
+      "size": [
+        126,
+        104
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "method": "source contour / dark-matte reconstruction",
+      "sourceRect": [
+        49,
+        354,
+        175,
+        458
+      ]
+    },
+    {
+      "file": "Status/Status_Buff.png",
+      "size": [
+        62,
+        63
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "method": "source contour",
+      "sourceRect": [
+        842,
+        362,
+        904,
+        425
+      ]
+    },
+    {
+      "file": "Status/Status_Debuff.png",
+      "size": [
+        62,
+        63
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "method": "source contour",
+      "sourceRect": [
+        970,
+        362,
+        1032,
+        425
+      ]
+    },
+    {
+      "file": "Status/Status_Guard.png",
+      "size": [
+        62,
+        63
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "method": "source contour",
+      "sourceRect": [
+        1097,
+        362,
+        1159,
+        425
+      ]
+    },
+    {
+      "file": "Status/Status_Invincible.png",
+      "size": [
+        62,
+        63
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "method": "source contour",
+      "sourceRect": [
+        1223,
+        362,
+        1285,
+        425
+      ]
+    },
+    {
+      "file": "Status/Status_JustGuard.png",
+      "size": [
+        62,
+        63
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "method": "source contour",
+      "sourceRect": [
+        1357,
+        362,
+        1419,
+        425
+      ]
+    },
+    {
+      "file": "Skills/Skill_Combo.png",
+      "size": [
+        89,
+        91
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "method": "source contour",
+      "sourceRect": [
+        28,
+        844,
+        117,
+        935
+      ]
+    },
+    {
+      "file": "Skills/Skill_ComboRound.png",
+      "size": [
+        96,
+        96
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "method": "source icon with reconstructed circular contour",
+      "sourceRect": [
+        28,
+        844,
+        117,
+        935
+      ]
+    },
+    {
+      "file": "Skills/Skill_Charge.png",
+      "size": [
+        89,
+        91
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "method": "source contour",
+      "sourceRect": [
+        132,
+        844,
+        221,
+        935
+      ]
+    },
+    {
+      "file": "Skills/Skill_ChargeRound.png",
+      "size": [
+        96,
+        96
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "method": "source icon with reconstructed circular contour",
+      "sourceRect": [
+        132,
+        844,
+        221,
+        935
+      ]
+    },
+    {
+      "file": "Skills/Skill_Launcher.png",
+      "size": [
+        89,
+        91
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "method": "source contour",
+      "sourceRect": [
+        236,
+        844,
+        325,
+        935
+      ]
+    },
+    {
+      "file": "Skills/Skill_LauncherRound.png",
+      "size": [
+        96,
+        96
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "method": "source icon with reconstructed circular contour",
+      "sourceRect": [
+        236,
+        844,
+        325,
+        935
+      ]
+    },
+    {
+      "file": "Skills/Skill_Heal.png",
+      "size": [
+        89,
+        91
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "method": "source contour",
+      "sourceRect": [
+        340,
+        844,
+        429,
+        935
+      ]
+    },
+    {
+      "file": "Skills/Skill_HealRound.png",
+      "size": [
+        96,
+        96
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "method": "source icon with reconstructed circular contour",
+      "sourceRect": [
+        340,
+        844,
+        429,
+        935
+      ]
+    },
+    {
+      "file": "Skills/Skill_Buff.png",
+      "size": [
+        89,
+        91
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "method": "source contour",
+      "sourceRect": [
+        445,
+        844,
+        534,
+        935
+      ]
+    },
+    {
+      "file": "Skills/Skill_BuffRound.png",
+      "size": [
+        96,
+        96
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "method": "source icon with reconstructed circular contour",
+      "sourceRect": [
+        445,
+        844,
+        534,
+        935
+      ]
+    },
+    {
+      "file": "Skills/Skill_Magic.png",
+      "size": [
+        89,
+        91
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "method": "source contour",
+      "sourceRect": [
+        549,
+        844,
+        638,
+        935
+      ]
+    },
+    {
+      "file": "Skills/Skill_MagicRound.png",
+      "size": [
+        96,
+        96
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "method": "source icon with reconstructed circular contour",
+      "sourceRect": [
+        549,
+        844,
+        638,
+        935
+      ]
+    },
+    {
+      "file": "Buttons/Button_Triangle.png",
+      "size": [
+        54,
+        56
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "method": "source contour",
+      "sourceRect": [
+        1260,
+        831,
+        1314,
+        887
+      ]
+    },
+    {
+      "file": "Buttons/Button_Circle.png",
+      "size": [
+        54,
+        56
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "method": "source contour",
+      "sourceRect": [
+        1326,
+        831,
+        1380,
+        887
+      ]
+    },
+    {
+      "file": "Buttons/Button_Cross.png",
+      "size": [
+        54,
+        56
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "method": "source contour",
+      "sourceRect": [
+        1391,
+        831,
+        1445,
+        887
+      ]
+    },
+    {
+      "file": "Buttons/Button_Square.png",
+      "size": [
+        54,
+        56
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "method": "source contour",
+      "sourceRect": [
+        1457,
+        831,
+        1511,
+        887
+      ]
+    },
+    {
+      "file": "Buttons/Button_L1.png",
+      "size": [
+        78,
+        40
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "method": "source contour",
+      "sourceRect": [
+        1294,
+        901,
+        1372,
+        941
+      ]
+    },
+    {
+      "file": "Buttons/Button_R1.png",
+      "size": [
+        79,
+        40
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "method": "source contour",
+      "sourceRect": [
+        1399,
+        901,
+        1478,
+        941
+      ]
+    },
+    {
+      "file": "Buttons/Button_L2.png",
+      "size": [
+        78,
+        42
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "method": "source contour",
+      "sourceRect": [
+        1294,
+        949,
+        1372,
+        991
+      ]
+    },
+    {
+      "file": "Buttons/Button_R2.png",
+      "size": [
+        79,
+        42
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "method": "source contour",
+      "sourceRect": [
+        1399,
+        949,
+        1478,
+        991
+      ]
+    },
+    {
+      "file": "Boss/BossBar_Frame.png",
+      "size": [
+        925,
+        38
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "method": "source rails; covered gauge interior removed",
+      "sourceRect": [
+        165,
+        104,
+        1090,
+        142
+      ]
+    },
+    {
+      "file": "Boss/BossBar_Background.png",
+      "size": [
+        256,
+        16
+      ],
+      "alpha": [
+        245,
+        245
+      ],
+      "method": "reconstructed geometry (not extracted)",
+      "sourceRect": null
+    },
+    {
+      "file": "Boss/BossBar_Fill.png",
+      "size": [
+        256,
+        16
+      ],
+      "alpha": [
+        255,
+        255
+      ],
+      "method": "reconstructed geometry (not extracted)",
+      "sourceRect": null
+    },
+    {
+      "file": "Boss/BossBar_DamageTrail.png",
+      "size": [
+        256,
+        16
+      ],
+      "alpha": [
+        230,
+        230
+      ],
+      "method": "reconstructed geometry (not extracted)",
+      "sourceRect": null
+    },
+    {
+      "file": "Player/PlayerBar_Frame.png",
+      "size": [
+        549,
+        23
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "method": "source rails; covered gauge interior removed",
+      "sourceRect": [
+        162,
+        387,
+        711,
+        410
+      ]
+    },
+    {
+      "file": "Player/PlayerBar_Background.png",
+      "size": [
+        256,
+        16
+      ],
+      "alpha": [
+        245,
+        245
+      ],
+      "method": "reconstructed geometry (not extracted)",
+      "sourceRect": null
+    },
+    {
+      "file": "Player/PlayerBar_HpFill.png",
+      "size": [
+        256,
+        16
+      ],
+      "alpha": [
+        255,
+        255
+      ],
+      "method": "reconstructed geometry (not extracted)",
+      "sourceRect": null
+    },
+    {
+      "file": "Player/PlayerBar_DamageTrail.png",
+      "size": [
+        256,
+        16
+      ],
+      "alpha": [
+        230,
+        230
+      ],
+      "method": "reconstructed geometry (not extracted)",
+      "sourceRect": null
+    },
+    {
+      "file": "Player/PlayerBar_ResourceFill.png",
+      "size": [
+        256,
+        16
+      ],
+      "alpha": [
+        255,
+        255
+      ],
+      "method": "reconstructed geometry (not extracted)",
+      "sourceRect": null
+    },
+    {
+      "file": "Boss/BossBar_HumanFrame.png",
+      "size": [
+        925,
+        41
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "method": "source rails; covered gauge interior removed",
+      "sourceRect": [
+        165,
+        235,
+        1090,
+        276
+      ]
+    },
+    {
+      "file": "Boss/BossBar_AwakenedDecoration.png",
+      "size": [
+        900,
+        36
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "method": "reconstructed geometry (not extracted)",
+      "sourceRect": null
+    },
+    {
+      "file": "ActionGuide/ActionGuide_Background.png",
+      "size": [
+        300,
+        270
+      ],
+      "alpha": [
+        0,
+        176
+      ],
+      "method": "reconstructed geometry (not extracted)",
+      "sourceRect": null
+    },
+    {
+      "file": "ActionGuide/ActionGuide_LabelBackground.png",
+      "size": [
+        220,
+        44
+      ],
+      "alpha": [
+        0,
+        212
+      ],
+      "method": "reconstructed geometry (not extracted)",
+      "sourceRect": null
+    },
+    {
+      "file": "ActionGuide/ActionGuide_ButtonFrame.png",
+      "size": [
+        100,
+        100
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "method": "reconstructed geometry (not extracted)",
+      "sourceRect": null
+    },
+    {
+      "file": "ActionGuide/ActionGuide_Highlight.png",
+      "size": [
+        100,
+        100
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "method": "reconstructed geometry (not extracted)",
+      "sourceRect": null
+    },
+    {
+      "file": "Skills/Skill_ReadyFrame.png",
+      "size": [
+        100,
+        100
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "method": "reconstructed geometry (not extracted)",
+      "sourceRect": null
+    },
+    {
+      "file": "Skills/Skill_Empty.png",
+      "size": [
+        100,
+        100
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "method": "reconstructed geometry (not extracted)",
+      "sourceRect": null
+    },
+    {
+      "file": "Skills/Skill_CooldownOverlay.png",
+      "size": [
+        1152,
+        1024
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "method": "generated 65-frame radial atlas; 9 columns, 128px cells",
+      "sourceRect": null
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+#pragma code_page(65001)
+#include "ApplicationResources.h"
+
+// 最小のアイコンIDへ対象アプリだけを登録し、Explorerでの選択を一意にする。
+#if defined(BS_APP_GAME)
+IDI_APPLICATION_ICON ICON "ANATHEMA/ANATHEMA.ico"
+#else
+IDI_APPLICATION_ICON ICON "BigShine/BigShine.ico"
+#endif

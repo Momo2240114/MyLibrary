@@ -48,19 +48,19 @@
                     },
                     {
                         "balance": [
-                            1,
-                            1,
-                            1
+                            1.0,
+                            1.0,
+                            1.0
                         ],
-                        "bri": 0,
-                        "con": 1,
-                        "sat": 1,
-                        "hue": 0,
-                        "intensity": 1,
-                        "dur": 0.6,
-                        "holdDur": 0.45,
-                        "returnDur": 0.8,
-                        "ease": 1
+                        "bri": 0.0,
+                        "con": 1.0,
+                        "dur": 0.6000000238418579,
+                        "ease": 1,
+                        "holdDur": 0.44999998807907104,
+                        "hue": 0.0,
+                        "intensity": 1.0,
+                        "returnDur": 0.800000011920929,
+                        "sat": 1.0
                     }
                 ],
                 "DefaultFilter": {
@@ -128,238 +128,391 @@
                         "ActionName": "PlayerIdle",
                         "ActorName": "PlayerModel",
                         "Duration": 0.0,
+                        "IncludeChildren": false,
+                        "MatchTargetRotation": false,
                         "PositionOffset": [
                             0.0,
                             0.0,
                             0.0
                         ],
+                        "PrefabName": "",
+                        "RefreshStateAssetOnPlay": false,
+                        "SkipInPreview": false,
+                        "SmoothMovement": true,
                         "StateAssetPath": "",
                         "StateName": "SS_Idle",
+                        "SwayAmplitude": 0.0,
+                        "SwayCycles": 2.0,
                         "TargetName": "",
+                        "TrailWidth": 1.2000000476837158,
                         "Type": 0
                     },
                     {
                         "ActionName": "DragonIdle",
                         "ActorName": "TestTarget",
                         "Duration": 0.0,
+                        "IncludeChildren": false,
+                        "MatchTargetRotation": false,
                         "PositionOffset": [
                             0.0,
                             0.0,
                             0.0
                         ],
+                        "PrefabName": "",
+                        "RefreshStateAssetOnPlay": false,
+                        "SkipInPreview": false,
+                        "SmoothMovement": true,
                         "StateAssetPath": "",
                         "StateName": "PlainsDragon_IdleBreathe",
+                        "SwayAmplitude": 0.0,
+                        "SwayCycles": 2.0,
                         "TargetName": "",
+                        "TrailWidth": 1.2000000476837158,
                         "Type": 0
                     },
                     {
                         "ActionName": "DrawWeapon",
                         "ActorName": "PlayerModel",
                         "Duration": 0.15000000596046448,
+                        "IncludeChildren": false,
+                        "MatchTargetRotation": false,
                         "PositionOffset": [
                             0.0,
                             0.0,
                             0.0
                         ],
+                        "PrefabName": "",
+                        "RefreshStateAssetOnPlay": false,
+                        "SkipInPreview": false,
+                        "SmoothMovement": true,
                         "StateAssetPath": "Data/Animation/StateData/Player/States/IntroDrawWeapon.json",
                         "StateName": "IntroDrawWeapon",
+                        "SwayAmplitude": 0.0,
+                        "SwayCycles": 2.0,
                         "TargetName": "",
+                        "TrailWidth": 1.2000000476837158,
                         "Type": 0
                     },
                     {
                         "ActionName": "LookAtEnemy",
                         "ActorName": "PlayerModel",
                         "Duration": 0.550000011920929,
+                        "IncludeChildren": false,
+                        "MatchTargetRotation": false,
                         "PositionOffset": [
                             0.0,
                             0.0,
                             0.0
                         ],
+                        "PrefabName": "",
+                        "RefreshStateAssetOnPlay": false,
+                        "SkipInPreview": false,
+                        "SmoothMovement": true,
                         "StateAssetPath": "",
                         "StateName": "",
+                        "SwayAmplitude": 0.0,
+                        "SwayCycles": 2.0,
                         "TargetName": "TestTarget",
+                        "TrailWidth": 1.2000000476837158,
                         "Type": 1
                     },
                     {
                         "ActionName": "DragonRoar",
                         "ActorName": "TestTarget",
                         "Duration": 0.15000000596046448,
+                        "IncludeChildren": false,
+                        "MatchTargetRotation": false,
                         "PositionOffset": [
                             0.0,
                             0.0,
                             0.0
                         ],
+                        "PrefabName": "",
+                        "RefreshStateAssetOnPlay": false,
+                        "SkipInPreview": false,
+                        "SmoothMovement": true,
                         "StateAssetPath": "Data/Animation/StateData/DragonFirstForm_Test/States/IntroRoar.json",
                         "StateName": "IntroRoar",
+                        "SwayAmplitude": 0.0,
+                        "SwayCycles": 2.0,
                         "TargetName": "",
+                        "TrailWidth": 1.2000000476837158,
                         "Type": 0
                     },
                     {
                         "ActionName": "ReleasePlayerAnimation",
                         "ActorName": "PlayerModel",
                         "Duration": 0.15000000596046448,
+                        "IncludeChildren": false,
+                        "MatchTargetRotation": false,
                         "PositionOffset": [
                             0.0,
                             0.0,
                             0.0
                         ],
+                        "PrefabName": "",
+                        "RefreshStateAssetOnPlay": false,
+                        "SkipInPreview": false,
+                        "SmoothMovement": true,
                         "StateAssetPath": "",
                         "StateName": "SS_Idle",
+                        "SwayAmplitude": 0.0,
+                        "SwayCycles": 2.0,
                         "TargetName": "",
+                        "TrailWidth": 1.2000000476837158,
                         "Type": 2
                     },
                     {
                         "ActionName": "ReleaseDragonAnimation",
                         "ActorName": "TestTarget",
                         "Duration": 0.15000000596046448,
+                        "IncludeChildren": false,
+                        "MatchTargetRotation": false,
                         "PositionOffset": [
                             0.0,
                             0.0,
                             0.0
                         ],
+                        "PrefabName": "",
+                        "RefreshStateAssetOnPlay": false,
+                        "SkipInPreview": false,
+                        "SmoothMovement": true,
                         "StateAssetPath": "",
                         "StateName": "PlainsDragon_IdleBreathe",
+                        "SwayAmplitude": 0.0,
+                        "SwayCycles": 2.0,
                         "TargetName": "",
+                        "TrailWidth": 1.2000000476837158,
                         "Type": 2
                     },
                     {
                         "ActionName": "GateWalk",
                         "ActorName": "PlayerModel",
                         "Duration": 0.11999999731779099,
+                        "IncludeChildren": false,
+                        "MatchTargetRotation": false,
                         "PositionOffset": [
                             0.0,
                             0.0,
                             0.0
                         ],
+                        "PrefabName": "",
+                        "RefreshStateAssetOnPlay": false,
+                        "SkipInPreview": false,
+                        "SmoothMovement": true,
                         "StateAssetPath": "Data/Animation/StateData/Player/States/IntroGateWalk.json",
                         "StateName": "IntroGateWalk",
+                        "SwayAmplitude": 0.0,
+                        "SwayCycles": 2.0,
                         "TargetName": "",
+                        "TrailWidth": 1.2000000476837158,
                         "Type": 0
                     },
                     {
                         "ActionName": "GateEnter",
                         "ActorName": "PlayerModel",
                         "Duration": 2.5999999046325684,
+                        "IncludeChildren": false,
+                        "MatchTargetRotation": false,
                         "PositionOffset": [
                             0.0,
                             0.0,
                             -3.0
                         ],
+                        "PrefabName": "",
+                        "RefreshStateAssetOnPlay": false,
+                        "SkipInPreview": false,
+                        "SmoothMovement": true,
                         "StateAssetPath": "",
                         "StateName": "",
+                        "SwayAmplitude": 0.0,
+                        "SwayCycles": 2.0,
                         "TargetName": "",
+                        "TrailWidth": 1.2000000476837158,
                         "Type": 3
                     },
                     {
                         "ActionName": "GateShow",
                         "ActorName": "IntroFogGate",
                         "Duration": 0.0,
+                        "IncludeChildren": false,
+                        "MatchTargetRotation": false,
                         "PositionOffset": [
                             0.0,
                             0.0,
                             0.0
                         ],
+                        "PrefabName": "",
+                        "RefreshStateAssetOnPlay": false,
+                        "SkipInPreview": false,
+                        "SmoothMovement": true,
                         "StateAssetPath": "",
                         "StateName": "",
+                        "SwayAmplitude": 0.0,
+                        "SwayCycles": 2.0,
                         "TargetName": "",
+                        "TrailWidth": 1.2000000476837158,
                         "Type": 4
                     },
                     {
                         "ActionName": "GateHide",
                         "ActorName": "IntroFogGate",
                         "Duration": 0.0,
+                        "IncludeChildren": false,
+                        "MatchTargetRotation": false,
                         "PositionOffset": [
                             0.0,
                             0.0,
                             0.0
                         ],
+                        "PrefabName": "",
+                        "RefreshStateAssetOnPlay": false,
+                        "SkipInPreview": false,
+                        "SmoothMovement": true,
                         "StateAssetPath": "",
                         "StateName": "",
+                        "SwayAmplitude": 0.0,
+                        "SwayCycles": 2.0,
                         "TargetName": "",
+                        "TrailWidth": 1.2000000476837158,
                         "Type": 5
                     },
                     {
                         "ActionName": "GateMistPlay",
                         "ActorName": "IntroGateMist",
                         "Duration": 0.0,
+                        "IncludeChildren": false,
+                        "MatchTargetRotation": false,
                         "PositionOffset": [
                             0.0,
                             0.0,
                             0.0
                         ],
+                        "PrefabName": "",
+                        "RefreshStateAssetOnPlay": false,
+                        "SkipInPreview": false,
+                        "SmoothMovement": true,
                         "StateAssetPath": "",
                         "StateName": "",
+                        "SwayAmplitude": 0.0,
+                        "SwayCycles": 2.0,
                         "TargetName": "",
+                        "TrailWidth": 1.2000000476837158,
                         "Type": 6
                     },
                     {
                         "ActionName": "GateMistStop",
                         "ActorName": "IntroGateMist",
                         "Duration": 0.0,
+                        "IncludeChildren": false,
+                        "MatchTargetRotation": false,
                         "PositionOffset": [
                             0.0,
                             0.0,
                             0.0
                         ],
+                        "PrefabName": "",
+                        "RefreshStateAssetOnPlay": false,
+                        "SkipInPreview": false,
+                        "SmoothMovement": true,
                         "StateAssetPath": "",
                         "StateName": "",
+                        "SwayAmplitude": 0.0,
+                        "SwayCycles": 2.0,
                         "TargetName": "",
+                        "TrailWidth": 1.2000000476837158,
                         "Type": 7
                     },
                     {
                         "ActionName": "GateLightPlay",
                         "ActorName": "IntroGateLight",
                         "Duration": 0.0,
+                        "IncludeChildren": false,
+                        "MatchTargetRotation": false,
                         "PositionOffset": [
                             0.0,
                             0.0,
                             0.0
                         ],
+                        "PrefabName": "",
+                        "RefreshStateAssetOnPlay": false,
+                        "SkipInPreview": false,
+                        "SmoothMovement": true,
                         "StateAssetPath": "",
                         "StateName": "",
+                        "SwayAmplitude": 0.0,
+                        "SwayCycles": 2.0,
                         "TargetName": "",
+                        "TrailWidth": 1.2000000476837158,
                         "Type": 6
                     },
                     {
                         "ActionName": "GateLightStop",
                         "ActorName": "IntroGateLight",
                         "Duration": 0.0,
+                        "IncludeChildren": false,
+                        "MatchTargetRotation": false,
                         "PositionOffset": [
                             0.0,
                             0.0,
                             0.0
                         ],
+                        "PrefabName": "",
+                        "RefreshStateAssetOnPlay": false,
+                        "SkipInPreview": false,
+                        "SmoothMovement": true,
                         "StateAssetPath": "",
                         "StateName": "",
+                        "SwayAmplitude": 0.0,
+                        "SwayCycles": 2.0,
                         "TargetName": "",
+                        "TrailWidth": 1.2000000476837158,
                         "Type": 7
                     },
                     {
                         "ActionName": "RoarAirPlay",
                         "ActorName": "IntroRoarAirCone",
                         "Duration": 0.0,
+                        "IncludeChildren": false,
+                        "MatchTargetRotation": false,
                         "PositionOffset": [
                             0.0,
                             0.0,
                             0.0
                         ],
+                        "PrefabName": "",
+                        "RefreshStateAssetOnPlay": false,
+                        "SkipInPreview": false,
+                        "SmoothMovement": true,
                         "StateAssetPath": "",
                         "StateName": "",
+                        "SwayAmplitude": 0.0,
+                        "SwayCycles": 2.0,
                         "TargetName": "",
+                        "TrailWidth": 1.2000000476837158,
                         "Type": 4
                     },
                     {
                         "ActionName": "RoarAirStop",
                         "ActorName": "IntroRoarAirCone",
                         "Duration": 0.0,
+                        "IncludeChildren": false,
+                        "MatchTargetRotation": false,
                         "PositionOffset": [
                             0.0,
                             0.0,
                             0.0
                         ],
+                        "PrefabName": "",
+                        "RefreshStateAssetOnPlay": false,
+                        "SkipInPreview": false,
+                        "SmoothMovement": true,
                         "StateAssetPath": "",
                         "StateName": "",
+                        "SwayAmplitude": 0.0,
+                        "SwayCycles": 2.0,
                         "TargetName": "",
+                        "TrailWidth": 1.2000000476837158,
                         "Type": 5
                     }
                 ],
@@ -459,248 +612,411 @@
                     {
                         "actions": [
                             {
+                                "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "ActorPresentation",
                                 "name": "BossIntro_RestoreSpawnPoints",
-                                "time": 0.0
+                                "time": 0.0,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
                             },
                             {
+                                "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "Camera",
                                 "name": "EventCamera_ActivateEventPriority",
-                                "time": 0.0
+                                "time": 0.0,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
                             },
                             {
+                                "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "GameMode",
                                 "name": "DisablePlayerControl",
-                                "time": 0.0
+                                "time": 0.0,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
                             },
                             {
+                                "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "GameMode",
                                 "name": "DisableEnemyAI",
-                                "time": 0.0
+                                "time": 0.0,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
                             },
                             {
+                                "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "Camera",
                                 "name": "LockOn_Disable",
-                                "time": 0.0
+                                "time": 0.0,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
                             },
                             {
+                                "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "CameraAction",
                                 "name": "IntroGateArrival",
-                                "time": 0.0
+                                "time": 0.0,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
                             },
                             {
+                                "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "PostProcess",
                                 "name": "BossIntro_Color_0",
-                                "time": 0.0
+                                "time": 0.0,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
                             },
                             {
+                                "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "ActorPresentation",
                                 "name": "BossIntro_PlayerIdle",
-                                "time": 0.0
+                                "time": 0.0,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
                             },
                             {
+                                "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "ActorPresentation",
                                 "name": "BossIntro_DragonIdle",
-                                "time": 0.0
+                                "time": 0.0,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
                             },
                             {
+                                "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "GameModeObject",
                                 "name": "UI_GameModeObject_Hide",
-                                "time": 0.0
+                                "time": 0.0,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
                             },
                             {
+                                "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "ActorPresentation",
                                 "name": "BossIntro_GateShow",
-                                "time": 0.0
+                                "time": 0.0,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
                             },
                             {
+                                "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "ActorPresentation",
                                 "name": "BossIntro_GateMistPlay",
-                                "time": 0.0
+                                "time": 0.0,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
                             },
                             {
+                                "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "ActorPresentation",
                                 "name": "BossIntro_GateEnter",
-                                "time": 0.0
+                                "time": 0.0,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
                             },
                             {
+                                "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "ActorPresentation",
                                 "name": "BossIntro_GateWalk",
-                                "time": 0.0
+                                "time": 0.0,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
                             },
                             {
+                                "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "ActorPresentation",
                                 "name": "BossIntro_GateMistStop",
-                                "time": 2.4000000953674316
+                                "time": 2.4000000953674316,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
                             },
                             {
+                                "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "ActorPresentation",
                                 "name": "BossIntro_GateLightPlay",
-                                "time": 2.4000000953674316
+                                "time": 2.4000000953674316,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
                             },
                             {
+                                "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "ActorPresentation",
                                 "name": "BossIntro_PlayerIdle",
-                                "time": 2.5999999046325684
+                                "time": 2.5999999046325684,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
                             },
                             {
+                                "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "ActorPresentation",
                                 "name": "BossIntro_GateHide",
-                                "time": 3.9000000953674316
+                                "time": 3.9000000953674316,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
                             },
                             {
+                                "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "ActorPresentation",
                                 "name": "BossIntro_GateLightStop",
-                                "time": 4.0
+                                "time": 4.0,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
                             },
                             {
+                                "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "CameraAction",
                                 "name": "IntroPlayer",
-                                "time": 4.724999904632568
+                                "time": 4.724999904632568,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
                             },
                             {
+                                "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "ActorPresentation",
                                 "name": "BossIntro_DrawWeapon",
-                                "time": 5.425000190734863
+                                "time": 5.425000190734863,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
                             },
                             {
+                                "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "Audio",
                                 "name": "BossIntro.DrawWeaponSound",
-                                "time": 5.425000190734863
+                                "time": 5.425000190734863,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
                             },
                             {
+                                "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "ActorPresentation",
                                 "name": "BossIntro_LookAtEnemy",
-                                "time": 7.699999809265137
+                                "time": 7.699999809265137,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
                             },
                             {
+                                "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "CameraAction",
                                 "name": "IntroShoulder",
-                                "time": 8.050000190734863
+                                "time": 8.050000190734863,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
                             },
                             {
+                                "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "CameraAction",
                                 "name": "IntroDragonWide",
-                                "time": 9.449999809265137
+                                "time": 9.449999809265137,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
                             },
                             {
+                                "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "CameraAction",
                                 "name": "IntroDragonClose",
-                                "time": 10.675000190734863
+                                "time": 10.675000190734863,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
                             },
                             {
+                                "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "ActorPresentation",
                                 "name": "BossIntro_DragonRoar",
-                                "time": 11.550000190734863
+                                "time": 11.550000190734863,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
                             },
                             {
+                                "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "CameraShake",
                                 "name": "IntroRoarShake",
-                                "time": 11.649999618530273
+                                "time": 11.649999618530273,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
                             },
                             {
+                                "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "PostProcess",
                                 "name": "BossIntro_RadialBlur_0",
-                                "time": 11.649999618530273
+                                "time": 11.649999618530273,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
                             },
                             {
+                                "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "Camera",
                                 "name": "EventCamera_Fov_0",
-                                "time": 11.649999618530273
+                                "time": 11.649999618530273,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
                             },
                             {
+                                "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "PostProcess",
                                 "name": "BossIntro_Color_1",
-                                "time": 11.649999618530273
+                                "time": 11.649999618530273,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
                             },
                             {
+                                "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "Audio",
                                 "name": "BossIntro.RoarSound",
-                                "time": 11.649999618530273
+                                "time": 11.649999618530273,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
                             },
                             {
+                                "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "ActorPresentation",
                                 "name": "BossIntro_RoarAirPlay",
-                                "time": 11.649999618530273
+                                "time": 11.649999618530273,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
                             },
                             {
+                                "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "UI",
                                 "name": "BossIntroName_ShowBossName",
-                                "time": 12.074999809265137
+                                "time": 12.074999809265137,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
                             },
                             {
+                                "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "ActorPresentation",
                                 "name": "BossIntro_RoarAirStop",
-                                "time": 14.007499694824219
+                                "time": 14.007499694824219,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
                             },
                             {
+                                "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "Camera",
                                 "name": "LockOn_Enable",
-                                "time": 15.574999809265137
+                                "time": 15.574999809265137,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
                             },
                             {
+                                "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "Camera",
                                 "name": "EventCamera_RestorePriority",
-                                "time": 15.574999809265137
+                                "time": 15.574999809265137,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
                             },
                             {
+                                "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "ActorPresentation",
                                 "name": "BossIntro_ReleasePlayerAnimation",
-                                "time": 16.799999237060547
+                                "time": 16.799999237060547,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
                             },
                             {
+                                "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "ActorPresentation",
                                 "name": "BossIntro_ReleaseDragonAnimation",
-                                "time": 16.799999237060547
+                                "time": 16.799999237060547,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
                             },
                             {
+                                "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "GameModeObject",
                                 "name": "UI_GameModeObject_Show",
-                                "time": 16.799999237060547
+                                "time": 16.799999237060547,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
                             }
                         ],
+                        "cinematicEditing": false,
+                        "cleanupObjectsOnCompletion": false,
                         "completionAction": "GameMode.SequenceFinished",
                         "duration": 16.975000381469727,
+                        "interruptionAction": "",
                         "name": "BossIntro"
                     }
                 ]

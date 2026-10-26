@@ -13,6 +13,7 @@ class PlayerControllerComponent;
 class PlayerStateMachine
 {
 public:
+    // ActionごとのStateを所有し、生成時に共通のOwnerとControllerを渡す。
     template<class T, class... Args>
     void AddState(PLAYER_ACTION action_, Args&&... args_)
     {

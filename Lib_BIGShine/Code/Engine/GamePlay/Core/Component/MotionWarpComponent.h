@@ -121,6 +121,8 @@ struct MotionWarpRequest
     bool explicitTarget = false;
     // 停止距離0の明示的な固定終点では、補正終了後の移動を持ち越さない。
     bool freezeAfterWarp = false;
+    // 予兆の始終点が指定された攻撃だけ、補正距離の制限で経路を短縮せずに移動する。
+    bool matchFixedPath = false;
     bool maintainStopDistance = false; // 補正終了後も同じ攻撃PhaseのRootMotionが対象を突き抜けないよう制限する。
     bool targetLocked = false;
     DirectX::XMFLOAT3 startPosition{ 0.0f, 0.0f, 0.0f };
@@ -154,6 +156,10 @@ public:
     void Gui() override;
     void Serialize(nlohmann::json& json_) const override;
     void Deserialize(const nlohmann::json& json_) override;
+    // 元の移動を保ったまま補正だけを切り替え、比較用の移動量を表示する。
+    void DrawComparisonGui();
+    // RootMotionがないモーションでも、明示対象への追加補正を更新する。
+    bool RequiresRootMotionUpdate() const { return request.active && request.explicitTarget; }
 
     void Play(const std::string& presetName_ = "");
     // AIの確定Targetと予定移動量を受け取り、既存RootMotion経路上で補正する。
@@ -161,7 +167,8 @@ public:
         const DirectX::XMFLOAT3& plannedRootMotion_, float stopDistance_, float startNormalizedTime_, float endNormalizedTime_,
         const DirectX::XMFLOAT3* fixedTargetPosition_ = nullptr,
         std::function<bool(const DirectX::XMFLOAT3&, const DirectX::XMFLOAT3&)> pathValidator_ = {},
-        float priorRotationCorrectionDegrees_ = 0.0f);
+        float priorRotationCorrectionDegrees_ = 0.0f,
+        const DirectX::XMFLOAT3* fixedPathStart_ = nullptr);
     // 保存済みプリセットを優先し、未登録の敵用初期値だけを補う。
     void AddPresetIfMissing(const MotionWarpPreset& preset_);
     const MotionWarpPreset* GetPreset(const std::string& presetName_) const { return FindPreset(presetName_); }
@@ -207,5 +214,6 @@ private:
     float debugAppliedYawDegrees = 0.0f;
     bool actionsRegistered = false;
     bool registerGlobalActions = true; // 敵はLocal Registryだけを使い、PlayerのGlobal Actionを上書きしない。
+    bool warpEnabled = true; // Componentやプリセットを変更せず、位置・回転補正だけを比較する。
     MotionWarpPreset explicitTargetPreset;
 };

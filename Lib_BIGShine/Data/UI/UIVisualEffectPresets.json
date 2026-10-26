@@ -1,0 +1,364 @@
+{
+    "SoftGlow": {
+        "GlowColor": [
+            0.55,
+            0.85,
+            1,
+            1
+        ],
+        "GlowIntensity": 0.7,
+        "GlowRadius": 8
+    },
+    "JadeGlow": {
+        "GlowColor": [
+            0.6,
+            1,
+            0.82,
+            1
+        ],
+        "GlowIntensity": 1.2,
+        "GlowRadius": 10,
+        "PulseAmount": 0.2,
+        "PulseSpeed": 0.7
+    },
+    "Outline": {
+        "OutlineWidth": 2,
+        "OutlineColor": [
+            0.8,
+            0.95,
+            1,
+            1
+        ]
+    },
+    "DropShadow": {
+        "ShadowColor": [
+            0,
+            0,
+            0,
+            0.8
+        ],
+        "ShadowOpacity": 1,
+        "ShadowOffset": [
+            5,
+            5
+        ],
+        "ShadowSoftness": 3
+    },
+    "Shine": {
+        "SweepColor": [
+            0.7,
+            1,
+            0.9,
+            1
+        ],
+        "SweepIntensity": 1.8,
+        "SweepWidth": 0.12,
+        "SweepAngle": -30,
+        "SweepSpeed": 0.45
+    },
+    "PulseLight": {
+        "PulseAmount": 0.8,
+        "PulseSpeed": 1.2,
+        "GlowIntensity": 0.4,
+        "GlowRadius": 5
+    },
+    "Grayscale": {
+        "Grayscale": 1
+    },
+    "Sepia": {
+        "Sepia": 1
+    },
+    "Invert": {
+        "Invert": 1
+    },
+    "Pixelate": {
+        "PixelSize": 5
+    },
+    "Blur": {
+        "BlurRadius": 2
+    },
+    "IceGradient": {
+        "GradientStrength": 1,
+        "GradientTop": [
+            0.8,
+            1,
+            1,
+            1
+        ],
+        "GradientBottom": [
+            0.1,
+            0.4,
+            1,
+            1
+        ]
+    },
+    "GoldGradient": {
+        "GradientStrength": 1,
+        "GradientTop": [
+            1,
+            1,
+            0.7,
+            1
+        ],
+        "GradientBottom": [
+            0.85,
+            0.35,
+            0.02,
+            1
+        ],
+        "SweepIntensity": 0.7
+    },
+    "Dissolve": {
+        "Dissolve": 1,
+        "TweenStrength": true,
+        "Loop": true,
+        "PingPong": true,
+        "Duration": 1.8,
+        "EdgeWidth": 0.04,
+        "BurnColor": [
+            0.25,
+            0.05,
+            0.04,
+            1
+        ]
+    },
+    "Burn": {
+        "Dissolve": 1,
+        "TweenStrength": true,
+        "Loop": true,
+        "PingPong": true,
+        "Duration": 2,
+        "EdgeWidth": 0.1,
+        "BurnColor": [
+            1,
+            0.18,
+            0.01,
+            1
+        ],
+        "MaskTexture": "Data/Texture/TransitionMasks/Ink.png"
+    },
+    "MaskWipe": {
+        "Dissolve": 1,
+        "TweenStrength": true,
+        "Loop": true,
+        "PingPong": true,
+        "Duration": 1.6,
+        "MaskTexture": "Data/Texture/TransitionMasks/Linear.png",
+        "BurnColor": [
+            0.55,
+            1,
+            0.8,
+            0.6
+        ]
+    },
+    "Afterimage": {
+        "TrailCount": 5,
+        "TrailLifetime": 0.28,
+        "TrailInterval": 0.035,
+        "TrailColor": [
+            0.65,
+            0.9,
+            1,
+            0.4
+        ]
+    },
+    "DarkAfterimage": {
+        "TrailCount": 4,
+        "TrailLifetime": 0.3,
+        "TrailInterval": 0.04,
+        "TrailColor": [
+            0,
+            0,
+            0,
+            0.5
+        ],
+        "TrailScale": 1.08
+    },
+    "AnathemaTitle": {
+        "GlowIntensity": 0.7,
+        "GlowColor": [
+            0.65,
+            1,
+            0.83,
+            1
+        ],
+        "GlowRadius": 6,
+        "SweepIntensity": 1,
+        "SweepColor": [
+            0.8,
+            1,
+            0.92,
+            1
+        ],
+        "SweepSpeed": 0.25,
+        "OutlineWidth": 1
+    },
+    "EngineBlue": {
+        "GlowIntensity": 0.55,
+        "GlowColor": [
+            0.4,
+            0.75,
+            1,
+            1
+        ],
+        "GlowRadius": 7,
+        "GradientStrength": 1,
+        "GradientTop": [
+            0.85,
+            1,
+            1,
+            1
+        ],
+        "GradientBottom": [
+            0.25,
+            0.6,
+            1,
+            1
+        ],
+        "OutlineWidth": 1
+    },
+    "UVFlow": {
+        "UVScroll": [
+            0.15,
+            0
+        ],
+        "GlowIntensity": 0.3,
+        "GlowRadius": 4
+    },
+    "MenuButton": {
+        "GlowColor": [
+            0.72,
+            1,
+            0.87,
+            1
+        ],
+        "GlowIntensity": 0.24,
+        "GlowRadius": 3,
+        "ShadowColor": [
+            0,
+            0,
+            0,
+            1
+        ],
+        "ShadowOpacity": 0.7,
+        "ShadowOffset": [
+            1,
+            2
+        ],
+        "ShadowSoftness": 1,
+        "SweepColor": [
+            0.8,
+            1,
+            0.92,
+            1
+        ],
+        "SweepIntensity": 0.28,
+        "SweepWidth": 0.1,
+        "SweepSpeed": 0.2
+    },
+    "MenuHeading": {
+        "GlowColor": [
+            0.7,
+            1,
+            0.86,
+            1
+        ],
+        "GlowIntensity": 0.24,
+        "GlowRadius": 4,
+        "ShadowColor": [
+            0,
+            0,
+            0,
+            1
+        ],
+        "ShadowOpacity": 0.7,
+        "ShadowOffset": [
+            1,
+            2
+        ],
+        "ShadowSoftness": 2,
+        "SweepColor": [
+            0.9,
+            1,
+            0.94,
+            1
+        ],
+        "SweepIntensity": 0.18,
+        "SweepSpeed": 0.13,
+        "SweepWidth": 0.12
+    },
+    "MenuAccent": {
+        "GlowColor": [
+            0.65,
+            1,
+            0.8,
+            1
+        ],
+        "GlowIntensity": 0.38,
+        "GlowRadius": 4,
+        "PulseAmount": 0.08,
+        "PulseSpeed": 0.45,
+        "SweepColor": [
+            0.85,
+            1,
+            0.93,
+            1
+        ],
+        "SweepIntensity": 0.25,
+        "SweepSpeed": 0.24,
+        "SweepWidth": 0.12
+    },
+    "HudReadable": {
+        "ShadowColor": [
+            0.005,
+            0.01,
+            0.02,
+            1
+        ],
+        "ShadowOpacity": 0.8,
+        "ShadowOffset": [
+            1,
+            1
+        ],
+        "ShadowSoftness": 1,
+        "GlowColor": [
+            0.72,
+            1,
+            0.9,
+            1
+        ],
+        "GlowIntensity": 0.1,
+        "GlowRadius": 2
+    },
+    "HudBossName": {
+        "ShadowColor": [
+            0.01,
+            0.005,
+            0.015,
+            1
+        ],
+        "ShadowOpacity": 0.85,
+        "ShadowOffset": [
+            1,
+            2
+        ],
+        "ShadowSoftness": 1,
+        "GlowColor": [
+            1,
+            0.7,
+            0.42,
+            1
+        ],
+        "GlowIntensity": 0.18,
+        "GlowRadius": 3,
+        "SweepColor": [
+            1,
+            0.9,
+            0.72,
+            1
+        ],
+        "SweepIntensity": 0.12,
+        "SweepSpeed": 0.11,
+        "SweepWidth": 0.1
+    }
+}

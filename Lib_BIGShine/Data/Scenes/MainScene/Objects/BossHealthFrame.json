@@ -4,20 +4,20 @@
         {
             "Data": {
                 "InputEnabled": false,
-                "ParentWidgetId": "UIRoot",
+                "ParentWidgetId": "BossHealthBar",
                 "RaycastTarget": false,
                 "RectTransform": {
                     "AnchorMax": [
                         0.5,
-                        0.0
+                        0.5
                     ],
                     "AnchorMin": [
                         0.5,
-                        0.0
+                        0.5
                     ],
                     "AnchoredPosition": [
                         0.0,
-                        72.0
+                        0.0
                     ],
                     "LocalRotation": 0.0,
                     "LocalScale": [
@@ -29,14 +29,14 @@
                         0.5
                     ],
                     "SizeDelta": [
-                        900.0,
-                        152.0
+                        890.0,
+                        28.0
                     ]
                 },
                 "Version": 1,
                 "Visible": true,
                 "WidgetId": "BossHealthFrame",
-                "ZOrder": 24
+                "ZOrder": 36
             },
             "Enabled": false,
             "LateUpdateEnabled": true,
@@ -49,25 +49,27 @@
         {
             "Data": {
                 "CatPos": [
-                    81.0,
-                    179.0
+                    0.0,
+                    0.0
                 ],
                 "CatSize": [
-                    2019.0,
-                    342.0
+                    925.0,
+                    38.0
                 ],
                 "Color": [
-                    1.25,
-                    1.25,
-                    1.25,
+                    1.0,
+                    1.0,
+                    1.0,
                     1.0
                 ],
+                "LinearSampling": true,
                 "LocalSize": [
-                    900.0,
-                    152.0
+                    1.0,
+                    1.0
                 ],
+                "SdrTexture": true,
                 "ShaderID": 0,
-                "TexturePath": "./Data/Sprite/UI/BossHealthFrame_Dragon.png",
+                "TexturePath": "./Data/Sprite/UI/Hud/Boss/BossBar_Frame.png",
                 "Visible": true,
                 "pivotType": 0
             },
@@ -82,7 +84,7 @@
     ],
     "Layer": 16,
     "Name": "BossHealthFrame",
-    "ParentName": "UI",
+    "ParentName": "BossHealthBar",
     "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [

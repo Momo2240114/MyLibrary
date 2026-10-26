@@ -16,8 +16,8 @@
                         0.0
                     ],
                     "AnchoredPosition": [
-                        124.0,
-                        58.0
+                        94.0,
+                        44.0
                     ],
                     "LocalRotation": 0.0,
                     "LocalScale": [
@@ -29,14 +29,14 @@
                         0.0
                     ],
                     "SizeDelta": [
-                        360.0,
-                        20.0
+                        440.0,
+                        12.0
                     ]
                 },
                 "Version": 1,
                 "Visible": true,
                 "WidgetId": "PlayerHpBar",
-                "ZOrder": 3
+                "ZOrder": 34
             },
             "Enabled": true,
             "LateUpdateEnabled": true,
@@ -49,8 +49,10 @@
         {
             "Data": {
                 "BackgroundWidgetId": "PlayerHpBackground",
+                "CropFillUV": true,
                 "CurrentRate": 1.0,
                 "CurrentWidgetId": "PlayerHpCurrent",
+                "DamageDelayDuration": 0.30000001192092896,
                 "DamageDelayRate": 1.0,
                 "DamageDelayWidgetId": "PlayerHpDamageDelay",
                 "DamageFlashColor": [
@@ -80,8 +82,8 @@
                     1.0,
                     0.5
                 ],
-                "IncreaseDelaySpeed": 0.6499999761581421,
-                "Source": "PLAYER_HP_RATE",
+                "IncreaseDelaySpeed": 1.5,
+                "Source": "MANUAL",
                 "TargetRate": 1.0,
                 "Version": 1
             },
@@ -90,7 +92,7 @@
             "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
             "TypeName": "UIProgressBarComponent",
-            "UpdateEnabled": true,
+            "UpdateEnabled": false,
             "UpdatePriority": 0
         }
     ],

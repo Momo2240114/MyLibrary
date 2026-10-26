@@ -5,6 +5,7 @@
 
 #include <DirectXMath.h>
 #include <cstdint>
+#include <cstddef>
 #include <memory>
 #include <string>
 #include <unordered_set>
@@ -117,6 +118,8 @@ public:
     void SetKnockBackPower(float knockBackPower_);
     void SetAirLiftPower(float targetAirLiftPower_, float attackerAirLiftPower_);
 
+    AttackFeedbackSettings feedback; // 生成する全HitBoxへ渡す攻撃の手応え。
+
     // Hit成立時にCameraShakeへ渡す揺れ設定。
     void SetCameraShake(
         bool enabled_,
@@ -157,6 +160,8 @@ public:
 
     // 実行時に生成するHitBox形状リストを差し替える。
     void SetHitShapes(const std::vector<AttackEffectHitShapeTemplate>& hitShapes_);
+    // 命中履歴を作り直さず、カプセルを指定したWorld線分へ追従させる。
+    bool SetCapsuleWorldSpan(std::size_t shapeIndex_, const DirectX::XMFLOAT3& start_, const DirectX::XMFLOAT3& end_);
 
     // 判定再生を開始する。
     void Play();

@@ -405,9 +405,30 @@
             "FromPinId": 228,
             "ToNodeId": 234,
             "ToPinId": 235
+        },
+        {
+            "FromNodeId": 4,
+            "FromPinId": 6,
+            "Id": 241,
+            "ToNodeId": 238,
+            "ToPinId": 239
+        },
+        {
+            "FromNodeId": 238,
+            "FromPinId": 240,
+            "Id": 245,
+            "ToNodeId": 242,
+            "ToPinId": 243
+        },
+        {
+            "FromNodeId": 238,
+            "FromPinId": 240,
+            "Id": 249,
+            "ToNodeId": 246,
+            "ToPinId": 247
         }
     ],
-    "NextId": 238,
+    "NextId": 250,
     "Nodes": [
         {
             "ActionEndCategory": "HumanBossAI",
@@ -936,7 +957,7 @@
                 113.0,
                 452.0
             ],
-            "Priority": 5,
+            "Priority": 6,
             "ScopeId": "Root",
             "StringValue": "",
             "SubGraphName": "",
@@ -1053,7 +1074,7 @@
                 855.0,
                 488.0
             ],
-            "Priority": 6,
+            "Priority": 7,
             "ScopeId": "Root",
             "StringValue": "",
             "SubGraphName": "",
@@ -1170,7 +1191,7 @@
                 1613.0,
                 376.0
             ],
-            "Priority": 7,
+            "Priority": 8,
             "ScopeId": "Root",
             "StringValue": "",
             "SubGraphName": "",
@@ -1287,7 +1308,7 @@
                 2465.0,
                 404.0
             ],
-            "Priority": 8,
+            "Priority": 9,
             "ScopeId": "Root",
             "StringValue": "",
             "SubGraphName": "",
@@ -1560,7 +1581,7 @@
                 4049.0,
                 456.0
             ],
-            "Priority": 9,
+            "Priority": 10,
             "ScopeId": "Root",
             "StringValue": "",
             "SubGraphName": "",
@@ -1681,7 +1702,7 @@
                 570,
                 520
             ],
-            "Priority": 4,
+            "Priority": 5,
             "Weight": 1.0,
             "BlackboardCategory": "HumanBossAI",
             "BlackboardScope": "Local",
@@ -1980,7 +2001,7 @@
                 1060,
                 400
             ],
-            "Priority": 2,
+            "Priority": 3,
             "ScopeId": "Root",
             "StringValue": "",
             "SubGraphName": "",
@@ -2097,7 +2118,7 @@
                 1240,
                 400
             ],
-            "Priority": 3,
+            "Priority": 4,
             "ScopeId": "Root",
             "StringValue": "",
             "SubGraphName": "",
@@ -2447,6 +2468,123 @@
             "Position": [
                 -700,
                 250
+            ],
+            "Priority": 1,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "PlayAction",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "HumanBossAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "HumanBossAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": true,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 238,
+            "InputPinId": 239,
+            "IntValue": 0,
+            "Name": "ガード継続への拘束攻撃",
+            "OutputPinId": 240,
+            "Position": [
+                1200.0,
+                700.0
+            ],
+            "Priority": 2,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "Sequence",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "HumanBossAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "HumanBossAI",
+            "BlackboardKey": "GuardExecutionReady",
+            "BlackboardScope": "Local",
+            "BoolValue": true,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 242,
+            "InputPinId": 243,
+            "IntValue": 0,
+            "Name": "GuardExecutionReady",
+            "OutputPinId": 244,
+            "Position": [
+                1200.0,
+                650.0
+            ],
+            "Priority": 0,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "HumanBossAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "HumanBoss_GUARD_EXECUTION",
+            "BlackboardCategory": "HumanBossAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": true,
+            "Comment": "ガード継続に予兆付きの掴みを仕掛け、予兆後に成立条件を再確認する。",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 246,
+            "InputPinId": 247,
+            "IntValue": 0,
+            "Name": "GUARD_EXECUTION",
+            "OutputPinId": 248,
+            "Position": [
+                1200.0,
+                800.0
             ],
             "Priority": 1,
             "ScopeId": "Root",

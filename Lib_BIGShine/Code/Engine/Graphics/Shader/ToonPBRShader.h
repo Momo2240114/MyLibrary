@@ -44,8 +44,15 @@ private:
         float normalScale;
         DirectX::XMFLOAT4  shadeFeathers;
         DirectX::XMFLOAT4 shadeSteps;
+        // 不透明描画と同じ材質設定で反射と輪郭光を計算する。
+        DirectX::XMFLOAT4 styleParams;
+        float specularStrength;
+        float rimStrength;
+        DirectX::XMFLOAT2 stylePadding;
 
     };
+
+    static_assert(sizeof(CbMesh) == 112);
 
     // 明暗段階のしきい値。小さい順に整列して使う。
     DirectX::XMFLOAT4 shadeSteps{ 0.45f, 0.45f, 0.45f, 0.45f };

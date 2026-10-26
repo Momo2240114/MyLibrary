@@ -8,11 +8,11 @@
                 "RaycastTarget": false,
                 "RectTransform": {
                     "AnchorMax": [
-                        1.0,
+                        0.0,
                         1.0
                     ],
                     "AnchorMin": [
-                        1.0,
+                        0.0,
                         0.0
                     ],
                     "AnchoredPosition": [
@@ -30,13 +30,13 @@
                     ],
                     "SizeDelta": [
                         10.0,
-                        6.0
+                        0.0
                     ]
                 },
                 "Version": 1,
                 "Visible": true,
                 "WidgetId": "BossHealthEdgeHighlight",
-                "ZOrder": 5
+                "ZOrder": 35
             },
             "Enabled": true,
             "LateUpdateEnabled": true,
@@ -60,12 +60,14 @@
                     1.0,
                     0.8799999952316284,
                     0.6600000262260437,
-                    0.699999988079071
+                    1.0
                 ],
+                "LinearSampling": false,
                 "LocalSize": [
                     10.0,
                     26.0
                 ],
+                "SdrTexture": false,
                 "ShaderID": 0,
                 "TexturePath": "",
                 "Visible": true,

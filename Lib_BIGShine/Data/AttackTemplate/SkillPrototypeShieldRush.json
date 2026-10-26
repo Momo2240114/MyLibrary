@@ -4,11 +4,12 @@
     "attack": {
         "allowMultiHit": false,
         "attackerAirLiftPower": 0.0,
-        "damage": 20,
+        "damage": 75.0,
+        "damageRate": 0.75,
         "hitGroupId": 0,
         "hitStopDuration": 0.025,
         "hitStopScale": 0.75,
-        "impactPower": 4.0,
+        "impactPower": 35.0,
         "knockBackPower": 1.2000000476837158,
         "knockBackType": 0,
         "targetAirLiftPower": 0.0,
@@ -16,6 +17,12 @@
         "damageApplyType": 0
     },
     "attackEffects": [],
+    "feedback": {
+        "hitSoundPath": "Data/Audio/SE/Sonniss/Combat/LightHit.wav",
+        "volume": 0.65,
+        "minDistance": 8.0,
+        "maxDistance": 100.0
+    },
     "cameraShake": {
         "attackScale": 0.5,
         "enabled": true,

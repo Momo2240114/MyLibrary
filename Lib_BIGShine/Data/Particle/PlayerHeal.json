@@ -1,0 +1,170 @@
+{
+    "AssetPath": "Data/Particle/PlayerHeal.json",
+    "AssetType": "ParticleEffect",
+    "AssetVersion": 1,
+    "Emitters": [
+        {
+            "Acceleration": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "BlendMode": 1,
+            "BurstCount": 36,
+            "Color": [
+                0.15,
+                1.0,
+                0.3,
+                1.0
+            ],
+            "ColorEnd": [
+                0.05,
+                0.65,
+                0.15,
+                0.0
+            ],
+            "ColorStart": [
+                0.2,
+                1.0,
+                0.4,
+                0.85
+            ],
+            "ConeAngle": [
+                0.0,
+                18.0
+            ],
+            "Delay": 0.0,
+            "Drag": 0.3,
+            "EmissionMode": 1,
+            "Fade": [
+                0.08,
+                0.65
+            ],
+            "FresnelPower": 2.0,
+            "FresnelStrength": 1.0,
+            "GradientTexturePath": "",
+            "Gravity": 0.0,
+            "LegacyRadius": [
+                0.0,
+                0.0
+            ],
+            "Lifespan": [
+                0.7,
+                1.2
+            ],
+            "MaskTexturePath": "",
+            "MaxCount": 48,
+            "MeshVertexSampleCount": 2048,
+            "Name": "HealRisingLights",
+            "NoiseFrequency": 3.0,
+            "NoiseSpeed": 1.0,
+            "NoiseStrength": 0.08,
+            "OrbitVelocity": 0.0,
+            "PosOffset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "RadialVelocity": 0.0,
+            "RenderType": 0,
+            "RotationSpeed": [
+                0.0,
+                0.0
+            ],
+            "ShapeEnd": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "ShapeSize": [
+                1.5,
+                1.5,
+                1.5
+            ],
+            "ShapeStart": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "Size": [
+                0.12,
+                0.025
+            ],
+            "SizeRandomEnd": [
+                1.0,
+                1.0
+            ],
+            "SizeRandomStart": [
+                1.0,
+                1.0
+            ],
+            "SpawnDirectionMode": 3,
+            "EmissionAxis": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "TargetPosition": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "UseTargetAttraction": 0,
+            "TargetAttractionStrength": 0.0,
+            "TargetAttractionRange": 0.0,
+            "TargetAttractionFalloff": 1.0,
+            "SpawnShape": 1,
+            "SpawnSpace": 0,
+            "Speed": [
+                0.7,
+                1.6
+            ],
+            "SpriteAnimationFps": 12.0,
+            "SpriteAnimationLoop": 1,
+            "SpriteAnimationRange": [
+                0,
+                0
+            ],
+            "SpriteSheetIndex": [
+                0,
+                0
+            ],
+            "StretchMax": 0.3,
+            "StretchScale": 0.08,
+            "TexturePath": "Data/Texture/Particle/Particles/Particles/Color/burst/color_burst_26.png",
+            "TextureSplitCount": [
+                1,
+                1
+            ],
+            "UseColorOverLife": 1,
+            "UseFresnel": 0,
+            "UseGradient": 0,
+            "UseMask": 0,
+            "UseRandomSize": 0,
+            "UseSpriteAnimation": 0,
+            "VerticalSpawnRange": 0.0,
+            "Wind": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "gradientDirection": 0,
+            "gradientEndUv": 1.0,
+            "gradientFixedUv": 0.5,
+            "gradientSampleMode": 0,
+            "gradientStartUv": 0.0,
+            "gradientTexturePath": "",
+            "maskTexturePath": "",
+            "shadeGradientDirection": 0,
+            "shadeGradientEndUv": 1.0,
+            "shadeGradientFixedUv": 0.5,
+            "shadeGradientSampleMode": 0,
+            "shadeGradientStartUv": 0.0,
+            "shadeGradientTexturePath": "",
+            "texturePath": "Data/Texture/Particle/Particles/Particles/Color/burst/color_burst_26.png",
+            "useGradientTexture": 0,
+            "useShadeGradientTexture": 0
+        }
+    ],
+    "IsPlaying": true
+}

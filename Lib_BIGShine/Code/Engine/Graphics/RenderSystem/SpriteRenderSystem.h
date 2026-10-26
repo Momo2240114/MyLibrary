@@ -74,6 +74,15 @@ private:
         DirectX::XMFLOAT2 texcoord;
     };
 
+    // HLSLのb1と16バイト単位で対応し、画像と文字に同じ合成効果を渡す。
+    struct UIEffectConstants
+    {
+        DirectX::XMFLOAT4 glowColor, outlineColor, shadowColor, sweepColor, gradientTop, gradientBottom;
+        DirectX::XMFLOAT4 tone, style, animation, sweep, sampling, shadow, uvRect, detail, burnColor;
+        DirectX::XMFLOAT4 maskUV, maskOptions;
+    };
+    Microsoft::WRL::ComPtr<ID3D11PixelShader> uiEffectShader;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> uiEffectBuffer;
     // UI階層やSubmit順に基づいて描画順を確定する。
     void SortDrawList();
 
@@ -123,6 +132,7 @@ private:
     std::map<SpriteShaderID, SpriteShader> shaders;
     Microsoft::WRL::ComPtr<ID3D11Buffer> constantBuffer;
     Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState;
+    Microsoft::WRL::ComPtr<ID3D11SamplerState> linearSamplerState;
     Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer;
     Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;
 };

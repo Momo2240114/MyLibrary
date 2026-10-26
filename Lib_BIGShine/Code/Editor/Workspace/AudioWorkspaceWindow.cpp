@@ -773,7 +773,7 @@ void AudioWorkspaceWindow::DeserializePreset(AudioPreset& preset_, const nlohman
     // 読み込み時にも範囲を丸め、古い/手編集されたJSONで不正値が入っても編集状態を壊さない。
     preset_.name = json_.value("Name", std::string("New Audio"));
     preset_.actionName = json_.value("ActionName", preset_.name);
-    preset_.path = json_.value("Path", std::string("Data/Audio/SE/TitleSelect.wav"));
+    preset_.path = json_.value("Path", std::string("Data/Audio/SE/Sword-Fight-1.wav"));
     preset_.isBGM = json_.value("IsBGM", false);
     preset_.loop = json_.value("Loop", false);
     preset_.volume = std::clamp(json_.value("Volume", 1.0f), 0.0f, 1.0f);

@@ -18,7 +18,7 @@ VS_OUT main(
     vout.texcoord = texcoord;
     vout.position = worldPos.xyz;
     vout.normal = SkinningVector(normal, boneWeights, boneIndices);
-    vout.tangent = SkinningVector(tangent.xyz, boneWeights, boneIndices);
+    vout.tangent = float4(SkinningVector(tangent.xyz, boneWeights, boneIndices), tangent.w);
 
     return vout;
 }

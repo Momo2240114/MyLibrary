@@ -1,44 +1,53 @@
 {
+    "CollisionMask": 0,
+    "Components": [
+        {
+            "Data": {
+                "ActionPrefix": "",
+                "AllowOverlap": true,
+                "AudioPath": "Data/Audio/BGM/PerituneMaterial_Sword_Flash_loop.mp3",
+                "ClearMuffleActionName": "ClearMuffleAudio",
+                "IsBGM": true,
+                "Loop": true,
+                "MuffleActionName": "MuffleAudio",
+                "Muffled": false,
+                "MuffledCutoff": 1200.0,
+                "PlayActionName": "PlayAudio",
+                "PlayOnStart": false,
+                "StopActionName": "StopAudio",
+                "UseWorkspacePreset": false,
+                "Volume": 0.6499999761581421,
+                "WorkspacePath": "Data/Audio/AudioWorkspace.json",
+                "WorkspacePresetName": ""
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "AudioComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        }
+    ],
+    "Layer": 0,
     "Name": "Phase2Music",
     "ParentName": "",
-    "Layer": 0,
-    "CollisionMask": 0,
     "RequiredForSceneStart": true,
     "Transform": {
         "Pos": [
-            0,
-            0,
-            0
+            0.0,
+            0.0,
+            0.0
         ],
         "Rot": [
-            0,
-            0,
-            0
+            0.0,
+            0.0,
+            0.0
         ],
         "Scale": [
-            1,
-            1,
-            1
+            1.0,
+            1.0,
+            1.0
         ]
-    },
-    "Components": [
-        {
-            "TypeName": "AudioComponent",
-            "Data": {
-                "AudioPath": "Data/Audio/BGM/Texture_Ambi01-1.wav",
-                "IsBGM": true,
-                "Loop": true,
-                "PlayOnStart": false,
-                "Volume": 0.65,
-                "UseWorkspacePreset": false
-            },
-            "Enabled": true,
-            "UpdateEnabled": true,
-            "LateUpdateEnabled": true,
-            "UpdatePriority": 0,
-            "LateUpdatePriority": 0,
-            "RequiredForSceneStart": false
-        }
-    ],
-    "ColliderComponents": []
+    }
 }

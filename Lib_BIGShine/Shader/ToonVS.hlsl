@@ -4,7 +4,7 @@
 #include "ModelCommon.hlsli" 
 
 
-// GltfModelCommponennt::InputElementDescs ‚Ì’è‹`‡‚É‡‚í‚¹‚é
+// GltfModelCommponennt::InputElementDescs ã®å®šç¾©é †ã«åˆã‚ã›ã‚‹
 VS_OUT main(
 	float4 position : POSITION,
 	float4 boneWeights : BONE_WEIGHTS,
@@ -16,20 +16,20 @@ VS_OUT main(
 {
     VS_OUT vout;
 
-    // ƒXƒLƒjƒ“ƒOFƒ{[ƒ“‚É‚æ‚é•ÏŒ`
-    // float3‚Ìposition‚ğfloat4‚É•ÏŠ·‚µ‚Ä“n‚·•K—v‚ª‚ ‚é
+    // ã‚¹ã‚­ãƒ‹ãƒ³ã‚°ï¼šãƒœãƒ¼ãƒ³ã«ã‚ˆã‚‹å¤‰å½¢
+    // float3ã®positionã‚’float4ã«å¤‰æ›ã—ã¦æ¸¡ã™å¿…è¦ãŒã‚ã‚‹
     float4 worldPos = SkinningPosition(position, boneWeights, boneIndices);
     
-    // À•W•ÏŠ·
+    // åº§æ¨™å¤‰æ›
     vout.vertex = mul(worldPos, viewProjection);
     
-    // ƒf[ƒ^ó‚¯“n‚µ
+    // ãƒ‡ãƒ¼ã‚¿å—ã‘æ¸¡ã—
     vout.texcoord = texcoord;
     vout.position = worldPos.xyz;
     
-    // –@ü‚ÆÚü‚ÌƒXƒLƒjƒ“ƒO
+    // æ³•ç·šã¨æ¥ç·šã®ã‚¹ã‚­ãƒ‹ãƒ³ã‚°
     vout.normal = SkinningVector(normal, boneWeights, boneIndices);
-    vout.tangent = SkinningVector(tangent.xyz, boneWeights, boneIndices);
+    vout.tangent = float4(SkinningVector(tangent.xyz, boneWeights, boneIndices), tangent.w);
     
     return vout;
 }

@@ -52,6 +52,13 @@ public:
 
     // Layout再計算が必要な状態にする。
     void MarkLayoutDirty();
+    // 保存対象のRectを変えず、メニュー演出の移動と拡縮だけをレイアウトへ重ねる。
+    void SetRuntimeVisualTransform(const DirectX::XMFLOAT2& offset_, float scale_)
+    {
+        runtimeVisualOffset = offset_;
+        runtimeVisualScale = scale_;
+        MarkLayoutDirty();
+    }
     // Transformの親をたどり、親Widgetを探す。
     void ResolveParentWidget();
     // Board/親Widget/画面Sizeから、このWidgetのScreenRectを計算する。
@@ -65,6 +72,8 @@ public:
     UIRectTransform& GetRectTransform() { return rectTransform; }
     const UIRectTransform& GetRectTransform() const { return rectTransform; }
     const UIScreenRect& GetScreenRect() const { return screenRect; }
+    // 保存された回転と独立したモーションの回転を合成する。
+    float GetVisualRotation();
     int GetZOrder() const { return zOrder; }
     bool IsVisible() const { return visible; }
     bool IsInputEnabled() const { return inputEnabled; }
@@ -78,6 +87,8 @@ private:
     std::string parentWidgetId;
     // Unity風のAnchor/Pivot/Layout情報。
     UIRectTransform rectTransform;
+    DirectX::XMFLOAT2 runtimeVisualOffset{ 0.0f, 0.0f };
+    float runtimeVisualScale = 1.0f;
     // 計算済みの画面座標。
     UIScreenRect screenRect;
     // 同じBoard内での描画/入力順。

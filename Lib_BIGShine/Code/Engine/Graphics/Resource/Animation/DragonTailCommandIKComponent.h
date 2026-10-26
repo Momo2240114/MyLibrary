@@ -84,6 +84,8 @@ public:
     bool GetTailTipWorldPosition(DirectX::XMFLOAT3& position_) const;
     // 尻尾全体を覆う攻撃判定の始点として、チェーン根元のWorld位置を取得する。
     bool GetTailRootWorldPosition(DirectX::XMFLOAT3& position_) const;
+    // 曲がった尻尾も節ごとに覆えるよう、チェーン全ノードのWorld位置を順番に取得する。
+    bool GetTailWorldPositions(std::vector<DirectX::XMFLOAT3>& positions_) const;
     bool GetTailTipWorldForward(DirectX::XMFLOAT3& forward_) const;
 
 private:

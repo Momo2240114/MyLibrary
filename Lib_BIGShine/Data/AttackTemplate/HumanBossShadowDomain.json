@@ -55,6 +55,13 @@
       ]
     }
   ],
+  "feedback": {
+    "startSoundPath": "Data/Audio/SE/Sonniss/Shadow/TentacleMotion.wav",
+    "hitSoundPath": "Data/Audio/SE/Sonniss/Mud/LiquidHit.wav",
+    "volume": 0.5,
+    "minDistance": 8.0,
+    "maxDistance": 100.0
+  },
   "cameraShake": {
     "attackScale": 0.5,
     "enabled": true,

@@ -4,7 +4,7 @@
 
 class PlayerControllerComponent;
 
-// Guard、Skill、Counterなど、専用Stateを持たないTimeline駆動Actionを扱う汎用State。
+// 指定Actionの開始と共通入力を扱い、通常ガード中は移動と注視を更新するState。
 class PlayerActionState : public PlayerState
 {
 public:
@@ -14,7 +14,9 @@ public:
         PLAYER_ACTION action_);
 
     const char* GetName() const override { return GetPlayerActionName(action); }
+    // 担当するActionの受付状態を初期化し、防御・反撃では水平移動を止める。
     void Enter() override;
+    // ガード中の移動と注視を更新し、共通の入力処理へ次の行動判断を渡す。
     void Execute(float elapsedTime_) override;
 
 private:

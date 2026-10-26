@@ -1,0 +1,11 @@
+{
+    "SceneName": "LoadingPresentation",
+    "ObjectList": [
+        "LoadingCamera",
+        "LoadingPlayer",
+        "LoadingSword",
+        "LoadingShield",
+        "LoadingLight",
+        "LoadingPresentation"
+    ]
+}

@@ -25,7 +25,7 @@
         {
             "TypeName": "AudioComponent",
             "Data": {
-                "AudioPath": "Data/Audio/SE/discovery.wav",
+                "AudioPath": "Data/Audio/SE/Swordsmanship-3.wav",
                 "IsBGM": false,
                 "Loop": false,
                 "PlayOnStart": false,

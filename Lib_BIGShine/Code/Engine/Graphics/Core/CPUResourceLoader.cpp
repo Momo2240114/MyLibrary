@@ -33,11 +33,14 @@ HRESULT CPUResourceLoader::LoadTextureFromFile(ID3D11Device* device_,
     Microsoft::WRL::ComPtr<ID3D11Resource> resource_;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv_;
 
-    auto it = textureResources.find(filename_);
+    // 同じPNGでも、Scene用のsRGB解釈とHUD用の表示値保持を別リソースとして扱う。
+    const std::wstring cacheKey_ = std::wstring(filename_) + (type == TextureType::Color ? L"|Color" : L"|Data");
+    auto it = textureResources.find(cacheKey_);
     if (it != textureResources.end())
     {
         // キャッシュヒット
         srv_ = it->second;
+        if (!srv_) return E_FAIL;
         srv_->GetResource(resource_.GetAddressOf());
     }
     else
@@ -50,6 +53,8 @@ HRESULT CPUResourceLoader::LoadTextureFromFile(ID3D11Device* device_,
         {
             hr = CreateDDSTextureFromFile(device_, dds_filename.c_str(),
                 resource_.GetAddressOf(), srv_.GetAddressOf()); // ← srv_ に受ける
+            // 任意のUIマスクTextureが破損していても、呼び出し元の代替描画へ戻す。
+            if (FAILED(hr) || !resource_ || !srv_) return FAILED(hr) ? hr : E_FAIL;
             _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
         }
         else
@@ -59,11 +64,13 @@ HRESULT CPUResourceLoader::LoadTextureFromFile(ID3D11Device* device_,
             hr = CreateWICTextureFromFileEx(device_, filename_, 0, D3D11_USAGE_DEFAULT,
                 D3D11_BIND_SHADER_RESOURCE, 0, 0, flags,
                 resource_.GetAddressOf(), srv_.GetAddressOf());
+            // 任意のUIマスクTextureが破損していても、呼び出し元の代替描画へ戻す。
+            if (FAILED(hr) || !resource_ || !srv_) return FAILED(hr) ? hr : E_FAIL;
             _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
         }
 
         //textureResources（map）に登録
-        textureResources.insert(make_pair(filename_, srv_));
+        textureResources.insert(make_pair(cacheKey_, srv_));
     }
 
     // texture2d_desc_ が nullptr でなければ取得

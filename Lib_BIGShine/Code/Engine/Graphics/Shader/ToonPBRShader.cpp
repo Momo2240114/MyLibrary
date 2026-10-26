@@ -110,6 +110,10 @@ void ToonPBRShader::Update(const RenderContext& rc, const GltfModelCommponennt::
     cb.occlusionStrength = mesh.material->occlusionStrength;
     cb.toonPbrBlend = mesh.material->toonPbrBlend;
     cb.normalScale = mesh.material->normalScale;
+    cb.styleParams = { mesh.material->shadowTint.x, mesh.material->shadowTint.y,
+        mesh.material->shadowTint.z, mesh.material->specularToonBlend };
+    cb.specularStrength = mesh.material->specularStrength;
+    cb.rimStrength = mesh.material->rimStrength;
 
     dc->UpdateSubresource(meshConstantBuffer.Get(), 0, 0, &cb, 0, 0);
 

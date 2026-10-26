@@ -11,6 +11,12 @@
         "knockBackType": 0,
         "damageRate": 5.0
     },
+    "feedback": {
+        "hitSoundPath": "Data/Audio/SE/Sonniss/Mud/SplatHit.wav",
+        "volume": 0.55,
+        "minDistance": 8.0,
+        "maxDistance": 100.0
+    },
     "cameraShake": {
         "enabled": true,
         "powerLevel": 1
@@ -83,7 +89,7 @@
     "weaponHitBox": {
         "activeEndTime": 0.13,
         "activeStartTime": 0.0,
-        "enabled": true,
+        "enabled": false,
         "endNodeName": "TrailEnd",
         "hitBoxName": "Sword",
         "radius": 70.4,

@@ -12,6 +12,7 @@
 #include "PoseLibraryResourceManager.h"
 #include "IKMapComponent.h"
 #include "Engine/Debug/TracyProfiler.h"
+#include "Engine/GamePlay/Combat/AttackTelegraphRuntime.h"
 
 #include <imgui.h>
 #include <imgui_stdlib.h>
@@ -846,6 +847,8 @@ void AnimationControllerComponent::SaveAsset(const std::string& assetName_)
                 e.eventTemplateType == ANIMATION_EVENT_TEMPLATE_TYPE::VFX_TEMPLATE ? "VFX_TEMPLATE" :
                 e.eventTemplateType == ANIMATION_EVENT_TEMPLATE_TYPE::SOUND_TEMPLATE ? "SOUND_TEMPLATE" : "NONE"},
             {"attackTemplateId", e.attackTemplateId},
+            {"telegraph", AttackTelegraphRuntime::SerializeSettings(e.telegraph)},
+            {"telegraphHitStart", e.telegraphHitStart},
             {"ownerTarget", e.ownerTarget},
             {"meshVFXAssetPath", e.meshVFXAssetPath},
             {"attachNodeName", e.attachNodeName},
@@ -890,6 +893,8 @@ void AnimationControllerComponent::SaveAsset(const std::string& assetName_)
             }
         }
         e.attackTemplateId = j.value("attackTemplateId", std::string{});
+        e.telegraph = AttackTelegraphRuntime::DeserializeSettings(j.value("telegraph", nlohmann::json::object()));
+        e.telegraphHitStart = j.value("telegraphHitStart", false);
         e.ownerTarget = j.value("ownerTarget", std::string("Self"));
         auto readVector3_ = [&j](const char* key_, const DirectX::XMFLOAT3& fallback_)
             {

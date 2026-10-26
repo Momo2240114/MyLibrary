@@ -116,6 +116,13 @@ void SpriteRenderer::SetTextureResource(
     localSize = textureSize;
 }
 
+void SpriteRenderer::SetTextureResource(Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture_,
+    const D3D11_TEXTURE2D_DESC& textureDesc_, const std::string& texturePath_)
+{
+    SetTextureResource(texture_,textureDesc_);
+    texturePath = texturePath_;
+}
+
 bool SpriteRenderer::LoadTexture(ID3D11Device* device_, const std::string& filename_)
 {
     BS_PROFILE_SCOPE("SpriteRenderer::LoadTexture");
@@ -137,7 +144,8 @@ bool SpriteRenderer::LoadTexture(ID3D11Device* device_, const std::string& filen
         device_,
         wpath_.c_str(),
         srv_.GetAddressOf(),
-        &texture2dDesc
+        &texture2dDesc,
+        sdrTexture ? TextureType::Data : TextureType::Color
     );
 
     if (FAILED(hr))
@@ -243,7 +251,7 @@ float SpriteRenderer::GetRotationZ() const
 bool SpriteRenderer::GetRenderData(RenderData& outData_) const
 {
     // 非表示ならスキップ
-    if (!visible)
+    if (!IsVisible())
         return false;
 
     // Transformが存在しない場合もスキップ
@@ -253,7 +261,7 @@ bool SpriteRenderer::GetRenderData(RenderData& outData_) const
 
     // 描画データを設定
     outData_.texture = texture;
-    outData_.color = color;
+    outData_.color = GetColor();
     outData_.worldMatrix = t_->GetWorldMatrix(); // Transformが行列を返す前提
     return true;
 }
@@ -298,6 +306,8 @@ void SpriteRenderer::Serialize(nlohmann::json& j) const
     j["CatSize"] = { catSize.x, catSize.y };
     j["CatPos"] = { catPos.x, catPos.y };
     j["Visible"] = visible;
+    j["LinearSampling"] = linearSampling;
+    j["SdrTexture"] = sdrTexture;
     j["ShaderID"] = static_cast<int>(spriteShaderID);
     j["pivotType"] = (int)pivotType; // 追加
 }
@@ -306,6 +316,10 @@ void SpriteRenderer::Serialize(nlohmann::json& j) const
 void SpriteRenderer::Deserialize(const nlohmann::json& j)
 {
     BS_PROFILE_SCOPE("SpriteRenderer::Deserialize");
+    hasRuntimeColor = false;
+    hasRuntimeVisibility = false;
+    linearSampling = j.value("LinearSampling", false);
+    sdrTexture = j.value("SdrTexture", false);
 
     if (j.contains("TexturePath")) {
         std::string name = j["TexturePath"];

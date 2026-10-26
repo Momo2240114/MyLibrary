@@ -1,26 +1,24 @@
 {
+    "CollisionMask": 0,
+    "Layer": 0,
     "Name": "MudSurroundTransform2",
     "ParentName": "",
-    "Layer": 0,
-    "CollisionMask": 0,
     "RequiredForSceneStart": true,
     "Transform": {
         "Pos": [
-            0,
-            0.1,
-            -27
+            0.0,
+            0.10000000149011612,
+            -27.0
         ],
         "Rot": [
-            0,
-            0,
-            0
+            0.0,
+            0.0,
+            0.0
         ],
         "Scale": [
-            1,
-            1,
-            1
+            1.0,
+            1.0,
+            1.0
         ]
-    },
-    "Components": [],
-    "ColliderComponents": []
+    }
 }

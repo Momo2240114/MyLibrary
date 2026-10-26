@@ -7,15 +7,11 @@
 
 
 #include"KeyInput.h"
+#include "Engine/Core/GameRuntimeSettings.h"
+#include "Engine/GamePlay/Scene/IScene.h"
 
 void MouseInput::Update(HWND hwnd_)
 {
-    // デバッグ切り替え
-    if (KeyInput::KeyPressedIn(KeyInput::Key::K_Enter))
-    {
-        m_DebugFlag = !m_DebugFlag;
-    }
-
     // ウィンドウサイズ取得
     RECT rc_;
     GetClientRect(hwnd_, &rc_);
@@ -125,6 +121,10 @@ void MouseInput::Update(HWND hwnd_)
     }
 
     // マウスボタン状態
+    // 中ボタンとサイドボタンも既存の状態取得経路で一度だけ読み取る。
+    previousExtraButtons = extraButtons;
+    for (std::size_t index_ = 0; index_ < extraButtons.size(); ++index_)
+        extraButtons[index_] = (GetAsyncKeyState(VK_MBUTTON + static_cast<int>(index_)) & 0x8000) != 0;
     SHORT leftState_ = GetAsyncKeyState(VK_LBUTTON);
     SHORT rightState_ = GetAsyncKeyState(VK_RBUTTON);
 
@@ -161,7 +161,15 @@ bool MouseInput::GetButtonState(int buttonCode, int type) const
         if (type == 0) return RightDown();
         if (type == 1) return RightPressed();
         return RightReleased();
-        // 必要に応じて中クリック(VK_MBUTTON)なども追加
+    case VK_MBUTTON:
+    case VK_XBUTTON1:
+    case VK_XBUTTON2:
+    {
+        const auto index_ = static_cast<std::size_t>(buttonCode - VK_MBUTTON);
+        if (type == 0) return extraButtons[index_];
+        if (type == 1) return extraButtons[index_] && !previousExtraButtons[index_];
+        return !extraButtons[index_] && previousExtraButtons[index_];
+    }
     }
     return false;
 }
@@ -179,6 +187,14 @@ void MouseInput::ReleaseCursorLock()
     }
 
     ClipCursor(nullptr);
+    // WM_SETCURSORで消したカーソル画像も戻し、解放直後からEditorを操作できるようにする。
+    SetCursor(LoadCursor(nullptr, IDC_ARROW));
+}
+
+void MouseInput::ToggleDebugCursor()
+{
+    m_DebugFlag = !m_DebugFlag;
+    if (m_DebugFlag) ReleaseCursorLock();
 }
 
 void MouseInput::CenterCursor(HWND hwnd_)
@@ -201,15 +217,7 @@ void MouseInput::SetCursorLockEnabled(bool enabled_)
 
     if (!enabled_)
     {
-        m_IsCursorLocked = false;
-        m_IsFirstMouseUpdate = true;
-        m_SubMousePos = Vector2(0.0f, 0.0f);
-
-        if (!m_IsCursorVisible)
-        {
-            while (ShowCursor(true) < 0) {}
-            m_IsCursorVisible = true;
-        }
+        ReleaseCursorLock();
     }
 }
 

@@ -12,22 +12,22 @@
             "BlendMode": 0,
             "BurstCount": 110,
             "Color": [
-                0.025,
-                0.008,
-                0.013,
-                0.35
+                0.065,
+                0.002,
+                0.006,
+                0.94
             ],
             "ColorEnd": [
-                0.012,
+                0.018,
                 0.001,
-                0.004,
+                0.003,
                 0
             ],
             "ColorStart": [
-                0.04,
-                0.005,
-                0.014,
-                0.9
+                0.065,
+                0.002,
+                0.006,
+                0.94
             ],
             "ConeAngle": [
                 0.0,
@@ -52,12 +52,12 @@
                 2.5,
                 3.8
             ],
-            "MaskTexturePath": "",
+            "MaskTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
             "MaxCount": 768,
             "MeshVertexSampleCount": 512,
             "Name": "VortexChunks0",
-            "NoiseFrequency": 0.55,
-            "NoiseSpeed": 0.45,
+            "NoiseFrequency": 0.38,
+            "NoiseSpeed": 0.28,
             "NoiseStrength": 0.5,
             "OrbitVelocity": 9,
             "PosOffset": [
@@ -68,8 +68,8 @@
             "RadialVelocity": -1.1,
             "RenderType": 0,
             "RotationSpeed": [
-                0.0,
-                0.0
+                -1.1,
+                1.1
             ],
             "ShapeEnd": [
                 0.0,
@@ -87,8 +87,8 @@
                 0.0
             ],
             "Size": [
-                0.6,
-                0.3
+                0.9,
+                0.5
             ],
             "SizeRandomEnd": [
                 0.8,
@@ -117,7 +117,7 @@
             ],
             "StretchMax": 100.0,
             "StretchScale": 0.03999999910593033,
-            "TexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+            "TexturePath": "Data/Texture/Particle/TransitionViscousMud.png",
             "TextureSplitCount": [
                 1,
                 1
@@ -125,7 +125,7 @@
             "UseColorOverLife": 1,
             "UseFresnel": 0,
             "UseGradient": 0,
-            "UseMask": 0,
+            "UseMask": 1,
             "UseRandomSize": 1,
             "UseSpriteAnimation": 0,
             "VerticalSpawnRange": 0.0,
@@ -140,14 +140,14 @@
             "gradientSampleMode": 0,
             "gradientStartUv": 0.0,
             "gradientTexturePath": "",
-            "maskTexturePath": "",
+            "maskTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
             "shadeGradientDirection": 0,
             "shadeGradientEndUv": 1.0,
             "shadeGradientFixedUv": 0.5,
             "shadeGradientSampleMode": 0,
             "shadeGradientStartUv": 0.0,
             "shadeGradientTexturePath": "",
-            "texturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+            "texturePath": "Data/Texture/Particle/TransitionViscousMud.png",
             "useGradientTexture": 0,
             "useShadeGradientTexture": 0,
             "MaterialPath": "",
@@ -166,22 +166,22 @@
             "BlendMode": 0,
             "BurstCount": 110,
             "Color": [
-                0.025,
+                0.78,
                 0.008,
-                0.013,
-                0.35
+                0.018,
+                0.82
             ],
             "ColorEnd": [
-                0.012,
-                0.001,
-                0.004,
+                0.2,
+                0.002,
+                0.006,
                 0
             ],
             "ColorStart": [
-                0.04,
-                0.005,
-                0.014,
-                0.9
+                0.78,
+                0.008,
+                0.018,
+                0.82
             ],
             "ConeAngle": [
                 0.0,
@@ -206,12 +206,12 @@
                 2.5,
                 3.8
             ],
-            "MaskTexturePath": "",
+            "MaskTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
             "MaxCount": 768,
             "MeshVertexSampleCount": 512,
             "Name": "VortexChunks1",
-            "NoiseFrequency": 0.55,
-            "NoiseSpeed": 0.45,
+            "NoiseFrequency": 0.38,
+            "NoiseSpeed": 0.28,
             "NoiseStrength": 0.5,
             "OrbitVelocity": -12,
             "PosOffset": [
@@ -222,8 +222,8 @@
             "RadialVelocity": -1.1,
             "RenderType": 0,
             "RotationSpeed": [
-                0.0,
-                0.0
+                -1.1,
+                1.1
             ],
             "ShapeEnd": [
                 0.0,
@@ -241,8 +241,8 @@
                 0.0
             ],
             "Size": [
-                0.6,
-                0.3
+                0.9,
+                0.5
             ],
             "SizeRandomEnd": [
                 0.8,
@@ -271,7 +271,7 @@
             ],
             "StretchMax": 100.0,
             "StretchScale": 0.03999999910593033,
-            "TexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+            "TexturePath": "Data/Texture/Particle/TransitionViscousMud.png",
             "TextureSplitCount": [
                 1,
                 1
@@ -279,7 +279,7 @@
             "UseColorOverLife": 1,
             "UseFresnel": 0,
             "UseGradient": 0,
-            "UseMask": 0,
+            "UseMask": 1,
             "UseRandomSize": 1,
             "UseSpriteAnimation": 0,
             "VerticalSpawnRange": 0.0,
@@ -294,14 +294,14 @@
             "gradientSampleMode": 0,
             "gradientStartUv": 0.0,
             "gradientTexturePath": "",
-            "maskTexturePath": "",
+            "maskTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
             "shadeGradientDirection": 0,
             "shadeGradientEndUv": 1.0,
             "shadeGradientFixedUv": 0.5,
             "shadeGradientSampleMode": 0,
             "shadeGradientStartUv": 0.0,
             "shadeGradientTexturePath": "",
-            "texturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+            "texturePath": "Data/Texture/Particle/TransitionViscousMud.png",
             "useGradientTexture": 0,
             "useShadeGradientTexture": 0,
             "MaterialPath": "",

@@ -4,20 +4,20 @@
         {
             "Data": {
                 "InputEnabled": false,
-                "ParentWidgetId": "UIRoot",
+                "ParentWidgetId": "BattleHudRoot",
                 "RaycastTarget": false,
                 "RectTransform": {
                     "AnchorMax": [
                         0.0,
-                        0.0
+                        1.0
                     ],
                     "AnchorMin": [
                         0.0,
-                        0.0
+                        1.0
                     ],
                     "AnchoredPosition": [
-                        32.0,
-                        900.0
+                        60.0,
+                        -120.0
                     ],
                     "LocalRotation": 0.0,
                     "LocalScale": [
@@ -30,7 +30,7 @@
                     ],
                     "SizeDelta": [
                         560.0,
-                        136.0
+                        116.0
                     ]
                 },
                 "Version": 1,
@@ -49,7 +49,7 @@
     ],
     "Layer": 16,
     "Name": "PlayerStatusRoot",
-    "ParentName": "UI",
+    "ParentName": "UIRoot",
     "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [

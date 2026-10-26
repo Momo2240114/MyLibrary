@@ -18,10 +18,14 @@ public:
         PLAYER_ACTION action_ = PLAYER_ACTION::DODGE);
 
     const char* GetName() const override { return GetPlayerActionName(action); }
+    // 回避方向とBlend入力を確定し、空中回避の場合は落下を一時停止する。
     void Enter() override;
+    // ジャスト回避の受付時間を進め、回避中の入力と空中姿勢を更新する。
     void Execute(float elapsedTime_) override;
+    // 中断された場合も受付判定を閉じ、変更した重力と移動制御を復元する。
     void Exit() override;
 
+    // Colliderからの成功通知を、回避状態と受付窓を確認して一度だけ受け付ける。
     void NotifyJustDodgeSucceeded();
 
 private:
@@ -67,6 +71,7 @@ private:
     bool justDodgeFrameActive = false;
     bool justDodgeSucceeded = false;
     bool counterAvailable = false;
+    // 空中回避の最初の停止時にだけ元の重力設定を保存し、終了時の復元に使う。
     bool airDodgeGravityOverridden = false;
     bool previousAirDodgeUseGravity = false;
 

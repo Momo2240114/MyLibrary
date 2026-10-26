@@ -34,6 +34,8 @@ public:
 
     // 外部コードから手動Target Rateを設定する。
     void SetTargetRate(float targetRate_);
+    // 表示対象の切替時に、前の対象の遅延ゲージを残さず初期化する。
+    void ResetDisplayedRate(float rate_);
 
 private:
     // IDで指定された子Widget/SpriteをScene内から探す。
@@ -63,11 +65,16 @@ private:
     // 値の取得元と、各Layerの表示Rate。
     UI_PROGRESS_SOURCE source = UI_PROGRESS_SOURCE::MANUAL;
     float targetRate = 1.0f;
+    float observedTargetRate = 1.0f; // 外部から設定された目標値の変化を次の更新で検出する。
     float currentRate = 1.0f;
     float damageDelayRate = 1.0f;
     float healDelayRate = 1.0f;
     // ダメージ遅延/回復追従の速度。
     float decreaseDelaySpeed = 0.45f;
+    // 既存JSONの動作を維持し、指定されたHUDだけ遅延開始とUV切り詰めを使う。
+    float damageDelayDuration = 0.0f;
+    float damageDelayTimer = 0.0f;
+    bool cropFillUV = false;
     float increaseDelaySpeed = 0.65f;
     float flashDuration = 0.28f;
     float flashTimer = 0.0f;

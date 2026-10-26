@@ -9,10 +9,15 @@ public:
     using PlayerState::PlayerState;
 
     const char* GetName() const override { return GetPlayerActionName(PLAYER_ACTION::JUMP); }
+    // 新規ジャンプと空中行動からの復帰を区別して、開始するフェーズを選ぶ。
     void Enter() override;
+    // 空中の速度調整、二段ジャンプ、離地後の着地と行動終了を管理する。
     void Execute(float elapsedTime_) override;
+    // 入力受付を閉じ、まだ空中なら次の空中行動へContextを引き継ぐ。
     void Exit() override;
+    // 踏み切り通知を受け、最初のジャンプの上昇を重複せず適用する。
     void ApplyJumpImpulseFromSequence();
+    // 二段ジャンプの終了通知から空中Loopへ戻す。
     void NotifyJumpLoopRequested();
 
 private:

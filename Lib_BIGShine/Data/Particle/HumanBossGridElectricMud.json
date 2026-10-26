@@ -1,0 +1,408 @@
+{
+    "AssetType": "ParticleEffect",
+    "AssetVersion": 1,
+    "AssetPath": "Data/Particle/HumanBossGridElectricMud.json",
+    "IsPlaying": false,
+    "Emitters": [
+        {
+            "Name": "GridElectric",
+            "EmissionMode": 1,
+            "BurstCount": 64,
+            "MaxCount": 480,
+            "SpawnShape": 4,
+            "SpawnSpace": 0,
+            "ShapeSize": [
+                0.05,
+                0.05,
+                0.05
+            ],
+            "LegacyRadius": [
+                0.03,
+                0.08
+            ],
+            "PosOffset": [
+                0,
+                0,
+                0
+            ],
+            "Speed": [
+                0.5,
+                2.0
+            ],
+            "Lifespan": [
+                0.18,
+                0.32
+            ],
+            "Size": [
+                1.6,
+                0.4
+            ],
+            "UseRandomSize": 1,
+            "SizeRandomStart": [
+                0.85,
+                1.25
+            ],
+            "SizeRandomEnd": [
+                0.2,
+                0.45
+            ],
+            "Color": [
+                2.0,
+                2.3,
+                3.8,
+                1.0
+            ],
+            "ColorStart": [
+                2.0,
+                2.3,
+                3.8,
+                1.0
+            ],
+            "ColorEnd": [
+                0.15,
+                0.05,
+                0.4,
+                0
+            ],
+            "UseColorOverLife": 1,
+            "BlendMode": 1,
+            "RenderType": 0,
+            "Gravity": 0.0,
+            "Acceleration": [
+                0,
+                0,
+                0
+            ],
+            "Drag": 2.5,
+            "Fade": [
+                0.005,
+                0.15
+            ],
+            "NoiseStrength": 0.9,
+            "NoiseFrequency": 12.0,
+            "NoiseSpeed": 1,
+            "TexturePath": "",
+            "MaskTexturePath": "Data/Texture/VFX/T_Free_Magic_Lightning.PNG",
+            "UseMask": 1,
+            "UseGradient": 0,
+            "useGradientTexture": 0,
+            "useShadeGradientTexture": 0,
+            "UseFresnel": 0,
+            "UseSpriteAnimation": 0,
+            "SpawnDirectionMode": 0,
+            "ConeAngle": [
+                0,
+                0
+            ],
+            "EmissionAxis": [
+                0,
+                1,
+                0
+            ],
+            "TextureSplitCount": [
+                2,
+                2
+            ],
+            "SpriteSheetIndex": [
+                0,
+                0
+            ]
+        },
+        {
+            "Name": "GridMud",
+            "EmissionMode": 1,
+            "BurstCount": 32,
+            "MaxCount": 48,
+            "SpawnShape": 4,
+            "SpawnSpace": 0,
+            "ShapeSize": [
+                0.05,
+                0.05,
+                0.05
+            ],
+            "LegacyRadius": [
+                0.03,
+                0.08
+            ],
+            "PosOffset": [
+                0,
+                0,
+                0
+            ],
+            "Speed": [
+                0.7,
+                2.4
+            ],
+            "Lifespan": [
+                0.22,
+                0.38
+            ],
+            "Size": [
+                0.4,
+                0.16
+            ],
+            "UseRandomSize": 1,
+            "SizeRandomStart": [
+                0.65,
+                1.15
+            ],
+            "SizeRandomEnd": [
+                0.2,
+                0.45
+            ],
+            "Color": [
+                0.1,
+                0.025,
+                0.14,
+                1.0
+            ],
+            "ColorStart": [
+                0.1,
+                0.025,
+                0.14,
+                1.0
+            ],
+            "ColorEnd": [
+                0.015,
+                0.006,
+                0.025,
+                0
+            ],
+            "UseColorOverLife": 1,
+            "BlendMode": 0,
+            "RenderType": 0,
+            "Gravity": -3.0,
+            "Acceleration": [
+                0,
+                0,
+                0
+            ],
+            "Drag": 2.5,
+            "Fade": [
+                0.005,
+                0.2
+            ],
+            "NoiseStrength": 0.15,
+            "NoiseFrequency": 2,
+            "NoiseSpeed": 1,
+            "TexturePath": "",
+            "MaskTexturePath": "Data/Texture/Particle/masks for  particles/masks for  particles/9.png",
+            "UseMask": 1,
+            "UseGradient": 0,
+            "useGradientTexture": 0,
+            "useShadeGradientTexture": 0,
+            "UseFresnel": 0,
+            "UseSpriteAnimation": 0,
+            "SpawnDirectionMode": 0,
+            "ConeAngle": [
+                0,
+                0
+            ],
+            "EmissionAxis": [
+                0,
+                1,
+                0
+            ]
+        },
+        {
+            "Name": "GridElectricSweep",
+            "EmissionMode": 0,
+            "BurstCount": 240,
+            "MaxCount": 320,
+            "SpawnShape": 4,
+            "SpawnSpace": 0,
+            "ShapeSize": [
+                0.05,
+                0.05,
+                0.05
+            ],
+            "LegacyRadius": [
+                0.03,
+                0.08
+            ],
+            "PosOffset": [
+                0,
+                0,
+                0
+            ],
+            "Speed": [
+                0.5,
+                2.0
+            ],
+            "Lifespan": [
+                0.18,
+                0.32
+            ],
+            "Size": [
+                1.6,
+                0.4
+            ],
+            "UseRandomSize": 1,
+            "SizeRandomStart": [
+                0.85,
+                1.25
+            ],
+            "SizeRandomEnd": [
+                0.2,
+                0.45
+            ],
+            "Color": [
+                2.0,
+                2.3,
+                3.8,
+                1.0
+            ],
+            "ColorStart": [
+                2.0,
+                2.3,
+                3.8,
+                1.0
+            ],
+            "ColorEnd": [
+                0.15,
+                0.05,
+                0.4,
+                0
+            ],
+            "UseColorOverLife": 1,
+            "BlendMode": 1,
+            "RenderType": 0,
+            "Gravity": 0.0,
+            "Acceleration": [
+                0,
+                0,
+                0
+            ],
+            "Drag": 2.5,
+            "Fade": [
+                0.005,
+                0.15
+            ],
+            "NoiseStrength": 0.9,
+            "NoiseFrequency": 12.0,
+            "NoiseSpeed": 1,
+            "TexturePath": "",
+            "MaskTexturePath": "Data/Texture/VFX/T_Free_Magic_Lightning.PNG",
+            "UseMask": 1,
+            "UseGradient": 0,
+            "useGradientTexture": 0,
+            "useShadeGradientTexture": 0,
+            "UseFresnel": 0,
+            "UseSpriteAnimation": 0,
+            "SpawnDirectionMode": 0,
+            "ConeAngle": [
+                0,
+                0
+            ],
+            "EmissionAxis": [
+                0,
+                1,
+                0
+            ],
+            "TextureSplitCount": [
+                2,
+                2
+            ],
+            "SpriteSheetIndex": [
+                0,
+                0
+            ]
+        },
+        {
+            "Name": "GridMudSweep",
+            "EmissionMode": 0,
+            "BurstCount": 160,
+            "MaxCount": 48,
+            "SpawnShape": 4,
+            "SpawnSpace": 0,
+            "ShapeSize": [
+                0.05,
+                0.05,
+                0.05
+            ],
+            "LegacyRadius": [
+                0.03,
+                0.08
+            ],
+            "PosOffset": [
+                0,
+                0,
+                0
+            ],
+            "Speed": [
+                0.7,
+                2.4
+            ],
+            "Lifespan": [
+                0.22,
+                0.38
+            ],
+            "Size": [
+                0.4,
+                0.16
+            ],
+            "UseRandomSize": 1,
+            "SizeRandomStart": [
+                0.65,
+                1.15
+            ],
+            "SizeRandomEnd": [
+                0.2,
+                0.45
+            ],
+            "Color": [
+                0.1,
+                0.025,
+                0.14,
+                1.0
+            ],
+            "ColorStart": [
+                0.1,
+                0.025,
+                0.14,
+                1.0
+            ],
+            "ColorEnd": [
+                0.015,
+                0.006,
+                0.025,
+                0
+            ],
+            "UseColorOverLife": 1,
+            "BlendMode": 0,
+            "RenderType": 0,
+            "Gravity": -3.0,
+            "Acceleration": [
+                0,
+                0,
+                0
+            ],
+            "Drag": 2.5,
+            "Fade": [
+                0.005,
+                0.2
+            ],
+            "NoiseStrength": 0.15,
+            "NoiseFrequency": 2,
+            "NoiseSpeed": 1,
+            "TexturePath": "",
+            "MaskTexturePath": "Data/Texture/Particle/masks for  particles/masks for  particles/9.png",
+            "UseMask": 1,
+            "UseGradient": 0,
+            "useGradientTexture": 0,
+            "useShadeGradientTexture": 0,
+            "UseFresnel": 0,
+            "UseSpriteAnimation": 0,
+            "SpawnDirectionMode": 0,
+            "ConeAngle": [
+                0,
+                0
+            ],
+            "EmissionAxis": [
+                0,
+                1,
+                0
+            ]
+        }
+    ]
+}

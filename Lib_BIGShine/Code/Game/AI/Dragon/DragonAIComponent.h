@@ -527,7 +527,7 @@ private:
     float previousHpRateForUltimate = 1.0f;
     float turnRootMotionLimitRemainingDegrees = 0.0f;
     bool turnRootMotionLimitActive = false;
-    float spinTailRotationDegrees = 180.0f;
+    float spinTailRotationDegrees = 360.0f;
     float spinTailRotationDirection = 1.0f;
     float spinTailRotationAppliedYaw = 0.0f;
     int airAttackCount = 0;

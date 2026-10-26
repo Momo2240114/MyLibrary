@@ -87,6 +87,8 @@ public:
     void Stop();
     // 保存済みEmitter設定を変更せず、演出中の連続発生量だけを補正する。
     void SetEmissionScale(float scale_);
+    // 一時的な見た目の倍率を適用し、Assetの設定値とPool内の元データは変更しない。
+    void SetRuntimeVisualScale(float scale_);
     // 外周Particleの半径と色を、保存設定とは別の実行時補正として渡す。
     void SetRuntimeRingAppearance(float radius_, const DirectX::XMFLOAT4& color_);
     void ClearRuntimeRingAppearance() { runtimeRingEnabled = false; }
@@ -159,6 +161,7 @@ private:
     double applyFeedbackUntil = 0.0;
     bool isPlaying = false;
     float emissionScale = 1.0f;
+    float runtimeVisualScale = 1.0f;
     bool runtimeRingEnabled = false;
     float runtimeRingRadius = 0.0f;
     DirectX::XMFLOAT4 runtimeRingColor{ 1.0f, 1.0f, 1.0f, 1.0f };

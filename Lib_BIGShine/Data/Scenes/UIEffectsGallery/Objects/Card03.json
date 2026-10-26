@@ -1,0 +1,106 @@
+{
+    "Name": "Card03",
+    "Layer": 16,
+    "CollisionMask": 0,
+    "ParentName": "GalleryBoard",
+    "RequiredForSceneStart": true,
+    "Transform": {
+        "Pos": [
+            0,
+            0,
+            0
+        ],
+        "Rot": [
+            0,
+            0,
+            0
+        ],
+        "Scale": [
+            1,
+            1,
+            1
+        ]
+    },
+    "Components": [
+        {
+            "TypeName": "UIWidgetComponent",
+            "Enabled": true,
+            "UpdateEnabled": true,
+            "LateUpdateEnabled": true,
+            "UpdatePriority": 0,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": true,
+            "Data": {
+                "WidgetId": "Card03",
+                "RaycastTarget": false,
+                "InputEnabled": false,
+                "ZOrder": 0,
+                "RectTransform": {
+                    "AnchorMin": [
+                        0,
+                        0
+                    ],
+                    "AnchorMax": [
+                        0,
+                        0
+                    ],
+                    "Pivot": [
+                        0.5,
+                        0.5
+                    ],
+                    "AnchoredPosition": [
+                        795,
+                        155
+                    ],
+                    "SizeDelta": [
+                        272,
+                        142
+                    ]
+                }
+            }
+        },
+        {
+            "TypeName": "SpriteRenderer",
+            "Enabled": true,
+            "UpdateEnabled": true,
+            "LateUpdateEnabled": true,
+            "UpdatePriority": 0,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": true,
+            "Data": {
+                "Color": [
+                    0.035,
+                    0.07,
+                    0.1,
+                    1
+                ],
+                "LocalSize": [
+                    272,
+                    142
+                ],
+                "LinearSampling": true
+            }
+        },
+        {
+            "TypeName": "UIVisualEffectComponent",
+            "Enabled": true,
+            "UpdateEnabled": true,
+            "LateUpdateEnabled": true,
+            "UpdatePriority": 0,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": true,
+            "Data": {
+                "Preset": "Outline",
+                "Settings": {
+                    "OutlineWidth": 1,
+                    "OutlineColor": [
+                        0.15,
+                        0.38,
+                        0.5,
+                        0.8
+                    ]
+                }
+            }
+        }
+    ]
+}

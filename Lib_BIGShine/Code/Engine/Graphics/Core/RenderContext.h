@@ -33,6 +33,9 @@ struct RenderContext
     ShapeRenderSystem* shapeSystem = nullptr;        // Boxメッシュの供給源
 
     CascadeShadowMap* cascadeShadowMap = nullptr;
+    // 通常シーンは線形HDR、PostEffectを通さないEditorプレビューは表示用の色を出す。
+    bool useHdrOutput = true;
+    bool suppressSkybox = false; // 決着撮影では背景の情報量を落とし、被写体と泥を優先する。
 
     // 必要であれば、ポストプロセス等で重宝する画面サイズ
     float screenWidth = 0.0f;

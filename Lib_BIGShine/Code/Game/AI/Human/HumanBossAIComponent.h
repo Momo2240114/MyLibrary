@@ -11,6 +11,8 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include "Engine/Graphics/RenderSystem/RadialBlurSystem.h"
+#include "Engine/Graphics/RenderSystem/BloomSystem.h"
 
 class HumanBossActionComponent;
 
@@ -22,7 +24,7 @@ enum class HumanBossActionType
     NORMAL_ATTACK_A, NORMAL_ATTACK_B, BACK_DODGE, SIDE_DODGE, GUARD, JUST_GUARD,
     COUNTER_ATTACK, DELAY_ATTACK, GUARD_BREAK, SHADOW_SHIFT_BACK, SHADOW_SHIFT_SIDE,
     SHADOW_SHIFT_BEHIND, SHADOW_SHIFT_APPROACH, DRAGON_HEAD_BREATH, DRAGON_BITE,
-    DRAGON_CLAW, DRAGON_TAIL, DRAGON_WING, SPECIAL_ATTACK, SPECIAL_COUNTER, LIGHT_COUNTER, WHIFF_PUNISH, ATTACK_FEINT, HEAVY_SINGLE_ATTACK, SHADOW_SLASH, SHADOW_DIVE_01, SHADOW_DIVE_02, SHADOW_DOMAIN, SHADOW_CHARGE, SHADOW_ORB, SHADOW_RAGNAROK, COUNT
+    DRAGON_CLAW, DRAGON_TAIL, DRAGON_WING, SPECIAL_ATTACK, SPECIAL_COUNTER, LIGHT_COUNTER, WHIFF_PUNISH, ATTACK_FEINT, HEAVY_SINGLE_ATTACK, SHADOW_SLASH, SHADOW_DIVE_01, SHADOW_DIVE_02, SHADOW_DOMAIN, SHADOW_CHARGE, SHADOW_ORB, SHADOW_RAGNAROK, GUARD_EXECUTION, COUNT
 };
 
 // Phaseごとの使用可否、重み、再使用時間と共通Skillを保持する行動定義。
@@ -58,6 +60,10 @@ public:
     void Start() override;
     // 実行中Actionを優先し、待機時に観察・反応・距離調整を進める。
     void Update(float deltaTime_) override;
+    // 影渡りやRootMotion後の位置へ、暴走の発生源を追従させる。
+    void LateUpdate(float deltaTime_) override;
+    // シーン破棄時にも、独立したParticleを残さない。
+    void OnDestroy() override;
     // 外部からの行動要求と被弾通知をOwnerのRegistryへ公開する。
     void RegisterActions() override;
     // 現在の判断材料と、Phase別の行動設定をEditorへ表示する。
@@ -70,6 +76,17 @@ public:
     bool RequestAction(HumanBossActionType type_);
     // 実行中の防御・攻撃を閉じ、通常判断を待機状態へ戻す。
     void Stop();
+    // HPを引く前に閾値を予約し、最終攻防中だけ通常死亡を保留する。
+    float ConstrainBattleDamage(float damage_);
+    // 有効なPlayer攻撃が最終スタンへ命中した瞬間だけ、決着演出へ引き渡す。
+    bool TryBeginFinalFinish(const std::shared_ptr<GameObject>& attacker_);
+    // リトライ・HPリセット・形態終了時に、保存しない戦闘履歴を破棄する。
+    void ResetBerserk();
+    bool IsBerserkActive() const { return berserkStage >= 0; }
+    // 連撃と攻撃間の隙間は完全無敵とし、反撃用スタンでのみ解除する。
+    bool IsBerserkInvulnerable() const { return berserkStage >= 0 && !berserkStunned && !finishRequested; }
+    // Owner階層を持たない独立範囲攻撃のジャストガードも同じ受付へ接続する。
+    void NotifyBerserkJustGuard() { OnBerserkJustGuarded(); }
     // 既存BehaviorTree Editorへ、実行中の判断グラフと保存先を公開する。
     AIBehaviorGraph& GetBehaviorGraph() { return behaviorGraph; }
     std::string& GetBehaviorGraphAssetPath() { return behaviorGraphAssetPath; }
@@ -82,6 +99,59 @@ public:
     // 実行中Actionに対応するノードをEditorで強調表示する。
     std::string GetCurrentGraphActionName() const;
 private:
+    // 通常BehaviorGraphより優先する有限の連撃・受け流し・スタンを更新する。
+    bool UpdateBerserk(float deltaTime_);
+    // 通常AIと同じ戦闘許可を使い、単体テストでもHP閾値を予約する。
+    bool CanRunBerserkBattle();
+    // 予約された暴走を、通常攻撃・被弾待ち・JG硬直より優先して一度だけ開始する。
+    bool TryStartBerserk();
+    bool BeginBerserkAttack();
+    void FinishBerserkAttack();
+    void EnterBerserkStun();
+    void OnBerserkJustGuarded();
+    // 攻撃単位の終了処理と分離して、連撃全体のオーラを管理する。
+    void StartBerserkAura();
+    void StopBerserkAura();
+    // 暴走開始の短い予備動作を非スケール時間で進め、終了・中断時に描画設定を戻す。
+    void BeginBerserkEntrance();
+    bool UpdateBerserkEntrance();
+    void RestoreBerserkEntrance();
+    // ダウン開始を最後まで再生した後、指定のダウンループへ切り替える。
+    void UpdateBerserkDown(float deltaTime_);
+    void DrawBerserkGui();
+    void SerializeBerserk(nlohmann::json& json_) const;
+    void DeserializeBerserk(const nlohmann::json& json_);
+    std::array<int, 3> berserkAttackCounts{3,5,12};
+    std::array<float, 3> berserkSpeeds{1.25f,1.5f,1.8f};
+    std::array<float, 3> berserkStunDurations{3.0f,4.0f,5.0f};
+    std::array<bool, 3> berserkPending{};
+    std::array<bool, 3> berserkUsed{};
+    int berserkStage = -1;
+    int berserkStartedCount = 0;
+    bool berserkAttackInFlight = false;
+    bool berserkStunned = false;
+    bool finalPhaseReserved = false;
+    bool finishRequested = false;
+    float berserkTimer = 0.0f;
+    float berserkFailureTime = 0.0f;
+    float berserkParryDelay = 0.16f;
+    float berserkActionGap = 0.06f;
+    float berserkMinimumTell = 0.18f;
+    std::weak_ptr<GameObject> berserkStunEffect;
+    std::weak_ptr<GameObject> berserkAuraEffect;
+    std::weak_ptr<GameObject> berserkEntranceEffect;
+    RadialBlurSystem::Parameters berserkPreviousBlur;
+    // 色相・彩度・色バランスを含めて保存し、白黒演出の終了後に元の配色へ戻す。
+    BloomSystem::CbColorFilter berserkPreviousFilter;
+    float berserkEntranceRemaining = 0.0f;
+    float berserkEntranceDuration = 0.6f;
+    float berserkEntranceBlur = 0.035f;
+    std::array<float, 3> berserkEntranceBlurMultipliers{1.0f,1.5f,2.0f};
+    std::array<float, 3> berserkEntranceMonochrome{0.55f,0.8f,1.0f};
+    float berserkDownElapsed = 0.0f;
+    bool berserkBlurOwned = false;
+    bool berserkDownLoop = false;
+    std::string berserkStartReason = "Waiting for HP threshold";
     // 優先判断はBehaviorGraphへ渡し、行動の実行条件と終了だけをComponentで管理する。
     void EnsureDefaultBehaviorGraph();
     // 攻撃設定が広い場合はIntentの追跡距離にも反映し、古い共通距離で攻撃を遮断しない。
@@ -115,10 +185,18 @@ private:
 
     // Managerの観測を使い、履歴・反応予算・Intentを更新する。
     void UpdateMind(float deltaTime_);
+    // 意図を選ぶ前に、観察履歴・反応待ち・反撃可能時間を更新する。
+    void UpdateMindMemory(float deltaTime_);
+    // 空中強攻撃の記憶がある場合に、着地への反撃または追跡を優先する。
+    bool TrySelectAirHeavyIntent();
+    // 現在の距離と観察傾向から候補を重み付けし、次の意図を選択する。
+    void SelectIntent();
     void DrawMindGui();
     float GetIntentActionModifier(std::size_t index_) const;
     float GetReactionCost(HumanBossActionType type_) const;
     bool IsReactionReady() const;
+    // 受け流しを開始できる強攻撃を判別し、受付直前まで他の防御へ逸れないようにする。
+    bool IsHeavyJustGuardReady() const;
     HumanBossMindSettings mindSettings;
     PlayerActionObservation playerObservation;
     HumanBossIntent intent = HumanBossIntent::OBSERVE;
@@ -185,7 +263,7 @@ private:
     float dodgeCooldown = 1.2f;
     float attackCooldown = 1.0f;
     float reactionLookAhead = 0.35f;
-    float justGuardLead = 0.15f;
+    float justGuardLead = 0.22f;
     float playerAttackReach = 3.5f;
     float playerAttackHalfAngle = 65.0f;
     float threatHeightTolerance = 2.0f;

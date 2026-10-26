@@ -119,13 +119,27 @@ void HitBox::SetAttackSector(float range_, float angle_, float halfHeight_)
     sectorHalfHeight = (std::max)(0.0f, halfHeight_);
 }
 
+void HitBox::SetAttackBox(float halfWidth_, float halfHeight_, float halfLength_)
+{
+    attackBoxHalfExtents = { (std::max)(0.0f, halfWidth_), (std::max)(0.0f, halfHeight_), (std::max)(0.0f, halfLength_) };
+}
+
 bool HitBox::IsWithinAttackSector(GameObject* target_) const
 {
-    if (sectorRange <= 0.0f) return true;
+    if (sectorRange <= 0.0f && attackBoxHalfExtents.x <= 0.0f) return true;
     const auto owner_ = gameObject.lock();
     if (!owner_ || !owner_->transform || !target_ || !target_->transform) return false;
     const auto center_ = owner_->transform->GetWorldPosition();
     const auto position_ = target_->transform->GetWorldPosition();
+    if (attackBoxHalfExtents.x > 0.0f)
+    {
+        // Guard、JustGuard、Dodgeも使用する共通判定で、帯の間の安全地帯を維持する。
+        DirectX::XMFLOAT3 localPosition_{};
+        DirectX::XMStoreFloat3(&localPosition_, DirectX::XMVector3TransformCoord(DirectX::XMLoadFloat3(&position_),
+            DirectX::XMMatrixInverse(nullptr, owner_->transform->GetWorldMatrix())));
+        return std::abs(localPosition_.x) <= attackBoxHalfExtents.x &&
+            std::abs(localPosition_.y) <= attackBoxHalfExtents.y && std::abs(localPosition_.z) <= attackBoxHalfExtents.z;
+    }
     const float dx_ = position_.x - center_.x;
     const float dz_ = position_.z - center_.z;
     const float distance_ = std::sqrt(dx_ * dx_ + dz_ * dz_);
@@ -428,6 +442,7 @@ void HitBox::Serialize(nlohmann::json& j_) const
     j_["HitSoundVolume"] = hitSoundVolume;
     j_["HitSoundMuffled"] = hitSoundMuffled;
     j_["HitSoundMuffledCutoff"] = hitSoundMuffledCutoff;
+    j_["Feedback"] = feedback;
     j_["CameraShakeEnabled"] = cameraShakeEnabled;
     j_["CameraShakeReceiveDuration"] = cameraShakeReceiveDuration;
     j_["CameraShakeReceivePositionStrength"] = cameraShakeReceivePositionStrength;
@@ -501,6 +516,7 @@ void HitBox::Deserialize(const nlohmann::json& j_)
     hitSoundVolume = (std::max)(j_.value("HitSoundVolume", 1.0f), 0.0f);
     hitSoundMuffled = j_.value("HitSoundMuffled", false);
     hitSoundMuffledCutoff = (std::max)(j_.value("HitSoundMuffledCutoff", 1200.0f), 10.0f);
+    feedback = j_.value("Feedback", AttackFeedbackSettings{});
     cameraShakeEnabled = j_.value("CameraShakeEnabled", true);
     cameraShakeReceiveDuration =
         (std::max)(j_.value("CameraShakeReceiveDuration", 0.12f), 0.0f);

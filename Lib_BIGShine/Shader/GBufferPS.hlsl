@@ -12,7 +12,10 @@ cbuffer CbGBufferMaterial : register(b0)
     float2 uvScale;
     float2 uvOffset;
     float uvRotation;
-    float3 materialPadding;
+    float normalScale;
+    float specularStrength;
+    float rimStrength;
+    float4 styleParams;
     float4 dissolveParams;
     float4 dissolveEdgeColor;
     float4 dissolveDirection;
@@ -53,10 +56,24 @@ struct GBUFFER_OUT
     float4 normal : SV_TARGET1;
     float4 material : SV_TARGET2;
     float4 emissive : SV_TARGET3;
+    float4 style : SV_TARGET4;
 };
 
 GBUFFER_OUT main(VS_OUT pin)
 {
+    // ロード用の指定値はModelRenderSystemと合わせ、形状だけを単色で出力する。
+    const int LOADING_SILHOUETTE_SHADING_MODEL = -1;
+    if (shadingModel == LOADING_SILHOUETTE_SHADING_MODEL)
+    {
+        GBUFFER_OUT silhouette_;
+        // LightingPSのUnlitへ渡し、法線やテクスチャによる陰影を付けない。
+        silhouette_.baseColorAndModel = float4(baseColor.rgb, 0.0f);
+        silhouette_.normal = float4(0.5f, 0.5f, 1.0f, 0.0f);
+        silhouette_.material = float4(1.0f, 1.0f, 0.0f, 0.0f);
+        silhouette_.emissive = 0.0f;
+        silhouette_.style = 0.0f;
+        return silhouette_;
+    }
     float dissolveEdge_ = 0.0f;
     if (dissolveParams.x > 0.0f)
     {
@@ -113,15 +130,20 @@ GBUFFER_OUT main(VS_OUT pin)
     }
 
     float3 normal_ = normalize(pin.normal);
-    float3 tangent_ = normalize(pin.tangent);
-    float3 bitangent_ = normalize(cross(normal_, tangent_));
+    float3 tangent_ = normalize(pin.tangent.xyz);
+    // 補間された接線を直交化し、ミラーUVの符号を反映する。
+    tangent_ = normalize(tangent_ - normal_ * dot(normal_, tangent_));
+    float3 bitangent_ = normalize(cross(normal_, tangent_)) * pin.tangent.w;
     float3x3 tangentBasis_ = float3x3(tangent_, bitangent_, normal_);
     float3 sampledNormal_ = NormalMap.Sample(LinearSampler, materialUV_).xyz * 2.0f - 1.0f;
+    sampledNormal_.xy *= normalScale;
     normal_ = normalize(mul(sampledNormal_, tangentBasis_));
 
-    float2 metalRough_ = MetalRoughMap.Sample(LinearSampler, materialUV_).gr;
-    float metalness_ = saturate(metalRough_.r * metalnessParam);
-    float roughness_ = max(saturate(metalRough_.g * roughnessParam), 0.04f);
+    float4 packedSample_ = MetalRoughMap.Sample(LinearSampler, materialUV_);
+    float2 metalRough_ = ApplySeparateMaterialMaps(
+        packedSample_, float2(metalnessParam, roughnessParam), LinearSampler, materialUV_);
+    float metalness_ = saturate(metalRough_.r);
+    float roughness_ = max(saturate(metalRough_.g), 0.04f);
     float ao_ = lerp(1.0f, AOMap.Sample(LinearSampler, materialUV_).r, occlusionStrength);
     float3 emissive_ = EmissiveMap.Sample(LinearSampler, materialUV_).rgb * emissiveColor;
     const float pulsePhase_ = overlayTime * overlayEmissivePulseSpeed * 6.28318530718f;
@@ -132,8 +154,10 @@ GBUFFER_OUT main(VS_OUT pin)
 
     GBUFFER_OUT output_;
     output_.baseColorAndModel = float4(sampledBase_.rgb, shadingModel);
-    output_.normal = float4(normal_ * 0.5f + 0.5f, 1.0f);
+    // 空いているAlphaへ反射強度とRim強度を保存し、RT追加を1枚に抑える。
+    output_.normal = float4(normal_ * 0.5f + 0.5f, specularStrength);
     output_.material = float4(ao_, roughness_, metalness_, saturate(toonPbrBlend));
-    output_.emissive = float4(emissive_, 1.0f);
+    output_.emissive = float4(emissive_, rimStrength);
+    output_.style = styleParams;
     return output_;
 }

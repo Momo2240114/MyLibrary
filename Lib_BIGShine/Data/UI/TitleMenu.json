@@ -1,0 +1,38 @@
+{
+    "MoveSound": "Data/Audio/SE/Sword-Practice-2.wav",
+    "ConfirmSound": "Data/Audio/SE/Sword-Fight-1.wav",
+    "Items": [
+        {
+            "Id": "game_start",
+            "Label": "GAME START",
+            "Visible": true,
+            "Enabled": true,
+            "Action": "GoSceneGame",
+            "Order": 0
+        },
+        {
+            "Id": "tutorial",
+            "Label": "TUTORIAL",
+            "Visible": true,
+            "Enabled": false,
+            "Action": "GoSceneTutorial",
+            "Order": 1
+        },
+        {
+            "Id": "settings",
+            "Label": "SETTINGS",
+            "Visible": true,
+            "Enabled": false,
+            "Action": "",
+            "Order": 2
+        },
+        {
+            "Id": "exit",
+            "Label": "EXIT GAME",
+            "Visible": true,
+            "Enabled": true,
+            "Action": "Title.Exit",
+            "Order": 3
+        }
+    ]
+}

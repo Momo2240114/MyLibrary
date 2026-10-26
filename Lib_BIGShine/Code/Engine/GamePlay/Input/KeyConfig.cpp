@@ -1,7 +1,9 @@
 #include "PrecompiledHeader.h"
 
 #include "KeyConfig.h"
+#include "Engine/Debug/TracyProfiler.h"
 #include "KeyInput.h"
+#include "Engine/UI/ScreenTransitionManager.h"
 #include "MouseInput.h"
 #include "ControllerInput.h"
 #include <fstream>
@@ -15,15 +17,18 @@ using json = nlohmann::json;
 void KeyConfig::BindAction(const std::string& action_, const InputCombo& combo_) {
     if (combo_.empty()) return;
     actionMap[action_].push_back(combo_);
+    ++bindingsRevision;
 }
 
 void KeyConfig::SetBinds(const std::string& action_, const std::vector<InputCombo>& combos_) {
     if (action_.empty()) return;
     actionMap[action_] = combos_;
+    ++bindingsRevision;
 }
 
 void KeyConfig::RemoveAction(const std::string& action_) {
     actionMap.erase(action_);
+    ++bindingsRevision;
 }
 
 bool KeyConfig::RenameAction(const std::string& oldAction_, const std::string& newAction_) {
@@ -35,11 +40,13 @@ bool KeyConfig::RenameAction(const std::string& oldAction_, const std::string& n
     auto combos = std::move(it->second);
     actionMap.erase(it);
     actionMap[newAction_] = std::move(combos);
+    ++bindingsRevision;
     return true;
 }
 
 void KeyConfig::ClearBinds(const std::string& action_) {
     actionMap.erase(action_);
+    ++bindingsRevision;
 }
 
 // --- 内部判定ロジック ---
@@ -89,6 +96,8 @@ bool KeyConfig::CheckCombo(const InputCombo& combo_, int type_) const {
 
 // --- 公開判定関数 ---
 bool KeyConfig::ActionPressed(const std::string& action_) const {
+    // 遷移中もデバイス状態は更新し、ゲーム向けの入力結果だけを抑止する。
+    if (ScreenTransitionManager::Instance().IsInputBlocked()) return false;
     auto it = actionMap.find(action_);
     if (it == actionMap.end()) return false;
     for (const auto& combo_ : it->second) if (CheckCombo(combo_, 0)) return true;
@@ -96,6 +105,8 @@ bool KeyConfig::ActionPressed(const std::string& action_) const {
 }
 
 bool KeyConfig::ActionPressedIn(const std::string& action_) const {
+    // 遷移中もデバイス状態は更新し、ゲーム向けの入力結果だけを抑止する。
+    if (ScreenTransitionManager::Instance().IsInputBlocked()) return false;
     auto it = actionMap.find(action_);
     if (it == actionMap.end()) return false;
     for (const auto& combo_ : it->second) if (CheckCombo(combo_, 1)) return true;
@@ -103,6 +114,8 @@ bool KeyConfig::ActionPressedIn(const std::string& action_) const {
 }
 
 bool KeyConfig::ActionPressedOut(const std::string& action_) const {
+    // 遷移中もデバイス状態は更新し、ゲーム向けの入力結果だけを抑止する。
+    if (ScreenTransitionManager::Instance().IsInputBlocked()) return false;
     auto it = actionMap.find(action_);
     if (it == actionMap.end()) return false;
     for (const auto& combo_ : it->second) if (CheckCombo(combo_, 2)) return true;
@@ -185,6 +198,7 @@ bool KeyConfig::Load(const std::string& filename)
     }
 
     actionMap.clear();
+    ++bindingsRevision;
     axisMap.clear();
 
     json actions_ = root_.contains("actions") ? root_["actions"] : root_;
@@ -260,6 +274,7 @@ float KeyConfig::GetAxis(const std::string& axisName_) const
 
 float KeyConfig::GetRawAxis(const std::string& axisName_) const
 {
+    if (ScreenTransitionManager::Instance().IsInputBlocked()) return 0.0f;
     auto it_ = axisMap.find(axisName_);
     if (it_ == axisMap.end()) return 0.0f;
 
@@ -339,3 +354,34 @@ float KeyConfig::GetAxisUnitValue(const AxisUnit& unit_) const
 
 bool KeyConfig::Save() { return Save(configFile); }
 bool KeyConfig::Load() { return Load(configFile); }
+
+// 新規操作だけを観測し、KeyPressedInの共有状態やゲーム操作のタイミングを変更しない。
+void KeyConfig::UpdateActiveDevice(bool focused_)
+{
+    BS_PROFILE_SCOPE("KeyConfig::UpdateActiveDevice");
+    auto& mouse_ = MouseInput::Instance();
+    auto& pad_ = ControllerInput::Instance();
+    bool keyboard_ = false;
+    for (int code_ = 8; code_ < 256; ++code_)
+    {
+        const bool down_ = KeyInput::KeyPressed(code_);
+        keyboard_ |= down_ && !observedKeys[code_];
+        observedKeys[code_] = down_;
+    }
+    bool click_ = false;
+    for (const int code_ : { VK_LBUTTON, VK_RBUTTON, VK_MBUTTON, VK_XBUTTON1, VK_XBUTTON2 })
+        click_ |= mouse_.GetButtonState(code_,1);
+    const auto delta_ = mouse_.GetSubMousePos();
+    const bool wheel_ = observedWheelRevision != mouse_.GetWheelRevision();
+    observedWheelRevision = mouse_.GetWheelRevision();
+    if (focused_ && observationInitialized)
+    {
+        // 明確なボタン操作を移動より優先し、4ピクセル未満のマウス振動を無視する。
+        if (keyboard_ || click_ || wheel_) activeDevice = InputDisplayDevice::KEYBOARD_MOUSE;
+        else if (pad_.HasMeaningfulInput()) activeDevice = pad_.IsPlayStation() ? InputDisplayDevice::PLAYSTATION_PAD : InputDisplayDevice::XBOX_PAD;
+        else if (delta_.x * delta_.x + delta_.y * delta_.y >= 16.0f) activeDevice = InputDisplayDevice::KEYBOARD_MOUSE;
+    }
+    if (!pad_.IsConnected() && activeDevice != InputDisplayDevice::KEYBOARD_MOUSE)
+        activeDevice = InputDisplayDevice::KEYBOARD_MOUSE;
+    observationInitialized = focused_;
+}

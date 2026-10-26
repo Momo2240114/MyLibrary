@@ -34,6 +34,10 @@ public:
     // Sceneから外れる前に、予約処理や外部への参照を終了する。
     virtual void OnDestroy() {}
     virtual void Update(float deltaTime_) {}
+    // ポーズやTimeScaleと独立して進めるUI用の更新。Managerが通常更新前に一度呼ぶ。
+    virtual void UpdateUnscaled(float deltaTime_) {}
+    // 通常RenderからImGuiへ提出する画面UI。InspectorのGuiとは用途を分ける。
+    virtual void RenderUI() {}
     virtual void LateUpdate(float elapsedTime_) {}
     virtual void Submit(ID3D11DeviceContext* context_) {}
     virtual void Gui() {}

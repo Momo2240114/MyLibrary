@@ -12,9 +12,9 @@
             "SpawnShape": 3,
             "SpawnSpace": 0,
             "ShapeSize": [
-                0.55,
-                0.55,
-                0.55
+                0.35,
+                0.35,
+                0.35
             ],
             "LegacyRadius": [
                 0.03,
@@ -27,15 +27,15 @@
             ],
             "Speed": [
                 0.1,
-                0.5
+                0.35
             ],
             "Lifespan": [
-                0.25,
-                0.5
+                0.35,
+                0.6
             ],
             "Size": [
-                0.16,
-                0.38
+                0.2,
+                0.42
             ],
             "UseRandomSize": 1,
             "SizeRandomStart": [
@@ -67,7 +67,7 @@
             "UseColorOverLife": 1,
             "BlendMode": 0,
             "RenderType": 0,
-            "Gravity": 0.2,
+            "Gravity": 0.0,
             "Acceleration": [
                 0,
                 0,
@@ -78,7 +78,7 @@
                 0.015,
                 0.15
             ],
-            "NoiseStrength": 0.45,
+            "NoiseStrength": 0.25,
             "NoiseFrequency": 1.5,
             "NoiseSpeed": 0.8,
             "TexturePath": "",
@@ -99,7 +99,7 @@
                 1,
                 0
             ],
-            "EmissionRate": 24
+            "EmissionRate": 32
         },
         {
             "Name": "ShadowOrbLayer1",
@@ -109,9 +109,9 @@
             "SpawnShape": 3,
             "SpawnSpace": 0,
             "ShapeSize": [
-                0.55,
-                0.55,
-                0.55
+                0.2,
+                0.2,
+                0.2
             ],
             "LegacyRadius": [
                 0.03,
@@ -123,16 +123,16 @@
                 0
             ],
             "Speed": [
-                0.1,
-                0.5
+                0.05,
+                0.2
             ],
             "Lifespan": [
-                0.25,
+                0.3,
                 0.5
             ],
             "Size": [
-                0.16,
-                0.38
+                0.12,
+                0.26
             ],
             "UseRandomSize": 1,
             "SizeRandomStart": [
@@ -144,27 +144,27 @@
                 0.45
             ],
             "Color": [
-                1.2,
-                0.3,
-                1.8,
-                0.7
+                0.5,
+                0.12,
+                1.0,
+                0.85
             ],
             "ColorStart": [
-                1.8,
-                0.55,
-                2.6,
-                0.8
+                0.75,
+                0.3,
+                1.0,
+                0.95
             ],
             "ColorEnd": [
-                0.13,
-                0.035,
-                0.22,
-                0
+                0.14,
+                0.01,
+                0.4,
+                0.0
             ],
             "UseColorOverLife": 1,
             "BlendMode": 1,
             "RenderType": 0,
-            "Gravity": 0.1,
+            "Gravity": 0.0,
             "Acceleration": [
                 0,
                 0,
@@ -175,7 +175,7 @@
                 0.015,
                 0.15
             ],
-            "NoiseStrength": 0.28,
+            "NoiseStrength": 0.18,
             "NoiseFrequency": 2,
             "NoiseSpeed": 1,
             "TexturePath": "",
@@ -196,7 +196,7 @@
                 1,
                 0
             ],
-            "EmissionRate": 24
+            "EmissionRate": 100
         },
         {
             "Name": "ShadowOrbLayer2",
@@ -206,9 +206,9 @@
             "SpawnShape": 3,
             "SpawnSpace": 0,
             "ShapeSize": [
-                0.55,
-                0.55,
-                0.55
+                0.5,
+                0.5,
+                0.5
             ],
             "LegacyRadius": [
                 0.03,
@@ -220,16 +220,16 @@
                 0
             ],
             "Speed": [
-                0.1,
-                0.5
+                0.35,
+                1.2
             ],
             "Lifespan": [
                 0.25,
-                0.5
+                0.55
             ],
             "Size": [
-                0.16,
-                0.38
+                0.035,
+                0.1
             ],
             "UseRandomSize": 1,
             "SizeRandomStart": [
@@ -241,38 +241,38 @@
                 0.45
             ],
             "Color": [
-                0.055,
-                0.028,
-                0.08,
-                0.8
+                0.8,
+                0.55,
+                1.0,
+                1.0
             ],
             "ColorStart": [
-                0.08,
-                0.035,
-                0.11,
-                0.85
+                1.0,
+                0.8,
+                1.0,
+                1.0
             ],
             "ColorEnd": [
-                0.02,
-                0.01,
-                0.025,
-                0
+                0.35,
+                0.03,
+                0.8,
+                0.0
             ],
             "UseColorOverLife": 1,
-            "BlendMode": 0,
+            "BlendMode": 1,
             "RenderType": 0,
-            "Gravity": -0.6,
+            "Gravity": 0.0,
             "Acceleration": [
                 0,
                 0,
                 0
             ],
-            "Drag": 1.2,
+            "Drag": 0.5,
             "Fade": [
                 0.015,
                 0.15
             ],
-            "NoiseStrength": 0.35,
+            "NoiseStrength": 0.65,
             "NoiseFrequency": 1.5,
             "NoiseSpeed": 0.8,
             "TexturePath": "",
@@ -293,7 +293,7 @@
                 1,
                 0
             ],
-            "EmissionRate": 24
+            "EmissionRate": 64
         }
     ]
 }

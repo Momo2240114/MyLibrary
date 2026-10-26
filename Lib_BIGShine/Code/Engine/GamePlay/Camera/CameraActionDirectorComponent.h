@@ -164,6 +164,8 @@ public:
 
     // 現在の演出を止める。immediate_ が true なら補間なしで通常制御へ戻す。
     void StopAction(bool immediate_);
+    // 開始側が所有する演出だけを終了し、途中で優先された別の演出を止めない。
+    void StopActionByName(const std::string& actionName_, bool immediate_ = false);
 
 private:
     // 所有 GameObject から Camera/TPS/LockOn/Blackboard などの参照を取り直す。

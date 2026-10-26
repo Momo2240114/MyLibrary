@@ -1,0 +1,22 @@
+{
+    "CameraPosition": [
+        0,
+        2.7,
+        -9.5
+    ],
+    "LookAtPosition": [
+        0,
+        1.8,
+        0
+    ],
+    "FieldOfView": 42,
+    "CameraMotionAmplitude": 0.16,
+    "CameraMotionSpeed": 0.12,
+    "LogoCenterX": 0.46,
+    "LogoTop": 0.02,
+    "LogoWidth": 0.56,
+    "LogoMaxHeight": 0.55,
+    "MenuLeft": 0.12,
+    "MenuTop": 0.64,
+    "MenuRowHeight": 66
+}

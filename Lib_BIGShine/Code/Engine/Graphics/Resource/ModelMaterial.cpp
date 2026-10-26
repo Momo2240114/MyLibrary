@@ -13,8 +13,42 @@ namespace
 {
     constexpr const char* TEXTURE_KEYS[] =
     {
-        "BaseColor", "Normal", "Emissive", "Occlusion", "MetalnessRoughness"
+        "BaseColor", "Normal", "Emissive", "Occlusion", "MetalnessRoughness",
+        "Metallic", "Roughness"
     };
+    static_assert(sizeof(TEXTURE_KEYS) / sizeof(TEXTURE_KEYS[0]) == ModelMaterial::TEXTURE_SLOT_COUNT);
+    constexpr const char* CHANNEL_KEYS[] = { "PackedMetallic", "PackedRoughness", "Metallic", "Roughness" };
+    static_assert(sizeof(CHANNEL_KEYS) / sizeof(CHANNEL_KEYS[0]) == ModelMaterial::MATERIAL_VALUE_COUNT);
+}
+
+void ModelMaterial::SetChannel(MaterialValue value_, TextureChannel channel_)
+{
+    const std::size_t index_ = static_cast<std::size_t>(value_);
+    const int channelIndex_ = static_cast<int>(channel_);
+    if (index_ >= MATERIAL_VALUE_COUNT || channelIndex_ < 0 || channelIndex_ > 3) return;
+    channels[index_] = channel_;
+}
+
+ModelMaterial::TextureChannel ModelMaterial::GetChannel(MaterialValue value_) const
+{
+    const std::size_t index_ = static_cast<std::size_t>(value_);
+    return index_ < MATERIAL_VALUE_COUNT ? channels[index_] : TextureChannel::R;
+}
+
+ModelMaterial::TextureChannel ModelMaterial::GetDefaultChannel(MaterialValue value_)
+{
+    if (value_ == MaterialValue::PACKED_METALLIC) return TextureChannel::B;
+    if (value_ == MaterialValue::PACKED_ROUGHNESS) return TextureChannel::G;
+    return TextureChannel::R;
+}
+
+ModelMaterial::TextureSlot ModelMaterial::GetValueTextureSlot(MaterialValue value_)
+{
+    if (value_ == MaterialValue::PACKED_METALLIC || value_ == MaterialValue::PACKED_ROUGHNESS)
+        return TextureSlot::METALNESS_ROUGHNESS;
+    if (value_ == MaterialValue::METALLIC) return TextureSlot::METALLIC;
+    if (value_ == MaterialValue::ROUGHNESS) return TextureSlot::ROUGHNESS;
+    return TextureSlot::COUNT;
 }
 
 void ModelMaterial::SetTexture(TextureSlot slot_, const std::string& path_)
@@ -108,6 +142,11 @@ void ModelMaterial::Serialize(nlohmann::json& json_) const
     {
         json_[TEXTURE_KEYS[index_]] = texturePaths[index_];
     }
+    json_["Channels"] = nlohmann::json::object();
+    for (std::size_t index_ = 0; index_ < MATERIAL_VALUE_COUNT; ++index_)
+    {
+        json_["Channels"][CHANNEL_KEYS[index_]] = static_cast<int>(channels[index_]);
+    }
 }
 
 void ModelMaterial::Deserialize(const nlohmann::json& json_)
@@ -115,5 +154,18 @@ void ModelMaterial::Deserialize(const nlohmann::json& json_)
     for (std::size_t index_ = 0; index_ < TEXTURE_SLOT_COUNT; ++index_)
     {
         SetTexture(static_cast<TextureSlot>(index_), json_.value(TEXTURE_KEYS[index_], std::string{}));
+    }
+    // チャンネル設定がない場合や不正な値の場合は、従来の参照先へ戻す。
+    for (std::size_t index_ = 0; index_ < MATERIAL_VALUE_COUNT; ++index_)
+    {
+        const auto value_ = static_cast<MaterialValue>(index_);
+        channels[index_] = GetDefaultChannel(value_);
+        if (!json_.contains("Channels") || !json_["Channels"].is_object()) continue;
+        const auto& channelJson_ = json_["Channels"];
+        const auto channel_ = channelJson_.find(CHANNEL_KEYS[index_]);
+        if (channel_ == channelJson_.end() || !channel_->is_number_integer()) continue;
+        // 数値を列挙型へ変換する前に範囲を確認し、不正な添字をGPUへ渡さない。
+        if (*channel_ >= 0 && *channel_ <= 3)
+            SetChannel(value_, static_cast<TextureChannel>(channel_->get<int>()));
     }
 }

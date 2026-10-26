@@ -4,7 +4,8 @@
     "attack": {
         "allowMultiHit": false,
         "attackerAirLiftPower": 0.699999988079071,
-        "damage": 250.0,
+        "damage": 90.0,
+        "damageRate": 0.9,
         "hitGroupId": 0,
         "hitStopDuration": 0.15000000596046448,
         "hitStopScale": 0.4000000059604645,
@@ -12,6 +13,13 @@
         "knockBackPower": 3.0,
         "knockBackType": 0,
         "targetAirLiftPower": 0.0
+    },
+    "feedback": {
+        "startSoundPath": "Data/Audio/SE/Sword-Practice-2.wav",
+        "hitSoundPath": "Data/Audio/SE/Swordsmanship-2.wav",
+        "volume": 0.75,
+        "minDistance": 8.0,
+        "maxDistance": 80.0
     },
     "cameraShake": {
         "enabled": true,

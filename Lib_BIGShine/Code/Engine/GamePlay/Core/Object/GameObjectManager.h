@@ -1,4 +1,5 @@
 #pragma once
+#include "Engine/GamePlay/Scene/SceneLoadRequest.h"
 
 #include "GameObject.h"
 #include "Engine/Graphics/RenderSystem/SpriteRenderSystem.h"
@@ -15,11 +16,14 @@
 #include "Engine/Common/StringId.h"
 
 #include <unordered_map>
+#include <unordered_set>
 
 class ColliderComponent;
 class BoxCollider;
 class GltfModelCommponennt;
 class TimeManager;
+class BossFinishDirector;
+class PlayerDeathDirector;
 class CameraManager;
 class CameraComponent;
 class MotionVelocityComponent;
@@ -38,6 +42,10 @@ enum class SCENE_RUNTIME_STATE
     FAILED
 };
 
+// Sceneのロード状態とは独立して、編集とテスト実行を管理する。
+enum class EditorPlayMode { EDITOR, PLAY, PAUSED };
+// GUIの操作を更新開始時に反映するための要求種別。
+enum class EditorPlayCommand { NONE, PLAY, PAUSE, STOP };
 
 #include"Engine/Graphics/RenderSystem/ParticleRenderSystem.h"
 #include"Engine/Graphics/VFX/MeshVFXRenderSystem.h"
@@ -49,7 +57,23 @@ enum class SCENE_RUNTIME_STATE
 class GameObjectManager
 {
 public:
-    void Initialize();
+    void Initialize(bool deferEffectPreload_ = false);
+    // 表示Componentへ渡す状態は値で保持し、ロード元Sceneの寿命に依存させない。
+    void SetPresentationLoadingStatus(const LoadingStatus& status_) { presentationLoadingStatus = status_; }
+    LoadingStatus GetPresentationLoadingStatus() const { return presentationLoadingStatus; }
+    void SetEngineLoadingPresentation(bool engine_) { engineLoadingPresentation = engine_; }
+    bool IsEngineLoadingPresentation() const { return engineLoadingPresentation; }
+    void SetPresentationRetryEnabled(bool enabled_) { presentationRetryEnabled = enabled_; }
+    bool IsPresentationRetryEnabled() const { return presentationRetryEnabled; }
+    void RequestPresentationRetry() { presentationRetryRequested = true; }
+    bool TakePresentationRetryRequest() { const bool requested_ = presentationRetryRequested; presentationRetryRequested = false; return requested_; }
+    void SetPresentationWarning(const std::string& warning_) { presentationWarning = warning_; }
+    const std::string& GetPresentationWarning() const { return presentationWarning; }
+    // 通常描画が失敗した場合も、既に準備したUIだけを提出できる。
+    void RenderUI();
+    void SetPresentationSilhouetteOverride(bool enabled_,bool white_) { presentationSilhouetteOverride = enabled_; presentationSilhouetteWhite = white_; }
+    bool HasPresentationSilhouetteOverride() const { return presentationSilhouetteOverride; }
+    bool IsPresentationSilhouetteWhite() const { return presentationSilhouetteWhite; }
     // 独立した監視サービスを公開する。観測値・履歴・戦闘結果の処理はSystemが担当する。
     std::shared_ptr<CombatObservationSystem> GetCombatObservationSystem() const;
 
@@ -125,8 +149,58 @@ public:
     void UnregisterMotionVelocityComponent(MotionVelocityComponent* component_);
 
     void Update(float elapsedTime_);
+    // Scene編集用Managerだけで有効化し、Workspaceの独立プレビューを維持する。
+    void EnableEditorPlayMode();
+    bool SupportsEditorPlayMode() const { return editorPlayModeEnabled; }
+    EditorPlayMode GetEditorPlayMode() const { return editorPlayModeEnabled ? editorPlayMode : EditorPlayMode::PLAY; }
+    bool CanStartEditorPlay() const { return editorPlayModeEnabled && editorPlayMode == EditorPlayMode::EDITOR && sceneRuntimeState == SCENE_RUNTIME_STATE::RUNNING; }
+    bool ShouldSimulatePhysics() const { return !cinematicPreviewActive && !gameMenuPaused && !IsBossFinishActive() && !IsPlayerDeathActive() && !loadingPresentation && GetEditorPlayMode() == EditorPlayMode::PLAY && !editorWorkspacePaused && sceneRuntimeState == SCENE_RUNTIME_STATE::RUNNING; }
+    // Sceneのメニュー停止を物理更新と音声管理にも共有する。
+    void SetGameMenuPaused(bool paused_) { gameMenuPaused = paused_; }
+    bool IsGameMenuPaused() const { return gameMenuPaused; }
+    // ActionSequenceの編集要求をWorkspaceへ渡す。Object走査中は切り替えない。
+    void RequestCinematicEditor(const std::string& ownerName_, int sequenceIndex_);
+    bool ConsumeCinematicEditorRequest(std::string& ownerName_, int& sequenceIndex_);
+    // 編集Sceneをメモリへ退避し、同じActionSequenceを本番の更新経路で試写する。
+    bool BeginCinematicSequencePreview(const std::string& ownerName_, int sequenceIndex_, const nlohmann::json& sequenceData_, GameProgressState context_);
+    void StopCinematicSequencePreview();
+    void SeekCinematicSequencePreview(float time_);
+    bool IsCinematicSequencePreview() const { return cinematicPreviewActive; }
+    bool HasCinematicSequenceStopRequest() const { return cinematicPreviewActive && (cinematicStopRequested || pendingEditorPlayCommand == EditorPlayCommand::STOP); }
+    bool IsCinematicSequenceSeeking() const { return cinematicReplayTarget >= 0.0f || cinematicRebuild; }
+    bool IsCinematicSequencePaused() const { return cinematicPaused; }
+    float GetCinematicSequenceTime() const { return cinematicTime; }
+    void SetCinematicSequencePaused(bool paused_);
+    void SetCinematicSequenceRate(float rate_);
+    // 決着中は専用時計だけを進め、物理や通常の行動予約を更新しない。
+    bool IsBossFinishActive() const;
+    BossFinishDirector* GetBossFinishDirector() { return bossFinishDirector.get(); }
+    // 死亡演出中は敵の行動予約、当たり判定、物理を通常更新から切り離す。
+    bool IsPlayerDeathActive() const;
+    void RequestPlayerDeath(const std::shared_ptr<GameObject>& player_);
+    PlayerDeathDirector* GetPlayerDeathDirector() { return playerDeathDirector.get(); }
+    void SetEditorWorkspacePaused(bool paused_) { editorWorkspacePaused = paused_; }
+    // Object走査中の破棄を避けるため、GUIからは切替要求だけを記録する。
+    void RequestEditorPlayCommand(EditorPlayCommand command_) { pendingEditorPlayCommand = command_; }
+    bool IsEditorStopRequested() const { return pendingEditorPlayCommand == EditorPlayCommand::STOP; }
+    bool IsEditorPauseRequested() const { return pendingEditorPlayCommand == EditorPlayCommand::PAUSE; }
+    void SetPlayInputCaptured(bool captured_) { playInputCaptured = captured_; }
+    bool IsPlayInputCaptured() const { return playInputCaptured && GetEditorPlayMode() == EditorPlayMode::PLAY && !editorWorkspacePaused; }
+    // 未保存の配置と設定をメモリ上のスナップショットから復元する。
+    void RestoreEditorSnapshot(const nlohmann::json& snapshot_);
+    // Play中は開始前の編集内容、それ以外は現在の編集内容を配布用に取得する。
+    nlohmann::json CaptureStandaloneScene();
+    // SceneLoadingからだけ使う段階ロード。CPU読込と主スレッドの復元処理を分離する。
+    void LoadSceneAsync(const std::string& sceneName_, bool beginGameSceneFlow_ = false);
+    void AdvanceSceneLoading(float deltaTime_);
+    // 戦闘・AI・物理を進めず、専用Sceneの見た目だけを更新する。
+    void UpdateLoadingPresentation(float deltaTime_);
+    const std::string& GetSceneLoadOperation() const { return sceneLoadOperation; }
+    void SetLoadingPresentation(bool enabled_) { loadingPresentation = enabled_; }
     SCENE_RUNTIME_STATE GetSceneRuntimeState() const { return sceneRuntimeState; }
     void SetSceneRuntimeState(SCENE_RUNTIME_STATE state) {  sceneRuntimeState = state; }
+    // 編集用の入力欄ではなく、実際に読み込んだScene名を演出設定へ渡す。
+    const std::string& GetLoadedSceneName() const { return loadedSceneName; }
     float GetSceneLoadProgress() const { return sceneLoadProgress; }
     const std::string& GetSceneRuntimeError() const { return sceneRuntimeError; }
 
@@ -140,9 +214,11 @@ public:
     // 指定したObjectを削除予約する。
     void Destroy(std::shared_ptr<GameObject> object_);
     void Destroy(std::string objectName_);
+    // 演出で実体を破棄しても、Sceneに配置した階層の保存元データを残す。
+    void DestroyRuntimeObject(const std::shared_ptr<GameObject>& object_);
 
     // 全てのObjectを解放する。
-    void Clear();
+    void Clear(bool rebuildEffectPools_ = true);
 
     // 選択中オブジェクト
     void SelectObject(std::shared_ptr<GameObject> object_) { selectedObject = object_; }
@@ -232,6 +308,25 @@ public:
     GuardSystem& GetGuardSystem() { return *guardSystem; }
     EffectManager& GetEffectManager() { return *effectManager; }
 private:
+    // 再構築・ロード待ち・固定刻みの再評価をフレーム予算内で処理する。
+    void UpdateCinematicSequencePreview(float deltaTime_);
+    nlohmann::json cinematicOriginalScene;
+    nlohmann::json cinematicRuntimeScene;
+    std::string cinematicOwnerName;
+    int cinematicSequenceIndex = -1;
+    GameProgressState cinematicContext = GameProgressState::GAME_SCENE_START;
+    bool cinematicPreviewActive = false;
+    bool cinematicStopRequested = false;
+    bool cinematicRebuild = false;
+    bool cinematicReloading = false;
+    bool cinematicStarted = false;
+    bool cinematicPaused = true;
+    float cinematicTime = 0.0f;
+    float cinematicReplayTarget = -1.0f;
+    float cinematicRate = 1.0f;
+    float cinematicRemainder = 0.0f;
+    std::string requestedCinematicOwner;
+    int requestedCinematicSequence = -1;
     // 指定名を基準に、Scene内で重複しない名前を作る。
     std::string MakeUniqueName(std::string baseName_)
     {
@@ -251,6 +346,43 @@ private:
 
 
 private:
+    // フレーム境界でPlay/Pause/Stopを反映する。
+    void ProcessEditorPlayCommand();
+    // ゲームのStartやAIを起動せず、編集に必要な描画データを更新する。
+    void UpdateEditorScene(float deltaTime_);
+    // ディスクへ書き出さず、編集状態を退避する。
+    nlohmann::json CaptureEditorSnapshot();
+    // ディスク読込とスナップショットで同じ復元経路を使う。
+    void LoadSceneData(const std::string& sceneName_, const nlohmann::json& sceneData_);
+    bool PumpSceneLoad();
+    std::unique_ptr<SceneLoadRequest> sceneReadRequest;
+    nlohmann::json pendingSceneDocument;
+    std::size_t sceneObjectCursor = 0;
+    bool incrementalSceneLoad = false;
+    bool stagedSceneLoad = false;
+    bool beginGameSceneFlowAfterRead = false;
+    std::size_t sceneFinalizeCursor = 0;
+    unsigned int sceneFinalizeStage = 0;
+    bool loadingPresentation = false;
+    std::string sceneLoadOperation;
+    bool editorPlayModeEnabled = false;
+    EditorPlayMode editorPlayMode = EditorPlayMode::EDITOR;
+    EditorPlayCommand pendingEditorPlayCommand = EditorPlayCommand::NONE;
+    bool editorWorkspacePaused = false;
+    bool gameMenuPaused = false;
+    LoadingStatus presentationLoadingStatus;
+    bool engineLoadingPresentation = false;
+    bool presentationRetryEnabled = false;
+    bool presentationRetryRequested = false;
+    std::string presentationWarning;
+    bool presentationSilhouetteOverride = false;
+    bool presentationSilhouetteWhite = true;
+    bool playInputCaptured = false;
+    bool editorPlayRoot = false;
+    bool editorCameraInitialized = false;
+    std::string loadedSceneName;
+    std::string pendingEditorSelection;
+
     // Scene保存/Load GUIの状態を保持する専用構造体。
     struct SceneState {
         char name[64] = "MainScene";
@@ -263,8 +395,14 @@ private:
 
 
     std::shared_ptr<GameModeManager> gameModeManager;
+    std::shared_ptr<BossFinishDirector> bossFinishDirector;
+    std::shared_ptr<PlayerDeathDirector> playerDeathDirector;
     std::unique_ptr<ResourceManager> resourceManager;
     std::vector<std::shared_ptr<GameObject>> objects;
+    // 読込・保存済みの配置データを、実行時に削除されたObjectの保存に使用する。
+    std::unordered_map<std::string, nlohmann::json> sceneObjectSaveBaselines;
+    std::vector<std::string> sceneObjectSaveOrder;
+    std::unordered_set<std::string> runtimeDeletedSceneObjects;
     bool showRuntimeObjects = false; // 一時VFXを含む、非保存ObjectもHierarchyで調査する。
     std::unordered_map<StringId, std::vector<std::weak_ptr<GameObject>>> objectNameIndex;
     // 更新ループ中の追加・削除を安全に反映するための待機リスト。

@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="Data\Particle">
+      <UniqueIdentifier>{DF827911-197B-4F79-ADA9-36AD9E5C39DA}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Data">
       <UniqueIdentifier>{b54ebd2a-a005-4ebe-9b9b-536b647a69e2}</UniqueIdentifier>
     </Filter>
@@ -268,6 +271,24 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Code\Editor\Window\BossFinishWindow.cpp">
+      <Filter>Code\Editor\Window</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Game\AI\Human\HumanBossAIComponent.Berserk.cpp">
+      <Filter>Code\Game\Logics\AI\Human</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Game\GameMode\BossFinishDirector.cpp">
+      <Filter>Code\Game\Logics\GameMode</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\Scene\SceneLoadRequest.cpp">
+      <Filter>Code\Engine\GamePlay\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Editor\GamePackageExporter.cpp">
+      <Filter>Code\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Core\GameRuntimeSettings.cpp">
+      <Filter>Code\Engine\Core</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\GamePlay\EventSystem\ObjectDeleteActionComponent.cpp">
       <Filter>Code\Engine\GamePlay\EventSystem</Filter>
     </ClCompile>
@@ -532,6 +553,12 @@
     <ClCompile Include="Code\Editor\Workspace\ParticleEditorWindow.cpp">
       <Filter>Code\Editor\Workspace</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Editor\Workspace\CinematicEditorWindow.cpp">
+      <Filter>Code\Editor\Workspace</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Editor\Workspace\CinematicSequenceEditor.cpp">
+      <Filter>Code\Editor\Workspace</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Editor\Workspace\PlayerStateEditorWindow.cpp">
       <Filter>Code\Editor\Workspace</Filter>
     </ClCompile>
@@ -706,6 +733,27 @@
     <ClCompile Include="Code\Engine\UI\UIProgressBarComponent.cpp">
       <Filter>Code\Engine\GamePlay\UI</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\UI\BattleHudComponent.cpp">
+      <Filter>Code\Engine\GamePlay\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\UI\MenuNavigationComponent.cpp">
+      <Filter>Code\Engine\GamePlay\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\UI\MenuPresentation.cpp">
+      <Filter>Code\Engine\GamePlay\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\UI\LoadingPresentation.cpp">
+      <Filter>Code\Engine\GamePlay\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\UI\ScreenFadeComponent.cpp">
+      <Filter>Code\Engine\GamePlay\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\UI\ScenePresentationComponent.cpp">
+      <Filter>Code\Engine\GamePlay\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\UI\InputIconAtlas.cpp">
+      <Filter>Code\Engine\GamePlay\UI</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\UI\UISpriteSheetComponent.cpp">
       <Filter>Code\Engine\GamePlay\UI</Filter>
     </ClCompile>
@@ -734,6 +782,9 @@
       <Filter>Code\Engine\Platform</Filter>
     </ClCompile>
     <ClCompile Include="Code\Game\Charcter\Player\PlayerControllerComponent.cpp">
+      <Filter>Code\Game\Logics\Charcter\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Game\Charcter\Player\PlayerControllerComponent.Execution.cpp">
       <Filter>Code\Game\Logics\Charcter\Player</Filter>
     </ClCompile>
     <ClCompile Include="Code\Game\Charcter\Player\PlayerActionState.cpp">
@@ -922,6 +973,9 @@
     <ClCompile Include="Code\Engine\GamePlay\Combat\AttackTemplateRuntime.cpp">
       <Filter>Code\Engine\GamePlay</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\Combat\AttackTelegraphRuntime.cpp">
+      <Filter>Code\Engine\GamePlay</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\GamePlay\Combat\CombatStatsComponent.cpp">
       <Filter>Code\Engine\GamePlay</Filter>
     </ClCompile>
@@ -1083,6 +1137,24 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Code\Editor\Window\BossFinishWindow.h">
+      <Filter>Code\Editor\Window</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Game\GameMode\BossFinishDirector.h">
+      <Filter>Code\Game\Logics\GameMode</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\Scene\SceneLoadRequest.h">
+      <Filter>Code\Engine\GamePlay\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\Scene\LoadingTypes.h">
+      <Filter>Code\Engine\GamePlay\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Editor\GamePackageExporter.h">
+      <Filter>Code\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Core\GameRuntimeSettings.h">
+      <Filter>Code\Engine\Core</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Engine\GamePlay\EventSystem\ObjectDeleteActionComponent.h">
       <Filter>Code\Engine\GamePlay\EventSystem</Filter>
     </ClInclude>
@@ -1362,6 +1434,12 @@
     <ClInclude Include="Code\Editor\Workspace\ParticleEditorWindow.h">
       <Filter>Code\Editor\Workspace</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Editor\Workspace\CinematicEditorWindow.h">
+      <Filter>Code\Editor\Workspace</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Editor\Workspace\CinematicSequenceEditor.h">
+      <Filter>Code\Editor\Workspace</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Editor\Workspace\PlayerStateEditorWindow.h">
       <Filter>Code\Editor\Workspace</Filter>
     </ClInclude>
@@ -1605,6 +1683,27 @@
     <ClInclude Include="Code\Engine\UI\UIProgressBarComponent.h">
       <Filter>Code\Engine\GamePlay\UI</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Engine\UI\BattleHudComponent.h">
+      <Filter>Code\Engine\GamePlay\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\UI\MenuNavigationComponent.h">
+      <Filter>Code\Engine\GamePlay\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\UI\MenuPresentation.h">
+      <Filter>Code\Engine\GamePlay\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\UI\LoadingPresentation.h">
+      <Filter>Code\Engine\GamePlay\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\UI\ScreenFadeComponent.h">
+      <Filter>Code\Engine\GamePlay\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\UI\ScenePresentationComponent.h">
+      <Filter>Code\Engine\GamePlay\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\UI\InputIconAtlas.h">
+      <Filter>Code\Engine\GamePlay\UI</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Engine\UI\UISpriteSheetComponent.h">
       <Filter>Code\Engine\GamePlay\UI</Filter>
     </ClInclude>
@@ -1809,6 +1908,12 @@
     <ClInclude Include="Code\Engine\GamePlay\Combat\AttackTemplateRuntime.h">
       <Filter>Code\Engine\GamePlay</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\Combat\AttackTelegraphRuntime.h">
+      <Filter>Code\Engine\GamePlay</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\Combat\AttackTelegraphSettings.h">
+      <Filter>Code\Engine\GamePlay</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Engine\GamePlay\Combat\CombatDamageTypes.h">
       <Filter>Code\Engine\GamePlay</Filter>
     </ClInclude>
@@ -2001,6 +2106,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="CustomExternalDependencies.props" />
+    <None Include="Data\Animation\StateData\Player\States\Heal_Air_01.json">
+      <Filter>Data\Animation\States</Filter>
+    </None>
+    <None Include="Data\Particle\PlayerHeal.json">
+      <Filter>Data\Particle</Filter>
+    </None>
     <None Include="Data\Animation\StateData\DragonFirstForm_Test\States\DragonGroundStamp.json">
       <Filter>Data\Animation\States</Filter>
     </None>
@@ -2281,5 +2392,417 @@
     <ClInclude Include="Code\Game\Charcter\Player\PlayerSkillState.h">
       <Filter>Code\Game\Logics\Charcter\Player\State</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Resources">
+      <UniqueIdentifier>{A1C6BB95-7BA5-40D5-BF32-F2C36A1E168A}</UniqueIdentifier>
+    </Filter>
+    <ResourceCompile Include="Data\Icons\Icons.rc">
+      <Filter>Resources</Filter>
+    </ResourceCompile>
+    <Image Include="Data\Icons\BigShine\BigShine.ico">
+      <Filter>Resources</Filter>
+    </Image>
+    <Image Include="Data\Icons\ANATHEMA\ANATHEMA.ico">
+      <Filter>Resources</Filter>
+    </Image>
+    <ClInclude Include="Code\Engine\Core\ApplicationResources.h">
+      <Filter>Code\Engine\Core</Filter>
+    </ClInclude>
+    <None Include="ApplicationBuild.props">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Tools\Build\GamePackage.json">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="ApplicationBuild.md">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="ReadMe_Editor.txt">
+      <Filter>Resources</Filter>
+    </None>
+    <ClCompile Include="Code\Game\GameMode\PlayerDeathDirector.cpp">
+      <Filter>Code\Game\Logics\GameMode</Filter>
+    </ClCompile>
+    <ClInclude Include="Code\Game\GameMode\PlayerDeathDirector.h">
+      <Filter>Code\Game\Logics\GameMode</Filter>
+    </ClInclude>
+    <ClCompile Include="Code\Game\Charcter\Player\PlayerDeathState.cpp">
+      <Filter>Code\Game\Logics\Charcter\Player\State</Filter>
+    </ClCompile>
+    <ClInclude Include="Code\Game\Charcter\Player\PlayerDeathState.h">
+      <Filter>Code\Game\Logics\Charcter\Player\State</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Code\Engine\GamePlay\UI\ScreenTransition">
+      <UniqueIdentifier>{9d67772c-adbb-40c1-8852-08c5bb9315b9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Engine\GamePlay\UI\ScreenTransition\Effects">
+      <UniqueIdentifier>{f5241459-f678-4ac5-bcf6-d2cf2532e1cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Engine\GamePlay\UI\Presentation">
+      <UniqueIdentifier>{f1fbef8d-1211-4022-ad2d-7d2a9baa6de1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Engine\GamePlay\UI\Menu">
+      <UniqueIdentifier>{6dbed0ce-b56c-4578-afba-c6da9a53af9c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\PostEffect\Transition">
+      <UniqueIdentifier>{bf9cca89-ea97-44c8-bdec-a16da29babeb}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Code\Engine\UI\TransitionParameters.cpp">
+      <Filter>Code\Engine\GamePlay\UI\ScreenTransition</Filter>
+    </ClCompile>
+    <ClInclude Include="Code\Engine\UI\TransitionParameters.h">
+      <Filter>Code\Engine\GamePlay\UI\ScreenTransition</Filter>
+    </ClInclude>
+    <ClCompile Include="Code\Engine\UI\TransitionSequence.cpp">
+      <Filter>Code\Engine\GamePlay\UI\ScreenTransition</Filter>
+    </ClCompile>
+    <ClInclude Include="Code\Engine\UI\TransitionSequence.h">
+      <Filter>Code\Engine\GamePlay\UI\ScreenTransition</Filter>
+    </ClInclude>
+    <ClCompile Include="Code\Engine\UI\ITransitionEffect.cpp">
+      <Filter>Code\Engine\GamePlay\UI\ScreenTransition</Filter>
+    </ClCompile>
+    <ClInclude Include="Code\Engine\UI\ITransitionEffect.h">
+      <Filter>Code\Engine\GamePlay\UI\ScreenTransition</Filter>
+    </ClInclude>
+    <ClCompile Include="Code\Engine\UI\ShaderTransitionEffect.cpp">
+      <Filter>Code\Engine\GamePlay\UI\ScreenTransition</Filter>
+    </ClCompile>
+    <ClInclude Include="Code\Engine\UI\ShaderTransitionEffect.h">
+      <Filter>Code\Engine\GamePlay\UI\ScreenTransition</Filter>
+    </ClInclude>
+    <ClCompile Include="Code\Engine\UI\ScreenTransitionManager.cpp">
+      <Filter>Code\Engine\GamePlay\UI\ScreenTransition</Filter>
+    </ClCompile>
+    <ClInclude Include="Code\Engine\UI\ScreenTransitionManager.h">
+      <Filter>Code\Engine\GamePlay\UI\ScreenTransition</Filter>
+    </ClInclude>
+    <ClCompile Include="Code\Engine\UI\ScreenTransitionComponent.cpp">
+      <Filter>Code\Engine\GamePlay\UI\ScreenTransition</Filter>
+    </ClCompile>
+    <ClInclude Include="Code\Engine\UI\ScreenTransitionComponent.h">
+      <Filter>Code\Engine\GamePlay\UI\ScreenTransition</Filter>
+    </ClInclude>
+    <ClCompile Include="Code\Engine\UI\LoadingPresentationComponent.cpp">
+      <Filter>Code\Engine\GamePlay\UI\Presentation</Filter>
+    </ClCompile>
+    <ClInclude Include="Code\Engine\UI\LoadingPresentationComponent.h">
+      <Filter>Code\Engine\GamePlay\UI\Presentation</Filter>
+    </ClInclude>
+    <ClCompile Include="Code\Engine\UI\GameMenuComponent.cpp">
+      <Filter>Code\Engine\GamePlay\UI\Menu</Filter>
+    </ClCompile>
+    <ClInclude Include="Code\Engine\UI\GameMenuComponent.h">
+      <Filter>Code\Engine\GamePlay\UI\Menu</Filter>
+    </ClInclude>
+    <ClCompile Include="Code\Engine\UI\FadeTransition.cpp">
+      <Filter>Code\Engine\GamePlay\UI\ScreenTransition\Effects</Filter>
+    </ClCompile>
+    <ClInclude Include="Code\Engine\UI\FadeTransition.h">
+      <Filter>Code\Engine\GamePlay\UI\ScreenTransition\Effects</Filter>
+    </ClInclude>
+    <ClCompile Include="Code\Engine\UI\RadialTransition.cpp">
+      <Filter>Code\Engine\GamePlay\UI\ScreenTransition\Effects</Filter>
+    </ClCompile>
+    <ClInclude Include="Code\Engine\UI\RadialTransition.h">
+      <Filter>Code\Engine\GamePlay\UI\ScreenTransition\Effects</Filter>
+    </ClInclude>
+    <ClCompile Include="Code\Engine\UI\SlashTransition.cpp">
+      <Filter>Code\Engine\GamePlay\UI\ScreenTransition\Effects</Filter>
+    </ClCompile>
+    <ClInclude Include="Code\Engine\UI\SlashTransition.h">
+      <Filter>Code\Engine\GamePlay\UI\ScreenTransition\Effects</Filter>
+    </ClInclude>
+    <ClCompile Include="Code\Engine\UI\DissolveTransition.cpp">
+      <Filter>Code\Engine\GamePlay\UI\ScreenTransition\Effects</Filter>
+    </ClCompile>
+    <ClInclude Include="Code\Engine\UI\DissolveTransition.h">
+      <Filter>Code\Engine\GamePlay\UI\ScreenTransition\Effects</Filter>
+    </ClInclude>
+    <ClCompile Include="Code\Engine\UI\ShutterTransition.cpp">
+      <Filter>Code\Engine\GamePlay\UI\ScreenTransition\Effects</Filter>
+    </ClCompile>
+    <ClInclude Include="Code\Engine\UI\ShutterTransition.h">
+      <Filter>Code\Engine\GamePlay\UI\ScreenTransition\Effects</Filter>
+    </ClInclude>
+    <ClCompile Include="Code\Engine\UI\WipeTransition.cpp">
+      <Filter>Code\Engine\GamePlay\UI\ScreenTransition\Effects</Filter>
+    </ClCompile>
+    <ClInclude Include="Code\Engine\UI\WipeTransition.h">
+      <Filter>Code\Engine\GamePlay\UI\ScreenTransition\Effects</Filter>
+    </ClInclude>
+    <ClCompile Include="Code\Engine\UI\TextureMaskTransition.cpp">
+      <Filter>Code\Engine\GamePlay\UI\ScreenTransition\Effects</Filter>
+    </ClCompile>
+    <ClInclude Include="Code\Engine\UI\TextureMaskTransition.h">
+      <Filter>Code\Engine\GamePlay\UI\ScreenTransition\Effects</Filter>
+    </ClInclude>
+    <FxCompile Include="Shader\Transition\FadeTransitionPS.hlsl">
+      <Filter>Shaders\PostEffect\Transition</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\Transition\RadialTransitionPS.hlsl">
+      <Filter>Shaders\PostEffect\Transition</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\Transition\SlashTransitionPS.hlsl">
+      <Filter>Shaders\PostEffect\Transition</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\Transition\DissolveTransitionPS.hlsl">
+      <Filter>Shaders\PostEffect\Transition</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\Transition\ShutterTransitionPS.hlsl">
+      <Filter>Shaders\PostEffect\Transition</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\Transition\WipeTransitionPS.hlsl">
+      <Filter>Shaders\PostEffect\Transition</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\Transition\TextureMaskTransitionPS.hlsl">
+      <Filter>Shaders\PostEffect\Transition</Filter>
+    </FxCompile>
+    <ClInclude Include="Shader\Transition\TransitionCommon.hlsli">
+      <Filter>Shaders\PostEffect\Transition</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader\Transition\ShapeMaskTransition.hlsli">
+      <Filter>Shaders\PostEffect\Transition</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Code\Engine\GamePlay\UI\Effects">
+      <UniqueIdentifier>{C01A663D-CC8D-4944-AEA6-E2278778B791}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Code\Engine\UI\UIPresentationPresets.cpp">
+      <Filter>Code\Engine\GamePlay\UI\Effects</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\UI\UIMotionComponent.cpp">
+      <Filter>Code\Engine\GamePlay\UI\Effects</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\UI\UIVisualEffectComponent.cpp">
+      <Filter>Code\Engine\GamePlay\UI\Effects</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\UI\DiamondTransition.cpp">
+      <Filter>Code\Engine\GamePlay\UI\ScreenTransition\Effects</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\UI\CurtainTransition.cpp">
+      <Filter>Code\Engine\GamePlay\UI\ScreenTransition\Effects</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\UI\CheckerTransition.cpp">
+      <Filter>Code\Engine\GamePlay\UI\ScreenTransition\Effects</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\UI\SpiralTransition.cpp">
+      <Filter>Code\Engine\GamePlay\UI\ScreenTransition\Effects</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\UI\GlassTransition.cpp">
+      <Filter>Code\Engine\GamePlay\UI\ScreenTransition\Effects</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Code\Engine\UI\UIPresentationPresets.h">
+      <Filter>Code\Engine\GamePlay\UI\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\UI\UIMotionComponent.h">
+      <Filter>Code\Engine\GamePlay\UI\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\UI\UIVisualEffectComponent.h">
+      <Filter>Code\Engine\GamePlay\UI\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\UI\DiamondTransition.h">
+      <Filter>Code\Engine\GamePlay\UI\ScreenTransition\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\UI\CurtainTransition.h">
+      <Filter>Code\Engine\GamePlay\UI\ScreenTransition\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\UI\CheckerTransition.h">
+      <Filter>Code\Engine\GamePlay\UI\ScreenTransition\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\UI\SpiralTransition.h">
+      <Filter>Code\Engine\GamePlay\UI\ScreenTransition\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\UI\GlassTransition.h">
+      <Filter>Code\Engine\GamePlay\UI\ScreenTransition\Effects</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shader\UIVisualEffectPS.hlsl">
+      <Filter>Shaders\Sprite</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\Transition\DiamondTransitionPS.hlsl">
+      <Filter>Shaders\PostEffect\Transition</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\Transition\CurtainTransitionPS.hlsl">
+      <Filter>Shaders\PostEffect\Transition</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\Transition\CheckerTransitionPS.hlsl">
+      <Filter>Shaders\PostEffect\Transition</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\Transition\SpiralTransitionPS.hlsl">
+      <Filter>Shaders\PostEffect\Transition</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\Transition\GlassTransitionPS.hlsl">
+      <Filter>Shaders\PostEffect\Transition</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shader\Transition\GlassTransitionVS.hlsl">
+      <Filter>Shaders\PostEffect\Transition</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Data\UI">
+      <UniqueIdentifier>{FF33DC44-C8C5-45C3-ABFC-F3F92826CE0B}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Data\UI\Presets">
+      <UniqueIdentifier>{E58B510F-4D9B-4CC5-9B34-A54287860F3F}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Data\UI\Gallery">
+      <UniqueIdentifier>{E5DDCDC9-4649-42F4-B617-A08E6AA812AC}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Data\Texture">
+      <UniqueIdentifier>{2F966FB9-C817-453D-92F0-A70A47452FD8}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Data\Texture\TransitionMasks">
+      <UniqueIdentifier>{E917D0DE-F0B3-4002-90B6-A6B7E4C8DE55}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Data\UI\SceneTransitions.json">
+      <Filter>Data\UI\Presets</Filter>
+    </None>
+    <None Include="Data\UI\UIMotionPresets.json">
+      <Filter>Data\UI\Presets</Filter>
+    </None>
+    <None Include="Data\UI\UIVisualEffectPresets.json">
+      <Filter>Data\UI\Presets</Filter>
+    </None>
+    <None Include="Data\Scenes\UIEffectsGallery\SceneList.json">
+      <Filter>Data\UI\Gallery</Filter>
+    </None>
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card01.json">
+      <Filter>Data\UI\Gallery</Filter>
+    </None>
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card01Label.json">
+      <Filter>Data\UI\Gallery</Filter>
+    </None>
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card02.json">
+      <Filter>Data\UI\Gallery</Filter>
+    </None>
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card02Label.json">
+      <Filter>Data\UI\Gallery</Filter>
+    </None>
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card03.json">
+      <Filter>Data\UI\Gallery</Filter>
+    </None>
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card03Label.json">
+      <Filter>Data\UI\Gallery</Filter>
+    </None>
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card04.json">
+      <Filter>Data\UI\Gallery</Filter>
+    </None>
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card04Label.json">
+      <Filter>Data\UI\Gallery</Filter>
+    </None>
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card05.json">
+      <Filter>Data\UI\Gallery</Filter>
+    </None>
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card05Label.json">
+      <Filter>Data\UI\Gallery</Filter>
+    </None>
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card06.json">
+      <Filter>Data\UI\Gallery</Filter>
+    </None>
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card06Label.json">
+      <Filter>Data\UI\Gallery</Filter>
+    </None>
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card07.json">
+      <Filter>Data\UI\Gallery</Filter>
+    </None>
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card07Label.json">
+      <Filter>Data\UI\Gallery</Filter>
+    </None>
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card08.json">
+      <Filter>Data\UI\Gallery</Filter>
+    </None>
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card08Label.json">
+      <Filter>Data\UI\Gallery</Filter>
+    </None>
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card09.json">
+      <Filter>Data\UI\Gallery</Filter>
+    </None>
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card09Label.json">
+      <Filter>Data\UI\Gallery</Filter>
+    </None>
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card10.json">
+      <Filter>Data\UI\Gallery</Filter>
+    </None>
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card10Label.json">
+      <Filter>Data\UI\Gallery</Filter>
+    </None>
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card11.json">
+      <Filter>Data\UI\Gallery</Filter>
+    </None>
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card11Label.json">
+      <Filter>Data\UI\Gallery</Filter>
+    </None>
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card12.json">
+      <Filter>Data\UI\Gallery</Filter>
+    </None>
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card12Label.json">
+      <Filter>Data\UI\Gallery</Filter>
+    </None>
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\GalleryBoard.json">
+      <Filter>Data\UI\Gallery</Filter>
+    </None>
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\GalleryCamera.json">
+      <Filter>Data\UI\Gallery</Filter>
+    </None>
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\GalleryHeading.json">
+      <Filter>Data\UI\Gallery</Filter>
+    </None>
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\GalleryHint.json">
+      <Filter>Data\UI\Gallery</Filter>
+    </None>
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\GallerySpriteExample.json">
+      <Filter>Data\UI\Gallery</Filter>
+    </None>
+    <None Include="Data\Texture\TransitionMasks\Checker.png">
+      <Filter>Data\Texture\TransitionMasks</Filter>
+    </None>
+    <None Include="Data\Texture\TransitionMasks\Diamond.png">
+      <Filter>Data\Texture\TransitionMasks</Filter>
+    </None>
+    <None Include="Data\Texture\TransitionMasks\Ink.png">
+      <Filter>Data\Texture\TransitionMasks</Filter>
+    </None>
+    <None Include="Data\Texture\TransitionMasks\Linear.png">
+      <Filter>Data\Texture\TransitionMasks</Filter>
+    </None>
+    <None Include="Data\Texture\TransitionMasks\Radial.png">
+      <Filter>Data\Texture\TransitionMasks</Filter>
+    </None>
+    <None Include="Data\Texture\TransitionMasks\RadialFlipbook.png">
+      <Filter>Data\Texture\TransitionMasks</Filter>
+    </None>
+    <None Include="Data\Texture\TransitionMasks\Spiral.png">
+      <Filter>Data\Texture\TransitionMasks</Filter>
+    </None>
+    <None Include="Data\Texture\TransitionMasks\Stripes.png">
+      <Filter>Data\Texture\TransitionMasks</Filter>
+    </None>
+    <None Include="Data\Texture\TransitionMasks\Waves.png">
+      <Filter>Data\Texture\TransitionMasks</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -104,7 +104,8 @@ private:
     std::shared_ptr<ModelResource> LoadOrBuildCpuResource(const std::string& filename_, float sampleRate_);
 
     // CPU 側に読み込まれたメッシュ・テクスチャ・アニメーションを D3D11 リソースへ変換する。
-    bool CreateGpuResource(ID3D11Device* device_, const std::string& filename_, const std::shared_ptr<ModelResource>& resource_);
+    bool CreateGpuResource(ID3D11Device* device_, const std::string& filename_, const std::shared_ptr<ModelResource>& resource_,
+        ModelLoadEntry& progress_, bool& completed_, float budgetMs_);
 
     // ワーカーが完了したエントリをメインスレッド用アップロードキューへ渡す。
     void QueueGpuUpload(const std::shared_ptr<ModelLoadEntry>& entry_);

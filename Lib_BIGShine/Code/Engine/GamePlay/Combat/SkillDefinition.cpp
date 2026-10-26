@@ -73,6 +73,7 @@ bool DeserializeSkillDefinition(const nlohmann::json& json_, SkillDefinition& de
         {
             SkillPhase phase_;
             phase_.animationState = phaseJson_.at("Animation").get<std::string>();
+            phase_.airAnimationState = phaseJson_.value("AirAnimation", std::string());
             phase_.sequence = phaseJson_.value("Sequence", std::string());
             phase_.motionWarpPreset = phaseJson_.value("MotionWarpPreset", std::string());
             phase_.continueSequence = phaseJson_.value("ContinueSequence", false);
@@ -134,6 +135,7 @@ void SerializeSkillDefinition(const SkillDefinition& definition_, nlohmann::json
         nlohmann::json phaseJson_ = index_ < previousPhases_.size() && previousPhases_[index_].is_object()
             ? previousPhases_[index_] : nlohmann::json::object();
         phaseJson_["Animation"] = phase_.animationState;
+        phaseJson_["AirAnimation"] = phase_.airAnimationState;
         phaseJson_["Sequence"] = phase_.sequence;
         phaseJson_["MotionWarpPreset"] = phase_.motionWarpPreset;
         phaseJson_["ContinueSequence"] = phase_.continueSequence;

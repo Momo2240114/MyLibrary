@@ -141,7 +141,7 @@
         },
         {
             "Data": {
-                "IsPlaying": false,
+                "IsPlaying": true,
                 "Parts": [
                     {
                         "Alpha": 1.0,
@@ -315,7 +315,7 @@
                             -0.07000000029802322,
                             -20.0
                         ],
-                        "RenderEnabled": false,
+                        "RenderEnabled": true,
                         "Rotation": [
                             0.0,
                             0.0,

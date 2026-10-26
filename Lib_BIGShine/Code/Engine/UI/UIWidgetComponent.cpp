@@ -1,4 +1,5 @@
 #include "PrecompiledHeader.h"
+#include "UIMotionComponent.h"
 
 #include "UIWidgetComponent.h"
 
@@ -115,6 +116,9 @@ void UIWidgetComponent::Serialize(nlohmann::json& json_) const
 void UIWidgetComponent::Deserialize(const nlohmann::json& json_)
 {
     BS_PROFILE_SCOPE("UIWidgetComponent::Deserialize");
+    // Sceneの再読込では前回の選択演出を引き継がない。
+    runtimeVisualOffset = { 0.0f, 0.0f };
+    runtimeVisualScale = 1.0f;
 
     widgetId = json_.value("WidgetId", widgetId);
     parentWidgetId = json_.value("ParentWidgetId", parentWidgetId);
@@ -188,6 +192,10 @@ void UIWidgetComponent::CalculateLayout(
 {
     BS_PROFILE_SCOPE("UIWidgetComponent::CalculateLayout");
 
+    UIMotionSample motion_;
+    if (const auto owner_ = GetGameObject())
+        if (const auto component_ = owner_->GetComponent<UIMotionComponent>(); component_ && component_->IsEnabled() && component_->IsStarted()) motion_ = component_->GetSample();
+    // 選択メニューの補正と独立して合成し、描画と入力判定で同じRectを使用する。
     const DirectX::XMFLOAT2 scale_ = board_
         ? board_->CalculateBoardScale(screenSize_)
         : DirectX::XMFLOAT2{ 1.0f, 1.0f };
@@ -218,8 +226,8 @@ void UIWidgetComponent::CalculateLayout(
     DirectX::XMFLOAT2 size_ =
     {
         // Anchor範囲のStretch分にsizeDeltaを加え、Board ScaleとLocal Scaleを反映する。
-        (anchorSize_.x + rectTransform.sizeDelta.x * scale_.x) * rectTransform.localScale.x,
-        (anchorSize_.y + rectTransform.sizeDelta.y * scale_.y) * rectTransform.localScale.y
+        (anchorSize_.x + rectTransform.sizeDelta.x * scale_.x) * rectTransform.localScale.x * runtimeVisualScale * motion_.scale.x,
+        (anchorSize_.y + rectTransform.sizeDelta.y * scale_.y) * rectTransform.localScale.y * runtimeVisualScale * motion_.scale.y
     };
     size_.x = (std::max)(1.0f, size_.x);
     size_.y = (std::max)(1.0f, size_.y);
@@ -233,8 +241,8 @@ void UIWidgetComponent::CalculateLayout(
     const DirectX::XMFLOAT2 pivotPosition_ =
     {
         // anchoredPositionはBoard Scaleを掛けてScreen座標へ反映する。
-        anchorReference_.x + rectTransform.anchoredPosition.x * scale_.x,
-        anchorReference_.y + rectTransform.anchoredPosition.y * scale_.y
+        anchorReference_.x + (rectTransform.anchoredPosition.x + runtimeVisualOffset.x + motion_.offset.x) * scale_.x,
+        anchorReference_.y + (rectTransform.anchoredPosition.y + runtimeVisualOffset.y + motion_.offset.y) * scale_.y
     };
 
     // Pivot位置からRectの左上/右下を算出する。
@@ -250,4 +258,11 @@ void UIWidgetComponent::CalculateLayout(
     };
 
     layoutDirty = false;
+}
+
+float UIWidgetComponent::GetVisualRotation()
+{
+    if (const auto owner_ = GetGameObject())
+        if (const auto component_ = owner_->GetComponent<UIMotionComponent>(); component_ && component_->IsEnabled() && component_->IsStarted()) return rectTransform.localRotation + component_->GetSample().rotation;
+    return rectTransform.localRotation;
 }

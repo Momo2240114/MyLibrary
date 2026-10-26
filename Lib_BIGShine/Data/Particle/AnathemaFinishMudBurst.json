@@ -1,0 +1,214 @@
+{
+    "AssetType": "ParticleEffect",
+    "AssetVersion": 1,
+    "AssetPath": "Data/Particle/AnathemaFinishMudBurst.json",
+    "IsPlaying": false,
+    "Emitters": [
+        {
+            "Name": "CounterMudChunks",
+            "EmissionMode": 0,
+            "BurstCount": 120,
+            "MaxCount": 256,
+            "SpawnShape": 1,
+            "SpawnSpace": 0,
+            "ShapeSize": [
+                2.4,
+                0.7,
+                2.4
+            ],
+            "LegacyRadius": [
+                0.03,
+                0.08
+            ],
+            "PosOffset": [
+                0,
+                0,
+                0
+            ],
+            "Speed": [
+                14,
+                23
+            ],
+            "Lifespan": [
+                0.3,
+                0.7
+            ],
+            "Size": [
+                0.5,
+                0.12
+            ],
+            "UseRandomSize": 1,
+            "SizeRandomStart": [
+                0.65,
+                1.35
+            ],
+            "SizeRandomEnd": [
+                0.65,
+                1.0
+            ],
+            "Color": [
+                0.045,
+                0.014,
+                0.07,
+                0.95
+            ],
+            "ColorStart": [
+                0.065,
+                0.019,
+                0.09,
+                0.95
+            ],
+            "ColorEnd": [
+                0.008,
+                0.003,
+                0.015,
+                0
+            ],
+            "UseColorOverLife": 1,
+            "BlendMode": 0,
+            "RenderType": 0,
+            "Gravity": -12,
+            "Acceleration": [
+                0,
+                3,
+                0
+            ],
+            "Drag": 0.35,
+            "Fade": [
+                0.005,
+                0.22
+            ],
+            "NoiseStrength": 0.05,
+            "NoiseFrequency": 2,
+            "NoiseSpeed": 1,
+            "TexturePath": "Data/Texture/Particle/TransitionViscousMud.png",
+            "MaskTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+            "UseMask": 0,
+            "UseGradient": 0,
+            "useGradientTexture": 0,
+            "useShadeGradientTexture": 0,
+            "UseFresnel": 0,
+            "UseSpriteAnimation": 0,
+            "SpawnDirectionMode": 1,
+            "ConeAngle": [
+                0,
+                0
+            ],
+            "EmissionAxis": [
+                0,
+                1,
+                0
+            ],
+            "texturePath": "Data/Texture/Particle/TransitionViscousMud.png",
+            "maskTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+            "RotationSpeed": [
+                -1.1,
+                1.1
+            ]
+        },
+        {
+            "Name": "CounterMudDroplets",
+            "EmissionMode": 0,
+            "BurstCount": 75,
+            "MaxCount": 256,
+            "SpawnShape": 1,
+            "SpawnSpace": 0,
+            "ShapeSize": [
+                2.4,
+                0.7,
+                2.4
+            ],
+            "LegacyRadius": [
+                0.03,
+                0.08
+            ],
+            "PosOffset": [
+                0,
+                0,
+                0
+            ],
+            "Speed": [
+                20,
+                32
+            ],
+            "Lifespan": [
+                0.3,
+                0.7
+            ],
+            "Size": [
+                0.14,
+                0.025
+            ],
+            "UseRandomSize": 1,
+            "SizeRandomStart": [
+                0.65,
+                1.35
+            ],
+            "SizeRandomEnd": [
+                0.65,
+                1.0
+            ],
+            "Color": [
+                0.045,
+                0.014,
+                0.07,
+                0.95
+            ],
+            "ColorStart": [
+                0.065,
+                0.019,
+                0.09,
+                0.95
+            ],
+            "ColorEnd": [
+                0.008,
+                0.003,
+                0.015,
+                0
+            ],
+            "UseColorOverLife": 1,
+            "BlendMode": 0,
+            "RenderType": 1,
+            "Gravity": -14,
+            "Acceleration": [
+                0,
+                2,
+                0
+            ],
+            "Drag": 0.25,
+            "Fade": [
+                0.005,
+                0.22
+            ],
+            "NoiseStrength": 0.05,
+            "NoiseFrequency": 2,
+            "NoiseSpeed": 1,
+            "TexturePath": "Data/Texture/Particle/TransitionViscousMud.png",
+            "MaskTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+            "UseMask": 0,
+            "UseGradient": 0,
+            "useGradientTexture": 0,
+            "useShadeGradientTexture": 0,
+            "UseFresnel": 0,
+            "UseSpriteAnimation": 0,
+            "SpawnDirectionMode": 1,
+            "ConeAngle": [
+                0,
+                0
+            ],
+            "EmissionAxis": [
+                0,
+                1,
+                0
+            ],
+            "texturePath": "Data/Texture/Particle/TransitionViscousMud.png",
+            "maskTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+            "StretchScale": 0.045,
+            "StretchMax": 1.8,
+            "RotationSpeed": [
+                -1.1,
+                1.1
+            ]
+        }
+    ]
+}

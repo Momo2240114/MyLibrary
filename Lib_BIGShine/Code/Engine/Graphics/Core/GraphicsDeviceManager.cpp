@@ -423,6 +423,8 @@ void GraphicsDeviceManager::Shutdown()
     gBufferMaterialSRV.Reset();
     gBufferEmissiveRTV.Reset();
     gBufferEmissiveSRV.Reset();
+    gBufferStyleRTV.Reset();
+    gBufferStyleSRV.Reset();
     swapChain.Reset();
     skyBoxVertexBuffer.Reset();
     skyBoxIndexBuffer.Reset();
@@ -490,6 +492,8 @@ void GraphicsDeviceManager::OnResize(int newWidth_, int newHeight_)
     gBufferMaterialSRV.Reset();
     gBufferEmissiveRTV.Reset();
     gBufferEmissiveSRV.Reset();
+    gBufferStyleRTV.Reset();
+    gBufferStyleSRV.Reset();
 
     // swapChain->ResizeBuffers() を呼び出し
     HRESULT result_ = swapChain->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0);
@@ -673,6 +677,7 @@ void GraphicsDeviceManager::ClearSceneRenderTargets(const float clearColor_[4])
     immediateContext->ClearRenderTargetView(gBufferNormalRTV.Get(), black);
     immediateContext->ClearRenderTargetView(gBufferMaterialRTV.Get(), black);
     immediateContext->ClearRenderTargetView(gBufferEmissiveRTV.Get(), black);
+    immediateContext->ClearRenderTargetView(gBufferStyleRTV.Get(), black);
     immediateContext->ClearDepthStencilView(
         depthStencilView.Get(),
         D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
@@ -721,6 +726,7 @@ void GraphicsDeviceManager::SetGBufferRenderTargets()
         gBufferNormalRTV.Get(),
         gBufferMaterialRTV.Get(),
         gBufferEmissiveRTV.Get(),
+        gBufferStyleRTV.Get(),
     };
     immediateContext->OMSetRenderTargets(_countof(rtvs_), rtvs_, depthStencilView.Get());
     immediateContext->RSSetViewports(1, &viewport);
@@ -737,6 +743,7 @@ void GraphicsDeviceManager::ResolveBloom(const RenderContext& rc) {
 
 void GraphicsDeviceManager::RenderSkyBox(const RenderContext& rc)
 {
+    if (rc.suppressSkybox) return;
     ID3D11DeviceContext* deviceContext_ = immediateContext.Get();
 
     // IBL specular_pmrem を t10 にバインド
@@ -1265,6 +1272,7 @@ bool GraphicsDeviceManager::CreateSceneViewRenderTarget(int width_, int height_)
 
 bool GraphicsDeviceManager::CreateGBufferTargets(int width_, int height_)
 {
+    BS_PROFILE_SCOPE("GraphicsDeviceManager::CreateGBufferTargets");
     struct Target_
     {
         DXGI_FORMAT format_;
@@ -1278,6 +1286,7 @@ bool GraphicsDeviceManager::CreateGBufferTargets(int width_, int height_)
         { DXGI_FORMAT_R16G16B16A16_FLOAT, &gBufferNormalRTV, &gBufferNormalSRV },
         { DXGI_FORMAT_R8G8B8A8_UNORM, &gBufferMaterialRTV, &gBufferMaterialSRV },
         { DXGI_FORMAT_R16G16B16A16_FLOAT, &gBufferEmissiveRTV, &gBufferEmissiveSRV },
+        { DXGI_FORMAT_R8G8B8A8_UNORM, &gBufferStyleRTV, &gBufferStyleSRV },
     };
 
     for (Target_& target_ : targets_)

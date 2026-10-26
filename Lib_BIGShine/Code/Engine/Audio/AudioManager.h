@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chrono>
 #include <memory>
 #include <set>
 #include <string>
@@ -49,11 +50,18 @@ public:
     void AddSE(std::unique_ptr<AudioSource> source_);
 
     void PlayBGM(size_t index_) const;
+    // 同じ曲の再開始を避け、通常戦闘・暴走・大技のBGMを排他的に切り替える。
+    void SwitchBGM(size_t index_);
     void SetVolumeBGM(size_t index_, float volume_) const;
+    // 演出前の設定音量を保持し、短い減衰後も次Sceneの音量へ持ち越さない。
+    std::vector<float> CaptureBgmVolumes() const;
+    void ApplyBgmVolumes(const std::vector<float>& volumes_, float scale_);
     void SetVolumeSE(size_t index_, float volume_) const;
 
     void PlaySE(size_t index_) const;
     void StopBGM();
+    // テスト一時停止中はFMOD側の再生時計も停止する。
+    void SetEditorPlayPaused(bool paused_);
     void StopSE();
     void StopSE(int index_);
     void RemoveBGM(size_t index_);
@@ -74,6 +82,17 @@ public:
     bool StopWorkspacePreset(const std::string& presetName_);
     std::vector<std::string> GetWorkspacePresetNames() const;
 
+    // カメラListenerからの距離と方向に応じ、攻撃音を重複可能な3D音声として再生する。
+    void PlaySpatialAttackSound(const std::string& path_, const DirectX::XMFLOAT3& position_,
+        float volume_ = 1.0f, float minDistance_ = 3.0f, float maxDistance_ = 40.0f,
+        bool muffled_ = false, float cutoff_ = 1200.0f);
+    // 個別設定を保ち、BGMは強め、SEを含む全体には軽めのこもりを同時に重ねる。
+    void PlayTimedMuffle(float duration_ = 0.5f, float cutoff_ = 1200.0f);
+    // 0で通常、1で無音とし、死亡時にBGMの高音も段階的に減衰する。
+    void SetDeathBgmEffect(float amount_);
+    // Scene変更やコンテニューで演出Busを通常状態へ戻す。
+    void ResetPresentationAudio();
+
     void ClearAll();
 
     // 音声ファイルをBGMまたはSEとして読み込み、登録先配列のIndexを返す。
@@ -86,6 +105,21 @@ private:
     AudioManager(const AudioManager&) = delete;
     AudioManager& operator=(const AudioManager&) = delete;
 
+    // 音声ごとの設定へ干渉しないよう、演出用DSPをMixer側で共有する。
+    void EnsurePresentationAudio();
+    // スローと独立した時計で、こもり効果の立ち上がりと復帰を更新する。
+    void UpdatePresentationAudio();
+    FMOD::ChannelGroup* bgmPresentationGroup = nullptr;
+    FMOD::DSP* bgmMuffleDsp = nullptr;
+    FMOD::DSP* sharedMuffleDsp = nullptr; // 全体へ軽いこもりを加え、BGM専用DSPでさらに高音を落とす。
+    FMOD::DSP* bgmDistanceDsp = nullptr;
+    float muffleRemaining = 0.0f;
+    float muffleDuration = 0.5f;
+    float muffleCutoff = 1200.0f;
+    std::chrono::steady_clock::time_point previousAudioUpdate = std::chrono::steady_clock::now();
+    bool editorPlayPaused = false;
+    // 個別再生と停止にも追従し、進行状態の監視で毎フレーム再開始しないようにする。
+    mutable size_t currentBgmIndex = static_cast<size_t>(-1);
     // 読み込み済みBGMのAudioSource一覧。
     std::vector<std::unique_ptr<AudioSource>> audioBGMs;
     // 読み込み済みSEのAudioSource一覧。
@@ -113,6 +147,9 @@ enum BGM_NUMBER
     BGM_TITLE,
     BGM_TUTORIAL,
     BGM_GAME,
+    BGM_HUMAN_BOSS,
+    BGM_BERSERK,
+    BGM_SPECIAL_ATTACK,
 };
 
 enum SE_NUMBER
