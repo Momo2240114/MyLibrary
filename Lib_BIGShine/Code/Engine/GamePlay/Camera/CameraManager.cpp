@@ -1,6 +1,7 @@
 #include "PrecompiledHeader.h"
 
 #include "CameraManager.h"
+#include "Engine/Debug/TracyProfiler.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 
 using namespace DirectX;
@@ -26,6 +27,15 @@ void CameraManager::Initialize()
         { 0.0f, 1.0f, 0.0f });
 }
 
+
+void CameraManager::ResetRuntimeState()
+{
+    BS_PROFILE_SCOPE("CameraManager::ResetRuntimeState");
+    activeCameraComponent.reset();
+    targetCamera.reset();
+    isTransitioning = false;
+    transitionTimer = 0.0f;
+}
 
 void CameraManager::Update(float et_, const std::vector<std::shared_ptr<GameObject>>& objects_)
 {

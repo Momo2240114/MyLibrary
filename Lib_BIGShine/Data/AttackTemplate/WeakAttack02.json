@@ -3,12 +3,21 @@
     "AssetVersion": 1,
     "attack": {
         "allowMultiHit": false,
-        "damage": 125.0,
+        "damage": 45.0,
+        "impactPower": 8.0,
+        "damageRate": 0.45,
         "hitGroupId": 0,
         "hitStopDuration": 0.03,
         "hitStopScale": 0.85,
         "knockBackPower": 1.5,
         "knockBackType": 0
+    },
+    "feedback": {
+        "startSoundPath": "Data/Audio/SE/Sword-Practice-2.wav",
+        "hitSoundPath": "Data/Audio/SE/Swordsmanship-2.wav",
+        "volume": 0.75,
+        "minDistance": 8.0,
+        "maxDistance": 80.0
     },
     "cameraShake": {
         "enabled": true,

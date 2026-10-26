@@ -1,26 +1,24 @@
 {
+    "CollisionMask": 0,
+    "Layer": 0,
     "Name": "MudScatterTransform1",
     "ParentName": "",
-    "Layer": 0,
-    "CollisionMask": 0,
     "RequiredForSceneStart": true,
     "Transform": {
         "Pos": [
             -7.5,
-            0.1,
+            0.10000000149011612,
             -30.0
         ],
         "Rot": [
-            0,
-            0,
-            0
+            0.0,
+            0.0,
+            0.0
         ],
         "Scale": [
-            1,
-            1,
-            1
+            1.0,
+            1.0,
+            1.0
         ]
-    },
-    "Components": [],
-    "ColliderComponents": []
+    }
 }

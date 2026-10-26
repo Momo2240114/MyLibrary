@@ -9,7 +9,7 @@ cbuffer CbStaticMesh : register(b5)
 VS_OUT main(
     float4 position : POSITION,
     float4 boneWeights : BONE_WEIGHTS,
-    uint4 boneIndices : BONE_INDICES,
+    uint4 boneIndices : BONE_INDICES,  
     float2 texcoord : TEXCOORD,
     float3 normal : NORMAL,
     float4 tangent : TANGENT
@@ -22,7 +22,7 @@ VS_OUT main(
     output_.texcoord = texcoord;
     output_.position = worldPosition_.xyz;
     output_.normal = mul(float4(normal, 0.0f), normalTransform).xyz;
-    output_.tangent = mul(float4(tangent.xyz, 0.0f), normalTransform).xyz;
+    output_.tangent = float4(mul(float4(tangent.xyz, 0.0f), normalTransform).xyz, tangent.w);
 
     return output_;
 }

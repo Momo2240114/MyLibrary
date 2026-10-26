@@ -2,6 +2,8 @@
 
 #include <Windows.h>
 #include <DirectXMath.h>
+#include <array>
+#include <cstdint>
 
 #include "Engine/Math/Vector.h"
 
@@ -48,10 +50,13 @@ public:
     int GetWheelDelta() const { return m_wheelDelta; }
     // 公開関数でフレーム内ホイール取得
     int GetWheelDeltaThisFrame() const { return m_wheelDeltaThisFrame; }
+    // ホイールの消費処理と独立した通知番号を表示側へ公開する。
+    std::uint64_t GetWheelRevision() const { return wheelRevision; }
 
     void OnMouseWheel(int delta)
     {
         m_wheelDelta = delta; // WM_MOUSEWHEEL で呼ぶ
+        if (delta != 0) ++wheelRevision;
     }
 
     float ConsumeWheelDelta()
@@ -62,6 +67,8 @@ public:
     }
 
     void ReleaseCursorLock();
+    // 開発中の明示操作でカーソルの解放状態を切り替える。
+    void ToggleDebugCursor();
     
 
     Vector2 GetSubMousePos()
@@ -87,6 +94,9 @@ public:
 private:
 
     MouseInput() = default;
+    std::uint64_t wheelRevision = 0;
+    std::array<bool, 3> extraButtons{};
+    std::array<bool, 3> previousExtraButtons{};
     ~MouseInput() = default;
 
     // 状態
@@ -130,4 +140,6 @@ private:
 public:
     void SetCursorLockEnabled(bool enabled_);
     bool IsCursorLockEnabled() const { return m_IsCursorLockEnabled; }
+    // 固定の要求ではなく、フォーカスや解放操作を反映した実際の状態を返す。
+    bool IsCursorLocked() const { return m_IsCursorLocked; }
 };

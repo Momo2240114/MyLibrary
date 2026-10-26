@@ -73,6 +73,7 @@ public:
     ID3D11ShaderResourceView* GetGBufferNormalSRV() { return gBufferNormalSRV.Get(); }
     ID3D11ShaderResourceView* GetGBufferMaterialSRV() { return gBufferMaterialSRV.Get(); }
     ID3D11ShaderResourceView* GetGBufferEmissiveSRV() { return gBufferEmissiveSRV.Get(); }
+    ID3D11ShaderResourceView* GetGBufferStyleSRV() { return gBufferStyleSRV.Get(); }
 
     ID3D11ShaderResourceView* GetIBLDiffuseSRV() { return iblDiffuseIemSRV.Get(); }
     ID3D11ShaderResourceView* GetIBLSpecularSRV() { return iblSpecularPmremSRV.Get(); }
@@ -214,6 +215,9 @@ private:
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> gBufferMaterialSRV;
     Microsoft::WRL::ComPtr<ID3D11RenderTargetView> gBufferEmissiveRTV;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> gBufferEmissiveSRV;
+    // 材質ごとの影色と反射のToon化率を保持する。
+    Microsoft::WRL::ComPtr<ID3D11RenderTargetView> gBufferStyleRTV;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> gBufferStyleSRV;
 
     // -------------------------------------------------------
     // IBL テクスチャ

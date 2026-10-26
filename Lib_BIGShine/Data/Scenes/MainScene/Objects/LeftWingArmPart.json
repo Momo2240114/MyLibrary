@@ -23,6 +23,7 @@
                 "IsTrigger": true,
                 "Mass": 0.0,
                 "NodeModelObjectName": "TestTarget",
+                "NodeSegmentScale": 1.0,
                 "Offset": [
                     0.0,
                     0.0,

@@ -4,6 +4,7 @@
 
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
 #include "Game/GameMode/GameModeManager.h"
+#include "Game/GameMode/PlayerDeathDirector.h"
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
 
 #include <iomanip>
@@ -90,6 +91,10 @@ void GameModeWindow::Draw()
             return;
         }
 
+        const bool scenePlaybackBlocked_ = gameObjectManager->SupportsEditorPlayMode() &&
+            gameObjectManager->GetEditorPlayMode() != EditorPlayMode::PLAY;
+        if (scenePlaybackBlocked_) ImGui::TextDisabled("Enter Play Mode to test scene events.");
+        ImGui::BeginDisabled(scenePlaybackBlocked_);
         DrawState(*gameModeManager_);
         // 単体Sequenceを直接再生せず、GameModeのロックと復元を伴う入口Actionを使う。
         ImGui::SeparatorText("Phase Transition Preview");
@@ -116,6 +121,8 @@ void GameModeWindow::Draw()
         ImGui::EndDisabled();
         ImGui::SeparatorText("Global Blackboard");
         DrawGlobalBlackboard(gameModeManager_->GetGlobalBlackboard());
+        ImGui::EndDisabled();
+        if (const auto director_ = gameObjectManager->GetPlayerDeathDirector()) director_->DrawSettingsGUI();
     }
     EndEditorWindow();
 }

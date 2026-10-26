@@ -617,6 +617,7 @@ static bool IsNodeInBlendMask(
 }
 void ModelAnimator::SetCurrentTime(float time_)
 {
+    attackTelegraphs.Reset();
     current.time = (std::max)(0.0f, time_);
     previous = current;
     isTransitioning = false;
@@ -967,7 +968,7 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
             }
         }
         current.sampleDuration = baseDuration;
-        current.Update(et, baseDuration, curvecomp, owner);
+        current.Update(et, baseDuration, curvecomp, owner, &attackTelegraphs);
     }
 
     // ------------------------------------------------------------
@@ -1308,6 +1309,9 @@ void ModelAnimator::CrossFadeTo(const AnimState* newState, float duration, std::
     if (!newState) return;
     if (current.state == newState && !restart_) return;
 
+    // 同じStateの再開始でも、旧コンボの未発生予兆を新しい区間へ引き継がない。
+    attackTelegraphs.Reset();
+
     CallStateExitEndActions(current, owner);
     previousRootMotionBasePosition = rootMotionBasePosition;
     previousRootMotionBaseRotation = rootMotionBaseRotation;
@@ -1489,7 +1493,7 @@ void ModelAnimator::ComputeCustomAnimationPose(const CustomAnimation& customAnim
         }
     }
 }
-void ModelAnimator::ActiveSlot::Update(float et, float duration, CurveComponent* curveComp, std::shared_ptr<GameObject> owner)
+void ModelAnimator::ActiveSlot::Update(float et, float duration, CurveComponent* curveComp, std::shared_ptr<GameObject> owner, AttackTelegraphRuntime* telegraphs_)
 {
     if (!state) return;
 
@@ -1521,6 +1525,9 @@ void ModelAnimator::ActiveSlot::Update(float et, float duration, CurveComponent*
     float prevTime = time;
     time += et * currentSpeed;
     if (et == 0.0f) return;
+
+    // 速度カーブ・イベント速度・TimeScaleを反映済みの、攻撃判定と同じ時間で予兆を判定する。
+    if (telegraphs_) telegraphs_->Advance(owner, *state, prevTime, time);
 
     // イベントの発火判定
     for (auto& ev : const_cast<AnimState*>(state)->events)

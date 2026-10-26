@@ -1,0 +1,34 @@
+{
+    "Name": "StartupUI",
+    "Layer": 0,
+    "RequiredForSceneStart": true,
+    "Transform": {
+        "Pos": [
+            0,
+            0,
+            0
+        ],
+        "Rot": [
+            0,
+            0,
+            0
+        ],
+        "Scale": [
+            1,
+            1,
+            1
+        ]
+    },
+    "Components": [
+        {
+            "TypeName": "LoadingPresentationComponent",
+            "Enabled": true,
+            "RequiredForSceneStart": true,
+            "UpdateEnabled": true,
+            "Data": {
+                "Brand": "AUTO",
+                "Standalone": true
+            }
+        }
+    ]
+}

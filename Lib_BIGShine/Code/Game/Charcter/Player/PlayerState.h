@@ -31,7 +31,12 @@ enum class PLAYER_ACTION
     AIR_DODGE,
 
     NONE,
-    SKILL_C
+    SKILL_C,
+    // 保存済みのAction番号を維持するため、4枠目は末尾へ追加する。
+    SKILL_D,
+    // 保存済みAction番号を変えず、死亡と復帰は末尾へ追加する。
+    DEAD,
+    REVIVING
 };
 
 // Actionを移動、攻撃、ガードなどの大きな分類で扱うための種別。
@@ -56,7 +61,9 @@ enum class PLAYER_ATTACK_TYPE
     COUNTER,
     SKILL_A,
     SKILL_B,
-    SKILL_C
+    SKILL_C,
+    // 既存の攻撃種別番号を維持し、4枠目のスキル種別を追加する。
+    SKILL_D
 };
 
 // 移動Action内でAnimation遷移に使用する詳細フェーズ。
@@ -175,6 +182,7 @@ inline const char* GetPlayerActionName(PLAYER_ACTION action_)
     case PLAYER_ACTION::SKILL_A: return "SkillA";
     case PLAYER_ACTION::SKILL_B: return "SkillB";
     case PLAYER_ACTION::SKILL_C: return "SkillC";
+    case PLAYER_ACTION::SKILL_D: return "SkillD";
     case PLAYER_ACTION::STRONG_CHARGE_ATTACK: return "StrongChargeAttack";
     case PLAYER_ACTION::AIR_WEAK_ATTACK: return "AirWeakAttack";
     case PLAYER_ACTION::AIR_STRONG_ATTACK: return "AirStrongAttack";
@@ -182,6 +190,8 @@ inline const char* GetPlayerActionName(PLAYER_ACTION action_)
     case PLAYER_ACTION::AIR_DODGE: return "AirDodge";
     case PLAYER_ACTION::COUNTER_ATTACK: return "CounterAttack";
     case PLAYER_ACTION::HIT: return "Hit";
+    case PLAYER_ACTION::DEAD: return "Dead";
+    case PLAYER_ACTION::REVIVING: return "Reviving";
     default: return "None";
     }
 }
@@ -203,6 +213,7 @@ inline PLAYER_ACTION_GROUP GetPlayerActionGroup(PLAYER_ACTION action_)
     case PLAYER_ACTION::SKILL_A:
     case PLAYER_ACTION::SKILL_B:
     case PLAYER_ACTION::SKILL_C:
+    case PLAYER_ACTION::SKILL_D:
         return PLAYER_ACTION_GROUP::ATTACK;
     case PLAYER_ACTION::HIT:
         return PLAYER_ACTION_GROUP::NONE;
@@ -241,6 +252,8 @@ inline PLAYER_ATTACK_TYPE GetPlayerAttackType(PLAYER_ACTION action_)
         return PLAYER_ATTACK_TYPE::SKILL_B;
     case PLAYER_ACTION::SKILL_C:
         return PLAYER_ATTACK_TYPE::SKILL_C;
+    case PLAYER_ACTION::SKILL_D:
+        return PLAYER_ATTACK_TYPE::SKILL_D;
     default:
         return PLAYER_ATTACK_TYPE::NONE;
     }
@@ -263,6 +276,7 @@ inline bool IsPlayerActionTimelineDriven(PLAYER_ACTION action_)
     case PLAYER_ACTION::SKILL_A:
     case PLAYER_ACTION::SKILL_B:
     case PLAYER_ACTION::SKILL_C:
+    case PLAYER_ACTION::SKILL_D:
     case PLAYER_ACTION::COUNTER_ATTACK:
     case PLAYER_ACTION::HIT:
         return true;
@@ -293,6 +307,7 @@ public:
     // State中の毎フレーム処理。
     virtual void Execute(float elapsedTime_) = 0;
     virtual void LateExecute(float et_) {}
+    // Stateを切り替える直前に呼ばれ、一時的な判定や移動設定を解除する。
     virtual void Exit() {}
 
 protected:

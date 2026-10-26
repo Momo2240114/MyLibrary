@@ -1,6 +1,8 @@
 #include "PrecompiledHeader.h"
+#include "Engine/UI/ScreenTransitionManager.h"
 
 #include "framework.h"
+#include "Engine/Core/GameRuntimeSettings.h"
 #include "Engine/Graphics/RenderSystem/ImGuiRenderer.h"
 #include "ImGui.h"
 
@@ -19,12 +21,15 @@
 #include "Engine/GamePlay/Serialize/ComponentRegistry.h"
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
 
+#include "Engine/GamePlay/Input/KeyInput.h"
 #include "Engine/GamePlay/Input/MouseInput.h"
 #include "Engine/GamePlay/Input/ControllerInput.h"
+#include "Engine/GamePlay/Input/KeyConfig.h"
 #include "Engine/GamePlay/Camera/FollowCameraComponent.h"
 
 #include "Engine/Physics/PhysXSystem.h"
 #include "Engine/GamePlay/Scene/SceneManager.h"
+#include "Engine/GamePlay/Scene/SceneBase.h"
 #include "Engine/Audio/AudioManager.h"
 
 #include "Engine/Debug/TracyProfiler.h"
@@ -82,6 +87,7 @@ bool framework::initialize()
 	//シーン作成
 	m_pSceneStartUp = std::make_unique<SceneStartUp>();
 
+    ScreenTransitionManager::Instance().Initialize();
 	SceneManager::Initialize(std::move(m_pSceneStartUp));
 
 	spriteRenderSystem.Initialize(
@@ -102,23 +108,82 @@ void framework::update(float elapsedTime_/*Elapsed seconds from last frame*/)
 
 	{
 		BS_PROFILE_SCOPE("Input");
+        // 入力を参照しないフレームも状態を進め、次の押下を確実に検出する。
+        KeyInput::Update();
+        const auto currentScene_ = SceneManager::GetCurrentScene();
+        const auto gameScene_ = dynamic_cast<SceneBase*>(currentScene_);
+        const bool playerDeathActive_ = gameScene_ && gameScene_->GetGameObjectManager() &&
+            gameScene_->GetGameObjectManager()->IsPlayerDeathActive();
+        const bool isWindowActive_ = GetForegroundWindow() == hwnd;
+        const bool toggleCursor_ = !GameRuntimeSettings::IsGameOnly() && isWindowActive_ &&
+            currentScene_ && !currentScene_->RequiresFreeCursor() &&
+            ImGui::IsKeyPressed(ImGuiKey_F2, false);
+        bool usesEditorPlayMode_ = false;
+        if (const auto scene_ = dynamic_cast<SceneBase*>(SceneManager::GetCurrentScene()))
+            if (const auto manager_ = scene_->GetGameObjectManager(); manager_ && manager_->SupportsEditorPlayMode())
+            {
+                usesEditorPlayMode_ = true;
+                // クリックやEnterでは捕捉せず、F2を押した実行中のフレームだけ切り替える。
+                if (!isWindowActive_) manager_->SetPlayInputCaptured(false);
+                else if (toggleCursor_ && manager_->GetEditorPlayMode() == EditorPlayMode::PLAY)
+                {
+                    MouseInput::Instance().SetDebugFlag(false);
+                    manager_->SetPlayInputCaptured(!manager_->IsPlayInputCaptured());
+                }
+                const bool capture_ = manager_->IsPlayInputCaptured();
+                // 状態が同じ時の再設定で、自由マウスの移動差分を毎フレーム消さない。
+                if (MouseInput::Instance().IsCursorLockEnabled() != capture_)
+                    MouseInput::Instance().SetCursorLockEnabled(capture_);
+            }
+        // Editor Play非対応の開発用Sceneでも、解放操作はF2へ統一する。
+        if (!usesEditorPlayMode_ && toggleCursor_) MouseInput::Instance().ToggleDebugCursor();
+        // メニューSceneでは自由マウスを使い、本編の配布版はゲーム入力を取得する。
+        // コンテニュー画面では本編の自動捕捉を止め、毎フレーム自由なマウス操作を維持する。
+        if (playerDeathActive_)
+        {
+            if (MouseInput::Instance().IsCursorLockEnabled()) MouseInput::Instance().SetCursorLockEnabled(false);
+        }
+        else if (currentScene_ && currentScene_->RequiresFreeCursor())
+        {
+            if (MouseInput::Instance().IsCursorLockEnabled()) MouseInput::Instance().SetCursorLockEnabled(false);
+        }
+        else if (GameRuntimeSettings::IsGameOnly() && !MouseInput::Instance().IsCursorLockEnabled())
+            MouseInput::Instance().SetCursorLockEnabled(true);
 		MouseInput::Instance().Update(hwnd);
 		ControllerInput::Instance().Update();
+		KeyConfig::Instance().UpdateActiveDevice(GetForegroundWindow() == hwnd);
 	}
 
 	{
 		BS_PROFILE_SCOPE("SceneManager::Update");
+        // 前フレームの被覆通知を、Object更新やSceneの破棄に入る前に処理する。
+        if (const auto scene_ = dynamic_cast<SceneBase*>(SceneManager::GetCurrentScene())) scene_->ActivateContext();
+        ScreenTransitionManager::Instance().Update(elapsedTime_);
 		SceneManager::Update(elapsedTime_);
 	}
 
 	{
 		BS_PROFILE_SCOPE("AudioManager::Update");
+        if (const auto scene_ = dynamic_cast<SceneBase*>(SceneManager::GetCurrentScene()))
+            if (const auto manager_ = scene_->GetGameObjectManager())
+            {
+                // ゲーム内メニューの操作音と死亡時のBGM減衰を維持し、Editor Pauseは従来どおり反映する。
+                const bool paused_ = manager_->IsCinematicSequencePreview() ?
+                    manager_->IsCinematicSequencePaused() || manager_->IsCinematicSequenceSeeking() :
+                    manager_->GetEditorPlayMode() != EditorPlayMode::EDITOR &&
+                    !manager_->ShouldSimulatePhysics() && !(manager_->GetEditorPlayMode() == EditorPlayMode::PLAY &&
+                        (manager_->IsGameMenuPaused() || manager_->IsPlayerDeathActive()));
+                AudioManager::Instance().SetEditorPlayPaused(paused_);
+            }
 		AudioManager::Instance().Update();
 	}
 
 	{
 		BS_PROFILE_SCOPE("PhysXSystem::Step");
-		PhysXSystem::Step(elapsedTime_);
+        bool simulate_ = true;
+        if (const auto scene_ = dynamic_cast<SceneBase*>(SceneManager::GetCurrentScene()))
+            if (const auto manager_ = scene_->GetGameObjectManager()) simulate_ = manager_->ShouldSimulatePhysics();
+        if (simulate_) PhysXSystem::Step(elapsedTime_);
 	}
 }
 
@@ -172,6 +237,9 @@ void framework::render(float elapsedTime_/*Elapsed seconds from last frame*/)
 		{
 			BS_PROFILE_SCOPE("ImGuiRenderer::RenderAll");
 			ImGuiRenderer::RenderAll(GraphicsDeviceManager::Instance().GetContext());
+            // Sprite・Particle・ImGuiを含む最終画面を覆ってからPresentする。
+            SceneManager::RenderTransition();
+            ScreenTransitionManager::Instance().Render();
 		}
 	}
 
@@ -316,8 +384,9 @@ LRESULT framework::handle_message(HWND hWnd_, UINT msg_, WPARAM wParam_, LPARAM 
 
     case WM_SETCURSOR:
     {
-        // ゲーム中カーソル固定が有効ならカーソル表示を抑える
-        if (MouseInput::Instance().IsCursorLockEnabled())
+        // 解放中や非クライアント領域では隠さず、実際に固定中のカーソルだけを抑える。
+        if (LOWORD(lParam_) == HTCLIENT && GetForegroundWindow() == hWnd_ &&
+            MouseInput::Instance().IsCursorLocked())
         {
             SetCursor(nullptr);
             return TRUE;
@@ -347,11 +416,7 @@ LRESULT framework::handle_message(HWND hWnd_, UINT msg_, WPARAM wParam_, LPARAM 
 
     case WM_KEYDOWN:
     {
-        if (wParam_ == VK_ESCAPE)
-        {
-            MouseInput::Instance().ReleaseCursorLock();
-            PostMessage(hWnd_, WM_CLOSE, 0, 0);
-        }
+        // ESCはScene側のポーズ入力として扱い、ウィンドウを閉じない。
         return 0;
     }
 
@@ -382,6 +447,7 @@ bool framework::uninitialize()
 
 	//m_pSceneGame->Finalize();
 	SceneManager::Clear();
+    ScreenTransitionManager::Instance().Shutdown();
 
 	PhysXSystem::Finalize();
 	AudioManager::Instance().Finalize();
@@ -404,6 +470,7 @@ void framework::GuiDraw()
 {
 	//#if defined(DEBUG) || defined(_DEBUG)
 	SceneManager::DrawGUI();
+    ScreenTransitionManager::Instance().DrawGUI(!GameRuntimeSettings::IsGameOnly());
 	//GraphicsDeviceManager::Instance().ShowPostEffectGui(); // ここで呼び出す
 	//#endif // DEBUG
 }

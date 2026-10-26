@@ -121,7 +121,8 @@ private:
 
 		int numPointLights;   // 有効なポイントライトの数
 		int numSpotLights;   // 有効なスポットライトの数
-		float padding[2];     // 16バイト境界合わせ
+		float outputLinearColor;
+		float padding;        // 16バイト境界合わせ
 
 		// デカール描画時にスクリーン座標からワールド座標を復元するための逆行列。
 		DirectX::XMFLOAT4X4 invViewProjection;
@@ -193,14 +194,30 @@ private:
 		DirectX::XMFLOAT2 uvScale;
 		DirectX::XMFLOAT2 uvOffset;
 		float uvRotation;
-		float padding[3];
+		float normalScale;
+		float specularStrength;
+		float rimStrength;
+		// RGBは影色、Wは反射のToon化率としてGBufferへ渡す。
+		DirectX::XMFLOAT4 styleParams;
 		// モデル単位のDissolve設定。未使用モデルではprogressを0にする。
 		DirectX::XMFLOAT4 dissolveParams;
 		DirectX::XMFLOAT4 dissolveEdgeColor;
 		DirectX::XMFLOAT4 dissolveDirection;
 		DirectX::XMFLOAT4 dissolveOrigin;
 	};
-	static_assert(sizeof(CbGBufferMaterial) % 16 == 0);
+	static_assert(sizeof(CbGBufferMaterial) == 160);
+	// 単独物性マップの有無を描画ごとに通知し、前のメッシュの設定が残ることを防ぐ。
+	struct CbSeparateMaterialMaps
+	{
+		uint32_t useMetallicMap = 0;
+		uint32_t useRoughnessMap = 0;
+		uint32_t packedMetallicChannel = 2;
+		uint32_t packedRoughnessChannel = 1;
+		uint32_t metallicChannel = 0;
+		uint32_t roughnessChannel = 0;
+		uint32_t padding[2] = {};
+	};
+	static_assert(sizeof(CbSeparateMaterialMaps) == 32);
 	// 半透明ToonPBRにも同じDissolve設定を渡すための描画単位の定数。
 	struct CbModelDissolve
 	{
@@ -278,6 +295,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> gBufferSimplePixelShader;
 	Microsoft::WRL::ComPtr<ID3D11InputLayout> gBufferInputLayout;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> gBufferMaterialConstantBuffer;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> separateMaterialMapsConstantBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> modelDissolveConstantBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> materialOverlayConstantBuffer;
 	std::shared_ptr<LightingShader> lightingShader;

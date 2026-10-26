@@ -120,7 +120,7 @@ void PostRenderSystem::Execute(const RenderContext& rc, ID3D11ShaderResourceView
                 rc,
                 currentSRV_,
                 graphics_.GetMainDepthSRV(),
-                graphics_.GetSceneNormalSRV(),
+                graphics_.GetGBufferNormalSRV(),
                 hasNextPass_ ? workBuffers[nextBufferIndex_].rtv.Get() : finalRTV,
                 xeGtaoParams_);
         }

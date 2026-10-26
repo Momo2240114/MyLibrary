@@ -68,6 +68,7 @@ public:
     float hitSoundVolume = 1.0f;
     bool hitSoundMuffled = false;
     float hitSoundMuffledCutoff = 1200.0f;
+    AttackFeedbackSettings feedback; // 武器と派生エフェクトで同じ振動・音声設定を使用する。
     bool cameraShakeEnabled = true; // Playerが関係するHitでCameraShakeを再生するか。
     float cameraShakeReceiveDuration = 0.12f;
     float cameraShakeReceivePositionStrength = 0.025f;
@@ -126,9 +127,12 @@ public:
     // 広域Sphereに入った対象を、実際の扇形の角度・高さで絞る。
     bool IsWithinAttackSector(GameObject* target_) const;
     void SetAttackSector(float range_, float angle_, float halfHeight_);
+    // 球の広域判定から、エフェクト姿勢に沿った長方形の帯だけを通す。
+    void SetAttackBox(float halfWidth_, float halfHeight_, float halfLength_);
     bool HasRegisteredHit() const { return !alreadyHitTargets.empty(); }
     bool CanHit(GameObject* target_) const;
 private:
+    DirectX::XMFLOAT3 attackBoxHalfExtents{}; // 攻撃エフェクトの形状設定から復元する実行時の寸法。
     float sectorRange = 0.0f; // 0なら既存のCapsule判定のみ。
     float sectorAngle = 360.0f;
     float sectorHalfHeight = 1.0f;

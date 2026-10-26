@@ -5,6 +5,8 @@
 #include <unordered_map>
 #include <vector>
 #include <string>
+#include <array>
+#include <cstdint>
 #include "DirectXMath.h"
 
 // デバイス種別（KBM: Keyboard & Mouse）
@@ -12,6 +14,9 @@ enum class DeviceType {
     KBM = 0,
     Gamepad = 1
 };
+
+// 保存済みの入力分類とは分離し、機種ごとの表示形式を公開する。
+enum class InputDisplayDevice { KEYBOARD_MOUSE, XBOX_PAD, PLAYSTATION_PAD };
 
 // 単一入力ユニット
 struct InputUnit {
@@ -73,6 +78,10 @@ public:
     bool RenameAction(const std::string& oldAction, const std::string& newAction);
     void ClearBinds(const std::string& action);
     const std::unordered_map<std::string, std::vector<InputCombo>>& GetActionMap() const { return actionMap; }
+    // フレームの入力取得後に呼び、ゲーム側の押下エッジを消費せず最終操作元を更新する。
+    void UpdateActiveDevice(bool focused_);
+    InputDisplayDevice GetActiveDevice() const { return activeDevice; }
+    std::uint64_t GetBindingsRevision() const { return bindingsRevision; }
 
     // ---- 入力判定 ----
     bool ActionPressed(const std::string& action) const;   // 押しっぱなし
@@ -96,6 +105,11 @@ public:
 
 private:
     KeyConfig() = default;
+    InputDisplayDevice activeDevice = InputDisplayDevice::KEYBOARD_MOUSE;
+    std::array<bool, 256> observedKeys{};
+    std::uint64_t observedWheelRevision = 0;
+    std::uint64_t bindingsRevision = 0;
+    bool observationInitialized = false;
 
     // 内部判定用
     bool CheckUnit(const InputUnit& unit, int type) const; // type 0:Hold, 1:In, 2:Out

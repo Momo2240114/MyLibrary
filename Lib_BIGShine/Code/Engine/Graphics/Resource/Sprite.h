@@ -49,8 +49,15 @@ public:
     void SetTextureResource(
         Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture_,
         const D3D11_TEXTURE2D_DESC& textureDesc_);
+    // 実行時に共有Textureを差し替えた場合も、保存する素材パスを対応させる。
+    void SetTextureResource(Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture_,
+        const D3D11_TEXTURE2D_DESC& textureDesc_, const std::string& texturePath_);
     void SetColor(const DirectX::XMFLOAT4& c) { color = c; }
     void SetVisible(bool v) { visible = v; }
+    // HUDのフェードと描画抑制は保存値から分離し、再ロード時の初期表示を保つ。
+    void SetRuntimeColor(const DirectX::XMFLOAT4& color_) { runtimeColor = color_; hasRuntimeColor = true; }
+    void SetRuntimeVisible(bool visible_) { runtimeVisible = visible_; hasRuntimeVisibility = true; }
+    DirectX::XMFLOAT4 GetConfiguredColor() const { return color; }
     void SetLocalSize(const DirectX::XMFLOAT2& s) { localSize = s; }
     void SetPivot(PosOfsset p) { pivotType = p; }
     void SetUVRect(float x_, float y_, float width_, float height_) {
@@ -69,8 +76,8 @@ public:
     std::shared_ptr<Transform> GetTransform() const { return transform.lock(); }
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetTexture() const { return texture; }
     D3D11_TEXTURE2D_DESC GetTexture2dDesc() { return texture2dDesc; }
-    bool IsVisible() { return visible; };
-    DirectX::XMFLOAT4 GetColor() const { return color; }
+    bool IsVisible() const { return hasRuntimeVisibility ? runtimeVisible : visible; };
+    DirectX::XMFLOAT4 GetColor() const { return hasRuntimeColor ? runtimeColor : color; }
     PosOfsset GetPivot() const { return pivotType; }
     // 実際の描画位置（ワールド座標）
     DirectX::XMFLOAT3 GetPosition() const;
@@ -90,6 +97,8 @@ public:
 
     void SetSpriteShaderID(SpriteShaderID id_) { spriteShaderID = id_; }
     SpriteShaderID GetSpriteShaderID() { return spriteShaderID; }
+    // 細密なHUD素材だけ線形補間を選択し、既存SpriteのPoint描画を維持する。
+    bool UsesLinearSampling() const { return linearSampling; }
 
     void RefreshSpriteFileList();
     void Serialize(nlohmann::json& j) const;
@@ -111,6 +120,13 @@ private:
     DirectX::XMFLOAT2 size = { 1, 1 };      // ピクセル単位のサイズ
     SpriteShaderID spriteShaderID = SpriteShaderID::Default;
     bool visible = true;
+    // 実行中の表示値だけを保持する。Serializeは従来のcolor/visibleを保存する。
+    DirectX::XMFLOAT4 runtimeColor{ 1,1,1,1 };
+    bool runtimeVisible = true;
+    bool hasRuntimeColor = false;
+    bool hasRuntimeVisibility = false;
+    bool linearSampling = false;
+    bool sdrTexture = false; // ポストエフェクト後のUNORM出力へPNGの表示色を直接渡すHUD用設定。
 
     std::weak_ptr<Transform> transform;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture;

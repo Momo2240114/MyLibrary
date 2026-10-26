@@ -129,6 +129,76 @@
                     "dev": 1
                 }
             ]
+        ],
+        "UI.MenuPrevious": [
+            [
+                {
+                    "dev": 0,
+                    "code": 38
+                }
+            ],
+            [
+                {
+                    "dev": 1,
+                    "code": 1
+                }
+            ],
+            [
+                {
+                    "dev": 1,
+                    "code": 262144
+                }
+            ]
+        ],
+        "UI.MenuNext": [
+            [
+                {
+                    "dev": 0,
+                    "code": 40
+                }
+            ],
+            [
+                {
+                    "dev": 1,
+                    "code": 2
+                }
+            ],
+            [
+                {
+                    "dev": 1,
+                    "code": 524288
+                }
+            ]
+        ],
+        "UI.MenuConfirm": [
+            [
+                {
+                    "dev": 0,
+                    "code": 13
+                }
+            ],
+            [
+                {
+                    "dev": 1,
+                    "code": 4096
+                }
+            ]
+        ],
+        "UI.OpenEditor": [
+            [
+                {
+                    "dev": 0,
+                    "code": 112
+                }
+            ]
+        ],
+        "UI.PresentationSettings": [
+            [
+                {
+                    "dev": 0,
+                    "code": 113
+                }
+            ]
         ]
     },
     "axes": {

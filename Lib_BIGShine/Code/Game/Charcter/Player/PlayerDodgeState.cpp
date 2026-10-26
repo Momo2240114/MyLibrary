@@ -47,6 +47,7 @@ void PlayerDodgeState::Enter()
     const DirectX::XMFLOAT3 cameraForward_ = player_->GetCameraForwardDirection();
     player_->SetFacingDirection(cameraForward_);
 
+    // 実際の方向とBlend用の入力軸を分け、カメラ基準の回避と再生方向を対応させる。
     dodgeDirection = player_->GetMoveInput();
     dodgeBlendInput = player_->GetMoveInputAxis();
     if (dodgeDirection.x == 0.0f && dodgeDirection.z == 0.0f)
@@ -299,6 +300,8 @@ void PlayerDodgeState::HandleJustDodgeSuccess()
     const std::shared_ptr<GameObject> owner_ = GetOwner();
     if (owner_)
     {
+        // 成功確定後にだけ通知し、通常回避や受付外の接触では振動させない。
+        owner_->ExecuteAction("Controller.RumbleJustDodge");
         const std::shared_ptr<JustDodgeReactionComponent> reaction_ =
             owner_->GetComponent<JustDodgeReactionComponent>();
         if (reaction_) reaction_->ExecuteReaction();

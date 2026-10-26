@@ -54,8 +54,17 @@ public:
     // 現在フレームのボタン/スティック状態を取得し、previousStateも更新する。
     void Update();
 
+    // 指定秒数だけ左右のモーターを駆動し、再生中より低い優先度や非対応のPadでは通知を抑える。
+    void PlayRumble(float lowStrength_, float highStrength_, float duration_, int priority_ = 1);
+    // 演出終了やテスト停止時に、残っている振動を解除する。
+    void StopRumble();
+
     bool IsConnected() const { return connected; }
     const std::string& GetName() const { return gamepadName; }
+    // SDLの機種情報は表示形式の選択にだけ使用する。
+    bool IsPlayStation() const { return gamepadType == SDL_GAMEPAD_TYPE_PS3 || gamepadType == SDL_GAMEPAD_TYPE_PS4 || gamepadType == SDL_GAMEPAD_TYPE_PS5; }
+    // 取得済みの状態を比較し、ドリフトや保持されたボタンを新規操作として扱わない。
+    bool HasMeaningfulInput() const;
 
     bool ButtonPressed(PadCode code_) const;
 
@@ -100,11 +109,15 @@ private:
 
     // 現在開いているSDL Gamepad。
     SDL_Gamepad* gamepad = nullptr;
+    // 成功・被弾の振動を弱い攻撃開始通知で上書きしないため、実時間の終了時刻を保持する。
+    Uint64 rumbleEndTime = 0;
+    int rumblePriority = 0;
 
     // 現在フレームと前フレームの入力状態。
     ControllerState state{};
     ControllerState previousState{};
     std::string gamepadName;
+    SDL_GamepadType gamepadType = SDL_GAMEPAD_TYPE_UNKNOWN;
     bool initialized = false;
     bool connected = false;
     bool gamepadEventsWereEnabled = false;

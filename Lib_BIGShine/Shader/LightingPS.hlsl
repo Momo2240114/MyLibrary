@@ -12,6 +12,7 @@ Texture2D GBufferNormal : register(t1);
 Texture2D GBufferMaterial : register(t2);
 Texture2D GBufferEmissive : register(t3);
 Texture2D SceneDepth : register(t4);
+Texture2D GBufferStyle : register(t7);
 TextureCube DiffuseIem : register(t10);
 TextureCube SpecularPmrem : register(t11);
 Texture2D LutGgx : register(t12);
@@ -49,7 +50,8 @@ float ToonRamp(float value_, int shadingModel_)
 }
 
 float3 CalculateDirectLight(float3 baseColor_, float3 normal_, float3 view_, float3 light_, float3 lightColor_,
-    float metalness_, float roughness_, int shadingModel_, float toonPbrBlend_)
+    float metalness_, float roughness_, int shadingModel_, float toonPbrBlend_,
+    float3 shadowTint_, float specularToonBlend_, float specularStrength_)
 {
     float3 halfVector_ = normalize(light_ + view_);
     float nDotL_ = saturate(dot(normal_, light_));
@@ -63,7 +65,7 @@ float3 CalculateDirectLight(float3 baseColor_, float3 normal_, float3 view_, flo
     float3 pbr_ = (diffuse_ + specular_) * lightColor_ * nDotL_;
 
     float toonAmount_ = ToonRamp(nDotL_, shadingModel_);
-    float3 toonShadow_ = baseColor_ * float3(0.3825f, 0.414f, 0.45f);
+    float3 toonShadow_ = baseColor_ * shadowTint_;
     float3 toonDiffuse_ = lerp(toonShadow_, baseColor_, toonAmount_) * (1.0f - metalness_);
     float3 toonSpecular_ = specular_ * step(0.4f, max(specular_.r, max(specular_.g, specular_.b)));
     float3 toon_ = (toonDiffuse_ + toonSpecular_) * lightColor_ * toonAmount_;
@@ -74,7 +76,13 @@ float3 CalculateDirectLight(float3 baseColor_, float3 normal_, float3 view_, flo
     }
     if (shadingModel_ == SHADING_MODEL_TOON_PBR)
     {
-        return lerp(pbr_, toon_, toonPbrBlend_);
+        // 拡散光はセル調、反射はPBR寄りに個別調整する。
+        float3 diffuseResult_ = lerp(diffuse_ * nDotL_, toonDiffuse_ * toonAmount_, toonPbrBlend_);
+        float specularMask_ = smoothstep(0.25f, 0.75f,
+            saturate(max(specular_.r, max(specular_.g, specular_.b)) * (1.0f - roughness_)));
+        float3 softToonSpecular_ = specular_ * lerp(0.35f, 1.0f, specularMask_);
+        float3 specularResult_ = lerp(specular_, softToonSpecular_, saturate(specularToonBlend_));
+        return (diffuseResult_ + specularResult_ * nDotL_ * specularStrength_) * lightColor_;
     }
     return pbr_;
 }
@@ -96,7 +104,10 @@ float4 main(VS_OUT_FULLSCREEN pin_) : SV_TARGET
         return float4(baseColor_ + emissive_, 1.0f);
     }
 
-    float3 normal_ = normalize(GBufferNormal.Sample(LinearSampler, pin_.uv).xyz * 2.0f - 1.0f);
+    float4 normalAndSpecular_ = GBufferNormal.Sample(LinearSampler, pin_.uv);
+    float3 normal_ = normalize(normalAndSpecular_.xyz * 2.0f - 1.0f);
+    float4 style_ = GBufferStyle.Sample(LinearSampler, pin_.uv);
+    float specularStrength_ = max(normalAndSpecular_.a, 0.0f);
     float4 material_ = GBufferMaterial.Sample(LinearSampler, pin_.uv);
     float ao_ = material_.r;
     float roughness_ = material_.g;
@@ -107,7 +118,7 @@ float4 main(VS_OUT_FULLSCREEN pin_) : SV_TARGET
 
     float3 directLighting_ = CalculateDirectLight(baseColor_, normal_, view_, normalize(-lightDirection.xyz),
         lightColor.rgb * lightDirection.w * CalcCascadeShadow(worldPosition_),
-        metalness_, roughness_, shadingModel_, toonPbrBlend_);
+        metalness_, roughness_, shadingModel_, toonPbrBlend_, style_.rgb, style_.a, specularStrength_);
 
     [loop]
     for (int pointIndex_ = 0; pointIndex_ < numPointLights; ++pointIndex_)
@@ -123,7 +134,7 @@ float4 main(VS_OUT_FULLSCREEN pin_) : SV_TARGET
         attenuation_ *= attenuation_;
         directLighting_ += CalculateDirectLight(baseColor_, normal_, view_, normalize(lightVector_),
             pointLight_.color * pointLight_.intensity * attenuation_,
-            metalness_, roughness_, shadingModel_, toonPbrBlend_);
+            metalness_, roughness_, shadingModel_, toonPbrBlend_, style_.rgb, style_.a, specularStrength_);
     }
 
     [loop]
@@ -145,7 +156,7 @@ float4 main(VS_OUT_FULLSCREEN pin_) : SV_TARGET
         attenuation_ = attenuation_ * attenuation_ * spotAttenuation_ * spotAttenuation_;
         directLighting_ += CalculateDirectLight(baseColor_, normal_, view_, light_,
             spotLight_.color * spotLight_.intensity * attenuation_,
-            metalness_, roughness_, shadingModel_, toonPbrBlend_);
+            metalness_, roughness_, shadingModel_, toonPbrBlend_, style_.rgb, style_.a, specularStrength_);
     }
 
     float3 f0_ = lerp(float3(0.04f, 0.04f, 0.04f), baseColor_, metalness_);
@@ -163,7 +174,16 @@ float4 main(VS_OUT_FULLSCREEN pin_) : SV_TARGET
 
     float toonBlend_ = shadingModel_ == SHADING_MODEL_TOON ? 1.0f : (shadingModel_ == SHADING_MODEL_TOON_PBR ? toonPbrBlend_ : 0.0f);
     float3 finalColor_ = directLighting_ + diffuseIbl_ * ao_ * lerp(1.0f, 0.4f, toonBlend_)
-        + specularIbl_ * lerp(1.0f, 0.03f, toonBlend_) + emissive_;
-    finalColor_ = pow(max(ACESFilm(finalColor_), 0.0f), 1.0f / 2.2f);
+        + specularIbl_ * (shadingModel_ == SHADING_MODEL_TOON_PBR
+            ? lerp(1.0f, 0.35f, style_.a) * specularStrength_
+            : lerp(1.0f, 0.03f, toonBlend_)) + emissive_;
+    // 発光と反射を線形HDRのまま後段へ渡し、ToneMappingの重複を避ける。
+    if (shadingModel_ == SHADING_MODEL_TOON_PBR)
+    {
+        float rimStrength_ = GBufferEmissive.Sample(LinearSampler, pin_.uv).a;
+        float rim_ = pow(1.0f - saturate(abs(dot(normal_, view_))), 3.0f) * max(rimStrength_, 0.0f);
+        finalColor_ += rim_ * lerp(baseColor_, float3(1.0f, 1.0f, 1.0f), 0.5f);
+    }
+    finalColor_ = max(finalColor_, 0.0f);
     return float4(finalColor_, 1.0f);
 }

@@ -65,10 +65,13 @@ public:
     // 再生が終わったOneShot ChannelとDSPを解放する。
     void Update();
     void SetVolume(float volume_);
+    float GetVolume() const { return volume; }
     void SetPitch(float pitch_);
     void SetPan(float pan_);
     void SetMuffled(bool muffled_);
     void SetLowPassCutoff(float cutoff_);
+    // BGM専用の演出Busへ接続し、個別音量やDSPを変更せず減衰できるようにする。
+    void SetChannelGroup(FMOD::ChannelGroup* group_) { channelGroup = group_; }
     bool IsValid() const { return sound != nullptr; }
 
 private:
@@ -89,6 +92,7 @@ private:
     void CleanupStoppedChannels();
 
     // Sound生成、Channel再生、DSP生成に使用するFMOD System。所有権はAudio側が持つ。
+    FMOD::ChannelGroup* channelGroup = nullptr; // 所有権はAudioManagerが保持する。
     FMOD::System* system = nullptr;
     // 読み込んだ音声データを表すFMOD Sound。
     FMOD::Sound* sound = nullptr;

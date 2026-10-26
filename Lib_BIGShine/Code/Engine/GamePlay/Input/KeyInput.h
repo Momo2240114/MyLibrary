@@ -1,20 +1,24 @@
 #pragma once
 
 #include <Windows.h>
-#include<unordered_map>
+#include <array>
 
+// フレームごとのキー状態を保持し、複数の処理へ同じ入力結果を提供する。
 class KeyInput
 {
 public:
+    // Scene更新前に全キーを取得し、押下と解放の差分をフレーム単位で確定する。
+    static void Update();
+
     //キーが押されているかの検知
     // 現在フレームでキーが押されている間 true。
-    static bool KeyPressed(int key);
+    static bool KeyPressed(int key_);
     //キー離された時
     // 前フレームは押されていて、現在フレームで離された瞬間だけ true。
-    static bool KeyPressedOut(int key);
+    static bool KeyPressedOut(int key_);
     //キー押された時
     // 前フレームは離されていて、現在フレームで押された瞬間だけ true。
-    static bool KeyPressedIn(int key);
+    static bool KeyPressedIn(int key_);
 
     //使いかた　KeyPut::KeyPressed(KeyPut::Key::K_A)
     //名前の衝突を避けるためK_を使う
@@ -59,8 +63,9 @@ public:
 
 
 private:
-    // KeyPressedIn/Outの差分判定に使う前フレーム状態。
-    static std::unordered_map<int, bool> oldState; // 宣言だけ
+    // 判定時には更新せず、前回と今回の状態を次のフレームまで保持する。
+    static std::array<bool, 256> oldState;
+    static std::array<bool, 256> currentState;
     // enum Key に定義された全キーを列挙
     static constexpr Key allKeys[] = {
         K_A,K_B,K_C,K_D,K_E,K_F,K_G,K_H,K_I,K_J,K_K,K_L,K_M,K_N,K_O,K_P,K_Q,

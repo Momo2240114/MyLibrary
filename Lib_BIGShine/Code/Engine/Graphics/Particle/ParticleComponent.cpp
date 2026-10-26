@@ -946,6 +946,7 @@ void ParticleComponent::Stop()
 void ParticleComponent::ResetRuntime()
 {
     BS_PROFILE_SCOPE("ParticleComponent::ResetRuntime");
+    runtimeVisualScale = 1.0f;
     Stop();
     timer = 0.0f;
     for (EmitterTrack& track_ : tracks)
@@ -1350,6 +1351,11 @@ void ParticleComponent::SetEmissionScale(float scale_)
     emissionScale = std::clamp(scale_, 0.0f, 1.0f);
 }
 
+void ParticleComponent::SetRuntimeVisualScale(float scale_)
+{
+    runtimeVisualScale = std::clamp(scale_, 0.01f, 20.0f);
+}
+
 void ParticleComponent::SetRuntimeRingAppearance(float radius_, const DirectX::XMFLOAT4& color_)
 {
     runtimeRingEnabled = true;
@@ -1404,6 +1410,14 @@ void ParticleComponent::Update(float deltaTime)
         }
 
         ParticleSystemConstants tempSettings_ = track_.settings;
+        // GPUへ渡す一時設定だけを拡大し、Pool再利用で倍率が累積することを防ぐ。
+        tempSettings_.emissionSize.x *= runtimeVisualScale;
+        tempSettings_.emissionSize.y *= runtimeVisualScale;
+        tempSettings_.emissionSpeed.x *= runtimeVisualScale;
+        tempSettings_.emissionSpeed.y *= runtimeVisualScale;
+        tempSettings_.shapeSize.x *= runtimeVisualScale;
+        tempSettings_.shapeSize.y *= runtimeVisualScale;
+        tempSettings_.shapeSize.z *= runtimeVisualScale;
         if (!attractionTargetName.empty() && owner_->manager)
         {
             const auto target_ = owner_->GetManager().Find(attractionTargetName);

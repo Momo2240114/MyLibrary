@@ -1,22 +1,12 @@
 #pragma once
+#include "SceneBase.h"
 
-#include"SceneBase.h"
-
-class SceneTitle :public SceneBase
+// 表示用SceneのJSONを読み込み、動作はScene内の汎用Componentへ委ねる。
+class SceneTitle : public SceneBase
 {
 public:
-	SceneTitle()
-	{
-		std::string name = "TitleScene";
-		sceneName = name;
-	}
-
-	void Initialize();
-	void Finalize();
-	void DrawGUI()override;
-	// 更新処理
-	void Update(float elapsedTime);
-
-	// 描画処理
-	void Render(float elapsedTime);
+    // 戦闘更新を行わない表示用Sceneとして初期化する。
+    SceneTitle();
+    // ObjectとComponentを既存の非同期Sceneロードで復元する。
+    void Initialize() override;
 };

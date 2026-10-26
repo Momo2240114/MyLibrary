@@ -9,6 +9,7 @@
 #include "Engine/Physics/HitBox.h"
 
 #include <algorithm>
+#include <cmath>
 #include <cstdio>
 #include <imgui.h>
 #include <imgui_stdlib.h>
@@ -24,8 +25,8 @@ ATTACK_HIT_SHAPE NormalizeAttackHitShape(ATTACK_HIT_SHAPE shape_)
     case ATTACK_HIT_SHAPE::CAPSULE:
     case ATTACK_HIT_SHAPE::SPHERE_GROUP:
     case ATTACK_HIT_SHAPE::FAN:
-        return shape_;
     case ATTACK_HIT_SHAPE::BOX:
+        return shape_;
     case ATTACK_HIT_SHAPE::CONE:
     case ATTACK_HIT_SHAPE::RAY:
     default:
@@ -270,6 +271,36 @@ void AttackEffectHitComponent::SetHitShapes(
     RebuildHitShapes();
 }
 
+bool AttackEffectHitComponent::SetCapsuleWorldSpan(std::size_t shapeIndex_,
+    const DirectX::XMFLOAT3& start_, const DirectX::XMFLOAT3& end_)
+{
+    BS_PROFILE_SCOPE("AttackEffectHitComponent::SetCapsuleWorldSpan");
+    if (shapeIndex_ >= hitShapes.size() || hitShapes[shapeIndex_].shape != ATTACK_HIT_SHAPE::CAPSULE) return false;
+    const float baseHalfHeight_ = hitShapes[shapeIndex_].halfHeight;
+    if (baseHalfHeight_ <= 0.0001f) return false;
+    using namespace DirectX;
+    const XMVECTOR segment_ = XMVectorSubtract(XMLoadFloat3(&end_), XMLoadFloat3(&start_));
+    const float length_ = XMVectorGetX(XMVector3Length(segment_));
+    // 同じ位置の補助ノードを含む場合も、短いカプセルとして球端の判定を残す。
+    const XMVECTOR axis_ = length_ > 0.0001f ? XMVectorScale(segment_, 1.0f / length_) : XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+    // 垂直に近い節でも外積を安定させ、半径を保ったままカプセルのY軸だけを伸ばす。
+    const XMVECTOR reference_ = std::abs(XMVectorGetY(axis_)) < 0.95f
+        ? XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f) : XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
+    const XMVECTOR right_ = XMVector3Normalize(XMVector3Cross(reference_, axis_));
+    XMMATRIX world_ = XMMatrixIdentity();
+    world_.r[0] = right_;
+    world_.r[1] = XMVectorScale(axis_, (std::max)(length_, 0.0001f) / (baseHalfHeight_ * 2.0f));
+    world_.r[2] = XMVector3Cross(right_, axis_);
+    world_.r[3] = XMVectorSetW(XMVectorScale(XMVectorAdd(XMLoadFloat3(&start_), XMLoadFloat3(&end_)), 0.5f), 1.0f);
+    for (auto& runtime_ : runtimeHitShapes)
+    {
+        if (runtime_.templateIndex != shapeIndex_ || !runtime_.object || !runtime_.object->transform) continue;
+        runtime_.object->transform->ApplyWorldMatrix(world_);
+        return true;
+    }
+    return false;
+}
+
 void AttackEffectHitComponent::Play()
 {
     BS_PROFILE_SCOPE("AttackEffectHitComponent::Play");
@@ -349,6 +380,7 @@ void AttackEffectHitComponent::ConfigureHitBox(
     hitBox_->hitStopScale = hitStopScale;
     hitBox_->SetKnockBackPower(knockBackPower);
     hitBox_->SetAirLiftPower(targetAirLiftPower, attackerAirLiftPower);
+    hitBox_->feedback = feedback;
     hitBox_->cameraShakeEnabled = cameraShakeEnabled;
     hitBox_->cameraShakeReceiveDuration = cameraShakeReceiveDuration;
     hitBox_->cameraShakeReceivePositionStrength = cameraShakeReceivePositionStrength;
@@ -394,6 +426,14 @@ void AttackEffectHitComponent::ConfigureHitBox(
         // 球を広域判定に使い、ダメージとGuardは同じ扇形条件で絞る。
         hitBox_->radius = (std::max)(shape_.range, 0.01f);
         hitBox_->SetAttackSector(shape_.range, shape_.angle, shape_.halfHeight);
+    }
+    if (normalizedShape_ == ATTACK_HIT_SHAPE::BOX)
+    {
+        // 帯を覆う球で接触候補を集め、長方形の寸法でダメージと防御受付を絞る。
+        const float halfLength_ = (std::max)(shape_.range * 0.5f, 0.01f);
+        hitBox_->halfHeight = 0.0f;
+        hitBox_->radius = std::sqrt(shape_.radius * shape_.radius + shape_.halfHeight * shape_.halfHeight + halfLength_ * halfLength_);
+        hitBox_->SetAttackBox(shape_.radius, shape_.halfHeight, halfLength_);
     }
     hitBox_->Deactivate();
     hitBox_->RecreatePhysXActor();
@@ -529,9 +569,10 @@ void AttackEffectHitComponent::Gui()
                 ATTACK_HIT_SHAPE::SPHERE,
                 ATTACK_HIT_SHAPE::CAPSULE,
                 ATTACK_HIT_SHAPE::SPHERE_GROUP,
-                ATTACK_HIT_SHAPE::FAN
+                ATTACK_HIT_SHAPE::FAN,
+                ATTACK_HIT_SHAPE::BOX
             };
-            const char* shapeNames_[] = { "None", "Sphere", "Capsule", "Sphere Group", "Fan" };
+            const char* shapeNames_[] = { "None", "Sphere", "Capsule", "Sphere Group", "Fan", "Box" };
             int shapeType_ = 0;
             for (int index_ = 0; index_ < IM_ARRAYSIZE(supportedShapes_); ++index_)
             {
@@ -549,7 +590,7 @@ void AttackEffectHitComponent::Gui()
             rebuild_ |= ImGui::DragFloat3("Local Offset", &shape_.localOffset.x, 0.01f);
             rebuild_ |= ImGui::DragFloat3("Local Rotation", &shape_.localRotation.x, 0.1f);
             rebuild_ |= ImGui::DragFloat3("Local Scale", &shape_.localScale.x, 0.01f);
-            rebuild_ |= ImGui::DragFloat("Radius", &shape_.radius, 0.01f, 0.01f);
+            rebuild_ |= ImGui::DragFloat(shape_.shape == ATTACK_HIT_SHAPE::BOX ? "Box Half Width" : "Radius", &shape_.radius, 0.01f, 0.01f);
             if (shape_.shape == ATTACK_HIT_SHAPE::FAN)
             {
                 rebuild_ |= ImGui::DragFloat("Fan Range", &shape_.range, .1f, .01f, 100.0f);
@@ -558,6 +599,11 @@ void AttackEffectHitComponent::Gui()
             }
             if (shape_.shape == ATTACK_HIT_SHAPE::CAPSULE)
                 rebuild_ |= ImGui::DragFloat("Half Height", &shape_.halfHeight, 0.01f, 0.0f);
+            if (shape_.shape == ATTACK_HIT_SHAPE::BOX)
+            {
+                rebuild_ |= ImGui::DragFloat("Box Length", &shape_.range, 0.1f, 0.01f, 200.0f);
+                rebuild_ |= ImGui::DragFloat("Box Half Height", &shape_.halfHeight, 0.1f, 0.0f, 10.0f);
+            }
             ImGui::DragFloat("Active Start", &shape_.activeStartTime, 0.01f, 0.0f);
             ImGui::DragFloat("Active End", &shape_.activeEndTime, 0.01f, shape_.activeStartTime);
             ImGui::DragFloat("Hit Interval", &shape_.hitInterval, 0.01f, 0.0f);
@@ -604,6 +650,7 @@ void AttackEffectHitComponent::Gui()
 void AttackEffectHitComponent::Serialize(nlohmann::json& json_) const
 {
     // 攻撃共通値とヒット時演出、さらに複数HitShapeのテンプレートをまとめて保存する。
+    json_["Feedback"] = feedback;
     json_["EffectType"] = static_cast<int>(effectType);
     json_["LifeTime"] = lifeTime;
     json_["Damage"] = damage;
@@ -672,6 +719,7 @@ void AttackEffectHitComponent::Deserialize(const nlohmann::json& json_)
     damage = json_.value("Damage", 1.0f);
     damageRate = (std::max)(json_.value("DamageRate", damage / 100.0f), 0.0f);
     fixedDamage = json_.value("FixedDamage", 0.0f);
+    feedback = json_.value("Feedback", AttackFeedbackSettings{});
     damageApplyType = static_cast<DAMAGE_APPLY_TYPE>(
         (std::clamp)(json_.value("DamageApplyType", 0), 0, 2));
     damageHitInterval = (std::max)(json_.value("DamageHitInterval", 0.0f), 0.0f);

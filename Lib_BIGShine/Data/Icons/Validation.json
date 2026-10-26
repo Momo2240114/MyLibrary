@@ -1,0 +1,90 @@
+{
+  "ANATHEMA": [
+    {
+      "size": 256,
+      "encoding": "PNG",
+      "bytes": 180036,
+      "decode": "PASS",
+      "pixels_match_png": true
+    },
+    {
+      "size": 128,
+      "encoding": "32-bit DIB + AND mask",
+      "bytes": 67624,
+      "decode": "PASS",
+      "pixels_match_png": true
+    },
+    {
+      "size": 64,
+      "encoding": "32-bit DIB + AND mask",
+      "bytes": 16936,
+      "decode": "PASS",
+      "pixels_match_png": true
+    },
+    {
+      "size": 48,
+      "encoding": "32-bit DIB + AND mask",
+      "bytes": 9640,
+      "decode": "PASS",
+      "pixels_match_png": true
+    },
+    {
+      "size": 32,
+      "encoding": "32-bit DIB + AND mask",
+      "bytes": 4264,
+      "decode": "PASS",
+      "pixels_match_png": true
+    },
+    {
+      "size": 16,
+      "encoding": "32-bit DIB + AND mask",
+      "bytes": 1128,
+      "decode": "PASS",
+      "pixels_match_png": true
+    }
+  ],
+  "BigShine": [
+    {
+      "size": 256,
+      "encoding": "PNG",
+      "bytes": 104696,
+      "decode": "PASS",
+      "pixels_match_png": true
+    },
+    {
+      "size": 128,
+      "encoding": "32-bit DIB + AND mask",
+      "bytes": 67624,
+      "decode": "PASS",
+      "pixels_match_png": true
+    },
+    {
+      "size": 64,
+      "encoding": "32-bit DIB + AND mask",
+      "bytes": 16936,
+      "decode": "PASS",
+      "pixels_match_png": true
+    },
+    {
+      "size": 48,
+      "encoding": "32-bit DIB + AND mask",
+      "bytes": 9640,
+      "decode": "PASS",
+      "pixels_match_png": true
+    },
+    {
+      "size": 32,
+      "encoding": "32-bit DIB + AND mask",
+      "bytes": 4264,
+      "decode": "PASS",
+      "pixels_match_png": true
+    },
+    {
+      "size": 16,
+      "encoding": "32-bit DIB + AND mask",
+      "bytes": 1128,
+      "decode": "PASS",
+      "pixels_match_png": true
+    }
+  ]
+}

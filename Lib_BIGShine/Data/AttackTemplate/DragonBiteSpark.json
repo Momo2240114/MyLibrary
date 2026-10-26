@@ -1,6 +1,12 @@
 {
     "AssetType": "AttackTemplate",
     "AssetVersion": 1,
+    "feedback": {
+        "hitSoundPath": "Data/Audio/SE/Sonniss/Combat/LightHit.wav",
+        "volume": 0.65,
+        "minDistance": 8.0,
+        "maxDistance": 100.0
+    },
     "id": "DragonBiteSpark",
     "displayName": "Dragon Bite Spark",
     "owner": {

@@ -44,8 +44,17 @@
 #include "Engine/GamePlay/EventSystem/TimeScaleDirector.h"
 #include "Engine/UI/NumberSwitcher.h"
 #include "Engine/UI/UIProgressBarComponent.h"
+#include "Engine/UI/BattleHudComponent.h"
+#include "Engine/UI/MenuNavigationComponent.h"
+#include "Engine/UI/ScreenFadeComponent.h"
+#include "Engine/UI/ScreenTransitionComponent.h"
+#include "Engine/UI/LoadingPresentationComponent.h"
+#include "Engine/UI/GameMenuComponent.h"
+#include "Engine/UI/ScenePresentationComponent.h"
 #include "Engine/UI/UISpriteSheetComponent.h"
 #include "Engine/UI/UITextComponent.h"
+#include "Engine/UI/UIMotionComponent.h"
+#include "Engine/UI/UIVisualEffectComponent.h"
 #include "Engine/UI/BossNamePresentationComponent.h"
 #include "Engine/GamePlay/EventSystem/ActorPresentationActionComponent.h"
 #include "Engine/UI/UIVertexModifierComponent.h"
@@ -162,8 +171,17 @@ void RegisterAllComponents()
     registry.Register<WidgetBoardComponent>("WidgetBoardComponent");
     registry.Register<UIWidgetComponent>("UIWidgetComponent");
     registry.Register<UIProgressBarComponent>("UIProgressBarComponent");
+    registry.Register<BattleHudComponent>("BattleHudComponent");
+    registry.Register<MenuNavigationComponent>("MenuNavigationComponent");
+    registry.Register<ScreenFadeComponent>("ScreenFadeComponent");
+    registry.Register<ScreenTransitionComponent>("ScreenTransitionComponent");
+    registry.Register<LoadingPresentationComponent>("LoadingPresentationComponent");
+    registry.Register<GameMenuComponent>("GameMenuComponent");
+    registry.Register<ScenePresentationComponent>("ScenePresentationComponent");
     registry.Register<UISpriteSheetComponent>("UISpriteSheetComponent");
     registry.Register<UITextComponent>("UITextComponent");
+    registry.Register<UIMotionComponent>("UIMotionComponent");
+    registry.Register<UIVisualEffectComponent>("UIVisualEffectComponent");
     registry.Register<BossNamePresentationComponent>("BossNamePresentationComponent");
     registry.Register<ActorPresentationActionComponent>("ActorPresentationActionComponent");
     registry.Register<UIVertexModifierComponent>("UIVertexModifierComponent");

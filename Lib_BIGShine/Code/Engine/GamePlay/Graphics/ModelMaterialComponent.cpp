@@ -11,8 +11,10 @@ namespace
 {
     constexpr const char* TEXTURE_LABELS[] =
     {
-        "Base Color", "Normal", "Emissive", "Occlusion", "Metalness / Roughness"
+        "Base Color", "Normal", "Emissive", "Occlusion", "Metalness / Roughness",
+        "Metallic", "Roughness"
     };
+    static_assert(sizeof(TEXTURE_LABELS) / sizeof(TEXTURE_LABELS[0]) == ModelMaterial::TEXTURE_SLOT_COUNT);
 }
 
 void ModelMaterialComponent::Start()
@@ -59,24 +61,39 @@ ID3D11ShaderResourceView* ModelMaterialComponent::ResolveTexture(
     int materialIndex_, ModelMaterial::TextureSlot slot_,
     ID3D11ShaderResourceView* originalTexture_, int meshIndex_) const
 {
-    if (!IsEnabled()) return originalTexture_;
+    const ModelMaterial* material_ = FindTextureOverride(materialIndex_, slot_, meshIndex_);
+    return material_ ? material_->GetTexture(slot_) : originalTexture_;
+}
+
+ModelMaterial::TextureChannel ModelMaterialComponent::ResolveChannel(
+    int materialIndex_, ModelMaterial::MaterialValue value_, int meshIndex_) const
+{
+    const ModelMaterial* material_ = FindTextureOverride(
+        materialIndex_, ModelMaterial::GetValueTextureSlot(value_), meshIndex_);
+    return material_ ? material_->GetChannel(value_) : ModelMaterial::GetDefaultChannel(value_);
+}
+
+const ModelMaterial* ModelMaterialComponent::FindTextureOverride(
+    int materialIndex_, ModelMaterial::TextureSlot slot_, int meshIndex_) const
+{
+    if (!IsEnabled()) return nullptr;
     // パーツで未設定またはロード失敗のスロットは、既存の共通設定へ引き継ぐ。
     const auto meshMaterial_ = meshMaterials.find(meshIndex_);
     if (meshMaterial_ != meshMaterials.end())
     {
-        if (ID3D11ShaderResourceView* texture_ = meshMaterial_->second.GetTexture(slot_)) return texture_;
+        if (meshMaterial_->second.GetTexture(slot_)) return &meshMaterial_->second;
     }
     const auto material_ = materials.find(materialIndex_);
     if (material_ != materials.end())
     {
-        if (ID3D11ShaderResourceView* texture_ = material_->second.GetTexture(slot_)) return texture_;
+        if (material_->second.GetTexture(slot_)) return &material_->second;
     }
     const auto fallback_ = materials.find(-1);
     if (fallback_ != materials.end())
     {
-        if (ID3D11ShaderResourceView* texture_ = fallback_->second.GetTexture(slot_)) return texture_;
+        if (fallback_->second.GetTexture(slot_)) return &fallback_->second;
     }
-    return originalTexture_;
+    return nullptr;
 }
 
 void ModelMaterialComponent::Gui()
@@ -153,6 +170,17 @@ void ModelMaterialComponent::Gui()
 
     ModelMaterial& material_ = selectedMeshIndex >= 0
         ? GetMeshMaterial(selectedMeshIndex) : GetMaterial(selectedMaterialIndex);
+    // 単独マップは元モデルの係数に影響されず、各物性の値として直接使用する。
+    ImGui::TextDisabled("Separate maps use the selected channel directly; unset maps use the packed map.");
+    ImGui::TextDisabled("Base Color / Emissive: sRGB. Normal / AO / Metallic / Roughness: Linear.");
+    ImGui::TextDisabled("Channel settings apply to the assigned override texture. A without alpha usually reads 1.");
+    // 結合マップと単独マップの各物性に、参照する成分を割り当てる。
+    const auto drawChannel_ = [&](const char* label_, ModelMaterial::MaterialValue value_)
+    {
+        int channel_ = static_cast<int>(material_.GetChannel(value_));
+        if (ImGui::Combo(label_, &channel_, "R\0G\0B\0A\0"))
+            material_.SetChannel(value_, static_cast<ModelMaterial::TextureChannel>(channel_));
+    };
     for (std::size_t index_ = 0; index_ < ModelMaterial::TEXTURE_SLOT_COUNT; ++index_)
     {
         const auto slot_ = static_cast<ModelMaterial::TextureSlot>(index_);
@@ -162,6 +190,15 @@ void ModelMaterialComponent::Gui()
         {
             material_.SetTexture(slot_, path_);
         }
+        if (slot_ == ModelMaterial::TextureSlot::METALNESS_ROUGHNESS)
+        {
+            drawChannel_("Packed Metallic Channel", ModelMaterial::MaterialValue::PACKED_METALLIC);
+            drawChannel_("Packed Roughness Channel", ModelMaterial::MaterialValue::PACKED_ROUGHNESS);
+        }
+        else if (slot_ == ModelMaterial::TextureSlot::METALLIC)
+            drawChannel_("Metallic Channel", ModelMaterial::MaterialValue::METALLIC);
+        else if (slot_ == ModelMaterial::TextureSlot::ROUGHNESS)
+            drawChannel_("Roughness Channel", ModelMaterial::MaterialValue::ROUGHNESS);
         if (material_.HasTextureFailure(slot_))
         {
             ImGui::TextDisabled("Texture load failed. Using fallback texture.");

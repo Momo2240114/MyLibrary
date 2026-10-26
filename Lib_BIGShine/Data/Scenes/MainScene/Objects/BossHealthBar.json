@@ -4,7 +4,7 @@
         {
             "Data": {
                 "InputEnabled": false,
-                "ParentWidgetId": "UIRoot",
+                "ParentWidgetId": "BattleHudRoot",
                 "RaycastTarget": false,
                 "RectTransform": {
                     "AnchorMax": [
@@ -16,8 +16,8 @@
                         0.0
                     ],
                     "AnchoredPosition": [
-                        2.0,
-                        125.0
+                        0.0,
+                        55.0
                     ],
                     "LocalRotation": 0.0,
                     "LocalScale": [
@@ -29,8 +29,8 @@
                         0.5
                     ],
                     "SizeDelta": [
-                        550.0,
-                        28.0
+                        850.0,
+                        12.0
                     ]
                 },
                 "Version": 1,
@@ -49,9 +49,11 @@
         {
             "Data": {
                 "BackgroundWidgetId": "BossHealthBackground",
-                "CurrentRate": 1.0,
+                "CropFillUV": true,
+                "CurrentRate": 0.0,
                 "CurrentWidgetId": "BossHealthCurrent",
-                "DamageDelayRate": 1.0,
+                "DamageDelayDuration": 0.30000001192092896,
+                "DamageDelayRate": 0.0,
                 "DamageDelayWidgetId": "BossHealthDamageDelay",
                 "DamageFlashColor": [
                     1.0,
@@ -59,7 +61,7 @@
                     0.07999999821186066,
                     0.7799999713897705
                 ],
-                "DecreaseDelaySpeed": 0.10000000149011612,
+                "DecreaseDelaySpeed": 0.44999998807907104,
                 "EdgeHighlightBaseAlpha": 0.699999988079071,
                 "EdgeHighlightColor": [
                     1.0,
@@ -72,7 +74,7 @@
                 "FlashDuration": 0.2800000011920929,
                 "FlashTimer": 0.0,
                 "FlashWidgetId": "BossHealthFlash",
-                "HealDelayRate": 1.0,
+                "HealDelayRate": 0.0,
                 "HealDelayWidgetId": "BossHealthHealDelay",
                 "HealFlashColor": [
                     1.0,
@@ -80,9 +82,9 @@
                     1.0,
                     0.5799999833106995
                 ],
-                "IncreaseDelaySpeed": 0.15000000596046448,
-                "Source": "BOSS_HP_RATE",
-                "TargetRate": 1.0,
+                "IncreaseDelaySpeed": 1.5,
+                "Source": "MANUAL",
+                "TargetRate": 0.0,
                 "Version": 1
             },
             "Enabled": true,
@@ -90,13 +92,13 @@
             "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
             "TypeName": "UIProgressBarComponent",
-            "UpdateEnabled": true,
+            "UpdateEnabled": false,
             "UpdatePriority": 0
         }
     ],
     "Layer": 16,
     "Name": "BossHealthBar",
-    "ParentName": "UI",
+    "ParentName": "UIRoot",
     "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [

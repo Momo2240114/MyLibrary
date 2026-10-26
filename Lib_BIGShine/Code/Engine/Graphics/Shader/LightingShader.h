@@ -15,6 +15,7 @@ public:
         ID3D11ShaderResourceView* material,
         ID3D11ShaderResourceView* emissive,
         ID3D11ShaderResourceView* depth,
+        ID3D11ShaderResourceView* styleSRV_,
         ID3D11ShaderResourceView* pointLightSRV,  // 追加
         ID3D11ShaderResourceView* spotLightSRV,
         ID3D11Buffer* sceneConstantBuffer,

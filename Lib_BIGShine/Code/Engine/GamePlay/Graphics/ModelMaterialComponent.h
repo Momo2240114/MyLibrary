@@ -37,8 +37,14 @@ public:
     ID3D11ShaderResourceView* ResolveTexture(
         int materialIndex_, ModelMaterial::TextureSlot slot_,
         ID3D11ShaderResourceView* originalTexture_, int meshIndex_ = -1) const;
+    // 採用されたテクスチャと同じ設定元から参照チャンネルを選ぶ。
+    ModelMaterial::TextureChannel ResolveChannel(
+        int materialIndex_, ModelMaterial::MaterialValue value_, int meshIndex_ = -1) const;
 
 private:
+    // 読み込み済みの差し替えを優先順で探し、画像とチャンネルの設定元を揃える。
+    const ModelMaterial* FindTextureOverride(
+        int materialIndex_, ModelMaterial::TextureSlot slot_, int meshIndex_) const;
     std::map<int, ModelMaterial> materials;
     std::map<int, ModelMaterial> meshMaterials; // メッシュごとの設定。元のモデルや共有マテリアルは変更しない。
     int selectedMaterialIndex = -1; // GUIで編集中のマテリアル番号。保存対象には含めない。

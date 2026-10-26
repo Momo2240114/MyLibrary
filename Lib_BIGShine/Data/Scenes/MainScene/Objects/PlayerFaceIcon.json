@@ -16,8 +16,8 @@
                         0.0
                     ],
                     "AnchoredPosition": [
-                        18.0,
-                        18.0
+                        44.0,
+                        46.0
                     ],
                     "LocalRotation": 0.0,
                     "LocalScale": [
@@ -25,18 +25,18 @@
                         1.0
                     ],
                     "Pivot": [
-                        0.0,
-                        0.0
+                        0.5,
+                        0.5
                     ],
                     "SizeDelta": [
-                        86.0,
-                        86.0
+                        40.0,
+                        40.0
                     ]
                 },
                 "Version": 1,
                 "Visible": true,
                 "WidgetId": "PlayerFaceIcon",
-                "ZOrder": 2
+                "ZOrder": 38
             },
             "Enabled": true,
             "LateUpdateEnabled": true,
@@ -62,10 +62,12 @@
                     1.0,
                     1.0
                 ],
+                "LinearSampling": false,
                 "LocalSize": [
                     86.0,
                     86.0
                 ],
+                "SdrTexture": false,
                 "ShaderID": 0,
                 "TexturePath": "./Data/Sprite/UI/Player/PlayerPortrait_ExpressionSheet.png",
                 "Visible": true,

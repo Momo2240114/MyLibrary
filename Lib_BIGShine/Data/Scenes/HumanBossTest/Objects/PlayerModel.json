@@ -15144,7 +15144,8 @@
                 "SkillLoadout": {
                     "Slot0": "PhantomRush",
                     "Slot1": "Breakthrough",
-                    "Slot2": "RisingJudgment"
+                    "Slot2": "RisingJudgment",
+                    "Slot3": "Heal"
                 },
                 "StrongAttackHoldThreshold": 0.3499999940395355,
                 "StrongChargeAttackSpeed": 14.0,

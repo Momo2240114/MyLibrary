@@ -334,7 +334,7 @@ bool MotionWarpComponent::PlayForTarget(const std::string& presetName_,
     const std::shared_ptr<GameObject>& target_, const DirectX::XMFLOAT3& plannedRootMotion_,
     float stopDistance_, float startNormalizedTime_, float endNormalizedTime_, const DirectX::XMFLOAT3* fixedTargetPosition_,
     std::function<bool(const DirectX::XMFLOAT3&, const DirectX::XMFLOAT3&)> pathValidator_,
-    float priorRotationCorrectionDegrees_)
+    float priorRotationCorrectionDegrees_, const DirectX::XMFLOAT3* fixedPathStart_)
 {
     BS_PROFILE_SCOPE("MotionWarpComponent::PlayForTarget");
     Stop();
@@ -348,6 +348,15 @@ bool MotionWarpComponent::PlayForTarget(const std::string& presetName_,
     explicitTargetPreset.endNormalizedTime = (std::min)(preset_->endNormalizedTime, endNormalizedTime_);
     explicitTargetPreset.rotationEndNormalizedTime = (std::min)(preset_->rotationEndNormalizedTime, endNormalizedTime_);
     explicitTargetPreset.targetDistance = (std::max)(preset_->targetDistance, stopDistance_);
+    const bool matchFixedPath_ = fixedPathStart_ != nullptr && fixedTargetPosition_ != nullptr;
+    if (matchFixedPath_)
+    {
+        // 予兆と共有する明示経路では、保存プリセットの停止距離や補正窓で寸法を変えない。
+        explicitTargetPreset.startNormalizedTime = startNormalizedTime_;
+        explicitTargetPreset.endNormalizedTime = endNormalizedTime_;
+        explicitTargetPreset.targetDistance = 0.0f;
+        if (!preset_->warpPosition) return false;
+    }
     if (explicitTargetPreset.endNormalizedTime <= explicitTargetPreset.startNormalizedTime) return false;
     request = {};
     request.requestName = presetName_;
@@ -357,9 +366,10 @@ bool MotionWarpComponent::PlayForTarget(const std::string& presetName_,
     // 予備動作で消費した旋回量も含め、同じ攻撃で最大角度を使い直さない。
     request.accumulatedRotationCorrectionDegrees = std::clamp(priorRotationCorrectionDegrees_, 0.0f, preset_->maximumRotationDegrees);
     request.maintainStopDistance = true;
+    request.matchFixedPath = matchFixedPath_;
     request.freezeAfterWarp = fixedTargetPosition_ != nullptr && explicitTargetPreset.targetDistance <= 0.0001f;
     request.targetLocked = preset_->lockTargetOnStart || fixedTargetPosition_ != nullptr;
-    request.startPosition = owner_->transform->GetWorldPosition();
+    request.startPosition = request.matchFixedPath ? *fixedPathStart_ : owner_->transform->GetWorldPosition();
     request.targetPosition = fixedTargetPosition_ ? *fixedTargetPosition_ : target_->transform->GetWorldPosition();
     request.initialTargetPosition = request.targetPosition;
     request.plannedRootMotion = plannedRootMotion_;
@@ -477,6 +487,13 @@ MotionWarpResult MotionWarpComponent::ApplyRootMotionWarp(
     debugWarpedDelta = debugOriginalDelta;
     debugAppliedPositionScale = 1.0f;
     debugAppliedYawDegrees = 0.0f;
+
+    // Off時は停止距離制限も加えず、入力された自然なRootMotionをそのまま返す。
+    if (!warpEnabled)
+    {
+        debugInactiveReason = "Comparison: MotionWarp OFF";
+        return result_;
+    }
 
     // 追加移動と旋回を終了した後も、同じPhaseの自然なRootMotionに停止円だけを適用する。
     auto limitCompletedWarp_ = [&]()
@@ -612,6 +629,44 @@ MotionWarpResult MotionWarpComponent::ApplyRootMotionWarp(
     }
 
     const DirectX::XMFLOAT3 ownerPosition_ = owner_->transform->GetWorldPosition();
+    if (request.matchFixedPath)
+    {
+        // 予兆で確定した線分をアニメーション時間でたどり、最大・最小補正距離による短縮を防ぐ。
+        float progress_ = std::clamp((request.normalizedTime - preset_->startNormalizedTime) /
+            (std::max)(preset_->endNormalizedTime - preset_->startNormalizedTime, 0.0001f), 0.0f, 1.0f);
+        if (progress_ > 0.0f && progress_ < 1.0f)
+            if (const auto curve_ = owner_->GetComponent<CurveComponent>();
+                curve_ && !preset_->positionCorrectionCurveName.empty() && curve_->HasTrack(preset_->positionCorrectionCurveName))
+                progress_ = std::clamp(curve_->GetValue(preset_->positionCorrectionCurveName, progress_), 0.0f, 1.0f);
+        const DirectX::XMFLOAT3 destination_ = {
+            request.startPosition.x + (request.targetPosition.x - request.startPosition.x) * progress_,
+            ownerPosition_.y,
+            request.startPosition.z + (request.targetPosition.z - request.startPosition.z) * progress_ };
+        result_.rootMotionDelta.deltaPosition.x = destination_.x - ownerPosition_.x;
+        result_.rootMotionDelta.deltaPosition.z = destination_.z - ownerPosition_.z;
+        result_.positionWarped = true;
+        // Transformは直接移動せず、従来のRootMotion・CharacterMovement・物理同期へ差分を渡す。
+        if (request.pathValidator && !request.pathValidator(ownerPosition_, destination_))
+        {
+            request.active = false;
+            result_.rootMotionDelta.deltaPosition.x = 0.0f;
+            result_.rootMotionDelta.deltaPosition.z = 0.0f;
+            debugInactiveReason = "Warp path blocked or unsupported";
+        }
+        else
+        {
+            if (finishExplicitWarp_)
+            {
+                request.active = false;
+                request.targetLocked = true;
+                request.normalizedTime = sampleNormalizedTime_;
+            }
+            debugInactiveReason.clear();
+        }
+        debugIdealStopPosition = request.targetPosition;
+        debugWarpedDelta = result_.rootMotionDelta.deltaPosition;
+        return result_;
+    }
     DirectX::XMFLOAT3 toTarget_
     {
         request.targetPosition.x - ownerPosition_.x,
@@ -903,9 +958,23 @@ void MotionWarpComponent::UnregisterActions()
     actionsRegistered = false;
 }
 
+void MotionWarpComponent::DrawComparisonGui()
+{
+    ImGui::PushID(this);
+    ImGui::Checkbox("MotionWarp ON (A/B Comparison)", &warpEnabled);
+    ImGui::Text("Warp: %s / Preset: %s", warpEnabled ? "ON" : "OFF", request.presetName.c_str());
+    ImGui::Text("Request: %s", request.active ? "ACTIVE" : "INACTIVE");
+    ImGui::Text("Original movement: %.4f, %.4f, %.4f", debugOriginalDelta.x, debugOriginalDelta.y, debugOriginalDelta.z);
+    ImGui::Text("Applied movement: %.4f, %.4f, %.4f", debugWarpedDelta.x, debugWarpedDelta.y, debugWarpedDelta.z);
+    ImGui::Text("Phase correction total: %.3f m / %.1f deg", request.accumulatedPositionCorrection, request.accumulatedRotationCorrectionDegrees);
+    ImGui::Text("Warp status: %s", debugInactiveReason.c_str());
+    ImGui::PopID();
+}
+
 void MotionWarpComponent::Gui()
 {
     EnsureDefaultPresets();
+    DrawComparisonGui();
     // デバッグ値は、補正前後のRootMotionと補正が止まった理由を確認するために表示する。
     ImGui::Text("Active: %s", request.active ? "true" : "false");
     ImGui::Text("Preset: %s", request.presetName.c_str());
@@ -964,6 +1033,7 @@ void MotionWarpComponent::Serialize(nlohmann::json& json_) const
 {
     // プリセットはアニメーションごとの調整値なので、コンポーネント設定としてまとめて保存する。
     json_["DefaultPresetName"] = defaultPresetName;
+    json_["WarpEnabled"] = warpEnabled;
     json_["RegisterGlobalActions"] = registerGlobalActions;
     nlohmann::json presetsJson_ = nlohmann::json::array();
     for (const MotionWarpPreset& preset_ : presets)
@@ -1014,6 +1084,7 @@ void MotionWarpComponent::Deserialize(const nlohmann::json& json_)
     UnregisterActions();
     Clear();
     defaultPresetName = json_.value("DefaultPresetName", defaultPresetName);
+    warpEnabled = json_.value("WarpEnabled", true);
     registerGlobalActions = json_.value("RegisterGlobalActions", true);
     // 保存済みプリセットを読み直し、不正値は範囲内へ丸めてRootMotion補正の暴走を防ぐ。
     presets.clear();

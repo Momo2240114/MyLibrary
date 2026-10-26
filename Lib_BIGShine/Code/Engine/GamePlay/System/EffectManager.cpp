@@ -123,6 +123,7 @@ void to_json(nlohmann::json& json_, const SlashEffectSpawnSetting& setting_)
         { "allowMultiHit", setting_.allowMultiHit },
         { "canBeGuarded", setting_.canBeGuarded },
         { "guardBreak", setting_.guardBreak },
+        { "feedback", setting_.feedback },
         { "cameraShakeEnabled", setting_.cameraShakeEnabled },
         { "cameraShakeReceiveDuration", setting_.cameraShakeReceiveDuration },
         { "cameraShakeReceivePositionStrength", setting_.cameraShakeReceivePositionStrength },
@@ -178,6 +179,7 @@ void from_json(const nlohmann::json& json_, SlashEffectSpawnSetting& setting_)
     setting_.allowMultiHit = json_.value("allowMultiHit", false);
     setting_.canBeGuarded = json_.value("canBeGuarded", true);
     setting_.guardBreak = json_.value("guardBreak", false);
+    setting_.feedback = json_.value("feedback", AttackFeedbackSettings{});
     setting_.cameraShakeEnabled = json_.value("cameraShakeEnabled", true);
     setting_.cameraShakeReceiveDuration =
         (std::max)(json_.value("cameraShakeReceiveDuration", 0.12f), 0.0f);
@@ -194,13 +196,14 @@ void from_json(const nlohmann::json& json_, SlashEffectSpawnSetting& setting_)
     setting_.mirror = json_.value("mirror", false);
 }
 
-void EffectManager::Initialize(GameObjectManager* gameObjectManager_)
+void EffectManager::Initialize(GameObjectManager* gameObjectManager_, bool preloadEffects_)
 {
     gameObjectManager = gameObjectManager_;
     // アセット名の候補と検索マップを作ってから、プール用に使用頻度の高いEffectを事前生成する。
     RefreshAssetCache();
     BuildAssetNameMap();
-    PreloadAllEffects();
+    incrementalPreloadCursor = 0;
+    if (preloadEffects_) PreloadAllEffects();
 }
 
 // 遅延中の攻撃演出と生成済みEffectの寿命を更新する
@@ -211,7 +214,8 @@ void EffectManager::Update(float deltaTime_)
     // spawnTimeが設定された攻撃演出を生成可能になるまで進める
     for (ScheduledAttackEffect& scheduledEffect_ : scheduledAttackEffects)
     {
-        scheduledEffect_.timeRemaining -= safeDeltaTime_;
+        const auto* owner_ = scheduledEffect_.request.ownerObject;
+        scheduledEffect_.timeRemaining -= safeDeltaTime_ * (owner_ ? owner_->GetRuntimePlaybackRate() : 1.0f);
     }
     std::vector<AttackEffectSpawnRequest> readyRequests_;
     for (const ScheduledAttackEffect& scheduledEffect_ : scheduledAttackEffects)
@@ -240,17 +244,19 @@ void EffectManager::Update(float deltaTime_)
     // 管理中Effectの寿命、Sequence時間、HitBox有効時間を更新する
     for (ManagedEffect& effect_ : managedEffects)
     {
+        const auto clockObject_ = effect_.object.lock();
+        const float effectDelta_ = safeDeltaTime_ * (clockObject_ ? clockObject_->GetRuntimePlaybackRate() : 1.0f);
         if (effect_.hasLifetimeOwner)
         {
             // 持続演出の所有Componentが削除された場合も、Poolへ返して残留を防ぐ。
             const auto owner_ = effect_.lifetimeOwner.lock();
             if (!owner_ || !owner_->IsEnabled()) effect_.lifeTimer = 0.0f;
         }
-        else effect_.lifeTimer -= safeDeltaTime_;
-        effect_.elapsedTime += safeDeltaTime_;
+        else effect_.lifeTimer -= effectDelta_;
+        effect_.elapsedTime += effectDelta_;
         if (effect_.poolType == EFFECT_POOL_TYPE::VFX_SEQUENCE)
         {
-            effect_.sequenceTime += safeDeltaTime_;
+            effect_.sequenceTime += effectDelta_;
             UpdateVFXSequence(effect_);
         }
         if (const std::shared_ptr<HitBox> hitBox_ = effect_.hitBox.lock())
@@ -370,6 +376,7 @@ void EffectManager::PreloadAllEffects()
     {
         PreloadImpactEffectAsset(entry_.fullPath);
     }
+    incrementalPreloadCursor = particleAssets.size() + meshVFXAssets.size() + vfxSequenceAssets.size() + impactEffectAssets.size();
 }
 
 // Cache済みAssetからRuntime用Poolを作り直す
@@ -571,6 +578,9 @@ std::shared_ptr<GameObject> EffectManager::SpawnParticle(
         object_->GetComponent<ParticleComponent>();
 
     if (!particle_) return object_;
+    // 演出プレビュー等で抑制されたPool個体を再利用しても、UpdateとRenderへ復帰させる。
+    particle_->SetRuntimeSuppressed(false);
+    particle_->ResetUpdateTiming();
     particle_->SetEnabled(true);
     particle_->ResetRuntime();
     for (ParticleComponent::EmitterTrack& track_ : particle_->GetTracks())
@@ -845,6 +855,7 @@ std::shared_ptr<GameObject> EffectManager::SpawnSlashEffect(
             hitBox_->allowMultiHit = request_.setting.allowMultiHit;
             hitBox_->canBeGuarded = request_.setting.canBeGuarded;
             hitBox_->guardBreak = request_.setting.guardBreak;
+            hitBox_->feedback = request_.setting.feedback;
             hitBox_->cameraShakeEnabled = request_.setting.cameraShakeEnabled;
             hitBox_->cameraShakeReceiveDuration =
                 request_.setting.cameraShakeReceiveDuration;
@@ -986,6 +997,7 @@ std::shared_ptr<GameObject> EffectManager::SpawnAttackEffect(
         attackHit_->SetAirLiftPower(
             attackTemplate_.targetAirLiftPower,
             attackTemplate_.attackerAirLiftPower);
+        attackHit_->feedback = attackTemplate_.feedback;
         attackHit_->SetCameraShake(
             attackTemplate_.cameraShake.enabled,
             attackTemplate_.cameraShake.receiveDuration,
@@ -1029,6 +1041,7 @@ std::shared_ptr<GameObject> EffectManager::SpawnAttackEffect(
         attackHit_->SetHitShapes(effectTemplate_.hitShapes);
         attackHit_->Play();
     }
+    if (ownerObject_) RegisterAttackEffectOwner(object_, ownerObject_->weak_from_this().lock());
     return object_;
 }
 
@@ -1330,12 +1343,15 @@ bool EffectManager::IsEffectOwnedBy(const std::shared_ptr<GameObject>& object_, 
 
 void EffectManager::RegisterAttackEffectOwner(const std::shared_ptr<GameObject>& object_, const std::shared_ptr<GameObject>& owner_)
 {
+    // Animation・Sequence・独立判定・VFX寿命を同じ時計倍率へそろえる。
+    if (object_) object_->SetRuntimePlaybackRate(owner_ ? owner_->GetRuntimePlaybackRate() : 1.0f);
     if (!object_ || !owner_) return;
     for (auto& effect_ : managedEffects)
         if (effect_.object.lock() == object_) { effect_.attackOwner = owner_; return; }
 }
 
-void EffectManager::StopAttackEffects(const std::shared_ptr<GameObject>& owner_)
+void EffectManager::StopAttackEffects(const std::shared_ptr<GameObject>& owner_,
+    const std::vector<std::weak_ptr<GameObject>>& preservedEffects_)
 {
     BS_PROFILE_SCOPE("EffectManager::StopAttackEffects");
     if (!owner_ || !gameObjectManager) return;
@@ -1343,9 +1359,16 @@ void EffectManager::StopAttackEffects(const std::shared_ptr<GameObject>& owner_)
         [&owner_](const ScheduledAttackEffect& effect_) { return effect_.request.ownerObject == owner_.get(); }), scheduledAttackEffects.end());
     std::vector<std::shared_ptr<GameObject>> managedObjects_;
     std::vector<std::shared_ptr<GameObject>> attackObjects_;
+    // 独立して発射を完了する弾は、見た目と判定を同じObject単位で停止対象から外す。
+    const auto isPreserved_ = [&preservedEffects_](const std::shared_ptr<GameObject>& object_)
+    {
+        return object_ && std::any_of(preservedEffects_.begin(), preservedEffects_.end(),
+            [&object_](const std::weak_ptr<GameObject>& effect_) { return effect_.lock() == object_; });
+    };
     for (const auto& effect_ : managedEffects)
     {
         const auto object_ = effect_.object.lock();
+        if (isPreserved_(object_)) continue;
         const auto hitBox_ = effect_.hitBox.lock();
         const auto attack_ = object_ ? object_->GetComponent<AttackEffectHitComponent>() : nullptr;
         if (object_ && (effect_.attackOwner.lock() == owner_ || (hitBox_ && hitBox_->GetAttackOwner() == owner_) || (attack_ && attack_->IsOwnedBy(owner_.get()))))
@@ -1353,6 +1376,7 @@ void EffectManager::StopAttackEffects(const std::shared_ptr<GameObject>& owner_)
     }
     for (const auto& object_ : gameObjectManager->GetObjects())
     {
+        if (isPreserved_(object_)) continue;
         const auto attack_ = object_ ? object_->GetComponent<AttackEffectHitComponent>() : nullptr;
         if (!attack_ || !attack_->IsOwnedBy(owner_.get())) continue;
         attack_->Stop();
@@ -1446,6 +1470,13 @@ std::shared_ptr<GameObject> EffectManager::AcquireParticleObject(
     const std::string assetName_ = BuildAssetNameFromPath(
         resolvedAssetPath_,
         "Data/Particle");
+    // 起動後に追加された演出Assetも生成できるようにする。初期一覧に無いだけで
+    // 「Pool枯渇」として生成を諦めると、呼出側でPlayしても描画対象自体が存在しない。
+    if (particleAssetCache.find(assetName_) == particleAssetCache.end())
+    {
+        PreloadParticleAsset(resolvedAssetPath_);
+        if (particleAssetCache.find(assetName_) == particleAssetCache.end()) return nullptr;
+    }
     std::vector<std::shared_ptr<GameObject>>& objects_ =
         particleObjectPool[assetName_];
     for (const std::shared_ptr<GameObject>& object_ : objects_)
@@ -1839,6 +1870,7 @@ void EffectManager::ReleasePooledEffect(ManagedEffect& effect_)
 {
     const std::shared_ptr<GameObject> object_ = effect_.object.lock();
     if (!object_) return;
+    object_->SetRuntimePlaybackRate(1.0f);
 
     if (const std::shared_ptr<ParticleComponent> particle_ =
         object_->GetComponent<ParticleComponent>())
@@ -2238,4 +2270,42 @@ const MeshVFXAsset* EffectManager::FindMeshVFXAssetFromRequest(
     if (iterator_ == meshVFXAssetCache.end()) return nullptr;
 
     return &iterator_->second;
+}
+
+
+// キャッシュ・Pool生成処理そのものは既存のPreload関数へ委譲する。
+bool EffectManager::AdvancePreload(float budgetMilliseconds_)
+{
+    BS_PROFILE_SCOPE("EffectManager::AdvancePreload");
+    const auto total_ = particleAssets.size() + meshVFXAssets.size() + vfxSequenceAssets.size() + impactEffectAssets.size();
+    const auto start_ = std::chrono::steady_clock::now();
+    while (incrementalPreloadCursor < total_)
+    {
+        std::size_t index_ = incrementalPreloadCursor++;
+        if (index_ < particleAssets.size()) PreloadParticleAsset(particleAssets[index_].fullPath);
+        else
+        {
+            index_ -= particleAssets.size();
+            if (index_ < meshVFXAssets.size()) PreloadMeshVFXAsset(meshVFXAssets[index_].fullPath);
+            else
+            {
+                index_ -= meshVFXAssets.size();
+                if (index_ < vfxSequenceAssets.size()) PreloadVFXSequenceAsset(vfxSequenceAssets[index_].fullPath);
+                else
+                {
+                    index_ -= vfxSequenceAssets.size();
+                    PreloadImpactEffectAsset(impactEffectAssets[index_].fullPath);
+                }
+            }
+        }
+        if (std::chrono::duration<float, std::milli>(std::chrono::steady_clock::now() - start_).count() >= budgetMilliseconds_)
+            return incrementalPreloadCursor >= total_;
+    }
+    return true;
+}
+
+float EffectManager::GetPreloadProgress() const
+{
+    const auto total_ = particleAssets.size() + meshVFXAssets.size() + vfxSequenceAssets.size() + impactEffectAssets.size();
+    return total_ == 0 ? 1.0f : (std::min)(1.0f, static_cast<float>(incrementalPreloadCursor) / static_cast<float>(total_));
 }

@@ -24,7 +24,7 @@ private:
         // AudioManagerへ登録・試聴する1音声分の再生設定。
         std::string name = "New Audio";
         std::string actionName = "Audio_NewAudio";
-        std::string path = "Data/Audio/SE/TitleSelect.wav";
+        std::string path = "Data/Audio/SE/Sword-Fight-1.wav";
         bool isBGM = false;
         bool loop = false;
         float volume = 1.0f;

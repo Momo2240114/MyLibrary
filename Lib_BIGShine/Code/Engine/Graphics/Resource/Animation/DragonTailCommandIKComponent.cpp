@@ -690,6 +690,27 @@ bool DragonTailCommandIKComponent::GetTailRootWorldPosition(DirectX::XMFLOAT3& p
     return true;
 }
 
+bool DragonTailCommandIKComponent::GetTailWorldPositions(std::vector<DirectX::XMFLOAT3>& positions_) const
+{
+    BS_PROFILE_SCOPE("DragonTailCommandIKComponent::GetTailWorldPositions");
+    positions_.clear();
+    if (!model || !ikMap) return false;
+    const auto chain_ = ikMap->FindChain(chainName);
+    if (!chain_ || chain_->nodeIndices.size() < 2) return false;
+    const auto& nodes_ = model->GetNodes();
+    positions_.reserve(chain_->nodeIndices.size());
+    for (const int nodeIndex_ : chain_->nodeIndices)
+    {
+        if (nodeIndex_ < 0 || nodeIndex_ >= static_cast<int>(nodes_.size()))
+        {
+            positions_.clear();
+            return false;
+        }
+        positions_.push_back(GetTranslation(nodes_[nodeIndex_].worldTransform));
+    }
+    return true;
+}
+
 bool DragonTailCommandIKComponent::GetTailTipWorldForward(DirectX::XMFLOAT3& forward_) const
 {
     // 尻尾先端の向きを、エフェクトや判定方向へ渡せるWorld前方向として返す。

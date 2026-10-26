@@ -1,4 +1,30 @@
 #include "Scene.hlsli"
+
+// 結合マップの計算結果を、読み込み済みの単独マップがある物性だけ上書きする。
+cbuffer CbSeparateMaterialMaps : register(b12)
+{
+    uint useMetallicMap;
+    uint useRoughnessMap;
+    uint packedMetallicChannel;
+    uint packedRoughnessChannel;
+    uint metallicChannel;
+    uint roughnessChannel;
+    uint2 separateMaterialPadding;
+};
+Texture2D SeparateMetallicMap : register(t19);
+Texture2D SeparateRoughnessMap : register(t20);
+
+// 参照成分を共通のMetallic/Roughnessへ揃え、結合マップだけに従来の係数を適用する。
+float2 ApplySeparateMaterialMaps(float4 packedSample_, float2 factors_, SamplerState sampler_, float2 uv_)
+{
+    float2 metalRough_ = float2(packedSample_[packedMetallicChannel], packedSample_[packedRoughnessChannel]) * factors_;
+    if (useMetallicMap != 0)
+        metalRough_.x = SeparateMetallicMap.Sample(sampler_, uv_)[metallicChannel];
+    if (useRoughnessMap != 0)
+        metalRough_.y = SeparateRoughnessMap.Sample(sampler_, uv_)[roughnessChannel];
+    return metalRough_;
+}
+
 // PBRCommon.hlsli
 
 struct VS_OUT
@@ -7,17 +33,18 @@ struct VS_OUT
     float2 texcoord : TEXCOORD;
     float3 normal : NORMAL;
     float3 position : POSITION;
-    float3 tangent : TANGENT;
+    // ミラーUVでも法線の向きを維持するため、接線の符号をWに残す。
+    float4 tangent : TANGENT;
 };
 
 
 // -----------------------------------------------
-// MRT ?o??
+// シーンカラーと法線を同時に出力する
 // -----------------------------------------------
 struct PS_OUT
 {
-    float4 color : SV_TARGET0; // ?V?[???J???[
-    float4 normal : SV_TARGET1; // ?@???o?b?t?@
+    float4 color : SV_TARGET0; // シーンカラー
+    float4 normal : SV_TARGET1; // 法線バッファ
 };
 
 static const int CascadeShadowCount = 4;

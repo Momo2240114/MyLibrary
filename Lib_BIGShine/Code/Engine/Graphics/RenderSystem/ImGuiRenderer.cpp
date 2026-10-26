@@ -10,6 +10,7 @@
 #include "ImGuiRenderer.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include "Engine/Debug/TracyProfiler.h"
+#include "Engine/Core/GameRuntimeSettings.h"
 
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -35,6 +36,13 @@ void ImGuiRenderer::Initialize(HWND hWnd, ID3D11Device* device, ID3D11DeviceCont
 	io.ConfigFlags |= ImGuiConfigFlags_DpiEnableScaleFonts;     // FIXME-DPI: THIS CURRENTLY DOESN'T WORK AS EXPECTED. DON'T USE IN USER APP!
 	io.ConfigFlags |= ImGuiConfigFlags_DpiEnableScaleViewports; // FIXME-DPI
 #endif
+
+    if (GameRuntimeSettings::IsGameOnly())
+    {
+        // ゲーム内GUIは維持し、開発用の別Windowとレイアウト保存だけを止める。
+        io.ConfigFlags &= ~(ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable | ImGuiConfigFlags_NavEnableKeyboard);
+        io.IniFilename = nullptr;
+    }
 
 	// Setup Dear ImGui style
 	ImGui::StyleColorsDark();

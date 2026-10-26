@@ -724,7 +724,7 @@ void DragonAIComponent::Deserialize(const nlohmann::json& json_)
     animationBlendDuration = json_.value("AnimationBlendDuration", 0.2f);
     limitTurnRootMotion = json_.value("LimitTurnRootMotion", true);
     turnRootMotionLimitPaddingDegrees = json_.value("TurnRootMotionLimitPaddingDegrees", 2.0f);
-    spinTailRotationDegrees = json_.value("SpinTailRotationDegrees", 180.0f);
+    spinTailRotationDegrees = json_.value("SpinTailRotationDegrees", 360.0f);
     crackedAggressionMultiplier = json_.value("CrackedAggressionMultiplier", 1.10f);
     darkLeakAggressionMultiplier = json_.value("DarkLeakAggressionMultiplier", 1.25f);
     collapseAggressionMultiplier = json_.value("CollapseAggressionMultiplier", 1.45f);
@@ -2567,7 +2567,7 @@ void DragonAIComponent::StartAction(DRAGON_ACTION_TYPE action_)
     }
     if (action_ == DRAGON_ACTION_TYPE::SPIN_TAIL_SWEEP)
     {
-        // RMなしのTurn90を使うため、180度回転は毎フレームのAI更新で補間する。
+        // RMなしのTurn90を使うため、一周分の回転は毎フレームのAI更新で補間する。
         BeginSpinTailSweepRotation();
     }
 

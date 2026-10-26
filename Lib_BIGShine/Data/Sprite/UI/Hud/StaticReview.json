@@ -1,0 +1,30 @@
+{
+  "assets": 46,
+  "sceneHudObjects": 73,
+  "resolutions": {
+    "(1920, 1080)": {
+      "checked": 72,
+      "outside": []
+    },
+    "(1600, 900)": {
+      "checked": 72,
+      "outside": []
+    },
+    "(1280, 720)": {
+      "checked": 72,
+      "outside": []
+    },
+    "(2560, 1080)": {
+      "checked": 72,
+      "outside": []
+    },
+    "(1024, 768)": {
+      "checked": 72,
+      "outside": []
+    }
+  },
+  "visualOnly": true,
+  "gameExecuted": false,
+  "buildExecuted": false,
+  "actualBackgroundVerified": false
+}

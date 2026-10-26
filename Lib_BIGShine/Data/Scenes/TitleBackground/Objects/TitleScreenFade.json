@@ -1,0 +1,121 @@
+{
+    "Name": "TitleScreenFade",
+    "Layer": 16,
+    "CollisionMask": 0,
+    "ParentName": "TitleUI",
+    "RequiredForSceneStart": true,
+    "Transform": {
+        "Pos": [
+            0,
+            0,
+            0
+        ],
+        "Rot": [
+            0,
+            0,
+            0
+        ],
+        "Scale": [
+            1,
+            1,
+            1
+        ]
+    },
+    "Components": [
+        {
+            "TypeName": "UIWidgetComponent",
+            "Enabled": true,
+            "RequiredForSceneStart": true,
+            "UpdateEnabled": true,
+            "LateUpdateEnabled": true,
+            "UpdatePriority": 0,
+            "LateUpdatePriority": 0,
+            "Data": {
+                "Version": 1,
+                "WidgetId": "TitleScreenFade",
+                "ParentWidgetId": "",
+                "Visible": true,
+                "InputEnabled": false,
+                "RaycastTarget": false,
+                "ZOrder": 1000,
+                "RectTransform": {
+                    "AnchorMin": [
+                        0,
+                        0
+                    ],
+                    "AnchorMax": [
+                        1,
+                        1
+                    ],
+                    "Pivot": [
+                        0,
+                        0
+                    ],
+                    "AnchoredPosition": [
+                        0,
+                        0
+                    ],
+                    "SizeDelta": [
+                        0,
+                        0
+                    ],
+                    "LocalScale": [
+                        1,
+                        1
+                    ],
+                    "LocalRotation": 0
+                }
+            }
+        },
+        {
+            "TypeName": "SpriteRenderer",
+            "Enabled": true,
+            "RequiredForSceneStart": true,
+            "UpdateEnabled": true,
+            "LateUpdateEnabled": true,
+            "UpdatePriority": 0,
+            "LateUpdatePriority": 0,
+            "Data": {
+                "TexturePath": "",
+                "LocalSize": [
+                    1,
+                    1
+                ],
+                "CatPos": [
+                    0,
+                    0
+                ],
+                "CatSize": [
+                    1,
+                    1
+                ],
+                "Color": [
+                    0,
+                    0,
+                    0,
+                    1
+                ],
+                "Visible": true,
+                "LinearSampling": true,
+                "SdrTexture": true,
+                "ShaderID": 0,
+                "pivotType": 0
+            }
+        },
+        {
+            "TypeName": "ScreenFadeComponent",
+            "Enabled": true,
+            "RequiredForSceneStart": true,
+            "UpdateEnabled": true,
+            "LateUpdateEnabled": true,
+            "UpdatePriority": 3000,
+            "LateUpdatePriority": 3000,
+            "Data": {
+                "FadeInOnStart": true,
+                "FadeInDuration": 0.7,
+                "FadeOutDelay": 0.5,
+                "FadeOutDuration": 0.6
+            }
+        }
+    ]
+}

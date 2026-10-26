@@ -267,7 +267,11 @@ void ActorPresentationActionComponent::ExecutePreset(int index_)
         if (!target_ || !target_->transform || !actor_->transform) return;
         startMovePosition = actor_->transform->localPosition;
         // Markerのワールド位置を対象の親座標へ戻し、親付きObjectでも同じ地点へ配置する。
-        const auto worldPosition_ = target_->transform->GetWorldPosition();
+        auto worldPosition_ = target_->transform->GetWorldPosition();
+        // 後退先などのワールド座標オフセットを加え、同じMarkerへの移動で距離が失われないようにする。
+        worldPosition_.x += preset_.positionOffset.x;
+        worldPosition_.y += preset_.positionOffset.y;
+        worldPosition_.z += preset_.positionOffset.z;
         auto position_ = DirectX::XMLoadFloat3(&worldPosition_);
         if (const auto parent_ = actor_->transform->parent.lock())
             position_ = DirectX::XMVector3TransformCoord(position_,
@@ -630,6 +634,7 @@ void ActorPresentationActionComponent::Gui()
             ImGui::DragFloat3("Entry Position Offset", &preset_.positionOffset.x, 0.05f);
         if (preset_.type == ActorPresentationActionType::MOVE_TO_TARGET)
         {
+            ImGui::DragFloat3("Target World Position Offset", &preset_.positionOffset.x, 0.05f);
             ImGui::Checkbox("Smooth Movement", &preset_.smoothMovement);
             ImGui::DragFloat("Trail Width", &preset_.trailWidth, 0.05f, 0.1f, 10.0f);
             ImGui::Checkbox("Match Marker Rotation (Teleport)", &preset_.matchTargetRotation);

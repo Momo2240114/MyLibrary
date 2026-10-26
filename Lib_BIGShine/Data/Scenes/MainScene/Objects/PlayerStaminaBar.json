@@ -62,10 +62,12 @@
                     0.800000011920929,
                     0.8199999928474426
                 ],
+                "LinearSampling": false,
                 "LocalSize": [
                     210.0,
                     12.0
                 ],
+                "SdrTexture": false,
                 "ShaderID": 0,
                 "TexturePath": "",
                 "Visible": false,

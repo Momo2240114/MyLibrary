@@ -1,0 +1,35 @@
+# イントロ終了後のカメラ復帰修正
+
+## 確認した不具合
+EventCameraのJSONで通常優先度priority=8、演出優先度eventPriority=8となっていた。
+従来はStart時にpriorityをinitialPriorityへ記録し、ActivateEventPriorityでpriority自体を8へ変更していた。
+演出中に保存すると通常値も8として保存され、次回はRestorePriorityでも8に戻る。MainCameraの優先度0より高いため、イントロ終了後も演出カメラが選ばれ続ける。
+この不具合はコードとSceneデータ上で確認した。ユーザーが報告した操作不能の全原因を実機で特定したものではない。
+
+## 変更内容
+CameraComponentのpriorityをInspector/保存用の通常値として維持し、実行時フラグeventPriorityActiveで選択用の優先度だけを切り替える。
+GetPriorityは演出中にeventPriority、それ以外は通常priorityを返す。演出Actionの許可判定もこの実効値を参照する。
+Start/Deserializeで実行時フラグを解除し、Serializeには保存しない。InspectorへEffective Priorityの表示を追加した。
+EventCameraの通常優先度を-1へ修復。MainCamera=0、演出中=8なので、通常はMainCamera、演出中だけEventCameraを選択する。
+CameraManagerは同値時に後のObjectを選ぶため、通常値を単に0へ戻すだけではEventCameraが選ばれる現在のObject順も確認した。
+
+## 進行経路の静的確認
+BossIntroは約16.975秒、最後のPlayer/Dragon演出制御解除は約16.8秒で、待機ObjectやAnimation State待ちのActionはない。
+completionAction=GameMode.SequenceFinishedは登録済み。ActionSequenceからGlobal Actionを経由し、GameModeManager::NotifySequenceFinished→TransitionToPhase1Battle→ApplyStateLocksで操作ロック解除へ進む経路を確認した。この経路や演出時間は変更していない。
+
+## コメント・Tracy・登録・形式
+通常値と実効値の区別、保存時に演出値を持ち込まない目的を日本語コメントで説明した。
+CameraComponent::Start、ActivateEventPriority、RestorePriorityの既存BS_PROFILE_SCOPEを維持。新しい毎フレーム処理は追加していない。
+新規C++ファイルはなく、Visual Studioへの追加登録は不要。
+3変更ファイルはUTF-8、BOMなし、CRLFとして厳密に確認した。
+
+## 変更ファイル
+- Code/Engine/GamePlay/Camera/CameraComponent.h
+- Code/Engine/GamePlay/Camera/CameraComponent.cpp
+- Data/Scenes/MainScene/Objects/EventCamera.json
+
+実機でのイントロ後の操作・カメラ復帰、演出中の保存と再読込、Debug/Releaseビルドは未確認。
+修正をビルド反映してからMainSceneを再読み込みして確認する。
+
+ビルドおよび実行確認は行っていません。
+コード上で確認可能な範囲の静的確認のみ実施しました。

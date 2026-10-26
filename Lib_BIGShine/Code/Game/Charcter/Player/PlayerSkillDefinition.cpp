@@ -11,10 +11,12 @@ namespace
         if (name_ == "SkillA") return PLAYER_ACTION::SKILL_A;
         if (name_ == "SkillB") return PLAYER_ACTION::SKILL_B;
         if (name_ == "SkillC") return PLAYER_ACTION::SKILL_C;
+        if (name_ == "SkillD") return PLAYER_ACTION::SKILL_D;
         return PLAYER_ACTION::NONE;
     }
 }
 
+// 共通スキルと入力表を一時領域へ読み込み、全項目の検証成功後に呼び出し元へ反映する。
 bool LoadPlayerSkillDefinitions(const std::string& path_,
     std::vector<PlayerSkillInputBinding>& inputs_, std::vector<PlayerSkillDefinition>& definitions_)
 {
@@ -61,15 +63,17 @@ bool LoadPlayerSkillDefinitions(const std::string& path_,
     }
 }
 
+// 画面上の枠順と既存のAction番号の違いを吸収し、保存済みのAction番号を維持する。
 PLAYER_ACTION PlayerSkillLoadout::GetSlotAction(std::size_t slotIndex_)
 {
     constexpr std::array<PLAYER_ACTION, SLOT_COUNT> SLOT_ACTIONS
     {
-        PLAYER_ACTION::SKILL_B, PLAYER_ACTION::SKILL_A, PLAYER_ACTION::SKILL_C
+        PLAYER_ACTION::SKILL_B, PLAYER_ACTION::SKILL_A, PLAYER_ACTION::SKILL_C, PLAYER_ACTION::SKILL_D
     };
     return slotIndex_ < SLOT_COUNT ? SLOT_ACTIONS[slotIndex_] : PLAYER_ACTION::NONE;
 }
 
+// スキル用Actionから装備枠へ逆引きし、通常行動は枠なしとして扱う。
 int PlayerSkillLoadout::GetSlotIndex(PLAYER_ACTION action_)
 {
     for (std::size_t slotIndex_ = 0; slotIndex_ < SLOT_COUNT; ++slotIndex_)
@@ -90,6 +94,7 @@ bool PlayerSkillLoadout::SetSkillName(std::size_t slotIndex_, const std::string&
     return true;
 }
 
+// Sceneには各枠の装備名だけを保存し、共通定義や実行中の待ち時間は複製しない。
 void PlayerSkillLoadout::Serialize(nlohmann::json& json_) const
 {
     json_ = nlohmann::json::object();
@@ -97,6 +102,7 @@ void PlayerSkillLoadout::Serialize(nlohmann::json& json_) const
         json_["Slot" + std::to_string(slotIndex_)] = skillNames[slotIndex_];
 }
 
+// 省略された枠は現在値を維持し、不正な型があれば装備全体の更新を取り消す。
 bool PlayerSkillLoadout::Deserialize(const nlohmann::json& json_)
 {
     if (!json_.is_object()) return false;

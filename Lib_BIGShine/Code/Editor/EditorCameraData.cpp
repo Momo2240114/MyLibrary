@@ -50,9 +50,14 @@ void EditorCameraData::ApplyToCamera(CameraComponent& camera_) const
 
 void EditorCameraData::CaptureFromCamera(const CameraComponent& camera_)
 {
-    // 既存カメラの位置と前方向から、Editor自由カメラの操作値へ変換する。
+    // LookAtや復元直後も正しい向きで操作を再開できるよう、注視点から前方向を求める。
     previewCameraPosition = camera_.GetEye();
-    const DirectX::XMFLOAT3& front_ = camera_.GetFront();
+    const auto& focus_ = camera_.GetFocus();
+    const DirectX::XMFLOAT3 direction_ = { focus_.x - previewCameraPosition.x,
+        focus_.y - previewCameraPosition.y, focus_.z - previewCameraPosition.z };
+    DirectX::XMFLOAT3 front_ = camera_.GetFront();
+    if (DirectX::XMVectorGetX(DirectX::XMVector3LengthSq(DirectX::XMLoadFloat3(&direction_))) > 0.000001f)
+        DirectX::XMStoreFloat3(&front_, DirectX::XMVector3Normalize(DirectX::XMLoadFloat3(&direction_)));
     previewCameraYaw = atan2f(front_.x, front_.z);
     previewCameraPitch = asinf(std::clamp(front_.y, -1.0f, 1.0f));
     previewCameraSpeedMultiplier = 1.0f;

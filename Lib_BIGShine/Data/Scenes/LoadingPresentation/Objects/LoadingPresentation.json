@@ -1,0 +1,97 @@
+{
+    "Name": "LoadingPresentation",
+    "Layer": 0,
+    "CollisionMask": 0,
+    "ParentName": "",
+    "RequiredForSceneStart": true,
+    "Transform": {
+        "Pos": [
+            0,
+            0,
+            0
+        ],
+        "Rot": [
+            0,
+            0,
+            0
+        ],
+        "Scale": [
+            1,
+            1,
+            1
+        ]
+    },
+    "Components": [
+        {
+            "TypeName": "ScenePresentationComponent",
+            "Enabled": true,
+            "RequiredForSceneStart": true,
+            "UpdateEnabled": true,
+            "LateUpdateEnabled": true,
+            "UpdatePriority": 1000,
+            "LateUpdatePriority": 1000,
+            "Data": {
+                "SceneName": "LoadingPresentation",
+                "SettingsObjectPath": "Data/Scenes/LoadingPresentation/Objects/LoadingPresentation.json",
+                "CameraObject": "LoadingCamera",
+                "ShowDebugShapes": false,
+                "ClearColor": [
+                    0.008,
+                    0.008,
+                    0.008,
+                    1
+                ],
+                "AttachmentObjects": [
+                    "LoadingSword",
+                    "LoadingShield"
+                ],
+                "Silhouette": {
+                    "Enabled": true,
+                    "Color": [
+                        1,
+                        1,
+                        1,
+                        1
+                    ],
+                    "Objects": [
+                        "LoadingPlayer",
+                        "LoadingSword",
+                        "LoadingShield"
+                    ]
+                },
+                "AnimationCycle": {
+                    "Object": "LoadingPlayer",
+                    "States": [
+                        "LoadingRun",
+                        "LoadingWalk"
+                    ],
+                    "Interval": 4.0,
+                    "BlendDuration": 0.3
+                },
+                "Presentation": {
+                    "CameraPosition": [
+                        0,
+                        1,
+                        -12
+                    ],
+                    "LookAtPosition": [
+                        0,
+                        1,
+                        0
+                    ],
+                    "Orthographic": true,
+                    "OrthographicHeight": 10.0
+                }
+            }
+        },
+        {
+            "TypeName": "LoadingPresentationComponent",
+            "Enabled": true,
+            "RequiredForSceneStart": true,
+            "UpdateEnabled": true,
+            "Data": {
+                "Brand": "AUTO"
+            }
+        }
+    ]
+}

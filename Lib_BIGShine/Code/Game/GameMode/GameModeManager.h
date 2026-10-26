@@ -25,6 +25,8 @@ enum class BossBattlePhase
     DEFEATED = 3
 };
 
+class GameObjectManager;
+
 // ゲーム全体で共有する進行状態とGlobalBlackboardを管理する軽量Manager。
 // 移動、演出、AI判断などのSystem側が参照するロック状態やAI方針を集約する。
 class GameModeManager
@@ -37,6 +39,8 @@ public:
     void Start();
     // 毎フレーム共有状態をGlobalBlackboardへ同期する。
     void Update(float deltaTime_);
+    // 確定した形態・暴走・大技の状態から、戦闘中だけBGMを選ぶ。
+    void UpdateBattleMusic(GameObjectManager& manager_);
     // 戦闘進行、HP割合、AI方針を初期値へ戻す。
     void ResetBattleState();
     // GameScene開始後の縦進行を開始する。
@@ -50,11 +54,13 @@ public:
     const std::string& GetCurrentSequenceName() const { return currentSequenceName; }
     const char* GetCurrentGameStateName() const;
 
-    bool IsGameplayLocked() const { return gameplayLocked; }
-    bool IsPlayerControlLocked() const { return playerControlLocked; }
-    bool IsEnemyAILocked() const { return enemyAILocked; }
-    bool IsPresentationPlaying() const { return presentationPlaying; }
-    bool IsBattlePaused() const { return battlePaused; }
+    bool IsGameplayLocked() const { return cinematicPreview || gameplayLocked; }
+    bool IsPlayerControlLocked() const { return cinematicPreview || playerControlLocked; }
+    bool IsEnemyAILocked() const { return cinematicPreview || enemyAILocked; }
+    bool IsPresentationPlaying() const { return cinematicPreview || presentationPlaying; }
+    bool IsBattlePaused() const { return cinematicPreview || battlePaused; }
+    // 任意Sequenceのプレビュー中は、Actionによる解除と独立して戦闘入力を抑制する。
+    void BeginCinematicPreview(GameProgressState context_);
     bool IsPhaseTransitionPreview() const { return phaseTransitionPreview; }
 
     void SetGameplayLocked(bool locked_);
@@ -142,6 +148,7 @@ private:
     bool sequenceStartAttempted = false;
     bool globalActionsRegistered = false;
     bool phaseTransitionPreview = false; // 第一形態戦闘中の単体演出プレビューだけを区別する。
+    bool cinematicPreview = false;
 
     // Gameplay全体、Player操作、Enemy AI、演出、戦闘停止のロック状態。
     bool gameplayLocked = false;

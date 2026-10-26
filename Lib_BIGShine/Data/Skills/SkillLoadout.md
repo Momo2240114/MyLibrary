@@ -10,12 +10,15 @@ Skill定義は共有ライブラリ、装備はPlayerのScene、CooldownはPlaye
 | L1 + □ | SkillSlot0 | PhantomRush | 3秒 |
 | L1 + △ | SkillSlot1 | Breakthrough | 5秒 |
 | L1 + ○ | SkillSlot2 | RisingJudgment | 8秒 |
+| L1 + × | SkillSlot3 | Heal | 30秒 |
+
+Healのキーボード直接入力はYキーです。既存の入力設定があればそちらを優先します。
 
 PlayerInputResolver::ResolveSkillSlotは、優先順位が最も高いスロット番号だけを返します。
 PlayerControllerComponent::RequestSkillSlotが既存Stateの識別子へ変換し、
 GetSkillDefinitionで装備名からカタログの定義を取得します。
 その後は既存のPlayerSkillState → SkillExecution → Animation / Action / Effectです。
-内部のState番号は変更せず、Slot0はSKILL_B、Slot1はSKILL_A、Slot2はSKILL_Cへ接続します。
+内部のState番号は変更せず、Slot0はSKILL_B、Slot1はSKILL_A、Slot2はSKILL_C、Slot3はSKILL_Dへ接続します。
 入力処理に具体的なSkill名の判定はありません。
 
 空スロットや存在しない装備名では使用要求を拒否します。
@@ -24,7 +27,7 @@ GetSkillDefinitionで装備名からカタログの定義を取得します。
 ## Editorでの変更
 
 Player Inspector、またはSkill WorkspaceのPlayer / AIタブで、
-Player Skill LoadoutのSkillSlot0 / 1 / 2のDropdownから装備を変更します。
+Player Skill LoadoutのSkillSlot0 / 1 / 2 / 3のDropdownから装備を変更します。
 選択は直ちにPlayerへ反映されます。Scene保存で永続化してください。
 Skill実行中は全スロットの編集を禁止します。
 
@@ -45,7 +48,8 @@ PlayerControllerComponentのScene設定へ次を保存します。
     "SkillLoadout": {
         "Slot0": "PhantomRush",
         "Slot1": "Breakthrough",
-        "Slot2": "RisingJudgment"
+        "Slot2": "RisingJudgment",
+        "Slot3": "Heal"
     }
 }
 ```
@@ -61,7 +65,7 @@ SkillライブラリのInputsは、ActionではなくSlotを持ちます。
 }
 ```
 
-旧InputsのAction=SkillA/B/Cも読み込めます。
+旧InputsのAction=SkillA/B/Cと追加のSkillDも読み込めます。
 旧SceneにSkillLoadoutがない場合だけ、旧DefinitionのActionを初期装備へ移行します。
 新しい定義のActionは不要で、名前だけで全定義を装備候補へ登録します。
 保存された装備名がカタログに存在しない場合は、その枠を使用不可にして参照切れを防ぎます。
@@ -69,7 +73,7 @@ SkillライブラリのInputsは、ActionではなくSlotを持ちます。
 ## 定義・装備・実行時情報
 
 - SkillDefinition: 名前、分類、使用場所、Cooldown、Phaseと演出の設定。
-- PlayerSkillLoadout: 3枠へ装備したSkill名だけ。PlayerSkillDefinition.h内の小さなデータ型です。
+- PlayerSkillLoadout: 4枠へ装備したSkill名だけ。PlayerSkillDefinition.h内の小さなデータ型です。
 - PlayerControllerComponent::skillCooldowns: Skill名ごとの残りCooldown。保存しません。
 - SkillExecution: 開始時に複製した定義とPhaseの実行状況。
 
@@ -88,8 +92,8 @@ CanUseOnGround / CanUseInAirも保存し、PlayerのCanExecuteSkillで使用条�
 - カテゴリ: HEAL
 - State: Heal_1段目
 - 実在クリップ: SS_Sp_Skill2（モデル内Index 7）
-- Cooldown: 10秒
-- 地上・空中で使用可能。初期装備には含めません。
+- Cooldown: 30秒
+- 定義上は地上・空中で使用可能。初期装備のSlot3へ割り当て、使用開始は既存の行動遷移条件に従います。
 - 0.35秒: 既存ParryStar Particleを仮演出として生成。
 - 0.50秒: Health_Heal ActionでHPを25回復。最大HPを超えず、死亡中は回復しません。
 - Animation終了後に既存の通常State復帰処理へ接続。空中では既存のJump復帰経路を使用します。

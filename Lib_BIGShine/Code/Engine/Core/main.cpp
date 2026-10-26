@@ -3,6 +3,8 @@
 #include <time.h>
 
 #include "framework.h"
+#include "ApplicationResources.h"
+#include "Engine/Core/GameRuntimeSettings.h"
 
 extern "C"
 {
@@ -21,6 +23,27 @@ LRESULT CALLBACK window_procedure(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpa
 
 int WINAPI WinMain(_In_ HINSTANCE instance, _In_opt_  HINSTANCE prev_instance, _In_ LPSTR cmd_line, _In_ int cmd_show)
 {
+    // 配布フォルダーからの起動では、相対AssetパスをEXEの場所へそろえる。
+    std::string runtimeError_;
+    if (!GameRuntimeSettings::Initialize(runtimeError_))
+    {
+        // 日本語を含むDataの絶対パスも、起動エラーで正しく表示する。
+        const int messageLength_ = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS,
+            runtimeError_.c_str(), -1, nullptr, 0);
+        std::wstring message_;
+        if (messageLength_ > 0)
+        {
+            message_.resize(messageLength_);
+            MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, runtimeError_.c_str(), -1,
+                message_.data(), messageLength_);
+        }
+        else
+        {
+            message_ = L"Game startup failed. Check the Data folder and GamePackage.json.";
+        }
+        MessageBoxW(nullptr, message_.c_str(), L"Game startup failed", MB_OK | MB_ICONERROR);
+        return 1;
+    }
 	srand(static_cast<unsigned int>(time(nullptr)));
 
 #if defined(DEBUG) | defined(_DEBUG)
@@ -37,12 +60,15 @@ int WINAPI WinMain(_In_ HINSTANCE instance, _In_opt_  HINSTANCE prev_instance, _
 	wcex.cbClsExtra = 0;
 	wcex.cbWndExtra = 0;
 	wcex.hInstance = instance;
-	wcex.hIcon = 0;
+	// EXEに埋め込んだ共通IDから、システムの大・小アイコン寸法に合わせて読み込む。
+	wcex.hIcon = static_cast<HICON>(LoadImageW(instance, MAKEINTRESOURCEW(IDI_APPLICATION_ICON),
+		IMAGE_ICON, GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON), LR_SHARED));
 	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
 	wcex.lpszMenuName = NULL;
 	wcex.lpszClassName = APPLICATION_NAME;
-	wcex.hIconSm = 0;
+	wcex.hIconSm = static_cast<HICON>(LoadImageW(instance, MAKEINTRESOURCEW(IDI_APPLICATION_ICON),
+		IMAGE_ICON, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), LR_SHARED));
 	RegisterClassExW(&wcex);
 
 	const DWORD windowStyle_ = WS_OVERLAPPEDWINDOW;

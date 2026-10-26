@@ -16,8 +16,11 @@ public:
         PLAYER_ACTION action_);
 
     const char* GetName() const override { return GetPlayerActionName(action); }
+    // 攻撃ごとの補正基準を確定し、攻撃種別に応じた移動と反撃用Warpを開始する。
     void Enter() override;
+    // 補正対象への追従と入力受付を更新し、行動の派生はControllerへ渡す。
     void Execute(float elapsedTime_) override;
+    // この攻撃で開始したWarpを閉じ、コンボで維持する対象と終了する対象を整理する。
     void Exit() override;
 
 private:
@@ -27,7 +30,7 @@ private:
     void ResolveAttackAssistTarget();
     // 攻撃中の向き補正と位置補正をまとめて適用する。
     void ApplyAttackAssist(float elapsedTime_);
-    // 攻撃中の向きをTarget方向へ補間する。a
+    // 攻撃中の向きをTarget方向へ補間する。
     void ApplyAttackFacingAssist(const std::shared_ptr<GameObject>& target_, float elapsedTime_);
     // 攻撃が届きやすい距離まで水平移動を補助する。
     void ApplyAttackPositionAssist(const std::shared_ptr<GameObject>& target_, float elapsedTime_);

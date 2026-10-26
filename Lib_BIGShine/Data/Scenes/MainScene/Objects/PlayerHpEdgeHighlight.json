@@ -30,13 +30,13 @@
                     ],
                     "SizeDelta": [
                         6.0,
-                        4.0
+                        0.0
                     ]
                 },
                 "Version": 1,
                 "Visible": true,
                 "WidgetId": "PlayerHpEdgeHighlight",
-                "ZOrder": 5
+                "ZOrder": 35
             },
             "Enabled": true,
             "LateUpdateEnabled": true,
@@ -60,12 +60,14 @@
                     1.0,
                     0.949999988079071,
                     0.7599999904632568,
-                    0.6000000238418579
+                    1.0
                 ],
+                "LinearSampling": false,
                 "LocalSize": [
                     6.0,
                     20.0
                 ],
+                "SdrTexture": false,
                 "ShaderID": 0,
                 "TexturePath": "",
                 "Visible": true,

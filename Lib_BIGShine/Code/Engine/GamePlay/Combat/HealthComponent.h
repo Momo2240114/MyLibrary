@@ -27,6 +27,8 @@ public:
 
     // 現在HPを最大HPへ戻す。
     void ResetHealth();
+    // 最終スタン後の決め絵が完成した時だけ、保留していた撃破を確定する。
+    void ConfirmPresentationDeath();
 
     float GetCurrentHealth() const { return currentHealth; }
     float GetMaxHealth() const { return maxHealth; }

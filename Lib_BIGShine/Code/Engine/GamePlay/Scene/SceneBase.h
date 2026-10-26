@@ -18,6 +18,13 @@ public:
 		sceneName = name;
 	}
 
+    // SceneLoadingは次Sceneを主スレッドで準備し、ゲーム用Updateは完了後まで呼ばない。
+    void SetLoadingPreparation(bool enabled_) { isLoadingPreparation = enabled_; }
+    void ActivateContext();
+    // Editorへ入るロード画面では、ゲームのブランドを表示しない。
+    virtual bool IsEditorDestination() const { return false; }
+    // Scene基底と表示Sceneで保持している名前を、演出設定の選択に使う。
+    const std::string& GetTransitionSceneName() const { return sceneName; }
 	virtual void Initialize();
 	virtual void Finalize();
 	// 更新処理
@@ -30,6 +37,8 @@ public:
 	void DrawGUI();
 
 	std::shared_ptr<GameObjectManager> GetGameObjectManager();
+    // 表示専用Sceneでは、ロード中もメニュー操作用カーソルを解放する。
+    bool RequiresFreeCursor() const override { return isLoadingPresentation; }
 protected:
 	template<class T>
 	void ChangeScene()
@@ -40,7 +49,11 @@ protected:
 
 	// エディタの各 Window を束ねる管理クラス。GameObjectManager を参照して編集する。
 	std::unique_ptr<EditorWindowManager> editorWindowManager;
-	bool ready;
+	bool ready = false;
+    bool isLoadingPreparation = false;
+    bool isLoadingPresentation = false;
+    // タイトルから開始する本編では、開発版でもEditorを表示せず直接プレイする。
+    bool isEditorSuppressed = false;
 
 	// Animation/Event/Component から呼ばれる Action のグローバル登録先。
 	std::shared_ptr<ActionRegistry> actionRegistry;

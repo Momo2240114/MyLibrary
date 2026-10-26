@@ -1,0 +1,37 @@
+# 第2形態でのScene保存によるドラゴン消失の修正
+
+## 原因と復元
+PhaseTransitionのObjectDeleteAction「DestroyDragon」は、TestTargetと子階層を実行時にDestroyする。
+従来のSaveSceneは現在のobjectsだけでObjectListを再作成するため、第2形態で保存すると第1形態の配置が一覧から失われていた。
+MainSceneにはJSON本体が残っていたため、TestTarget以下59 Objectを親先行でSceneListへ再登録した。Object個別JSONとPrefabは変更していない。
+現在のScene登録数は217。ドラゴンの保存済みHPは5000/5000。実行時生成されるHumanBossは一覧に追加していない。
+
+## コード変更
+GameObjectManagerはScene読込時のJSONを保持し、通常保存が成功したObjectはその保存データで更新する。Sceneクリア時に保持データを破棄する。
+新しいDestroyRuntimeObjectは演出対象の配置Object名を子階層も含めて記録し、実体は従来のDestroyへ渡す。物理・描画・参照解放の経路は変更していない。
+ObjectDeleteActionComponentの削除だけをこの経路へ接続した。Editorの削除は既存Destroyのままなので、意図的な編集削除を復活させない。
+SaveSceneは実行時に失われた配置を保持JSONから補完する。PendingDestroyの死亡・溶解後データは保存しない。同名の生存する保存対象があれば新しい編集内容を優先する。
+まだ一度もScene読込・保存されていない新規Objectには保存元データがないため、この復元対象にはしない。
+保持データはJSONであり、破棄されたGameObjectやGPUリソースの寿命を延ばさない。保存のために実行時Objectを再生成しない。
+
+## コメント・Tracy
+配置データの保持、実行時削除と編集削除の区別、保存時補完に日本語コメントを追加。
+GameObjectManager::DestroyRuntimeObjectとSaveSceneにBS_PROFILE_SCOPEを追加し、LoadSceneの既存計測を維持した。
+
+## 変更ファイル
+- Code/Engine/GamePlay/Core/Object/GameObjectManager.h
+- Code/Engine/GamePlay/Core/Object/GameObjectManager.cpp
+- Code/Engine/GamePlay/EventSystem/ObjectDeleteActionComponent.cpp
+- Data/Scenes/MainScene/SceneList.json
+
+新規C++ファイルはなく、Visual Studio登録の追加は不要。
+対象ファイルはUTF-8、BOMなし、CRLFとして厳密に確認した。
+
+## 静的確認
+全217 Objectのファイル存在、名前の一致・重複なし、ドラゴン59 Objectの親先行とHP、HumanBossの非保存設定を確認した。
+宣言と定義、Actionからの呼び出し、必要include、Sceneクリア時の保持データ解放、PendingDestroyを除外する保存経路、通常のEditor削除経路をコード上で確認した。
+実画面での復元、形態移行後の保存・再読込、Debug/Releaseのコンパイルは未確認。
+修正を反映した実行ファイルでMainSceneを再読み込みして確認する。
+
+ビルドおよび実行確認は行っていません。
+コード上で確認可能な範囲の静的確認のみ実施しました。

@@ -4,20 +4,20 @@
         {
             "Data": {
                 "InputEnabled": false,
-                "ParentWidgetId": "UIRoot",
+                "ParentWidgetId": "BossHealthBar",
                 "RaycastTarget": false,
                 "RectTransform": {
                     "AnchorMax": [
-                        0.5,
+                        0.0,
                         0.0
                     ],
                     "AnchorMin": [
-                        0.5,
+                        0.0,
                         0.0
                     ],
                     "AnchoredPosition": [
                         0.0,
-                        89.0
+                        -26.0
                     ],
                     "LocalRotation": 0.0,
                     "LocalScale": [
@@ -25,18 +25,18 @@
                         1.0
                     ],
                     "Pivot": [
-                        0.5,
+                        0.0,
                         0.5
                     ],
                     "SizeDelta": [
-                        328.0,
-                        44.0
+                        325.0,
+                        45.0
                     ]
                 },
                 "Version": 1,
                 "Visible": true,
                 "WidgetId": "BossNamePlate",
-                "ZOrder": 19
+                "ZOrder": 39
             },
             "Enabled": true,
             "LateUpdateEnabled": true,
@@ -53,8 +53,8 @@
                     0.0
                 ],
                 "CatSize": [
-                    328.0,
-                    44.0
+                    325.0,
+                    45.0
                 ],
                 "Color": [
                     1.0,
@@ -62,10 +62,12 @@
                     1.0,
                     1.0
                 ],
+                "LinearSampling": false,
                 "LocalSize": [
-                    328.0,
-                    44.0
+                    325.0,
+                    45.0
                 ],
+                "SdrTexture": false,
                 "ShaderID": 0,
                 "TexturePath": "",
                 "Visible": true,
@@ -81,18 +83,19 @@
         },
         {
             "Data": {
-                "AutoSizeWidget": true,
+                "AutoSizeWidget": false,
                 "Color": [
                     1.0,
                     1.0,
-                    1.0,
+                    0.9607843160629272,
                     1.0
                 ],
                 "FontPath": "Data/Font/NotoSansJP-Regular.otf",
-                "FontSize": 22.0,
-                "HorizontalAlign": "CENTER",
-                "MaxWidth": 320.0,
-                "Padding": 4.0,
+                "FontSize": 28.0,
+                "FontStrokeWidth": 1.0,
+                "HorizontalAlign": "LEFT",
+                "MaxWidth": 325.0,
+                "Padding": 0.0,
                 "Text": "断崖の龍",
                 "Version": 1,
                 "VerticalAlign": "CENTER"
@@ -104,11 +107,55 @@
             "TypeName": "UITextComponent",
             "UpdateEnabled": true,
             "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "PlayOnStart": true,
+                "Preset": "HudBossName",
+                "Settings": {
+                    "GlowColor": [
+                        1,
+                        0.7,
+                        0.42,
+                        1
+                    ],
+                    "GlowIntensity": 0.18,
+                    "GlowRadius": 3,
+                    "ShadowColor": [
+                        0.01,
+                        0.005,
+                        0.015,
+                        1
+                    ],
+                    "ShadowOffset": [
+                        1,
+                        2
+                    ],
+                    "ShadowOpacity": 0.85,
+                    "ShadowSoftness": 1,
+                    "SweepColor": [
+                        1,
+                        0.9,
+                        0.72,
+                        1
+                    ],
+                    "SweepIntensity": 0.12,
+                    "SweepSpeed": 0.11,
+                    "SweepWidth": 0.1
+                }
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "UIVisualEffectComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         }
     ],
     "Layer": 16,
     "Name": "BossNamePlate",
-    "ParentName": "UI",
+    "ParentName": "BossHealthBar",
     "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [

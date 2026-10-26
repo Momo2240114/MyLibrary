@@ -3268,7 +3268,7 @@
                                     "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": true,
-                                    "endTime": 0.25,
+                                    "endTime": 0.4,
                                     "eventTemplateType": "NONE",
                                     "label": "JustGuardWindow",
                                     "localPosition": [
@@ -6138,7 +6138,7 @@
                                     "attackTemplateId": "HumanBossShadowCharge",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": true,
-                                    "endTime": 1.8,
+                                    "endTime": 0.51666667,
                                     "eventTemplateType": "ATTACK_TEMPLATE",
                                     "label": "Shadow Charge Slash",
                                     "localPosition": [
@@ -6163,7 +6163,7 @@
                                     "overridePlaybackSpeed": false,
                                     "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
-                                    "startTime": 1.55
+                                    "startTime": 0.26666667
                                 }
                             ],
                             "loop": false,
@@ -6267,7 +6267,7 @@
                     ]
                 },
                 "AssetPath": "HumanBoss",
-                "GraphAssetPath": "",
+                "GraphAssetPath": "HumanBoss",
                 "StateAssets": {
                     "Block_Hit_Break_Seq": "Data\\Animation\\StateData\\HumanBoss\\States\\JustGuardRecoil.json"
                 },
@@ -6687,7 +6687,7 @@
                 "ShadowReappearDuration": 0.3,
                 "ShadowEffectInterval": 0.1,
                 "ShadowEffectSpacing": 1.2,
-                "ChargeMaximumDistance": 12.0,
+                "ChargeMaximumDistance": 18.0,
                 "ChargeWidth": 2.0,
                 "ChargeGrowthTime": 1.0,
                 "OrbCount": 3,
@@ -6704,13 +6704,24 @@
                 "RagnarokAngle": 180.0,
                 "RagnarokRotationTime": 1.0,
                 "RagnarokHitDuration": 0.2,
+                "RangedAttackSoundPath": "Data/Audio/SE/Sonniss/Shadow/TentacleMotion.wav",
                 "RangedStageCenter": [
                     0,
                     0,
                     0
                 ],
                 "RangedStageRadius": 50.0,
-                "RagnarokAdvanceSpeed": 8.0
+                "RagnarokAdvanceSpeed": 8.0,
+                "RagnarokGridLineCount": 9,
+                "RagnarokGridWidth": 1.4,
+                "RagnarokGridSpacing": 9.0,
+                "RagnarokRotationSpeed": 85.0,
+                "RagnarokTellTime": 1.25,
+                "RagnarokRecoveryTime": 1.6,
+                "GridParticleSweepTime": 0.16,
+                "GridParticleDensity": 0.55,
+                "GridParticleLineLimit": 24,
+                "GridParticleAsset": "Data/Particle/HumanBossGridElectricMud.json"
             },
             "Enabled": true,
             "LateUpdateEnabled": false,
@@ -7183,9 +7194,9 @@
                     {
                         "Category": 1,
                         "Cooldown": [
-                            6.0,
-                            6.0,
-                            5.0
+                            2.5,
+                            2.25,
+                            2.0
                         ],
                         "Enabled": [
                             true,
@@ -7206,7 +7217,7 @@
                                 {
                                     "Animation": "Parry_L_Seq",
                                     "AnimationStartTime": 0.0,
-                                    "BlendDuration": 0.10000000149011612,
+                                    "BlendDuration": 0.03,
                                     "CanActionBranch": false,
                                     "CanBufferInput": false,
                                     "CanDodgeCancel": false,
@@ -7257,28 +7268,28 @@
                             "CanUseInAir": false,
                             "CanUseOnGround": true,
                             "Category": "COUNTER",
-                            "CleanupAction": "",
+                            "CleanupAction": "HumanBoss_ExecutionRelease",
                             "Cooldown": 0.0,
                             "Enabled": true,
                             "Name": "COUNTER_ATTACK",
                             "Phases": [
                                 {
-                                    "Animation": "HumanBossCounter",
+                                    "Animation": "Execution_03_Seq",
                                     "AnimationStartTime": 0.0,
                                     "BlendDuration": 0.10000000149011612,
                                     "CanActionBranch": false,
                                     "CanBufferInput": false,
                                     "CanDodgeCancel": false,
                                     "ContinueSequence": false,
-                                    "Duration": 0.0,
+                                    "Duration": 1.92,
                                     "EnableGuard": false,
-                                    "End": "ANIMATION_END",
-                                    "EnterAction": "",
+                                    "End": "DURATION",
+                                    "EnterAction": "HumanBoss_ExecutionCapture",
                                     "ExitAction": "",
                                     "ForwardSpeed": 0.0,
                                     "ForwardSpeedCurve": "",
-                                    "MaximumDuration": 5.0,
-                                    "MotionWarpPreset": "HumanBoss.Counter",
+                                    "MaximumDuration": 3.0,
+                                    "MotionWarpPreset": "",
                                     "PlayAnimationFromSequence": false,
                                     "PreventFlinch": true,
                                     "Sequence": "",
@@ -11269,7 +11280,7 @@
                 "HitRecoveryDuration": 0.6000000238418579,
                 "HitState": "SS_HitGround_Medium",
                 "IdleState": "SS_Idle",
-                "JustGuardLead": 0.15000000596046448,
+                "JustGuardLead": 0.22,
                 "JustGuardReactionSkill": {
                     "CanUseInAir": false,
                     "CanUseOnGround": true,
@@ -11389,10 +11400,40 @@
                 "WaitMax": 1.5,
                 "WaitMin": 0.5,
                 "WalkSpeed": 2.0,
-                "WalkState": "HumanBossCombatWalk"
+                "WalkState": "HumanBossCombatWalk",
+                "Berserk": {
+                    "ActionCounts": [
+                        3,
+                        5,
+                        12
+                    ],
+                    "Speeds": [
+                        1.25,
+                        1.5,
+                        1.8
+                    ],
+                    "StunDurations": [
+                        3.0,
+                        4.0,
+                        5.0
+                    ],
+                    "ParryDelay": 0.16,
+                    "ActionGap": 0.06,
+                    "MinimumTell": 0.18,
+                    "EntranceBlurMultipliers": [
+                        1.0,
+                        1.5,
+                        2.0
+                    ],
+                    "EntranceMonochrome": [
+                        0.55,
+                        0.8,
+                        1.0
+                    ]
+                }
             },
             "Enabled": true,
-            "LateUpdateEnabled": false,
+            "LateUpdateEnabled": true,
             "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
             "TypeName": "HumanBossAIComponent",

@@ -7,14 +7,14 @@
         {
             "Name": "CounterMudChunks",
             "EmissionMode": 1,
-            "BurstCount": 160,
+            "BurstCount": 320,
             "MaxCount": 512,
-            "SpawnShape": 3,
+            "SpawnShape": 1,
             "SpawnSpace": 0,
             "ShapeSize": [
-                2,
                 2.4,
-                2
+                0.7,
+                2.4
             ],
             "LegacyRadius": [
                 0.03,
@@ -26,64 +26,64 @@
                 0
             ],
             "Speed": [
-                8,
-                15
+                14,
+                23
             ],
             "Lifespan": [
-                0.45,
-                1
+                0.85,
+                1.35
             ],
             "Size": [
-                0.18,
-                0.4
+                0.5,
+                0.12
             ],
             "UseRandomSize": 1,
             "SizeRandomStart": [
                 0.65,
-                1.15
+                1.35
             ],
             "SizeRandomEnd": [
-                0.2,
-                0.45
+                0.65,
+                1.0
             ],
             "Color": [
-                0.045,
+                0.16,
+                0.008,
                 0.014,
-                0.065,
-                0.9
+                1
             ],
             "ColorStart": [
-                0.06,
-                0.02,
-                0.09,
-                0.95
+                0.16,
+                0.008,
+                0.014,
+                1
             ],
             "ColorEnd": [
-                0.015,
-                0.004,
-                0.025,
+                0.018,
+                0.001,
+                0.003,
                 0
             ],
             "UseColorOverLife": 1,
             "BlendMode": 0,
             "RenderType": 0,
-            "Gravity": -8,
+            "Gravity": -12,
             "Acceleration": [
                 0,
-                0,
+                3,
                 0
             ],
-            "Drag": 1,
+            "Drag": 0.35,
             "Fade": [
-                0.015,
-                0.3
+                0.005,
+                0.22
             ],
-            "NoiseStrength": 0.12,
+            "NoiseStrength": 0.05,
             "NoiseFrequency": 2,
             "NoiseSpeed": 1,
-            "TexturePath": "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/smoke_03.png",
+            "TexturePath": "Data/Texture/Particle/TransitionViscousMud.png",
             "MaskTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
-            "UseMask": 1,
+            "UseMask": 0,
             "UseGradient": 0,
             "useGradientTexture": 0,
             "useShadeGradientTexture": 0,
@@ -99,20 +99,24 @@
                 1,
                 0
             ],
-            "texturePath": "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/smoke_03.png",
-            "maskTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG"
+            "texturePath": "Data/Texture/Particle/TransitionViscousMud.png",
+            "maskTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+            "RotationSpeed": [
+                -1.1,
+                1.1
+            ]
         },
         {
             "Name": "CounterMudDroplets",
             "EmissionMode": 1,
-            "BurstCount": 100,
+            "BurstCount": 220,
             "MaxCount": 384,
-            "SpawnShape": 3,
+            "SpawnShape": 1,
             "SpawnSpace": 0,
             "ShapeSize": [
-                2.2,
-                1.4,
-                2.2
+                2.4,
+                0.7,
+                2.4
             ],
             "LegacyRadius": [
                 0.03,
@@ -124,64 +128,64 @@
                 0
             ],
             "Speed": [
-                12,
-                22
+                20,
+                32
             ],
             "Lifespan": [
-                0.3,
-                0.65
+                0.6,
+                1.05
             ],
             "Size": [
-                0.04,
-                0.1
+                0.14,
+                0.025
             ],
             "UseRandomSize": 1,
             "SizeRandomStart": [
                 0.65,
-                1.15
+                1.35
             ],
             "SizeRandomEnd": [
-                0.2,
-                0.45
+                0.65,
+                1.0
             ],
             "Color": [
-                0.045,
-                0.014,
-                0.065,
-                0.9
+                0.78,
+                0.008,
+                0.018,
+                0.82
             ],
             "ColorStart": [
-                0.06,
-                0.02,
-                0.09,
-                0.95
+                0.78,
+                0.008,
+                0.018,
+                0.82
             ],
             "ColorEnd": [
-                0.015,
-                0.004,
-                0.025,
+                0.2,
+                0.002,
+                0.006,
                 0
             ],
             "UseColorOverLife": 1,
             "BlendMode": 0,
             "RenderType": 1,
-            "Gravity": -10,
+            "Gravity": -14,
             "Acceleration": [
                 0,
-                0,
+                2,
                 0
             ],
-            "Drag": 0.9,
+            "Drag": 0.25,
             "Fade": [
-                0.015,
-                0.3
+                0.005,
+                0.22
             ],
-            "NoiseStrength": 0.12,
+            "NoiseStrength": 0.05,
             "NoiseFrequency": 2,
             "NoiseSpeed": 1,
-            "TexturePath": "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/smoke_03.png",
+            "TexturePath": "Data/Texture/Particle/TransitionViscousMud.png",
             "MaskTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
-            "UseMask": 1,
+            "UseMask": 0,
             "UseGradient": 0,
             "useGradientTexture": 0,
             "useShadeGradientTexture": 0,
@@ -197,10 +201,14 @@
                 1,
                 0
             ],
-            "texturePath": "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/smoke_03.png",
+            "texturePath": "Data/Texture/Particle/TransitionViscousMud.png",
             "maskTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
-            "StretchScale": 0.13,
-            "StretchMax": 1
+            "StretchScale": 0.045,
+            "StretchMax": 1.8,
+            "RotationSpeed": [
+                -1.1,
+                1.1
+            ]
         }
     ]
 }

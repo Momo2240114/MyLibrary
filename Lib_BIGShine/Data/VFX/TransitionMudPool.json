@@ -12,17 +12,17 @@
                 "Loop": true,
                 "Duration": 0,
                 "Color": [
-                    0.025,
-                    0.008,
-                    0.04,
-                    0.9
+                    0.035,
+                    0.001,
+                    0.004,
+                    0.94
                 ],
                 "Alpha": 0.9,
                 "AnimateAlpha": false,
                 "AlphaStart": 1,
                 "AlphaEnd": 0,
                 "BlendMode": 0,
-                "EmissiveStrength": 0.3,
+                "EmissiveStrength": 0.06,
                 "Position": [
                     0,
                     0.025,
@@ -55,7 +55,7 @@
                     1
                 ],
                 "MaskUVSpeed": [
-                    1.5,
+                    0.32,
                     0
                 ],
                 "UseNoise": true,
@@ -67,10 +67,10 @@
                     2
                 ],
                 "NoiseUVSpeed": [
-                    3,
-                    0
+                    0.24,
+                    -0.16
                 ],
-                "NoiseStrength": 0.12,
+                "NoiseStrength": 0.22,
                 "UseFresnel": false,
                 "UseNormal": false,
                 "UseEdgeHighlight": false,
@@ -92,7 +92,18 @@
                     1
                 ],
                 "AlphaCurveName": "",
-                "ScaleCurveName": ""
+                "ScaleCurveName": "",
+                "UseVertexNoise": true,
+                "VertexNoiseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+                "VertexNoiseHorizontalStrength": 0.16,
+                "VertexNoiseVerticalStrength": 0.025,
+                "VertexNoiseHorizontalScale": 2.4,
+                "VertexNoiseVerticalScale": 1.8,
+                "VertexNoiseSpeed": [
+                    0.14,
+                    0.2,
+                    -0.11
+                ]
             },
             {
                 "RenderEnabled": false,
@@ -101,17 +112,17 @@
                 "Loop": true,
                 "Duration": 0,
                 "Color": [
-                    0.025,
-                    0.008,
-                    0.04,
-                    0.9
+                    0.92,
+                    0.006,
+                    0.014,
+                    0.78
                 ],
                 "Alpha": 0.9,
                 "AnimateAlpha": false,
                 "AlphaStart": 1,
                 "AlphaEnd": 0,
                 "BlendMode": 0,
-                "EmissiveStrength": 1.3,
+                "EmissiveStrength": 1.7,
                 "Position": [
                     0,
                     0.025,
@@ -144,7 +155,7 @@
                     1
                 ],
                 "MaskUVSpeed": [
-                    1.5,
+                    0.32,
                     0
                 ],
                 "UseNoise": true,
@@ -156,10 +167,10 @@
                     2
                 ],
                 "NoiseUVSpeed": [
-                    3,
-                    0
+                    0.24,
+                    -0.16
                 ],
-                "NoiseStrength": 0.12,
+                "NoiseStrength": 0.22,
                 "UseFresnel": false,
                 "UseNormal": false,
                 "UseEdgeHighlight": false,
@@ -181,7 +192,18 @@
                     1
                 ],
                 "AlphaCurveName": "",
-                "ScaleCurveName": ""
+                "ScaleCurveName": "",
+                "UseVertexNoise": true,
+                "VertexNoiseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+                "VertexNoiseHorizontalStrength": 0.16,
+                "VertexNoiseVerticalStrength": 0.025,
+                "VertexNoiseHorizontalScale": 2.4,
+                "VertexNoiseVerticalScale": 1.8,
+                "VertexNoiseSpeed": [
+                    0.14,
+                    0.2,
+                    -0.11
+                ]
             },
             {
                 "RenderEnabled": false,
@@ -190,17 +212,17 @@
                 "Loop": true,
                 "Duration": 3,
                 "Color": [
-                    0.025,
-                    0.006,
-                    0.04,
-                    0.86
+                    0.035,
+                    0.001,
+                    0.004,
+                    0.94
                 ],
                 "Alpha": 0.9,
                 "AnimateAlpha": false,
                 "AlphaStart": 1,
                 "AlphaEnd": 0,
                 "BlendMode": 0,
-                "EmissiveStrength": 0.045,
+                "EmissiveStrength": 0.06,
                 "Position": [
                     -3,
                     0.55,
@@ -233,7 +255,7 @@
                     1
                 ],
                 "MaskUVSpeed": [
-                    1.5,
+                    0.32,
                     0
                 ],
                 "UseNoise": true,
@@ -245,10 +267,10 @@
                     2
                 ],
                 "NoiseUVSpeed": [
-                    0.11,
-                    -0.14
+                    0.24,
+                    -0.16
                 ],
-                "NoiseStrength": 0.12,
+                "NoiseStrength": 0.22,
                 "UseFresnel": false,
                 "UseNormal": false,
                 "UseEdgeHighlight": false,
@@ -284,6 +306,17 @@
                     0,
                     0,
                     0
+                ],
+                "UseVertexNoise": true,
+                "VertexNoiseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+                "VertexNoiseHorizontalStrength": 0.08,
+                "VertexNoiseVerticalStrength": 0.06,
+                "VertexNoiseHorizontalScale": 2.4,
+                "VertexNoiseVerticalScale": 1.8,
+                "VertexNoiseSpeed": [
+                    0.14,
+                    0.2,
+                    -0.11
                 ]
             },
             {
@@ -293,17 +326,17 @@
                 "Loop": true,
                 "Duration": 3,
                 "Color": [
-                    0.025,
-                    0.006,
-                    0.04,
-                    0.86
+                    0.035,
+                    0.001,
+                    0.004,
+                    0.94
                 ],
                 "Alpha": 0.9,
                 "AnimateAlpha": false,
                 "AlphaStart": 1,
                 "AlphaEnd": 0,
                 "BlendMode": 0,
-                "EmissiveStrength": 0.045,
+                "EmissiveStrength": 0.06,
                 "Position": [
                     2.5,
                     0.6,
@@ -336,7 +369,7 @@
                     1
                 ],
                 "MaskUVSpeed": [
-                    1.5,
+                    0.32,
                     0
                 ],
                 "UseNoise": true,
@@ -348,10 +381,10 @@
                     2
                 ],
                 "NoiseUVSpeed": [
-                    0.11,
-                    -0.14
+                    0.24,
+                    -0.16
                 ],
-                "NoiseStrength": 0.12,
+                "NoiseStrength": 0.22,
                 "UseFresnel": false,
                 "UseNormal": false,
                 "UseEdgeHighlight": false,
@@ -387,6 +420,17 @@
                     0,
                     0,
                     0
+                ],
+                "UseVertexNoise": true,
+                "VertexNoiseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+                "VertexNoiseHorizontalStrength": 0.08,
+                "VertexNoiseVerticalStrength": 0.06,
+                "VertexNoiseHorizontalScale": 2.4,
+                "VertexNoiseVerticalScale": 1.8,
+                "VertexNoiseSpeed": [
+                    0.14,
+                    0.2,
+                    -0.11
                 ]
             },
             {
@@ -396,17 +440,17 @@
                 "Loop": true,
                 "Duration": 3,
                 "Color": [
-                    0.025,
-                    0.006,
-                    0.04,
-                    0.86
+                    0.035,
+                    0.001,
+                    0.004,
+                    0.94
                 ],
                 "Alpha": 0.9,
                 "AnimateAlpha": false,
                 "AlphaStart": 1,
                 "AlphaEnd": 0,
                 "BlendMode": 0,
-                "EmissiveStrength": 0.045,
+                "EmissiveStrength": 0.06,
                 "Position": [
                     0,
                     0.45,
@@ -439,7 +483,7 @@
                     1
                 ],
                 "MaskUVSpeed": [
-                    1.5,
+                    0.32,
                     0
                 ],
                 "UseNoise": true,
@@ -451,10 +495,10 @@
                     2
                 ],
                 "NoiseUVSpeed": [
-                    0.11,
-                    -0.14
+                    0.24,
+                    -0.16
                 ],
-                "NoiseStrength": 0.12,
+                "NoiseStrength": 0.22,
                 "UseFresnel": false,
                 "UseNormal": false,
                 "UseEdgeHighlight": false,
@@ -490,6 +534,17 @@
                     0,
                     0,
                     0
+                ],
+                "UseVertexNoise": true,
+                "VertexNoiseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+                "VertexNoiseHorizontalStrength": 0.08,
+                "VertexNoiseVerticalStrength": 0.06,
+                "VertexNoiseHorizontalScale": 2.4,
+                "VertexNoiseVerticalScale": 1.8,
+                "VertexNoiseSpeed": [
+                    0.14,
+                    0.2,
+                    -0.11
                 ]
             }
         ]

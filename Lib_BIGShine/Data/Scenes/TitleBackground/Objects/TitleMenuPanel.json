@@ -1,0 +1,183 @@
+{
+    "Name": "TitleMenuPanel",
+    "Layer": 16,
+    "CollisionMask": 0,
+    "ParentName": "TitleUI",
+    "RequiredForSceneStart": true,
+    "Transform": {
+        "Pos": [
+            0,
+            0,
+            0
+        ],
+        "Rot": [
+            0,
+            0,
+            0
+        ],
+        "Scale": [
+            1,
+            1,
+            1
+        ]
+    },
+    "Components": [
+        {
+            "TypeName": "UIWidgetComponent",
+            "Enabled": true,
+            "RequiredForSceneStart": true,
+            "UpdateEnabled": true,
+            "LateUpdateEnabled": true,
+            "UpdatePriority": 0,
+            "LateUpdatePriority": 0,
+            "Data": {
+                "Version": 1,
+                "WidgetId": "TitleMenuPanel",
+                "ParentWidgetId": "",
+                "Visible": true,
+                "InputEnabled": false,
+                "RaycastTarget": false,
+                "ZOrder": 0,
+                "RectTransform": {
+                    "AnchorMin": [
+                        0,
+                        0.6
+                    ],
+                    "AnchorMax": [
+                        0.49,
+                        0.89
+                    ],
+                    "Pivot": [
+                        0,
+                        0
+                    ],
+                    "AnchoredPosition": [
+                        0,
+                        0
+                    ],
+                    "SizeDelta": [
+                        0,
+                        0
+                    ],
+                    "LocalScale": [
+                        1,
+                        1
+                    ],
+                    "LocalRotation": 0
+                }
+            }
+        },
+        {
+            "TypeName": "SpriteRenderer",
+            "Enabled": true,
+            "RequiredForSceneStart": true,
+            "UpdateEnabled": true,
+            "LateUpdateEnabled": true,
+            "UpdatePriority": 0,
+            "LateUpdatePriority": 0,
+            "Data": {
+                "TexturePath": "",
+                "LocalSize": [
+                    1,
+                    1
+                ],
+                "CatPos": [
+                    0,
+                    0
+                ],
+                "CatSize": [
+                    1,
+                    1
+                ],
+                "Color": [
+                    1,
+                    1,
+                    1,
+                    1
+                ],
+                "Visible": true,
+                "LinearSampling": true,
+                "SdrTexture": true,
+                "ShaderID": 0,
+                "pivotType": 0
+            }
+        },
+        {
+            "TypeName": "UIVertexModifierComponent",
+            "Enabled": true,
+            "RequiredForSceneStart": true,
+            "UpdateEnabled": true,
+            "LateUpdateEnabled": true,
+            "UpdatePriority": 0,
+            "LateUpdatePriority": 0,
+            "Data": {
+                "Vertices": {
+                    "LEFT_TOP": {
+                        "PositionOffset": [
+                            0,
+                            0
+                        ],
+                        "UVOffset": [
+                            0,
+                            0
+                        ],
+                        "ColorMultiplier": [
+                            0.016,
+                            0.012,
+                            0.027,
+                            0.66
+                        ]
+                    },
+                    "RIGHT_TOP": {
+                        "PositionOffset": [
+                            0,
+                            0
+                        ],
+                        "UVOffset": [
+                            0,
+                            0
+                        ],
+                        "ColorMultiplier": [
+                            0.016,
+                            0.012,
+                            0.027,
+                            0
+                        ]
+                    },
+                    "LEFT_BOTTOM": {
+                        "PositionOffset": [
+                            0,
+                            0
+                        ],
+                        "UVOffset": [
+                            0,
+                            0
+                        ],
+                        "ColorMultiplier": [
+                            0.016,
+                            0.012,
+                            0.027,
+                            0.66
+                        ]
+                    },
+                    "RIGHT_BOTTOM": {
+                        "PositionOffset": [
+                            0,
+                            0
+                        ],
+                        "UVOffset": [
+                            0,
+                            0
+                        ],
+                        "ColorMultiplier": [
+                            0.016,
+                            0.012,
+                            0.027,
+                            0
+                        ]
+                    }
+                }
+            }
+        }
+    ]
+}

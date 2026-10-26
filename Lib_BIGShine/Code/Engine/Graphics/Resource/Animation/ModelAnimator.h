@@ -5,6 +5,7 @@
 #include "Engine/Math/Curve/CurveComponent.h"
 #include "PoseLibraryResource.h"
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
+#include "Engine/GamePlay/Combat/AttackTelegraphRuntime.h"
 
 #include <unordered_map>
 
@@ -29,7 +30,7 @@ public:
 
 
         // 再生時間を進め、Curve/Blackboardによる速度補正も反映する。
-        void Update(float et, float duration, CurveComponent* curvecomp, std::shared_ptr<GameObject> owner);
+        void Update(float et, float duration, CurveComponent* curvecomp, std::shared_ptr<GameObject> owner, AttackTelegraphRuntime* telegraphs_ = nullptr);
     };
     struct RootMotionDelta {
         // このフレームにRoot Motionから発生した移動差分。
@@ -66,7 +67,11 @@ public:
     // AnimationEventやEditorのシークから、現在Stateの再生時間を直接設定する。
     void SetCurrentTime(float time_);
     const AnimState* GetCurrentState() const { return current.state; }
+    // Controllerが最新のブレンド姿勢をModelへ反映してから予兆を発生させる。
+    void FlushAttackTelegraphs(const std::shared_ptr<GameObject>& owner_) { attackTelegraphs.Flush(owner_); }
 private:
+    // Animatorごとに保持し、同じState資産を使う別の敵との発生履歴共有を避ける。
+    AttackTelegraphRuntime attackTelegraphs;
     // カスタムアニメーション（ポーズの系譜）から一本のポーズを編み出す秘術
     void ComputeCustomAnimationPose(
         const CustomAnimation& customAnim,

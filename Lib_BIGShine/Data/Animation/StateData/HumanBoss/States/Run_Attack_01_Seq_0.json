@@ -61,7 +61,7 @@
                 "attackTemplateId": "HumanBossShadowCharge",
                 "blackboardWrites": [],
                 "callEndOnStateExit": true,
-                "endTime": 1.8,
+                "endTime": 0.51666667,
                 "eventTemplateType": "ATTACK_TEMPLATE",
                 "label": "Shadow Charge Slash",
                 "localPosition": [
@@ -86,7 +86,7 @@
                 "overridePlaybackSpeed": false,
                 "ownerTarget": "Self",
                 "playbackSpeed": 1.0,
-                "startTime": 1.55
+                "startTime": 0.26666667
             }
         ],
         "loop": false,

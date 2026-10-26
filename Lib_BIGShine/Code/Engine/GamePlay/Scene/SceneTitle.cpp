@@ -1,40 +1,16 @@
 #include "PrecompiledHeader.h"
-
 #include "SceneTitle.h"
+#include "Engine/Debug/TracyProfiler.h"
 
-
-void SceneTitle::Finalize()
+SceneTitle::SceneTitle()
 {
-	SceneBase::Finalize();
+    sceneName = "TitleBackground";
+    isLoadingPresentation = true;
 }
-
-void SceneTitle::DrawGUI()
-{
-	SceneBase::DrawGUI();
-
-
-}
-
 
 void SceneTitle::Initialize()
 {
-	SceneBase::Initialize();
-
-
-	// TitleSceneでは現在MainSceneを読み込み、タイトル用の初期シーンとして扱う。
-	_GameObjectManager->LoadScene("MainScene");
-
-	// Sceneロード後に親子関係を解決し、Transform階層を使える状態にする。
-	_GameObjectManager->ResolveHierarchy();
+    BS_PROFILE_SCOPE("SceneTitle::Initialize");
+    SceneBase::Initialize();
+    _GameObjectManager->LoadSceneAsync(sceneName);
 }
-
-void SceneTitle::Update(float elapsedTime)
-{
-	SceneBase::Update(elapsedTime);
-}
-
-void SceneTitle::Render(float elapsedTime)
-{
-	SceneBase::Render(elapsedTime);
-}
-

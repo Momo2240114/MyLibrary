@@ -90,6 +90,7 @@ struct AttackHitEvent
     float hitSoundMuffledCutoff = 1200.0f;
 
     // Hit 成立時の CameraShake 設定。
+    AttackFeedbackSettings feedback; // 武器と派生エフェクトで同じ振動・音声設定を使用する。
     bool cameraShakeEnabled = false;
     float cameraShakeReceiveDuration = 0.0f;
     float cameraShakeReceivePositionStrength = 0.0f;

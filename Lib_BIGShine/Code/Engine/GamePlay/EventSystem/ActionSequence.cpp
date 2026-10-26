@@ -1,4 +1,5 @@
 #include "PrecompiledHeader.h"
+#include "Engine/UI/ScreenTransitionComponent.h"
 
 #include "ActionSequence.h"
 #include "PrefabSpawnActionComponent.h"
@@ -171,6 +172,7 @@ void ActionSequence::CleanupSpawnedObjects(bool includePersistent_)
 void ActionSequence::Update(float elapsedTime_)
 {
     BS_PROFILE_SCOPE("ActionSequence::Update");
+    waitingForObject = false;
     const unsigned int generation_ = playbackGeneration;
     remainingDuration -= (std::max)(elapsedTime_, 0.0f);
     for (auto& pending_ : pendingActions)
@@ -182,15 +184,28 @@ void ActionSequence::Update(float elapsedTime_)
     {
         const auto& pending_ = pendingActions[index_];
         bool ready_ = pending_.timer <= 0.0f;
-        if (ready_ && !pending_.waitForObject.empty())
+        if (ready_ && (!pending_.waitForObject.empty() || pending_.waitForScreenCovered))
         {
-            const auto awaited_ = owner_ && owner_->manager ? owner_->GetManager().Find(pending_.waitForObject) : nullptr;
-            if (!awaited_ || !awaited_->IsHierarchyReady())
+            bool blocked_ = false;
+            if (!pending_.waitForObject.empty())
             {
-                // このFrameで消費した時計を戻し、後続Actionを生成完了より先に実行しない。
-                remainingDuration += (std::max)(elapsedTime_, 0.0f);
+                const auto awaited_ = owner_ && owner_->manager ? owner_->GetManager().Find(pending_.waitForObject) : nullptr;
+                blocked_ = !awaited_ || !awaited_->IsHierarchyReady();
+            }
+            if (pending_.waitForScreenCovered)
+            {
+                const auto transition_ = owner_ ? owner_->GetComponent<ScreenTransitionComponent>() : nullptr;
+                blocked_ = blocked_ || !transition_ || !transition_->IsCovered();
+                // 別の演出との競合で開始できなかった場合は、所有Componentの要求だけを再試行する。
+                if (transition_ && !ScreenTransitionManager::Instance().IsActive()) transition_->Cover();
+            }
+            if (blocked_)
+            {
+                waitingForObject = true;
+                // 生成待ちと被覆待ちを同じ時計の停止として扱い、既存の時刻関係を維持する。
+                remainingDuration += (std::max)(elapsedTime_,0.0f);
                 for (auto& waiting_ : pendingActions)
-                    if (waiting_.animationState.empty()) waiting_.timer += (std::max)(elapsedTime_, 0.0f);
+                    if (waiting_.animationState.empty()) waiting_.timer += (std::max)(elapsedTime_,0.0f);
                 return;
             }
         }
@@ -224,20 +239,25 @@ void ActionSequence::Update(float elapsedTime_)
 void ActionSequence::StartSequence(int index_)
 {
     BS_PROFILE_SCOPE("ActionSequence::StartSequence");
+    const auto owner_ = GetGameObject();
+    if (owner_ && owner_->manager && owner_->GetManager().SupportsEditorPlayMode() &&
+        owner_->GetManager().GetEditorPlayMode() != EditorPlayMode::PLAY) return;
     if (index_ < 0 || index_ >= (int)sequences.size()) return;
 
     pendingActions.clear();
     ++playbackGeneration;
     remainingDuration = sequences[index_].duration;
+    playbackDuration = remainingDuration;
+    playingSequenceName = sequences[index_].name;
     pendingCompletionAction = sequences[index_].completionAction;
     cleanupObjectsOnCompletion = sequences[index_].cleanupObjectsOnCompletion;
     interruptionAction = sequences[index_].interruptionAction;
 
     // Editorで並び順を変更しても実行時刻を優先し、同時刻だけ保存順を維持する。
     for (const ActionReference& action_ : sequences[index_].actions) {
-        if (action_.actionName.empty() && action_.waitForObject.empty()) continue;
+        if (action_.actionName.empty() && action_.waitForObject.empty() && !action_.waitForScreenCovered) continue;
         pendingActions.push_back({ action_.waitForObject, action_.executionTime, action_.actionName, action_.blackboardWrites,
-            action_.animationState, action_.useNormalizedTime });
+            action_.animationState, action_.useNormalizedTime, action_.waitForScreenCovered });
     }
     std::stable_sort(pendingActions.begin(), pendingActions.end(),
         [](const PendingAction& left_, const PendingAction& right_) { return left_.timer < right_.timer; });
@@ -405,6 +425,14 @@ void ActionSequence::DrawEditorGui()
 
         if (ImGui::CollapsingHeader(sequence_.name.empty() ? "Unnamed Sequence" : sequence_.name.c_str(), nullptr, flags))
         {
+            // 通常のAction編集と同じデータを、映像付きWorkspaceへ引き継ぐ。
+            const bool changed_ = ImGui::Checkbox("Cinematic editing", &sequence_.cinematicEditing);
+            if (sequence_.cinematicEditing && owner && owner->manager)
+            {
+                ImGui::SameLine();
+                const bool open_ = ImGui::Button("Open Cinematic Editor");
+                if (changed_ || open_) owner->GetManager().RequestCinematicEditor(owner->GetName(), sequenceIndex_);
+            }
             // Sequence名はRegistryへ登録されるAction名でもあるため、ここで編集できるようにする。
             char buf[64];
             strcpy_s(buf, sequence_.name.c_str());
@@ -468,11 +496,16 @@ void ActionSequence::DrawEditorGui()
             }
             ImGui::EndChild();
 
+            const bool scenePlaybackBlocked_ = owner && owner->manager && owner->GetManager().SupportsEditorPlayMode() &&
+                owner->GetManager().GetEditorPlayMode() != EditorPlayMode::PLAY;
+            if (scenePlaybackBlocked_) ImGui::TextDisabled("Enter Play Mode to test this scene sequence.");
+            ImGui::BeginDisabled(scenePlaybackBlocked_);
             if (ImGui::Button("Register & Play", ImVec2(-1, 25))) {
                 // 編集中のSequenceをRegistryへ反映して、その場で再生確認する。
                 RegisterSequence("");
                 StartSequence(sequenceIndex_);
             }
+            ImGui::EndDisabled();
 
             if (sequence_.selectedAction >= 0 && sequence_.selectedAction < static_cast<int>(sequence_.actions.size())) {
                 auto& action_ = sequence_.actions[sequence_.selectedAction];
@@ -519,6 +552,7 @@ void ActionSequence::DrawEditorGui()
 
                 ImGui::SetNextItemWidth(180.0f);
                 ImGui::InputText("Wait For Spawned Object", &action_.waitForObject);
+                ImGui::Checkbox("Wait For Screen Covered", &action_.waitForScreenCovered);
                 ImGui::InputText("Animation State (empty: real time)", &action_.animationState);
                 if (!action_.animationState.empty()) ImGui::Checkbox("Normalized Animation Time", &action_.useNormalizedTime);
                 const float maximumTime_ = !action_.animationState.empty() && action_.useNormalizedTime ? 1.0f : sequence_.duration;
@@ -607,6 +641,7 @@ void ActionSequence::Serialize(nlohmann::json& j) const {
     for (const auto& seq : sequences) {
         nlohmann::json seqItem;
         seqItem["name"] = seq.name;
+        seqItem["cinematicEditing"] = seq.cinematicEditing;
         seqItem["duration"] = seq.duration;
         seqItem["completionAction"] = seq.completionAction;
         seqItem["cleanupObjectsOnCompletion"] = seq.cleanupObjectsOnCompletion;
@@ -635,6 +670,7 @@ void ActionSequence::Serialize(nlohmann::json& j) const {
             }
             actItem_["blackboardWrites"] = writesArray_;
             actItem_["waitForObject"] = act.waitForObject;
+            actItem_["waitForScreenCovered"] = act.waitForScreenCovered;
             actItem_["animationState"] = act.animationState;
             actItem_["useNormalizedTime"] = act.useNormalizedTime;
             actArray.push_back(actItem_);
@@ -658,6 +694,7 @@ void ActionSequence::Deserialize(const nlohmann::json& j)
 
         SequenceData data;
         data.name = seqItem.value("name", "New Sequence");
+        data.cinematicEditing = seqItem.value("cinematicEditing", false);
         data.duration = seqItem.value("duration", 10.0f);
         data.completionAction = seqItem.value("completionAction", std::string{});
         data.cleanupObjectsOnCompletion = seqItem.value("cleanupObjectsOnCompletion", false);
@@ -671,6 +708,7 @@ void ActionSequence::Deserialize(const nlohmann::json& j)
                     ref.category = actItem.value("cat", "");
                     ref.actionName = actItem.value("name", "");
                     ref.waitForObject = actItem.value("waitForObject", std::string{});
+                    ref.waitForScreenCovered = actItem.value("waitForScreenCovered", false);
                     ref.animationState = actItem.value("animationState", std::string());
                     ref.useNormalizedTime = actItem.value("useNormalizedTime", false);
                     if (actItem.contains("time")) {
@@ -705,7 +743,7 @@ void ActionSequence::Deserialize(const nlohmann::json& j)
                         }
                     }
 
-                    if (!ref.actionName.empty() || !ref.waitForObject.empty()) {
+                    if (!ref.actionName.empty() || !ref.waitForObject.empty() || ref.waitForScreenCovered) {
                         data.actions.push_back(ref);
                     }
                 }

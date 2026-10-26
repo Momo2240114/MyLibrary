@@ -2,6 +2,7 @@
 
 #include "AttackEffectHitComponent.h"
 #include "CombatDamageTypes.h"
+#include "AttackTelegraphSettings.h"
 
 #include <DirectXMath.h>
 #include <cstdint>
@@ -166,7 +167,10 @@ struct AttackTemplate
     bool canBeGuarded = true; // 旧Templateは通常通りガード可能な攻撃として復元する。
     bool canHitOwner = false;
     WeaponHitBoxTemplate weaponHitBox;
+    // 武器判定の有効開始時刻から予兆を導出し、独立した攻撃タイマーは持たない。
+    AttackTelegraphSettings telegraph;
     AttackHitEffectTemplate hitEffect;
+    AttackFeedbackSettings feedback; // 武器と派生エフェクトで同じ振動・音声設定を使用する。
     AttackCameraShakeTemplate cameraShake;
     std::vector<SlashEffectTemplate> slashEffects;
     std::vector<AttackEffectSpawnTemplate> attackEffects;

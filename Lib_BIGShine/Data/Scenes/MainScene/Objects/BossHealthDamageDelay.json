@@ -8,7 +8,7 @@
                 "RaycastTarget": false,
                 "RectTransform": {
                     "AnchorMax": [
-                        1.0,
+                        0.0,
                         1.0
                     ],
                     "AnchorMin": [
@@ -26,7 +26,7 @@
                     ],
                     "Pivot": [
                         0.0,
-                        0.5
+                        0.0
                     ],
                     "SizeDelta": [
                         0.0,
@@ -36,7 +36,7 @@
                 "Version": 1,
                 "Visible": true,
                 "WidgetId": "BossHealthDamageDelay",
-                "ZOrder": 1
+                "ZOrder": 32
             },
             "Enabled": true,
             "LateUpdateEnabled": true,
@@ -53,21 +53,23 @@
                     0.0
                 ],
                 "CatSize": [
+                    0.0,
+                    16.0
+                ],
+                "Color": [
+                    1.0,
+                    1.0,
                     1.0,
                     1.0
                 ],
-                "Color": [
-                    0.4000000059604645,
-                    0.4000000059604645,
-                    0.4000000059604645,
-                    0.949999988079071
-                ],
+                "LinearSampling": true,
                 "LocalSize": [
-                    760.0,
-                    20.0
+                    1.0,
+                    1.0
                 ],
+                "SdrTexture": true,
                 "ShaderID": 0,
-                "TexturePath": "",
+                "TexturePath": "./Data/Sprite/UI/Hud/Boss/BossBar_DamageTrail.png",
                 "Visible": true,
                 "pivotType": 0
             },

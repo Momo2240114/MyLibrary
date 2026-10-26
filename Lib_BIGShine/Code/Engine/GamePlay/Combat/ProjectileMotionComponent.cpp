@@ -8,6 +8,7 @@
 #include "Engine/GamePlay/Transform/Transform.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/GamePlay/Combat/HealthComponent.h"
+#include "Engine/Graphics/Particle/ParticleComponent.h"
 #include "Engine/Physics/PhysXSystem.h"
 
 #include <algorithm>
@@ -76,6 +77,13 @@ void ProjectileMotionComponent::Gui()
     BS_PROFILE_SCOPE("ProjectileMotionComponent::Gui");
 
     ImGui::Checkbox("Homing", &homingEnabled);
+    ImGui::Checkbox("Orbit While Waiting", &orbitEnabled);
+    ImGui::DragFloat("Orbit Radius", &orbitRadius, 0.05f, 0.1f, 10.0f);
+    ImGui::DragFloat("Orbit Height", &orbitHeight, 0.05f, 0.0f, 10.0f);
+    ImGui::DragFloat("Orbit Tilt", &orbitTilt, 0.5f, -75.0f, 75.0f);
+    ImGui::DragFloat("Orbit Degrees/Sec", &orbitAngularSpeed, 1.0f, -720.0f, 720.0f);
+    ImGui::DragFloat("Orbit Initial Phase", &orbitPhase, 1.0f);
+    ImGui::DragFloat("Orbit Yaw", &orbitYaw, 1.0f);
     ImGui::DragFloat("Homing Wait", &homingWaitTime, 0.01f, 0.0f, 10.0f);
     ImGui::DragFloat("Homing Turn Degrees/Sec", &homingTurnSpeed, 0.1f, 0.0f, 180.0f);
     ImGui::DragFloat("Homing Collision Radius", &homingCollisionRadius, 0.01f, 0.01f, 5.0f);
@@ -91,6 +99,13 @@ void ProjectileMotionComponent::Gui()
 
 void ProjectileMotionComponent::Serialize(nlohmann::json& json_) const
 {
+    json_["OrbitEnabled"] = orbitEnabled;
+    json_["OrbitRadius"] = orbitRadius;
+    json_["OrbitHeight"] = orbitHeight;
+    json_["OrbitTilt"] = orbitTilt;
+    json_["OrbitAngularSpeed"] = orbitAngularSpeed;
+    json_["OrbitPhase"] = orbitPhase;
+    json_["OrbitYaw"] = orbitYaw;
     json_["HomingEnabled"] = homingEnabled;
     json_["HomingWaitTime"] = homingWaitTime;
     json_["HomingTurnSpeed"] = homingTurnSpeed;
@@ -108,6 +123,13 @@ void ProjectileMotionComponent::Serialize(nlohmann::json& json_) const
 
 void ProjectileMotionComponent::Deserialize(const nlohmann::json& json_)
 {
+    orbitEnabled = json_.value("OrbitEnabled", false);
+    orbitRadius = std::clamp(json_.value("OrbitRadius", 3.2f), 0.1f, 10.0f);
+    orbitHeight = std::clamp(json_.value("OrbitHeight", 3.0f), 0.0f, 10.0f);
+    orbitTilt = std::clamp(json_.value("OrbitTilt", 35.0f), -75.0f, 75.0f);
+    orbitAngularSpeed = std::clamp(json_.value("OrbitAngularSpeed", 180.0f), -720.0f, 720.0f);
+    orbitPhase = json_.value("OrbitPhase", 0.0f);
+    orbitYaw = json_.value("OrbitYaw", 0.0f);
     homingEnabled = json_.value("HomingEnabled", false);
     homingWaitTime = (std::max)(0.0f, json_.value("HomingWaitTime", 0.0f));
     homingTurnSpeed = std::clamp(json_.value("HomingTurnSpeed", 25.0f), 0.0f, 180.0f);
@@ -135,6 +157,7 @@ void ProjectileMotionComponent::Configure(
     float maxSpeed_)
 {
     homingEnabled = false;
+    orbitEnabled = false;
     homingTarget.reset();
     homingAttacker.reset();
     homingElapsed = 0.0f;
@@ -189,6 +212,7 @@ DirectX::XMFLOAT3 ProjectileMotionComponent::ReadFloat3(
 void ProjectileMotionComponent::ConfigureHoming(const std::shared_ptr<GameObject>& target_,
     const std::shared_ptr<GameObject>& attacker_, float waitTime_, float turnDegreesPerSecond_, float collisionRadius_)
 {
+    orbitEnabled = false;
     homingTarget = target_;
     homingAttacker = attacker_;
     homingEnabled = true;
@@ -197,6 +221,45 @@ void ProjectileMotionComponent::ConfigureHoming(const std::shared_ptr<GameObject
     homingTurnSpeed = std::clamp(turnDegreesPerSecond_, 0.0f, 180.0f);
     homingCollisionRadius = (std::max)(0.01f, collisionRadius_);
     if (const auto owner_ = GetGameObject()) hoverPosition = owner_->transform->GetWorldPosition();
+}
+
+void ProjectileMotionComponent::ConfigureOrbit(float radius_, float height_, float tiltDegrees_, float angularSpeed_, float phaseDegrees_, float yawDegrees_)
+{
+    orbitEnabled = true;
+    orbitRadius = std::clamp(radius_, 0.1f, 10.0f);
+    orbitHeight = std::clamp(height_, 0.0f, 10.0f);
+    orbitTilt = std::clamp(tiltDegrees_, -75.0f, 75.0f);
+    orbitAngularSpeed = std::clamp(angularSpeed_, -720.0f, 720.0f);
+    orbitPhase = phaseDegrees_;
+    orbitYaw = yawDegrees_;
+    UpdateOrbitPosition(0.0f);
+}
+
+void ProjectileMotionComponent::UpdateOrbitPosition(float elapsedTime_)
+{
+    BS_PROFILE_SCOPE("ProjectileMotionComponent::UpdateOrbitPosition");
+    const auto owner_ = GetGameObject();
+    const auto attacker_ = homingAttacker.lock();
+    if (!owner_ || !owner_->transform || !attacker_ || !attacker_->transform) return;
+    const float angle_ = DirectX::XMConvertToRadians(orbitPhase + orbitAngularSpeed * elapsedTime_);
+    const float tilt_ = DirectX::XMConvertToRadians(orbitTilt);
+    // 軌道面を傾けてから生成時の敵の向きへ回し、敵の旋回で軌道を急変させない。
+    const DirectX::XMFLOAT3 local_ = { std::cos(angle_) * orbitRadius,
+        std::sin(angle_) * orbitRadius * std::sin(tilt_), std::sin(angle_) * orbitRadius * std::cos(tilt_) };
+    DirectX::XMFLOAT3 offset_{};
+    DirectX::XMStoreFloat3(&offset_, DirectX::XMVector3TransformNormal(DirectX::XMLoadFloat3(&local_),
+        DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(orbitYaw))));
+    const auto center_ = attacker_->transform->GetWorldPosition();
+    const float height_ = (std::max)(orbitHeight, orbitRadius * std::abs(std::sin(tilt_)) + homingCollisionRadius + 0.25f);
+    owner_->transform->ApplyWorldMatrix(DirectX::XMMatrixTranslation(center_.x + offset_.x,
+        center_.y + height_ + offset_.y, center_.z + offset_.z));
+    owner_->UpdateTransform();
+    // 発射へ近づくほど光粒の発生量を増やし、周回を溜めの演出として見せる。
+    if (const auto particle_ = owner_->GetComponent<ParticleComponent>())
+    {
+        const float chargeRate_ = std::clamp(elapsedTime_ / (std::max)(homingWaitTime, 0.0001f), 0.0f, 1.0f);
+        particle_->SetEmissionScale(0.55f + chargeRate_ * 0.45f);
+    }
 }
 
 bool ProjectileMotionComponent::UpdateHoming(float deltaTime_)
@@ -211,8 +274,11 @@ bool ProjectileMotionComponent::UpdateHoming(float deltaTime_)
     const float delta_ = (std::max)(0.0f, deltaTime_);
     const bool wasWaiting_ = homingElapsed < homingWaitTime;
     homingElapsed += delta_;
+    if (orbitEnabled && (wasWaiting_ || homingElapsed < homingWaitTime))
+        UpdateOrbitPosition((std::min)(homingElapsed, homingWaitTime));
     if (homingElapsed < homingWaitTime)
     {
+        if (orbitEnabled) return true;
         // 待機中の揺れは基準位置から計算し、上下移動を累積しない。
         owner_->transform->ApplyWorldMatrix(DirectX::XMMatrixTranslation(hoverPosition.x,
             hoverPosition.y + std::sin(homingElapsed * 3.0f) * 0.12f, hoverPosition.z));

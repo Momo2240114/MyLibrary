@@ -1,0 +1,120 @@
+{
+    "Name": "TitleMenu_tutorialHighlight",
+    "Layer": 16,
+    "CollisionMask": 0,
+    "ParentName": "TitleUI",
+    "RequiredForSceneStart": true,
+    "Transform": {
+        "Pos": [
+            0,
+            0,
+            0
+        ],
+        "Rot": [
+            0,
+            0,
+            0
+        ],
+        "Scale": [
+            1,
+            1,
+            1
+        ]
+    },
+    "Components": [
+        {
+            "TypeName": "UIWidgetComponent",
+            "Enabled": true,
+            "RequiredForSceneStart": true,
+            "UpdateEnabled": true,
+            "LateUpdateEnabled": true,
+            "UpdatePriority": 0,
+            "LateUpdatePriority": 0,
+            "Data": {
+                "Version": 1,
+                "WidgetId": "TitleMenu_tutorialHighlight",
+                "ParentWidgetId": "",
+                "Visible": true,
+                "InputEnabled": false,
+                "RaycastTarget": false,
+                "ZOrder": 10,
+                "RectTransform": {
+                    "AnchorMin": [
+                        0.12,
+                        0.64
+                    ],
+                    "AnchorMax": [
+                        0.12,
+                        0.64
+                    ],
+                    "Pivot": [
+                        0,
+                        0
+                    ],
+                    "AnchoredPosition": [
+                        -40,
+                        60
+                    ],
+                    "SizeDelta": [
+                        450,
+                        53
+                    ],
+                    "LocalScale": [
+                        1,
+                        1
+                    ],
+                    "LocalRotation": 0
+                }
+            }
+        },
+        {
+            "TypeName": "SpriteRenderer",
+            "Enabled": true,
+            "RequiredForSceneStart": true,
+            "UpdateEnabled": true,
+            "LateUpdateEnabled": true,
+            "UpdatePriority": 0,
+            "LateUpdatePriority": 0,
+            "Data": {
+                "TexturePath": "",
+                "LocalSize": [
+                    1,
+                    1
+                ],
+                "CatPos": [
+                    0,
+                    0
+                ],
+                "CatSize": [
+                    1,
+                    1
+                ],
+                "Color": [
+                    0.6,
+                    0.35,
+                    0.1,
+                    0.12
+                ],
+                "Visible": true,
+                "LinearSampling": true,
+                "SdrTexture": true,
+                "ShaderID": 0,
+                "pivotType": 0
+            }
+        },
+        {
+            "TypeName": "UIVisualEffectComponent",
+            "Enabled": true,
+            "RequiredForSceneStart": false,
+            "UpdateEnabled": true,
+            "LateUpdateEnabled": true,
+            "UpdatePriority": 0,
+            "LateUpdatePriority": 0,
+            "Data": {
+                "Preset": "MenuAccent",
+                "PlayOnStart": true,
+                "Settings": {}
+            }
+        }
+    ]
+}

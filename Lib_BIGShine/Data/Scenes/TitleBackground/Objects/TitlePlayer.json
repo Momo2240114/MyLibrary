@@ -1,0 +1,617 @@
+{
+    "ColliderComponents": [
+        {
+            "Data": {
+                "CanBeCharacterGround": true,
+                "ColliderName": "",
+                "CollisionOwnerObjectName": "",
+                "CollisionRole": 1,
+                "ContactOffset": 0.019999999552965164,
+                "ContainmentMode": 0,
+                "DebugPrimitiveColor": [
+                    0.20000000298023224,
+                    0.6000000238418579,
+                    1.0,
+                    1.0
+                ],
+                "EndNodeName": "",
+                "GravityScale": 2.0,
+                "GroundSnapDistance": 0.8999999761581421,
+                "HalfHeight": 1.0,
+                "IsStatic": false,
+                "IsTrigger": false,
+                "LimitHorizontalLift": true,
+                "Mass": 1.0,
+                "MaxHorizontalLift": 0.05000000074505806,
+                "NodeModelObjectName": "",
+                "NodeSegmentScale": 1.0,
+                "NonGroundLift": 0.1599999964237213,
+                "NonGroundSlideSpeed": 3.0,
+                "Offset": [
+                    0.0,
+                    1.600000023841858,
+                    0.0
+                ],
+                "PhysicsControlsTransform": true,
+                "Radius": 0.5,
+                "RotateVelocityThreshold": 0.0010000000474974513,
+                "ShapeRenderFlg": false,
+                "SlideOffNonGround": true,
+                "StartNodeName": "",
+                "StepOffset": 0.5,
+                "UseGravity": true,
+                "UsePhysicsResponse": true,
+                "VelocityRotationMode": 0,
+                "shapeSizeScale": 1.0
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "CharacterCollider",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "CanBeCharacterGround": true,
+                "ColliderName": "",
+                "CollisionOwnerObjectName": "",
+                "CollisionRole": 3,
+                "ContainmentMode": 0,
+                "DamageMultiplier": 1.0,
+                "DebugPrimitiveColor": [
+                    0.20000000298023224,
+                    1.0,
+                    0.30000001192092896,
+                    1.0
+                ],
+                "EndNodeName": "",
+                "GravityScale": 1.0,
+                "HalfHeight": 1.0,
+                "HurtTag": "Body",
+                "InvincibilityDuration": 0.07999999821186066,
+                "IsStatic": false,
+                "IsTrigger": true,
+                "Mass": 0.0,
+                "NodeModelObjectName": "",
+                "NodeSegmentScale": 1.0,
+                "Offset": [
+                    0.0,
+                    1.440000057220459,
+                    0.0
+                ],
+                "PhysicsControlsTransform": false,
+                "Radius": 0.5,
+                "RotateVelocityThreshold": 0.0010000000474974513,
+                "ShapeRenderFlg": false,
+                "StartNodeName": "",
+                "SyncCharacterColliderShape": true,
+                "UseGravity": false,
+                "UsePhysicsResponse": false,
+                "VelocityRotationMode": 0,
+                "shapeSizeScale": 1.0
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "HurtBox",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "ActionPrefix": "JustDodge",
+                "ActivateActionName": "EnableJustDodgeCollider",
+                "CanBeCharacterGround": true,
+                "CanReactToOwnerAttack": false,
+                "ColliderName": "",
+                "CollisionOwnerObjectName": "",
+                "CollisionRole": 5,
+                "ContainmentMode": 0,
+                "DeactivateActionName": "DisableJustDodgeCollider",
+                "DebugPrimitiveColor": [
+                    0.20000000298023224,
+                    0.6000000238418579,
+                    1.0,
+                    1.0
+                ],
+                "EndNodeName": "",
+                "GravityScale": 1.0,
+                "HalfHeight": 1.0,
+                "IsStatic": false,
+                "IsTrigger": true,
+                "Mass": 0.0,
+                "NodeModelObjectName": "",
+                "NodeSegmentScale": 1.0,
+                "Offset": [
+                    0.0,
+                    1.5,
+                    0.0
+                ],
+                "OncePerAttackActivation": true,
+                "PhysicsControlsTransform": false,
+                "Radius": 1.5,
+                "RotateVelocityThreshold": 0.0010000000474974513,
+                "ShapeRenderFlg": false,
+                "StartNodeName": "",
+                "TeamId": 0,
+                "UseGravity": false,
+                "UsePhysicsResponse": false,
+                "VelocityRotationMode": 0,
+                "shapeSizeScale": 1.0
+            },
+            "Enabled": false,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "JustDodgeCollider",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "ActionPrefix": "",
+                "ActivateActionName": "EnableGuardCollider",
+                "CanBeCharacterGround": true,
+                "CanGuardOwnerAttack": false,
+                "ColliderName": "",
+                "CollisionOwnerObjectName": "",
+                "CollisionRole": 6,
+                "ContainmentMode": 0,
+                "DeactivateActionName": "DisableGuardCollider",
+                "DebugPrimitiveColor": [
+                    0.20000000298023224,
+                    0.800000011920929,
+                    1.0,
+                    1.0
+                ],
+                "DisableJustGuardActionName": "DisableJustGuard",
+                "EnableJustGuardActionName": "EnableJustGuard",
+                "EndNodeName": "",
+                "GravityScale": 1.0,
+                "GuardAngle": 160.0,
+                "GuardBodyContact": true,
+                "GuardBreakDamageRate": 1.0,
+                "HalfHeight": 0.0010000000474974513,
+                "IsStatic": false,
+                "IsTrigger": true,
+                "Mass": 0.0,
+                "NodeModelObjectName": "",
+                "NodeSegmentScale": 1.0,
+                "Offset": [
+                    0.0,
+                    1.5,
+                    1.5
+                ],
+                "OncePerAttackActivation": true,
+                "PhysicsControlsTransform": false,
+                "Radius": 1.0,
+                "ReactToGuardBreak": true,
+                "RotateVelocityThreshold": 0.0010000000474974513,
+                "ShapeRenderFlg": true,
+                "StartNodeName": "",
+                "TeamId": 0,
+                "UseGravity": false,
+                "UsePhysicsResponse": false,
+                "VelocityRotationMode": 0,
+                "shapeSizeScale": 1.0
+            },
+            "Enabled": false,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "GuardCollider",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        }
+    ],
+    "CollisionMask": 0,
+    "Components": [
+        {
+            "Data": {
+                "LocalScale": 0.019999999552965164,
+                "LocalScaleXYZ": [
+                    0.019999999552965164,
+                    0.019999999552965164,
+                    0.019999999552965164
+                ],
+                "MaterialOverrides": [
+                    {
+                        "alphaCutoff": 0.4560000002384186,
+                        "alphaMode": 0,
+                        "baseColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "disableOutline": true,
+                        "emissiveColor": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "id": 0,
+                        "metalness": 0.10199999809265137,
+                        "name": "Body.002",
+                        "normalScale": 1.0,
+                        "occlusionStrength": 0.4869999885559082,
+                        "outlineThicknessOffset": 0.029999999329447746,
+                        "rimStrength": 0.05999999865889549,
+                        "roughness": 1.0,
+                        "shaderId": 3,
+                        "shadowTint": [
+                            0.3824999928474426,
+                            0.414000004529953,
+                            0.44999998807907104
+                        ],
+                        "specularStrength": 1.0,
+                        "specularToonBlend": 0.25,
+                        "toonPbrBlend": 1.0,
+                        "uvAddressMode": 0,
+                        "uvOffset": [
+                            0.0,
+                            0.0
+                        ],
+                        "uvRotation": 0.0,
+                        "uvScale": [
+                            1.0,
+                            1.0
+                        ]
+                    },
+                    {
+                        "alphaCutoff": 0.5,
+                        "alphaMode": 0,
+                        "baseColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "disableOutline": true,
+                        "emissiveColor": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "id": 1,
+                        "metalness": 0.0,
+                        "name": "Face.002",
+                        "normalScale": 1.0,
+                        "occlusionStrength": 0.9950000047683716,
+                        "outlineThicknessOffset": 0.0020000000949949026,
+                        "rimStrength": 0.05999999865889549,
+                        "roughness": 0.8500000238418579,
+                        "shaderId": 3,
+                        "shadowTint": [
+                            0.3824999928474426,
+                            0.414000004529953,
+                            0.44999998807907104
+                        ],
+                        "specularStrength": 1.0,
+                        "specularToonBlend": 0.25,
+                        "toonPbrBlend": 0.9940000176429749,
+                        "uvAddressMode": 0,
+                        "uvOffset": [
+                            0.0,
+                            0.0
+                        ],
+                        "uvRotation": 0.0,
+                        "uvScale": [
+                            1.0,
+                            1.0
+                        ]
+                    },
+                    {
+                        "alphaCutoff": 0.5,
+                        "alphaMode": 0,
+                        "baseColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "disableOutline": false,
+                        "emissiveColor": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "id": 2,
+                        "metalness": 0.0,
+                        "name": "Eye.002",
+                        "normalScale": 1.0,
+                        "occlusionStrength": 1.0,
+                        "outlineThicknessOffset": 0.019999999552965164,
+                        "rimStrength": 0.05999999865889549,
+                        "roughness": 0.75,
+                        "shaderId": 3,
+                        "shadowTint": [
+                            0.3824999928474426,
+                            0.414000004529953,
+                            0.44999998807907104
+                        ],
+                        "specularStrength": 1.0,
+                        "specularToonBlend": 0.25,
+                        "toonPbrBlend": 1.0,
+                        "uvAddressMode": 0,
+                        "uvOffset": [
+                            0.0,
+                            0.0
+                        ],
+                        "uvRotation": 0.0,
+                        "uvScale": [
+                            1.0,
+                            1.0
+                        ]
+                    },
+                    {
+                        "alphaCutoff": 0.5,
+                        "alphaMode": 1,
+                        "baseColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "disableOutline": true,
+                        "emissiveColor": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "id": 3,
+                        "metalness": 1.0,
+                        "name": "Squire_Cloth.002",
+                        "normalScale": 1.0,
+                        "occlusionStrength": 0.9330000281333923,
+                        "outlineThicknessOffset": 0.02800000086426735,
+                        "rimStrength": 0.05999999865889549,
+                        "roughness": 0.9980000257492065,
+                        "shaderId": 3,
+                        "shadowTint": [
+                            0.3824999928474426,
+                            0.414000004529953,
+                            0.44999998807907104
+                        ],
+                        "specularStrength": 1.0,
+                        "specularToonBlend": 0.25,
+                        "toonPbrBlend": 0.8999999761581421,
+                        "uvAddressMode": 0,
+                        "uvOffset": [
+                            0.0,
+                            0.0
+                        ],
+                        "uvRotation": 0.0,
+                        "uvScale": [
+                            1.0,
+                            1.0
+                        ]
+                    },
+                    {
+                        "alphaCutoff": 0.9990000128746033,
+                        "alphaMode": 0,
+                        "baseColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "disableOutline": true,
+                        "emissiveColor": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "id": 4,
+                        "metalness": 1.0,
+                        "name": "Shiled_Cloth.002",
+                        "normalScale": 1.0,
+                        "occlusionStrength": 1.0,
+                        "outlineThicknessOffset": 0.019999999552965164,
+                        "rimStrength": 0.05999999865889549,
+                        "roughness": 0.9819999933242798,
+                        "shaderId": 3,
+                        "shadowTint": [
+                            0.3824999928474426,
+                            0.414000004529953,
+                            0.44999998807907104
+                        ],
+                        "specularStrength": 1.0,
+                        "specularToonBlend": 0.25,
+                        "toonPbrBlend": 0.8500000238418579,
+                        "uvAddressMode": 0,
+                        "uvOffset": [
+                            0.0,
+                            0.0
+                        ],
+                        "uvRotation": 0.0,
+                        "uvScale": [
+                            1.0,
+                            1.0
+                        ]
+                    },
+                    {
+                        "alphaCutoff": 0.5,
+                        "alphaMode": 0,
+                        "baseColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "disableOutline": true,
+                        "emissiveColor": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "id": 5,
+                        "metalness": 0.03200000151991844,
+                        "name": "Shiled_Hair.002",
+                        "normalScale": 1.0,
+                        "occlusionStrength": 1.0,
+                        "outlineThicknessOffset": 0.012500000186264515,
+                        "rimStrength": 0.05999999865889549,
+                        "roughness": 1.0,
+                        "shaderId": 3,
+                        "shadowTint": [
+                            0.3824999928474426,
+                            0.414000004529953,
+                            0.44999998807907104
+                        ],
+                        "specularStrength": 1.0,
+                        "specularToonBlend": 0.25,
+                        "toonPbrBlend": 1.0,
+                        "uvAddressMode": 0,
+                        "uvOffset": [
+                            0.0,
+                            0.0
+                        ],
+                        "uvRotation": 0.0,
+                        "uvScale": [
+                            1.0,
+                            1.0
+                        ]
+                    }
+                ],
+                "ModelName": "./Data/Model/SwordPlayer/CombatGirls_Sword_Shield.gltf",
+                "RootMotionName": "root",
+                "ShaderID": 1,
+                "StaticModel": false,
+                "UsedNaviMeshSystemFlg": false,
+                "_RootRotationOffset": {
+                    "w": 0.7141432166099548,
+                    "x": 0.6999995708465576,
+                    "y": 0.0,
+                    "z": 0.0
+                }
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": true,
+            "TypeName": "GltfModel",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "AssetPath": "",
+                "GraphAssetPath": "",
+                "StateAssets": {},
+                "UseTransitionGraph": false,
+                "AnimationData": {
+                    "DefaultState": "SS_Idle",
+                    "States": [
+                        {
+                            "animIndexA": -1,
+                            "animIndexB": -1,
+                            "animationIndex": 23,
+                            "blend2DBackwardAnimationIndex": -1,
+                            "blend2DBackwardLeft90AnimationIndex": -1,
+                            "blend2DBackwardLeft90PhaseOffset": 0.0,
+                            "blend2DBackwardLeftAnimationIndex": -1,
+                            "blend2DBackwardLeftPhaseOffset": 0.0,
+                            "blend2DBackwardPhaseOffset": 0.0,
+                            "blend2DBackwardRight90AnimationIndex": -1,
+                            "blend2DBackwardRight90PhaseOffset": 0.0,
+                            "blend2DBackwardRightAnimationIndex": -1,
+                            "blend2DBackwardRightPhaseOffset": 0.0,
+                            "blend2DDefaultInput": [
+                                0.0,
+                                1.0
+                            ],
+                            "blend2DForwardAnimationIndex": -1,
+                            "blend2DForwardLeft90AnimationIndex": -1,
+                            "blend2DForwardLeft90PhaseOffset": 0.0,
+                            "blend2DForwardLeftAnimationIndex": -1,
+                            "blend2DForwardLeftPhaseOffset": 0.0,
+                            "blend2DForwardPhaseOffset": 0.0,
+                            "blend2DForwardRight90AnimationIndex": -1,
+                            "blend2DForwardRight90PhaseOffset": 0.0,
+                            "blend2DForwardRightAnimationIndex": -1,
+                            "blend2DForwardRightPhaseOffset": 0.0,
+                            "blend2DIdleAnimationIndex": -1,
+                            "blend2DIdlePhaseOffset": 0.0,
+                            "blend2DIdleThreshold": 0.05000000074505806,
+                            "blend2DLeftAnimationIndex": -1,
+                            "blend2DLeftPhaseOffset": 0.0,
+                            "blend2DParamName": "MoveInput",
+                            "blend2DRightAnimationIndex": -1,
+                            "blend2DRightPhaseOffset": 0.0,
+                            "blend2DSyncNormalizedTime": true,
+                            "blend2DUseEightDirections": false,
+                            "blend2DUseForwardBackwardLateral": false,
+                            "blend2DUseIdleStop": false,
+                            "blendDefaultWeight": 0.5,
+                            "blendMaskRootNodes": [],
+                            "blendParamName": "BlendAlpha",
+                            "blendParameterMax": 1.0,
+                            "blendParameterMin": 0.0,
+                            "blendPhaseOffsetA": 0.0,
+                            "blendPhaseOffsetB": 0.0,
+                            "blendSyncNormalizedTime": true,
+                            "blendUseMask": false,
+                            "customAnimIndex": -1,
+                            "events": [],
+                            "loop": true,
+                            "name": "SS_Idle",
+                            "rootMotion": {
+                                "enable": false,
+                                "applyPositionX": false,
+                                "applyPositionY": false,
+                                "applyPositionZ": false,
+                                "applyRotationX": false,
+                                "applyRotationY": false,
+                                "applyRotationZ": false,
+                                "cutVisualPositionX": true,
+                                "cutVisualPositionY": true,
+                                "cutVisualPositionZ": true,
+                                "cutVisualWhenDisabled": true,
+                                "sourceNodeName": ""
+                            },
+                            "rootMotionScale": 1.0,
+                            "rootMotionScaleCurveName": "SS_Idle.RootScale",
+                            "sequenceClips": [],
+                            "sequencer": "",
+                            "speed": 1.0,
+                            "speedCurveName": "Track 0",
+                            "type": 0
+                        }
+                    ]
+                }
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": true,
+            "TypeName": "AnimationControllerComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        }
+    ],
+    "Layer": 1,
+    "Name": "TitlePlayer",
+    "ParentName": "",
+    "RequiredForSceneStart": true,
+    "Transform": {
+        "Pos": [
+            4.0,
+            0.0,
+            0.0
+        ],
+        "Rot": [
+            0.0,
+            165.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

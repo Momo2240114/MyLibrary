@@ -8,6 +8,8 @@ class CameraManager {
 public:
     CameraManager() = default;
     void Initialize();
+    // 編集カメラを保持し、古い実行カメラへの参照と補間状態を破棄する。
+    void ResetRuntimeState();
     // 全カメラを探索し、最も優先度の高いものを決定
     void Update(float et_, const std::vector<std::shared_ptr<GameObject>>& objects_);
 

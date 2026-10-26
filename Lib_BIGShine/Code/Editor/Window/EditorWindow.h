@@ -30,6 +30,10 @@ public:
     // Animation/Particleなど、編集中にScene更新を止めたいWindowがtrueを返す。
     virtual bool ShouldPauseScene() const { return false; }
     virtual bool ShouldRenderSceneWhenPaused() const { return false; }
+    // Sceneの最終画像をWorkspace内に表示する場合だけ、専用RenderTargetを要求する。
+    virtual bool RequiresSceneRenderTarget() const { return false; }
+    // ActionSequenceから指定された対象を受け取れるWorkspaceだけがtrueを返す。
+    virtual bool OpenCinematicSequence(const std::string& ownerName_, int sequenceIndex_) { return false; }
 
     // Windowの表示状態を確認・設定する。変更時はOnVisibilityChangedで派生側へ通知する。
     bool IsVisible() const { return isVisible; }

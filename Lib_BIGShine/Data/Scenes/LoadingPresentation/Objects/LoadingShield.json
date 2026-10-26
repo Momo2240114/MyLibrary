@@ -1,0 +1,113 @@
+{
+    "CollisionMask": 0,
+    "Components": [
+        {
+            "Data": {
+                "LocalScale": 1.0,
+                "LocalScaleXYZ": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "MaterialOverrides": [
+                    {
+                        "alphaCutoff": 0.5,
+                        "alphaMode": 0,
+                        "baseColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "disableOutline": true,
+                        "emissiveColor": [
+                            0.9529411792755127,
+                            0.003921568859368563,
+                            0.0
+                        ],
+                        "id": 0,
+                        "metalness": 0.800000011920929,
+                        "name": "Weapon_Sword_Shiled.001",
+                        "normalScale": 1.0,
+                        "occlusionStrength": 1.0,
+                        "outlineThicknessOffset": 0.004999999888241291,
+                        "rimStrength": 0.05999999865889549,
+                        "roughness": 0.5,
+                        "shaderId": 3,
+                        "shadowTint": [
+                            0.3843137323856354,
+                            0.4901960790157318,
+                            0.45098039507865906
+                        ],
+                        "specularStrength": 1.0,
+                        "specularToonBlend": 0.25,
+                        "toonPbrBlend": 0.800000011920929,
+                        "uvAddressMode": 0,
+                        "uvOffset": [
+                            0.0,
+                            0.0
+                        ],
+                        "uvRotation": 0.0,
+                        "uvScale": [
+                            1.0,
+                            1.0
+                        ]
+                    }
+                ],
+                "ModelName": "./Data/Model/SwordPlayer/Weapon/Sword_ShiledModel.gltf",
+                "RootMotionName": "",
+                "ShaderID": 1,
+                "StaticModel": false,
+                "UsedNaviMeshSystemFlg": false,
+                "_RootRotationOffset": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                }
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": true,
+            "TypeName": "GltfModel",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "targetGameObjectName": "LoadingPlayer",
+                "targetNodeIndex": 85,
+                "targetStartNodeName": "lowerarm_l"
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": true,
+            "TypeName": "ModelAttachment",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        }
+    ],
+    "Layer": 1,
+    "Name": "LoadingShield",
+    "ParentName": "LoadingPlayer",
+    "RequiredForSceneStart": true,
+    "Transform": {
+        "Pos": [
+            -12.5,
+            0.0,
+            5.300000190734863
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

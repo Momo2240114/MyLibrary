@@ -1,6 +1,8 @@
 #include "PrecompiledHeader.h"
 
 #include "HealthComponent.h"
+#include "Game/AI/Human/HumanBossAIComponent.h"
+#include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
@@ -65,6 +67,11 @@ void HealthComponent::ApplyHit()
 
 void HealthComponent::ApplyDamage(float damage_)
 {
+    const auto actor_ = GetGameObject();
+    if (actor_ && actor_->manager &&
+        (actor_->GetManager().IsBossFinishActive() || actor_->GetManager().IsPlayerDeathActive())) return;
+    if (const auto bossAI_ = actor_ ? actor_->GetComponent<HumanBossAIComponent>() : nullptr)
+        damage_ = bossAI_->ConstrainBattleDamage(damage_);
     const bool wasDead_ = IsDead();
 
     // 0未満にならないようHPを減らし、死亡した瞬間だけDeath Actionを呼ぶ。
@@ -74,6 +81,8 @@ void HealthComponent::ApplyDamage(float damage_)
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!wasDead_ && IsDead() && owner_)
     {
+        // 既存の死亡Actionを維持し、Playerだけは衝突走査後のコンテニュー演出も予約する。
+        if (owner_->manager) owner_->GetManager().RequestPlayerDeath(owner_);
         owner_->ExecuteAction("Health_Death");
     }
 }
@@ -87,9 +96,19 @@ void HealthComponent::Heal(float amount_)
 
 void HealthComponent::ResetHealth()
 {
+    if (const auto actor_ = GetGameObject())
+        if (const auto bossAI_ = actor_->GetComponent<HumanBossAIComponent>()) bossAI_->ResetBerserk();
     // デバッグやリトライ時に、死亡フラグも含めて正常な生存状態へ戻す。
     currentHealth = maxHealth;
     PublishToBlackboard();
+}
+
+void HealthComponent::ConfirmPresentationDeath()
+{
+    if (IsDead()) return;
+    currentHealth = 0.0f;
+    PublishToBlackboard();
+    if (const auto actor_ = GetGameObject()) actor_->ExecuteAction("Health_Death");
 }
 
 void HealthComponent::RegisterActions()

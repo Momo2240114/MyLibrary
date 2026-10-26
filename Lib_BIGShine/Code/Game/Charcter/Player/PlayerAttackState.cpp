@@ -522,6 +522,7 @@ void PlayerAttackState::ApplyAttackFacingAssist(
     float yawDifference_ = NormalizeAngleDegrees(desiredYaw_ - currentYaw_);
     if (std::abs(yawDifference_) <= 0.001f) return;
 
+    // 往復する補正も絶対角度で累積し、長い攻撃で追従が無制限に続くことを防ぐ。
     const float remainingTotalDegrees_ =
         (std::max)(settings_.maximumTotalRotationDegrees, 0.0f) -
         accumulatedFacingCorrectionDegrees;
@@ -582,6 +583,7 @@ void PlayerAttackState::ApplyAttackPositionAssist(
     if (distanceSquared_ <= 0.000001f) return;
 
     const float distance_ = std::sqrt(distanceSquared_);
+    // 見た目の停止距離よりColliderの合計半径が大きい場合は、判定同士の間隔を優先する。
     const float colliderStopDistance_ =
         GetWorldCapsuleRadius(owner_) + GetWorldCapsuleRadius(target_) + 0.05f;
     const float stopDistance_ =
@@ -661,6 +663,7 @@ std::shared_ptr<CameraLockOnComponent> PlayerAttackState::ResolveCameraLockOnCom
     return nullptr;
 }
 
+// 反撃だけに使う広い補正Presetを開始し、このStateが停止すべきWarpとして記録する。
 void PlayerAttackState::StartCounterMotionWarp()
 {
     const std::shared_ptr<GameObject> owner_ = GetOwner();
@@ -675,6 +678,7 @@ void PlayerAttackState::StartCounterMotionWarp()
     counterMotionWarpActive = true;
 }
 
+// このStateが開始した反撃用Presetだけを停止し、終了・中断後の補正残りを防ぐ。
 void PlayerAttackState::StopCounterMotionWarp()
 {
     if (!counterMotionWarpActive) return; 

@@ -49,6 +49,10 @@ struct ModelLoadEntry
     double relativeLoadWeight = 1.0;
     double completedLoadMilliseconds = 0.0;
     std::chrono::steady_clock::time_point loadStartTime;
+    // GPU準備は主スレッドだけが進める。モデル全体を1フレームで作らないための再開位置。
+    std::size_t gpuMaterialCursor = 0;
+    std::size_t gpuMeshCursor = 0;
+    bool gpuNodesBound = false;
     // Thread間でResource/Error更新を守るMutex。
     mutable std::mutex mutex;
 };

@@ -445,7 +445,8 @@ void PrefabWorkspaceWindow::LoadPrefabForEdit(const std::string& prefabName_)
     editingPrefabName = prefabName_;
     // 読み込み先をPreview専用Managerに限定し、現在のSceneへPrefabを増やさない。
     previewGameObjectManager->Clear();
-    editingRootObject = previewGameObjectManager->Instantiate(editingPrefabName);
+    // 編集時は内部Object名を保持し、保存先のPrefab名で生成先や装着先の参照名を変えない。
+    editingRootObject = previewGameObjectManager->Instantiate(editingPrefabName, true);
     if (const std::shared_ptr<GameObject> rootObject_ = editingRootObject.lock())
     {
         previewGameObjectManager->SetSelectedObject(rootObject_);

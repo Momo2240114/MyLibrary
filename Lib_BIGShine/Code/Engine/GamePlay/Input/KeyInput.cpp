@@ -1,29 +1,37 @@
 #include "PrecompiledHeader.h"
 
 #include "KeyInput.h"
+#include "Engine/Debug/TracyProfiler.h"
 
-std::unordered_map<int, bool> KeyInput::oldState;
+std::array<bool, 256> KeyInput::oldState{};
+std::array<bool, 256> KeyInput::currentState{};
 
-//キーが押されているかを検知
-bool KeyInput::KeyPressed(int key)
+// 判定の呼び出し順や回数によらず、同じフレームでは同じ入力結果を返す。
+void KeyInput::Update()
 {
-    return (GetAsyncKeyState(key) & 0x8000) != 0;
+    BS_PROFILE_SCOPE("KeyInput::Update");
+    oldState = currentState;
+    for (int key_ = 0; key_ < static_cast<int>(currentState.size()); ++key_)
+    {
+        currentState[key_] = (GetAsyncKeyState(key_) & 0x8000) != 0;
+    }
 }
 
-// 押した瞬間を検知
-bool KeyInput::KeyPressedIn(int key) {
-    bool current = KeyPressed(key);
-    bool prev = oldState[key];
-    oldState[key] = current;
-    return (!prev && current);
+// 現在フレームでキーが押されているかを取得する。
+bool KeyInput::KeyPressed(int key_)
+{
+    return key_ >= 0 && key_ < static_cast<int>(currentState.size()) && currentState[key_];
 }
 
-// 離した瞬間を検知
-bool KeyInput::KeyPressedOut(int key) {
-    bool current = KeyPressed(key);
-    bool prev = oldState[key];
-    oldState[key] = current;
-    return (prev && !current);
+// 前フレームから押下へ変化した入力を、消費せずに取得する。
+bool KeyInput::KeyPressedIn(int key_)
+{
+    return KeyPressed(key_) && !oldState[key_];
 }
 
-
+// 前フレームから解放へ変化した入力を、消費せずに取得する。
+bool KeyInput::KeyPressedOut(int key_)
+{
+    return key_ >= 0 && key_ < static_cast<int>(currentState.size()) &&
+        oldState[key_] && !currentState[key_];
+}

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Engine/GamePlay/Core/Component/ComponentBase.h"
+#include <algorithm>
 
 enum class BLACKBOARD_VALUE_TYPE
 {
@@ -34,11 +35,15 @@ struct ActionReference {
     // 指定Stateの再生位置を基準に実行し、速度カーブによる時間のずれを防ぐ。
     std::string animationState;
     bool useNormalizedTime = false;
+    // OwnerのScreenTransitionComponentが完全被覆を描画するまで後続Actionを待つ。
+    bool waitForScreenCovered = false;
 };
 
 // 複数Actionを時間軸でまとめたシーケンスデータ。
 // Animation以外からも、カメラ・VFX・Combatの一連演出を呼べるようにする。
 struct SequenceData {
+    // 編集方法の指定だけを保存し、本番のAction実行方式は変えない。
+    bool cinematicEditing = false;
     std::string name = "New Sequence";
     std::vector<ActionReference> actions;
     float duration = 10.0f;
@@ -61,6 +66,8 @@ struct PendingAction {
     std::vector<BlackboardValueWrite> blackboardWrites;
     std::string animationState;
     bool useNormalizedTime = false;
+    // OwnerのScreenTransitionComponentが完全被覆を描画するまで後続Actionを待つ。
+    bool waitForScreenCovered = false;
 };
 
 // Editorで組んだAction列を再生するComponent。
@@ -81,6 +88,10 @@ public:
     void StartSequence(int index_);
     // 外部Stateは開始時の世代を保存し、自分の予約だけを停止する。
     unsigned int GetPlaybackGeneration() const { return playbackGeneration; }
+    // 汎用プレビューが実際のSequence時刻とロード待ちを表示するための情報。
+    float GetPlaybackTime() const { return std::clamp(playbackDuration - remainingDuration, 0.0f, (std::max)(0.0f, playbackDuration)); }
+    const std::string& GetPlayingSequenceName() const { return playingSequenceName; }
+    bool IsWaitingForObject() const { return waitingForObject; }
     void StopPlayback(unsigned int generation_);
     void SetRegisterGlobal(bool registerGlobal_) { registerGlobal = registerGlobal_; }
     // 指定名の即時実行Sequenceが無ければ作成し、外部から呼べるActionとして登録する。
@@ -114,6 +125,9 @@ private:
     // trueならLocalだけでなくGlobalActionにもSequenceを公開する。
     bool registerGlobal = false;
     float remainingDuration = 0.0f;
+    float playbackDuration = 0.0f;
+    std::string playingSequenceName;
+    bool waitingForObject = false;
     std::string pendingCompletionAction;
     unsigned int playbackGeneration = 0; // Action内で別Sequenceが始まった場合に古い予約を中断する。
 };

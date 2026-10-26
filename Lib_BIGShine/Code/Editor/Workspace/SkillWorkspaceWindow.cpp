@@ -40,7 +40,7 @@ namespace
             return input_.at("Slot").get<int>();
         }
         const std::string action_ = input_.value("Action", std::string());
-        return action_ == "SkillB" ? 0 : action_ == "SkillA" ? 1 : action_ == "SkillC" ? 2 : -1;
+        return action_ == "SkillB" ? 0 : action_ == "SkillA" ? 1 : action_ == "SkillC" ? 2 : action_ == "SkillD" ? 3 : -1;
     }
 
     // 装備名はSceneへ分離し、ライブラリ側では入力のスロット番号だけを検証する。
@@ -53,7 +53,7 @@ namespace
             {
                 const int slotIndex_ = GetInputSlotIndex(input_);
                 if (slotIndex_ < 0 || slotIndex_ >= static_cast<int>(PlayerSkillLoadout::SLOT_COUNT))
-                    throw std::runtime_error("Input Slot must be 0, 1 or 2.");
+                    throw std::runtime_error("Input Slot must be 0, 1, 2 or 3.");
                 if (input_.at("ModifierAction").get<std::string>().empty() || input_.at("TriggerAction").get<std::string>().empty())
                     throw std::runtime_error("Input Action names must not be empty.");
                 const int priority_ = input_.value("Priority", 100);
@@ -392,6 +392,8 @@ void SkillWorkspaceWindow::DrawPhaseInspector()
     const auto target_ = targetObject.lock();
     const auto animation_ = target_ ? target_->GetComponent<AnimationControllerComponent>() : nullptr;
     dirty |= ImGui::InputText("Animation", &phase_.animationState);
+    // 未指定なら通常Animationを使い、保存済みの空中発動設定もここで編集できるようにする。
+    dirty |= ImGui::InputText("Air Animation (Optional)", &phase_.airAnimationState);
     dirty |= ImGui::InputText("Motion Warp Preset", &phase_.motionWarpPreset);
     if (animation_ && ImGui::BeginCombo("Actor Animations", phase_.animationState.c_str()))
     {
@@ -473,13 +475,13 @@ void SkillWorkspaceWindow::DrawInputBindings()
         std::string modifier_ = json_.value("ModifierAction", std::string());
         std::string trigger_ = json_.value("TriggerAction", std::string());
         int priority_ = json_.value("Priority", 100);
-        bool changed_ = ImGui::InputInt("SkillSlot (0..2)", &slotIndex_);
+        bool changed_ = ImGui::InputInt("SkillSlot (0..3)", &slotIndex_);
         changed_ |= ImGui::InputText("Modifier Hold", &modifier_);
         changed_ |= ImGui::InputText("Trigger Action", &trigger_);
         changed_ |= ImGui::InputInt("Priority", &priority_);
         if (changed_)
         {
-            json_["Slot"] = (std::clamp)(slotIndex_, 0, 2); json_["ModifierAction"] = modifier_; json_["TriggerAction"] = trigger_; json_["Priority"] = priority_;
+            json_["Slot"] = (std::clamp)(slotIndex_, 0, static_cast<int>(PlayerSkillLoadout::SLOT_COUNT) - 1); json_["ModifierAction"] = modifier_; json_["TriggerAction"] = trigger_; json_["Priority"] = priority_;
             json_.erase("Action");
             dirty = true;
         }
@@ -548,8 +550,8 @@ void SkillWorkspaceWindow::DrawExecutionPanel()
     {
         player_->DrawSkillLoadoutGui();
         ImGui::TextDisabled("Save the scene to keep the equipped skills.");
-        const char* slotNames_[] = { "SkillSlot0 (Square)", "SkillSlot1 (Triangle)", "SkillSlot2 (Circle)" };
-        ImGui::Combo("Equip / Preview Slot", &selectedPlayerSlot, slotNames_, 3);
+        const char* slotNames_[] = { "SkillSlot0 (Square)", "SkillSlot1 (Triangle)", "SkillSlot2 (Circle)", "SkillSlot3 (Cross)" };
+        ImGui::Combo("Equip / Preview Slot", &selectedPlayerSlot, slotNames_, static_cast<int>(PlayerSkillLoadout::SLOT_COUNT));
         if (ImGui::Button("Reset Skill Cooldowns")) player_->ResetSkillCooldowns();
     }
     else if (dragon_)
