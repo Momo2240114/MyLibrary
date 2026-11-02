@@ -37,26 +37,44 @@
                 "ZOrder": 2,
                 "RectTransform": {
                     "AnchorMin": [
-                        0,
-                        0
+                        0.5,
+                        0.5
                     ],
                     "AnchorMax": [
-                        0,
-                        0
+                        0.5,
+                        0.5
                     ],
                     "Pivot": [
                         0.5,
                         0.5
                     ],
                     "AnchoredPosition": [
-                        1105,
-                        330
+                        465,
+                        -6
                     ],
                     "SizeDelta": [
                         260,
                         86
                     ]
                 }
+            }
+        },
+        {
+            "TypeName": "SpriteRenderer",
+            "Enabled": true,
+            "UpdateEnabled": true,
+            "LateUpdateEnabled": true,
+            "UpdatePriority": 0,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": true,
+            "Data": {
+                "Color": [
+                    1,
+                    1,
+                    1,
+                    1
+                ],
+                "LinearSampling": true
             }
         },
         {

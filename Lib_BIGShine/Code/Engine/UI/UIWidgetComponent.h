@@ -74,7 +74,9 @@ public:
     const UIScreenRect& GetScreenRect() const { return screenRect; }
     // 保存された回転と独立したモーションの回転を合成する。
     float GetVisualRotation();
-    int GetZOrder() const { return zOrder; }
+    int GetZOrder() const { return zOrder + runtimeZOrderOffset; }
+    // 拡大表示などの一時的な前面化を、保存対象の描画順から分離する。
+    void SetRuntimeZOrderOffset(int offset_) { runtimeZOrderOffset = offset_; }
     bool IsVisible() const { return visible; }
     bool IsInputEnabled() const { return inputEnabled; }
     bool IsRaycastTarget() const { return raycastTarget; }
@@ -93,6 +95,7 @@ private:
     UIScreenRect screenRect;
     // 同じBoard内での描画/入力順。
     int zOrder = 0;
+    int runtimeZOrderOffset = 0;
     // 表示、入力、Raycast対象の有効状態。
     bool visible = true;
     bool inputEnabled = true;

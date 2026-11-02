@@ -10,6 +10,7 @@
 #include <filesystem>
 #include <fstream>
 #include <random>
+#include <utility>
 
 namespace
 {
@@ -134,6 +135,8 @@ void AIBehaviorGraph::Clear()
     // Assetとして保持するノードと接続情報を破棄する。
     nodes.clear();
     links.clear();
+    areas.clear();
+    priorityFromPositions = true;
     // 実行途中の状態も破棄し、新規GraphとしてIDを1から発行し直す。
     runtimeStates.clear();
     nextId = 1;
@@ -340,6 +343,16 @@ void AIBehaviorGraph::Serialize(nlohmann::json& json_) const
     json_ = nlohmann::json::object();
     json_["Version"] = 1;
     json_["NextId"] = nextId;
+    json_["PriorityFromPositions"] = priorityFromPositions;
+    json_["Areas"] = nlohmann::json::array();
+    for (const auto& area_ : areas)
+    {
+        json_["Areas"].push_back({ { "Id", area_.id }, { "Name", area_.name },
+            { "Comment", area_.comment }, { "Position", { area_.position.x, area_.position.y } },
+            { "Size", { area_.size.x, area_.size.y } },
+            { "Color", { area_.color.x, area_.color.y, area_.color.z, area_.color.w } },
+            { "NodeIds", area_.nodeIds } });
+    }
     json_["Nodes"] = nlohmann::json::array();
     json_["Links"] = nlohmann::json::array();
 
@@ -396,6 +409,7 @@ void AIBehaviorGraph::Deserialize(const nlohmann::json& json_)
     // 保存済みIDを復元しつつ、次に生成するIDが既存要素と衝突しないよう下限を更新する。
     Clear();
     nextId = json_.value("NextId", static_cast<uintptr_t>(1));
+    priorityFromPositions = json_.value("PriorityFromPositions", true);
 
     if (json_.contains("Nodes") && json_["Nodes"].is_array())
     {
@@ -467,6 +481,27 @@ void AIBehaviorGraph::Deserialize(const nlohmann::json& json_)
         }
     }
 
+    // 領域を持たない旧Assetも従来どおり読み込み、IDはノード・ピン・リンクと共有する。
+    if (json_.contains("Areas") && json_["Areas"].is_array())
+    {
+        for (const auto& areaJson_ : json_["Areas"])
+        {
+            AIBehaviorArea area_;
+            area_.id = areaJson_.value("Id", static_cast<uintptr_t>(0));
+            if (area_.id == 0 || FindNode(area_.id)) continue;
+            area_.name = areaJson_.value("Name", std::string("Action Area"));
+            area_.comment = areaJson_.value("Comment", std::string{});
+            const auto position_ = areaJson_.value("Position", std::vector<float>{ 0.0f, 0.0f });
+            const auto size_ = areaJson_.value("Size", std::vector<float>{ 500.0f, 300.0f });
+            const auto color_ = areaJson_.value("Color", std::vector<float>{ 0.2f, 0.35f, 0.55f, 0.18f });
+            if (position_.size() == 2) area_.position = { position_[0], position_[1] };
+            if (size_.size() == 2) area_.size = { (std::max)(size_[0], 240.0f), (std::max)(size_[1], 160.0f) };
+            if (color_.size() == 4) area_.color = { color_[0], color_[1], color_[2], color_[3] };
+            area_.nodeIds = areaJson_.value("NodeIds", std::vector<uintptr_t>{});
+            areas.push_back(std::move(area_));
+            SetIdCounterFloor(areas.back().id + 1);
+        }
+    }
     EnsureDefaultGraph();
 }
 
@@ -510,11 +545,10 @@ AI_BEHAVIOR_STATUS AIBehaviorGraph::TickNode(AIBehaviorNode& node_, AIBehaviorCo
 {
     runtimeActiveNodeIds.push_back(node_.id);
 
-    if (IsComposite(node_.type))
-    {
-        return TickComposite(node_, context_);
-    }
-    return TickTask(node_, context_);
+    const AI_BEHAVIOR_STATUS status_ = IsComposite(node_.type)
+        ? TickComposite(node_, context_) : TickTask(node_, context_);
+    if (context_.nodeEvaluationObserver) context_.nodeEvaluationObserver(node_, status_);
+    return status_;
 }
 
 // 条件を満たすAction名を、副作用なしでRootから収集する。
@@ -540,7 +574,13 @@ bool AIBehaviorGraph::CollectSelectableActions(const AIBehaviorNode& node_, AIBe
     BS_PROFILE_SCOPE("AIBehaviorGraph::CollectSelectableActions");
     if (std::find(path_.begin(), path_.end(), node_.id) != path_.end()) return false;
     if (node_.type == AI_BEHAVIOR_NODE_TYPE::BLACKBOARD_CONDITION)
-        return EvaluateBlackboardCondition(node_, context_);
+    {
+        const bool passed_ = EvaluateBlackboardCondition(node_, context_);
+        // 抽選前に除外された枝の条件も、実際の事前評価結果として通知する。
+        if (context_.nodeEvaluationObserver) context_.nodeEvaluationObserver(node_,
+            passed_ ? AI_BEHAVIOR_STATUS::SUCCESS : AI_BEHAVIOR_STATUS::FAILURE);
+        return passed_;
+    }
     if (node_.type == AI_BEHAVIOR_NODE_TYPE::WAIT_BLACKBOARD_BOOL)
     {
         BlackboardComponent* blackboard_ = ResolveBlackboard(node_, context_);
@@ -913,4 +953,283 @@ AIBehaviorNode* AIBehaviorGraph::FindRootNode()
         if (node_.type == AI_BEHAVIOR_NODE_TYPE::ROOT) return &node_;
     }
     return nullptr;
+}
+
+// 領域の余白にタイトルを置き、ノードとピンを枠の内側へ収める。
+void AIBehaviorGraph::FitArea(AIBehaviorArea& area_)
+{
+    bool found_ = false;
+    float left_ = 0.0f, top_ = 0.0f, right_ = 0.0f, bottom_ = 0.0f;
+    for (const uintptr_t nodeId_ : area_.nodeIds)
+    {
+        const auto node_ = FindNode(nodeId_);
+        if (!node_) continue;
+        if (!found_) { left_ = right_ = node_->position.x; top_ = bottom_ = node_->position.y; found_ = true; }
+        left_ = (std::min)(left_, node_->position.x);
+        right_ = (std::max)(right_, node_->position.x + 210.0f);
+        top_ = (std::min)(top_, node_->position.y);
+        bottom_ = (std::max)(bottom_, node_->position.y + 112.0f);
+    }
+    if (!found_) return;
+    // 説明文を置く上側の余白と、入れ子の行動Boxを収める外側の余白を確保する。
+    const bool singleNode_ = area_.nodeIds.size() == 1;
+    const float sidePadding_ = singleNode_ ? 32.0f : 64.0f;
+    const float topPadding_ = singleNode_ ? 100.0f : 120.0f;
+    const float bottomPadding_ = singleNode_ ? 32.0f : 64.0f;
+    area_.position = { left_ - sidePadding_, top_ - topPadding_ };
+    area_.size = { right_ - left_ + sidePadding_ * 2.0f, bottom_ - top_ + topPadding_ + bottomPadding_ };
+}
+
+void AIBehaviorGraph::OrganizeActionAreas()
+{
+    BS_PROFILE_SCOPE("AIBehaviorGraph::OrganizeActionAreas");
+    // 行動と条件を一緒に囲んだBoxでは、既存の分類を保って再整列する。
+    bool partitioned_ = !areas.empty();
+    std::vector<uintptr_t> assigned_;
+    for (const auto& area_ : areas)
+    {
+        if (area_.nodeIds.empty()) partitioned_ = false;
+        for (const uintptr_t id_ : area_.nodeIds)
+        {
+            if (!FindNode(id_) || std::find(assigned_.begin(), assigned_.end(), id_) != assigned_.end()) partitioned_ = false;
+            assigned_.push_back(id_);
+        }
+    }
+    if (partitioned_)
+    {
+        ArrangeExistingAreas();
+        return;
+    }
+    auto root_ = FindRootNode();
+    if (!root_) return;
+    auto rootChildren_ = GetChildren(*root_);
+    if (rootChildren_.empty()) return;
+    auto selector_ = rootChildren_.front();
+    auto branches_ = GetChildren(*selector_);
+    const bool selectorIsBranch_ = branches_.empty();
+    if (selectorIsBranch_) branches_.push_back(selector_);
+    // 自動整列では座標と判断順を切り離し、SelectorとSequenceの既存Priorityを一切変更しない。
+    priorityFromPositions = false;
+    // 再整列しても、行動ごとに編集したタイトル・説明・色は維持する。
+    const auto previousAreas_ = areas;
+    areas.clear();
+    std::vector<uintptr_t> placed_{ root_->id };
+    if (selector_ != root_ && !selectorIsBranch_) placed_.push_back(selector_->id);
+    // 独立した行動を下の段へ折り返さず、条件と派生だけを同じ枝の下方向へ配置する。
+    constexpr float AREA_TOP = 500.0f;
+    constexpr float BRANCH_NODE_TOP = 620.0f;
+    float columnLeft_ = 0.0f;
+    for (std::size_t branchIndex_ = 0; branchIndex_ < branches_.size(); ++branchIndex_)
+    {
+        AIBehaviorArea area_;
+        area_.id = GenerateId();
+        area_.name = std::to_string(branchIndex_ + 1) + ". " + branches_[branchIndex_]->name;
+        area_.comment = "Priority順に評価する行動の枝。配置変更は判断順へ影響しません。";
+        const float hue_ = static_cast<float>(branchIndex_ % 4) * 0.08f;
+        area_.color = { 0.16f + hue_, 0.30f, 0.48f - hue_ * 0.5f, 0.18f };
+        float nextLeafX_ = columnLeft_ + 50.0f;
+        std::function<float(AIBehaviorNode&, int)> place_ = [&](AIBehaviorNode& node_, int depth_)
+        {
+            if (std::find(placed_.begin(), placed_.end(), node_.id) != placed_.end()) return node_.position.x;
+            placed_.push_back(node_.id);
+            area_.nodeIds.push_back(node_.id);
+            const auto children_ = GetChildren(node_);
+            float firstX_ = nextLeafX_, lastX_ = nextLeafX_;
+            bool first_ = true;
+            for (auto child_ : children_)
+            {
+                const float childX_ = place_(*child_, depth_ + 1);
+                if (first_) { firstX_ = childX_; first_ = false; }
+                lastX_ = childX_;
+            }
+            const float x_ = children_.empty() ? nextLeafX_ : (firstX_ + lastX_) * 0.5f;
+            if (children_.empty()) nextLeafX_ += 340.0f;
+            node_.position = { x_, BRANCH_NODE_TOP + static_cast<float>(depth_) * 280.0f };
+            return x_;
+        };
+        place_(*branches_[branchIndex_], 0);
+        FitArea(area_);
+        const float alignX_ = columnLeft_ - area_.position.x;
+        const float alignY_ = AREA_TOP - area_.position.y;
+        for (const uintptr_t id_ : area_.nodeIds)
+            if (auto node_ = FindNode(id_))
+            { node_->position.x += alignX_; node_->position.y += alignY_; }
+        area_.position = { columnLeft_, AREA_TOP };
+        columnLeft_ = area_.position.x + area_.size.x + 160.0f;
+        areas.push_back(std::move(area_));
+    }
+    // 大分類の内側に行動ごとのコメントBoxを作り、個々の攻撃や防御を見分けられるようにする。
+    std::vector<AIBehaviorArea> actionAreas_;
+    for (const auto& node_ : nodes)
+    {
+        if (node_.type != AI_BEHAVIOR_NODE_TYPE::PLAY_ACTION) continue;
+        const bool alreadySingle_ = std::any_of(areas.begin(), areas.end(),
+            [&node_](const AIBehaviorArea& area_)
+            { return area_.nodeIds.size() == 1 && area_.nodeIds.front() == node_.id; });
+        const auto previous_ = std::find_if(previousAreas_.begin(), previousAreas_.end(),
+            [&node_](const AIBehaviorArea& area_)
+            { return area_.nodeIds.size() == 1 && area_.nodeIds.front() == node_.id; });
+        if (alreadySingle_)
+        {
+            if (previous_ != previousAreas_.end())
+                for (auto& area_ : areas)
+                    if (area_.nodeIds.size() == 1 && area_.nodeIds.front() == node_.id)
+                    { area_.name = previous_->name; area_.comment = previous_->comment; area_.color = previous_->color; break; }
+            continue;
+        }
+        AIBehaviorArea actionArea_;
+        actionArea_.id = GenerateId();
+        actionArea_.name = previous_ != previousAreas_.end() ? previous_->name : node_.name;
+        actionArea_.comment = previous_ != previousAreas_.end() ? previous_->comment :
+            (node_.comment.empty() ? "実行Action: " + node_.actionName : node_.comment);
+        actionArea_.nodeIds.push_back(node_.id);
+        actionArea_.color = previous_ != previousAreas_.end() ? previous_->color : DirectX::XMFLOAT4{ 0.20f, 0.42f, 0.48f, 0.24f };
+        FitArea(actionArea_);
+        actionAreas_.push_back(std::move(actionArea_));
+    }
+    areas.insert(areas.end(), actionAreas_.begin(), actionAreas_.end());
+    // 直下の枝だけでなく派生を含むBox全体の幅を使い、Rootの中心を左右の中央へ合わせる。
+    float layoutLeft_ = areas.front().position.x;
+    float layoutRight_ = layoutLeft_ + areas.front().size.x;
+    for (const auto& area_ : areas)
+    {
+        layoutLeft_ = (std::min)(layoutLeft_, area_.position.x);
+        layoutRight_ = (std::max)(layoutRight_, area_.position.x + area_.size.x);
+    }
+    constexpr float ROOT_NODE_WIDTH = 190.0f;
+    const float decisionX_ = (layoutLeft_ + layoutRight_ - ROOT_NODE_WIDTH) * 0.5f;
+    root_->position = { decisionX_, 0.0f };
+    if (!selectorIsBranch_) selector_->position = { decisionX_, 180.0f };
+    // 未接続ノードは行動列の右端へ残し、無関係な行動の下へ配置しない。
+    float unlinkedX_ = columnLeft_;
+    for (auto& node_ : nodes)
+        if (std::find(placed_.begin(), placed_.end(), node_.id) == placed_.end())
+        { node_.position = { unlinkedX_, BRANCH_NODE_TOP }; unlinkedX_ += 340.0f; }
+}
+
+void AIBehaviorGraph::ArrangeExistingAreas()
+{
+    BS_PROFILE_SCOPE("AIBehaviorGraph::ArrangeExistingAreas");
+    priorityFromPositions = false;
+    std::vector<uintptr_t> placed_;
+    // Boxごとの横方向の領域を分け、縦方向はBox内の条件・派生だけに使う。
+    constexpr float BOX_TOP = 500.0f;
+    constexpr float BOX_NODE_TOP = 620.0f;
+    float columnLeft_ = 0.0f;
+    for (std::size_t areaIndex_ = 0; areaIndex_ < areas.size(); ++areaIndex_)
+    {
+        auto& area_ = areas[areaIndex_];
+        float leafX_ = columnLeft_ + 80.0f;
+        std::function<float(AIBehaviorNode&, int)> place_ = [&](AIBehaviorNode& node_, int depth_)
+        {
+            if (std::find(placed_.begin(), placed_.end(), node_.id) != placed_.end()) return node_.position.x;
+            placed_.push_back(node_.id);
+            std::vector<AIBehaviorNode*> children_;
+            for (auto child_ : GetChildren(node_))
+                if (std::find(area_.nodeIds.begin(), area_.nodeIds.end(), child_->id) != area_.nodeIds.end()) children_.push_back(child_);
+            float firstX_ = leafX_, lastX_ = leafX_;
+            bool first_ = true;
+            for (auto child_ : children_)
+            {
+                const float childX_ = place_(*child_, depth_ + 1);
+                if (first_) { firstX_ = childX_; first_ = false; }
+                lastX_ = childX_;
+            }
+            const float x_ = children_.empty() ? leafX_ : (firstX_ + lastX_) * 0.5f;
+            if (children_.empty()) leafX_ += 340.0f;
+            node_.position = { x_, BOX_NODE_TOP + static_cast<float>(depth_) * 280.0f };
+            return x_;
+        };
+        // Box外から入るリンクは表示用の接続として残し、Box内の根から配置する。
+        for (const uintptr_t id_ : area_.nodeIds)
+        {
+            const bool hasLocalParent_ = std::any_of(links.begin(), links.end(),
+                [&area_, id_](const AIBehaviorLink& link_)
+                { return link_.toNodeId == id_ && std::find(area_.nodeIds.begin(), area_.nodeIds.end(), link_.fromNodeId) != area_.nodeIds.end(); });
+            if (!hasLocalParent_)
+                if (auto node_ = FindNode(id_)) place_(*node_, 0);
+        }
+        for (const uintptr_t id_ : area_.nodeIds)
+            if (std::find(placed_.begin(), placed_.end(), id_) == placed_.end())
+                if (auto node_ = FindNode(id_)) place_(*node_, 0);
+        FitArea(area_);
+        const float alignX_ = columnLeft_ - area_.position.x;
+        const float alignY_ = BOX_TOP - area_.position.y;
+        for (const uintptr_t id_ : area_.nodeIds)
+            if (auto node_ = FindNode(id_))
+            { node_->position.x += alignX_; node_->position.y += alignY_; }
+        area_.position = { columnLeft_, BOX_TOP };
+        columnLeft_ = area_.position.x + area_.size.x + 160.0f;
+    }
+    // 横方向の専用列は保ち、実際に接続された派生Boxだけを下へ伸ばす。
+    std::unordered_map<uintptr_t, std::size_t> nodeAreas_;
+    for (std::size_t index_ = 0; index_ < areas.size(); ++index_)
+        for (const uintptr_t id_ : areas[index_].nodeIds) nodeAreas_[id_] = index_;
+    std::vector<std::vector<std::size_t>> successors_(areas.size());
+    std::vector<std::size_t> incoming_(areas.size(), 0);
+    std::vector<std::size_t> levels_(areas.size(), 0);
+    for (const auto& link_ : links)
+    {
+        const auto from_ = nodeAreas_.find(link_.fromNodeId);
+        const auto to_ = nodeAreas_.find(link_.toNodeId);
+        if (from_ == nodeAreas_.end() || to_ == nodeAreas_.end() || from_->second == to_->second) continue;
+        auto& destinations_ = successors_[from_->second];
+        if (std::find(destinations_.begin(), destinations_.end(), to_->second) != destinations_.end()) continue;
+        destinations_.push_back(to_->second);
+        ++incoming_[to_->second];
+    }
+    std::vector<std::size_t> ordered_;
+    for (std::size_t index_ = 0; index_ < areas.size(); ++index_)
+        if (incoming_[index_] == 0) ordered_.push_back(index_);
+    for (std::size_t cursor_ = 0; cursor_ < ordered_.size(); ++cursor_)
+        for (const std::size_t child_ : successors_[ordered_[cursor_]])
+        {
+            levels_[child_] = (std::max)(levels_[child_], levels_[ordered_[cursor_]] + 1);
+            if (--incoming_[child_] == 0) ordered_.push_back(child_);
+        }
+    // 循環するBox関係は段数を増やし続けず、横置きの位置を維持する。
+    if (!areas.empty() && ordered_.size() == areas.size())
+    {
+        std::vector<float> levelHeights_(areas.size(), 0.0f);
+        std::vector<float> levelTops_(areas.size(), BOX_TOP);
+        for (std::size_t index_ = 0; index_ < areas.size(); ++index_)
+            levelHeights_[levels_[index_]] = (std::max)(levelHeights_[levels_[index_]], areas[index_].size.y);
+        for (std::size_t level_ = 1; level_ < levelTops_.size(); ++level_)
+            levelTops_[level_] = levelTops_[level_ - 1] + levelHeights_[level_ - 1] + 180.0f;
+        for (std::size_t index_ = 0; index_ < areas.size(); ++index_)
+        {
+            auto& area_ = areas[index_];
+            const float deltaY_ = levelTops_[levels_[index_]] - area_.position.y;
+            for (const uintptr_t id_ : area_.nodeIds)
+                if (auto node_ = FindNode(id_)) node_->position.y += deltaY_;
+            area_.position.y += deltaY_;
+        }
+    }
+    // Boxへ含めていないRootと最上位Selectorは、判断全体の入口として上段へ残す。
+    auto root_ = FindRootNode();
+    if (root_ && std::find(placed_.begin(), placed_.end(), root_->id) == placed_.end())
+    {
+        // 空中・地上など直下の判断Boxが左端にあっても、派生した全行動Boxの範囲で中央を決める。
+        float layoutLeft_ = areas.empty() ? 0.0f : areas.front().position.x;
+        float layoutRight_ = areas.empty() ? 0.0f : layoutLeft_ + areas.front().size.x;
+        for (const auto& area_ : areas)
+        {
+            layoutLeft_ = (std::min)(layoutLeft_, area_.position.x);
+            layoutRight_ = (std::max)(layoutRight_, area_.position.x + area_.size.x);
+        }
+        constexpr float ROOT_NODE_WIDTH = 190.0f;
+        const float decisionX_ = areas.empty() ? 600.0f : (layoutLeft_ + layoutRight_ - ROOT_NODE_WIDTH) * 0.5f;
+        root_->position = { decisionX_, 0.0f };
+        placed_.push_back(root_->id);
+        const auto children_ = GetChildren(*root_);
+        if (!children_.empty() && std::find(placed_.begin(), placed_.end(), children_.front()->id) == placed_.end())
+        {
+            children_.front()->position = { decisionX_, 200.0f };
+            placed_.push_back(children_.front()->id);
+        }
+    }
+    float unassignedX_ = columnLeft_;
+    for (auto& node_ : nodes)
+        if (std::find(placed_.begin(), placed_.end(), node_.id) == placed_.end())
+        { node_.position = { unassignedX_, BOX_NODE_TOP }; unassignedX_ += 340.0f; }
 }

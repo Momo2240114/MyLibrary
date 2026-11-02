@@ -127,6 +127,17 @@ void AnimationGraphBridgeComponent::RequestInputCategory(const std::string& cate
     }
 }
 
+void AnimationGraphBridgeComponent::RequestCancelAttackTelegraphs()
+{
+    BS_PROFILE_SCOPE("AnimationGraphBridgeComponent::RequestCancelAttackTelegraphs");
+    if (!ResolveController()) return;
+    if (const auto board_ = ResolveBoard())
+    {
+        board_->SetBool(Keys::REQUEST, Keys::TELEGRAPH_CANCEL_PENDING, true);
+        ProcessRequests();
+    }
+}
+
 void AnimationGraphBridgeComponent::RequestYawLimit(float degrees_)
 {
     if (!ResolveController()) return;

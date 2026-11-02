@@ -15,6 +15,7 @@
 #include "Engine/Graphics/RenderSystem/BloomSystem.h"
 
 class HumanBossActionComponent;
+class HumanBossAITraceComponent;
 
 // 観察から選択する行動の大分類。特殊演出も同じ実行経路へ接続する。
 enum class HumanBossState { NEUTRAL, REACTION, OFFENSE, REPOSITION, SHADOW, DRAGON_SHADOW, SPECIAL };
@@ -99,6 +100,8 @@ public:
     // 実行中Actionに対応するノードをEditorで強調表示する。
     std::string GetCurrentGraphActionName() const;
 private:
+    // 追跡専用Componentは状態を読み取るだけで、AIの選択や実行を変更しない。
+    friend class HumanBossAITraceComponent;
     // 通常BehaviorGraphより優先する有限の連撃・受け流し・スタンを更新する。
     bool UpdateBerserk(float deltaTime_);
     // 通常AIと同じ戦闘許可を使い、単体テストでもHP閾値を予約する。
@@ -158,7 +161,7 @@ private:
     float GetAttackDecisionDistance() const;
     void TickBehaviorGraph(float deltaTime_, bool finishCurrent_ = false);
     // ツリー内の候補へ使用条件とPhase別Weightを渡す。
-    float GetGraphActionWeight(const std::string& actionName_) const;
+    float GetGraphActionWeight(const std::string& actionName_, std::string* reason_ = nullptr) const;
     // ツリーで選ばれた接近・後退・観察を既存の実行担当へ渡す。
     void UpdateLocomotion(const std::string& actionName_);
     AIBehaviorGraph behaviorGraph;
@@ -171,7 +174,7 @@ private:
     // 履歴、予兆時間、攻撃の到達可能性を一度の観察で更新する。
     bool ObservePlayer();
     // Phase、距離、連続使用、Cooldown、必要素材の条件をまとめて判定する。
-    bool IsAvailable(std::size_t index_) const;
+    bool IsAvailable(std::size_t index_, std::string* reason_ = nullptr) const;
     // 開始成功時だけ履歴とCooldownを確定する。
     bool BeginAction(std::size_t index_);
     // 行動終了後に観察時間と周回方向を選び直す。

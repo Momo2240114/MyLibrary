@@ -4,6 +4,7 @@
 #include "Engine/Debug/TracyProfiler.h"
 
 #include <SDL3/SDL_events.h>
+#include <SDL3/SDL_hints.h>
 #include <SDL3/SDL_timer.h>
 
 #include <algorithm>
@@ -53,6 +54,9 @@ bool ControllerInput::Initialize()
         return true;
     }
 
+    // DualShock 4のUSB/Bluetooth出力をHIDAPIで扱い、振動に必要な拡張レポートを有効にする。
+    SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_PS4, "1");
+    SDL_SetHint(SDL_HINT_JOYSTICK_ENHANCED_REPORTS, "1");
     initialized = SDL_InitSubSystem(SDL_INIT_GAMEPAD);
     if (!initialized)
     {

@@ -1020,6 +1020,7 @@ void ColliderComponent::SyncFromPhysics(float dt_)
 
 void ColliderComponent::PreparePhysicsStep(float deltaTime_)
 {
+    horizontalMovementBlocked = false;
     BS_PROFILE_SCOPE("ColliderComponent::PreparePhysicsStep");
 
     if (collisionRole == CollisionRole::HIT_BOX ||
@@ -1181,6 +1182,7 @@ void ColliderComponent::PreparePhysicsStep(float deltaTime_)
         position_ = characterController->getPosition();
         const bool hasSideCollision_ =
             collisionFlags_.isSet(PxControllerCollisionFlag::eCOLLISION_SIDES);
+        horizontalMovementBlocked = hasSideCollision_;
         const bool hasHorizontalMove_ =
             displacement_.x * displacement_.x + displacement_.z * displacement_.z > 0.000001f;
         if (hasSideCollision_ && hasHorizontalMove_ && verticalDisplacement_ <= 0.0f)

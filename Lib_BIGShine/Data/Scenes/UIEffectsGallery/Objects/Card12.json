@@ -37,20 +37,20 @@
                 "ZOrder": 0,
                 "RectTransform": {
                     "AnchorMin": [
-                        0,
-                        0
+                        0.5,
+                        0.5
                     ],
                     "AnchorMax": [
-                        0,
-                        0
+                        0.5,
+                        0.5
                     ],
                     "Pivot": [
                         0.5,
                         0.5
                     ],
                     "AnchoredPosition": [
-                        1105,
-                        525
+                        465,
+                        168
                     ],
                     "SizeDelta": [
                         272,

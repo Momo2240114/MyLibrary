@@ -89,6 +89,10 @@ public:
     // 注視方向を既存Movementへ予約する。
     void FaceTarget(const DirectX::XMFLOAT3& direction_, bool immediate_ = false);
 private:
+    // 自身の攻撃に対するジャストガード・ジャスト回避から無敵解除Actionへつなぐ。
+    void NotifyCounterOpportunity(std::shared_ptr<GameObject> attacker_);
+    // 反撃を受け付けるため、影移動と部位のAction由来の無敵を解除する。
+    void ReleaseCounterInvulnerability();
     // ガード継続への掴みは近距離・接地中だけ許可し、予兆後にも回避の成否を確認する。
     bool CanCaptureGuardingPlayer(const std::shared_ptr<GameObject>& target_) const;
     // ジャストガード反撃でPlayerを固定し、終了・死亡・中断時に必ず解除する。
@@ -249,7 +253,9 @@ private:
     void UpdateShadowDive(float deltaTime_);
     // 物理Queryで実際の着地点の高さと足場を確認する。
     bool ResolveShadowGround(const DirectX::XMFLOAT3& position_, DirectX::XMFLOAT3& ground_) const;
-    // 上空への出現経路に天井や障害物がないことを確認する。
+    // プレイヤーの正面に、着地時の間合いを確保した地面位置を求める。
+    bool ResolveShadowDiveGround(DirectX::XMFLOAT3& ground_) const;
+    // 正面の着地点から上空への出現経路に天井や障害物がないことを確認する。
     bool CanRaiseShadowDive(float height_) const;
     // 派生中断時に予兆と演出を所有者ごとに閉じる。
     void ClearShadowArea();

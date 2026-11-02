@@ -356,8 +356,15 @@
                                      "ownerTarget":  "Self",
                                      "playbackSpeed":  1.0,
                                      "startTime":  0.10000000149011612
-                                 }
-                             ],
+                                 },
+                      {
+                          "actionStart": "BeginWeakComboWarp",
+                          "startTime": 0.0,
+                          "endTime": 0.0,
+                          "eventTemplateType": "NONE",
+                          "label": "BeginWeakComboWarp"
+                      }
+                  ],
                   "loop":  false,
                   "name":  "SS_Attack2",
                   "rootMotion":  {
@@ -377,7 +384,8 @@
                   "rootMotionScaleCurveName":  "",
                   "sequencer":  "",
                   "speed":  2.0,
-                  "speedCurveName":  "",
+                  "sampleWeaponHitBoxes":  true,
+                  "speedCurveName":  "Player.WeakCombo2.Speed",
                   "type":  0
               }
 }

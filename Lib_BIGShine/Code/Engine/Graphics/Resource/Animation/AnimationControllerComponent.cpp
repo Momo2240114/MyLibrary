@@ -486,6 +486,7 @@ void AnimationControllerComponent::Update(float deltaTime_)
         modelComponent->UpdateTransformIfDirty();
     }
     // 最新のノード姿勢とRootMotion移動を反映してから、頭部のワールド位置を参照する。
+    animator.SampleWeaponHitBoxes(GetGameObject(), modelComponent);
     animator.FlushAttackTelegraphs(GetGameObject());
     PublishGraphFeedback();
 }

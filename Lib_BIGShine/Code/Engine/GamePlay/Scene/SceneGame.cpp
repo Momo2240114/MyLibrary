@@ -25,13 +25,17 @@ void SceneGame::Initialize()
     if (startImmediately && isEditorSuppressed) MouseInput::Instance().SetCursorLockEnabled(true);
 	if (!GameRuntimeSettings::IsGameOnly() && !startImmediately) _GameObjectManager->EnableEditorPlayMode();
 	if (SceneManager::IsRestoringEditorScene())
-
 	{
 		_GameObjectManager->RestoreEditorSnapshot(SceneManager::GetEditorPlaySnapshot());
 	}
 	else
 	{
+#if defined(BS_BUILD_RELEASE) && !defined(BS_APP_GAME) && !defined(BS_APP_ENGINE)
+        // 通常のReleaseはEditorを有効にした配布版でも、書き出し時の開始Sceneを読み込む。
+        const auto name_ = GameRuntimeSettings::GetStartupScene();
+#else
         const auto name_ = GameRuntimeSettings::IsGameOnly() ? GameRuntimeSettings::GetStartupScene() : std::string("MainScene");
+#endif
         if (isLoadingPreparation)
             _GameObjectManager->LoadSceneAsync(name_, startImmediately || GameRuntimeSettings::IsGameOnly() || SceneManager::IsEditorPlaySessionActive());
         else _GameObjectManager->LoadScene(name_);

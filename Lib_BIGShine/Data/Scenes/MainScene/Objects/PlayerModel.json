@@ -234,22 +234,22 @@
                             0.0
                         ],
                         "id": 0,
-                        "metalness": 0.10199999809265137,
+                        "metalness": 0.0,
                         "name": "Body.002",
                         "normalScale": 1.0,
                         "occlusionStrength": 0.4869999885559082,
-                        "outlineThicknessOffset": 0.029999999329447746,
-                        "rimStrength": 0.05999999865889549,
-                        "roughness": 1.0,
+                        "outlineThicknessOffset": 0.014999999664723873,
+                        "rimStrength": 0.5320000052452087,
+                        "roughness": 0.9980000257492065,
                         "shaderId": 3,
                         "shadowTint": [
-                            0.3824999928474426,
-                            0.414000004529953,
-                            0.44999998807907104
+                            0.3843137323856354,
+                            0.4156862795352936,
+                            0.46666666865348816
                         ],
-                        "specularStrength": 1.0,
-                        "specularToonBlend": 0.25,
-                        "toonPbrBlend": 1.0,
+                        "specularStrength": 1.1710000038146973,
+                        "specularToonBlend": 0.2720000147819519,
+                        "toonPbrBlend": 0.8500000238418579,
                         "uvAddressMode": 0,
                         "uvOffset": [
                             0.0,
@@ -262,7 +262,7 @@
                         ]
                     },
                     {
-                        "alphaCutoff": 0.5,
+                        "alphaCutoff": 1.0,
                         "alphaMode": 0,
                         "baseColor": [
                             1.0,
@@ -280,19 +280,19 @@
                         "metalness": 0.0,
                         "name": "Face.002",
                         "normalScale": 1.0,
-                        "occlusionStrength": 0.9950000047683716,
+                        "occlusionStrength": 1.0,
                         "outlineThicknessOffset": 0.0020000000949949026,
-                        "rimStrength": 0.05999999865889549,
-                        "roughness": 0.8500000238418579,
+                        "rimStrength": 0.35899999737739563,
+                        "roughness": 1.0,
                         "shaderId": 3,
                         "shadowTint": [
                             0.3824999928474426,
                             0.414000004529953,
                             0.44999998807907104
                         ],
-                        "specularStrength": 1.0,
-                        "specularToonBlend": 0.25,
-                        "toonPbrBlend": 0.9940000176429749,
+                        "specularStrength": 2.5290000438690186,
+                        "specularToonBlend": 0.6299999952316284,
+                        "toonPbrBlend": 0.7820000052452087,
                         "uvAddressMode": 0,
                         "uvOffset": [
                             0.0,
@@ -1457,6 +1457,392 @@
                         ],
                         "Type": 3,
                         "Visible": true
+                    },
+                    {
+                        "AssetPath": "Data/Curve/Player.WeakCombo1.Speed.json",
+                        "Color": 4282694655,
+                        "Name": "Player.WeakCombo1.Speed",
+                        "PointOptions": [
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            }
+                        ],
+                        "Points": [
+                            [
+                                0.0,
+                                2.0999999046325684
+                            ],
+                            [
+                                0.03999999538064003,
+                                2.0
+                            ],
+                            [
+                                0.10666666179895401,
+                                1.75
+                            ],
+                            [
+                                0.1666666567325592,
+                                2.0
+                            ],
+                            [
+                                0.21333332359790802,
+                                2.8499999046325684
+                            ],
+                            [
+                                0.3533332943916321,
+                                2.8499999046325684
+                            ],
+                            [
+                                0.43333330750465393,
+                                2.1500000953674316
+                            ],
+                            [
+                                0.5666666030883789,
+                                2.0
+                            ],
+                            [
+                                1.0,
+                                2.049999952316284
+                            ]
+                        ],
+                        "Type": 3,
+                        "Visible": true
+                    },
+                    {
+                        "AssetPath": "Data/Curve/Player.WeakCombo2.Speed.json",
+                        "Color": 4282694655,
+                        "Name": "Player.WeakCombo2.Speed",
+                        "PointOptions": [
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            }
+                        ],
+                        "Points": [
+                            [
+                                0.0,
+                                2.1500000953674316
+                            ],
+                            [
+                                0.024193545803427696,
+                                1.7999999523162842
+                            ],
+                            [
+                                0.0532258003950119,
+                                1.75
+                            ],
+                            [
+                                0.09677418321371078,
+                                2.75
+                            ],
+                            [
+                                0.20322579145431519,
+                                2.75
+                            ],
+                            [
+                                0.2516128718852997,
+                                2.1500000953674316
+                            ],
+                            [
+                                0.39677417278289795,
+                                2.049999952316284
+                            ],
+                            [
+                                0.5564515590667725,
+                                2.0999999046325684
+                            ],
+                            [
+                                1.0,
+                                2.0999999046325684
+                            ]
+                        ],
+                        "Type": 3,
+                        "Visible": true
+                    },
+                    {
+                        "AssetPath": "Data/Curve/Player.WeakCombo3.Speed.json",
+                        "Color": 4282694655,
+                        "Name": "Player.WeakCombo3.Speed",
+                        "PointOptions": [
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            }
+                        ],
+                        "Points": [
+                            [
+                                0.0,
+                                1.75
+                            ],
+                            [
+                                0.053333330899477005,
+                                1.5
+                            ],
+                            [
+                                0.13333332538604736,
+                                1.399999976158142
+                            ],
+                            [
+                                0.20666664838790894,
+                                2.5999999046325684
+                            ],
+                            [
+                                0.31999996304512024,
+                                2.5999999046325684
+                            ],
+                            [
+                                0.3999999761581421,
+                                1.7000000476837158
+                            ],
+                            [
+                                0.4999999701976776,
+                                1.600000023841858
+                            ],
+                            [
+                                1.0,
+                                1.600000023841858
+                            ]
+                        ],
+                        "Type": 3,
+                        "Visible": true
+                    },
+                    {
+                        "AssetPath": "Data/Curve/Player.WeakCombo4.Speed.json",
+                        "Color": 4282694655,
+                        "Name": "Player.WeakCombo4.Speed",
+                        "PointOptions": [
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            }
+                        ],
+                        "Points": [
+                            [
+                                0.0,
+                                1.649999976158142
+                            ],
+                            [
+                                0.04363636299967766,
+                                1.4500000476837158
+                            ],
+                            [
+                                0.1090909093618393,
+                                1.2999999523162842
+                            ],
+                            [
+                                0.1581818163394928,
+                                2.450000047683716
+                            ],
+                            [
+                                0.2181818187236786,
+                                2.450000047683716
+                            ],
+                            [
+                                0.2836363613605499,
+                                1.4500000476837158
+                            ],
+                            [
+                                0.33272725343704224,
+                                1.2999999523162842
+                            ],
+                            [
+                                0.38181817531585693,
+                                2.3499999046325684
+                            ],
+                            [
+                                0.49090906977653503,
+                                2.3499999046325684
+                            ],
+                            [
+                                0.5727272629737854,
+                                1.649999976158142
+                            ],
+                            [
+                                0.6981818079948425,
+                                1.4500000476837158
+                            ],
+                            [
+                                1.0,
+                                1.5
+                            ]
+                        ],
+                        "Type": 3,
+                        "Visible": true
                     }
                 ]
             },
@@ -2407,6 +2793,7 @@
                             ],
                             "loop": false,
                             "name": "SS_HitGround_Medium",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -2423,6 +2810,7 @@
                             },
                             "rootMotionScale": 1.0,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -2987,6 +3375,7 @@
                             ],
                             "loop": false,
                             "name": "SS_Sp_Skill1",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -3003,6 +3392,7 @@
                             },
                             "rootMotionScale": 0.03999999910593033,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.600000023841858,
@@ -3567,6 +3957,7 @@
                             ],
                             "loop": false,
                             "name": "SS_Attack4",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -3583,6 +3974,7 @@
                             },
                             "rootMotionScale": 0.019999999552965164,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.5,
@@ -3755,6 +4147,7 @@
                             ],
                             "loop": false,
                             "name": "SS_Quickshift_F",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -3771,6 +4164,7 @@
                             },
                             "rootMotionScale": 0.05000000074505806,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -4279,6 +4673,7 @@
                             ],
                             "loop": false,
                             "name": "Combo_Attack_Air_02_Seq",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": false,
@@ -4295,6 +4690,7 @@
                             },
                             "rootMotionScale": 0.009999999776482582,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.100000023841858,
@@ -4411,6 +4807,7 @@
                             ],
                             "loop": false,
                             "name": "SS_HitGround_Large",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -4427,6 +4824,7 @@
                             },
                             "rootMotionScale": 1.0,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -4486,6 +4884,7 @@
                             "events": [],
                             "loop": true,
                             "name": "Attack_Air_To_Floor_Start_01_Seq_0",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -4502,6 +4901,7 @@
                             },
                             "rootMotionScale": 1.0,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -5010,6 +5410,7 @@
                             ],
                             "loop": false,
                             "name": "SS_Attack3",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -5026,6 +5427,7 @@
                             },
                             "rootMotionScale": 0.02500000037252903,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.5,
@@ -5085,6 +5487,7 @@
                             "events": [],
                             "loop": false,
                             "name": "Jump_Combat_End_L_90_Seq",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -5101,6 +5504,7 @@
                             },
                             "rootMotionScale": 1.0,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -5609,6 +6013,7 @@
                             ],
                             "loop": false,
                             "name": "SS_Attack1",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -5625,6 +6030,7 @@
                             },
                             "rootMotionScale": 0.019999999552965164,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 2.0,
@@ -6133,6 +6539,7 @@
                             ],
                             "loop": false,
                             "name": "SS_Attack2",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -6149,6 +6556,7 @@
                             },
                             "rootMotionScale": 0.019999999552965164,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 2.0,
@@ -6208,6 +6616,7 @@
                             "events": [],
                             "loop": false,
                             "name": "Roll_Combat_F",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": false,
@@ -6224,6 +6633,7 @@
                             },
                             "rootMotionScale": 0.019999999552965164,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -6283,6 +6693,7 @@
                             "events": [],
                             "loop": true,
                             "name": "SS_HitAir_Large_Loop",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -6299,6 +6710,7 @@
                             },
                             "rootMotionScale": 1.0,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -6358,6 +6770,7 @@
                             "events": [],
                             "loop": true,
                             "name": "SS_Idle",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -6374,6 +6787,7 @@
                             },
                             "rootMotionScale": 1.0,
                             "rootMotionScaleCurveName": "SS_Idle.RootScale",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -6433,6 +6847,7 @@
                             "events": [],
                             "loop": true,
                             "name": "SS_Run",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -6449,6 +6864,7 @@
                             },
                             "rootMotionScale": 1.0,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -6508,6 +6924,7 @@
                             "events": [],
                             "loop": true,
                             "name": "SS_Sprint",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": false,
                                 "applyPositionY": true,
@@ -6524,6 +6941,7 @@
                             },
                             "rootMotionScale": 1.0,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -6583,6 +7001,7 @@
                             "events": [],
                             "loop": false,
                             "name": "Double_Jump_Combat_0_Seq_0",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -6599,6 +7018,7 @@
                             },
                             "rootMotionScale": 1.0,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -6658,6 +7078,7 @@
                             "events": [],
                             "loop": false,
                             "name": "Jump_Combat_End_0_Seq_0",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -6674,6 +7095,7 @@
                             },
                             "rootMotionScale": 1.0,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -6733,6 +7155,7 @@
                             "events": [],
                             "loop": false,
                             "name": "Jump_Combat_Start_0_Seq_0",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -6749,6 +7172,7 @@
                             },
                             "rootMotionScale": 1.0,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -7201,6 +7625,7 @@
                             ],
                             "loop": false,
                             "name": "SS_Dodge",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": false,
@@ -7217,6 +7642,7 @@
                             },
                             "rootMotionScale": 0.05000000074505806,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -7276,6 +7702,7 @@
                             "events": [],
                             "loop": true,
                             "name": "SS_Guard",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -7292,6 +7719,7 @@
                             },
                             "rootMotionScale": 1.0,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -7351,6 +7779,7 @@
                             "events": [],
                             "loop": true,
                             "name": "Combo_Attack_01_03_Seq",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -7367,6 +7796,7 @@
                             },
                             "rootMotionScale": 1.0,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -7875,6 +8305,7 @@
                             ],
                             "loop": false,
                             "name": "Combo_Attack_Air_01_Seq",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": false,
@@ -7891,6 +8322,7 @@
                             },
                             "rootMotionScale": 0.029999999329447746,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.100000023841858,
@@ -8567,6 +8999,7 @@
                             ],
                             "loop": false,
                             "name": "Combo_Attack_Air_03_Seq",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": false,
@@ -8583,6 +9016,7 @@
                             },
                             "rootMotionScale": 0.009999999776482582,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.100000023841858,
@@ -9035,6 +9469,7 @@
                             ],
                             "loop": false,
                             "name": "Combo_Attack_Air_04_Seq",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": false,
@@ -9051,6 +9486,7 @@
                             },
                             "rootMotionScale": 0.009999999776482582,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.100000023841858,
@@ -9447,6 +9883,7 @@
                             ],
                             "loop": false,
                             "name": "Dash_Air_Attack_Seq",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": false,
@@ -9463,6 +9900,7 @@
                             },
                             "rootMotionScale": 0.03500000014901161,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -9691,6 +10129,7 @@
                             ],
                             "loop": false,
                             "name": "Parry_L_Seq",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -9707,6 +10146,7 @@
                             },
                             "rootMotionScale": 1.0,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -10159,6 +10599,7 @@
                             ],
                             "loop": false,
                             "name": "AirDodge_Blend",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": false,
@@ -10175,6 +10616,7 @@
                             },
                             "rootMotionScale": 0.02500000037252903,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.7999999523162842,
@@ -10234,6 +10676,7 @@
                             "events": [],
                             "loop": false,
                             "name": "Jump_Combat_End_0_Seq",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -10250,6 +10693,7 @@
                             },
                             "rootMotionScale": 1.0,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -10366,6 +10810,7 @@
                             ],
                             "loop": false,
                             "name": "Jump_Combat_Start_0_Seq",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -10382,6 +10827,7 @@
                             },
                             "rootMotionScale": 1.0,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -10441,6 +10887,7 @@
                             "events": [],
                             "loop": true,
                             "name": "Jump_Combat_Loop_0_Seq_0",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -10457,6 +10904,7 @@
                             },
                             "rootMotionScale": 1.0,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -10516,6 +10964,7 @@
                             "events": [],
                             "loop": true,
                             "name": "Block_Walk_Loop_Blend",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": false,
@@ -10532,6 +10981,7 @@
                             },
                             "rootMotionScale": 0.0,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -10591,6 +11041,7 @@
                             "events": [],
                             "loop": true,
                             "name": "Walk_Block_Loop_B_0_Seq",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -10607,6 +11058,7 @@
                             },
                             "rootMotionScale": 0.0,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -10666,6 +11118,7 @@
                             "events": [],
                             "loop": true,
                             "name": "Block_Start_Blend",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -10682,6 +11135,7 @@
                             },
                             "rootMotionScale": 1.0,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -10741,6 +11195,7 @@
                             "events": [],
                             "loop": false,
                             "name": "Block_Walk_Start_Blend",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": false,
@@ -10757,6 +11212,7 @@
                             },
                             "rootMotionScale": 0.0,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -10873,6 +11329,7 @@
                             ],
                             "loop": false,
                             "name": "SS_HitAir_Medium",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -10889,6 +11346,7 @@
                             },
                             "rootMotionScale": 1.0,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -10948,6 +11406,7 @@
                             "events": [],
                             "loop": false,
                             "name": "SS_HitAir_Large_Start",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -10964,6 +11423,7 @@
                             },
                             "rootMotionScale": 1.0,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -11080,6 +11540,7 @@
                             ],
                             "loop": false,
                             "name": "SS_HitAir_Large_End",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -11096,6 +11557,7 @@
                             },
                             "rootMotionScale": 1.0,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -11212,6 +11674,7 @@
                             ],
                             "loop": false,
                             "name": "Block_Walk_End_Blend",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": false,
@@ -11228,6 +11691,7 @@
                             },
                             "rootMotionScale": 0.0,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -11568,6 +12032,7 @@
                             ],
                             "loop": true,
                             "name": "Run_Attack_01_Seq",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": false,
@@ -11584,6 +12049,7 @@
                             },
                             "rootMotionScale": 0.05999999865889549,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -11924,6 +12390,7 @@
                             ],
                             "loop": false,
                             "name": "Breakthrough_1段目",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": false,
@@ -11940,6 +12407,7 @@
                             },
                             "rootMotionScale": 0.009999999776482582,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 2.200000047683716,
@@ -12168,6 +12636,7 @@
                             ],
                             "loop": true,
                             "name": "Breakthrough_2段目",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": false,
@@ -12184,6 +12653,7 @@
                             },
                             "rootMotionScale": 0.009999999776482582,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.399999976158142,
@@ -12468,6 +12938,7 @@
                             ],
                             "loop": false,
                             "name": "Breakthrough_3段目",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": false,
@@ -12484,6 +12955,7 @@
                             },
                             "rootMotionScale": 0.009999999776482582,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.5,
@@ -12806,6 +13278,7 @@
                             ],
                             "loop": false,
                             "name": "Heal_1段目",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -12822,6 +13295,7 @@
                             },
                             "rootMotionScale": 1.0,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -13218,6 +13692,7 @@
                             ],
                             "loop": false,
                             "name": "PhantomRush_1段目",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": false,
@@ -13234,6 +13709,7 @@
                             },
                             "rootMotionScale": 0.0010000000474974513,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 2.4000000953674316,
@@ -13574,6 +14050,7 @@
                             ],
                             "loop": false,
                             "name": "PhantomRush_2段目",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": false,
@@ -13590,6 +14067,7 @@
                             },
                             "rootMotionScale": 0.009999999776482582,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 2.4000000953674316,
@@ -13930,6 +14408,7 @@
                             ],
                             "loop": false,
                             "name": "PhantomRush_3段目",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": false,
@@ -13946,6 +14425,7 @@
                             },
                             "rootMotionScale": 0.009999999776482582,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 2.4000000953674316,
@@ -14286,6 +14766,7 @@
                             ],
                             "loop": false,
                             "name": "PhantomRush_4段目",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": false,
@@ -14302,6 +14783,7 @@
                             },
                             "rootMotionScale": 0.009999999776482582,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 2.4000000953674316,
@@ -14698,6 +15180,7 @@
                             ],
                             "loop": false,
                             "name": "RisingJudgment_1段目",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -14714,6 +15197,7 @@
                             },
                             "rootMotionScale": 1.0,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.7999999523162842,
@@ -14998,6 +15482,7 @@
                             ],
                             "loop": false,
                             "name": "RisingJudgment_2段目",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -15014,6 +15499,7 @@
                             },
                             "rootMotionScale": 1.0,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.7999999523162842,
@@ -15298,6 +15784,7 @@
                             ],
                             "loop": false,
                             "name": "RisingJudgment_3段目",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": false,
@@ -15314,6 +15801,7 @@
                             },
                             "rootMotionScale": 0.009999999776482582,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 2.4000000953674316,
@@ -15654,6 +16142,7 @@
                             ],
                             "loop": false,
                             "name": "RisingJudgment_4段目",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -15670,6 +16159,7 @@
                             },
                             "rootMotionScale": 1.0,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.7999999523162842,
@@ -16010,6 +16500,7 @@
                             ],
                             "loop": false,
                             "name": "RisingJudgment_5段目",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": false,
@@ -16026,6 +16517,7 @@
                             },
                             "rootMotionScale": 0.009999999776482582,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 2.4000000953674316,
@@ -16310,6 +16802,7 @@
                             ],
                             "loop": false,
                             "name": "RisingJudgment_6段目",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": false,
@@ -16326,6 +16819,7 @@
                             },
                             "rootMotionScale": 0.009999999776482582,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 2.4000000953674316,
@@ -16442,6 +16936,7 @@
                             ],
                             "loop": false,
                             "name": "Block_Hit_Seq",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": false,
                                 "applyPositionY": false,
@@ -16458,6 +16953,7 @@
                             },
                             "rootMotionScale": 0.0,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -16574,6 +17070,7 @@
                             ],
                             "loop": false,
                             "name": "Block_Hit_Break_Seq",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": false,
                                 "applyPositionY": false,
@@ -16590,6 +17087,7 @@
                             },
                             "rootMotionScale": 0.0,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -16734,6 +17232,7 @@
                             ],
                             "loop": false,
                             "name": "Breakthrough_4段目",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -16750,6 +17249,7 @@
                             },
                             "rootMotionScale": 1.0,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.7999999523162842,
@@ -16866,6 +17366,7 @@
                             ],
                             "loop": true,
                             "name": "Breakthrough_5段目",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -16882,6 +17383,7 @@
                             },
                             "rootMotionScale": 1.0,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -17166,6 +17668,7 @@
                             ],
                             "loop": false,
                             "name": "Breakthrough_6段目",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -17182,6 +17685,7 @@
                             },
                             "rootMotionScale": 1.0,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -17522,6 +18026,7 @@
                             ],
                             "loop": false,
                             "name": "PhantomRush_5段目",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": false,
@@ -17538,6 +18043,7 @@
                             },
                             "rootMotionScale": 0.009999999776482582,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 2.4000000953674316,
@@ -17878,6 +18384,7 @@
                             ],
                             "loop": false,
                             "name": "PhantomRush_6段目",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": false,
@@ -17894,6 +18401,7 @@
                             },
                             "rootMotionScale": 0.019999999552965164,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -17953,6 +18461,7 @@
                             "events": [],
                             "loop": false,
                             "name": "RisingJudgment_7段目",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -17969,6 +18478,7 @@
                             },
                             "rootMotionScale": 1.0,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.7999999523162842,
@@ -18085,6 +18595,7 @@
                             ],
                             "loop": true,
                             "name": "RisingJudgment_8段目",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -18101,6 +18612,7 @@
                             },
                             "rootMotionScale": 1.0,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -18385,6 +18897,7 @@
                             ],
                             "loop": false,
                             "name": "RisingJudgment_9段目",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -18401,6 +18914,7 @@
                             },
                             "rootMotionScale": 1.0,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -18460,6 +18974,7 @@
                             "events": [],
                             "loop": false,
                             "name": "Execution_Target_03_Seq",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": false,
                                 "applyPositionY": false,
@@ -18476,6 +18991,7 @@
                             },
                             "rootMotionScale": 0.0,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -18535,6 +19051,7 @@
                             "events": [],
                             "loop": false,
                             "name": "Get_Up_Seq",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": false,
                                 "applyPositionY": false,
@@ -18551,6 +19068,7 @@
                             },
                             "rootMotionScale": 0.0,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -18610,6 +19128,7 @@
                             "events": [],
                             "loop": true,
                             "name": "IntroGateWalk",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": false,
                                 "applyPositionY": false,
@@ -18626,6 +19145,7 @@
                             },
                             "rootMotionScale": 1.0,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -18685,6 +19205,7 @@
                             "events": [],
                             "loop": false,
                             "name": "IntroDrawWeapon",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -18701,6 +19222,7 @@
                             },
                             "rootMotionScale": 1.0,
                             "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -19469,7 +19991,19 @@
                     }
                 ],
                 "DoubleJumpImpulse": 9.0,
+                "GroundAcceleration": 140.0,
+                "GroundAnimationReferenceSpeed": 16.0,
+                "GroundDeceleration": 160.0,
+                "GroundDirectionTurnSpeed": 1440.0,
                 "GroundDodgeCooldownDuration": 0.5,
+                "GroundInputReleaseThreshold": 0.10000000149011612,
+                "GroundInputStartThreshold": 0.18000000715255737,
+                "GroundLoopBlendTime": 0.07999999821186066,
+                "GroundReversalDeceleration": 330.0,
+                "GroundStartBlendTime": 0.07999999821186066,
+                "GroundStopBlendTime": 0.05999999865889549,
+                "GroundStopSpeedThreshold": 0.05000000074505806,
+                "GroundTurnSpeed": 1080.0,
                 "GuardMoveSpeed": 2.0,
                 "GuardSettings": {
                     "GuardBreakAnimation": "Block_Hit_Break_Seq",
@@ -19510,8 +20044,8 @@
                 "JustSuccessReturnDuration": 0.20000000298023224,
                 "JustSuccessTimeScale": 0.25,
                 "MoveSpeed": 22.0,
-                "RunEndDuration": 0.18000000715255737,
-                "RunStartDuration": 0.18000000715255737,
+                "RunEndDuration": 0.30000001192092896,
+                "RunStartDuration": 0.25999999046325684,
                 "SkillDefinitionsPath": "Data/Skills/PlayerSkills.json",
                 "SkillLoadout": {
                     "Slot0": "PhantomRush",
@@ -20874,6 +21408,7 @@
                 "Presets": [
                     {
                         "ContinueAcrossCombo": false,
+                        "DiscardUnappliedCorrection": false,
                         "EndNormalizedTime": 0.2800000011920929,
                         "HorizontalOnly": true,
                         "LockTargetNormalizedTime": 0.0,
@@ -20909,6 +21444,7 @@
                     },
                     {
                         "ContinueAcrossCombo": false,
+                        "DiscardUnappliedCorrection": false,
                         "EndNormalizedTime": 0.3799999952316284,
                         "HorizontalOnly": true,
                         "LockTargetNormalizedTime": 0.0,
@@ -20944,6 +21480,7 @@
                     },
                     {
                         "ContinueAcrossCombo": false,
+                        "DiscardUnappliedCorrection": false,
                         "EndNormalizedTime": 0.5,
                         "HorizontalOnly": true,
                         "LockTargetNormalizedTime": 0.0,
@@ -20979,6 +21516,7 @@
                     },
                     {
                         "ContinueAcrossCombo": false,
+                        "DiscardUnappliedCorrection": false,
                         "EndNormalizedTime": 0.30000001192092896,
                         "HorizontalOnly": true,
                         "LockTargetNormalizedTime": 0.0,
@@ -21014,6 +21552,7 @@
                     },
                     {
                         "ContinueAcrossCombo": false,
+                        "DiscardUnappliedCorrection": false,
                         "EndNormalizedTime": 0.6499999761581421,
                         "HorizontalOnly": true,
                         "LockTargetNormalizedTime": 0.0,
@@ -21042,6 +21581,150 @@
                         "StartNormalizedTime": 0.0,
                         "StopWhenTargetInvalid": true,
                         "TargetDistance": 1.149999976158142,
+                        "TargetMode": 4,
+                        "UseUnscaledTime": false,
+                        "WarpPosition": true,
+                        "WarpRotation": true
+                    },
+                    {
+                        "ContinueAcrossCombo": false,
+                        "DiscardUnappliedCorrection": true,
+                        "EndNormalizedTime": 0.20555554330348969,
+                        "HorizontalOnly": true,
+                        "LockTargetNormalizedTime": 0.18555554747581482,
+                        "LockTargetOnStart": false,
+                        "MaximumPositionCorrectionPerFrame": 2.5,
+                        "MaximumPositionCorrectionPerSecond": 24.0,
+                        "MaximumPositionScale": 1.100000023841858,
+                        "MaximumRotationDegrees": 55.0,
+                        "MaximumRotationDegreesPerSecond": 540.0,
+                        "MaximumTargetTravelAngleDegrees": 15.0,
+                        "MaximumTargetTravelDistance": 0.6000000238418579,
+                        "MaximumTotalPositionCorrection": 2.5,
+                        "MaximumWarpTargetDistance": 12.0,
+                        "MinimumPositionScale": 0.8999999761581421,
+                        "MinimumRemainingRootMotionDistance": 0.009999999776482582,
+                        "MinimumTargetDistance": 0.15000000596046448,
+                        "PositionCorrectionCurveName": "",
+                        "PositionMode": 4,
+                        "PositionStrength": 1.0,
+                        "PresetName": "WeakAttackWarp1",
+                        "RotationEndNormalizedTime": 0.18555554747581482,
+                        "RotationFullStrengthEndNormalizedTime": 0.13916665315628052,
+                        "RotationMode": 1,
+                        "RotationStartNormalizedTime": 0.0,
+                        "RotationStrength": 1.0,
+                        "StartNormalizedTime": 0.0,
+                        "StopWhenTargetInvalid": true,
+                        "TargetDistance": 1.2000000476837158,
+                        "TargetMode": 4,
+                        "UseUnscaledTime": false,
+                        "WarpPosition": true,
+                        "WarpRotation": true
+                    },
+                    {
+                        "ContinueAcrossCombo": false,
+                        "DiscardUnappliedCorrection": true,
+                        "EndNormalizedTime": 0.09274192899465561,
+                        "HorizontalOnly": true,
+                        "LockTargetNormalizedTime": 0.07274192571640015,
+                        "LockTargetOnStart": false,
+                        "MaximumPositionCorrectionPerFrame": 2.5,
+                        "MaximumPositionCorrectionPerSecond": 20.0,
+                        "MaximumPositionScale": 1.100000023841858,
+                        "MaximumRotationDegrees": 45.0,
+                        "MaximumRotationDegreesPerSecond": 540.0,
+                        "MaximumTargetTravelAngleDegrees": 15.0,
+                        "MaximumTargetTravelDistance": 0.6000000238418579,
+                        "MaximumTotalPositionCorrection": 1.25,
+                        "MaximumWarpTargetDistance": 12.0,
+                        "MinimumPositionScale": 0.8999999761581421,
+                        "MinimumRemainingRootMotionDistance": 0.009999999776482582,
+                        "MinimumTargetDistance": 0.15000000596046448,
+                        "PositionCorrectionCurveName": "",
+                        "PositionMode": 4,
+                        "PositionStrength": 1.0,
+                        "PresetName": "WeakAttackWarp2",
+                        "RotationEndNormalizedTime": 0.07274192571640015,
+                        "RotationFullStrengthEndNormalizedTime": 0.05455644801259041,
+                        "RotationMode": 1,
+                        "RotationStartNormalizedTime": 0.0,
+                        "RotationStrength": 1.0,
+                        "StartNormalizedTime": 0.0,
+                        "StopWhenTargetInvalid": true,
+                        "TargetDistance": 1.2000000476837158,
+                        "TargetMode": 4,
+                        "UseUnscaledTime": false,
+                        "WarpPosition": true,
+                        "WarpRotation": true
+                    },
+                    {
+                        "ContinueAcrossCombo": false,
+                        "DiscardUnappliedCorrection": true,
+                        "EndNormalizedTime": 0.20555554330348969,
+                        "HorizontalOnly": true,
+                        "LockTargetNormalizedTime": 0.18555554747581482,
+                        "LockTargetOnStart": false,
+                        "MaximumPositionCorrectionPerFrame": 2.5,
+                        "MaximumPositionCorrectionPerSecond": 20.0,
+                        "MaximumPositionScale": 1.100000023841858,
+                        "MaximumRotationDegrees": 45.0,
+                        "MaximumRotationDegreesPerSecond": 540.0,
+                        "MaximumTargetTravelAngleDegrees": 15.0,
+                        "MaximumTargetTravelDistance": 0.6000000238418579,
+                        "MaximumTotalPositionCorrection": 1.25,
+                        "MaximumWarpTargetDistance": 12.0,
+                        "MinimumPositionScale": 0.8999999761581421,
+                        "MinimumRemainingRootMotionDistance": 0.009999999776482582,
+                        "MinimumTargetDistance": 0.15000000596046448,
+                        "PositionCorrectionCurveName": "",
+                        "PositionMode": 4,
+                        "PositionStrength": 1.0,
+                        "PresetName": "WeakAttackWarp3",
+                        "RotationEndNormalizedTime": 0.18555554747581482,
+                        "RotationFullStrengthEndNormalizedTime": 0.13916665315628052,
+                        "RotationMode": 1,
+                        "RotationStartNormalizedTime": 0.0,
+                        "RotationStrength": 1.0,
+                        "StartNormalizedTime": 0.0,
+                        "StopWhenTargetInvalid": true,
+                        "TargetDistance": 1.2000000476837158,
+                        "TargetMode": 4,
+                        "UseUnscaledTime": false,
+                        "WarpPosition": true,
+                        "WarpRotation": true
+                    },
+                    {
+                        "ContinueAcrossCombo": false,
+                        "DiscardUnappliedCorrection": true,
+                        "EndNormalizedTime": 0.15000000596046448,
+                        "HorizontalOnly": true,
+                        "LockTargetNormalizedTime": 0.1300000101327896,
+                        "LockTargetOnStart": false,
+                        "MaximumPositionCorrectionPerFrame": 2.5,
+                        "MaximumPositionCorrectionPerSecond": 20.0,
+                        "MaximumPositionScale": 1.100000023841858,
+                        "MaximumRotationDegrees": 45.0,
+                        "MaximumRotationDegreesPerSecond": 540.0,
+                        "MaximumTargetTravelAngleDegrees": 15.0,
+                        "MaximumTargetTravelDistance": 0.6000000238418579,
+                        "MaximumTotalPositionCorrection": 1.25,
+                        "MaximumWarpTargetDistance": 12.0,
+                        "MinimumPositionScale": 0.8999999761581421,
+                        "MinimumRemainingRootMotionDistance": 0.009999999776482582,
+                        "MinimumTargetDistance": 0.15000000596046448,
+                        "PositionCorrectionCurveName": "",
+                        "PositionMode": 4,
+                        "PositionStrength": 1.0,
+                        "PresetName": "WeakAttackWarp4",
+                        "RotationEndNormalizedTime": 0.1300000101327896,
+                        "RotationFullStrengthEndNormalizedTime": 0.09750000387430191,
+                        "RotationMode": 1,
+                        "RotationStartNormalizedTime": 0.0,
+                        "RotationStrength": 1.0,
+                        "StartNormalizedTime": 0.0,
+                        "StopWhenTargetInvalid": true,
+                        "TargetDistance": 1.2000000476837158,
                         "TargetMode": 4,
                         "UseUnscaledTime": false,
                         "WarpPosition": true,

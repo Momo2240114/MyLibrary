@@ -934,6 +934,8 @@ void AnimationControllerComponent::SaveAsset(const std::string& assetName_)
             {"rootMotionScale", s.rootMotionScale},
             {"rootMotionScaleCurveName", s.rootMotionScaleCurveName},
             {"speedCurveName", s.speedCurveName},
+            {"playbackSpeedParamName", s.playbackSpeedParamName},
+            {"sampleWeaponHitBoxes", s.sampleWeaponHitBoxes},
             {"events", s.events},
             // Single用
             {"animationIndex", s.animationIndex},
@@ -1000,6 +1002,8 @@ void from_json(const nlohmann::json& j, AnimState& s)
     s.rootMotionScale = j.value("rootMotionScale", 1.0f);
     s.rootMotionScaleCurveName = j.value("rootMotionScaleCurveName", "");
     s.speedCurveName = j.value("speedCurveName", "");
+    s.playbackSpeedParamName = j.value("playbackSpeedParamName", "");
+    s.sampleWeaponHitBoxes = j.value("sampleWeaponHitBoxes", false);
 
     // Single用復元
     s.animationIndex = j.value("animationIndex", -1);

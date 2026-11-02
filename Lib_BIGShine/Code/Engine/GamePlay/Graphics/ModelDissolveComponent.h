@@ -41,7 +41,10 @@ public:
     void Reset(bool visible_);
     // 表示中から消滅、または非表示から形成を開始する。
     void Play(bool reveal_);
-    float GetProgress() const { return progress; }
+    // 演出の直接シークは通常の消滅再生を変更せず、一時的な進行度だけを上書きする。
+    void SetPresentationProgress(float progress_);
+    void ClearPresentationProgress() { presentationProgress = -1.0f; }
+    float GetProgress() const { return presentationProgress >= 0.0f ? presentationProgress : progress; }
     const ModelDissolveSettings& GetSettings() const { return settings; }
     ID3D11ShaderResourceView* GetNoiseTexture() const;
 
@@ -52,6 +55,7 @@ private:
     float disappearDuration = 4.0f;
     float revealDuration = 3.0f;
     bool startVisible = true;
+    float presentationProgress = -1.0f;
     float progress = 0.0f;
     float startProgress = 0.0f;
     float targetProgress = 0.0f;

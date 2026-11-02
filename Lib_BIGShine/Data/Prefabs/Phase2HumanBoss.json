@@ -1096,7 +1096,7 @@
                         "CollisionOwnerObjectName": "",
                         "CollisionRole": 3,
                         "ContainmentMode": 0,
-                        "DamageMultiplier": 1.0,
+                        "DamageMultiplier": 2.0,
                         "DebugPrimitiveColor": [
                             0.20000000298023224,
                             1.0,
@@ -14525,6 +14525,19 @@
                     "TypeName": "ParticleComponent",
                     "UpdateEnabled": true,
                     "UpdatePriority": 20
+                },
+                {
+                    "Data": {
+                        "MaxEntries": 256,
+                        "RecordingEnabled": true
+                    },
+                    "Enabled": true,
+                    "LateUpdateEnabled": false,
+                    "LateUpdatePriority": 0,
+                    "RequiredForSceneStart": false,
+                    "TypeName": "HumanBossAITraceComponent",
+                    "UpdateEnabled": true,
+                    "UpdatePriority": 1000
                 }
             ],
             "Layer": 2,

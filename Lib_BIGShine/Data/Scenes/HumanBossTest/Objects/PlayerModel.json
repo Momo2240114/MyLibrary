@@ -1405,6 +1405,392 @@
                         ],
                         "Type": 3,
                         "Visible": true
+                    },
+                    {
+                        "Name": "Player.WeakCombo1.Speed",
+                        "Type": 3,
+                        "Color": 4282694655,
+                        "Visible": true,
+                        "Points": [
+                            [
+                                0.0,
+                                2.1
+                            ],
+                            [
+                                0.03999999682108586,
+                                2.0
+                            ],
+                            [
+                                0.10666665818956231,
+                                1.75
+                            ],
+                            [
+                                0.1666666534211911,
+                                2.0
+                            ],
+                            [
+                                0.21333331637912462,
+                                2.85
+                            ],
+                            [
+                                0.35333330525292517,
+                                2.85
+                            ],
+                            [
+                                0.43333329889509686,
+                                2.15
+                            ],
+                            [
+                                0.5666666216320497,
+                                2.0
+                            ],
+                            [
+                                1.0,
+                                2.05
+                            ]
+                        ],
+                        "PointOptions": [
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            }
+                        ],
+                        "AssetPath": "Data/Curve/Player.WeakCombo1.Speed.json"
+                    },
+                    {
+                        "Name": "Player.WeakCombo2.Speed",
+                        "Type": 3,
+                        "Color": 4282694655,
+                        "Visible": true,
+                        "Points": [
+                            [
+                                0.0,
+                                2.15
+                            ],
+                            [
+                                0.024193546340319345,
+                                1.8
+                            ],
+                            [
+                                0.05322580194870256,
+                                1.75
+                            ],
+                            [
+                                0.09677418536127738,
+                                2.75
+                            ],
+                            [
+                                0.20322578925868248,
+                                2.75
+                            ],
+                            [
+                                0.2516128819393212,
+                                2.15
+                            ],
+                            [
+                                0.3967741599812372,
+                                2.05
+                            ],
+                            [
+                                0.5564515658273449,
+                                2.1
+                            ],
+                            [
+                                1.0,
+                                2.1
+                            ]
+                        ],
+                        "PointOptions": [
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            }
+                        ],
+                        "AssetPath": "Data/Curve/Player.WeakCombo2.Speed.json"
+                    },
+                    {
+                        "Name": "Player.WeakCombo3.Speed",
+                        "Type": 3,
+                        "Color": 4282694655,
+                        "Visible": true,
+                        "Points": [
+                            [
+                                0.0,
+                                1.75
+                            ],
+                            [
+                                0.053333329094781154,
+                                1.5
+                            ],
+                            [
+                                0.1333333227369529,
+                                1.4
+                            ],
+                            [
+                                0.20666665024227696,
+                                2.6
+                            ],
+                            [
+                                0.3199999745686869,
+                                2.6
+                            ],
+                            [
+                                0.39999996821085865,
+                                1.7
+                            ],
+                            [
+                                0.4999999602635733,
+                                1.6
+                            ],
+                            [
+                                1.0,
+                                1.6
+                            ]
+                        ],
+                        "PointOptions": [
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            }
+                        ],
+                        "AssetPath": "Data/Curve/Player.WeakCombo3.Speed.json"
+                    },
+                    {
+                        "Name": "Player.WeakCombo4.Speed",
+                        "Type": 3,
+                        "Color": 4282694655,
+                        "Visible": true,
+                        "Points": [
+                            [
+                                0.0,
+                                1.65
+                            ],
+                            [
+                                0.043636362690570946,
+                                1.45
+                            ],
+                            [
+                                0.10909090672642738,
+                                1.3
+                            ],
+                            [
+                                0.15818181475331966,
+                                2.45
+                            ],
+                            [
+                                0.21818181345285476,
+                                2.45
+                            ],
+                            [
+                                0.2836363574887112,
+                                1.45
+                            ],
+                            [
+                                0.33272726551560344,
+                                1.3
+                            ],
+                            [
+                                0.38181817354249575,
+                                2.35
+                            ],
+                            [
+                                0.49090908026892316,
+                                2.35
+                            ],
+                            [
+                                0.5727272603137437,
+                                1.65
+                            ],
+                            [
+                                0.6981818030491351,
+                                1.45
+                            ],
+                            [
+                                1.0,
+                                1.5
+                            ]
+                        ],
+                        "PointOptions": [
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 2,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            }
+                        ],
+                        "AssetPath": "Data/Curve/Player.WeakCombo4.Speed.json"
                     }
                 ]
             },
@@ -15138,8 +15524,17 @@
                 "JumpImpulseFallbackDuration": 0.18000000715255737,
                 "JustDodgeInvincibilityDuration": 0.5,
                 "MoveSpeed": 22.0,
-                "RunEndDuration": 0.18000000715255737,
-                "RunStartDuration": 0.18000000715255737,
+                "GroundAcceleration": 140.0,
+                "GroundDeceleration": 160.0,
+                "GroundTurnSpeed": 1080.0,
+                "GroundInputStartThreshold": 0.18,
+                "GroundInputReleaseThreshold": 0.1,
+                "GroundAnimationReferenceSpeed": 12.0,
+                "GroundStartBlendTime": 0.08,
+                "GroundLoopBlendTime": 0.08,
+                "GroundStopBlendTime": 0.06,
+                "RunEndDuration": 0.3,
+                "RunStartDuration": 0.26,
                 "SkillDefinitionsPath": "Data/Skills/PlayerSkills.json",
                 "SkillLoadout": {
                     "Slot0": "PhantomRush",
@@ -15149,7 +15544,10 @@
                 },
                 "StrongAttackHoldThreshold": 0.3499999940395355,
                 "StrongChargeAttackSpeed": 14.0,
-                "TimelineActionFallbackDuration": 1.5
+                "TimelineActionFallbackDuration": 1.5,
+                "GroundReversalDeceleration": 330.0,
+                "GroundDirectionTurnSpeed": 1440.0,
+                "GroundStopSpeedThreshold": 0.05
             },
             "Enabled": true,
             "LateUpdateEnabled": true,
@@ -16641,6 +17039,150 @@
                         "UseUnscaledTime": false,
                         "WarpPosition": true,
                         "WarpRotation": true
+                    },
+                    {
+                        "ContinueAcrossCombo": false,
+                        "EndNormalizedTime": 0.20555554584220678,
+                        "HorizontalOnly": true,
+                        "LockTargetNormalizedTime": 0.1855555458422068,
+                        "LockTargetOnStart": false,
+                        "MaximumPositionCorrectionPerFrame": 2.5,
+                        "MaximumPositionCorrectionPerSecond": 24.0,
+                        "MaximumPositionScale": 1.100000023841858,
+                        "MaximumRotationDegrees": 55.0,
+                        "MaximumRotationDegreesPerSecond": 540.0,
+                        "MaximumTargetTravelAngleDegrees": 15.0,
+                        "MaximumTargetTravelDistance": 0.6,
+                        "MaximumTotalPositionCorrection": 2.5,
+                        "MaximumWarpTargetDistance": 12.0,
+                        "MinimumPositionScale": 0.8999999761581421,
+                        "MinimumRemainingRootMotionDistance": 0.009999999776482582,
+                        "MinimumTargetDistance": 0.15000000596046448,
+                        "PositionCorrectionCurveName": "",
+                        "PositionMode": 4,
+                        "PositionStrength": 1.0,
+                        "PresetName": "WeakAttackWarp1",
+                        "RotationEndNormalizedTime": 0.1855555458422068,
+                        "RotationFullStrengthEndNormalizedTime": 0.1391666593816551,
+                        "RotationMode": 1,
+                        "RotationStartNormalizedTime": 0.0,
+                        "RotationStrength": 1.0,
+                        "StartNormalizedTime": 0.0,
+                        "StopWhenTargetInvalid": true,
+                        "TargetDistance": 1.2,
+                        "TargetMode": 4,
+                        "UseUnscaledTime": false,
+                        "WarpPosition": true,
+                        "WarpRotation": true,
+                        "DiscardUnappliedCorrection": true
+                    },
+                    {
+                        "ContinueAcrossCombo": false,
+                        "EndNormalizedTime": 0.09274192859925598,
+                        "HorizontalOnly": true,
+                        "LockTargetNormalizedTime": 0.07274192859925598,
+                        "LockTargetOnStart": false,
+                        "MaximumPositionCorrectionPerFrame": 2.5,
+                        "MaximumPositionCorrectionPerSecond": 20.0,
+                        "MaximumPositionScale": 1.100000023841858,
+                        "MaximumRotationDegrees": 45.0,
+                        "MaximumRotationDegreesPerSecond": 540.0,
+                        "MaximumTargetTravelAngleDegrees": 15.0,
+                        "MaximumTargetTravelDistance": 0.6,
+                        "MaximumTotalPositionCorrection": 1.25,
+                        "MaximumWarpTargetDistance": 12.0,
+                        "MinimumPositionScale": 0.8999999761581421,
+                        "MinimumRemainingRootMotionDistance": 0.009999999776482582,
+                        "MinimumTargetDistance": 0.15000000596046448,
+                        "PositionCorrectionCurveName": "",
+                        "PositionMode": 4,
+                        "PositionStrength": 1.0,
+                        "PresetName": "WeakAttackWarp2",
+                        "RotationEndNormalizedTime": 0.07274192859925598,
+                        "RotationFullStrengthEndNormalizedTime": 0.05455644644944198,
+                        "RotationMode": 1,
+                        "RotationStartNormalizedTime": 0.0,
+                        "RotationStrength": 1.0,
+                        "StartNormalizedTime": 0.0,
+                        "StopWhenTargetInvalid": true,
+                        "TargetDistance": 1.2,
+                        "TargetMode": 4,
+                        "UseUnscaledTime": false,
+                        "WarpPosition": true,
+                        "WarpRotation": true,
+                        "DiscardUnappliedCorrection": true
+                    },
+                    {
+                        "ContinueAcrossCombo": false,
+                        "EndNormalizedTime": 0.20555554584220678,
+                        "HorizontalOnly": true,
+                        "LockTargetNormalizedTime": 0.1855555458422068,
+                        "LockTargetOnStart": false,
+                        "MaximumPositionCorrectionPerFrame": 2.5,
+                        "MaximumPositionCorrectionPerSecond": 20.0,
+                        "MaximumPositionScale": 1.100000023841858,
+                        "MaximumRotationDegrees": 45.0,
+                        "MaximumRotationDegreesPerSecond": 540.0,
+                        "MaximumTargetTravelAngleDegrees": 15.0,
+                        "MaximumTargetTravelDistance": 0.6,
+                        "MaximumTotalPositionCorrection": 1.25,
+                        "MaximumWarpTargetDistance": 12.0,
+                        "MinimumPositionScale": 0.8999999761581421,
+                        "MinimumRemainingRootMotionDistance": 0.009999999776482582,
+                        "MinimumTargetDistance": 0.15000000596046448,
+                        "PositionCorrectionCurveName": "",
+                        "PositionMode": 4,
+                        "PositionStrength": 1.0,
+                        "PresetName": "WeakAttackWarp3",
+                        "RotationEndNormalizedTime": 0.1855555458422068,
+                        "RotationFullStrengthEndNormalizedTime": 0.1391666593816551,
+                        "RotationMode": 1,
+                        "RotationStartNormalizedTime": 0.0,
+                        "RotationStrength": 1.0,
+                        "StartNormalizedTime": 0.0,
+                        "StopWhenTargetInvalid": true,
+                        "TargetDistance": 1.2,
+                        "TargetMode": 4,
+                        "UseUnscaledTime": false,
+                        "WarpPosition": true,
+                        "WarpRotation": true,
+                        "DiscardUnappliedCorrection": true
+                    },
+                    {
+                        "ContinueAcrossCombo": false,
+                        "EndNormalizedTime": 0.15000000325116236,
+                        "HorizontalOnly": true,
+                        "LockTargetNormalizedTime": 0.13000000325116237,
+                        "LockTargetOnStart": false,
+                        "MaximumPositionCorrectionPerFrame": 2.5,
+                        "MaximumPositionCorrectionPerSecond": 20.0,
+                        "MaximumPositionScale": 1.100000023841858,
+                        "MaximumRotationDegrees": 45.0,
+                        "MaximumRotationDegreesPerSecond": 540.0,
+                        "MaximumTargetTravelAngleDegrees": 15.0,
+                        "MaximumTargetTravelDistance": 0.6,
+                        "MaximumTotalPositionCorrection": 1.25,
+                        "MaximumWarpTargetDistance": 12.0,
+                        "MinimumPositionScale": 0.8999999761581421,
+                        "MinimumRemainingRootMotionDistance": 0.009999999776482582,
+                        "MinimumTargetDistance": 0.15000000596046448,
+                        "PositionCorrectionCurveName": "",
+                        "PositionMode": 4,
+                        "PositionStrength": 1.0,
+                        "PresetName": "WeakAttackWarp4",
+                        "RotationEndNormalizedTime": 0.13000000325116237,
+                        "RotationFullStrengthEndNormalizedTime": 0.09750000243837179,
+                        "RotationMode": 1,
+                        "RotationStartNormalizedTime": 0.0,
+                        "RotationStrength": 1.0,
+                        "StartNormalizedTime": 0.0,
+                        "StopWhenTargetInvalid": true,
+                        "TargetDistance": 1.2,
+                        "TargetMode": 4,
+                        "UseUnscaledTime": false,
+                        "WarpPosition": true,
+                        "WarpRotation": true,
+                        "DiscardUnappliedCorrection": true
                     }
                 ],
                 "RegisterGlobalActions": true
@@ -16872,7 +17414,7 @@
         ],
         "Rot": [
             0.0,
-            -179.80361938476563,
+            -179.80361938476562,
             1.52587890625e-05
         ],
         "Scale": [

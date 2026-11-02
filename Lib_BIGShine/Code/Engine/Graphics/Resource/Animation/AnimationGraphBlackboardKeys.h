@@ -28,6 +28,7 @@ namespace AnimationGraphBlackboardKeys
     inline constexpr const char* ACCEPTED = "Accepted";
     inline constexpr const char* EVALUATE_PENDING = "EvaluatePending";
     inline constexpr const char* EVALUATE_IMMEDIATE = "EvaluateImmediate";
+    inline constexpr const char* TELEGRAPH_CANCEL_PENDING = "TelegraphCancelPending";
     inline constexpr const char* YAW_PENDING = "YawPending";
     inline constexpr const char* YAW_ENABLED = "YawEnabled";
     inline constexpr const char* YAW_LIMIT = "YawLimit";

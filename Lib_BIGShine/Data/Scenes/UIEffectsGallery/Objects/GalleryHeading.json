@@ -34,26 +34,26 @@
                 "WidgetId": "GalleryHeading",
                 "RaycastTarget": false,
                 "InputEnabled": false,
-                "ZOrder": 0,
+                "ZOrder": 20,
                 "RectTransform": {
                     "AnchorMin": [
-                        0,
-                        0
+                        0.5,
+                        0.5
                     ],
                     "AnchorMax": [
-                        0,
-                        0
+                        0.5,
+                        0.5
                     ],
                     "Pivot": [
                         0.5,
                         0.5
                     ],
                     "AnchoredPosition": [
-                        640,
-                        46
+                        0,
+                        -320
                     ],
                     "SizeDelta": [
-                        1100,
+                        1120,
                         60
                     ]
                 }
@@ -68,20 +68,38 @@
             "LateUpdatePriority": 0,
             "RequiredForSceneStart": true,
             "Data": {
-                "Text": "UI EFFECTS / MOTION GALLERY",
+                "Text": "UI EFFECTS / INTERACTIVE GALLERY",
                 "FontPath": "Data/Font/NotoSansJP-Regular.otf",
                 "FontSize": 30,
+                "Color": [
+                    0.88,
+                    0.95,
+                    1,
+                    1
+                ],
+                "MaxWidth": 1104,
+                "Padding": 8,
+                "AutoSizeWidget": true,
+                "HorizontalAlign": "CENTER",
+                "VerticalAlign": "CENTER"
+            }
+        },
+        {
+            "TypeName": "SpriteRenderer",
+            "Enabled": true,
+            "UpdateEnabled": true,
+            "LateUpdateEnabled": true,
+            "UpdatePriority": 0,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": true,
+            "Data": {
                 "Color": [
                     1,
                     1,
                     1,
                     1
                 ],
-                "MaxWidth": 270,
-                "Padding": 12,
-                "AutoSizeWidget": false,
-                "HorizontalAlign": "CENTER",
-                "VerticalAlign": "CENTER"
+                "LinearSampling": true
             }
         },
         {

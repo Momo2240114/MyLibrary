@@ -298,7 +298,11 @@ void AttackSystem::HandleHit(
     {
         const float strength_ = IsPlayerObject(target_)
             ? event_.feedback.receiveStrength : event_.feedback.attackStrength;
-        ControllerInput::Instance().PlayRumble(strength_, strength_ * 0.6f, event_.feedback.duration,
+        // 既存の技ごとの強弱と無効設定を保ち、命中・被弾の両モーターを強める。
+        constexpr float HIT_RUMBLE_GAIN = 1.6f;
+        constexpr float HIT_RUMBLE_DURATION_SCALE = 1.25f;
+        ControllerInput::Instance().PlayRumble(strength_ * HIT_RUMBLE_GAIN, strength_ * 0.9f,
+            event_.feedback.duration * HIT_RUMBLE_DURATION_SCALE,
             IsPlayerObject(target_) ? 3 : 2);
     }
 
@@ -494,12 +498,14 @@ void AttackSystem::PlayCameraShake(const AttackHitEvent& event_) const
     const bool playerIsAttacker_ = IsPlayerObject(attacker_);
     if (!playerIsTarget_ && !playerIsAttacker_) return;
 
-    const float scale_ = playerIsTarget_
+    // 技ごとの設定を基準に振幅を増やし、攻撃命中時も短すぎない衝撃を残す。
+    constexpr float HIT_SHAKE_GAIN = 2.0f;
+    const float scale_ = (playerIsTarget_
         ? 1.0f
-        : event_.cameraShakeAttackScale;
+        : event_.cameraShakeAttackScale) * HIT_SHAKE_GAIN;
     const float durationScale_ = playerIsTarget_
-        ? 1.0f
-        : event_.cameraShakeAttackScale;
+        ? 1.15f
+        : std::sqrt((std::max)(event_.cameraShakeAttackScale, 0.0f));
     const std::vector<std::shared_ptr<CameraShakeComponent>> cameraShakes_ =
         target_->GetManager().FindComponents<CameraShakeComponent>();
     if (cameraShakes_.empty()) return;

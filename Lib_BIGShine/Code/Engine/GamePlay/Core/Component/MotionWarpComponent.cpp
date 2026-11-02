@@ -512,7 +512,7 @@ MotionWarpResult MotionWarpComponent::ApplyRootMotionWarp(
             return;
         }
         result_.positionWarped = LimitRootMotionToStopDistance(result_.rootMotionDelta.deltaPosition,
-            owner_->transform->GetWorldPosition(), target_->transform->GetWorldPosition(), explicitTargetPreset.targetDistance);
+            owner_->transform->GetWorldPosition(), (explicitTargetPreset.discardUnappliedCorrection && request.targetLocked) ? request.targetPosition : target_->transform->GetWorldPosition(), explicitTargetPreset.targetDistance);
         debugWarpedDelta = result_.rootMotionDelta.deltaPosition;
     };
     auto limitFixedPath_ = [&]()
@@ -825,8 +825,16 @@ MotionWarpResult MotionWarpComponent::ApplyRootMotionWarp(
             const auto curve_ = owner_->GetComponent<CurveComponent>();
             if (curve_ && !preset_->positionCorrectionCurveName.empty() && curve_->HasTrack(preset_->positionCorrectionCurveName))
                 progress_ = std::clamp(curve_->GetValue(preset_->positionCorrectionCurveName, progress_), 0.0f, 1.0f);
-            DirectX::XMFLOAT3 correction_{ totalCorrection_.x * progress_ - request.appliedPlannedCorrection.x, 0.0f,
-                totalCorrection_.z * progress_ - request.appliedPlannedCorrection.z };
+            const DirectX::XMFLOAT3 scheduled_{ totalCorrection_.x * progress_, 0.0f, totalCorrection_.z * progress_ };
+            DirectX::XMFLOAT3 correction_{ scheduled_.x - request.appliedPlannedCorrection.x, 0.0f,
+                scheduled_.z - request.appliedPlannedCorrection.z };
+            if (preset_->discardUnappliedCorrection)
+            {
+                // 物理結果が予定より短くても、未消化分を後からまとめて加算しない。
+                correction_ = { scheduled_.x - request.scheduledPositionCorrection.x, 0.0f,
+                    scheduled_.z - request.scheduledPositionCorrection.z };
+                request.scheduledPositionCorrection = scheduled_;
+            }
             const float length_ = GetHorizontalLength(correction_);
             const float remaining_ = (std::max)(0.0f, preset_->maximumTotalPositionCorrection - request.accumulatedPositionCorrection);
             const float limit_ = (std::min)(remaining_, (std::min)(preset_->maximumPositionCorrectionPerFrame,
@@ -1018,6 +1026,7 @@ void MotionWarpComponent::Gui()
         ImGui::Checkbox("Continue Across Combo", &preset_.continueAcrossCombo);
         ImGui::Checkbox("Use Unscaled Time", &preset_.useUnscaledTime);
         ImGui::DragFloat("MaximumPositionCorrectionPerSecond", &preset_.maximumPositionCorrectionPerSecond, 0.01f, 0.0f, 180.0f);
+        ImGui::Checkbox("Discard Unapplied Correction", &preset_.discardUnappliedCorrection);
         ImGui::DragFloat("LockTargetNormalizedTime", &preset_.lockTargetNormalizedTime, 0.01f, 0.0f, 1.0f);
         ImGui::DragFloat("MaximumTargetTravelDistance", &preset_.maximumTargetTravelDistance, 0.01f, 0.0f, 180.0f);
         ImGui::DragFloat("MaximumTargetTravelAngleDegrees", &preset_.maximumTargetTravelAngleDegrees, 0.01f, 0.0f, 180.0f);
@@ -1067,6 +1076,7 @@ void MotionWarpComponent::Serialize(nlohmann::json& json_) const
                 { "UseUnscaledTime", preset_.useUnscaledTime },
                 { "MaximumPositionCorrectionPerSecond", preset_.maximumPositionCorrectionPerSecond },
                 { "LockTargetNormalizedTime", preset_.lockTargetNormalizedTime },
+                { "DiscardUnappliedCorrection", preset_.discardUnappliedCorrection },
                 { "MaximumTargetTravelDistance", preset_.maximumTargetTravelDistance },
                 { "MaximumTargetTravelAngleDegrees", preset_.maximumTargetTravelAngleDegrees },
                 { "RotationStartNormalizedTime", preset_.rotationStartNormalizedTime },
@@ -1122,6 +1132,7 @@ void MotionWarpComponent::Deserialize(const nlohmann::json& json_)
             preset_.continueAcrossCombo = presetJson_.value("ContinueAcrossCombo", preset_.continueAcrossCombo);
             preset_.useUnscaledTime = presetJson_.value("UseUnscaledTime", preset_.useUnscaledTime);
             preset_.maximumPositionCorrectionPerSecond = (std::max)(presetJson_.value("MaximumPositionCorrectionPerSecond", 24.0f), 0.0f);
+            preset_.discardUnappliedCorrection = presetJson_.value("DiscardUnappliedCorrection", false);
             preset_.lockTargetNormalizedTime = std::clamp(presetJson_.value("LockTargetNormalizedTime", 0.0f), 0.0f, 1.0f);
             preset_.maximumTargetTravelDistance = (std::max)(presetJson_.value("MaximumTargetTravelDistance", 0.6f), 0.0f);
             preset_.maximumTargetTravelAngleDegrees = std::clamp(presetJson_.value("MaximumTargetTravelAngleDegrees", 20.0f), 0.0f, 180.0f);

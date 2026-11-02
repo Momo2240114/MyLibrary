@@ -21,6 +21,7 @@ enum class HIT_REACTION_KIND
 
 class BlackboardComponent;
 
+// 被弾時のダメージ反映、リアクションと短時間の赤いフラッシュを管理する。
 class HitReactionComponent : public Component
 {
 public:
@@ -38,6 +39,8 @@ public:
 
     // AttackSystemからCombat/OnHit Action経由で呼ばれるHit処理入口。
     void HandleHit();
+    // 描画時に実時間から被弾フラッシュの強さを求め、ヒットストップ中も自然に消す。
+    float GetDamageFlashWeight() const;
     // HPとHit記録を初期値へ戻す。
     void ResetHealth();
     void SetReactionActionName(const std::string& actionName_)
@@ -107,5 +110,11 @@ private:
     std::string overlayStopActionName = "MaterialOverlay_Stop";
     float overlayDuration = 0.12f;
     float overlayTimer = 0.0f;
+
+    // 保存する調整値と、保存しない実時間の発生時刻を分ける。
+    bool damageFlashEnabled = true;
+    float damageFlashDuration = 0.18f;
+    uint64_t damageFlashStartTime = 0;
+    bool damageFlashActive = false;
 
 };

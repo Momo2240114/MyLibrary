@@ -12,7 +12,7 @@
 - ATTACK_TEMPLATEイベントはAttackTemplateRuntime::Start/Update/Endへ接続されます。武器HitBoxの開始はイベント開始時刻＋WeaponHitBoxTemplate::activeStartTimeです。
 - ActionSequenceには独立秒数とAnimation State時間に結び付いた予約があり、すべてが同じ時計ではありません。
 - DragonAI_PlaySequencerAttackは現在行動に応じて武器判定、弾、範囲攻撃へ分岐します。噛みつきでは呼び出されたその場でBiteHitBoxを有効化します。
-- 派生AttackEffectの寿命・HitShapeの有効時間は生成後に別管理されます。Animation Timeからの一律な近似は追加していません。
+- 派生AttackEffectの寿命・HitShapeの有効時間は生成後に別管理されます。生成直後に始まるHitShapeはアニメーション上の生成時刻を使い、生成後に遅延する判定は一律に近似しません。
 - 既存VFXManagerとEffectManagerを確認し、現行の攻撃演出と同じEffectManager::SpawnParticle、ParticleComponent、GPU Particleを使用しています。
 - ModelAttachmentComponentと同じく、モデルノードのworldTransformを使って発生座標を求めます。
 
@@ -25,6 +25,9 @@ ANIMATION_TIME方式です。武器判定の予兆時刻は次の式で求めま
 通常は12フレーム、暴走時は9フレームです。描画FPSによってフレーム数を数え直す処理はありません。
 再生速度2倍では、12アニメーションフレーム分の実時間は約0.10秒になります。実時間0.20秒を保証する方式ではありません。
 速度カーブ・速度イベント・TimeScale反映後の時間を、既存の判定イベントと共用します。
+AttackEffectは生成直後に有効なHitShapeについて、イベント開始＋spawnTimeOffsetから同じ式で予兆を導出します。
+SlashEffectは生成予約の遅延と判定開始遅延がともにない場合だけ、イベント開始時刻を基準にします。
+武器・AttackEffect・SlashEffectが同時刻に始まる場合も、共通の重複除外を適用します。
 実際の発生は更新フレーム単位です。1回の時間更新で予兆と判定の両方を通過した場合は、遅れた予兆を出しません。
 
 従来のEnable～HitBox Actionイベントにも対応します。動的ActionにはAnimation Editorで`Telegraph Hit Start`を設定し、判定を直接開始するイベントを明示できます。
@@ -44,6 +47,8 @@ ANIMATION_TIME方式です。武器判定の予兆時刻は次の式で求めま
 - 各攻撃イベントの開始時刻ごとに予約し、同時刻の複数HitBoxを1件へまとめます。
 - 消費済みフラグはAnimatorごとに保持し、別Actorとの共有を避けます。
 - State変更、同じStateの再開始、シークで未発生予約を破棄します。ループは次周の予約を再作成します。
+- 人型ボスのStopAttackHitBoxesとドラゴンのDisableSequencerHitBoxesから、Blackboard経由で予兆中断を要求します。State遷移に失敗しても、同じStateの予約を復元しません。
+- Event内の中断要求はそのフレームのFlush前に処理します。Exit Actionによる中断の後で再開始用のResetを行うため、同じStateの明示的な再開始では予兆が再び有効になります。
 - フェードアウト中の旧Stateから予兆を再生成しません。
 - 暴走状態はHumanBossAIのBlackboardから読み、Berserk Lead Framesを選びます。
 - 所有者削除後に動く遅延Callbackは保持せず、生成直前にも削除予約を確認します。
@@ -62,6 +67,7 @@ AttackTemplate EditorにAttack Telegraph欄を追加しました。
 従来のAnimation Eventにも、Telegraph Hit Startと同じ設定欄を追加しました。
 プレビューは選択Actorのモデルを使います。設定は既存のJSON保存経路へ追加しています。
 旧JSONで予兆項目がない場合は既定値を使い、従来イベントの明示開始フラグはfalseになります。
+予兆設定内で数値・真偽値・文字列の型が異なる場合も、その項目の既定値へ戻します。Editorには予備動作不足と独立時計の制約を表示します。
 Template設定を再生中に変更した場合、予約は次の再生区間で再構築されます。
 
 ## 静的確認結果
@@ -113,6 +119,42 @@ Template設定を再生中に変更した場合、予約は次の再生区間で
 - `BIGShine.vcxproj`
 - `BIGShine.vcxproj.filters`
 - `Docs/AttackTelegraphImplementation.md`（本報告）
+
+## 今回の補完作業（2026-10-29）
+
+作業開始時点で存在していた予兆機能を調査し、以下の既存ファイルを補完しました。上記の追加・変更ファイル一覧は機能全体の構成です。
+今回、新規ソースや実ファイルの移動はなく、Visual Studioの登録・Filterは既存のものを維持しました。
+
+### 今回の変更ファイル
+
+- `Code/Engine/GamePlay/Combat/AttackTelegraphRuntime.h`：同じStateでの中断状態を保持するAPIとメンバ。
+- `Code/Engine/GamePlay/Combat/AttackTelegraphRuntime.cpp`：中断、生成直後のEffect判定、設定値の型確認、Editorの制約表示。
+- `Code/Engine/Graphics/Resource/Animation/ModelAnimator.h`：現在区間の予兆停止窓口。
+- `Code/Engine/Graphics/Resource/Animation/ModelAnimator.cpp`：Exit Action後に予兆を初期化する順序。
+- `Code/Engine/Graphics/Resource/Animation/AnimationGraphBlackboardKeys.h`：予兆中断の要求キー。
+- `Code/Engine/Graphics/Resource/Animation/AnimationGraphBridgeComponent.h`：中断要求の宣言。
+- `Code/Engine/Graphics/Resource/Animation/AnimationGraphBridgeComponent.cpp`：既存Blackboard経路を使った中断要求。
+- `Code/Engine/Graphics/Resource/Animation/AnimationControllerComponent.Blackboard.cpp`：遷移評価の再帰防止中も予兆だけ停止する要求処理。
+- `Code/Game/AI/Human/HumanBossActionComponent.cpp`：攻撃判定停止と予兆中断の連動。
+- `Code/Game/AI/Dragon/DragonAIComponent.cpp`：シーケンサー判定停止と予兆中断の連動。
+- `Docs/AttackTelegraphImplementation.md`：本報告の更新。
+
+### コメント・Tracy・ファイル形式
+
+中断時の再予約防止、Blackboard要求の処理順、同じStateの再開始、異なる時計の区別、JSONの既定値復元に日本語コメントを追加しました。
+新規の主要処理である`AttackTelegraphRuntime::Cancel`と`AnimationGraphBridgeComponent::RequestCancelAttackTelegraphs`に、既存の`BS_PROFILE_SCOPE`を追加しました。
+Build、Advance、Flush、Spawn、AIの停止処理、Controllerの要求処理の既存計測を維持しました。
+今回変更した10ソースと本報告は、厳密なUTF-8、BOMなし、CRLFで保存しました。
+
+### 静的確認と実機確認の範囲
+
+変更ソース10件について、`.vcxproj`への登録と`.vcxproj.filters`への登録を個別に確認しました。
+新規APIの宣言・定義・呼び出し、参照する型とinclude、nullptrの確認、中断→同じState継続、中断→再開始、Event内中断→Flushの経路をコード上で確認しました。
+既存7件の人型攻撃Templateの通常12／暴走9フレームとプリセット参照、Particle JSONの解析、2種類の参照テクスチャの存在を確認しました。
+C++コンパイラ、ゲーム、テストプログラムは実行していません。
+
+実機では、通常・暴走の各攻撃、同時刻の武器とEffect、Event内のキャンセル、遷移先がない停止、同じStateの再開始、頭部姿勢、欠損プリセット、Editorの保存と再読込を確認してください。
+予備動作不足の省略、REAL_TIME未対応、生成後に遅延する判定とActionSequence単独の攻撃は、上記の制約のとおりです。
 
 ## ビルド
 

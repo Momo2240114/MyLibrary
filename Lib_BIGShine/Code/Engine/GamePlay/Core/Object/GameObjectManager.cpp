@@ -1939,7 +1939,8 @@ void GameObjectManager::RenderAll(
             modelSystem_.PushSubmit(modelComponent_->GetShaderID(), modelComponent_);
     }
     RenderContext renderContext_;
-    renderContext_.suppressSkybox = finishActive_;
+    // とどめ演出も通常のステージと空を背景に描画する。
+    renderContext_.suppressSkybox = false;
 
     renderContext_.device = GraphicsDeviceManager::Instance().GetDevice();
     renderContext_.deviceContext = deviceContext_;
@@ -2578,7 +2579,8 @@ void GameObjectManager::UpdateEditorScene(float deltaTime_)
             const auto& name_ = component_->GetName();
             const bool editorVisual_ = name_ == "SpriteRenderer" || name_ == "UITextComponent" ||
                 name_ == "UIWidgetComponent" || name_ == "WidgetBoardComponent" ||
-                name_ == "UIMotionComponent" || name_ == "UIVisualEffectComponent";
+                name_ == "UIMotionComponent" || name_ == "UIVisualEffectComponent" ||
+                name_ == "UIEffectsGalleryComponent";
             if (!editorVisual_) continue;
             if (!component_->IsStarted())
             {

@@ -1,0 +1,130 @@
+{
+    "AssetType": "CurveTrack",
+    "AssetVersion": 1,
+    "Curve": {
+        "Name": "Player.WeakCombo4.Speed",
+        "Type": 3,
+        "Color": 4282694655,
+        "Visible": true,
+        "Points": [
+            [
+                0.0,
+                1.65
+            ],
+            [
+                0.043636362690570946,
+                1.45
+            ],
+            [
+                0.10909090672642738,
+                1.3
+            ],
+            [
+                0.15818181475331966,
+                2.45
+            ],
+            [
+                0.21818181345285476,
+                2.45
+            ],
+            [
+                0.2836363574887112,
+                1.45
+            ],
+            [
+                0.33272726551560344,
+                1.3
+            ],
+            [
+                0.38181817354249575,
+                2.35
+            ],
+            [
+                0.49090908026892316,
+                2.35
+            ],
+            [
+                0.5727272603137437,
+                1.65
+            ],
+            [
+                0.6981818030491351,
+                1.45
+            ],
+            [
+                1.0,
+                1.5
+            ]
+        ],
+        "PointOptions": [
+            {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+            },
+            {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+            },
+            {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+            },
+            {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+            },
+            {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+            },
+            {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+            },
+            {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+            },
+            {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+            },
+            {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+            },
+            {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+            },
+            {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+            },
+            {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+            }
+        ]
+    },
+    "MinBounds": [
+        0.0,
+        0.0
+    ],
+    "MaxBounds": [
+        1.0,
+        3.2
+    ]
+}
