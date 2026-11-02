@@ -4,6 +4,7 @@
 #include "Engine/GamePlay/Combat/CombatDamageTypes.h"
 
 #include <cstdint>
+#include <vector>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -100,6 +101,11 @@ public:
     void Start() override;
     void Activate();
     void Deactivate();
+    // アニメーション判定窓内の途中姿勢を、そのフレームの共通戦闘判定へ渡す。
+    void AddFrameSweepSample(const Capsule& capsule_);
+    CollisionManifold CheckFrameSweep(const Capsule& other_, Capsule& contactCapsule_) const;
+    // 一時的に有効化した判定は、ガード・回避・命中の全判定が終わってから閉じる。
+    void FinishFrameSweep();
     uint64_t GetActivationId() const { return activationId; }
     void SetOwner(GameObject* owner_);
     void SetAttackInstanceId(uint32_t attackInstanceId_);
@@ -155,6 +161,11 @@ private:
 
 private:
     // 同じ攻撃の多重ヒット制御用。ActivateごとにIDを進め、既に当てた対象を記録する。
+    std::vector<Capsule> frameSweepSamples;
+    // アニメーション更新後にCCTが進めた実移動だけを、保存した武器軌道へ反映する。
+    std::weak_ptr<GameObject> frameSweepOwner;
+    DirectX::XMFLOAT3 frameSweepOwnerPosition{ 0.0f, 0.0f, 0.0f };
+    bool deactivateAfterFrameSweep = false;
     uint64_t activationId = 0;
     bool hitEffectBlackboardOverrideEnabled = true;
     bool attackDataBlackboardOverrideEnabled = true;

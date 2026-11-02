@@ -1,0 +1,106 @@
+{
+    "Name": "Page05Demo03Caption",
+    "Layer": 16,
+    "CollisionMask": 0,
+    "ParentName": "GalleryBoard",
+    "RequiredForSceneStart": true,
+    "Transform": {
+        "Pos": [
+            0,
+            0,
+            0
+        ],
+        "Rot": [
+            0,
+            0,
+            0
+        ],
+        "Scale": [
+            1,
+            1,
+            1
+        ]
+    },
+    "Components": [
+        {
+            "TypeName": "UIWidgetComponent",
+            "Enabled": true,
+            "UpdateEnabled": true,
+            "LateUpdateEnabled": true,
+            "UpdatePriority": 0,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": true,
+            "Data": {
+                "WidgetId": "Page05Demo03Caption",
+                "RaycastTarget": false,
+                "InputEnabled": false,
+                "ZOrder": 4,
+                "RectTransform": {
+                    "AnchorMin": [
+                        0.5,
+                        0.5
+                    ],
+                    "AnchorMax": [
+                        0.5,
+                        0.5
+                    ],
+                    "Pivot": [
+                        0.5,
+                        0.5
+                    ],
+                    "AnchoredPosition": [
+                        400,
+                        -41
+                    ],
+                    "SizeDelta": [
+                        330,
+                        34
+                    ]
+                }
+            }
+        },
+        {
+            "TypeName": "SpriteRenderer",
+            "Enabled": true,
+            "UpdateEnabled": true,
+            "LateUpdateEnabled": true,
+            "UpdatePriority": 0,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": true,
+            "Data": {
+                "Color": [
+                    1,
+                    1,
+                    1,
+                    1
+                ],
+                "LinearSampling": true
+            }
+        },
+        {
+            "TypeName": "UITextComponent",
+            "Enabled": true,
+            "UpdateEnabled": true,
+            "LateUpdateEnabled": true,
+            "UpdatePriority": 0,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": true,
+            "Data": {
+                "Text": "CLICK TO EXPAND",
+                "FontPath": "Data/Font/NotoSansJP-Regular.otf",
+                "FontSize": 14,
+                "Color": [
+                    0.5,
+                    0.75,
+                    0.85,
+                    1
+                ],
+                "MaxWidth": 314,
+                "Padding": 8,
+                "AutoSizeWidget": false,
+                "HorizontalAlign": "CENTER",
+                "VerticalAlign": "CENTER"
+            }
+        }
+    ]
+}

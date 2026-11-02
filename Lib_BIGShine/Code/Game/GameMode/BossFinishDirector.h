@@ -72,6 +72,9 @@ private:
         AnimState state;
         ModelAnimator animator;
         bool ready = false;
+        // シークで変化しない骨格の水平基準を、連続するクリップ間でも共有する。
+        DirectX::XMFLOAT3 rootReferencePosition{};
+        bool hasRootReference = false;
     };
     // 装備のAttachment更新で変化する行列も含め、編集前の状態を記録する。
     struct SavedActor
@@ -84,8 +87,14 @@ private:
     };
     void PrepareActor(ActorPose& actor_, const char* key_);
     void SampleActor(ActorPose& actor_, float time_);
-    // 命中ポーズの剣と敵の胴体から、接触する踏み込み先を準備する。
-    void PrepareImpact();
+    // 親ノードの移動も含め、骨格の水平位置を演出開始時の基準へ戻す。
+    void ConstrainActorPose(ActorPose& actor_, std::vector<GltfModelCommponennt::NodePose>& poses_);
+    // 配置を動かさず、走り攻撃・ダウンから拘束開始のポーズへ補間する。
+    void BlendExecutionPose(ActorPose& source_, ActorPose& execution_, float sourceTime_, float blend_);
+    // 拘束と叩きつけの同期再生を準備する。
+    void PrepareExecution();
+    // ステージ中央を演出の配置基準として取得する。
+    DirectX::XMFLOAT3 GetStageAnchor() const;
     // アニメーション内の命中時刻を演出時計へ変換する。
     float GetImpactTime() const;
     // 演出設定に従い、敵または接触点を基準にエフェクト位置を求める。
@@ -108,7 +117,8 @@ private:
     std::shared_ptr<CameraComponent> camera;
     ActorPose player;
     ActorPose boss;
-    // 命中前の構えと死亡リアクションを別の状態として評価する。
+    // 拘束する側と受ける側のクリップを同じ時刻で評価する。
+    ActorPose playerExecution;
     ActorPose bossReaction;
     std::shared_ptr<GameObject> imageSprite;
     std::shared_ptr<GameObject> solidSprite;
@@ -130,12 +140,11 @@ private:
     float elapsed = 0.0f;
     float returnElapsed = 0.0f;
     float effectsTime = 0.0f;
-    // 命中位置と成否はプレビューでも同じポーズから再計算する。
+    // 叩きつけの基準位置と、同期再生の準備状態を保持する。
     DirectX::XMFLOAT3 impactPosition{};
-    DirectX::XMFLOAT3 alignedEndPosition{};
     bool impactReady = false;
     bool impactConfirmed = false;
-    // 本番の撃破受付は演出内の構図診断と分離し、骨・剣の配置でクリア進行を失わない。
+    // 本番の撃破受付は演出クリップの準備状態と分離し、クリア進行を維持する。
     bool finishAuthorized = false;
     bool completionCommitted = false;
     bool previousPlayerLock = false;

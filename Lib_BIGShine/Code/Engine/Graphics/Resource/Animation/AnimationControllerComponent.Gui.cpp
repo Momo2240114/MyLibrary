@@ -1226,6 +1226,8 @@ void AnimationControllerComponent::Gui()
             ImGui::TextDisabled("Events still use the same Animation Sequence Editor timeline.");
         }
         ImGui::DragFloat("Speed", &editingState->playbackSpeed, 0.05f);
+        ImGui::InputText("Speed Multiplier Parameter", &editingState->playbackSpeedParamName);
+        ImGui::Checkbox("Sample Weapon Hit Boxes", &editingState->sampleWeaponHitBoxes);
         ImGui::Checkbox("Loop", &editingState->isLoop);
 
 

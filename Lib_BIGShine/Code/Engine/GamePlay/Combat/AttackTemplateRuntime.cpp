@@ -14,6 +14,9 @@
 #include "Engine/GamePlay/Input/ControllerInput.h"
 
 #include <cstdio>
+#include <algorithm>
+#include <cmath>
+#include "Engine/Graphics/Resource/GlTFModel.h"
 
 namespace
 {
@@ -290,4 +293,46 @@ void AttackTemplateRuntime::End(
 
     // Runtime 中だけ持っていた「どの追加エフェクトを出したか」の印を破棄する。
     event_.spawnedAttackEffects.clear();
+}
+
+// アニメーション上の判定窓で切り取った軌道を、既存HitBoxの共通判定へ蓄える。
+void AttackTemplateRuntime::SampleWeaponInterval(const std::shared_ptr<GameObject>& owner_, AnimEvent& event_,
+    GltfModelCommponennt* model_, const AnimState& state_, float previousTime_, float currentTime_)
+{
+    const auto template_ = GetTemplate(event_);
+    if (!owner_ || !model_ || !template_ || !template_->weaponHitBox.enabled || event_.attackTemplateInstanceId == 0 ||
+        state_.animationIndex < 0 || state_.animationIndex >= static_cast<int>(model_->GetAnimations().size())) return;
+    const float start_ = (std::max)(previousTime_, event_.startTime + template_->weaponHitBox.activeStartTime);
+    const float end_ = (std::min)(currentTime_, (std::min)(event_.endTime, event_.startTime + template_->weaponHitBox.activeEndTime));
+    if (end_ < start_ || currentTime_ <= previousTime_) return;
+    const auto hitBox_ = FindHitBox(GetRoot(owner_), template_->weaponHitBox.hitBoxName);
+    if (!hitBox_ || hitBox_->attackInstanceId != event_.attackTemplateInstanceId) return;
+    BS_PROFILE_SCOPE("AttackTemplateRuntime::SampleWeaponInterval");
+    std::vector<GltfModelCommponennt::NodePose> savedPose_;
+    std::vector<GltfModelCommponennt::NodePose> sampledPose_;
+    model_->GetNodePoses(savedPose_);
+    const std::string rootName_ = state_.rootMotion.sourceNodeName.empty() ? model_->GetRootMotionName() : state_.rootMotion.sourceNodeName;
+    const int rootIndex_ = model_->GetNodeIndex(rootName_.empty() ? "root" : rootName_.c_str());
+    constexpr float WEAPON_SAMPLE_RATE = 120.0f;
+    const int steps_ = std::clamp(static_cast<int>(std::ceil((end_ - start_) * WEAPON_SAMPLE_RATE)), 1, 64);
+    for (int step_ = 0; step_ <= steps_; ++step_)
+    {
+        const float time_ = start_ + (end_ - start_) * static_cast<float>(step_) / steps_;
+        model_->ComputeAnimation(state_.animationIndex, time_, sampledPose_);
+        if (rootIndex_ >= 0 && static_cast<std::size_t>(rootIndex_) < sampledPose_.size())
+        {
+            // 通常描画と同じroot抽出を行い、元移動が武器位置へ二重適用されないようにする。
+            auto& position_ = sampledPose_[rootIndex_].position;
+            const auto& base_ = savedPose_[rootIndex_].position;
+            if (state_.rootMotion.applyPositionX || state_.rootMotion.cutVisualPositionX) position_.x = base_.x;
+            if (state_.rootMotion.applyPositionY || state_.rootMotion.cutVisualPositionY) position_.y = base_.y;
+            if (state_.rootMotion.applyPositionZ || state_.rootMotion.cutVisualPositionZ) position_.z = base_.z;
+        }
+        model_->SetNodePoses(sampledPose_);
+        model_->UpdateTransformIfDirty();
+        hitBox_->AddFrameSweepSample(hitBox_->GetCapsuleData());
+    }
+    // 一時サンプリングを描画や次フレームのRootMotion履歴へ残さない。
+    model_->SetNodePoses(savedPose_);
+    model_->UpdateTransformIfDirty();
 }

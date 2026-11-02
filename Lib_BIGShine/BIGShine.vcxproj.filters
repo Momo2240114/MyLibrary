@@ -7,6 +7,9 @@
     <Filter Include="Data">
       <UniqueIdentifier>{b54ebd2a-a005-4ebe-9b9b-536b647a69e2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Data\Curve">
+      <UniqueIdentifier>{b2dd9ca8-69ad-4e9e-b5c4-172c8ae9f874}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Data\Animation">
       <UniqueIdentifier>{28c8b069-8491-4e1e-945e-848762fa2d39}</UniqueIdentifier>
     </Filter>
@@ -1105,6 +1108,9 @@
     <ClCompile Include="Code\Game\AI\Human\HumanBossAIComponent.cpp">
       <Filter>Code\Game\Logics\AI\Human</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Game\AI\Human\HumanBossAITraceComponent.cpp">
+      <Filter>Code\Game\Logics\AI\Human</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Game\AI\Human\HumanBossActionComponent.cpp">
       <Filter>Code\Game\Logics\AI\Human</Filter>
     </ClCompile>
@@ -2070,6 +2076,9 @@
     <ClInclude Include="Code\Game\AI\Human\HumanBossAIComponent.h">
       <Filter>Code\Game\Logics\AI\Human</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Game\AI\Human\HumanBossAITraceComponent.h">
+      <Filter>Code\Game\Logics\AI\Human</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Game\AI\Human\HumanBossActionComponent.h">
       <Filter>Code\Game\Logics\AI\Human</Filter>
     </ClInclude>
@@ -2107,6 +2116,27 @@
   <ItemGroup>
     <None Include="CustomExternalDependencies.props" />
     <None Include="Data\Animation\StateData\Player\States\Heal_Air_01.json">
+      <Filter>Data\Animation\States</Filter>
+    </None>
+    <None Include="Data\Curve\Player.WeakCombo1.Speed.json">
+      <Filter>Data\Curve</Filter>
+    </None>
+    <None Include="Data\Curve\Player.WeakCombo2.Speed.json">
+      <Filter>Data\Curve</Filter>
+    </None>
+    <None Include="Data\Curve\Player.WeakCombo3.Speed.json">
+      <Filter>Data\Curve</Filter>
+    </None>
+    <None Include="Data\Curve\Player.WeakCombo4.Speed.json">
+      <Filter>Data\Curve</Filter>
+    </None>
+    <None Include="Data\Animation\StateData\Player\States\Run_Fast_Combat_IP_Start_Seq.json">
+      <Filter>Data\Animation\States</Filter>
+    </None>
+    <None Include="Data\Animation\StateData\Player\States\Run_Fast_Combat_IP_Loop_Seq.json">
+      <Filter>Data\Animation\States</Filter>
+    </None>
+    <None Include="Data\Animation\StateData\Player\States\Run_Fast_Combat_IP_Stop_Seq.json">
       <Filter>Data\Animation\States</Filter>
     </None>
     <None Include="Data\Particle\PlayerHeal.json">
@@ -2585,6 +2615,9 @@
     <ClCompile Include="Code\Engine\UI\UIVisualEffectComponent.cpp">
       <Filter>Code\Engine\GamePlay\UI\Effects</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\UI\UIEffectsGalleryComponent.cpp">
+      <Filter>Code\Engine\GamePlay\UI\Effects</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\UI\DiamondTransition.cpp">
       <Filter>Code\Engine\GamePlay\UI\ScreenTransition\Effects</Filter>
     </ClCompile>
@@ -2609,6 +2642,9 @@
       <Filter>Code\Engine\GamePlay\UI\Effects</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\UI\UIVisualEffectComponent.h">
+      <Filter>Code\Engine\GamePlay\UI\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\UI\UIEffectsGalleryComponent.h">
       <Filter>Code\Engine\GamePlay\UI\Effects</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\UI\DiamondTransition.h">

@@ -886,6 +886,13 @@
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
                         "startTime": 0.0833333358168602
+                    },
+                    {
+                        "actionStart": "BeginWeakComboWarp",
+                        "startTime": 0.0,
+                        "endTime": 0.0,
+                        "eventTemplateType": "NONE",
+                        "label": "BeginWeakComboWarp"
                     }
                 ],
                 "loop": false,
@@ -908,8 +915,9 @@
                 "sequenceClips": [],
                 "sequencer": "",
                 "speed": 1.5,
-                "speedCurveName": "",
-                "type": 0
+                "speedCurveName": "Player.WeakCombo4.Speed",
+                "type": 0,
+                "sampleWeaponHitBoxes": true
             },
             {
                 "animIndexA": -1,
@@ -1944,6 +1952,13 @@
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
                         "startTime": 1.2166666984558105
+                    },
+                    {
+                        "actionStart": "BeginWeakComboWarp",
+                        "startTime": 0.0,
+                        "endTime": 0.0,
+                        "eventTemplateType": "NONE",
+                        "label": "BeginWeakComboWarp"
                     }
                 ],
                 "loop": false,
@@ -1966,8 +1981,9 @@
                 "sequenceClips": [],
                 "sequencer": "",
                 "speed": 1.5,
-                "speedCurveName": "",
-                "type": 0
+                "speedCurveName": "Player.WeakCombo3.Speed",
+                "type": 0,
+                "sampleWeaponHitBoxes": true
             },
             {
                 "animIndexA": -1,
@@ -2381,6 +2397,13 @@
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
                         "startTime": 1.3333333730697632
+                    },
+                    {
+                        "actionStart": "BeginWeakComboWarp",
+                        "startTime": 0.0,
+                        "endTime": 0.0,
+                        "eventTemplateType": "NONE",
+                        "label": "BeginWeakComboWarp"
                     }
                 ],
                 "loop": false,
@@ -2403,8 +2426,9 @@
                 "sequenceClips": [],
                 "sequencer": "",
                 "speed": 2.0,
-                "speedCurveName": "",
-                "type": 0
+                "speedCurveName": "Player.WeakCombo1.Speed",
+                "type": 0,
+                "sampleWeaponHitBoxes": true
             },
             {
                 "animIndexA": -1,
@@ -2744,6 +2768,13 @@
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
                         "startTime": 0.10000000149011612
+                    },
+                    {
+                        "actionStart": "BeginWeakComboWarp",
+                        "startTime": 0.0,
+                        "endTime": 0.0,
+                        "eventTemplateType": "NONE",
+                        "label": "BeginWeakComboWarp"
                     }
                 ],
                 "loop": false,
@@ -2766,8 +2797,9 @@
                 "sequenceClips": [],
                 "sequencer": "",
                 "speed": 2.0,
-                "speedCurveName": "",
-                "type": 0
+                "speedCurveName": "Player.WeakCombo2.Speed",
+                "type": 0,
+                "sampleWeaponHitBoxes": true
             },
             {
                 "animIndexA": -1,
@@ -2846,7 +2878,7 @@
             {
                 "animIndexA": -1,
                 "animIndexB": -1,
-                "animationIndex": 23,
+                "animationIndex": 165,
                 "blend2DBackwardAnimationIndex": -1,
                 "blend2DBackwardLeft90AnimationIndex": -1,
                 "blend2DBackwardLeft90PhaseOffset": 0.0,
@@ -12348,6 +12380,165 @@
                 "speed": 1.0,
                 "speedCurveName": "",
                 "type": 0
+            },
+            {
+                "animIndexA": -1,
+                "animIndexB": -1,
+                "animationIndex": 254,
+                "blend2DBackwardAnimationIndex": -1,
+                "blend2DBackwardPhaseOffset": 0.0,
+                "blend2DDefaultInput": [
+                    0.0,
+                    1.0
+                ],
+                "blend2DForwardAnimationIndex": -1,
+                "blend2DForwardPhaseOffset": 0.0,
+                "blend2DLeftAnimationIndex": -1,
+                "blend2DLeftPhaseOffset": 0.0,
+                "blend2DParamName": "MoveInput",
+                "blend2DRightAnimationIndex": -1,
+                "blend2DRightPhaseOffset": 0.0,
+                "blend2DSyncNormalizedTime": true,
+                "blendDefaultWeight": 0.5,
+                "blendMaskRootNodes": [],
+                "blendParamName": "BlendAlpha",
+                "blendParameterMax": 1.0,
+                "blendParameterMin": 0.0,
+                "blendPhaseOffsetA": 0.0,
+                "blendPhaseOffsetB": 0.0,
+                "blendSyncNormalizedTime": true,
+                "blendUseMask": false,
+                "customAnimIndex": -1,
+                "events": [],
+                "loop": false,
+                "name": "Run_Fast_Combat_IP_Start_Seq",
+                "rootMotion": {
+                    "applyPositionX": false,
+                    "applyPositionY": false,
+                    "applyPositionZ": false,
+                    "applyRotationX": false,
+                    "applyRotationY": false,
+                    "applyRotationZ": false,
+                    "enable": false,
+                    "sourceNodeName": "root",
+                    "cutVisualWhenDisabled": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": false,
+                    "cutVisualPositionZ": true
+                },
+                "rootMotionScale": 1.0,
+                "rootMotionScaleCurveName": "",
+                "sequencer": "",
+                "speed": 1.0,
+                "speedCurveName": "",
+                "type": 0,
+                "playbackSpeedParamName": "GroundPlaybackRate"
+            },
+            {
+                "animIndexA": -1,
+                "animIndexB": -1,
+                "animationIndex": 253,
+                "blend2DBackwardAnimationIndex": -1,
+                "blend2DBackwardPhaseOffset": 0.0,
+                "blend2DDefaultInput": [
+                    0.0,
+                    1.0
+                ],
+                "blend2DForwardAnimationIndex": -1,
+                "blend2DForwardPhaseOffset": 0.0,
+                "blend2DLeftAnimationIndex": -1,
+                "blend2DLeftPhaseOffset": 0.0,
+                "blend2DParamName": "MoveInput",
+                "blend2DRightAnimationIndex": -1,
+                "blend2DRightPhaseOffset": 0.0,
+                "blend2DSyncNormalizedTime": true,
+                "blendDefaultWeight": 0.5,
+                "blendMaskRootNodes": [],
+                "blendParamName": "BlendAlpha",
+                "blendParameterMax": 1.0,
+                "blendParameterMin": 0.0,
+                "blendPhaseOffsetA": 0.0,
+                "blendPhaseOffsetB": 0.0,
+                "blendSyncNormalizedTime": true,
+                "blendUseMask": false,
+                "customAnimIndex": -1,
+                "events": [],
+                "loop": true,
+                "name": "Run_Fast_Combat_IP_Loop_Seq",
+                "rootMotion": {
+                    "applyPositionX": false,
+                    "applyPositionY": false,
+                    "applyPositionZ": false,
+                    "applyRotationX": false,
+                    "applyRotationY": false,
+                    "applyRotationZ": false,
+                    "enable": false,
+                    "sourceNodeName": "root",
+                    "cutVisualWhenDisabled": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": false,
+                    "cutVisualPositionZ": true
+                },
+                "rootMotionScale": 1.0,
+                "rootMotionScaleCurveName": "",
+                "sequencer": "",
+                "speed": 1.0,
+                "speedCurveName": "",
+                "type": 0,
+                "playbackSpeedParamName": "GroundPlaybackRate"
+            },
+            {
+                "animIndexA": -1,
+                "animIndexB": -1,
+                "animationIndex": 255,
+                "blend2DBackwardAnimationIndex": -1,
+                "blend2DBackwardPhaseOffset": 0.0,
+                "blend2DDefaultInput": [
+                    0.0,
+                    1.0
+                ],
+                "blend2DForwardAnimationIndex": -1,
+                "blend2DForwardPhaseOffset": 0.0,
+                "blend2DLeftAnimationIndex": -1,
+                "blend2DLeftPhaseOffset": 0.0,
+                "blend2DParamName": "MoveInput",
+                "blend2DRightAnimationIndex": -1,
+                "blend2DRightPhaseOffset": 0.0,
+                "blend2DSyncNormalizedTime": true,
+                "blendDefaultWeight": 0.5,
+                "blendMaskRootNodes": [],
+                "blendParamName": "BlendAlpha",
+                "blendParameterMax": 1.0,
+                "blendParameterMin": 0.0,
+                "blendPhaseOffsetA": 0.0,
+                "blendPhaseOffsetB": 0.0,
+                "blendSyncNormalizedTime": true,
+                "blendUseMask": false,
+                "customAnimIndex": -1,
+                "events": [],
+                "loop": false,
+                "name": "Run_Fast_Combat_IP_Stop_Seq",
+                "rootMotion": {
+                    "applyPositionX": false,
+                    "applyPositionY": false,
+                    "applyPositionZ": false,
+                    "applyRotationX": false,
+                    "applyRotationY": false,
+                    "applyRotationZ": false,
+                    "enable": false,
+                    "sourceNodeName": "root",
+                    "cutVisualWhenDisabled": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": false,
+                    "cutVisualPositionZ": true
+                },
+                "rootMotionScale": 1.0,
+                "rootMotionScaleCurveName": "",
+                "sequencer": "",
+                "speed": 1.0,
+                "speedCurveName": "",
+                "type": 0,
+                "playbackSpeedParamName": "GroundPlaybackRate"
             }
         ]
     },
@@ -12925,12 +13116,50 @@
             "posY": 1300,
             "scopeId": "Root",
             "stateName": "PlayerRevive"
+        },
+        {
+            "childScopeId": "",
+            "id": 9039,
+            "inputPin": 9040,
+            "nodeType": 0,
+            "outputPin": 9041,
+            "posX": 470.0,
+            "posY": -150.0,
+            "scopeId": "Root",
+            "stateName": "Run_Fast_Combat_IP_Start_Seq"
+        },
+        {
+            "childScopeId": "",
+            "id": 9042,
+            "inputPin": 9043,
+            "nodeType": 0,
+            "outputPin": 9044,
+            "posX": 730.0,
+            "posY": -150.0,
+            "scopeId": "Root",
+            "stateName": "Run_Fast_Combat_IP_Loop_Seq"
+        },
+        {
+            "childScopeId": "",
+            "id": 9045,
+            "inputPin": 9046,
+            "nodeType": 0,
+            "outputPin": 9047,
+            "posX": 990.0,
+            "posY": -150.0,
+            "scopeId": "Root",
+            "stateName": "Run_Fast_Combat_IP_Stop_Seq"
         }
     ],
     "GraphTransitions": [
         {
             "conditions": [
-                {"type": 0, "param": "DeathSequenceActive", "op": 0, "threshold": 0.0},
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
                 {
                     "op": 0,
                     "param": "IsJustGuard",
@@ -12987,7 +13216,12 @@
         },
         {
             "conditions": [
-                {"type": 0, "param": "DeathSequenceActive", "op": 0, "threshold": 0.0},
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
                 {
                     "op": 0,
                     "param": "IsIdle",
@@ -13026,7 +13260,12 @@
         },
         {
             "conditions": [
-                {"type": 0, "param": "DeathSequenceActive", "op": 0, "threshold": 0.0},
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
                 {
                     "op": 0,
                     "param": "IsMove",
@@ -13038,18 +13277,35 @@
                     "param": "EnemyExecutionActive",
                     "op": 0,
                     "threshold": 0.0
+                },
+                {
+                    "type": 0,
+                    "param": "IsRunLoop",
+                    "op": 0,
+                    "threshold": 1.0
+                },
+                {
+                    "type": 0,
+                    "param": "GroundSoftStop",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
-            "duration": 0.20000000298023224,
+            "duration": 0.08,
             "from": "__Any__",
             "id": 48,
             "logic": 0,
             "scopeId": "Root",
-            "to": "SS_Sprint"
+            "to": "Run_Fast_Combat_IP_Loop_Seq"
         },
         {
             "conditions": [
-                {"type": 0, "param": "DeathSequenceActive", "op": 0, "threshold": 0.0},
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
                 {
                     "op": 0,
                     "param": "AttackEnter",
@@ -13304,7 +13560,12 @@
         },
         {
             "conditions": [
-                {"type": 0, "param": "DeathSequenceActive", "op": 0, "threshold": 0.0},
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
                 {
                     "op": 0,
                     "param": "IsDodge",
@@ -13377,7 +13638,12 @@
         },
         {
             "conditions": [
-                {"type": 0, "param": "DeathSequenceActive", "op": 0, "threshold": 0.0},
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
                 {
                     "op": 0,
                     "param": "IsJumpStart",
@@ -13435,14 +13701,32 @@
                     "param": "EnemyExecutionActive",
                     "op": 0,
                     "threshold": 0.0
+                },
+                {
+                    "type": 0,
+                    "param": "IsMove",
+                    "op": 0,
+                    "threshold": 1.0
+                },
+                {
+                    "type": 0,
+                    "param": "IsRunLoop",
+                    "op": 0,
+                    "threshold": 1.0
+                },
+                {
+                    "type": 0,
+                    "param": "GroundSoftStop",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
-            "duration": 0.20000000298023224,
+            "duration": 0.08,
             "from": "Air_State",
             "id": 154,
             "logic": 0,
             "scopeId": "Root",
-            "to": "SS_Sprint"
+            "to": "Run_Fast_Combat_IP_Loop_Seq"
         },
         {
             "conditions": [
@@ -14732,7 +15016,12 @@
         },
         {
             "conditions": [
-                {"type": 0, "param": "DeathSequenceActive", "op": 0, "threshold": 0.0},
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
                 {
                     "op": 0,
                     "param": "HitTrigger",
@@ -15210,7 +15499,12 @@
         {
             "BlackboardRequestRoute": false,
             "conditions": [
-                {"type": 0, "param": "DeathSequenceActive", "op": 0, "threshold": 0.0},
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
                 {
                     "type": 2,
                     "param": "EnemyExecutionStart",
@@ -15296,7 +15590,12 @@
         {
             "BlackboardRequestRoute": false,
             "conditions": [
-                {"type": 0, "param": "DeathSequenceActive", "op": 0, "threshold": 0.0},
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
                 {
                     "type": 2,
                     "param": "EnemyExecutionAbort",
@@ -15379,6 +15678,630 @@
             "id": 9038,
             "logic": 0,
             "scopeId": "Root"
+        },
+        {
+            "conditions": [
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "op": 0,
+                    "param": "IsMove",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "type": 0,
+                    "param": "IsRunStart",
+                    "op": 0,
+                    "threshold": 1.0
+                },
+                {
+                    "type": 0,
+                    "param": "GroundSoftStop",
+                    "op": 0,
+                    "threshold": 0.0
+                }
+            ],
+            "duration": 0.08,
+            "from": "__Any__",
+            "id": 9048,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "Run_Fast_Combat_IP_Start_Seq"
+        },
+        {
+            "conditions": [
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "op": 0,
+                    "param": "IsMove",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "type": 0,
+                    "param": "IsRunEnd",
+                    "op": 0,
+                    "threshold": 1.0
+                },
+                {
+                    "type": 0,
+                    "param": "GroundSoftStop",
+                    "op": 0,
+                    "threshold": 0.0
+                }
+            ],
+            "duration": 0.06,
+            "from": "__Any__",
+            "id": 9049,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "Run_Fast_Combat_IP_Stop_Seq"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "GuardInput",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "op": 0,
+                    "param": "IsGuard",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                }
+            ],
+            "duration": 0.07999999821186066,
+            "from": "Run_Fast_Combat_IP_Start_Seq",
+            "id": 9050,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "Guard_State"
+        },
+        {
+            "conditions": [
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "op": 0,
+                    "param": "IsIdle",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                }
+            ],
+            "duration": 0.1,
+            "from": "Run_Fast_Combat_IP_Start_Seq",
+            "id": 9051,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "SS_Idle"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "GuardInput",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "op": 0,
+                    "param": "IsGuard",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                }
+            ],
+            "duration": 0.07999999821186066,
+            "from": "Run_Fast_Combat_IP_Loop_Seq",
+            "id": 9052,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "Guard_State"
+        },
+        {
+            "conditions": [
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "op": 0,
+                    "param": "IsIdle",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                }
+            ],
+            "duration": 0.1,
+            "from": "Run_Fast_Combat_IP_Loop_Seq",
+            "id": 9053,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "SS_Idle"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "GuardInput",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "op": 0,
+                    "param": "IsGuard",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                }
+            ],
+            "duration": 0.07999999821186066,
+            "from": "Run_Fast_Combat_IP_Stop_Seq",
+            "id": 9054,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "Guard_State"
+        },
+        {
+            "conditions": [
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "op": 0,
+                    "param": "IsIdle",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                }
+            ],
+            "duration": 0.1,
+            "from": "Run_Fast_Combat_IP_Stop_Seq",
+            "id": 9055,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "SS_Idle"
+        },
+        {
+            "conditions": [
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "op": 0,
+                    "param": "IsMove",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "type": 0,
+                    "param": "IsRunStart",
+                    "op": 0,
+                    "threshold": 1.0
+                },
+                {
+                    "type": 0,
+                    "param": "GroundSoftStop",
+                    "op": 0,
+                    "threshold": 0.0
+                }
+            ],
+            "duration": 0.08,
+            "from": "SS_Idle",
+            "id": 9056,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "Run_Fast_Combat_IP_Start_Seq"
+        },
+        {
+            "conditions": [
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "op": 0,
+                    "param": "IsMove",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "type": 0,
+                    "param": "IsRunLoop",
+                    "op": 0,
+                    "threshold": 1.0
+                },
+                {
+                    "type": 0,
+                    "param": "GroundSoftStop",
+                    "op": 0,
+                    "threshold": 0.0
+                }
+            ],
+            "duration": 0.08,
+            "from": "Run_Fast_Combat_IP_Start_Seq",
+            "id": 9057,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "Run_Fast_Combat_IP_Loop_Seq"
+        },
+        {
+            "conditions": [
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "op": 0,
+                    "param": "IsMove",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "type": 0,
+                    "param": "IsRunEnd",
+                    "op": 0,
+                    "threshold": 1.0
+                },
+                {
+                    "type": 0,
+                    "param": "GroundSoftStop",
+                    "op": 0,
+                    "threshold": 0.0
+                }
+            ],
+            "duration": 0.06,
+            "from": "Run_Fast_Combat_IP_Start_Seq",
+            "id": 9058,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "Run_Fast_Combat_IP_Stop_Seq"
+        },
+        {
+            "conditions": [
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "op": 0,
+                    "param": "IsMove",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "type": 0,
+                    "param": "IsRunEnd",
+                    "op": 0,
+                    "threshold": 1.0
+                },
+                {
+                    "type": 0,
+                    "param": "GroundSoftStop",
+                    "op": 0,
+                    "threshold": 0.0
+                }
+            ],
+            "duration": 0.06,
+            "from": "Run_Fast_Combat_IP_Loop_Seq",
+            "id": 9059,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "Run_Fast_Combat_IP_Stop_Seq"
+        },
+        {
+            "conditions": [
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "op": 0,
+                    "param": "IsMove",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "type": 0,
+                    "param": "IsRunStart",
+                    "op": 0,
+                    "threshold": 1.0
+                },
+                {
+                    "type": 0,
+                    "param": "GroundSoftStop",
+                    "op": 0,
+                    "threshold": 0.0
+                }
+            ],
+            "duration": 0.08,
+            "from": "Run_Fast_Combat_IP_Stop_Seq",
+            "id": 9060,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "Run_Fast_Combat_IP_Start_Seq"
+        },
+        {
+            "conditions": [
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "op": 0,
+                    "param": "IsMove",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "type": 0,
+                    "param": "IsRunLoop",
+                    "op": 0,
+                    "threshold": 1.0
+                },
+                {
+                    "type": 0,
+                    "param": "GroundSoftStop",
+                    "op": 0,
+                    "threshold": 0.0
+                }
+            ],
+            "duration": 0.08,
+            "from": "Run_Fast_Combat_IP_Stop_Seq",
+            "id": 9061,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "Run_Fast_Combat_IP_Loop_Seq"
+        },
+        {
+            "conditions": [
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "op": 0,
+                    "param": "IsMove",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "type": 0,
+                    "param": "GroundSoftStop",
+                    "op": 0,
+                    "threshold": 1.0
+                }
+            ],
+            "duration": 0.08,
+            "from": "__Any__",
+            "id": 9062,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "SS_Idle"
+        },
+        {
+            "conditions": [
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "op": 0,
+                    "param": "IsMove",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "type": 0,
+                    "param": "GroundSoftStop",
+                    "op": 0,
+                    "threshold": 1.0
+                }
+            ],
+            "duration": 0.08,
+            "from": "Run_Fast_Combat_IP_Start_Seq",
+            "id": 9063,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "SS_Idle"
+        },
+        {
+            "conditions": [
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "op": 0,
+                    "param": "IsMove",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "type": 0,
+                    "param": "GroundSoftStop",
+                    "op": 0,
+                    "threshold": 1.0
+                }
+            ],
+            "duration": 0.08,
+            "from": "Run_Fast_Combat_IP_Loop_Seq",
+            "id": 9064,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "SS_Idle"
+        },
+        {
+            "conditions": [
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "op": 0,
+                    "param": "IsMove",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "type": 0,
+                    "param": "GroundSoftStop",
+                    "op": 0,
+                    "threshold": 1.0
+                }
+            ],
+            "duration": 0.08,
+            "from": "Run_Fast_Combat_IP_Stop_Seq",
+            "id": 9065,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "SS_Idle"
         }
     ],
     "StateAssets": {
@@ -15448,7 +16371,10 @@
         "Roll_Combat_F": "Data/Animation/StateData/Player/States/Roll_Combat_F.json",
         "Get_Up_Seq": "Data/Animation/StateData/Player/States/Get_Up_Seq.json",
         "PlayerDeath": "Data/Animation/StateData/Player/States/PlayerDeath.json",
-        "PlayerRevive": "Data/Animation/StateData/Player/States/PlayerRevive.json"
+        "PlayerRevive": "Data/Animation/StateData/Player/States/PlayerRevive.json",
+        "Run_Fast_Combat_IP_Start_Seq": "Data\\Animation\\StateData\\Player\\States\\Run_Fast_Combat_IP_Start_Seq.json",
+        "Run_Fast_Combat_IP_Loop_Seq": "Data\\Animation\\StateData\\Player\\States\\Run_Fast_Combat_IP_Loop_Seq.json",
+        "Run_Fast_Combat_IP_Stop_Seq": "Data\\Animation\\StateData\\Player\\States\\Run_Fast_Combat_IP_Stop_Seq.json"
     },
     "UseTransitionGraph": true
 }

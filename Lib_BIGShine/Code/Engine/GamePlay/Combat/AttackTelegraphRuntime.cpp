@@ -24,6 +24,7 @@ namespace
 
 void AttackTelegraphRuntime::Reset()
 {
+    canceled = false;
     activeState = nullptr;
     lastTime = -1.0f;
     cues.clear();
@@ -32,6 +33,15 @@ void AttackTelegraphRuntime::Reset()
     cachedNodes = nullptr;
     cachedNodeCount = 0;
     nodeIndices.clear();
+}
+
+void AttackTelegraphRuntime::Cancel(const AnimState* state_)
+{
+    BS_PROFILE_SCOPE("AttackTelegraphRuntime::Cancel");
+    activeState = state_;
+    canceled = true;
+    cues.clear();
+    pending.clear();
 }
 
 void AttackTelegraphRuntime::WarnOnce(const std::string& message_)
@@ -77,8 +87,31 @@ void AttackTelegraphRuntime::Build(const std::shared_ptr<GameObject>& owner_, co
                 const float hitTime_ = event_.startTime + attack_->weaponHitBox.activeStartTime;
                 if (hitTime_ <= event_.endTime) addCue_(hitTime_, attack_->telegraph);
             }
-            else if (attack_->telegraph.enabled && (!attack_->attackEffects.empty() || !attack_->slashEffects.empty()))
-                WarnOnce(event_.attackTemplateId + ": independently timed effect hitboxes require their own telegraph event");
+            // 生成直後に有効な判定は、生成を決めるAnimation Eventの時刻へ正確に結び付けられる。
+            // 生成後の遅延はEffect側の時計なので、アニメーション速度から近似しない。
+            for (const auto& effect_ : attack_->attackEffects)
+            {
+                if (!effect_.enabled) continue;
+                for (const auto& shape_ : effect_.hitShapes)
+                {
+                    if (!shape_.enabled || shape_.shape == ATTACK_HIT_SHAPE::NONE) continue;
+                    if (shape_.activeStartTime <= 0.0f && shape_.activeEndTime >= 0.0f)
+                    {
+                        const float hitTime_ = event_.startTime + (std::max)(effect_.spawnTimeOffset, 0.0f);
+                        if (hitTime_ <= event_.endTime) addCue_(hitTime_, attack_->telegraph);
+                    }
+                    else if (attack_->telegraph.enabled)
+                        WarnOnce(event_.attackTemplateId + ": delayed effect hitbox uses an independent clock; telegraph skipped");
+                }
+            }
+            for (const auto& slash_ : attack_->slashEffects)
+            {
+                if (!slash_.enabled || slash_.vfxPath.empty() || !slash_.hitBox.enabled) continue;
+                if (slash_.spawnTimeOffset <= 0.0f && slash_.hitBox.activeStartTime <= 0.0f && slash_.hitBox.activeEndTime >= 0.0f)
+                    addCue_(event_.startTime, attack_->telegraph);
+                else if (attack_->telegraph.enabled)
+                    WarnOnce(event_.attackTemplateId + ": delayed slash hitbox uses an independent clock; telegraph skipped");
+            }
         }
         else if (event_.telegraphHitStart || (event_.startAction.find("Enable") != std::string::npos &&
             event_.startAction.find("HitBox") != std::string::npos))
@@ -93,6 +126,8 @@ void AttackTelegraphRuntime::Advance(const std::shared_ptr<GameObject>& owner_, 
 {
     if (!owner_ || !owner_->manager || owner_->IsPendingDestroy() || owner_->GetLayer() != LayerType::Enemy) return;
     BS_PROFILE_SCOPE("AttackTelegraphRuntime::Advance");
+    // 中断直後に同じStateを描画し続けても、古い攻撃の予約を復元しない。
+    if (canceled && activeState == &state_) return;
     // 同じStateのループも新しい区間として扱い、前周の消費状態を持ち越さない。
     if (activeState != &state_ || (state_.isLoop && previousTime_ < lastTime))
     {
@@ -187,14 +222,20 @@ AttackTelegraphSettings AttackTelegraphRuntime::DeserializeSettings(const nlohma
     if (!json_.is_object()) return settings_;
     const auto readFloat_ = [&](const char* key_, float fallback_, float minimum_, float maximum_)
     {
-        const float value_ = json_.value(key_, fallback_);
+        const auto entry_ = json_.find(key_);
+        if (entry_ == json_.end() || !entry_->is_number()) return fallback_;
+        const float value_ = entry_->get<float>();
         return std::isfinite(value_) ? std::clamp(value_, minimum_, maximum_) : fallback_;
     };
-    settings_.enabled = json_.value("enabled", settings_.enabled);
+    // 古い設定や型の異なる手編集データは、予兆だけを既定値へ戻して読み込む。
+    const auto enabled_ = json_.find("enabled");
+    if (enabled_ != json_.end() && enabled_->is_boolean()) settings_.enabled = enabled_->get<bool>();
     settings_.leadFrames = readFloat_("leadFrames", settings_.leadFrames, 1.0f, 120.0f);
     settings_.berserkLeadFrames = readFloat_("berserkLeadFrames", settings_.berserkLeadFrames, 1.0f, 120.0f);
-    settings_.particleName = json_.value("particleName", settings_.particleName);
-    settings_.attachNodeName = json_.value("attachNodeName", settings_.attachNodeName);
+    const auto particleName_ = json_.find("particleName");
+    if (particleName_ != json_.end() && particleName_->is_string()) settings_.particleName = particleName_->get<std::string>();
+    const auto attachNodeName_ = json_.find("attachNodeName");
+    if (attachNodeName_ != json_.end() && attachNodeName_->is_string()) settings_.attachNodeName = attachNodeName_->get<std::string>();
     settings_.particleScale = readFloat_("particleScale", settings_.particleScale, 0.01f, 20.0f);
     settings_.lifeTime = readFloat_("lifeTime", settings_.lifeTime, 0.01f, 5.0f);
     for (const auto& entry_ : { std::make_pair("localOffset", &settings_.localOffset), std::make_pair("fallbackOffset", &settings_.fallbackOffset) })
@@ -213,6 +254,7 @@ void AttackTelegraphRuntime::DrawSettings(AttackTelegraphSettings& settings_, Ga
     if (!ImGui::CollapsingHeader("Attack Telegraph")) return;
     ImGui::Checkbox("Enable Telegraph", &settings_.enabled);
     ImGui::TextDisabled("ANIMATION_TIME / 60 FPS reference");
+    ImGui::TextWrapped("Warnings are skipped when the attack starts before the configured lead time. Independent effect timers are not predicted.");
     ImGui::InputText("Particle Preset", &settings_.particleName);
     if (manager_ && ImGui::BeginCombo("Preset List", settings_.particleName.c_str()))
     {

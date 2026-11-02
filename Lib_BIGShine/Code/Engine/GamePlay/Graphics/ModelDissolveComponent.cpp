@@ -4,6 +4,7 @@
 #include "Engine/Graphics/Resource/GlTFModel.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include <algorithm>
+#include <cmath>
 #include <imgui_stdlib.h>
 
 void ModelDissolveComponent::Start()
@@ -33,6 +34,12 @@ void ModelDissolveComponent::RegisterActions()
     register_("DissolveIn", true, false);
     register_("ResetVisible", true, true);
     register_("ResetHidden", false, true);
+}
+
+// 通常再生の時計を保持したまま、演出プレビューの任意時刻を描画へ反映する。
+void ModelDissolveComponent::SetPresentationProgress(float progress_)
+{
+    presentationProgress = std::isfinite(progress_) ? std::clamp(progress_, 0.0f, 1.0f) : 0.0f;
 }
 
 void ModelDissolveComponent::Reset(bool visible_)

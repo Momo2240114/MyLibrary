@@ -92,6 +92,8 @@ struct MotionWarpPreset
     bool useUnscaledTime = false;
     // 明示Target要求だけで使う制限。旧Playerプリセットの移動方式は維持する。
     float maximumPositionCorrectionPerSecond = 24.0f;
+    // 衝突や速度上限で進めなかった予定補正を後のフレームへ持ち越さない。
+    bool discardUnappliedCorrection = false;
     float lockTargetNormalizedTime = 0.0f;
     float maximumTargetTravelDistance = 0.6f;
     float maximumTargetTravelAngleDegrees = 20.0f;
@@ -129,6 +131,8 @@ struct MotionWarpRequest
     DirectX::XMFLOAT3 initialTargetPosition{ 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 plannedRootMotion{ 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 appliedPlannedCorrection{ 0.0f, 0.0f, 0.0f };
+    // 上限や衝突で消費できなかった予定分を、後のフレームへ繰り越さない。
+    DirectX::XMFLOAT3 scheduledPositionCorrection{ 0.0f, 0.0f, 0.0f };
     std::function<bool(const DirectX::XMFLOAT3&, const DirectX::XMFLOAT3&)> pathValidator;
 };
 

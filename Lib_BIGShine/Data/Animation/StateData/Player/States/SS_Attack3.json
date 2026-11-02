@@ -356,8 +356,15 @@
                                      "ownerTarget":  "Self",
                                      "playbackSpeed":  1.0,
                                      "startTime":  1.2166666984558105
-                                 }
-                             ],
+                                 },
+                      {
+                          "actionStart": "BeginWeakComboWarp",
+                          "startTime": 0.0,
+                          "endTime": 0.0,
+                          "eventTemplateType": "NONE",
+                          "label": "BeginWeakComboWarp"
+                      }
+                  ],
                   "loop":  false,
                   "name":  "SS_Attack3",
                   "rootMotion":  {
@@ -377,7 +384,8 @@
                   "rootMotionScaleCurveName":  "",
                   "sequencer":  "",
                   "speed":  1.5,
-                  "speedCurveName":  "",
+                  "sampleWeaponHitBoxes":  true,
+                  "speedCurveName":  "Player.WeakCombo3.Speed",
                   "type":  0
               }
 }

@@ -39,7 +39,12 @@ bool GameRuntimeSettings::Initialize(std::string& error_)
             if (startupScene.empty() || startupScene == "." || startupScene == ".." ||
                 startupScene.find_first_of("/\\:") != std::string::npos)
                 throw std::runtime_error("Invalid startup scene name.");
+#if defined(BS_BUILD_RELEASE) && !defined(BS_APP_GAME) && !defined(BS_APP_ENGINE)
+            // 通常のReleaseだけは、書き出した配布版でもタイトルからF1でEditorへ入れるようにする。
+            gameOnly = false;
+#else
             gameOnly = true;
+#endif
         }
         // Engineの出力先から直接起動した場合も、親階層の開発用Dataを解決する。
 #if defined(BS_APP_ENGINE)
@@ -47,7 +52,7 @@ bool GameRuntimeSettings::Initialize(std::string& error_)
 #else
         constexpr bool RESOLVE_ENGINE_DATA = false;
 #endif
-        if (gameOnly || RESOLVE_ENGINE_DATA)
+        if (hasPackageSettings_ || gameOnly || RESOLVE_ENGINE_DATA)
         {
             auto dataDirectory_ = directory_;
             // 配布設定がある場合は、別のプロジェクトのDataで欠損を補わない。

@@ -193,6 +193,10 @@ struct AnimState
     bool isLoop = true;
     // 使用するカーブの名前（空なら従来の playbackSpeed を使用）
     std::string speedCurveName = "";
+    // 空欄なら従来どおり再生し、指定時だけ現在カテゴリのFloat値を速度倍率へ使う。
+    std::string playbackSpeedParamName;
+    // 高速な武器モーションだけ、判定区間内の途中姿勢も同じ戦闘判定へ渡す。
+    bool sampleWeaponHitBoxes = false;
     // 将来的にはここに「ノードの座標」などのエディタ用データが入る
     // イベントリスト
     std::vector<AnimEvent> events;

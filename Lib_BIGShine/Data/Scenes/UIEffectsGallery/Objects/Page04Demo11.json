@@ -1,0 +1,141 @@
+{
+    "Name": "Page04Demo11",
+    "Layer": 16,
+    "CollisionMask": 0,
+    "ParentName": "GalleryBoard",
+    "RequiredForSceneStart": true,
+    "Transform": {
+        "Pos": [
+            0,
+            0,
+            0
+        ],
+        "Rot": [
+            0,
+            0,
+            0
+        ],
+        "Scale": [
+            1,
+            1,
+            1
+        ]
+    },
+    "Components": [
+        {
+            "TypeName": "UIWidgetComponent",
+            "Enabled": true,
+            "UpdateEnabled": true,
+            "LateUpdateEnabled": true,
+            "UpdatePriority": 0,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": true,
+            "Data": {
+                "WidgetId": "Page04Demo11",
+                "RaycastTarget": false,
+                "InputEnabled": false,
+                "ZOrder": 2,
+                "RectTransform": {
+                    "AnchorMin": [
+                        0.5,
+                        0.5
+                    ],
+                    "AnchorMax": [
+                        0.5,
+                        0.5
+                    ],
+                    "Pivot": [
+                        0.5,
+                        0.5
+                    ],
+                    "AnchoredPosition": [
+                        155,
+                        152
+                    ],
+                    "SizeDelta": [
+                        226,
+                        72
+                    ]
+                }
+            }
+        },
+        {
+            "TypeName": "UITextComponent",
+            "Enabled": true,
+            "UpdateEnabled": true,
+            "LateUpdateEnabled": true,
+            "UpdatePriority": 0,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": true,
+            "Data": {
+                "Text": "PLAY",
+                "FontPath": "Data/Font/NotoSansJP-Regular.otf",
+                "FontSize": 30,
+                "Color": [
+                    0.88,
+                    0.95,
+                    1,
+                    1
+                ],
+                "MaxWidth": 210,
+                "Padding": 8,
+                "AutoSizeWidget": false,
+                "HorizontalAlign": "CENTER",
+                "VerticalAlign": "CENTER"
+            }
+        },
+        {
+            "TypeName": "SpriteRenderer",
+            "Enabled": true,
+            "UpdateEnabled": true,
+            "LateUpdateEnabled": true,
+            "UpdatePriority": 0,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": true,
+            "Data": {
+                "Color": [
+                    1,
+                    1,
+                    1,
+                    1
+                ],
+                "LinearSampling": true
+            }
+        },
+        {
+            "TypeName": "UIVisualEffectComponent",
+            "Enabled": true,
+            "UpdateEnabled": true,
+            "LateUpdateEnabled": true,
+            "UpdatePriority": 0,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": true,
+            "Data": {
+                "Preset": "Afterimage",
+                "PlayOnStart": true
+            }
+        },
+        {
+            "TypeName": "UIMotionComponent",
+            "Enabled": true,
+            "UpdateEnabled": true,
+            "LateUpdateEnabled": true,
+            "UpdatePriority": 0,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": true,
+            "Data": {
+                "Preset": "TrailSweep",
+                "PlayOnStart": true,
+                "Settings": {
+                    "Duration": 1.8,
+                    "Loop": true,
+                    "OffsetAmplitude": [
+                        42,
+                        0
+                    ],
+                    "RotationAmplitude": 8
+                }
+            }
+        }
+    ]
+}

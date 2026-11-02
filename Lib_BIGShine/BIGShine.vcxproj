@@ -631,6 +631,7 @@
     <ClCompile Include="Code\Engine\UI\WidgetBoardComponent.cpp" />
     <ClCompile Include="Code\Game\AI\Human\HumanBossAIComponent.Mind.cpp" />
     <ClCompile Include="Code\Game\AI\Human\HumanBossAIComponent.cpp" />
+    <ClCompile Include="Code\Game\AI\Human\HumanBossAITraceComponent.cpp" />
     <ClCompile Include="Code\Game\AI\Human\HumanBossActionComponent.cpp" />
     <ClCompile Include="Code\Game\AI\Human\HumanBossActionComponent.Ranged.cpp" />
     <ClCompile Include="Code\Game\AI\Dragon\DragonAIComponent.cpp" />
@@ -993,6 +994,7 @@
     <ClInclude Include="Code\Engine\UI\UIButton.h" />
     <ClInclude Include="Code\Game\AI\Human\HumanBossMind.h" />
     <ClInclude Include="Code\Game\AI\Human\HumanBossAIComponent.h" />
+    <ClInclude Include="Code\Game\AI\Human\HumanBossAITraceComponent.h" />
     <ClInclude Include="Code\Game\AI\Human\HumanBossActionComponent.h" />
     <ClInclude Include="Code\Game\AI\Dragon\DragonAIComponent.h" />
     <ClInclude Include="Code\Game\AI\Dragon\DragonAttackControllerComponent.h" />
@@ -1052,6 +1054,13 @@
   <ItemGroup>
     <None Include="CustomExternalDependencies.props" />
     <None Include="Data\Animation\StateData\Player\States\Heal_Air_01.json" />
+    <None Include="Data\Animation\StateData\Player\States\Run_Fast_Combat_IP_Start_Seq.json" />
+    <None Include="Data\Curve\Player.WeakCombo1.Speed.json" />
+    <None Include="Data\Curve\Player.WeakCombo2.Speed.json" />
+    <None Include="Data\Curve\Player.WeakCombo3.Speed.json" />
+    <None Include="Data\Curve\Player.WeakCombo4.Speed.json" />
+    <None Include="Data\Animation\StateData\Player\States\Run_Fast_Combat_IP_Loop_Seq.json" />
+    <None Include="Data\Animation\StateData\Player\States\Run_Fast_Combat_IP_Stop_Seq.json" />
     <None Include="Data\Particle\PlayerHeal.json" />
     <None Include="Data\Animation\StateData\DragonFirstForm_Test\States\DragonGroundStamp.json" />
     <None Include="Shader\Basic.hlsli" />
@@ -1411,6 +1420,7 @@
     <ClCompile Include="Code\Engine\UI\UIPresentationPresets.cpp" />
     <ClCompile Include="Code\Engine\UI\UIMotionComponent.cpp" />
     <ClCompile Include="Code\Engine\UI\UIVisualEffectComponent.cpp" />
+    <ClCompile Include="Code\Engine\UI\UIEffectsGalleryComponent.cpp" />
     <ClCompile Include="Code\Engine\UI\DiamondTransition.cpp" />
     <ClCompile Include="Code\Engine\UI\CurtainTransition.cpp" />
     <ClCompile Include="Code\Engine\UI\CheckerTransition.cpp" />
@@ -1421,6 +1431,7 @@
     <ClInclude Include="Code\Engine\UI\UIPresentationPresets.h" />
     <ClInclude Include="Code\Engine\UI\UIMotionComponent.h" />
     <ClInclude Include="Code\Engine\UI\UIVisualEffectComponent.h" />
+    <ClInclude Include="Code\Engine\UI\UIEffectsGalleryComponent.h" />
     <ClInclude Include="Code\Engine\UI\DiamondTransition.h" />
     <ClInclude Include="Code\Engine\UI\CurtainTransition.h" />
     <ClInclude Include="Code\Engine\UI\CheckerTransition.h" />

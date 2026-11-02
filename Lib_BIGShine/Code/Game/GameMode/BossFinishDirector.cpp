@@ -1,6 +1,7 @@
 #include "PrecompiledHeader.h"
 #include "BossFinishDirector.h"
 #include "GameModeManager.h"
+#include "Engine/GamePlay/Graphics/ModelDissolveComponent.h"
 #include "Engine/Common/DebugLog.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/GamePlay/Camera/CameraManager.h"
@@ -78,37 +79,173 @@ namespace
     nlohmann::json DefaultSettings()
     {
         return nlohmann::json::parse(R"JSON({
-  "Version": 1,
-  "Anchor": [0.0, -0.12, 0.0],
+  "Version": 2,
+  "Anchor": [
+    0.0,
+    -0.12,
+    0.0
+  ],
   "Aspect": 1.7777778,
-  "HitStop": 0.16,
-  "ImpactHold": 0.16,
-  "BlackoutEnd": 0.65,
-  "CounterStart": 2.8,
-  "CaptureTime": 4.25,
+  "HitStop": 0.0,
+  "ImpactHold": 0.0,
+  "BlackoutEnd": 0.0,
+  "CounterStart": 0.0,
+  "CaptureTime": 6.8,
   "HoldTime": 1.3,
   "PromptDelay": 2.8,
   "ReturnFade": 0.65,
-  "Camera": {"Position": [6.6, 3.2, -8.5], "Focus": [0.0, 1.5, 0.6], "Fov": 43.0, "Roll": -5.0, "Shake": 0.12, "ImpactShake": 0.44, "ImpactShakeDuration": 0.18, "ImpactRoll": 3.5, "ImpactFovKick": 5.0},
-  "Player": {"Object": "PlayerModel", "StateAsset": "Data/Animation/StateData/Player/States/Run_Attack_01_Seq.json", "Position": [-1.6, 0.0, -3.5], "EndPosition": [-1.1, 0.0, -0.9], "Yaw": 10.0, "PoseTime": 0.85, "WindupTime": 0.35, "WindupSpeed": 0.22, "StrikeSpeed": 1.8, "HitPoseTime": 0.35, "WeaponObject": "Weapon", "BladeStartNode": "TrailStart", "BladeEndNode": "TrailEnd"},
-  "Boss": {"Object": "HumanBoss", "StateAsset": "Data/Animation/StateData/HumanBoss/States/HumanBossBerserkDownLoop.json", "Position": [0.3, 0.0, 1.6], "Yaw": 180.0, "PoseTime": 0.8, "WindupPoseTime": 0.18, "HitNode": "spine_02", "HitRadius": 0.65, "ReactionAnimation": "Knock_Down_Combat_Loop_Seq", "ReactionSpeed": 1.0, "ReactionPoseTime": 1.8, "KeepPoseAnimation": true},
-  "Equipment": ["Weapon", "Shield", "HumanBossWeapon", "HumanBossShield"],
-  "Background": [0.009, 0.003, 0.018, 1.0],
-  "ImageTint": [0.94, 1.0, 0.97, 1.0],
+  "Camera": {
+    "Position": [
+      5,
+      2.8,
+      -6
+    ],
+    "Focus": [
+      0,
+      0.85,
+      0.1
+    ],
+    "Fov": 43.0,
+    "Roll": 0,
+    "Shake": 0,
+    "ImpactShake": 0.12,
+    "ImpactShakeDuration": 0.18,
+    "ImpactRoll": 0.8,
+    "ImpactFovKick": 1.5
+  },
+  "Player": {
+    "Object": "PlayerModel",
+    "StateAsset": "Data/Animation/StateData/Player/States/Run_Attack_01_Seq.json",
+    "Position": [
+      0,
+      0,
+      -3.6
+    ],
+    "EndPosition": [
+      0,
+      0,
+      -0.9
+    ],
+    "Yaw": 0,
+    "PoseTime": 2.0666668,
+    "WindupTime": 0.35,
+    "WindupSpeed": 0.22,
+    "StrikeSpeed": 1.8,
+    "HitPoseTime": 0.35,
+    "WeaponObject": "Weapon",
+    "BladeStartNode": "TrailStart",
+    "BladeEndNode": "TrailEnd",
+    "Animation": "Run_Attack_01_Seq_0",
+    "ApproachTime": 0.55
+  },
+  "Boss": {
+    "Object": "HumanBoss",
+    "StateAsset": "Data/Animation/StateData/HumanBoss/States/HumanBossBerserkDownLoop.json",
+    "Position": [
+      0,
+      0,
+      0.9
+    ],
+    "Yaw": 180,
+    "PoseTime": 0.8,
+    "WindupPoseTime": 0.18,
+    "HitNode": "spine_02",
+    "HitRadius": 0.65,
+    "ReactionAnimation": "Knock_Down_Combat_Loop_Seq",
+    "ReactionSpeed": 1.0,
+    "ReactionPoseTime": 1.8,
+    "KeepPoseAnimation": true,
+    "Animation": "Knock_Down_Loop_Seq",
+    "Loop": true,
+    "ExecutionDistance": 1.8
+  },
+  "Equipment": [
+    "Weapon",
+    "Shield",
+    "HumanBossWeapon",
+    "HumanBossShield"
+  ],
+  "Background": [
+    0.009,
+    0.003,
+    0.018,
+    1.0
+  ],
+  "ImageTint": [
+    1,
+    1,
+    1,
+    1
+  ],
   "ZoomStart": 1.0,
-  "ZoomEnd": 1.045,
+  "ZoomEnd": 1.0,
   "ClearText": "討伐完了",
   "PromptText": "ボタンを押してタイトルへ",
-  "ClearPosition": [0.5, 0.76],
-  "PromptPosition": [0.5, 0.9],
+  "ClearPosition": [
+    0.5,
+    0.76
+  ],
+  "PromptPosition": [
+    0.5,
+    0.9
+  ],
   "ConfirmAction": "UI.MenuConfirm",
   "Effects": [
-    {"Kind": "Particle", "Asset": "Data/Particle/AnathemaFinishMudBurst.json", "Position": [0.3, 1.6, 1.6], "Rotation": [0.0, 0.0, 0.0], "Scale": [1.0, 1.0, 1.0], "Start": 0.0, "Stop": 0.85, "PoseTime": 0.8, "Color": [1.0, 1.0, 1.0, 1.0], "Emission": 1.0, "Anchor": "Impact", "Offset": [0.0, 0.0, 0.0], "TimeAnchor": "Impact", "RequiresImpact": true},
-    {"Kind": "Particle", "Asset": "Data/Particle/AnathemaFinishMudSlough.json", "Position": [0.3, 1.1, 1.6], "Rotation": [0.0, 0.0, 0.0], "Scale": [1.0, 1.0, 1.0], "Start": 0.08, "Stop": 1.25, "PoseTime": 1.1, "Color": [1.0, 1.0, 1.0, 1.0], "Emission": 1.0, "Anchor": "Boss", "Offset": [0.0, 0.0, 0.0], "TimeAnchor": "Impact", "RequiresImpact": true, "Node": "spine_02"},
-    {"Kind": "Mesh", "Asset": "Data/VFX/TransitionMudPool.json", "Position": [0.3, 0.05, 1.6], "Rotation": [0.0, 0.0, 0.0], "Scale": [1.4, 1.0, 1.4], "Start": 0.7, "Stop": 4.25, "PoseTime": 2.5, "Color": [0.08, 0.025, 0.11, 1.0], "Emission": 1.0, "Anchor": "Boss", "Offset": [0.0, 0.05, 0.0]},
-    {"Kind": "Mesh", "Asset": "Data/VFX/TransitionMudVortex.json", "Position": [0.3, 0.4, 1.6], "Rotation": [0.0, 0.0, 0.0], "Scale": [0.65, 1.3, 0.65], "Start": 1.1, "Stop": 4.25, "PoseTime": 2.4, "Color": [0.08, 0.02, 0.12, 1.0], "Emission": 1.0, "Anchor": "Boss", "Offset": [0.0, 0.4, 0.0]},
-    {"Kind": "Mesh", "Asset": "Data/VFX/AnathemaFinishCross.json", "Position": [0.0, 1.7, 1.0], "Rotation": [0.0, 0.0, 0.0], "Scale": [1.0, 1.0, 1.0], "Start": 0.0, "Stop": 0.4, "PoseTime": 0.35, "Color": [0.83, 1.0, 0.89, 1.0], "Emission": 5.0, "Anchor": "Impact", "Offset": [0.0, 0.0, 0.0], "TimeAnchor": "Impact", "RequiresImpact": true}
-  ]
+    {
+      "Kind": "Particle",
+      "Asset": "Data/Particle/AnathemaFinishMudSlough.json",
+      "Position": [
+        0,
+        0,
+        0
+      ],
+      "Rotation": [
+        0,
+        0,
+        0
+      ],
+      "Scale": [
+        1,
+        1,
+        1
+      ],
+      "Start": 0,
+      "Stop": 3.15,
+      "PoseTime": 3.2,
+      "Color": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "Emission": 1.0,
+      "Anchor": "Boss",
+      "Offset": [
+        0,
+        0,
+        0
+      ],
+      "MeshSourceObject": true,
+      "EmitDuration": 2.1,
+      "TimeAnchor": "Dissolve"
+    }
+  ],
+  "StageCenterObject": "Stage",
+  "ExecutionStart": 2.3,
+  "AlignDuration": 0.23,
+  "SlamTime": 0.8333333333333334,
+  "DissolveDelay": 0.4,
+  "DissolveDuration": 2.1,
+  "PlayerExecution": {
+    "Object": "PlayerModel",
+    "StateAsset": "Data/Animation/StateData/HumanBoss/States/Execution_03_Seq.json",
+    "Animation": "Execution_03_Seq"
+  },
+  "BossExecution": {
+    "Object": "HumanBoss",
+    "StateAsset": "Data/Animation/StateData/Player/States/Execution_Target_03_Seq.json",
+    "Animation": "Execution_Target_03_Seq"
+  }
 }
 )JSON");
     }
@@ -135,8 +272,8 @@ void BossFinishDirector::SetPreviewPlaybackRate(float rate_)
 
 BossFinishDirector::PreviewActorInfo BossFinishDirector::GetPreviewActorInfo(bool boss_) const
 {
-    const auto& actor_ = boss_ && !settings.at("Boss").value("KeepPoseAnimation", false) &&
-        impactConfirmed && elapsed > GetImpactCueTime() + settings.value("ImpactHold", 0.16f) ? bossReaction : boss_ ? boss : player;
+    const auto& actor_ = elapsed >= settings.at("ExecutionStart").get<float>()
+        ? (boss_ ? bossReaction : playerExecution) : (boss_ ? boss : player);
     PreviewActorInfo info_;
     info_.ready = actor_.ready;
     if (!actor_.ready || !actor_.object) return info_;
@@ -159,7 +296,16 @@ void BossFinishDirector::Normalize()
     };
     clamp_("Aspect", 0.5f, 3.5f);
     clamp_("HitStop", 0.0f, 1.0f);
-    clamp_("BlackoutEnd", settings["HitStop"].get<float>() + 0.05f, 3.0f);
+    // 旧プリセットでも暗転・単発カウンターへ戻らず、新しい連続演出の時計へ統一する。
+    settings["HitStop"] = 0.0f;
+    settings["BlackoutEnd"] = 0.0f;
+    settings["CounterStart"] = 0.0f;
+    settings["ImpactHold"] = 0.0f;
+    clamp_("ExecutionStart", 0.1f, 10.0f);
+    clamp_("AlignDuration", 0.01f, settings["ExecutionStart"].get<float>());
+    clamp_("SlamTime", 0.0f, 1.9166667f);
+    clamp_("DissolveDelay", 0.0f, 5.0f);
+    clamp_("DissolveDuration", 0.1f, 10.0f);
     clamp_("CounterStart", settings["BlackoutEnd"].get<float>(), 15.0f);
     clamp_("CaptureTime", settings["CounterStart"].get<float>() + 0.1f, 25.0f);
     clamp_("HoldTime", 0.0f, 10.0f);
@@ -175,7 +321,21 @@ void BossFinishDirector::Normalize()
     player_["StrikeSpeed"] = std::clamp(player_.value("StrikeSpeed", 1.8f), 0.01f, 5.0f);
     player_["HitPoseTime"] = std::clamp(player_.value("HitPoseTime", 0.35f), 0.01f, 3.0f);
     player_["PoseTime"] = (std::max)(player_.value("PoseTime", 0.85f), player_["HitPoseTime"].get<float>());
+    const float runDuration_ = player_["PoseTime"].get<float>();
+    const float blendDuration_ = settings["AlignDuration"].get<float>();
+    settings["ExecutionStart"] = (std::max)(settings["ExecutionStart"].get<float>(), runDuration_ + blendDuration_);
+    const float approach_ = player_.value("ApproachTime", 0.55f);
+    player_["ApproachTime"] = std::isfinite(approach_) ? std::clamp(approach_, 0.01f, runDuration_) : 0.55f;
+    auto& boss_ = settings["Boss"];
+    const float distance_ = boss_.value("ExecutionDistance", 1.8f);
+    boss_["ExecutionDistance"] = std::isfinite(distance_) ? std::clamp(distance_, 0.8f, 4.0f) : 1.8f;
+    const auto position_ = ReadPosition(boss_["Position"]);
+    const float yaw_ = DirectX::XMConvertToRadians(player_.value("Yaw", 0.0f));
+    player_["EndPosition"] = {position_.x - std::sin(yaw_)*boss_["ExecutionDistance"].get<float>(), position_.y,
+        position_.z - std::cos(yaw_)*boss_["ExecutionDistance"].get<float>()};
     settings["CaptureTime"] = (std::max)(GetCaptureTime(), GetImpactTime() + settings["ImpactHold"].get<float>() + 0.15f);
+    settings["CaptureTime"] = (std::max)(GetCaptureTime(), GetImpactTime() +
+        settings["DissolveDelay"].get<float>() + settings["DissolveDuration"].get<float>() + 1.0f);
     // キーが無い従来データは固定カメラのまま扱い、新規キーだけを時刻順に整える。
     auto& camera_ = settings["Camera"];
     if (camera_.contains("Keys") && camera_["Keys"].is_array())
@@ -208,13 +368,7 @@ void BossFinishDirector::Normalize()
 
 float BossFinishDirector::GetImpactTime() const
 {
-    const auto& config_ = settings.at("Player");
-    const float windup_ = config_.value("WindupTime", 0.35f);
-    const float speed_ = config_.value("WindupSpeed", 0.22f);
-    const float pose_ = config_.value("HitPoseTime", 0.35f);
-    const float offset_ = pose_ <= windup_ * speed_ ? pose_ / (std::max)(speed_, 0.01f)
-        : windup_ + (pose_ - windup_ * speed_) / (std::max)(config_.value("StrikeSpeed", 1.8f), 0.01f);
-    return settings.at("CounterStart").get<float>() + offset_;
+    return settings.at("ExecutionStart").get<float>() + settings.at("SlamTime").get<float>();
 }
 
 bool BossFinishDirector::Load()
@@ -303,6 +457,7 @@ void BossFinishDirector::PrepareActor(ActorPose& actor_, const char* key_)
     const auto& config_ = settings.at(key_);
     actor_.object = manager.Find(config_.value("Object", std::string()));
     actor_.ready = false;
+    actor_.hasRootReference = false;
     try
     {
         std::ifstream file_(WindowsDialogHelper::Utf8ToPath(config_.at("StateAsset").get<std::string>()));
@@ -311,12 +466,22 @@ void BossFinishDirector::PrepareActor(ActorPose& actor_, const char* key_)
         file_ >> data_;
         actor_.state = data_.at("State").get<AnimState>();
         const auto model_ = actor_.object ? actor_.object->GetComponent<GltfModelCommponennt>() : nullptr;
+        // モデルごとの並び順に依存せず、指定されたクリップ名を優先して解決する。
+        if (model_ && config_.contains("Animation"))
+        {
+            actor_.state.animationIndex = -1;
+            const auto& animations_ = model_->GetAnimations();
+            for (std::size_t index_ = 0; index_ < animations_.size(); ++index_)
+                if (animations_[index_].name == config_.at("Animation").get<std::string>())
+                { actor_.state.animationIndex = static_cast<int>(index_); break; }
+            actor_.state.name = config_.at("Animation").get<std::string>();
+        }
         if (!model_ || !model_->IsModelReady() || actor_.state.animationIndex < 0 ||
             actor_.state.animationIndex >= static_cast<int>(model_->GetAnimations().size()))
             throw std::runtime_error("actor or animation index unavailable");
-        // カウンターの見た目を再利用し、ダメージ・ActionSequence・VFXの二重生成は起こさない。
+        // 演出専用のポーズ評価では、戦闘イベントによるダメージやVFXの二重生成を防ぐ。
         actor_.state.events.clear();
-        actor_.state.isLoop = false;
+        actor_.state.isLoop = config_.value("Loop", false);
         actor_.state.playbackSpeed = 0.0f;
         actor_.state.rootMotion.enable = false;
         actor_.state.rootMotion.cutVisualWhenDisabled = true;
@@ -340,9 +505,76 @@ void BossFinishDirector::SampleActor(ActorPose& actor_, float time_)
     if (!actor_.ready || !actor_.object) return;
     const auto model_ = actor_.object->GetComponent<GltfModelCommponennt>();
     if (!model_) return;
-    actor_.animator.SetCurrentTime((std::max)(time_, 0.0f));
+    const float duration_ = actor_.animator.GetCurrentSampleDuration();
+    const float sample_ = duration_ > 0.0f ? (actor_.state.isLoop ? std::fmod(time_, duration_) : (std::min)(time_, duration_)) : time_;
+    actor_.animator.SetCurrentTime((std::max)(sample_, 0.0f));
     actor_.animator.Update(0.0f, model_.get(), nullptr);
-    model_->SetNodePoses(actor_.animator.GetCurrentPose());
+    auto poses_ = actor_.animator.GetCurrentPose();
+    // SetCurrentTimeでAnimatorのRootMotion基準が初期化されるため、演出側の固定基準で補正する。
+    ConstrainActorPose(actor_, poses_);
+    model_->SetNodePoses(poses_);
+    model_->UpdateTransform();
+}
+
+// 骨盤までの親階層を含めて水平移動を除去し、配置移動との二重加算を防ぐ。
+void BossFinishDirector::ConstrainActorPose(ActorPose& actor_, std::vector<GltfModelCommponennt::NodePose>& poses_)
+{
+    BS_PROFILE_SCOPE("BossFinishDirector::ConstrainActorPose");
+    const auto model_ = actor_.object ? actor_.object->GetComponent<GltfModelCommponennt>() : nullptr;
+    if (!model_) return;
+    const int rootIndex_ = model_->GetNodeIndex(actor_.state.rootMotion.sourceNodeName.empty()
+        ? "pelvis" : actor_.state.rootMotion.sourceNodeName.c_str());
+    const auto& nodes_ = model_->GetNodes();
+    if (rootIndex_ < 0 || rootIndex_ >= static_cast<int>(poses_.size()) || rootIndex_ >= static_cast<int>(nodes_.size())) return;
+    using namespace DirectX::SimpleMath;
+    Matrix parentMatrix_ = Matrix::Identity;
+    int parentIndex_ = nodes_[rootIndex_].parentIndex;
+    for (std::size_t depth_ = 0; parentIndex_ >= 0 && depth_ < nodes_.size(); ++depth_)
+    {
+        if (parentIndex_ >= static_cast<int>(nodes_.size()) || parentIndex_ >= static_cast<int>(poses_.size())) return;
+        const auto& pose_ = poses_[parentIndex_];
+        parentMatrix_ *= Matrix::CreateScale(pose_.scale) * Matrix::CreateFromQuaternion(pose_.rotation) * Matrix::CreateTranslation(pose_.position);
+        parentIndex_ = nodes_[parentIndex_].parentIndex;
+    }
+    auto position_ = Vector3::Transform(poses_[rootIndex_].position, parentMatrix_);
+    if (!actor_.hasRootReference)
+    {
+        actor_.rootReferencePosition = position_;
+        actor_.hasRootReference = true;
+    }
+    position_.x = actor_.rootReferencePosition.x;
+    position_.z = actor_.rootReferencePosition.z;
+    // 叩きつけの上下動は残し、水平成分だけを骨盤のローカル座標へ戻す。
+    poses_[rootIndex_].position = Vector3::Transform(position_, parentMatrix_.Invert());
+}
+
+// 同じ固定位置で双方の姿勢をつなぎ、クリップ切り替え時の見た目の位置飛びを防ぐ。
+void BossFinishDirector::BlendExecutionPose(ActorPose& source_, ActorPose& execution_, float sourceTime_, float blend_)
+{
+    BS_PROFILE_SCOPE("BossFinishDirector::BlendExecutionPose");
+    if (!source_.ready || !execution_.ready || !source_.object) return;
+    const auto model_ = source_.object->GetComponent<GltfModelCommponennt>();
+    if (!model_) return;
+    SampleActor(source_, sourceTime_);
+    std::vector<GltfModelCommponennt::NodePose> sourcePoses_;
+    model_->GetNodePoses(sourcePoses_);
+    SampleActor(execution_, 0.0f);
+    std::vector<GltfModelCommponennt::NodePose> poses_;
+    model_->GetNodePoses(poses_);
+    if (sourcePoses_.size() != poses_.size()) return;
+    using namespace DirectX;
+    const float ratio_ = std::clamp(blend_, 0.0f, 1.0f);
+    const float eased_ = ratio_ * ratio_ * (3.0f - 2.0f * ratio_);
+    for (std::size_t index_ = 0; index_ < poses_.size(); ++index_)
+    {
+        auto& pose_ = poses_[index_];
+        const auto& sourcePose_ = sourcePoses_[index_];
+        XMStoreFloat3(&pose_.position, XMVectorLerp(XMLoadFloat3(&sourcePose_.position), XMLoadFloat3(&pose_.position), eased_));
+        XMStoreFloat3(&pose_.scale, XMVectorLerp(XMLoadFloat3(&sourcePose_.scale), XMLoadFloat3(&pose_.scale), eased_));
+        XMStoreFloat4(&pose_.rotation, XMQuaternionSlerp(XMLoadFloat4(&sourcePose_.rotation), XMLoadFloat4(&pose_.rotation), eased_));
+    }
+    ConstrainActorPose(execution_, poses_);
+    model_->SetNodePoses(poses_);
     model_->UpdateTransform();
 }
 
@@ -364,7 +596,7 @@ void BossFinishDirector::Begin(bool preview_)
     if (auto mode_ = manager.GetGameModeManager())
     {
         // BOSS_DEFEATEDへ到達した時点で戦闘側の有効打は受付済み。
-        // 演出内の簡易接触チェックを、もう一度撃破を要求する条件にはしない。
+        // 演出用クリップの準備状態を、もう一度撃破を要求する条件にはしない。
         finishAuthorized = !preview && mode_->GetCurrentGameState() == GameProgressState::BOSS_DEFEATED;
         previousPlayerLock = mode_->IsPlayerControlLocked(); previousAILock = mode_->IsEnemyAILocked();
         previousPresentation = mode_->IsPresentationPlaying(); previousGameplayLock = mode_->IsGameplayLocked();
@@ -391,7 +623,7 @@ void BossFinishDirector::Begin(bool preview_)
     }
     camera = std::make_shared<CameraComponent>();
     PrepareActor(player, "Player"); PrepareActor(boss, "Boss");
-    PrepareImpact();
+    PrepareExecution();
     PrepareSprites(); CreateEffects(); Evaluate(0.0f, 0.0f);
 }
 
@@ -410,6 +642,9 @@ void BossFinishDirector::Stop()
             model_->SetNodePoses(saved_.poses); model_->SetRuntimeVisible(saved_.visible); model_->UpdateTransform();
         }
     }
+    for (auto& saved_ : savedActors)
+        if (saved_.object)
+            if (const auto dissolve_ = saved_.object->GetComponent<ModelDissolveComponent>()) dissolve_->ClearPresentationProgress();
     savedActors.clear(); effects.clear();
     if (!preview) AudioManager::Instance().ApplyBgmVolumes(previousBgmVolumes,1.0f);
     previousBgmVolumes.clear();
@@ -417,6 +652,7 @@ void BossFinishDirector::Stop()
     imageSprite.reset(); solidSprite.reset(); clearSprite.reset(); promptSprite.reset(); camera.reset();
     player.object.reset(); boss.object.reset(); player.ready = false; boss.ready = false;
     bossReaction.object.reset(); bossReaction.ready = false;
+    playerExecution.object.reset(); playerExecution.ready = false;
     if (preview) if (auto mode_ = manager.GetGameModeManager())
     {
         mode_->SetPlayerControlLocked(previousPlayerLock); mode_->SetEnemyAILocked(previousAILock);
@@ -428,80 +664,33 @@ void BossFinishDirector::Stop()
     finishAuthorized = false;
 }
 
-void BossFinishDirector::PrepareImpact()
+// 叩きつける側と受ける側を別Animatorで準備し、同じ演出時計で評価する。
+void BossFinishDirector::PrepareExecution()
 {
-    BS_PROFILE_SCOPE("BossFinishDirector::PrepareImpact");
-    impactReady = false;
-    const auto anchor_ = ReadPosition(settings["Anchor"]);
-    const auto& playerConfig_ = settings["Player"];
-    const auto& bossConfig_ = settings["Boss"];
-    const auto reportContact_ = [&](const std::string& reason_)
+    BS_PROFILE_SCOPE("BossFinishDirector::PrepareExecution");
+    PrepareActor(playerExecution, "PlayerExecution");
+    PrepareActor(bossReaction, "BossExecution");
+    // アニメーションごとの開始位置を採用せず、移動前の骨格位置を次のクリップへ引き継ぐ。
+    playerExecution.rootReferencePosition = player.rootReferencePosition;
+    playerExecution.hasRootReference = player.hasRootReference;
+    bossReaction.rootReferencePosition = boss.rootReferencePosition;
+    bossReaction.hasRootReference = boss.hasRootReference;
+    impactPosition = AddPosition(GetStageAnchor(), ReadPosition(settings["Boss"]["Position"]));
+    impactReady = player.ready && boss.ready && playerExecution.ready && bossReaction.ready;
+}
+
+// ステージの水平中心を基準にし、接地高さは演出設定で調整する。
+DirectX::XMFLOAT3 BossFinishDirector::GetStageAnchor() const
+{
+    auto position_ = ReadPosition(settings.at("Anchor"));
+    const auto stage_ = manager.Find(settings.value("StageCenterObject", std::string("Stage")));
+    if (stage_ && stage_->transform)
     {
-        status = "Finish contact diagnostic: " + reason_ + ". Presentation and clear display will continue.";
-        BS_LOG_INFO(LOG_CATEGORY::GAME,status);
-    };
-    alignedEndPosition = ReadPosition(playerConfig_["EndPosition"]);
-    impactPosition = AddPosition(anchor_, ReadPosition(bossConfig_["Position"]));
-    if (!player.ready || !boss.ready) { reportContact_("player or boss animation unavailable"); return; }
-    // 命中後の姿勢はプリセットで選ぶ。ダウン維持では同じループを最後まで使う。
-    bossReaction.object = boss.object;
-    bossReaction.state = boss.state;
-    bossReaction.ready = false;
-    const auto bossModel_ = boss.object->GetComponent<GltfModelCommponennt>();
-    const auto& animations_ = bossModel_->GetAnimations();
-    for (std::size_t index_ = 0; index_ < animations_.size(); ++index_)
-        if (animations_[index_].name == bossConfig_.value("ReactionAnimation", std::string("Hit_Combat_Large_Death_Seq")))
-        {
-            bossReaction.state.animationIndex = static_cast<int>(index_);
-            bossReaction.animator = ModelAnimator{};
-            bossReaction.animator.CrossFadeTo(&bossReaction.state, 0.0f);
-            bossReaction.ready = true;
-            break;
-        }
-    if (!bossReaction.ready && !bossConfig_.value("KeepPoseAnimation",false))
-    { reportContact_("boss reaction animation missing"); return; }
-    PlaceActor(boss.object, impactPosition, bossConfig_.value("Yaw", 180.0f));
-    // 接触位置の計算にも本番の命中時刻と同じダウン姿勢を使い、胴体の高さを一致させる。
-    SampleActor(boss, bossConfig_.value("WindupPoseTime", 0.18f) +
-        (bossConfig_.value("KeepPoseAnimation",false) ? GetImpactTime() : 0.0f));
-    PlaceActor(player.object, AddPosition(anchor_, alignedEndPosition), playerConfig_.value("Yaw", 10.0f));
-    SampleActor(player, playerConfig_.value("HitPoseTime", 0.35f));
-    const auto weapon_ = manager.Find(playerConfig_.value("WeaponObject", std::string("Weapon")));
-    const auto attachment_ = weapon_ ? weapon_->GetComponent<ModelAttachmentComponent>() : nullptr;
-    if (!attachment_ || !attachment_->IsEnabled()) { reportContact_("weapon attachment missing or disabled"); return; }
-    attachment_->SyncAttachment();
-    DirectX::XMFLOAT3 target_, start_, end_;
-    if (!ReadNodePosition(boss.object, bossConfig_.value("HitNode", std::string("spine_02")), target_) ||
-        !ReadNodePosition(weapon_, playerConfig_.value("BladeStartNode", std::string("TrailStart")), start_) ||
-        !ReadNodePosition(weapon_, playerConfig_.value("BladeEndNode", std::string("TrailEnd")), end_))
-    { reportContact_("boss hit node or blade nodes unavailable"); return; }
-    // 刃の高さに合う点を選び、接地高さを変えず水平移動だけで敵の胴体へ寄せる。
-    const float bladeRatio_ = std::abs(end_.y - start_.y) > 0.001f
-        ? std::clamp((target_.y - start_.y) / (end_.y - start_.y), 0.0f, 1.0f) : 0.5f;
-    const DirectX::XMFLOAT3 bladePoint_{start_.x + (end_.x-start_.x)*bladeRatio_,
-        start_.y + (end_.y-start_.y)*bladeRatio_, start_.z + (end_.z-start_.z)*bladeRatio_};
-    alignedEndPosition.x += target_.x - bladePoint_.x;
-    alignedEndPosition.z += target_.z - bladePoint_.z;
-    PlaceActor(player.object, AddPosition(anchor_, alignedEndPosition), playerConfig_.value("Yaw", 10.0f));
-    SampleActor(player, playerConfig_.value("HitPoseTime", 0.35f));
-    attachment_->SyncAttachment();
-    if (!ReadNodePosition(weapon_, playerConfig_.value("BladeStartNode", std::string("TrailStart")), start_) ||
-        !ReadNodePosition(weapon_, playerConfig_.value("BladeEndNode", std::string("TrailEnd")), end_))
-    { reportContact_("aligned blade nodes unavailable"); return; }
-    using namespace DirectX;
-    const auto startVector_ = XMLoadFloat3(&start_);
-    const auto segment_ = XMLoadFloat3(&end_) - startVector_;
-    const float lengthSquared_ = XMVectorGetX(XMVector3LengthSq(segment_));
-    if (lengthSquared_ <= 0.000001f) { reportContact_("blade segment has zero length"); return; }
-    const float ratio_ = std::clamp(XMVectorGetX(XMVector3Dot(XMLoadFloat3(&target_)-startVector_, segment_)) / lengthSquared_, 0.0f, 1.0f);
-    const auto contact_ = startVector_ + segment_ * ratio_;
-    const float radius_ = std::clamp(bossConfig_.value("HitRadius", 0.65f), 0.05f, 2.0f);
-    impactReady = XMVectorGetX(XMVector3LengthSq(contact_ - XMLoadFloat3(&target_))) <= radius_ * radius_;
-    XMStoreFloat3(&impactPosition, contact_);
-    if (!impactReady)
-    {
-        reportContact_("blade does not reach the boss; adjust HitPoseTime / HitNode");
+        const auto center_ = stage_->transform->GetWorldPosition();
+        position_.x += center_.x;
+        position_.z += center_.z;
     }
+    return position_;
 }
 
 DirectX::XMFLOAT3 BossFinishDirector::GetEffectPosition(const nlohmann::json& config_) const
@@ -525,7 +714,7 @@ DirectX::XMFLOAT3 BossFinishDirector::GetEffectPosition(const nlohmann::json& co
         return AddPosition(position_, ReadPosition(config_.at("Offset")));
     }
     // 旧プリセットの絶対配置はそのまま読み込み、新形式だけ基準位置とオフセットを使う。
-    return AddPosition(ReadPosition(settings.at("Anchor")), ReadPosition(config_.at("Position")));
+    return AddPosition(GetStageAnchor(), ReadPosition(config_.at("Position")));
 }
 
 void BossFinishDirector::CreateEffects()
@@ -547,6 +736,14 @@ void BossFinishDirector::CreateEffects()
             {
                 auto particle_ = object_->AddComponent<ParticleComponent>();
                 if (!particle_->LoadAsset(path_)) throw std::runtime_error(path_);
+                if (config_.value("MeshSourceObject", false))
+                {
+                    // 倒れた敵のスキニング済み頂点から細粒を発生させる。
+                    nlohmann::json particleConfig_;
+                    particle_->Serialize(particleConfig_);
+                    particleConfig_["MeshSourceObjectName"] = settings["Boss"]["Object"];
+                    particle_->Deserialize(particleConfig_);
+                }
                 const auto rotation_ = ReadPosition(config_["Rotation"]);
                 const auto scale_ = ReadPosition(config_["Scale"]);
                 const auto tint_ = ReadColor(config_["Color"]);
@@ -600,7 +797,9 @@ void BossFinishDirector::AdvanceEffects(float from_, float to_)
     for (std::size_t index_ = 0; index_ < effects.size(); ++index_)
     {
         const auto& config_ = configs_[index_];
-        const float origin_ = config_.value("TimeAnchor", std::string()) == "Impact" ? GetImpactTime() : 0.0f;
+        const auto timeAnchor_ = config_.value("TimeAnchor", std::string());
+        const float origin_ = timeAnchor_ == "Dissolve" ? GetImpactTime() + settings["DissolveDelay"].get<float>() :
+            timeAnchor_ == "Impact" ? GetImpactTime() : 0.0f;
         const float start_ = origin_ + config_.value("Start", 0.0f);
         const float stop_ = origin_ + config_.value("Stop", GetCaptureTime() - origin_);
         const float limit_ = (std::max)(config_.value("PoseTime", 10.0f), 0.0f);
@@ -614,8 +813,12 @@ void BossFinishDirector::AdvanceEffects(float from_, float to_)
         {
             // GPUの直接シークは使わず、リセット後も本番も同じ固定刻みでシミュレーションする。
             particle_->SetRuntimeSuppressed(!visible_);
-            const float growth_ = config_.value("RequiresImpact", false) ? 1.0f : std::clamp(current_ / 1.8f, 0.15f, 1.0f);
-            particle_->SetEmissionScale(growth_);
+            // 敵の消滅粒子は開始直後から全量を発生させ、短い演出でも十分な密度を確保する。
+            const float growth_ = (config_.value("MeshSourceObject", false) || config_.value("RequiresImpact", false))
+                ? 1.0f : std::clamp(current_ / 1.8f, 0.15f, 1.0f);
+            const float emitDuration_ = config_.value("MeshSourceObject", false) ? settings["DissolveDuration"].get<float>() :
+                config_.value("EmitDuration", limit_ + 1.0f);
+            particle_->SetEmissionScale(current_ >= emitDuration_ ? 0.0f : growth_);
             if (current_ > previous_) particle_->Update(current_ - previous_);
         }
         if (const auto mesh_ = effect_->GetComponent<MeshVFXComponent>())
@@ -634,42 +837,56 @@ void BossFinishDirector::Evaluate(float time_, float deltaTime_)
     const float sampleTime_ = (std::min)(time_, captureTime_);
     const float impactTime_ = GetImpactTime();
     const float impactAge_ = (std::max)(sampleTime_ - impactTime_, 0.0f);
-    const float impactHold_ = settings["ImpactHold"].get<float>();
-    // 接触の成否は構図調整用。本番では既に成立した戦闘の撃破受付を優先し、
-    // ダウン姿勢による胴体の高さや欠損アセットで討伐完了・タイトル復帰を停止させない。
-    // Previewも本番と同じ命中キューとクリア表示を確認できるが、死亡確定は実行しない。
     impactConfirmed = (impactReady || finishAuthorized || preview) && sampleTime_ >= impactTime_;
-    // 命中したポーズで短く止めてから振り抜き、接触前に敵をのけぞらせない。
-    const float actionTime_ = sampleTime_ - (impactConfirmed ? (std::min)(impactAge_, impactHold_) : 0.0f);
-    const float counterTime_ = (std::max)(actionTime_ - settings["CounterStart"].get<float>(), 0.0f);
+    const float executionStart_ = settings["ExecutionStart"].get<float>();
+    const float executionTime_ = (std::max)(sampleTime_ - executionStart_, 0.0f);
+    const auto anchor_ = GetStageAnchor();
     const auto& playerConfig_ = settings["Player"];
-    const float windup_ = playerConfig_.value("WindupTime", 0.35f);
-    const float windupSpeed_ = playerConfig_.value("WindupSpeed", 0.22f);
-    const float strikeSpeed_ = playerConfig_.value("StrikeSpeed", 1.8f);
-    const float poseTime_ = (std::min)(counterTime_, windup_) * windupSpeed_ + (std::max)(counterTime_ - windup_, 0.0f) * strikeSpeed_;
-    const auto anchor_ = ReadPosition(settings["Anchor"]);
-    if (player.object)
+    const auto& bossConfig_ = settings["Boss"];
+    const auto start_ = ReadPosition(playerConfig_["Position"]);
+    const auto bossPosition_ = ReadPosition(bossConfig_["Position"]);
+    const float yaw_ = DirectX::XMConvertToRadians(playerConfig_.value("Yaw", 0.0f));
+    const float distance_ = std::clamp(bossConfig_.value("ExecutionDistance", 1.8f), 0.8f, 4.0f);
+    // 停止位置と拘束位置を同じ敵座標から求め、攻撃後の再配置を不要にする。
+    const DirectX::XMFLOAT3 end_{bossPosition_.x - std::sin(yaw_)*distance_,
+        bossPosition_.y, bossPosition_.z - std::cos(yaw_)*distance_};
+    const float runDuration_ = playerConfig_.value("PoseTime", 2.0666668f);
+    const float travel_ = std::clamp(sampleTime_ / (std::max)(playerConfig_.value("ApproachTime", 0.55f), 0.01f), 0.0f, 1.0f);
+    const DirectX::XMFLOAT3 playerPosition_{start_.x + (end_.x-start_.x)*travel_,
+        start_.y + (end_.y-start_.y)*travel_, start_.z + (end_.z-start_.z)*travel_};
+    PlaceActor(player.object, AddPosition(anchor_, playerPosition_), playerConfig_.value("Yaw", 0.0f));
+    PlaceActor(boss.object, AddPosition(anchor_, bossPosition_), playerConfig_.value("Yaw", 0.0f) + 180.0f);
+    const float blendDuration_ = settings["AlignDuration"].get<float>();
+    const float blendStart_ = executionStart_ - blendDuration_;
+    if (sampleTime_ >= executionStart_)
     {
-        auto position_ = ReadPosition(playerConfig_["Position"]);
-        const auto end_ = alignedEndPosition;
-        const float travel_ = std::clamp((actionTime_ - settings["CounterStart"].get<float>() - windup_) /
-            (std::max)(impactTime_ - settings["CounterStart"].get<float>() - windup_, 0.01f), 0.0f, 1.0f);
-        position_ = {position_.x+(end_.x-position_.x)*travel_, position_.y+(end_.y-position_.y)*travel_, position_.z+(end_.z-position_.z)*travel_};
-        PlaceActor(player.object, AddPosition(anchor_, position_), playerConfig_.value("Yaw", 0.0f));
-        SampleActor(player, (std::min)(poseTime_, playerConfig_.value("PoseTime", 0.85f)));
+        SampleActor(playerExecution, executionTime_);
+        SampleActor(bossReaction, executionTime_);
     }
-    if (boss.object)
+    else if (sampleTime_ >= blendStart_)
     {
-        const auto& bossConfig_ = settings["Boss"];
-        PlaceActor(boss.object, AddPosition(anchor_, ReadPosition(bossConfig_["Position"])), bossConfig_.value("Yaw", 180.0f));
-        const float reaction_ = impactConfirmed ? (std::max)(impactAge_ - impactHold_, 0.0f) * bossConfig_.value("ReactionSpeed", 1.6f) : 0.0f;
-        if (bossConfig_.value("KeepPoseAnimation",false))
-            // 主人公と同じ命中停止時間を除き、ダウンLoopの位相を前後で途切れさせない。
-            SampleActor(boss,bossConfig_.value("WindupPoseTime",0.18f) + actionTime_);
-        else if (impactConfirmed && impactAge_ > impactHold_)
-            SampleActor(bossReaction, (std::min)(reaction_, bossConfig_.value("ReactionPoseTime", 1.8f)));
-        else
-            SampleActor(boss, bossConfig_.value("WindupPoseTime", 0.18f));
+        const float blend_ = (sampleTime_ - blendStart_) / blendDuration_;
+        BlendExecutionPose(player, playerExecution, (std::min)(blendStart_, runDuration_), blend_);
+        BlendExecutionPose(boss, bossReaction, blendStart_, blend_);
+    }
+    else
+    {
+        SampleActor(player, (std::min)(sampleTime_, runDuration_));
+        SampleActor(boss, sampleTime_);
+    }
+    // 叩きつけ後に間を置き、敵本体と装備を同じ進行度で消滅させる。
+    const float dissolveStart_ = impactTime_ + settings["DissolveDelay"].get<float>();
+    const float dissolveProgress_ = std::clamp((sampleTime_ - dissolveStart_) / settings["DissolveDuration"].get<float>(), 0.0f, 1.0f);
+    for (const auto& name_ : { bossConfig_["Object"].get<std::string>(), std::string("HumanBossWeapon"), std::string("HumanBossShield") })
+    {
+        const auto object_ = manager.Find(name_);
+        if (!object_) continue;
+        if (const auto dissolve_ = object_->GetComponent<ModelDissolveComponent>())
+        {
+            dissolve_->SetPresentationProgress(dissolveProgress_);
+            dissolve_->UpdateLoadState();
+        }
+        if (const auto model_ = object_->GetComponent<GltfModelCommponennt>()) model_->SetRuntimeVisible(dissolveProgress_ < 1.0f);
     }
     for (auto& saved_ : savedActors)
     {
@@ -715,11 +932,9 @@ void BossFinishDirector::Evaluate(float time_, float deltaTime_)
     }
     auto eye_ = AddPosition(anchor_, ReadPosition(config_["Position"]));
     auto focus_ = AddPosition(anchor_, ReadPosition(config_["Focus"]));
-    const float chargeShake_ = sampleTime_ > settings["BlackoutEnd"].get<float>() && sampleTime_ < settings["CounterStart"].get<float>()
-        ? config_.value("Shake", 0.12f) * std::clamp(sampleTime_ / 2.5f, 0.0f, 1.0f) : 0.0f;
-    // 命中を起点に位置とロールを強く揺らし、減衰させて決め絵までに静める。
+    // 叩きつけに合わせてカメラを揺らし、消滅が始まるまでに減衰させる。
     const float decay_ = impactConfirmed ? std::exp(-impactAge_ / (std::max)(config_.value("ImpactShakeDuration", 0.22f), 0.01f)) : 0.0f;
-    const float shake_ = chargeShake_ + config_.value("ImpactShake", 0.38f) * decay_;
+    const float shake_ = config_.value("ImpactShake", 0.38f) * decay_;
     const float phase_ = sampleTime_ * 71.0f;
     const DirectX::XMFLOAT3 offset_{std::sin(phase_) * shake_, std::cos(sampleTime_ * 93.0f) * shake_ * 0.7f,
         std::sin(sampleTime_ * 57.0f) * shake_ * 0.4f};
@@ -779,7 +994,7 @@ void BossFinishDirector::Seek(float time_)
     BS_PROFILE_SCOPE("BossFinishDirector::Seek");
     if (!active || !preview) return;
     Normalize();
-    PrepareActor(player,"Player"); PrepareActor(boss,"Boss"); PrepareImpact(); PrepareSprites();
+    PrepareActor(player,"Player"); PrepareActor(boss,"Boss"); PrepareExecution(); PrepareSprites();
     effectsTime = 0.0f;
     CreateEffects();
     capturedView.Reset(); capturedTexture.Reset();
@@ -798,6 +1013,7 @@ void BossFinishDirector::RequestCapture()
 bool BossFinishDirector::ShouldRenderActor(const std::shared_ptr<GameObject>& object_) const
 {
     if (!object_) return false;
+    if (object_->GetName() == settings.value("StageCenterObject", std::string("Stage"))) return true;
     if (object_ == player.object || object_ == boss.object) return true;
     for (const auto& name_ : settings.at("Equipment")) if (object_->GetName() == name_.get<std::string>()) return true;
     return false;
@@ -927,10 +1143,6 @@ void BossFinishDirector::RenderOutput(SpriteRenderSystem& sprites_, ID3D11Render
     const float impactAge_ = elapsed - settings["HitStop"].get<float>() - GetImpactTime();
     if (impactConfirmed && impactAge_ >= 0.0f && impactAge_ < 0.12f)
         DrawSprite(sprites_,solidSprite,0,0,width_,height_,{1,1,1,0.65f * std::exp(-impactAge_ / 0.035f)});
-    const float hitStop_ = settings["HitStop"].get<float>();
-    const float blackout_ = settings["BlackoutEnd"].get<float>();
-    const float fade_ = elapsed <= hitStop_ ? 1.0f : 1.0f-std::clamp((elapsed-hitStop_)/(std::max)(blackout_,0.01f),0.0f,1.0f);
-    if (fade_ > 0) DrawSprite(sprites_,solidSprite,0,0,width_,height_,{0,0,0,fade_});
     if (returning) DrawSprite(sprites_,solidSprite,0,0,width_,height_,{0,0,0,std::clamp(returnElapsed/settings["ReturnFade"].get<float>(),0.0f,1.0f)});
 }
 
@@ -938,7 +1150,7 @@ void BossFinishDirector::CaptureEditorCamera()
 {
     const auto editorCamera_ = manager.GetCameraManager()->GetEditorCamera();
     if (!editorCamera_) return;
-    const auto anchor_ = ReadPosition(settings["Anchor"]);
+    const auto anchor_ = GetStageAnchor();
     const auto eye_ = editorCamera_->GetEye(), focus_ = editorCamera_->GetFocus();
     settings["Camera"]["Position"] = {eye_.x-anchor_.x,eye_.y-anchor_.y,eye_.z-anchor_.z};
     settings["Camera"]["Focus"] = {focus_.x-anchor_.x,focus_.y-anchor_.y,focus_.z-anchor_.z};

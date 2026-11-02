@@ -12107,6 +12107,19 @@
             "UpdatePriority": 0,
             "LateUpdatePriority": 0,
             "RequiredForSceneStart": false
+        },
+        {
+            "Data": {
+                "MaxEntries": 256,
+                "RecordingEnabled": true
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": false,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "HumanBossAITraceComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 1000
         }
     ],
     "Layer": 2,

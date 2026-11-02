@@ -30,7 +30,7 @@ public:
 
 
         // 再生時間を進め、Curve/Blackboardによる速度補正も反映する。
-        void Update(float et, float duration, CurveComponent* curvecomp, std::shared_ptr<GameObject> owner, AttackTelegraphRuntime* telegraphs_ = nullptr);
+        void Update(float et, float duration, CurveComponent* curvecomp, std::shared_ptr<GameObject> owner, AttackTelegraphRuntime* telegraphs_ = nullptr, const BlackboardCategory* blackboard_ = nullptr, float* advancedTime_ = nullptr);
     };
     struct RootMotionDelta {
         // このフレームにRoot Motionから発生した移動差分。
@@ -68,7 +68,11 @@ public:
     void SetCurrentTime(float time_);
     const AnimState* GetCurrentState() const { return current.state; }
     // Controllerが最新のブレンド姿勢をModelへ反映してから予兆を発生させる。
+    // 判定窓をまたいだフレームも、途中の武器姿勢をサンプリングして判定へ渡す。
+    void SampleWeaponHitBoxes(const std::shared_ptr<GameObject>& owner_, GltfModelCommponennt* model_);
     void FlushAttackTelegraphs(const std::shared_ptr<GameObject>& owner_) { attackTelegraphs.Flush(owner_); }
+    // グラフの再生を維持した中断では、現在区間の予兆予約だけを停止する。
+    void CancelAttackTelegraphs() { attackTelegraphs.Cancel(current.state); }
 private:
     // Animatorごとに保持し、同じState資産を使う別の敵との発生履歴共有を避ける。
     AttackTelegraphRuntime attackTelegraphs;
@@ -83,6 +87,9 @@ private:
     RootMotionDelta currentRootMotionDelta;
 
     // currentはフェードイン中の姿勢、previousはフェードアウト中の姿勢。
+    const AnimState* weaponSampleState = nullptr;
+    float weaponSampleStartTime = 0.0f;
+    float weaponSampleEndTime = 0.0f;
     ActiveSlot current;
     ActiveSlot previous; // フェードアウト用
 

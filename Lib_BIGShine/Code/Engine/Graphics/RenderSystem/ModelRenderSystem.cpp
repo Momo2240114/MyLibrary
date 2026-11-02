@@ -10,6 +10,7 @@
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/Graphics/VFX/MaterialOverlayComponent.h"
+#include "Engine/GamePlay/Combat/HitReactionComponent.h"
 #include "Engine/GamePlay/Graphics/ModelMaterialComponent.h"
 #include "Engine/GamePlay/Graphics/ModelDissolveComponent.h"
 #include "Engine/Debug/TracyProfiler.h"
@@ -1332,6 +1333,19 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 					}
 				}
 			}
+            // 共有マテリアルを変更せず、被弾したモデルの描画定数だけを短時間赤く上書きする。
+            const auto damageOwner_ = model_.GetGameObject();
+            const auto hitReaction_ = damageOwner_ ? damageOwner_->GetComponent<HitReactionComponent>() : nullptr;
+            const float damageFlashWeight_ = hitReaction_ && hitReaction_->IsEnabled() && !model_.HasRuntimeSilhouette()
+                ? hitReaction_->GetDamageFlashWeight() : 0.0f;
+            if (damageFlashWeight_ > 0.0f)
+            {
+                overlayConstants_ = {};
+                overlayConstants_.enabled = 1u;
+                overlayConstants_.color = { 1.0f, 0.005f, 0.005f, 1.0f };
+                overlayConstants_.alpha = damageFlashWeight_;
+                overlayConstants_.emissiveStrength = 1.5f;
+            }
 			dc->UpdateSubresource(materialOverlayConstantBuffer.Get(), 0, nullptr, &overlayConstants_, 0, 0);
 			dc->PSSetShaderResources(9, _countof(overlaySrvs_), overlaySrvs_);
 			if (isSkinnedMeshResult_)

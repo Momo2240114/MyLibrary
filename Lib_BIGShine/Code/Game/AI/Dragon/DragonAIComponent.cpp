@@ -2998,6 +2998,9 @@ void DragonAIComponent::DisableTailHitBoxes()
 
 void DragonAIComponent::DisableSequencerHitBoxes()
 {
+    // 完了・被弾・演出停止で、同じアニメーションが残っても予兆を再生成しない。
+    if (const auto animation_ = AnimationGraphBridgeComponent::Acquire(GetGameObject()))
+        animation_->RequestCancelAttackTelegraphs();
     DisableBiteHitBox();
     DisableTailHitBoxes();
 }

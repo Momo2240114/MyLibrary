@@ -217,6 +217,8 @@ public:
     // Player InspectorとSkill Workspaceで同じ装備編集UIを使用する。
     void DrawSkillLoadoutGui();
     void ProcessActionInput(); // 入力からAction要求を発行する。
+    // MOVE内の加減速と開始・停止を更新し、戦闘への割り込みは既存の入力処理へ任せる。
+    void UpdateGroundMovement(float deltaTime_);
     void SendMoveInputToBlackboard(const DirectX::XMFLOAT3& input_); // 移動入力をBlackboardへ送る。
     // ガード基準の移動入力をPlayerとAnimの両カテゴリへ同期する。
     void SendGuardMoveInputToBlackboard(const DirectX::XMFLOAT3& input_);
@@ -244,8 +246,21 @@ public:
     // 強攻撃を溜め攻撃へ切り替える保持時間と、溜め攻撃開始時の踏み込み速度。
     float strongAttackHoldThreshold = 0.35f;
     float strongChargeAttackSpeed = 14.0f;
-    float runStartDuration = 0.18f;
-    float runEndDuration = 0.18f;
+    // 地上移動だけの応答と見た目を調整し、攻撃・回避のRootMotionへ影響させない。
+    float groundAcceleration = 140.0f; // 地上の加速度。単位はワールド単位/秒の二乗。
+    float groundReversalDeceleration = 330.0f; // 大きな切り返しだけに使う制動加速度。
+    float groundDirectionTurnSpeed = 1440.0f; // 水平速度の向きを変更する最大角速度。
+    float groundStopSpeedThreshold = 0.05f; // 微小な残速を停止とみなす速度。
+    float groundDeceleration = 160.0f;
+    float groundTurnSpeed = 1080.0f; // 毎秒の最大旋回角度。
+    float groundInputStartThreshold = 0.18f;
+    float groundInputReleaseThreshold = 0.10f;
+    float groundAnimationReferenceSpeed = 16.0f; // 対応する移動付きLoopとモデル倍率から得た歩調基準。
+    float groundStartBlendTime = 0.08f;
+    float groundLoopBlendTime = 0.08f;
+    float groundStopBlendTime = 0.06f;
+    float runStartDuration = 0.26f; // Startアニメーションの目標再生秒数。
+    float runEndDuration = 0.30f; // Stopアニメーション全体の目標再生秒数。
     float jumpEndDuration = 0.18f;
     float jumpImpulseFallbackDuration = 0.18f; // Sequencer未設定時に踏み切りを補完する待機時間。
     float timelineActionFallbackDuration = 1.5f;
@@ -329,6 +344,8 @@ private:
     std::shared_ptr<CameraLockOnComponent> ResolveCameraLockOnComponent() const;
     void ToggleLockOn();
     void ApplyPendingMovement(); // 予約された水平速度と向きをMovementへ反映する。
+    // 地上移動の開始・中断時だけ実行情報を破棄し、他行動の移動やImpulseは変更しない。
+    void ResetGroundMovement();
 
     bool ForceChangeAction(PLAYER_ACTION action_); // Debug用に強制Action遷移する。
 
@@ -393,7 +410,6 @@ private:
     int comboIndex = 0; // 現在再生中のコンボ段番号。
     int pendingComboIndex = 0; // 次に開始するActionへ渡すコンボ段番号。
     PLAYER_ACTION previousAction = PLAYER_ACTION::NONE;
-    PLAYER_ACTION locomotionPhaseAction = PLAYER_ACTION::NONE;
 
     DirectX::XMFLOAT3 pendingHorizontalVelocity{ 0.0f, 0.0f, 0.0f }; // Update終端で反映する水平速度。
     DirectX::XMFLOAT3 pendingFacingDirection{ 0.0f, 0.0f, 1.0f }; // Update終端で反映する向き。
@@ -408,7 +424,27 @@ private:
     bool airborneActionContextLeftGround = false;
     bool jumpLoopResumeRequested = false;
     bool airDodgeConsumed = false;
-    bool runEndActive = false;
+    // MOVEを抜けると破棄し、攻撃や回避の速度を通常移動へ持ち越さない。
+    float groundMoveSpeed = 0.0f;
+    float groundPhaseTimer = 0.0f;
+    float groundPreviousDeltaTime = 0.0f;
+    float groundLastTurnSign = 1.0f;
+    bool groundMoveInputActive = false;
+    bool groundHasPreviousPosition = false;
+    bool groundWasGrounded = false;
+    bool groundHasActualVelocity = false;
+    bool groundReversing = false;
+    bool groundSoftStop = false;
+    bool groundMovementBlocked = false;
+    float groundTargetSpeed = 0.0f;
+    // 目標、現在、物理へ渡した区間平均、衝突後の実速度を分離する。
+    DirectX::XMFLOAT3 groundTargetVelocity{ 0.0f, 0.0f, 0.0f };
+    DirectX::XMFLOAT3 groundCurrentVelocity{ 0.0f, 0.0f, 0.0f };
+    DirectX::XMFLOAT3 groundRequestedVelocity{ 0.0f, 0.0f, 0.0f };
+    DirectX::XMFLOAT3 groundActualVelocity{ 0.0f, 0.0f, 0.0f };
+    DirectX::XMFLOAT3 groundMoveDirection{ 0.0f, 0.0f, 1.0f };
+    DirectX::XMFLOAT3 groundPreviousPosition{ 0.0f, 0.0f, 0.0f };
+    PLAYER_LOCOMOTION_PHASE groundMovePhase = PLAYER_LOCOMOTION_PHASE::IDLE;
     // 一時的な耐性を基本設定のarmorと区別し、終了時に基本値へ戻せるようにする。
     bool runtimeArmorOverrideActive = false;
     bool hasSentGrounded = false;
@@ -416,8 +452,6 @@ private:
     bool hasSentLocomotionPhase = false;
     float lastUpdateDeltaTime = 0.0f;
     float strongAttackHoldTimer = 0.0f;
-    float locomotionPhaseTimer = 0.0f;
-    float runEndTimer = 0.0f;
     float timelineActionSafetyTimer = 0.0f;
     // 地上回避は終了後の待ち時間、反撃Tagは成功通知後の受付時間を保持する。
     float groundDodgeCooldownTimer = 0.0f;

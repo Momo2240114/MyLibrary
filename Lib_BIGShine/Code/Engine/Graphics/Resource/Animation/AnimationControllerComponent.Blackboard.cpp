@@ -24,11 +24,19 @@ void AnimationControllerComponent::PublishGraphFeedback()
 void AnimationControllerComponent::ProcessBlackboardGraphRequests(bool transitions_)
 {
     BS_PROFILE_SCOPE("AnimationControllerComponent::ProcessBlackboardGraphRequests");
-    if (processingBlackboardGraphRequests) return;
     const auto owner_ = GetGameObject();
     const auto board_ = owner_ ? owner_->GetComponent<BlackboardComponent>() : nullptr;
     if (!board_) return;
     if (!owner_->GetComponent<AnimationGraphBridgeComponent>() && board_->GetCategory(Keys::REQUEST).empty()) return;
+    // Event処理中の中断要求も、そのフレームのFlushより先に予約を破棄する。
+    // 予兆停止は遷移を評価しないため、再帰防止中でも安全に受け付けられる。
+    bool cancelTelegraphs_ = false;
+    if (board_->GetBool(Keys::REQUEST, Keys::TELEGRAPH_CANCEL_PENDING, cancelTelegraphs_) && cancelTelegraphs_)
+    {
+        board_->SetBool(Keys::REQUEST, Keys::TELEGRAPH_CANCEL_PENDING, false);
+        animator.CancelAttackTelegraphs();
+    }
+    if (processingBlackboardGraphRequests) return;
     blackboardComponent = board_.get();
     // StateExitのActionが次の要求を発行しても、遷移評価を再帰呼び出ししない。
     struct ProcessingGuard

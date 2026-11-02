@@ -1,6 +1,9 @@
 #include "PrecompiledHeader.h"
 
 #include "HitReactionComponent.h"
+#include "Engine/Debug/TracyProfiler.h"
+
+#include <SDL3/SDL_timer.h>
 
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
 #include "Engine/GamePlay/Core/Component/CharacterMovementComponent.h"
@@ -84,6 +87,7 @@ void HitReactionComponent::Update(float deltaTime_)
 
 void HitReactionComponent::HandleHit()
 {
+    BS_PROFILE_SCOPE("HitReactionComponent::HandleHit");
 
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_) return;
@@ -112,6 +116,12 @@ void HitReactionComponent::HandleHit()
     blackboard_->GetVector2("Hit", "Direction", hitDirection_);
 
     lastDamage = (std::max)(damage_, 0.0f);
+    // ダメージが成立した受け手だけを赤くし、ガードや無敵で不成立の接触では発光させない。
+    if (lastDamage > 0.0f && damageFlashEnabled)
+    {
+        damageFlashStartTime = SDL_GetTicks();
+        damageFlashActive = true;
+    }
     lastImpactPower = (std::max)(impactPower_, 0.0f);
     currentHealth = (std::max)(currentHealth - lastDamage, 0.0f);
     ++hitCount;
@@ -197,9 +207,19 @@ void HitReactionComponent::HandleHit()
     if (overlayTimer <= 0.0f) CallOwnerAction(overlayStopActionName);
 }
 
+float HitReactionComponent::GetDamageFlashWeight() const
+{
+    if (!damageFlashEnabled || !damageFlashActive || damageFlashDuration <= 0.0f) return 0.0f;
+    const float elapsed_ = static_cast<float>(SDL_GetTicks() - damageFlashStartTime) * 0.001f;
+    // 前半は赤い衝撃を保ち、残りの時間で通常の外観へ戻す。
+    const float fadeStart_ = damageFlashDuration * 0.3f;
+    return 1.0f - std::clamp((elapsed_ - fadeStart_) / (damageFlashDuration - fadeStart_), 0.0f, 1.0f);
+}
+
 void HitReactionComponent::ResetHealth()
 {
     // DebugやScene開始時にHP/Hit記録を戻す。
+    damageFlashActive = false;
     currentHealth = maxHealth;
     lastDamage = 0.0f;
     lastImpactPower = 0.0f;
@@ -362,6 +382,8 @@ void HitReactionComponent::Gui()
     ImGui::SameLine();
     if (ImGui::Button("Reset Health")) ResetHealth();
 
+    ImGui::Checkbox("Damage Flash Enabled", &damageFlashEnabled);
+    ImGui::DragFloat("Damage Flash Duration", &damageFlashDuration, 0.01f, 0.01f, 1.0f);
     ImGui::SeparatorText("Hit Reaction");
     ImGui::DragFloat("Armor", &armor, 0.1f, 0.0f, 99999.0f);
     ImGui::DragFloat("Ground Medium Impact", &mediumImpactThreshold, 0.1f, 0.0f, 99999.0f);
@@ -432,6 +454,8 @@ void HitReactionComponent::Serialize(nlohmann::json& json_) const
     json_["OverlayStartActionName"] = overlayStartActionName;
     json_["OverlayStopActionName"] = overlayStopActionName;
     json_["OverlayDuration"] = overlayDuration;
+    json_["DamageFlashEnabled"] = damageFlashEnabled;
+    json_["DamageFlashDuration"] = damageFlashDuration;
 }
 
 void HitReactionComponent::Deserialize(const nlohmann::json& json_)
@@ -479,4 +503,7 @@ void HitReactionComponent::Deserialize(const nlohmann::json& json_)
         "OverlayStopActionName",
         std::string("MaterialOverlay_Stop"));
     overlayDuration = (std::max)(json_.value("OverlayDuration", 0.12f), 0.0f);
+    damageFlashEnabled = json_.value("DamageFlashEnabled", true);
+    damageFlashDuration = std::clamp(json_.value("DamageFlashDuration", 0.18f), 0.01f, 1.0f);
+    damageFlashActive = false;
 }

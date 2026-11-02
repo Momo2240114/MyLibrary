@@ -6,6 +6,7 @@
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/Debug/TracyProfiler.h"
+#include "Engine/Math/CollisionMath.h"
 
 #include <algorithm>
 #include <cmath>
@@ -227,12 +228,82 @@ void HitBox::Activate()
 
 void HitBox::Deactivate()
 {
+    // 中断経路からの無効化では、未処理の途中姿勢も同時に破棄する。
+    frameSweepSamples.clear();
+    frameSweepOwner.reset();
+    deactivateAfterFrameSweep = false;
     BS_PROFILE_SCOPE("HitBox::Deactivate");
 
     // 攻撃受付終了時はColliderを無効化し、Trigger状態とHit済み対象を破棄する。
     SetEnabled(false);
     currentTriggers.clear();
     ClearHitTargets();
+}
+
+// 判定窓を1フレームで通過しても、同じ攻撃IDのまま物理判定を一度通す。
+void HitBox::AddFrameSweepSample(const Capsule& capsule_)
+{
+    if (frameSweepSamples.empty())
+    {
+        const auto owner_ = GetAttackOwner();
+        frameSweepOwner = owner_;
+        if (owner_ && owner_->transform) frameSweepOwnerPosition = owner_->transform->GetWorldPosition();
+    }
+    if (!IsEnabled())
+    {
+        deactivateAfterFrameSweep = true;
+        ++activationId;
+        if (activationId == 0) ++activationId;
+        SetEnabled(true);
+    }
+    frameSweepSamples.push_back(capsule_);
+}
+
+// 窓内の姿勢と姿勢間を調べ、現在の終端姿勢だけによる当たり抜けを抑える。
+CollisionManifold HitBox::CheckFrameSweep(const Capsule& other_, Capsule& contactCapsule_) const
+{
+    if (frameSweepSamples.empty()) return CollisionMath::CapsuleVsCapsule(contactCapsule_, other_);
+    BS_PROFILE_SCOPE("HitBox::CheckFrameSweep");
+    DirectX::XMVECTOR displacement_ = DirectX::XMVectorZero();
+    if (const auto owner_ = frameSweepOwner.lock(); owner_ && owner_->transform)
+    {
+        const auto position_ = owner_->transform->GetWorldPosition();
+        displacement_ = DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&position_), DirectX::XMLoadFloat3(&frameSweepOwnerPosition));
+    }
+    for (std::size_t index_ = 0; index_ < frameSweepSamples.size(); ++index_)
+    {
+        const auto& current_ = frameSweepSamples[index_];
+        const auto& previous_ = frameSweepSamples[index_ > 0 ? index_ - 1 : index_];
+        const float travel_ = (std::max)(
+            DirectX::XMVectorGetX(DirectX::XMVector3Length(DirectX::XMVectorSubtract(current_.p0, previous_.p0))),
+            DirectX::XMVectorGetX(DirectX::XMVector3Length(DirectX::XMVectorSubtract(current_.p1, previous_.p1))));
+        const int steps_ = std::clamp(static_cast<int>(std::ceil(travel_ / (std::max)(current_.radius * 0.5f, 0.01f))), 1, 32);
+        for (int step_ = 0; step_ <= steps_; ++step_)
+        {
+            const float rate_ = static_cast<float>(step_) / steps_;
+            Capsule sample_{};
+            sample_.p0 = DirectX::XMVectorAdd(DirectX::XMVectorLerp(previous_.p0, current_.p0, rate_), displacement_);
+            sample_.p1 = DirectX::XMVectorAdd(DirectX::XMVectorLerp(previous_.p1, current_.p1, rate_), displacement_);
+            // 補間点間の隙間は半間隔の拡張で覆い、細い高速軌道を取りこぼさない。
+            sample_.radius = (std::max)(previous_.radius, current_.radius) + travel_ / steps_ * 0.5f;
+            const auto manifold_ = CollisionMath::CapsuleVsCapsule(sample_, other_);
+            if (manifold_.isHit)
+            {
+                contactCapsule_ = sample_;
+                return manifold_;
+            }
+        }
+    }
+    return {};
+}
+
+// フレームを越えて判定窓やサンプルを持ち越さず、通常の有効状態だけを残す。
+void HitBox::FinishFrameSweep()
+{
+    frameSweepSamples.clear();
+    frameSweepOwner.reset();
+    if (deactivateAfterFrameSweep) Deactivate();
+    deactivateAfterFrameSweep = false;
 }
 
 void HitBox::Gui()

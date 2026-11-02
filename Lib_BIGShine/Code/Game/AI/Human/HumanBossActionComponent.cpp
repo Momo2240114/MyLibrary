@@ -1,6 +1,7 @@
 #include "PrecompiledHeader.h"
 #include "HumanBossActionComponent.h"
 #include "Engine/Audio/AudioManager.h"
+#include "Engine/Debug/TracyProfiler.h"
 #include "Game/Charcter/Player/PlayerControllerComponent.h"
 #include "Game/GameMode/GameModeBlackboardKeys.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
@@ -16,6 +17,8 @@
 #include "Engine/Physics/HitBox.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/GamePlay/System/EffectManager.h"
+#include "Engine/GamePlay/System/JustGuardSystem.h"
+#include "Engine/GamePlay/System/JustDodgeSystem.h"
 #include "Engine/Graphics/VFX/WeaponTrailComponent.h"
 #include "Engine/Graphics/VFX/MeshVFXComponent.h"
 #include "Engine/GamePlay/Core/Component/MotionWarpComponent.h"
@@ -512,8 +515,21 @@ const std::string& HumanBossActionComponent::GetName() const
 
 void HumanBossActionComponent::Start()
 {
+    BS_PROFILE_SCOPE("HumanBossActionComponent::Start");
     InitializeAttackAssist();
     RegisterActions();
+    const auto owner_ = GetGameObject();
+    if (!owner_ || !owner_->manager) return;
+    // 成功イベントの攻撃元を確認し、このボスへの反撃時だけ無敵解除Actionを実行する。
+    const std::weak_ptr<HumanBossActionComponent> weak_ = owner_->GetComponent<HumanBossActionComponent>();
+    owner_->GetManager().GetJustGuardSystem().AddJustGuardCallback([weak_](const JustGuardEvent& event_)
+    {
+        if (const auto self_ = weak_.lock()) self_->NotifyCounterOpportunity(event_.attacker.lock());
+    });
+    owner_->GetManager().GetJustDodgeSystem().AddJustDodgeCallback([weak_](const JustDodgeEvent& event_)
+    {
+        if (const auto self_ = weak_.lock()) self_->NotifyCounterOpportunity(event_.attacker.lock());
+    });
 }
 
 void HumanBossActionComponent::RegisterActions()
@@ -523,6 +539,8 @@ void HumanBossActionComponent::RegisterActions()
     // Registryより先にComponentが破棄されても、通知から解放済みのthisを参照しない。
     const std::weak_ptr<HumanBossActionComponent> weak_ = owner_->GetComponent<HumanBossActionComponent>();
     RegisterRangedActions();
+    owner_->RegisterAction("HumanBoss", "HumanBoss_ReleaseCounterInvulnerability", [weak_]()
+    { if (const auto self_ = weak_.lock()) self_->ReleaseCounterInvulnerability(); });
     owner_->RegisterAction("HumanBoss", "ActionEnd", [weak_]()
     {
         if (const auto self_ = weak_.lock()) self_->execution.NotifyPhaseEnd();
@@ -591,8 +609,25 @@ void HumanBossActionComponent::RegisterActions()
             const auto actor_ = self_->GetGameObject();
             const auto phase_ = self_->execution.GetCurrentPhase();
             if (!actor_ || !actor_->transform || !phase_) return;
-            self_->shadowGroundPosition = actor_->transform->GetWorldPosition();
-            self_->shadowGroundPosition.y -= phase_->warpHeight;
+            if (!self_->ResolveShadowDiveGround(self_->shadowGroundPosition)) { self_->Stop(); return; }
+            // プレイヤーの正面上へ出現させ、移動距離によらず着地攻撃の位置を揃える。
+            const auto position_ = actor_->transform->GetWorldPosition();
+            const DirectX::XMFLOAT3 destination_{ self_->shadowGroundPosition.x,
+                self_->shadowGroundPosition.y + phase_->warpHeight, self_->shadowGroundPosition.z };
+            actor_->transform->ApplyWorldMatrix(actor_->transform->GetWorldMatrix() * DirectX::XMMatrixTranslation(
+                destination_.x - position_.x, destination_.y - position_.y, destination_.z - position_.z));
+            actor_->UpdateTransform();
+            if (const auto movement_ = actor_->GetComponent<CharacterMovementComponent>())
+            {
+                movement_->StopHorizontalMovementImmediately();
+                if (const auto target_ = self_->attackTarget.lock())
+                    if (target_->transform)
+                    {
+                        const auto targetPosition_ = target_->transform->GetWorldPosition();
+                        movement_->SetFacingDirection({ targetPosition_.x - destination_.x, 0.0f,
+                            targetPosition_.z - destination_.z }, true);
+                    }
+            }
             self_->shadowLandingLocked = false;
             if (const auto target_ = self_->attackTarget.lock())
                 if (target_->transform) self_->shadowPreviousTargetPosition = target_->transform->GetWorldPosition();
@@ -624,12 +659,34 @@ bool HumanBossActionComponent::ResolveShadowGround(const DirectX::XMFLOAT3& posi
     return true;
 }
 
+bool HumanBossActionComponent::ResolveShadowDiveGround(DirectX::XMFLOAT3& ground_) const
+{
+    BS_PROFILE_SCOPE("HumanBossActionComponent::ResolveShadowDiveGround");
+    const auto owner_ = gameObject.lock();
+    const auto target_ = attackTarget.lock();
+    const auto ownCollider_ = ResolveAttackCharacter(owner_);
+    const auto targetCollider_ = ResolveAttackCharacter(target_);
+    if (!owner_ || !owner_->transform || !target_ || !target_->transform || !ownCollider_ || !targetCollider_) return false;
+    const auto forward_ = target_->transform->GetFront();
+    const float length_ = std::sqrt(forward_.x * forward_.x + forward_.z * forward_.z);
+    if (!std::isfinite(length_) || length_ < 0.0001f) return false;
+    const float distance_ = ownCollider_->GetCapsuleData().radius + targetCollider_->GetCapsuleData().radius + 0.5f;
+    auto position_ = target_->transform->GetWorldPosition();
+    // 着地時の体同士の重なりを避ける間合いを、プレイヤーの前方向へ確保する。
+    position_.x += forward_.x / length_ * distance_;
+    position_.z += forward_.z / length_ * distance_;
+    return ResolveShadowGround(position_, ground_);
+}
+
 bool HumanBossActionComponent::CanRaiseShadowDive(float height_) const
 {
     BS_PROFILE_SCOPE("HumanBossActionComponent::CanRaiseShadowDive");
-    const auto collider_ = ResolveAttackCharacter(gameObject.lock());
+    const auto owner_ = gameObject.lock();
+    const auto collider_ = ResolveAttackCharacter(owner_);
     auto scene_ = PhysXSystem::GetScene();
-    if (!collider_ || !scene_ || height_ <= 0.0f || height_ > 10.0f) return false;
+    DirectX::XMFLOAT3 ground_{};
+    if (!owner_ || !owner_->transform || !collider_ || !scene_ || height_ <= 0.0f || height_ > 10.0f ||
+        !ResolveShadowDiveGround(ground_)) return false;
     const auto capsule_ = collider_->GetCapsuleData();
     DirectX::XMFLOAT3 center_{};
     DirectX::XMStoreFloat3(&center_, DirectX::XMVectorScale(DirectX::XMVectorAdd(capsule_.p0, capsule_.p1), 0.5f));
@@ -639,8 +696,11 @@ bool HumanBossActionComponent::CanRaiseShadowDive(float height_) const
     filter_.data.word3 = collider_->GetCollisionOwnerId();
     physx::PxSweepBuffer hit_;
     const physx::PxCapsuleGeometry geometry_((std::max)(0.01f, capsule_.radius - collider_->GetContactOffset()), halfHeight_);
-    const physx::PxTransform pose_(physx::PxVec3(center_.x, center_.y + 0.02f, center_.z), physx::PxQuat(physx::PxHalfPi, physx::PxVec3(0, 0, 1)));
-    // 上空出現前に天井と他Colliderを確認し、通常物理との同期経路はSkillExecutionへ任せる。
+    const auto position_ = owner_->transform->GetWorldPosition();
+    const physx::PxTransform pose_(physx::PxVec3(center_.x + ground_.x - position_.x,
+        center_.y + ground_.y - position_.y + 0.02f, center_.z + ground_.z - position_.z),
+        physx::PxQuat(physx::PxHalfPi, physx::PxVec3(0, 0, 1)));
+    // ワープ先の着地点から上空までを検査し、壁や天井に埋まる出現を防ぐ。
     return !scene_->sweep(geometry_, pose_, physx::PxVec3(0, 1, 0), height_, hit_, physx::PxHitFlag::eDEFAULT,
         filter_, PhysXSystem::GetCharacterControllerQueryFilterCallback()) || !hit_.hasBlock;
 }
@@ -661,15 +721,21 @@ void HumanBossActionComponent::UpdateShadowDive(float deltaTime_)
     targetPosition_.x += std::clamp((currentTarget_.x - shadowPreviousTargetPosition.x) / deltaTime_ * 0.12f, -0.4f, 0.4f);
     targetPosition_.z += std::clamp((currentTarget_.z - shadowPreviousTargetPosition.z) / deltaTime_ * 0.12f, -0.4f, 0.4f);
     shadowPreviousTargetPosition = currentTarget_;
-    const float dx_ = targetPosition_.x - position_.x;
-    const float dz_ = targetPosition_.z - position_.z;
-    const float distance_ = std::sqrt(dx_ * dx_ + dz_ * dz_);
     const auto ownCollider_ = ResolveAttackCharacter(owner_);
     const auto targetCollider_ = ResolveAttackCharacter(target_);
     if (!ownCollider_ || !targetCollider_) return;
-    const float stopDistance_ = ownCollider_->GetCapsuleData().radius + targetCollider_->GetCapsuleData().radius + 0.5f;
-    if (distance_ <= stopDistance_) return;
-    const float step_ = (std::min)(distance_ - stopDistance_, 6.0f * deltaTime_);
+    const auto forward_ = target_->transform->GetFront();
+    const float forwardLength_ = std::sqrt(forward_.x * forward_.x + forward_.z * forward_.z);
+    if (!std::isfinite(forwardLength_) || forwardLength_ < 0.0001f) return;
+    const float frontDistance_ = ownCollider_->GetCapsuleData().radius + targetCollider_->GetCapsuleData().radius + 0.5f;
+    // 出現後の短い追従も正面位置を目標にし、プレイヤーの真上へ寄せない。
+    targetPosition_.x += forward_.x / forwardLength_ * frontDistance_;
+    targetPosition_.z += forward_.z / forwardLength_ * frontDistance_;
+    const float dx_ = targetPosition_.x - position_.x;
+    const float dz_ = targetPosition_.z - position_.z;
+    const float distance_ = std::sqrt(dx_ * dx_ + dz_ * dz_);
+    if (distance_ <= 0.05f) return;
+    const float step_ = (std::min)(distance_, 6.0f * deltaTime_);
     DirectX::XMFLOAT3 groundStart_{ position_.x, shadowGroundPosition.y, position_.z };
     DirectX::XMFLOAT3 groundEnd_{ position_.x + dx_ / distance_ * step_, shadowGroundPosition.y, position_.z + dz_ / distance_ * step_ };
     if (!CanWarpPath(groundStart_, groundEnd_)) return;
@@ -788,6 +854,41 @@ void HumanBossActionComponent::StrikeShadowArea()
             }
         }
     }
+}
+
+void HumanBossActionComponent::NotifyCounterOpportunity(std::shared_ptr<GameObject> attacker_)
+{
+    BS_PROFILE_SCOPE("HumanBossActionComponent::NotifyCounterOpportunity");
+    const auto owner_ = GetGameObject();
+    if (!IsEnabled() || !owner_ || owner_->IsPendingDestroy()) return;
+    // 武器や部位が攻撃Ownerでも、親をたどって自身の攻撃だけを対象にする。
+    while (attacker_)
+    {
+        if (attacker_ == owner_)
+        {
+            owner_->ExecuteAction("HumanBoss_ReleaseCounterInvulnerability");
+            return;
+        }
+        const auto parent_ = attacker_->transform ? attacker_->transform->parent.lock() : nullptr;
+        attacker_ = parent_ ? parent_->gameObject.lock() : nullptr;
+    }
+}
+
+void HumanBossActionComponent::ReleaseCounterInvulnerability()
+{
+    BS_PROFILE_SCOPE("HumanBossActionComponent::ReleaseCounterInvulnerability");
+    SetShadowInvulnerable(false);
+    // 本体だけでなく部位のAction由来の無敵も解除し、反撃の接近補正と被弾を受け付ける。
+    const std::function<void(const std::shared_ptr<GameObject>&)> release_ = [&](const std::shared_ptr<GameObject>& object_)
+    {
+        if (!object_) return;
+        for (const auto& hurt_ : object_->GetComponents<HurtBox>())
+            if (hurt_) hurt_->SetInvincible(false);
+        if (object_->transform)
+            for (const auto& child_ : object_->transform->children)
+                if (child_) release_(child_->gameObject.lock());
+    };
+    release_(GetGameObject());
 }
 
 void HumanBossActionComponent::SetShadowInvulnerable(bool invulnerable_)
@@ -1665,6 +1766,9 @@ void HumanBossActionComponent::Stop(const std::string& idleState_)
 void HumanBossActionComponent::StopAttackHitBoxes(bool clearTrail_)
 {
     BS_PROFILE_SCOPE("HumanBossActionComponent::StopAttackHitBoxes");
+    // Idleへの遷移が成立しない場合も、旧攻撃の未発生予兆を残さない。
+    if (const auto animation_ = AnimationGraphBridgeComponent::Acquire(GetGameObject()))
+        animation_->RequestCancelAttackTelegraphs();
     ragnarokParticleSweeps.clear();
     if (const auto actor_ = GetGameObject())
         if (const auto warp_ = actor_->GetComponent<MotionWarpComponent>()) warp_->Stop();

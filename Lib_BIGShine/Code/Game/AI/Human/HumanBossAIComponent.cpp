@@ -2,6 +2,7 @@
 #include "Engine/GamePlay/System/CombatObservationSystem.h"
 #include "HumanBossAIComponent.h"
 #include "HumanBossActionComponent.h"
+#include "HumanBossAITraceComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
@@ -639,32 +640,35 @@ bool HumanBossAIComponent::ObservePlayer()
     return true;
 }
 
-bool HumanBossAIComponent::IsAvailable(std::size_t index_) const
+bool HumanBossAIComponent::IsAvailable(std::size_t index_, std::string* reason_) const
 {
-    if (justGuardStunned || stoppingAction) return false;
-    if (index_ >= actions.size() || index_ >= cooldowns.size()) return false;
+    // 既存の判定結果を変えず、追跡が要求された場合だけ最初の除外理由を残す。
+    const auto reject_ = [reason_](const char* message_)
+    { if (reason_) *reason_ = message_; return false; };
+    if (justGuardStunned || stoppingAction) return reject_("JG recoil / action stopping");
+    if (index_ >= actions.size() || index_ >= cooldowns.size()) return reject_("Action definition missing");
     const auto& definition_ = actions[index_];
     const auto type_ = definition_.type;
     const auto category_ = definition_.category;
 
     // 成功が確定した専用反撃は、通常抽選用の距離・Cooldown・連続使用制限で落とさない。
     const bool confirmedCounter_ = type_ == HumanBossActionType::COUNTER_ATTACK && counterPending;
-    if (!definition_.enabled[phase]) return false;
+    if (!definition_.enabled[phase]) return reject_("Disabled in current AI phase");
     if (!confirmedCounter_)
     {
-        if (cooldowns[index_] > 0.0f) return false;
-        if (distance < definition_.minDistance || distance > definition_.maxDistance) return false;
+        if (cooldowns[index_] > 0.0f) return reject_("Action cooldown remaining");
+        if (distance < definition_.minDistance || distance > definition_.maxDistance) return reject_("Outside configured action distance");
         if (category_ != HumanBossState::REACTION && category_ != HumanBossState::SHADOW &&
-            static_cast<int>(index_) == lastAction) return false;
+            static_cast<int>(index_) == lastAction) return reject_("Same action repetition blocked");
     }
 
     // 履歴と共通待機時間による制限は、行動ごとの再使用時間とは別に適用する。
-    if (type_ >= HumanBossActionType::SHADOW_SLASH && static_cast<int>(index_) == lastAction) return false;
+    if (type_ >= HumanBossActionType::SHADOW_SLASH && static_cast<int>(index_) == lastAction) return reject_("Same action repetition blocked");
     const bool normalOffense_ = category_ == HumanBossState::OFFENSE && !IsCounterAttack(type_);
-    if (normalOffense_ && static_cast<int>(index_) == lastOffense) return false;
-    if (category_ == HumanBossState::REACTION && reactionBudget < GetReactionCost(type_)) return false;
-    if (IsDodge(type_) && dodgeTimer > 0.0f) return false;
-    if (normalOffense_ && attackTimer > 0.0f) return false;
+    if (normalOffense_ && static_cast<int>(index_) == lastOffense) return reject_("Same offense repetition blocked");
+    if (category_ == HumanBossState::REACTION && reactionBudget < GetReactionCost(type_)) return reject_("Insufficient reaction budget");
+    if (IsDodge(type_) && dodgeTimer > 0.0f) return reject_("Shared dodge cooldown remaining");
+    if (normalOffense_ && attackTimer > 0.0f) return reject_("Shared attack cooldown remaining");
 
     // 影渡りの派生は、対応済みの行動範囲だけを実行担当へ渡す。
     if (category_ == HumanBossState::SHADOW)
@@ -673,17 +677,20 @@ bool HumanBossAIComponent::IsAvailable(std::size_t index_) const
             type_ <= HumanBossActionType::SHADOW_SHIFT_APPROACH;
         const bool shadowAttack_ = type_ >= HumanBossActionType::SHADOW_SLASH &&
             type_ <= HumanBossActionType::SHADOW_DOMAIN;
-        if (!shadowEnabled || (!basicShift_ && !shadowAttack_)) return false;
+        if (!shadowEnabled || (!basicShift_ && !shadowAttack_)) return reject_("Shadow category disabled / unsupported action");
     }
-    if (category_ == HumanBossState::DRAGON_SHADOW && !dragonShadowEnabled) return false;
-    if (category_ == HumanBossState::SPECIAL && type_ != HumanBossActionType::SHADOW_RAGNAROK && !specialEnabled) return false;
+    if (category_ == HumanBossState::DRAGON_SHADOW && !dragonShadowEnabled) return reject_("Dragon shadow disabled");
+    if (category_ == HumanBossState::SPECIAL && type_ != HumanBossActionType::SHADOW_RAGNAROK && !specialEnabled) return reject_("Special category disabled");
 
     // 設定上の条件を満たした後で、必要素材と移動経路を検証する。
     const HumanBossDefense defense_ = GetDefense(type_);
     const auto executor_ = executor.lock();
-    if (!executor_ || !executor_->CanStart(definition_.skill, defense_, target.lock())) return false;
-    if (category_ == HumanBossState::SHADOW)
-        return executor_->CanShadowShift(definition_.skill, GetShadowShiftMode(definition_), target.lock(), strafeDirection);
+    if (!executor_) return reject_("Action executor missing");
+    if (!executor_->CanStart(definition_.skill, defense_, target.lock()))
+    { if (reason_) *reason_ = "Executor rejected: " + executor_->GetValidationError(); return false; }
+    if (category_ == HumanBossState::SHADOW &&
+        !executor_->CanShadowShift(definition_.skill, GetShadowShiftMode(definition_), target.lock(), strafeDirection))
+        return reject_("Shadow destination / route unavailable");
     return true;
 }
 
@@ -713,7 +720,16 @@ bool HumanBossAIComponent::BeginAction(std::size_t index_)
         ? executor_->BeginShadowShift(definition_.skill,
             GetShadowShiftMode(definition_), target.lock(), strafeDirection)
         : executor_->Begin(executionSkill_, defense_, velocity_, target.lock());
-    if (!started_) return false;
+    if (!started_)
+    {
+        if (const auto owner_ = GetGameObject())
+            if (const auto trace_ = owner_->GetComponent<HumanBossAITraceComponent>())
+            {
+                const std::string event_ = std::string("Action start rejected: ") + ActionName(static_cast<int>(index_));
+                trace_->Capture(*this, event_.c_str(), true);
+            }
+        return false;
+    }
     if (const auto owner_ = GetGameObject())
         if (const auto blackboard_ = owner_->GetComponent<BlackboardComponent>()) blackboard_->SetBool("HumanBossAI", "ActionEnded", false);
     if (definition_.category == HumanBossState::REACTION) reactedSerial = attackSerial;
@@ -744,6 +760,8 @@ bool HumanBossAIComponent::BeginAction(std::size_t index_)
     if (state == HumanBossState::OFFENSE && definition_.type != HumanBossActionType::COUNTER_ATTACK && definition_.type != HumanBossActionType::LIGHT_COUNTER)
     { attackTimer = attackCooldown; lastOffense = currentAction; reactionStreak = 0; }
     intentReason += std::string(" -> ") + ActionName(currentAction) + " / cooldown=" + std::to_string(cooldowns[index_]) + " budgetCost=" + std::to_string(GetReactionCost(definition_.type));
+    if (const auto owner_ = GetGameObject())
+        if (const auto trace_ = owner_->GetComponent<HumanBossAITraceComponent>()) trace_->Capture(*this, "Action started", true);
     return true;
 }
 
@@ -953,6 +971,7 @@ void HumanBossAIComponent::PublishDebug()
     blackboard_->SetInt("HumanBossAI", "SameActionRepeatCount", sameActionRepeatCount);
     blackboard_->SetFloat("HumanBossAI", "GuardFrequency", guardFrequency);
     blackboard_->SetFloat("HumanBossAI", "DodgeFrequency", dodgeFrequency);
+    if (const auto trace_ = owner_->GetComponent<HumanBossAITraceComponent>()) trace_->Capture(*this, "State change");
 }
 
 void HumanBossAIComponent::NormalizeSettings()
@@ -1385,16 +1404,19 @@ std::string HumanBossAIComponent::GetCurrentGraphActionName() const
     return currentAction >= 0 ? std::string("HumanBoss_") + ActionName(currentAction) : std::string();
 }
 
-float HumanBossAIComponent::GetGraphActionWeight(const std::string& actionName_) const
+float HumanBossAIComponent::GetGraphActionWeight(const std::string& actionName_, std::string* reason_) const
 {
-    if (justGuardStunned || stoppingAction) return 0.0f;
+    const auto reject_ = [reason_](const char* message_)
+    { if (reason_) *reason_ = message_; return 0.0f; };
+    if (reason_) *reason_ = "Eligible: weighted candidate";
+    if (justGuardStunned || stoppingAction) return reject_("JG recoil / action stopping");
     const auto owner_ = gameObject.lock();
     const auto matchesAction_ = [&actionName_, &owner_](const std::string& name_)
     {
         return actionName_ == name_ || (owner_ && actionName_ == owner_->BuildActionName(name_));
     };
     // 実行中は開始済みノードの終了監視だけを許可し、別Actionによる割り込みを防ぐ。
-    if (currentAction >= 0) return matchesAction_(GetCurrentGraphActionName()) ? 1.0f : 0.0f;
+    if (currentAction >= 0) return matchesAction_(GetCurrentGraphActionName()) ? 1.0f : reject_("Another action is running");
     if (matchesAction_("HumanBoss_NoReaction"))
         return intent == HumanBossIntent::DEFEND && IsReactionReady() && !IsHeavyJustGuardReady() ? noneReactionWeight : 0.0f;
     if (matchesAction_("HumanBoss_Approach") || matchesAction_("HumanBoss_Reposition") || matchesAction_("HumanBoss_Observe")) return 1.0f;
@@ -1404,20 +1426,20 @@ float HumanBossAIComponent::GetGraphActionWeight(const std::string& actionName_)
         if (!matchesAction_(std::string("HumanBoss_") + ActionName(static_cast<int>(index_)))) continue;
         // 観察中の影の派生攻撃も待機を守り、通常攻撃だけが止まる状態を防ぐ。
         if (waitTimer > 0.0f && definition_.category == HumanBossState::SHADOW &&
-            definition_.type >= HumanBossActionType::SHADOW_SLASH) return 0.0f;
-        if (!IsAvailable(index_)) return 0.0f;
+            definition_.type >= HumanBossActionType::SHADOW_SLASH) return reject_("Observation wait blocks shadow attack");
+        if (!IsAvailable(index_, reason_)) return 0.0f;
         const float intentModifier_ = GetIntentActionModifier(index_);
-        if (intentModifier_ <= 0.0f) return 0.0f;
-        if (definition_.type == HumanBossActionType::COUNTER_ATTACK) return counterPending ? intentModifier_ : 0.0f;
-        if (definition_.type == HumanBossActionType::LIGHT_COUNTER) return lightCounterPending ? intentModifier_ : 0.0f;
+        if (intentModifier_ <= 0.0f) return reject_("Current intent excludes this action");
+        if (definition_.type == HumanBossActionType::COUNTER_ATTACK) return counterPending ? intentModifier_ : reject_("Confirmed counter not pending");
+        if (definition_.type == HumanBossActionType::LIGHT_COUNTER) return lightCounterPending ? intentModifier_ : reject_("Light counter not pending");
         if (definition_.category == HumanBossState::REACTION)
         {
-            if (!playerAttackDetected || reactionTimer > 0.0f || attackSerial == reactedSerial) return 0.0f;
-            if (definition_.type == HumanBossActionType::JUST_GUARD && (incomingTime > justGuardLead || incomingTime < -justGuardLead)) return 0.0f;
+            if (!playerAttackDetected || reactionTimer > 0.0f || attackSerial == reactedSerial) return reject_("No new threat / reaction cooldown");
+            if (definition_.type == HumanBossActionType::JUST_GUARD && (incomingTime > justGuardLead || incomingTime < -justGuardLead)) return reject_("Outside just-guard timing window");
         }
         if (definition_.category == HumanBossState::OFFENSE)
         {
-            if ((waitTimer > 0.0f || repositionTimer > 0.0f) && definition_.type != HumanBossActionType::WHIFF_PUNISH) return 0.0f;
+            if ((waitTimer > 0.0f || repositionTimer > 0.0f) && definition_.type != HumanBossActionType::WHIFF_PUNISH) return reject_("Observation / reposition wait remaining");
         }
         return definition_.weight[phase] * intentModifier_;
     }
@@ -1512,8 +1534,33 @@ void HumanBossAIComponent::TickBehaviorGraph(float deltaTime_, bool finishCurren
     behaviorContext.targetDistance = distance;
     if (owner_->manager)
         if (auto mode_ = owner_->GetManager().GetGameModeManager()) behaviorContext.globalBlackboard = &mode_->GetGlobalBlackboard();
-    behaviorContext.actionWeightModifier = [this](const std::string& actionName_) { return GetGraphActionWeight(actionName_); };
+    const auto trace_ = owner_->GetComponent<HumanBossAITraceComponent>();
+    const bool traceEnabled_ = trace_ && trace_->IsRecording();
+    if (traceEnabled_) trace_->BeginEvaluation();
+    behaviorContext.actionWeightModifier = [this, trace_, traceEnabled_](const std::string& actionName_)
+    {
+        std::string reason_;
+        const float weight_ = GetGraphActionWeight(actionName_, traceEnabled_ ? &reason_ : nullptr);
+        if (traceEnabled_) trace_->ObserveActionWeight(actionName_, weight_, reason_);
+        return weight_;
+    };
+    if (traceEnabled_)
+    {
+        behaviorContext.actionWeightObserver = [trace_](const std::string& action_, float base_, float modifier_)
+        { trace_->ObserveGraphWeight(action_, base_, modifier_); };
+        behaviorContext.nodeEvaluationObserver = [trace_, this](const AIBehaviorNode& node_, AI_BEHAVIOR_STATUS status_)
+        { trace_->ObserveNode(node_, status_, behaviorContext); };
+    }
     const AI_BEHAVIOR_STATUS status_ = behaviorGraph.Tick(behaviorContext);
+    if (traceEnabled_)
+    {
+        trace_->FinishEvaluation();
+        trace_->Capture(*this, finishCurrent_ ? "Action finished" : "Graph decision", finishCurrent_);
+    }
+    // Contextは次のTickまで保持するため、Componentの所有循環を作らないようCallbackを外す。
+    behaviorContext.actionWeightModifier = {};
+    behaviorContext.actionWeightObserver = {};
+    behaviorContext.nodeEvaluationObserver = {};
     if (status_ == AI_BEHAVIOR_STATUS::FAILURE && currentAction < 0)
         if (const auto executor_ = executor.lock()) executor_->SetLocomotion(idleState, { 0.0f, 0.0f, 0.0f }, toPlayer, { 0.0f, 0.0f });
 }

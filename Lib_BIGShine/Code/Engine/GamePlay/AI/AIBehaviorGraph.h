@@ -139,6 +139,18 @@ struct AIBehaviorLink
     uintptr_t toPinId = 0;
 };
 
+// 実行順に影響させず、関連ノードを名前と色で囲む編集用の領域。
+struct AIBehaviorArea
+{
+    uintptr_t id = 0;
+    std::string name = "Action Area";
+    std::string comment;
+    DirectX::XMFLOAT2 position{ 0.0f, 0.0f };
+    DirectX::XMFLOAT2 size{ 500.0f, 300.0f };
+    DirectX::XMFLOAT4 color{ 0.2f, 0.35f, 0.55f, 0.18f };
+    std::vector<uintptr_t> nodeIds;
+};
+
 // 実行中ノードの経過時間や進行位置を保持する
 struct AIBehaviorRuntimeState
 {
@@ -178,6 +190,8 @@ struct AIBehaviorContext
     std::function<float(const std::string&)> actionWeightModifier;
     // 単独攻撃の枝で使用した基本重みと補正をデバッグ表示へ通知する。
     std::function<void(const std::string&, float, float)> actionWeightObserver;
+    // 実際に通過したノードと結果だけを追跡へ通知し、再評価による副作用を避ける。
+    std::function<void(const AIBehaviorNode&, AI_BEHAVIOR_STATUS)> nodeEvaluationObserver;
 };
 
 // BlackboardとActionを使用して敵AIの判断グラフを実行する
@@ -204,6 +218,14 @@ public:
     const AIBehaviorNode* FindNodeByPin(uintptr_t pinId_) const;
     AIBehaviorLink* FindLink(uintptr_t linkId_);
 
+    // 既存のPriorityを維持して行動の枝を領域ごとに配置する。
+    void OrganizeActionAreas();
+    // 登録済みノードが収まる大きさへ領域を合わせる。
+    void FitArea(AIBehaviorArea& area_);
+    std::vector<AIBehaviorArea>& GetAreas() { return areas; }
+    const std::vector<AIBehaviorArea>& GetAreas() const { return areas; }
+    bool& GetPriorityFromPositions() { return priorityFromPositions; }
+
     uintptr_t GenerateId();
     void SetIdCounterFloor(uintptr_t minValue_);
 
@@ -220,6 +242,8 @@ public:
     AI_BEHAVIOR_STATUS GetLastTickStatus() const { return lastTickStatus; }
 
 private:
+    // 重複所属のない既存Boxを再配置し、共有行動の接続と説明を維持する。
+    void ArrangeExistingAreas();
     // 条件を満たす枝に含まれるActionを収集し、循環リンクは評価しない。
     bool CollectSelectableActions(const AIBehaviorNode& node_, AIBehaviorContext& context_,
         std::vector<std::string>& actions_, std::vector<uintptr_t>& path_) const;
@@ -238,6 +262,9 @@ private:
     std::vector<AIBehaviorNode> nodes;
     // 親ノードから子ノードへの接続情報。
     std::vector<AIBehaviorLink> links;
+    // 領域はEditor専用で、Runtimeのリンクや条件としては評価しない。
+    std::vector<AIBehaviorArea> areas;
+    bool priorityFromPositions = true;
     // ノードIDごとの待機時間・Sequence進行位置・Action開始状態。
     std::unordered_map<uintptr_t, AIBehaviorRuntimeState> runtimeStates;
     // 直前のTickで評価されたノードID。Editorの実行中表示に使用する。

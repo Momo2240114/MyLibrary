@@ -6,7 +6,6 @@
 
 #include <memory>
 #include <string>
-#include <unordered_map>
 
 class AIControllerComponent;
 class DragonAIComponent;
@@ -37,7 +36,7 @@ private:
         HumanBossAIComponent* humanBossAI = nullptr;
         GameObject* owner = nullptr;
 
-        bool IsValid() const { return aiController != nullptr || dragonAI != nullptr; }
+        bool IsValid() const { return aiController != nullptr || dragonAI != nullptr || humanBossAI != nullptr; }
     };
 
     BehaviorGraphTarget ResolveTarget();
@@ -48,6 +47,10 @@ private:
     void DrawGraphAssetBar(const BehaviorGraphTarget& target_);
     void DrawInspector(const BehaviorGraphTarget& target_);
     void DrawNode(AIBehaviorNode& node_);
+    // コメント領域を背景として描き、内側のノードとまとめて移動できるようにする。
+    void DrawArea(AIBehaviorArea& area_);
+    // 選択中ノードを囲む領域を作成する。
+    void CreateAreaFromSelection(AIBehaviorGraph& graph_);
     bool IsRuntimeActiveNode(const AIBehaviorNode& node_) const;
     void AddNode(const BehaviorGraphTarget& target_, AI_BEHAVIOR_NODE_TYPE type_, const char* name_);
     void DrawCreateNodePopup(const BehaviorGraphTarget& target_);
@@ -65,11 +68,12 @@ private:
     std::weak_ptr<GameObject> targetObject;
     ax::NodeEditor::EditorContext* nodeEditorContext = nullptr;
     AssetBrowserWindow assetBrowser;
-    // 独自リンク描画で使うため、各ピンIDから画面上の中心座標を引けるように保持する。
-    std::unordered_map<uintptr_t, ImVec2> pinPositions;
+    // 選択したBoxやノードに関係するリンクを見分けやすくする表示設定。
+    bool focusSelectedLinks = true;
     // DragonAIの現在アクション名。PLAY_ACTIONノードのランタイム強調に使う。
     std::string activeActionName;
     uintptr_t selectedNodeId = 0;
+    uintptr_t focusAreaId = 0;
     uintptr_t nodeToPlaceId = 0;
     // 右クリックで新規作成したノードを置くキャンバス座標。
     DirectX::XMFLOAT2 nextNodePosition = { 220.0f, 180.0f };

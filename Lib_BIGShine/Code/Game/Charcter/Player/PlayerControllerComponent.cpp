@@ -331,6 +331,9 @@ void PlayerControllerComponent::Update(float dt_)
         SendMoveInputToBlackboard({ 0.0f, 0.0f, 0.0f });
         SendGuardInputToBlackboard(false);
         ResetStrongAttackInput();
+        // 操作ロック中に残った走行速度を、操作再開時へ持ち越さない。
+        ResetGroundMovement();
+        if (GetCurrentAction() == PLAYER_ACTION::MOVE) groundMovePhase = PLAYER_LOCOMOTION_PHASE::RUN_START;
         // 演出Stateを通常のIdle/Move更新で上書きせず、予約済み移動だけ停止する。
         ApplyPendingMovement();
         SendGroundedToBlackboard();
@@ -357,8 +360,10 @@ void PlayerControllerComponent::Update(float dt_)
     UpdateDodgeRestrictions(dt_);
     UpdateCounterTags(dt_);
     SendGroundedToBlackboard();
-    UpdateLocomotionAnimationPhase(dt_);
     UpdateTimelineActionSafety(dt_);
+    // どのStateからMOVEへ入っても、同じ時間幅で一度だけ速度を更新する。
+    if (GetCurrentAction() == PLAYER_ACTION::MOVE) UpdateGroundMovement(lastUpdateDeltaTime);
+    UpdateLocomotionAnimationPhase(dt_);
     ApplyPendingMovement();
 }
 
@@ -606,6 +611,14 @@ DirectX::XMFLOAT3 PlayerControllerComponent::GetMoveInputAxis() const
         input_.z *= inverseLength_;
     }
 
+    // 地上移動だけ開始・解除のしきい値を分け、デッドゾーン付近の往復を防ぐ。
+    if (GetPlayerActionGroup(GetCurrentAction()) == PLAYER_ACTION_GROUP::LOCOMOTION)
+    {
+        const float threshold_ = groundMoveInputActive
+            ? (std::min)(groundInputReleaseThreshold, groundInputStartThreshold)
+            : groundInputStartThreshold;
+        if (lengthSquared_ < threshold_ * threshold_) return { 0.0f, 0.0f, 0.0f };
+    }
     return input_;
 }
 
@@ -1372,8 +1385,13 @@ void PlayerControllerComponent::NotifyActionEnd()
     }
 
     const DirectX::XMFLOAT3 input_ = GetMoveInput();
+    // 着地後の残速はMOVEで減速し、攻撃や回避の速度はこの条件で引き継がない。
+    const auto landingVelocity_ = currentAction_ == PLAYER_ACTION::JUMP && IsGrounded() && movement
+        ? movement->GetDesiredHorizontalVelocity() : DirectX::XMFLOAT3{ 0.0f, 0.0f, 0.0f };
+    const bool hasLandingMomentum_ = landingVelocity_.x * landingVelocity_.x + landingVelocity_.z * landingVelocity_.z >
+        groundStopSpeedThreshold * groundStopSpeedThreshold;
     const PLAYER_ACTION locomotionAction_ =
-        (input_.x != 0.0f || input_.z != 0.0f)
+        (input_.x != 0.0f || input_.z != 0.0f || hasLandingMomentum_)
         ? PLAYER_ACTION::MOVE
         : PLAYER_ACTION::IDLE;
     stateMachine.ChangeState(locomotionAction_);
@@ -1596,6 +1614,11 @@ void PlayerControllerComponent::EnterAction(PLAYER_ACTION action_)
         guardRearmRequired = KeyConfig::Instance().ActionPressed(PlayerInputAction::GUARD);
         StopNormalGuard();
     }
+    if (previousAction_ == PLAYER_ACTION::WEAK_ATTACK && action_ != PLAYER_ACTION::WEAK_ATTACK)
+    {
+        ClearAttackAssistTarget();
+        if (movement) movement->ClearRootMotionDelta();
+    }
     previousAction = action_;
     if (previousAction_ == PLAYER_ACTION::DODGE &&
         action_ != PLAYER_ACTION::DODGE)
@@ -1612,15 +1635,48 @@ void PlayerControllerComponent::EnterAction(PLAYER_ACTION action_)
         ClearCounterTags();
     }
     hasSentLocomotionPhase = false;
-    if (locomotionPhaseAction != action_)
+    if (action_ == PLAYER_ACTION::MOVE && previousAction_ != PLAYER_ACTION::MOVE)
     {
-        locomotionPhaseAction = action_;
-        locomotionPhaseTimer = 0.0f;
+        // 戦闘のRootMotionを通常移動へ足さず、新しい入力から走り直す。
+        ResetGroundMovement();
+        groundMovePhase = PLAYER_LOCOMOTION_PHASE::RUN_START;
+        if (movement)
+        {
+            movement->ClearRootMotionDelta();
+            if (previousAction_ == PLAYER_ACTION::JUMP && IsGrounded())
+            {
+                const auto velocity_ = movement->GetDesiredHorizontalVelocity();
+                const float speed_ = std::sqrt(velocity_.x * velocity_.x + velocity_.z * velocity_.z);
+                if (speed_ > groundStopSpeedThreshold)
+                {
+                    // 着地時だけは現在の空中慣性を引き継ぎ、地上速度の古い履歴は使わない。
+                    groundMoveSpeed = (std::min)(speed_, moveSpeed);
+                    groundMoveDirection = { velocity_.x / speed_, 0.0f, velocity_.z / speed_ };
+                    groundCurrentVelocity = { groundMoveDirection.x * groundMoveSpeed, 0.0f, groundMoveDirection.z * groundMoveSpeed };
+                    if (groundMoveSpeed > moveSpeed * 0.35f) groundMovePhase = PLAYER_LOCOMOTION_PHASE::RUN_LOOP;
+                }
+            }
+        }
     }
-    runEndActive = action_ == PLAYER_ACTION::IDLE && previousAction_ == PLAYER_ACTION::MOVE;
-    if (runEndActive)
+    else if (previousAction_ == PLAYER_ACTION::MOVE && action_ != PLAYER_ACTION::MOVE)
     {
-        runEndTimer = 0.0f;
+        // ジャンプだけ水平慣性を渡し、地上減速を空中へ持ち込まない。
+        if (action_ == PLAYER_ACTION::JUMP)
+        {
+            DirectX::XMFLOAT3 inheritedVelocity_ = groundCurrentVelocity;
+            const auto owner_ = GetGameObject();
+            if (collider && collider->WasHorizontalMovementBlocked() && owner_ && owner_->transform &&
+                groundHasPreviousPosition && groundPreviousDeltaTime > 0.000001f)
+            {
+                const auto position_ = owner_->transform->GetWorldPosition();
+                inheritedVelocity_ = { (position_.x - groundPreviousPosition.x) / groundPreviousDeltaTime, 0.0f,
+                    (position_.z - groundPreviousPosition.z) / groundPreviousDeltaTime };
+            }
+            SetHorizontalVelocity(inheritedVelocity_, 1.0f, false);
+        }
+        else
+            SetHorizontalVelocity({ 0.0f, 0.0f, 0.0f }, 0.0f);
+        ResetGroundMovement();
     }
 
     if (action_ != PLAYER_ACTION::STRONG_ATTACK &&
@@ -1654,16 +1710,6 @@ void PlayerControllerComponent::EnterAction(PLAYER_ACTION action_)
         const auto animation_ = owner_ ? owner_->GetComponent<AnimationControllerComponent>() : nullptr;
         if (animation_ && !animation_->IsSkillControlled() && animation_->GetStates().count("Block_Walk_Start_Blend"))
             animation_->ChangeState("Block_Walk_Start_Blend", guardSettings.releaseBlendTime, true);
-    }
-    else if (previousAction_ == PLAYER_ACTION::GUARD &&
-        (action_ == PLAYER_ACTION::IDLE || action_ == PLAYER_ACTION::MOVE))
-    {
-        const auto owner_ = GetGameObject();
-        const auto animation_ = owner_ ? owner_->GetComponent<AnimationControllerComponent>() : nullptr;
-        const std::string state_ = action_ == PLAYER_ACTION::MOVE ? "SS_Run" : "SS_Idle";
-        // 見た目だけを補間し、Block_Endの終了待ちをゲームプレイへ持ち込まない。
-        if (animation_ && !animation_->IsSkillControlled() && animation_->GetStates().count(state_))
-            animation_->ChangeState(state_, guardSettings.releaseBlendTime);
     }
 }
 
@@ -2150,6 +2196,11 @@ void PlayerControllerComponent::RegisterPlayerAnimationActions()
         {
             NotifyComboTransition();
         });
+    // 再生開始イベントを入口にし、コンボの旧アニメーション時間で次段のWarpを進めない。
+    owner_->RegisterAction("PlayerState", "BeginWeakComboWarp", [this]()
+    {
+        if (auto* state_ = stateMachine.GetCurrentStateAs<PlayerAttackState>()) state_->NotifyWeakAnimationStarted();
+    });
     owner_->RegisterAction("PlayerState", "ActionEnd", [this]()
         {
             NotifyActionEnd();
@@ -2252,35 +2303,254 @@ void PlayerControllerComponent::SendActionToBlackboard(PLAYER_ACTION action_)
     SendMoveInputToBlackboard(GetMoveInput());
 }
 
-void PlayerControllerComponent::UpdateLocomotionAnimationPhase(float deltaTime_)
+// 入力や戦闘の境界で実行情報だけを初期化し、物理の重力やImpulseには触れない。
+void PlayerControllerComponent::ResetGroundMovement()
 {
-    // 移動開始/Loop/停止の見た目用Phaseを時間で切り替える。
-    locomotionPhaseTimer += (std::max)(deltaTime_, 0.0f);
+    groundMoveSpeed = 0.0f;
+    groundTargetSpeed = 0.0f;
+    groundPhaseTimer = 0.0f;
+    groundPreviousDeltaTime = 0.0f;
+    groundMoveInputActive = false;
+    groundHasPreviousPosition = false;
+    groundWasGrounded = false;
+    groundHasActualVelocity = false;
+    groundReversing = false;
+    groundSoftStop = false;
+    groundMovementBlocked = false;
+    groundTargetVelocity = {};
+    groundCurrentVelocity = {};
+    groundRequestedVelocity = {};
+    groundActualVelocity = {};
+    groundMoveDirection = { 0.0f, 0.0f, 1.0f };
+    groundMovePhase = PLAYER_LOCOMOTION_PHASE::IDLE;
+}
 
-    PLAYER_LOCOMOTION_PHASE phase_ = PLAYER_LOCOMOTION_PHASE::IDLE;
-    const PLAYER_ACTION currentAction_ = GetCurrentAction();
-    if (currentAction_ == PLAYER_ACTION::JUMP)
+// 目標、現在、衝突後の速度を分け、実移動が止まるまでMOVE内で減速を継続する。
+void PlayerControllerComponent::UpdateGroundMovement(float deltaTime_)
+{
+    BS_PROFILE_SCOPE("PlayerControllerComponent::UpdateGroundMovement");
+    const float deltaTimeSafe_ = (std::max)(deltaTime_, 0.0f);
+    const auto owner_ = GetGameObject();
+    const auto input_ = GetMoveInput();
+    const float magnitude_ = std::sqrt(input_.x * input_.x + input_.z * input_.z);
+    const bool hasInput_ = magnitude_ > 0.0001f;
+    const bool grounded_ = !collider || IsGrounded();
+    const bool wasBlocked_ = groundMovementBlocked;
+    groundMoveInputActive = hasInput_;
+    groundTargetSpeed = moveSpeed * magnitude_;
+    groundTargetVelocity = { input_.x * moveSpeed, 0.0f, input_.z * moveSpeed };
+    const DirectX::XMFLOAT3 targetDirection_ = hasInput_
+        ? DirectX::XMFLOAT3{ input_.x / magnitude_, 0.0f, input_.z / magnitude_ } : groundMoveDirection;
+    const auto horizontalLength_ = [](const DirectX::XMFLOAT3& value_)
     {
+        return std::sqrt(value_.x * value_.x + value_.z * value_.z);
+    };
+
+    // 前回の要求ではなく、CCTを通った実移動を記録する。上下の変位は速度制御へ混ぜない。
+    groundMovementBlocked = false;
+    groundHasActualVelocity = false;
+    if (owner_ && owner_->transform)
+    {
+        const auto position_ = owner_->transform->GetWorldPosition();
+        if (groundHasPreviousPosition && groundPreviousDeltaTime > 0.000001f)
+        {
+            groundHasActualVelocity = true;
+            groundActualVelocity = { (position_.x - groundPreviousPosition.x) / groundPreviousDeltaTime,
+                0.0f, (position_.z - groundPreviousPosition.z) / groundPreviousDeltaTime };
+            const float requestedSpeed_ = horizontalLength_(groundRequestedVelocity);
+            const float actualSpeed_ = horizontalLength_(groundActualVelocity);
+            if (grounded_ && groundWasGrounded && collider && collider->WasHorizontalMovementBlocked())
+            {
+                groundMovementBlocked = actualSpeed_ <= groundStopSpeedThreshold * 2.0f;
+                const float forwardProgress_ = groundActualVelocity.x * groundRequestedVelocity.x +
+                    groundActualVelocity.z * groundRequestedVelocity.z;
+                if (requestedSpeed_ > groundStopSpeedThreshold && actualSpeed_ < requestedSpeed_ * 0.95f && forwardProgress_ >= 0.0f)
+                {
+                    // 壁で消えた速度を保持せず、壁沿いに進めた成分だけを次の初速にする。
+                    groundMoveSpeed *= std::clamp(actualSpeed_ / requestedSpeed_, 0.0f, 1.0f);
+                    if (actualSpeed_ > groundStopSpeedThreshold)
+                        groundMoveDirection = { groundActualVelocity.x / actualSpeed_, 0.0f, groundActualVelocity.z / actualSpeed_ };
+                    else groundMoveSpeed = 0.0f;
+                }
+            }
+        }
+        groundPreviousPosition = { position_.x, position_.y, position_.z };
+        groundHasPreviousPosition = true;
+    }
+    groundPreviousDeltaTime = deltaTimeSafe_;
+    groundWasGrounded = grounded_;
+    groundPhaseTimer += deltaTimeSafe_;
+
+    if (!grounded_)
+    {
+        // 段差から離れたMOVEにも既存の空中設定を使い、地上の強い減速を適用しない。
+        const DirectX::XMFLOAT3 previousVelocity_{ groundMoveDirection.x * groundMoveSpeed, 0.0f, groundMoveDirection.z * groundMoveSpeed };
+        const DirectX::XMFLOAT3 airTarget_{ groundTargetVelocity.x * airControlRate, 0.0f, groundTargetVelocity.z * airControlRate };
+        groundTargetVelocity = airTarget_;
+        groundTargetSpeed = horizontalLength_(airTarget_);
+        const float rate_ = (std::max)(hasInput_ ? airControlAcceleration : airDeceleration, 0.0f);
+        const float decay_ = std::exp(-rate_ * deltaTimeSafe_);
+        const float averageWeight_ = rate_ * deltaTimeSafe_ > 0.000001f
+            ? (1.0f - decay_) / (rate_ * deltaTimeSafe_) : 1.0f;
+        groundCurrentVelocity = { airTarget_.x + (previousVelocity_.x - airTarget_.x) * decay_, 0.0f,
+            airTarget_.z + (previousVelocity_.z - airTarget_.z) * decay_ };
+        groundRequestedVelocity = { airTarget_.x + (previousVelocity_.x - airTarget_.x) * averageWeight_, 0.0f,
+            airTarget_.z + (previousVelocity_.z - airTarget_.z) * averageWeight_ };
+        groundMoveSpeed = horizontalLength_(groundCurrentVelocity);
+        if (groundMoveSpeed > 0.0001f)
+            groundMoveDirection = { groundCurrentVelocity.x / groundMoveSpeed, 0.0f, groundCurrentVelocity.z / groundMoveSpeed };
+        groundMovePhase = PLAYER_LOCOMOTION_PHASE::RUN_LOOP;
+        groundSoftStop = false;
+        groundReversing = false;
+        SendMoveInputToBlackboard(input_);
+        SetHorizontalVelocity(groundRequestedVelocity, 1.0f);
+        if (blackboard) blackboard->SetFloat(PlayerBlackboardCategory::ANIM, "GroundPlaybackRate", 1.0f);
         return;
     }
-    else if (currentAction_ == PLAYER_ACTION::MOVE)
+
+    if (hasInput_ && groundMovePhase == PLAYER_LOCOMOTION_PHASE::IDLE)
     {
-        phase_ = locomotionPhaseTimer <= runStartDuration
-            ? PLAYER_LOCOMOTION_PHASE::RUN_START
-            : PLAYER_LOCOMOTION_PHASE::RUN_LOOP;
-        runEndActive = false;
+        groundMovePhase = PLAYER_LOCOMOTION_PHASE::RUN_START;
+        groundPhaseTimer = 0.0f;
     }
-    else if (currentAction_ == PLAYER_ACTION::IDLE && runEndActive)
+    if (hasInput_ && groundMovePhase == PLAYER_LOCOMOTION_PHASE::RUN_END)
     {
-        runEndTimer += (std::max)(deltaTime_, 0.0f);
-        phase_ = PLAYER_LOCOMOTION_PHASE::RUN_END;
-        if (runEndTimer >= runEndDuration)
-        {
-            runEndActive = false;
-        }
+        // 停止中の再入力でも残速は初期化しない。進行方向の反転は下の制動で扱う。
+        groundMovePhase = !groundSoftStop && groundMoveSpeed > groundTargetSpeed * 0.35f && groundPhaseTimer < 0.15f
+            ? PLAYER_LOCOMOTION_PHASE::RUN_LOOP : PLAYER_LOCOMOTION_PHASE::RUN_START;
+        groundPhaseTimer = 0.0f;
+        groundSoftStop = false;
+    }
+    else if (!hasInput_ && groundMovePhase != PLAYER_LOCOMOTION_PHASE::RUN_END)
+    {
+        // 小さい入力はIdleへブレンドしながら減速し、低速でも速度を突然ゼロにしない。
+        groundSoftStop = groundMoveSpeed < moveSpeed * 0.30f ||
+            (groundMovePhase == PLAYER_LOCOMOTION_PHASE::RUN_START && groundPhaseTimer - deltaTimeSafe_ < 0.08f);
+        groundMovePhase = PLAYER_LOCOMOTION_PHASE::RUN_END;
+        groundPhaseTimer = 0.0f;
+    }
+    if (hasInput_ && wasBlocked_ && !groundMovementBlocked)
+    {
+        groundMovePhase = PLAYER_LOCOMOTION_PHASE::RUN_START;
+        groundPhaseTimer = 0.0f;
     }
 
-    SendLocomotionPhaseToBlackboard(phase_);
+    constexpr float MAXIMUM_GROUND_STEP = 1.0f / 240.0f;
+    constexpr float REVERSAL_ANGLE = 120.0f;
+    constexpr float REVERSAL_CANCEL_ANGLE = 90.0f;
+    DirectX::XMFLOAT3 displacement_{};
+    float remainingTime_ = deltaTimeSafe_;
+    // 固定の小区間で角度と速度を更新し、曲がり角で速度ベクトルを単純補間しない。
+    while (remainingTime_ > 0.000001f)
+    {
+        float difference_ = hasInput_ ? std::remainder(std::atan2(targetDirection_.x, targetDirection_.z) -
+            std::atan2(groundMoveDirection.x, groundMoveDirection.z), DirectX::XM_2PI) : 0.0f;
+        if (!hasInput_ || std::abs(difference_) < DirectX::XMConvertToRadians(REVERSAL_CANCEL_ANGLE)) groundReversing = false;
+        if (hasInput_ && groundMoveSpeed > groundStopSpeedThreshold &&
+            std::abs(difference_) >= DirectX::XMConvertToRadians(REVERSAL_ANGLE)) groundReversing = true;
+        if (hasInput_ && groundMoveSpeed <= groundStopSpeedThreshold)
+        {
+            groundMoveDirection = targetDirection_;
+            groundReversing = false;
+            difference_ = 0.0f;
+        }
+        const float speedRate_ = (std::max)(groundReversing ? groundReversalDeceleration :
+            (groundTargetSpeed > groundMoveSpeed ? groundAcceleration : groundDeceleration), 0.01f);
+        const float targetSpeed_ = groundReversing ? 0.0f : groundTargetSpeed;
+        float step_ = (std::min)(remainingTime_, MAXIMUM_GROUND_STEP);
+        if (groundReversing) step_ = (std::min)(step_, groundMoveSpeed / speedRate_);
+        const auto previousDirection_ = groundMoveDirection;
+        const float previousSpeed_ = groundMoveSpeed;
+        if (hasInput_ && !groundReversing)
+        {
+            const float turnLimit_ = DirectX::XMConvertToRadians((std::max)(groundDirectionTurnSpeed, 0.0f)) * step_;
+            const float yaw_ = std::atan2(groundMoveDirection.x, groundMoveDirection.z) + std::clamp(difference_, -turnLimit_, turnLimit_);
+            groundMoveDirection = { std::sin(yaw_), 0.0f, std::cos(yaw_) };
+        }
+        const float changingTime_ = (std::min)(step_, std::abs(targetSpeed_ - previousSpeed_) / speedRate_);
+        groundMoveSpeed += std::clamp(targetSpeed_ - previousSpeed_, -speedRate_ * step_, speedRate_ * step_);
+        const float distance_ = (previousSpeed_ + groundMoveSpeed) * 0.5f * changingTime_ + groundMoveSpeed * (step_ - changingTime_);
+        displacement_.x += (previousDirection_.x + groundMoveDirection.x) * 0.5f * distance_;
+        displacement_.z += (previousDirection_.z + groundMoveDirection.z) * 0.5f * distance_;
+        if (!hasInput_ && groundMoveSpeed <= groundStopSpeedThreshold) groundMoveSpeed = 0.0f;
+        remainingTime_ -= step_;
+    }
+    groundCurrentVelocity = { groundMoveDirection.x * groundMoveSpeed, 0.0f, groundMoveDirection.z * groundMoveSpeed };
+    groundRequestedVelocity = deltaTimeSafe_ > 0.000001f
+        ? DirectX::XMFLOAT3{ displacement_.x / deltaTimeSafe_, 0.0f, displacement_.z / deltaTimeSafe_ } : groundCurrentVelocity;
+    SetHorizontalVelocity(groundRequestedVelocity, 1.0f, false);
+
+    // 見た目の向きは目標方向へ向け、切り返し中の進行方向とは分離する。
+    // ロックオン中も通常移動は進行入力、ガード中は敵方向という既存の分担を維持する。
+    if (hasInput_ && owner_ && owner_->transform)
+    {
+        const float currentYaw_ = DirectX::XMConvertToRadians(owner_->transform->localRotation.y);
+        const float targetYaw_ = std::atan2(targetDirection_.x, targetDirection_.z);
+        float difference_ = std::remainder(targetYaw_ - currentYaw_, DirectX::XM_2PI);
+        if (std::abs(std::abs(difference_) - DirectX::XM_PI) < 0.01f) difference_ = std::abs(difference_) * groundLastTurnSign;
+        else if (std::abs(difference_) > 0.01f) groundLastTurnSign = difference_ > 0.0f ? 1.0f : -1.0f;
+        const float turnLimit_ = DirectX::XMConvertToRadians((std::max)(groundTurnSpeed, 0.0f)) * deltaTimeSafe_;
+        const float yaw_ = currentYaw_ + std::clamp(difference_, -turnLimit_, turnLimit_);
+        SetFacingDirection({ std::sin(yaw_), 0.0f, std::cos(yaw_) });
+    }
+
+    const auto animation_ = owner_ ? owner_->GetComponent<AnimationControllerComponent>() : nullptr;
+    const auto activeState_ = animation_ ? animation_->GetCurrentState() : nullptr;
+    const char* phaseName_ = groundMovePhase == PLAYER_LOCOMOTION_PHASE::RUN_START
+        ? "Run_Fast_Combat_IP_Start_Seq" : "Run_Fast_Combat_IP_Stop_Seq";
+    const float phaseDuration_ = groundMovePhase == PLAYER_LOCOMOTION_PHASE::RUN_START ? runStartDuration : runEndDuration;
+    const float progress_ = activeState_ && activeState_->name == phaseName_ && animation_->GetCurrentSampleDuration() > 0.0f
+        ? animation_->GetAnimatorTime() / animation_->GetCurrentSampleDuration()
+        : groundPhaseTimer / (std::max)(phaseDuration_, 0.01f);
+    const bool slidingAlongWall_ = collider && collider->WasHorizontalMovementBlocked() &&
+        horizontalLength_(groundActualVelocity) > groundStopSpeedThreshold;
+    if (groundMovementBlocked && hasInput_) groundMovePhase = PLAYER_LOCOMOTION_PHASE::RUN_LOOP;
+    else if (groundMovePhase == PLAYER_LOCOMOTION_PHASE::RUN_START && hasInput_ && progress_ >= 0.98f &&
+        (groundMoveSpeed >= groundTargetSpeed * 0.85f || slidingAlongWall_)) groundMovePhase = PLAYER_LOCOMOTION_PHASE::RUN_LOOP;
+    // Stop後半は既に待機姿勢へ戻るため、最後の静止区間を必ず再生し終える必要はない。
+    if (!hasInput_ && groundMovePhase == PLAYER_LOCOMOTION_PHASE::RUN_END && groundMoveSpeed <= groundStopSpeedThreshold &&
+        horizontalLength_(groundRequestedVelocity) <= groundStopSpeedThreshold &&
+        horizontalLength_(groundActualVelocity) <= groundStopSpeedThreshold && (groundSoftStop || progress_ >= 0.67f))
+    {
+        RequestAction(PLAYER_ACTION::IDLE);
+        return;
+    }
+    SendMoveInputToBlackboard(input_);
+    if (blackboard)
+    {
+        float rate_ = std::clamp(horizontalLength_(groundHasActualVelocity ? groundActualVelocity : groundCurrentVelocity) /
+            (std::max)(groundAnimationReferenceSpeed, 0.01f), 0.70f, 2.0f);
+        if (groundMovePhase == PLAYER_LOCOMOTION_PHASE::RUN_START) rate_ = 0.6666667f / (std::max)(runStartDuration, 0.01f);
+        else if (groundMovePhase == PLAYER_LOCOMOTION_PHASE::RUN_END) rate_ = 1.20f / (std::max)(runEndDuration, 0.01f);
+        blackboard->SetFloat(PlayerBlackboardCategory::ANIM, "GroundPlaybackRate", rate_);
+    }
+}
+
+// 現在の地上フェーズとInspectorのブレンド設定をアニメーショングラフへ同期する。
+void PlayerControllerComponent::UpdateLocomotionAnimationPhase(float)
+{
+    BS_PROFILE_SCOPE("PlayerControllerComponent::UpdateLocomotionAnimationPhase");
+    const PLAYER_ACTION currentAction_ = GetCurrentAction();
+    if (blackboard)
+    {
+        const bool softStop_ = currentAction_ == PLAYER_ACTION::MOVE && (groundSoftStop || groundMovementBlocked);
+        blackboard->SetBool(PlayerBlackboardCategory::ANIM, "GroundSoftStop", softStop_);
+        blackboard->SetBool(PlayerBlackboardCategory::PLAYER, "GroundSoftStop", softStop_);
+    }
+    if (currentAction_ == PLAYER_ACTION::JUMP) return;
+    SendLocomotionPhaseToBlackboard(currentAction_ == PLAYER_ACTION::MOVE
+        ? groundMovePhase : PLAYER_LOCOMOTION_PHASE::IDLE);
+
+    // 既存グラフの遷移時間をInspector設定へ接続し、再生Stateは直接切り替えない。
+    const auto owner_ = GetGameObject();
+    const auto animation_ = owner_ ? owner_->GetComponent<AnimationControllerComponent>() : nullptr;
+    if (!animation_) return;
+    for (auto& transition_ : animation_->GetTransitions())
+    {
+        if (transition_.toStateName == "Run_Fast_Combat_IP_Start_Seq") transition_.duration = groundStartBlendTime;
+        else if (transition_.toStateName == "Run_Fast_Combat_IP_Loop_Seq") transition_.duration = groundLoopBlendTime;
+        else if (transition_.toStateName == "Run_Fast_Combat_IP_Stop_Seq") transition_.duration = groundStopBlendTime;
+    }
 }
 
 void PlayerControllerComponent::SendLocomotionPhaseToBlackboard(PLAYER_LOCOMOTION_PHASE phase_)
@@ -2767,6 +3037,29 @@ void PlayerControllerComponent::Gui()
 
     ImGui::TextUnformatted("Input: KeyConfig Player.* actions / axes");
     ImGui::DragFloat("Move Speed", &moveSpeed, 0.1f, 0.0f, 100.0f);
+    // 地上移動の応答とグラフのブレンド時間を同じInspectorで調整する。
+    ImGui::DragFloat("Ground Acceleration (units/s^2)", &groundAcceleration, 1.0f, 0.01f, 2000.00f);
+    ImGui::DragFloat("Reversal Brake (units/s^2)", &groundReversalDeceleration, 1.0f, 0.01f, 4000.00f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
+    ImGui::DragFloat("Direction Turn Speed (deg/s)", &groundDirectionTurnSpeed, 1.0f, 0.01f, 7200.00f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
+    ImGui::DragFloat("Stop Speed (units/s)", &groundStopSpeedThreshold, 0.001f, 0.001f, 1.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+    ImGui::DragFloat("Ground Deceleration (units/s^2)", &groundDeceleration, 0.01f, 0.01f, 2000.00f);
+    ImGui::DragFloat("Facing Turn Speed (deg/s)", &groundTurnSpeed, 0.01f, 0.01f, 7200.00f);
+    ImGui::DragFloat("Ground Input Start Threshold", &groundInputStartThreshold, 0.01f, 0.01f, 1.00f);
+    ImGui::DragFloat("Ground Input Release Threshold", &groundInputReleaseThreshold, 0.01f, 0.00f, 1.00f);
+    ImGui::DragFloat("Ground Animation Reference Speed", &groundAnimationReferenceSpeed, 0.01f, 0.01f, 1000.00f);
+    ImGui::DragFloat("Ground Start Blend Time", &groundStartBlendTime, 0.01f, 0.00f, 1.00f);
+    ImGui::DragFloat("Ground Loop Blend Time", &groundLoopBlendTime, 0.01f, 0.00f, 1.00f);
+    ImGui::DragFloat("Ground Stop Blend Time", &groundStopBlendTime, 0.01f, 0.00f, 1.00f);
+    groundInputReleaseThreshold = (std::min)(groundInputReleaseThreshold, groundInputStartThreshold);
+    const float actualGroundSpeed_ = std::sqrt(groundActualVelocity.x * groundActualVelocity.x + groundActualVelocity.z * groundActualVelocity.z);
+    const char* groundPhaseName_ = groundMovePhase == PLAYER_LOCOMOTION_PHASE::RUN_START ? "Start"
+        : groundMovePhase == PLAYER_LOCOMOTION_PHASE::RUN_LOOP ? "Loop"
+        : groundMovePhase == PLAYER_LOCOMOTION_PHASE::RUN_END ? "Stop" : "Idle";
+    ImGui::Text("Ground: %s / reverse: %s / blocked: %s", groundPhaseName_, groundReversing ? "yes" : "no", groundMovementBlocked ? "yes" : "no");
+    ImGui::Text("Target XZ: %.2f %.2f / sent XZ: %.2f %.2f", groundTargetVelocity.x, groundTargetVelocity.z, groundRequestedVelocity.x, groundRequestedVelocity.z);
+    ImGui::Text("Target %.2f / current %.2f / actual previous %.2f (units/s)%s", groundTargetSpeed, groundMoveSpeed, actualGroundSpeed_, groundHasActualVelocity ? "" : " (no sample)");
+    ImGui::Text("Current XZ: %.2f %.2f / actual XZ: %.2f %.2f", groundCurrentVelocity.x, groundCurrentVelocity.z, groundActualVelocity.x, groundActualVelocity.z);
+
     ImGui::DragFloat("Guard Move Speed", &guardMoveSpeed, 0.1f, 0.0f, 100.0f);
     if (ImGui::TreeNode("Normal Guard / Effects"))
     {
@@ -2802,8 +3095,8 @@ void PlayerControllerComponent::Gui()
     ImGui::DragFloat("Air Deceleration", &airDeceleration, 0.1f, 0.0f, 60.0f, "%.2f");
     ImGui::DragFloat("Strong Hold Threshold", &strongAttackHoldThreshold, 0.01f, 0.0f, 5.0f, "%.2f");
     ImGui::DragFloat("Strong Charge Speed", &strongChargeAttackSpeed, 0.1f, 0.0f, 100.0f);
-    ImGui::DragFloat("Run Start Duration", &runStartDuration, 0.01f, 0.0f, 5.0f, "%.2f");
-    ImGui::DragFloat("Run End Duration", &runEndDuration, 0.01f, 0.0f, 5.0f, "%.2f");
+    ImGui::DragFloat("Start Animation Duration (s)", &runStartDuration, 0.01f, 0.01f, 5.0f, "%.2f");
+    ImGui::DragFloat("Stop Animation Duration (s)", &runEndDuration, 0.01f, 0.01f, 5.0f, "%.2f");
     ImGui::DragFloat("Jump End Duration", &jumpEndDuration, 0.01f, 0.0f, 5.0f, "%.2f");
     ImGui::DragFloat("Jump Impulse Fallback", &jumpImpulseFallbackDuration, 0.01f, 0.0f, 5.0f, "%.2f");
     ImGui::DragFloat("Timeline Action Fallback", &timelineActionFallbackDuration, 0.01f, 0.0f, 10.0f, "%.2f");
@@ -2916,6 +3209,7 @@ void PlayerControllerComponent::InitializeBlackboardValues()
 
     for (const char* category_ : categories_)
     {
+        blackboard->SetBool(category_, "GroundSoftStop", false);
         blackboard->SetInt(category_, PlayerBlackboardKey::ACTION, static_cast<int>(PLAYER_ACTION::NONE));
         blackboard->SetInt(category_, PlayerBlackboardKey::ACTION_GROUP, static_cast<int>(PLAYER_ACTION_GROUP::NONE));
         blackboard->SetInt(category_, PlayerBlackboardKey::ATTACK_TYPE, static_cast<int>(PLAYER_ATTACK_TYPE::NONE));
@@ -2990,6 +3284,18 @@ void PlayerControllerComponent::Serialize(nlohmann::json& j_) const
     j_["SkillDefinitionsPath"] = skillDefinitionsPath;
     skillLoadout.Serialize(j_["SkillLoadout"]);
     j_["MoveSpeed"] = moveSpeed;
+    j_["GroundAcceleration"] = groundAcceleration;
+    j_["GroundReversalDeceleration"] = groundReversalDeceleration;
+    j_["GroundDirectionTurnSpeed"] = groundDirectionTurnSpeed;
+    j_["GroundStopSpeedThreshold"] = groundStopSpeedThreshold;
+    j_["GroundDeceleration"] = groundDeceleration;
+    j_["GroundTurnSpeed"] = groundTurnSpeed;
+    j_["GroundInputStartThreshold"] = groundInputStartThreshold;
+    j_["GroundInputReleaseThreshold"] = groundInputReleaseThreshold;
+    j_["GroundAnimationReferenceSpeed"] = groundAnimationReferenceSpeed;
+    j_["GroundStartBlendTime"] = groundStartBlendTime;
+    j_["GroundLoopBlendTime"] = groundLoopBlendTime;
+    j_["GroundStopBlendTime"] = groundStopBlendTime;
     j_["GuardMoveSpeed"] = guardMoveSpeed;
     j_["GuardSettings"] = {
         { "GuardReleaseBlendTime", guardSettings.releaseBlendTime },
@@ -3083,6 +3389,20 @@ void PlayerControllerComponent::Deserialize(const nlohmann::json& j_)
     skillLoadout = PlayerSkillLoadout();
     hasExplicitSkillLoadout = j_.contains("SkillLoadout") && skillLoadout.Deserialize(j_.at("SkillLoadout"));
     moveSpeed = (std::max)(j_.value("MoveSpeed", moveSpeed), 0.0f);
+    groundAcceleration = std::clamp(j_.value("GroundAcceleration", groundAcceleration), 0.01f, 2000.00f);
+    groundReversalDeceleration = std::clamp(j_.value("GroundReversalDeceleration", groundReversalDeceleration), 0.010f, 4000.00f);
+    groundDirectionTurnSpeed = std::clamp(j_.value("GroundDirectionTurnSpeed", groundDirectionTurnSpeed), 0.010f, 7200.00f);
+    groundStopSpeedThreshold = std::clamp(j_.value("GroundStopSpeedThreshold", groundStopSpeedThreshold), 0.001f, 1.00f);
+    groundDeceleration = std::clamp(j_.value("GroundDeceleration", groundDeceleration), 0.01f, 2000.00f);
+    groundTurnSpeed = std::clamp(j_.value("GroundTurnSpeed", groundTurnSpeed), 0.01f, 7200.00f);
+    groundInputStartThreshold = std::clamp(j_.value("GroundInputStartThreshold", groundInputStartThreshold), 0.01f, 1.00f);
+    groundInputReleaseThreshold = std::clamp(j_.value("GroundInputReleaseThreshold", groundInputReleaseThreshold), 0.00f, 1.00f);
+    groundAnimationReferenceSpeed = std::clamp(j_.value("GroundAnimationReferenceSpeed", groundAnimationReferenceSpeed), 0.01f, 1000.00f);
+    groundStartBlendTime = std::clamp(j_.value("GroundStartBlendTime", groundStartBlendTime), 0.00f, 1.00f);
+    groundLoopBlendTime = std::clamp(j_.value("GroundLoopBlendTime", groundLoopBlendTime), 0.00f, 1.00f);
+    groundStopBlendTime = std::clamp(j_.value("GroundStopBlendTime", groundStopBlendTime), 0.00f, 1.00f);
+    groundInputReleaseThreshold = (std::min)(groundInputReleaseThreshold, groundInputStartThreshold);
+    ResetGroundMovement();
     guardMoveSpeed = (std::max)(j_.value("GuardMoveSpeed", guardMoveSpeed), 0.0f);
     StopNormalGuard();
     guardRearmRequired = false;
@@ -3116,8 +3436,8 @@ void PlayerControllerComponent::Deserialize(const nlohmann::json& j_)
     airDeceleration = (std::max)(j_.value("AirDeceleration", airDeceleration), 0.0f);
     strongAttackHoldThreshold = (std::max)(j_.value("StrongAttackHoldThreshold", strongAttackHoldThreshold), 0.0f);
     strongChargeAttackSpeed = (std::max)(j_.value("StrongChargeAttackSpeed", strongChargeAttackSpeed), 0.0f);
-    runStartDuration = (std::max)(j_.value("RunStartDuration", runStartDuration), 0.0f);
-    runEndDuration = (std::max)(j_.value("RunEndDuration", runEndDuration), 0.0f);
+    runStartDuration = (std::max)(j_.value("RunStartDuration", runStartDuration), 0.01f);
+    runEndDuration = (std::max)(j_.value("RunEndDuration", runEndDuration), 0.01f);
     jumpEndDuration = (std::max)(j_.value("JumpEndDuration", jumpEndDuration), 0.0f);
     jumpImpulseFallbackDuration = (std::max)(
         j_.value("JumpImpulseFallbackDuration", jumpImpulseFallbackDuration),

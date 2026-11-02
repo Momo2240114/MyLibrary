@@ -18,6 +18,8 @@ class AttackTelegraphRuntime
 public:
     // State変更・再開始・シーク時に、旧区間の未発生予兆を破棄する。
     void Reset();
+    // Stateが変わらない中断でも予約を破棄し、明示的な再開始まで再予約しない。
+    void Cancel(const AnimState* state_);
     // 攻撃判定と同じアニメーション時間を使い、今回通過した予兆だけを予約する。
     void Advance(const std::shared_ptr<GameObject>& owner_, const AnimState& state_, float previousTime_, float currentTime_);
     // ブレンドとRootMotionを反映した後に、予約済みの予兆を描画側へ渡す。
@@ -48,6 +50,7 @@ private:
 
     const AnimState* activeState = nullptr;
     float lastTime = -1.0f;
+    bool canceled = false;
     std::vector<Cue> cues;
     std::vector<AttackTelegraphSettings> pending;
     std::weak_ptr<GltfModelCommponennt> cachedModel;
