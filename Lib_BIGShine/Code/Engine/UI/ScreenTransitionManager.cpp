@@ -67,7 +67,7 @@ void ScreenTransitionManager::Update(float rawDeltaTime_)
         if (handle == current_) { owner.reset(); onCovered = {}; onCompleted = {}; preview = false; handle = 0; effect.reset(); }
     }
 }
-void ScreenTransitionManager::Render()
+void ScreenTransitionManager::Render(ID3D11RenderTargetView* renderTarget_)
 {
     BS_PROFILE_SCOPE("ScreenTransitionManager::Render");
     if (!IsActive()) return;
@@ -76,7 +76,7 @@ void ScreenTransitionManager::Render()
     {
         effect->SetProgress(sequence.GetProgress());
         effect->Update(sequence.GetEffectTime(),sequence.GetState() == TransitionState::TRANSITION_IN);
-        rendered_ = effect->Render();
+        rendered_ = effect->Render(renderTarget_);
     }
     else rendered_ = fallbackQueued;
     if (rendered_ && GraphicsDeviceManager::Instance().GetRenderTargetView()) sequence.NotifyRendered();

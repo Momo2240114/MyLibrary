@@ -121,10 +121,9 @@ void GameModeManager::BeginCinematicPreview(GameProgressState context_)
 {
     BS_PROFILE_SCOPE("GameModeManager::BeginCinematicPreview");
     cinematicPreview = true;
-    currentGameState = context_;
     sequenceStartRequested = false;
     sequenceStartAttempted = false;
-    WriteBlackboard();
+    SetGameState(context_);
 }
 
 void GameModeManager::SetGameplayLocked(bool locked_)

@@ -126,7 +126,7 @@ void ShaderTransitionEffect::ShutdownSharedResources()
     UIPresentationPresets::ClearTexturePreviews();
     sharedWhite.Reset(); sharedNoise.Reset(); sharedConstantBuffer.Reset(); sharedVertexShader.Reset();
 }
-bool ShaderTransitionEffect::Render()
+bool ShaderTransitionEffect::Render(ID3D11RenderTargetView* renderTarget_)
 {
     BS_PROFILE_SCOPE("ShaderTransitionEffect::Render");
     if (!ready) return false;
@@ -136,11 +136,13 @@ bool ShaderTransitionEffect::Render()
     if (!context_ || !states_ || !graphics_.GetRenderTargetView()) return false;
     BS_PROFILE_GPU_SCOPE(graphics_.GetTracyGpuContext(),"GPU::ScreenTransition");
     graphics_.SetBackBufferRenderTarget();
+    auto* target_ = renderTarget_ ? renderTarget_ : graphics_.GetRenderTargetView();
+    if (renderTarget_) context_->OMSetRenderTargets(1, &target_, nullptr);
     // ガラス演出だけ現在の画面を保存する。開く段階では新Sceneを取り込み直す。
     if (parameters.type == TransitionType::GLASS)
     {
         Microsoft::WRL::ComPtr<ID3D11Resource> source_;
-        graphics_.GetRenderTargetView()->GetResource(source_.GetAddressOf());
+        target_->GetResource(source_.GetAddressOf());
         Microsoft::WRL::ComPtr<ID3D11Texture2D> sourceTexture_;
         source_.As(&sourceTexture_);
         if (sourceTexture_)
@@ -186,7 +188,7 @@ bool ShaderTransitionEffect::Render()
     context_->UpdateSubresource(sharedConstantBuffer.Get(),0,nullptr,&cb_,0,0);
     context_->RSSetState(states_->GetRasterizerState(RasterizerState::SolidCullNone));
     context_->OMSetDepthStencilState(states_->GetDepthStencilState(DepthState::NoTestNoWrite),0);
-    context_->OMSetBlendState(states_->GetBlendState(BlendState::Transparency),nullptr,0xffffffff);
+    context_->OMSetBlendState(states_->GetBlendState(renderTarget_ ? BlendState::TransparencyKeepAlpha : BlendState::Transparency),nullptr,0xffffffff);
     context_->IASetInputLayout(nullptr); context_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     context_->VSSetShader(glassVertexShader ? glassVertexShader.Get() : sharedVertexShader.Get(),nullptr,0); context_->PSSetShader(pixelShader.Get(),nullptr,0);
     context_->GSSetShader(nullptr,nullptr,0); context_->HSSetShader(nullptr,nullptr,0); context_->DSSetShader(nullptr,nullptr,0);

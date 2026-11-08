@@ -3,6 +3,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+struct ID3D11RenderTargetView;
 // 再生状態から独立し、視覚表現と固有リソースだけを扱うStrategy。
 class ITransitionEffect
 {
@@ -13,7 +14,7 @@ public:
     virtual void SetParameters(const TransitionParameters& parameters_) = 0;
     virtual void SetProgress(float progress_) = 0;
     virtual void Update(float elapsedTime_, bool revealing_) = 0;
-    virtual bool Render() = 0;
+    virtual bool Render(ID3D11RenderTargetView* renderTarget_) = 0;
     virtual void Gui(TransitionParameters& parameters_) = 0;
     virtual bool IsReady() const = 0;
 };

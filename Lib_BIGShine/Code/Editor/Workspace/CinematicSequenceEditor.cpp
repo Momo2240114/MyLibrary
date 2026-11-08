@@ -77,13 +77,36 @@ bool CinematicSequenceEditor::Bind(const std::string& ownerName_, int sequenceIn
     if (sequenceIndex_ < 0 || sequenceIndex_ >= static_cast<int>(data_["Sequences"].size())) return false;
     draft = std::move(data_);
     ownerName = inspectObjectName = ownerName_;
-    sequenceIndex = sequenceIndex_;
-    selectedAction = -1;
-    previewDuration = draft["Sequences"][sequenceIndex].value("duration", 10.0f);
-    viewDuration = (std::max)(previewDuration, 1.0f);
+    SelectSequence(sequenceIndex_);
     dirty = restartPending = restartPlaying = false;
     pendingSeek = -1.0f;
     return true;
+}
+
+void CinematicSequenceEditor::SelectSequence(int index_)
+{
+    sequenceIndex = index_;
+    selectedAction = -1;
+    const auto& sequences_ = draft["Sequences"];
+    const auto& selected_ = sequences_[index_];
+    const auto name_ = selected_.value("name", std::string());
+    previewDuration = selected_.value("duration", 10.0f);
+    auto context_ = GameProgressState::GAME_SCENE_START;
+    if (name_ == "BossIntro") context_ = GameProgressState::BOSS_INTRO;
+    else if (name_ == "Phase2Intro" || name_ == "PhaseTransitionBattleResume") context_ = GameProgressState::PHASE_2_INTRO;
+    else if (name_ == "Phase1Defeat")
+    {
+        context_ = GameProgressState::PHASE_1_DEFEAT;
+        for (const auto& sequence_ : sequences_)
+            if (sequence_.value("name", std::string()) == "Phase2Intro")
+            {
+                // 被覆・生成待ちがあるため、連続再生にはSequenceの尺より余裕を持たせる。
+                previewDuration += sequence_.value("duration", 0.0f) + 5.0f;
+                break;
+            }
+    }
+    contextIndex = static_cast<int>(context_);
+    viewDuration = (std::max)(selected_.value("duration", 10.0f), 1.0f);
 }
 
 void CinematicSequenceEditor::Stop()
@@ -108,6 +131,7 @@ void CinematicSequenceEditor::Start(bool playing_)
         return;
     }
     ownsPreview = true;
+    status.clear();
     manager->SetCinematicSequencePaused(!playing_);
     manager->SetCinematicSequenceRate(rate);
 }
@@ -135,7 +159,11 @@ void CinematicSequenceEditor::Update(float deltaTime_)
 {
     BS_PROFILE_SCOPE("CinematicSequenceEditor::Update");
     if (!manager) return;
-    if (ownsPreview && !manager->IsCinematicSequencePreview()) ownsPreview = false;
+    if (ownsPreview && !manager->IsCinematicSequencePreview())
+    {
+        ownsPreview = false;
+        status = manager->GetCinematicPreviewError();
+    }
     if (ownsPreview) manager->SetCinematicSequenceRate(rate);
     if (restartPending && !manager->IsCinematicSequencePreview() && manager->CanStartEditorPlay())
     {
@@ -374,7 +402,7 @@ void CinematicSequenceEditor::Draw()
     if (HasSequence() && ImGui::BeginCombo("Sequence", draft["Sequences"][sequenceIndex].value("name", std::string()).c_str()))
     {
         for (int index_ = 0; index_ < static_cast<int>(draft["Sequences"].size()); ++index_)
-            if (ImGui::Selectable(draft["Sequences"][index_].value("name", std::string()).c_str(), index_ == sequenceIndex)) { sequenceIndex = index_; selectedAction = -1; previewDuration = draft["Sequences"][index_].value("duration", 10.0f); viewDuration = (std::max)(previewDuration, 1.0f); }
+            if (ImGui::Selectable(draft["Sequences"][index_].value("name", std::string()).c_str(), index_ == sequenceIndex)) SelectSequence(index_);
         ImGui::EndCombo();
     }
     ImGui::EndDisabled();
@@ -390,11 +418,22 @@ void CinematicSequenceEditor::Draw()
     ImGui::SameLine(); ImGui::Checkbox("Loop", &loop);
     ImGui::SameLine(); ImGui::Text("%.3fs %s", manager->GetCinematicSequenceTime(), manager->IsCinematicSequenceSeeking() ? "Replaying / loading..." : "");
     ImGui::SetNextItemWidth(130.0f); ImGui::DragFloat("Preview end", &previewDuration, 0.1f, 0.1f, 600.0f);
-    ImGui::SameLine(); ImGui::SetNextItemWidth(170.0f);
-    ImGui::BeginDisabled(active_);
-    const char* contexts_[] = {"Game start", "Boss intro", "Phase 1 battle", "Phase 1 defeat", "Phase 2 intro", "Phase 2 battle", "Boss defeated", "Result"};
-    ImGui::Combo("Initial GameMode context", &contextIndex, contexts_, 8);
-    ImGui::EndDisabled();
+    const auto& sequences_ = draft["Sequences"];
+    const bool hasLeadIn_ = sequences_[sequenceIndex].value("name", std::string()) == "Phase2Intro" &&
+        std::any_of(sequences_.begin(), sequences_.end(), [](const auto& sequence_)
+            { return sequence_.value("name", std::string()) == "Phase1Defeat"; });
+    if (hasLeadIn_)
+    {
+        ImGui::TextDisabled("Phase1Defeat runs first. The timeline starts at Phase2Intro.");
+    }
+    else
+    {
+        ImGui::SameLine(); ImGui::SetNextItemWidth(170.0f);
+        ImGui::BeginDisabled(active_);
+        const char* CONTEXTS[] = {"Game start", "Boss intro", "Phase 1 battle", "Phase 1 defeat", "Phase 2 intro", "Phase 2 battle", "Boss defeated", "Result"};
+        ImGui::Combo("Initial GameMode context", &contextIndex, CONTEXTS, IM_ARRAYSIZE(CONTEXTS));
+        ImGui::EndDisabled();
+    }
     if (ImGui::Button("Refresh preview from draft") && active_)
     {
         manager->StopCinematicSequencePreview(); ownsPreview = false;

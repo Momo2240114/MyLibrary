@@ -100,6 +100,8 @@ private:
     float viewDuration = 8.0f;
     int frameRate = 60;
     bool ownsPreview = false;
+    bool ownsFinishScene = false;
+    bool playWhenFinishReady = false;
     bool seekPending = false;
     bool editing = false;
     bool dirty = false;

@@ -12,7 +12,7 @@ public:
     void SetParameters(const TransitionParameters& parameters_) override;
     void SetProgress(float progress_) override { progress = progress_; }
     void Update(float elapsedTime_, bool revealing_) override { elapsedTime = elapsedTime_; revealing = revealing_; }
-    bool Render() override;
+    bool Render(ID3D11RenderTargetView* renderTarget_) override;
     bool IsReady() const override { return ready; }
     static void ShutdownSharedResources();
 protected:

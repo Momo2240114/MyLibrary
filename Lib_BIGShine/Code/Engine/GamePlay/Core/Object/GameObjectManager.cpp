@@ -2,6 +2,7 @@
 #include "Engine/UI/LoadingPresentationComponent.h"
 #include "Engine/UI/GameMenuComponent.h"
 #include "Game/GameMode/BossFinishDirector.h"
+#include "Engine/UI/ScreenTransitionManager.h"
 #include "Game/GameMode/PlayerDeathDirector.h"
 #include "Engine/GamePlay/System/CombatObservationSystem.h"
 
@@ -309,7 +310,7 @@ bool GameObjectManager::ConsumeCinematicEditorRequest(std::string& ownerName_, i
     return true;
 }
 
-bool GameObjectManager::BeginCinematicSequencePreview(const std::string& ownerName_, int sequenceIndex_, const nlohmann::json& sequenceData_, GameProgressState context_)
+bool GameObjectManager::BeginCinematicSequencePreview(const std::string& ownerName_, int sequenceIndex_, const nlohmann::json& sequenceData_, GameProgressState context_, bool prepareFinish_)
 {
     BS_PROFILE_SCOPE("CinematicSequence::Begin");
     if (!CanStartEditorPlay() || SceneManager::IsEditorPlaySessionActive() || cinematicPreviewActive || IsBossFinishActive() || IsPlayerDeathActive()) return false;
@@ -317,6 +318,17 @@ bool GameObjectManager::BeginCinematicSequencePreview(const std::string& ownerNa
     const auto sourceSequence_ = sourceOwner_ ? sourceOwner_->GetComponent<ActionSequence>() : nullptr;
     if (!sourceOwner_ || sourceOwner_->IsPendingDestroy() || !sourceSequence_ || !sourceSequence_->IsEnabled() || !sourceSequence_->ShouldUpdate()) return false;
     if (!sequenceData_.contains("Sequences") || !sequenceData_["Sequences"].is_array() || sequenceIndex_ < 0 || sequenceIndex_ >= static_cast<int>(sequenceData_["Sequences"].size())) return false;
+    const auto& sequences_ = sequenceData_["Sequences"];
+    int leadInIndex_ = -1;
+    if (sequences_[sequenceIndex_].value("name", std::string()) == "Phase2Intro")
+    {
+        for (int index_ = 0; index_ < static_cast<int>(sequences_.size()); ++index_)
+            if (sequences_[index_].value("name", std::string()) == "Phase1Defeat")
+            {
+                leadInIndex_ = index_;
+                break;
+            }
+    }
     auto original_ = CaptureEditorSnapshot();
     if (!original_["Objects"].contains(ownerName_)) return false;
     auto runtime_ = original_;
@@ -328,7 +340,11 @@ bool GameObjectManager::BeginCinematicSequencePreview(const std::string& ownerNa
     cinematicRuntimeScene = std::move(runtime_);
     cinematicOwnerName = ownerName_;
     cinematicSequenceIndex = sequenceIndex_;
-    cinematicContext = context_;
+    cinematicLeadInIndex = leadInIndex_;
+    cinematicPrepareFinish = prepareFinish_;
+    cinematicPreparing = false;
+    cinematicPreviewError.clear();
+    cinematicContext = leadInIndex_ >= 0 ? GameProgressState::PHASE_1_DEFEAT : context_;
     cinematicPreviewActive = cinematicRebuild = true;
     cinematicStopRequested = cinematicStarted = false;
     cinematicPaused = true;
@@ -366,6 +382,12 @@ void GameObjectManager::SetCinematicSequencePaused(bool paused_)
     if (paused_) ControllerInput::Instance().StopRumble();
 }
 
+bool GameObjectManager::IsCinematicFinishReady() const
+{
+    return cinematicPreviewActive && cinematicPrepareFinish && cinematicStarted &&
+        !cinematicPreparing && !cinematicStopRequested;
+}
+
 void GameObjectManager::UpdateCinematicSequencePreview(float deltaTime_)
 {
     BS_PROFILE_SCOPE("CinematicSequence::Update");
@@ -389,16 +411,29 @@ void GameObjectManager::UpdateCinematicSequencePreview(float deltaTime_)
         editorPlayMode = EditorPlayMode::PLAY;
         beginGameSceneFlowAfterRead = false;
         try { LoadSceneData(cinematicRuntimeScene.value("SceneName", std::string("MainScene")), cinematicRuntimeScene); }
-        catch (...) { cinematicReloading = false; cinematicStopRequested = true; return; }
+        catch (...)
+        {
+            cinematicReloading = false;
+            cinematicPreviewError = "Could not reload the preview Scene.";
+            cinematicStopRequested = true;
+            return;
+        }
         cinematicReloading = false;
-        if (gameModeManager) gameModeManager->BeginCinematicPreview(cinematicContext);
+        gameModeManager->BeginCinematicPreview(cinematicContext);
         cinematicRebuild = cinematicStarted = false;
+        cinematicPreparing = cinematicLeadInIndex >= 0 || cinematicPrepareFinish;
+        cinematicPreparationTime = 0.0f;
         cinematicTime = cinematicRemainder = 0.0f;
         return;
     }
     if (sceneRuntimeState != SCENE_RUNTIME_STATE::RUNNING)
     {
-        if (sceneRuntimeState == SCENE_RUNTIME_STATE::FAILED) { cinematicStopRequested = true; return; }
+        if (sceneRuntimeState == SCENE_RUNTIME_STATE::FAILED)
+        {
+            cinematicPreviewError = "Could not load the preview Scene.";
+            cinematicStopRequested = true;
+            return;
+        }
         AdvanceSceneLoading(deltaTime_);
         return;
     }
@@ -406,26 +441,65 @@ void GameObjectManager::UpdateCinematicSequencePreview(float deltaTime_)
     {
         const auto owner_ = Find(cinematicOwnerName);
         const auto sequence_ = owner_ ? owner_->GetComponent<ActionSequence>() : nullptr;
-        if (!sequence_ || !sequence_->IsEnabled() || !sequence_->ShouldUpdate()) { cinematicStopRequested = true; return; }
+        if (!sequence_ || !sequence_->IsEnabled() || !sequence_->ShouldUpdate())
+        {
+            cinematicPreviewError = "The preview ActionSequence is unavailable.";
+            cinematicStopRequested = true;
+            return;
+        }
         cinematicStarted = true;
-        sequence_->StartSequence(cinematicSequenceIndex);
+        // Phase2Introが使うカメラ、生成物、ステージ状態を本番の完了Action経由で引き継ぐ。
+        sequence_->StartSequence(cinematicLeadInIndex >= 0 ? cinematicLeadInIndex : cinematicSequenceIndex);
+    }
+    if (IsCinematicFinishReady())
+    {
+        if (bossFinishDirector && bossFinishDirector->IsActive()) bossFinishDirector->Update(deltaTime_);
+        return;
     }
     const bool replay_ = cinematicReplayTarget >= 0.0f;
-    if (!replay_ && cinematicPaused) return;
-    if (!replay_) cinematicRemainder += std::clamp(std::isfinite(deltaTime_) ? deltaTime_ : 0.0f, 0.0f, 0.1f) * cinematicRate;
+    const auto owner_ = cinematicPreparing && cinematicLeadInIndex >= 0 ? Find(cinematicOwnerName) : nullptr;
+    const auto sequence_ = owner_ ? owner_->GetComponent<ActionSequence>() : nullptr;
+    if (!cinematicPreparing && !replay_ && cinematicPaused) return;
+    if (!cinematicPreparing && !replay_) cinematicRemainder += std::clamp(std::isfinite(deltaTime_) ? deltaTime_ : 0.0f, 0.0f, 0.1f) * cinematicRate;
     for (int index_ = 0; index_ < MAX_STEPS; ++index_)
     {
-        const float remaining_ = replay_ ? cinematicReplayTarget - cinematicTime : cinematicRemainder;
+        const float remaining_ = cinematicPreparing ? FIXED_STEP : replay_ ? cinematicReplayTarget - cinematicTime : cinematicRemainder;
         if (remaining_ <= 0.00001f || (!replay_ && remaining_ < FIXED_STEP)) break;
         const float step_ = (std::min)(FIXED_STEP, remaining_);
         // ActionSequenceのWaitForObject、Animation、カメラ、VFXを本番と同じ順番で進める。
+        ScreenTransitionManager::Instance().Update(step_);
         UpdateRunningRuntime(step_);
-        if (replay_) ControllerInput::Instance().StopRumble();
+        if (replay_ || cinematicPreparing) ControllerInput::Instance().StopRumble();
+        if (cinematicStopRequested) return;
+        if (cinematicPreparing)
+        {
+            cinematicPreparationTime += step_;
+            const auto state_ = gameModeManager->GetCurrentGameState();
+            if (sequence_ && state_ == GameProgressState::PHASE_2_INTRO)
+            {
+                // Phase2Introの開始要求だけを処理し、タイムラインの0秒で時計を進めない。
+                gameModeManager->Update(0.0f);
+            }
+            const bool ready_ = cinematicPrepareFinish ? state_ == GameProgressState::PHASE_2_BATTLE :
+                state_ == GameProgressState::PHASE_2_INTRO && sequence_ && sequence_->GetPlayingSequenceName() == "Phase2Intro";
+            if (ready_)
+            {
+                cinematicPreparing = false;
+                AudioManager::Instance().StopSE();
+                break;
+            }
+            if (cinematicPreparationTime >= 600.0f)
+            {
+                cinematicPreviewError = "Phase transition did not reach the requested cinematic.";
+                cinematicStopRequested = true;
+                return;
+            }
+            continue;
+        }
         cinematicTime += step_;
         if (!replay_) cinematicRemainder -= step_;
-        if (cinematicStopRequested) return;
     }
-    if (replay_ && cinematicTime >= cinematicReplayTarget - 0.00001f)
+    if (!cinematicPreparing && replay_ && cinematicTime >= cinematicReplayTarget - 0.00001f)
     {
         cinematicReplayTarget = -1.0f;
         AudioManager::Instance().StopSE();
@@ -1209,7 +1283,7 @@ void GameObjectManager::Clear(bool rebuildEffectPools_)
     // 試写用の再読込だけは、元Sceneへ戻すためのメモリを保持する。
     if (!cinematicReloading)
     {
-        cinematicPreviewActive = cinematicStopRequested = cinematicRebuild = false;
+        cinematicPreviewActive = cinematicStopRequested = cinematicRebuild = cinematicPreparing = false;
         cinematicOriginalScene = nlohmann::json();
         cinematicRuntimeScene = nlohmann::json();
         cinematicTime = cinematicRemainder = 0.0f;
