@@ -9,6 +9,7 @@
 #include "Engine/Graphics/Particle/ParticleComponent.h"
 #include "Engine/Graphics/VFX/MeshVFXComponent.h"
 #include "Engine/GamePlay/Camera/CameraComponent.h"
+#include "Engine/GamePlay/EventSystem/ActionSequence.h"
 #include "Engine/Platform/WindowsDialogHelper.h"
 #include "Engine/Debug/TracyProfiler.h"
 #include <imgui_stdlib.h>
@@ -115,7 +116,13 @@ void CinematicEditorWindow::StartPreview(bool playing_)
 {
     BS_PROFILE_SCOPE("CinematicEditor::StartPreview");
     const auto director_ = GetDirector();
-    if (!director_ || gameObjectManager->IsCinematicSequencePreview() || (director_->IsActive() && (!director_->IsPreview() || !ownsPreview))) return;
+    if (!director_ || (gameObjectManager->IsCinematicSequencePreview() && !ownsFinishScene) ||
+        (director_->IsActive() && (!director_->IsPreview() || !ownsPreview))) return;
+    if (ownsFinishScene && !gameObjectManager->IsCinematicFinishReady())
+    {
+        playWhenFinishReady = playing_;
+        return;
+    }
     if (gameObjectManager->GetSceneRuntimeState() != SCENE_RUNTIME_STATE::RUNNING || gameObjectManager->IsPlayerDeathActive())
     {
         status = "Wait for Scene loading / player death presentation to finish before previewing.";
@@ -123,6 +130,32 @@ void CinematicEditorWindow::StartPreview(bool playing_)
     }
     if (!director_->IsActive())
     {
+        const auto bossName_ = director_->GetSettings().at("Boss").value("Object", std::string());
+        if (!ownsFinishScene && bossName_ == "HumanBoss" && !gameObjectManager->Find(bossName_))
+        {
+            const auto transition_ = gameObjectManager->Find("PhaseTransition");
+            const auto sequence_ = transition_ ? transition_->GetComponent<ActionSequence>() : nullptr;
+            if (sequence_)
+            {
+                nlohmann::json data_;
+                sequence_->Serialize(data_);
+                const auto& sequences_ = data_["Sequences"];
+                for (int index_ = 0; index_ < static_cast<int>(sequences_.size()); ++index_)
+                {
+                    if (sequences_[index_].value("name", std::string()) != "Phase1Defeat") continue;
+                    // MainSceneの第2形態は戦闘中に生成されるため、試写用Sceneで形態移行を完了させる。
+                    if (gameObjectManager->BeginCinematicSequencePreview(transition_->GetName(), index_, data_,
+                        GameProgressState::PHASE_1_DEFEAT, true))
+                    {
+                        ownsFinishScene = true;
+                        playWhenFinishReady = playing_;
+                        status = "Preparing phase 2 for the boss finish...";
+                    }
+                    else status = "Stop Editor Play and wait for the Scene before previewing the boss finish.";
+                    return;
+                }
+            }
+        }
         // 遅延ロード中のモデルを使って不完全なプレビューを開始しない。
         for (const char* key_ : { "Player", "Boss" })
         {
@@ -130,12 +163,14 @@ void CinematicEditorWindow::StartPreview(bool playing_)
             const auto model_ = object_ ? object_->GetComponent<GltfModelCommponennt>() : nullptr;
             if (!model_ || !model_->IsModelReady())
             {
+                if (ownsFinishScene) StopPreview();
                 status = std::string(key_) + ": Scene object/model is unavailable. Set Object in the inspector.";
                 return;
             }
         }
         director_->Begin(true);
         ownsPreview = director_->IsPreview() && director_->IsActive();
+        if (ownsPreview) status = director_->GetStatus();
     }
     director_->SetPreviewPlaybackRate(previewRate);
     director_->SetPaused(!playing_);
@@ -146,6 +181,12 @@ void CinematicEditorWindow::StopPreview()
     if (sequenceEditor) sequenceEditor->Stop();
     const auto director_ = GetDirector();
     if (ownsPreview && director_ && director_->IsPreview()) director_->Stop();
+    if (ownsFinishScene && gameObjectManager)
+    {
+        gameObjectManager->StopCinematicSequencePreview();
+        if (!ownsPreview) status.clear();
+    }
+    ownsFinishScene = playWhenFinishReady = false;
     ownsPreview = seekPending = exploreCamera = false;
     draggingTrack = -1;
     dragMode = DragMode::NONE;
@@ -164,7 +205,14 @@ void CinematicEditorWindow::Update(float deltaTime_)
     if (useSequenceEditor) { sequenceEditor->Update(deltaTime_); return; }
     const auto director_ = GetDirector();
     if (!isVisible || !director_) return;
+    if (ownsFinishScene && !gameObjectManager->IsCinematicSequencePreview())
+    {
+        StopPreview();
+        status = gameObjectManager->GetCinematicPreviewError();
+    }
     if (ownsPreview && (!director_->IsActive() || !director_->IsPreview())) StopPreview();
+    if (ownsFinishScene && !ownsPreview && !seekPending && gameObjectManager->IsCinematicFinishReady())
+        StartPreview(playWhenFinishReady);
     if (ownsPreview) director_->SetPreviewPlaybackRate(previewRate);
     seekCooldown -= (std::max)(deltaTime_, 0.0f);
     // GPU Particleの再構築をフレーム中に重ねず、ドラッグ中は短い間隔へ集約する。
@@ -191,7 +239,7 @@ void CinematicEditorWindow::Update(float deltaTime_)
             seekPending = false;
             seekCooldown = 0.08f;
         }
-        else seekPending = false;
+        else if (!ownsFinishScene) seekPending = false;
     }
     if (ownsPreview && !director_->IsPaused() && !seekPending)
     {
@@ -252,7 +300,8 @@ void CinematicEditorWindow::DrawToolbar()
     const auto director_ = GetDirector();
     if (!director_) return;
     // テキスト編集中のSpaceやCtrl+Zを、再生操作や履歴操作に流さない。
-    const bool keyboard_ = (!director_->IsActive() || ownsPreview) &&
+    const bool preparing_ = ownsFinishScene && !gameObjectManager->IsCinematicFinishReady();
+    const bool keyboard_ = !preparing_ && (!director_->IsActive() || ownsPreview) &&
         ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) && !ImGui::GetIO().WantTextInput;
     if (keyboard_ && ImGui::IsKeyPressed(ImGuiKey_Space, false))
     {
@@ -261,11 +310,13 @@ void CinematicEditorWindow::DrawToolbar()
     }
     if (keyboard_ && ImGui::GetIO().KeyCtrl && !editing && ImGui::IsKeyPressed(ImGuiKey_Z, false)) RestoreHistory(false);
     if (keyboard_ && ImGui::GetIO().KeyCtrl && !editing && ImGui::IsKeyPressed(ImGuiKey_Y, false)) RestoreHistory(true);
+    ImGui::BeginDisabled(preparing_);
     if (ImGui::Button(ownsPreview && !director_->IsPaused() ? "Pause" : "Play"))
     {
         seekPending = false;
         StartPreview(director_->IsPaused() || !ownsPreview);
     }
+    ImGui::EndDisabled();
     ImGui::SameLine();
     if (ImGui::Button("Stop + Restore")) StopPreview();
     ImGui::SameLine();

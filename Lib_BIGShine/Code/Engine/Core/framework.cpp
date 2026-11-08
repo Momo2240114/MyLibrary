@@ -157,8 +157,11 @@ void framework::update(float elapsedTime_/*Elapsed seconds from last frame*/)
 	{
 		BS_PROFILE_SCOPE("SceneManager::Update");
         // 前フレームの被覆通知を、Object更新やSceneの破棄に入る前に処理する。
-        if (const auto scene_ = dynamic_cast<SceneBase*>(SceneManager::GetCurrentScene())) scene_->ActivateContext();
-        ScreenTransitionManager::Instance().Update(elapsedTime_);
+        const auto scene_ = dynamic_cast<SceneBase*>(SceneManager::GetCurrentScene());
+        if (scene_) scene_->ActivateContext();
+        const auto manager_ = scene_ ? scene_->GetGameObjectManager() : nullptr;
+        if (!manager_ || !manager_->IsCinematicSequencePreview())
+            ScreenTransitionManager::Instance().Update(elapsedTime_);
 		SceneManager::Update(elapsedTime_);
 	}
 
@@ -239,7 +242,10 @@ void framework::render(float elapsedTime_/*Elapsed seconds from last frame*/)
 			ImGuiRenderer::RenderAll(GraphicsDeviceManager::Instance().GetContext());
             // Sprite・Particle・ImGuiを含む最終画面を覆ってからPresentする。
             SceneManager::RenderTransition();
-            ScreenTransitionManager::Instance().Render();
+            const auto scene_ = dynamic_cast<SceneBase*>(SceneManager::GetCurrentScene());
+            const auto manager_ = scene_ ? scene_->GetGameObjectManager() : nullptr;
+            if (!manager_ || !manager_->IsCinematicSequencePreview())
+                ScreenTransitionManager::Instance().Render();
 		}
 	}
 

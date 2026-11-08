@@ -162,12 +162,14 @@ public:
     void RequestCinematicEditor(const std::string& ownerName_, int sequenceIndex_);
     bool ConsumeCinematicEditorRequest(std::string& ownerName_, int& sequenceIndex_);
     // 編集Sceneをメモリへ退避し、同じActionSequenceを本番の更新経路で試写する。
-    bool BeginCinematicSequencePreview(const std::string& ownerName_, int sequenceIndex_, const nlohmann::json& sequenceData_, GameProgressState context_);
+    bool BeginCinematicSequencePreview(const std::string& ownerName_, int sequenceIndex_, const nlohmann::json& sequenceData_, GameProgressState context_, bool prepareFinish_ = false);
     void StopCinematicSequencePreview();
     void SeekCinematicSequencePreview(float time_);
     bool IsCinematicSequencePreview() const { return cinematicPreviewActive; }
     bool HasCinematicSequenceStopRequest() const { return cinematicPreviewActive && (cinematicStopRequested || pendingEditorPlayCommand == EditorPlayCommand::STOP); }
-    bool IsCinematicSequenceSeeking() const { return cinematicReplayTarget >= 0.0f || cinematicRebuild; }
+    bool IsCinematicSequenceSeeking() const { return cinematicReplayTarget >= 0.0f || cinematicRebuild || cinematicPreparing; }
+    bool IsCinematicFinishReady() const;
+    const std::string& GetCinematicPreviewError() const { return cinematicPreviewError; }
     bool IsCinematicSequencePaused() const { return cinematicPaused; }
     float GetCinematicSequenceTime() const { return cinematicTime; }
     void SetCinematicSequencePaused(bool paused_);
@@ -314,6 +316,11 @@ private:
     nlohmann::json cinematicRuntimeScene;
     std::string cinematicOwnerName;
     int cinematicSequenceIndex = -1;
+    int cinematicLeadInIndex = -1;
+    bool cinematicPrepareFinish = false;
+    bool cinematicPreparing = false;
+    float cinematicPreparationTime = 0.0f;
+    std::string cinematicPreviewError;
     GameProgressState cinematicContext = GameProgressState::GAME_SCENE_START;
     bool cinematicPreviewActive = false;
     bool cinematicStopRequested = false;

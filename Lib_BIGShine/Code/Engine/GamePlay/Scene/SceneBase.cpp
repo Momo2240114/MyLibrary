@@ -11,6 +11,7 @@
 #include"Engine/GamePlay/Serialize/ActionRegistry.h"
 #include"Engine/GamePlay/Input/KeyInput.h"
 #include "Engine/Audio/AudioManager.h"
+#include "Engine/UI/ScreenTransitionManager.h"
 #include "Editor/Window/HierarchyWindow.h"
 #include "Editor/Window/InspectorWindow.h"
 #include "Editor/Window/ShaderWindow.h"
@@ -210,6 +211,9 @@ void SceneBase::Render(float elapsedTime)
         _GameObjectManager->GetEditorPlayMode() == EditorPlayMode::EDITOR ?
         _GameObjectManager->GetCameraManager()->GetEditorCamera() : nullptr;
     _GameObjectManager->RenderAll(m_SpriteRenderSystem, m_ModelRenderSystem, finalRenderTargetView_, editorCamera_.get(), isLoadingPresentation);
+
+    if (_GameObjectManager->IsCinematicSequencePreview())
+        ScreenTransitionManager::Instance().Render(finalRenderTargetView_);
 
     if (useDockedSceneView_)
     {

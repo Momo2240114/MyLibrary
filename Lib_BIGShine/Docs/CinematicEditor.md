@@ -11,7 +11,7 @@
 1. `ActionSequence owner`と`Sequence`で対象を選ぶ。対象はSceneへ保存されるObjectの、有効なActionSequenceとする。Editor Playを停止し、Sceneの読み込み完了後に再生する。
 2. TimelineのActionを選択し、キーをドラッグして実行時刻を調整する。SnapとFPSでフレーム単位に合わせる。Actionタブでは呼び出す登録済みAction、待機Object、アニメーション基準時刻、Blackboard書込み、完了・中断Actionを編集できる。
 3. `Play`で実際のSceneのAnimation、カメラ、Particle、MeshVFXとActionを更新する。Pause、Speed、Loop、コマ送りに対応する。`Preview end`は確認する演出全体の長さで、Sequence自身のdurationとは別に指定する。
-4. 進行状態に応じて完了Actionが分岐する場合は、再生前に`Initial GameMode context`を合わせる。例としてBossIntroはBoss intro、Phase1DefeatからPhase2Introへ続く確認はPhase 1 defeatを選び、Preview endを40秒程度へ伸ばす。再生対象の名前に依存した専用分岐は設けていない。
+4. MainSceneの`PhaseTransition`で`Phase1Defeat`を選ぶと、第1形態の撃破から`Phase2Intro`まで続けて再生する。`Phase2Intro`を選ぶと、再生やシークの前に`Phase1Defeat`を評価し、カメラ、ドラゴンの退場、VFXの状態を引き継ぐ。タイムラインの0秒は`Phase2Intro`の開始。その他のSequenceで進行状態を指定したい場合は`Initial GameMode context`を使う。
 5. `Live actors / VFX`で実際のAnimation Stateとサンプル時刻・尺、選択ObjectのParticle寿命・遅延、MeshVFXの経過時間・duration・loopを確認する。Sequenceの時計とWaitForObjectの待機状態も表示する。
 6. Scene内のカメラや演出Componentを変更する場合は停止後に`Scene settings`を開く。既存ComponentのInspectorを使用する。
 7. 再生中のAction編集は下書きへ保持する。変更後の結果は`Refresh preview from draft`で再構築して確認する。`Stop + Restore Scene`、Workspace切替、ウィンドウを閉じる操作で試写開始前のSceneへ戻す。
@@ -36,6 +36,8 @@
 ## 既存のFinish preset
 
 `Authoring source`を`Finish preset`へ切り替えると、既存BossFinishDirector用の編集を使用できる。Player/Boss、VFX、カメラキー、Easing、Assetsからの追加、Undo/Redo、Save AsとApply to gameを維持する。
+
+MainSceneで第2形態のボスが未生成の場合は、試写用Sceneで形態移行を進めてからとどめ演出を再生する。`Stop + Restore`で試写開始前のSceneに戻る。
 
 このモードの保存形式は従来のBossFinishCinematicプリセット。Apply to gameは`Data/Presentation/AnathemaBossFinish.json`へ反映する。旧プリセットと固定カメラの互換性は維持する。ActionSequence編集とは保存先と時間の意味が異なる。
 

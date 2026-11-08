@@ -20,8 +20,8 @@ public:
         std::weak_ptr<Component> owner_ = {}, bool trackOwner_ = false, bool persistent_ = false, int priority_ = 0, bool preview_ = false);
     // フレーム開始時に一度呼び、前フレームの被覆通知をObject更新前に実行する。
     void Update(float rawDeltaTime_);
-    // 主画面のImGui描画後、Present前に一度だけ合成する。
-    void Render();
+    // 通常は主画面へ合成し、試写中はSceneViewへ合成する。
+    void Render(ID3D11RenderTargetView* renderTarget_ = nullptr);
     void DrawGUI(bool editor_);
     void Hold(TransitionHandle handle_);
     void Reveal(TransitionHandle handle_);

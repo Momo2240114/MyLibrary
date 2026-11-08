@@ -23,6 +23,7 @@ private:
     // 選択中Sequenceの有効性と、試写する範囲を取得する。
     bool HasSequence() const;
     float GetDuration() const;
+    void SelectSequence(int index_);
     // 元Sceneの設定へ再生用データを渡し、必要なら先頭から再評価する。
     void Start(bool playing_);
     void Seek(float time_);
