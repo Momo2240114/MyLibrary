@@ -11,13 +11,22 @@
 #include "Engine/GamePlay/Input/KeyConfig.h"
 #include "Engine/GamePlay/Input/MouseInput.h"
 #include "Engine/GamePlay/Transform/ModelAttachmentComponent.h"
+#include "Engine/Graphics/Core/GraphicsDeviceManager.h"
+#include "Engine/Graphics/Core/LightManager.h"
+#include "Engine/Graphics/Particle/ParticleComponent.h"
 #include "Engine/Graphics/Resource/Animation/AnimationControllerComponent.h"
+#include "Engine/Graphics/Resource/GlTFModel.h"
+#include "Engine/Math/Vector.h"
 #include "Engine/Audio/AudioManager.h"
 #include "Engine/GamePlay/Input/ControllerInput.h"
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
+#include "Engine/UI/BattleHudComponent.h"
+#include "Engine/UI/UIProgressBarComponent.h"
 
 #include <algorithm>
+#include <array>
 #include <cmath>
+#include <cstdint>
 #include <fstream>
 #include <exception>
 #include <imgui.h>
@@ -25,6 +34,10 @@
 namespace
 {
     constexpr const char* SETTINGS_PATH = "Data/Settings/PlayerDeath.json";
+    constexpr const char* REVIVE_PARTICLE_PATH = "Data/Particle/PlayerRevive.json";
+    constexpr float REVIVE_DISPERSE_TIME = 1.3f;
+    constexpr float REVIVE_LIGHT_INTENSITY = 9.0f;
+    constexpr float FLASHBACK_CAMERA_BLEND_TIME = 0.25f;
 
     // カメラの移動開始・停止を滑らかにし、死亡時の急な視点変化を抑える。
     float SmoothRatio(float time_, float duration_)
@@ -122,6 +135,71 @@ void PlayerDeathDirector::UpdatePlayerPresentation(float deltaTime_)
         if (attachment_ && attachment_->IsEnabled()) attachment_->SyncAttachment();
 }
 
+void PlayerDeathDirector::PrepareFlashbackShot()
+{
+    constexpr std::array<const char*, 6> FRAME_NODES{"head", "pelvis", "hand_l", "hand_r", "foot_l", "foot_r"};
+    std::array<Vector3, FRAME_NODES.size()> points_{};
+    std::size_t pointCount_ = 0;
+    if (const auto model_ = player->GetComponent<GltfModelCommponennt>(); model_ && model_->IsModelReady())
+    {
+        model_->UpdateTransformIfDirty();
+        for (const auto name_ : FRAME_NODES)
+        {
+            const int index_ = model_->GetNodeIndex(name_);
+            if (index_ < 0) continue;
+            const auto& world_ = model_->GetNodes()[index_].worldTransform;
+            if (std::isfinite(world_._41) && std::isfinite(world_._42) && std::isfinite(world_._43))
+                points_[pointCount_++] = {world_._41, world_._42, world_._43};
+        }
+    }
+
+    Vector3 focus_ = Vector3{player->transform->GetWorldPosition()} + Vector3{0.0f, 0.55f, 0.0f};
+    if (pointCount_ >= 2)
+    {
+        Vector3 min_ = points_[0];
+        Vector3 max_ = points_[0];
+        for (std::size_t index_ = 1; index_ < pointCount_; ++index_)
+        {
+            min_ = Vector3::Min(min_, points_[index_]);
+            max_ = Vector3::Max(max_, points_[index_]);
+        }
+        focus_ = (min_ + max_) * 0.5f;
+    }
+
+    const auto stage_ = manager.Find(settings["StageCenterObject"].get<std::string>());
+    Vector3 inside_ = Vector3{stage_ && stage_->transform ? stage_->transform->GetWorldPosition() : camera->GetEye()} - focus_;
+    inside_.y = 0.0f;
+    Vector3 side_ = inside_;
+    if (pointCount_ >= 2)
+    {
+        const auto bodyAxis_ = points_[pointCount_ - 1] - points_[0];
+        side_ = Vector3{bodyAxis_.z, 0.0f, -bodyAxis_.x};
+        if (side_.Dot(inside_) < 0.0f) side_ = -side_;
+        if (side_.LengthSquared() < 0.01f) side_ = inside_;
+    }
+    if (side_.LengthSquared() < 0.01f) side_ = {0.0f, 0.0f, -1.0f};
+    side_.Normalize();
+    auto viewFrom_ = Vector3::Up + side_ * 0.42f;
+    viewFrom_.Normalize();
+
+    // 倒れた姿勢の頭と手足を画面の縦横に収め、輪郭が切れないよう余白を取る。
+    auto right_ = Vector3::Up.Cross(-viewFrom_);
+    right_.Normalize();
+    const auto viewUp_ = (-viewFrom_).Cross(right_);
+    const float halfFov_ = std::tan(DirectX::XMConvertToRadians(std::clamp(camera->GetFovY(), 10.0f, 120.0f)) * 0.5f);
+    const float halfWidth_ = halfFov_ * (std::max)(camera->GetAspect(), 0.1f);
+    float distance_ = (std::max)(2.25f, camera->GetNear() + 1.0f);
+    for (std::size_t index_ = 0; index_ < pointCount_; ++index_)
+    {
+        const auto offset_ = points_[index_] - focus_;
+        const float width_ = (std::abs(offset_.Dot(right_)) + 0.35f) / halfWidth_;
+        const float height_ = (std::abs(offset_.Dot(viewUp_)) + 0.35f) / halfFov_;
+        distance_ = (std::max)(distance_, offset_.Dot(viewFrom_) + (std::max)(width_, height_));
+    }
+    flashbackFocus = focus_;
+    flashbackEye = focus_ + viewFrom_ * distance_;
+}
+
 void PlayerDeathDirector::Begin(const std::shared_ptr<GameObject>& player_)
 {
     BS_PROFILE_SCOPE("PlayerDeathDirector::Begin");
@@ -132,6 +210,7 @@ void PlayerDeathDirector::Begin(const std::shared_ptr<GameObject>& player_)
     ControllerInput::Instance().StopRumble();
     active = true;
     phase = Phase::DYING;
+    frameFlashback = flashbackCaptureAvailable;
     elapsed = 0.0f;
     deathFinishedTime = -1.0f;
     fadeAlpha = 0.0f;
@@ -199,27 +278,57 @@ bool PlayerDeathDirector::Update(float deltaTime_)
             requestedPlayer.reset();
             return false;
         }
+        requestedPlayer = actor_;
+        const auto barObject_ = manager.Find("PlayerHpBar");
+        const auto bar_ = barObject_ && !barObject_->IsPendingDestroy() ?
+            barObject_->GetComponent<UIProgressBarComponent>() : nullptr;
+        if (bar_ && bar_->IsEnabled() && bar_->IsStarted())
+        {
+            bar_->SetTargetRate(0.0f);
+            // HUDが遅延ゲージを描き終えるまで、Sceneの通常更新を続ける。
+            if (bar_->HasRemainingFill())
+            {
+                if (bar_->ShouldUpdate()) return false;
+                for (const auto& hud_ : manager.FindComponents<BattleHudComponent>())
+                    if (hud_->UpdatesPlayerHealthBar(bar_.get())) return false;
+            }
+        }
         Begin(actor_);
     }
     if (!player || player->IsPendingDestroy()) { Stop(); return true; }
     // 死亡演出は戦闘のHitStopやTimeScaleから独立させ、起き上がりの実際の尺まで待つ。
-    elapsed += std::isfinite(deltaTime_) ? (std::max)(deltaTime_, 0.0f) : 0.0f;
-    UpdatePlayerPresentation(std::isfinite(deltaTime_) ? (std::max)(deltaTime_, 0.0f) : 0.0f);
+    const float presentationDeltaTime_ = std::isfinite(deltaTime_) ? (std::max)(deltaTime_, 0.0f) : 0.0f;
+    elapsed += presentationDeltaTime_;
+    UpdatePlayerPresentation(presentationDeltaTime_);
     const auto controller_ = player->GetComponent<PlayerControllerComponent>();
     if (phase == Phase::DYING)
     {
         // 距離感を音量と高音の減衰で表現し、最終的に無音へ到達させる。
         AudioManager::Instance().SetDeathBgmEffect(elapsed / settings["BgmFadeOutTime"].get<float>());
-        const float ratio_ = SmoothRatio(elapsed, settings["CameraMoveTime"].get<float>());
-        camera->SetLookAt(LerpPosition(startEye, endEye, ratio_), LerpPosition(startFocus, endFocus, ratio_), cameraUp);
         // 死亡Stateがグラフの実際の完了を確認するまで、暗転とコンテニューへ進まない。
-        if (deathFinishedTime < 0.0f && controller_ && controller_->IsDeathAnimationFinished()) deathFinishedTime = elapsed;
+        if (deathFinishedTime < 0.0f && controller_ && controller_->IsDeathAnimationFinished())
+        {
+            deathFinishedTime = elapsed;
+            if (frameFlashback) PrepareFlashbackShot();
+        }
+        const float ratio_ = SmoothRatio(elapsed, settings["CameraMoveTime"].get<float>());
+        const float shotRatio_ = frameFlashback && deathFinishedTime >= 0.0f ?
+            SmoothRatio(elapsed - deathFinishedTime, FLASHBACK_CAMERA_BLEND_TIME) : 0.0f;
+        camera->SetLookAt(LerpPosition(LerpPosition(startEye, endEye, ratio_), flashbackEye, shotRatio_),
+            LerpPosition(LerpPosition(startFocus, endFocus, ratio_), flashbackFocus, shotRatio_),
+            LerpPosition(cameraUp, Vector3::Up, shotRatio_));
         if (deathFinishedTime >= 0.0f)
-            fadeAlpha = std::clamp((elapsed - deathFinishedTime - settings["DeathHold"].get<float>()) /
+        {
+            const float hold_ = (std::max)(settings["DeathHold"].get<float>(), frameFlashback ? FLASHBACK_CAMERA_BLEND_TIME : 0.0f);
+            fadeAlpha = std::clamp((elapsed - deathFinishedTime - hold_) /
                 settings["FadeOutTime"].get<float>(), 0.0f, 1.0f);
+        }
         if (fadeAlpha >= 1.0f && elapsed >= (std::max)(settings["CameraMoveTime"].get<float>(), settings["BgmFadeOutTime"].get<float>()))
         {
+            endEye = camera->GetEye();
+            endFocus = camera->GetFocus();
             phase = Phase::CONTINUE;
+            reachedGameOver = true;
             elapsed = 0.0f;
             continueMenu.Reset();
             manager.SetPlayInputCaptured(false);
@@ -247,8 +356,35 @@ bool PlayerDeathDirector::Update(float deltaTime_)
         fadeAlpha = 1.0f - std::clamp(elapsed / settings["FadeInTime"].get<float>(), 0.0f, 1.0f);
         const float duration_ = settings["CameraReturnTime"].get<float>();
         const float ratio_ = SmoothRatio(elapsed, duration_);
-        camera->SetLookAt(LerpPosition(endEye, startEye, ratio_), LerpPosition(endFocus, startFocus, ratio_), cameraUp);
-        if (controller_ && controller_->IsReviveAnimationFinished() && fadeAlpha <= 0.0f && elapsed >= duration_) Stop();
+        camera->SetLookAt(LerpPosition(endEye, startEye, ratio_), LerpPosition(endFocus, startFocus, ratio_),
+            frameFlashback ? LerpPosition(Vector3::Up, cameraUp, ratio_) : cameraUp);
+
+        if (!recoveryEffect || recoveryEffect->IsPendingDestroy()) { Stop(); return true; }
+        recoveryEffect->transform->localPosition = player->transform->GetWorldPosition();
+        recoveryEffect->transform->MarkDirty();
+        recoveryEffect->UpdateTransform();
+        const auto particles_ = recoveryEffect->GetComponent<ParticleComponent>();
+        const auto light_ = recoveryEffect->GetComponent<LightComponent>();
+        if (reviveFinishedTime < 0.0f && controller_ && controller_->IsReviveAnimationFinished() && fadeAlpha <= 0.0f)
+        {
+            reviveFinishedTime = elapsed;
+            if (particles_ && particles_->IsEnabled())
+            {
+                // 起き上がったら発生を止め、残った粒子の寿命を進めながら外側へ光を散らす。
+                particles_->Stop();
+                particles_->TriggerEmitter("ReviveScatter");
+            }
+        }
+
+        const float disperseTime_ = reviveFinishedTime < 0.0f ? 0.0f : elapsed - reviveFinishedTime;
+        if (light_ && light_->IsEnabled())
+        {
+            light_->intensity = REVIVE_LIGHT_INTENSITY * SmoothRatio(elapsed, 0.5f) *
+                (1.0f - SmoothRatio(disperseTime_, REVIVE_DISPERSE_TIME));
+            light_->Update(presentationDeltaTime_);
+        }
+        if (particles_ && particles_->IsEnabled()) particles_->Update(presentationDeltaTime_);
+        if (reviveFinishedTime >= 0.0f && disperseTime_ >= REVIVE_DISPERSE_TIME && elapsed >= duration_) Stop();
     }
     // 終了フレームも通常のAI更新へ戻さず、起き上がり中に次の行動を開始させない。
     return true;
@@ -262,6 +398,33 @@ void PlayerDeathDirector::BeginRecovery()
     controller_->BeginReviveState();
     phase = Phase::RECOVERING;
     elapsed = 0.0f;
+    reviveFinishedTime = -1.0f;
+
+    recoveryEffect = manager.Create("PlayerReviveEffect");
+    recoveryEffect->saveFlg = false;
+    const auto light_ = recoveryEffect->AddComponent<LightComponent>();
+    light_->type = LightComponent::Type::Point;
+    light_->color = {0.62f, 0.82f, 1.0f};
+    light_->offsetPosition = {0.0f, 1.1f, 0.0f};
+    light_->range = 5.0f;
+    light_->intensity = 0.0f;
+
+    const auto particles_ = recoveryEffect->AddComponent<ParticleComponent>();
+    try
+    {
+        if (particles_->LoadAsset(REVIVE_PARTICLE_PATH) && particles_->HasRuntimeResources())
+        {
+            particles_->PlayEmitter("ReviveSparks");
+            particles_->PlayEmitter("ReviveMist");
+            return;
+        }
+        BS_LOG_WARNING(LOG_CATEGORY::GAME, "Revive particle asset unavailable.");
+    }
+    catch (const std::exception& error_)
+    {
+        BS_LOG_WARNING(LOG_CATEGORY::GAME, std::string("Revive particle load failed: ") + error_.what());
+    }
+    particles_->SetEnabled(false);
 }
 
 void PlayerDeathDirector::Stop()
@@ -269,6 +432,12 @@ void PlayerDeathDirector::Stop()
     BS_PROFILE_SCOPE("PlayerDeathDirector::Stop");
     requestedPlayer.reset();
     if (!active) return;
+    flashbackCaptureAvailable = false;
+    if (recoveryEffect)
+    {
+        manager.Destroy(recoveryEffect);
+        recoveryEffect.reset();
+    }
     AudioManager::Instance().ResetPresentationAudio();
     if (player && !player->IsPendingDestroy())
         if (const auto controller_ = player->GetComponent<PlayerControllerComponent>()) controller_->ResetDeathPresentationState();
@@ -296,6 +465,73 @@ void PlayerDeathDirector::RenderOutput(SpriteRenderSystem& sprites_)
     continueMenu.DrawBackdrop(sprites_,fadeAlpha);
     if (phase != Phase::CONTINUE || elapsed < settings["ContinueDelay"].get<float>()) return;
     continueMenu.Draw(sprites_,"YOU DIED","コンテニュー",true);
+}
+
+void PlayerDeathDirector::CaptureFlashback(ID3D11RenderTargetView* target_)
+{
+    if (!target_ || !active || phase == Phase::RECOVERING || deathFinishedTime < 0.0f || !flashbackCaptureAvailable) return;
+    if (phase == Phase::DYING && elapsed - deathFinishedTime < FLASHBACK_CAMERA_BLEND_TIME) return;
+    BS_PROFILE_SCOPE("PlayerDeathDirector::CaptureFlashback");
+    flashbackCaptureAvailable = false;
+
+    auto& graphics_ = GraphicsDeviceManager::Instance();
+    auto* device_ = graphics_.GetDevice();
+    auto* context_ = graphics_.GetContext();
+    Microsoft::WRL::ComPtr<ID3D11Resource> resource_;
+    target_->GetResource(resource_.GetAddressOf());
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> source_;
+    if (FAILED(resource_.As(&source_))) return;
+
+    D3D11_TEXTURE2D_DESC desc_{};
+    source_->GetDesc(&desc_);
+    // 通常画面とドッキング表示はいずれもRGBA8の最終出力を使う。
+    if (desc_.Format != DXGI_FORMAT_R8G8B8A8_UNORM || desc_.SampleDesc.Count != 1) return;
+    desc_.Usage = D3D11_USAGE_STAGING;
+    desc_.BindFlags = 0;
+    desc_.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+    desc_.MiscFlags = 0;
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> staging_;
+    if (FAILED(device_->CreateTexture2D(&desc_, nullptr, staging_.GetAddressOf()))) return;
+
+    const UINT rowBytes_ = desc_.Width * 4;
+    std::vector<std::uint8_t> pixels_(static_cast<std::size_t>(rowBytes_) * desc_.Height);
+    Microsoft::WRL::ComPtr<ID3D11DepthStencilView> depth_;
+    context_->OMGetRenderTargets(0, nullptr, depth_.GetAddressOf());
+    context_->OMSetRenderTargets(0, nullptr, nullptr);
+    context_->CopyResource(staging_.Get(), source_.Get());
+    context_->OMSetRenderTargets(1, &target_, depth_.Get());
+    D3D11_MAPPED_SUBRESOURCE mapped_{};
+    if (FAILED(context_->Map(staging_.Get(), 0, D3D11_MAP_READ, 0, &mapped_))) return;
+    for (UINT y_ = 0; y_ < desc_.Height; ++y_)
+    {
+        const auto* sourceRow_ = static_cast<const std::uint8_t*>(mapped_.pData) + static_cast<std::size_t>(y_) * mapped_.RowPitch;
+        auto* outputRow_ = pixels_.data() + static_cast<std::size_t>(y_) * rowBytes_;
+        for (UINT x_ = 0; x_ < rowBytes_; x_ += 4)
+        {
+            const auto gray_ = static_cast<std::uint8_t>(
+                (299 * sourceRow_[x_] + 587 * sourceRow_[x_ + 1] + 114 * sourceRow_[x_ + 2] + 500) / 1000);
+            outputRow_[x_] = outputRow_[x_ + 1] = outputRow_[x_ + 2] = gray_;
+            outputRow_[x_ + 3] = 255;
+        }
+    }
+    context_->Unmap(staging_.Get(), 0);
+
+    desc_.Usage = D3D11_USAGE_IMMUTABLE;
+    desc_.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+    desc_.CPUAccessFlags = 0;
+    const D3D11_SUBRESOURCE_DATA data_{pixels_.data(), rowBytes_, 0};
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> texture_;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> view_;
+    if (SUCCEEDED(device_->CreateTexture2D(&desc_, &data_, texture_.GetAddressOf())) &&
+        SUCCEEDED(device_->CreateShaderResourceView(texture_.Get(), nullptr, view_.GetAddressOf())))
+        flashbackTexture = std::move(view_);
+}
+
+void PlayerDeathDirector::ClearDeathHistory()
+{
+    reachedGameOver = false;
+    flashbackCaptureAvailable = true;
+    flashbackTexture.Reset();
 }
 
 void PlayerDeathDirector::DrawSettingsGUI()

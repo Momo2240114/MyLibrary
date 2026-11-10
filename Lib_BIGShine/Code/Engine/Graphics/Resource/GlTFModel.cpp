@@ -24,6 +24,7 @@
 #include <cstdint>
 #include <cstring>
 #include <cstdio>
+#include <utility>
 
 
 const std::vector<D3D11_INPUT_ELEMENT_DESC> GltfModelCommponennt::InputElementDescs =
@@ -458,8 +459,24 @@ bool GltfModelCommponennt::IsModelLoading() const
 	return asyncLoadRequested && !asyncLoadApplied && !modelLoadHandle.IsFailed();
 }
 
+void GltfModelCommponennt::SetPresentationMaterials(std::vector<Material> materials_)
+{
+    if (materials_.size() != meshes.size()) return;
+    presentationMaterials = std::move(materials_);
+    for (std::size_t index_ = 0; index_ < meshes.size(); ++index_)
+        meshes[index_].material = &presentationMaterials[index_];
+}
+
+void GltfModelCommponennt::ClearPresentationMaterials()
+{
+    if (presentationMaterials.empty()) return;
+    for (auto& mesh_ : meshes) mesh_.material = &materials.at(mesh_.materialIndex);
+    presentationMaterials.clear();
+}
+
 void GltfModelCommponennt::RebindInternalPointers()
 {
+    presentationMaterials.clear();
 	// ノードの親子関係を再結線
 	for (size_t nodeIndex = 0; nodeIndex < nodes.size(); ++nodeIndex)
 	{

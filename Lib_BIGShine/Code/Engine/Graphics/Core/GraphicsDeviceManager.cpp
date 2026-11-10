@@ -462,7 +462,7 @@ void GraphicsDeviceManager::OnResize(int newWidth_, int newHeight_)
         return;
     }
 
-    // 追加：リサイズ中は描画を止める or コンテキストをクリア
+    // リサイズ中は描画を止める or コンテキストをクリア
     immediateContext->OMSetRenderTargets(0, nullptr, nullptr);
     immediateContext->ClearState(); // 念のため一度すべて解除
 
@@ -475,7 +475,7 @@ void GraphicsDeviceManager::OnResize(int newWidth_, int newHeight_)
     depthStencilView.Reset();
     depthStencilTexture.Reset(); // 深度テクスチャ自体もリセットが必要
 
-    // --- 【修正】シーン用バッファとブルームもリセット ---
+    // --- シーン用バッファとブルームもリセット ---
     sceneRTV.Reset();
     sceneSRV.Reset();
     sceneViewRTV.Reset();
@@ -583,7 +583,7 @@ void GraphicsDeviceManager::BeginFrame(const float clearColor_[4])
     immediateContext->ClearRenderTargetView(renderTargetView.Get(), clearColor_);
     ClearSceneRenderTargets(clearColor_);
 
-    // --- 変更点：描画先を「シーンバッファ」に固定する ---
+    // --- 描画先を「シーンバッファ」に固定する ---
     // これにより、GameObjectManagerの通常の描画がすべてHDRテクスチャに描き込まれます
     ID3D11RenderTargetView* renderTargets_[] = { sceneRTV.Get(), sceneNormalRTV.Get() };
     immediateContext->OMSetRenderTargets(2, renderTargets_, depthStencilView.Get());
@@ -906,7 +906,7 @@ void GraphicsDeviceManager::DrawPostEffectGuiContent()
             xeGtaoParams = XeGtaoSystem::Parameters{};
         }
     }
-    // --- 【追加】ラジアルブラー設定 ---
+    // --- ラジアルブラー設定 ---
     if (ImGui::CollapsingHeader("Radial Blur", ImGuiTreeNodeFlags_DefaultOpen))
     {
         // 1. ブラー半径 (Blur Radius)
@@ -1113,7 +1113,7 @@ bool GraphicsDeviceManager::CreateDepthStencil()
     texture2dDesc_.SampleDesc.Count = 1;
     texture2dDesc_.SampleDesc.Quality = 0;
     texture2dDesc_.Usage = D3D11_USAGE_DEFAULT;
-    // 重要：深度書き込み用(DS)と、シェーダー読み込み用(SR)の両方を指定
+    // 深度書き込み用(DS)と、シェーダー読み込み用(SR)の両方を指定
     texture2dDesc_.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
     texture2dDesc_.CPUAccessFlags = 0;
     texture2dDesc_.MiscFlags = 0;

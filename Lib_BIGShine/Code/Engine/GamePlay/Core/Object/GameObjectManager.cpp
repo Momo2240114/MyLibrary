@@ -288,6 +288,14 @@ bool GameObjectManager::IsPlayerDeathActive() const
     return playerDeathDirector && playerDeathDirector->IsActive();
 }
 
+bool GameObjectManager::ShouldSimulatePhysics() const
+{
+    return !cinematicPreviewActive && !gameMenuPaused && !IsBossFinishActive() &&
+        !(playerDeathDirector && playerDeathDirector->IsWorldPaused()) && !loadingPresentation &&
+        GetEditorPlayMode() == EditorPlayMode::PLAY && !editorWorkspacePaused &&
+        sceneRuntimeState == SCENE_RUNTIME_STATE::RUNNING;
+}
+
 void GameObjectManager::RequestPlayerDeath(const std::shared_ptr<GameObject>& player_)
 {
     if (playerDeathDirector && !loadingPresentation && GetEditorPlayMode() == EditorPlayMode::PLAY)
@@ -1290,7 +1298,11 @@ void GameObjectManager::Clear(bool rebuildEffectPools_)
         cinematicReplayTarget = -1.0f;
         cinematicPaused = true;
     }
-    if (playerDeathDirector) playerDeathDirector->Stop();
+    if (playerDeathDirector)
+    {
+        playerDeathDirector->Stop();
+        playerDeathDirector->ClearDeathHistory();
+    }
     if (bossFinishDirector) bossFinishDirector->Stop();
     // ロード中の破棄でも、CPU読込の終了を待ってからSceneの所有物を解放する。
     sceneReadRequest.reset();
@@ -1910,10 +1922,13 @@ void GameObjectManager::RenderAll(
     auto deviceContext_ = GraphicsDeviceManager::Instance().GetContext();
     auto& graphicsDeviceManager_ = GraphicsDeviceManager::Instance();
     const bool finishActive_ = bossFinishDirector && bossFinishDirector->IsActive();
+    const bool finishImpactShot_ = finishActive_ && bossFinishDirector->IsBadEndingImpactShot();
     const auto previousBloom_ = graphicsDeviceManager_.GetBloomParams();
     const auto previousFilter_ = graphicsDeviceManager_.GetFilterParams();
     const auto previousRadial_ = graphicsDeviceManager_.GetRadialBlurParams();
     const auto previousMotion_ = graphicsDeviceManager_.GetMotionBlurParams();
+    const auto previousVignette_ = graphicsDeviceManager_.GetVignetteParams();
+    const auto previousGtao_ = graphicsDeviceManager_.GetXeGtaoParams();
     if (finishActive_)
     {
         // 戦闘終了時の残留Blurを撮影へ持ち込まず、描画終了時に共有設定を元へ戻す。
@@ -1922,6 +1937,15 @@ void GameObjectManager::RenderAll(
         graphicsDeviceManager_.GetBloomParams().intensity = 0.3f;
         graphicsDeviceManager_.GetBloomParams().exposure = 1.1f;
         graphicsDeviceManager_.GetFilterParams() = BloomSystem::CbColorFilter{};
+    }
+    if (finishImpactShot_)
+    {
+        // 赤いシルエットと黒背景に、通常画面の色や発光を重ねない。
+        graphicsDeviceManager_.GetBloomParams().enabled = false;
+        graphicsDeviceManager_.GetBloomParams().toneMappingEnabled = false;
+        graphicsDeviceManager_.GetBloomParams().exposure = 1.0f;
+        graphicsDeviceManager_.GetVignetteParams().enabled = false;
+        graphicsDeviceManager_.GetXeGtaoParams().enabled = false;
     }
     // ロード画面と次Sceneが共存しても、PostEffectへ渡す描画Systemは現在のSceneに合わせる。
     // Retryで次Sceneを破棄した後も、破棄済みのMotionVelocity描画Systemを参照させない。
@@ -1936,7 +1960,7 @@ void GameObjectManager::RenderAll(
             const auto component_ = object_->GetComponent<ScenePresentationComponent>();
             if (component_ && component_->IsEnabled() && component_->IsStarted()) { presentation_ = component_; break; }
         }
-    if (presentation_) presentation_->BeginRender();
+    if (presentation_ && !finishImpactShot_) presentation_->BeginRender();
     if (clearSceneRenderTargets_ || finishActive_)
     {
         const auto color_ = finishActive_ ? bossFinishDirector->GetBackgroundColor() : presentation_ ? presentation_->GetClearColor() : DirectX::XMFLOAT4{0.5f,0.5f,0.5f,1.0f};
@@ -1996,7 +2020,7 @@ void GameObjectManager::RenderAll(
         auto decalComponent_ = object_->GetComponent<DecalComponent>();
 
         // デカールの収集
-        if (decalComponent_ && decalComponent_->IsEnabled())
+        if (!finishImpactShot_ && decalComponent_ && decalComponent_->IsEnabled())
         {
             decalComponent_->SubmitDecal(decalManager_);
         }
@@ -2013,8 +2037,8 @@ void GameObjectManager::RenderAll(
             modelSystem_.PushSubmit(modelComponent_->GetShaderID(), modelComponent_);
     }
     RenderContext renderContext_;
-    // とどめ演出も通常のステージと空を背景に描画する。
-    renderContext_.suppressSkybox = false;
+    // 貫通カットだけ空を外し、黒背景にシルエットを重ねる。
+    renderContext_.suppressSkybox = finishImpactShot_;
 
     renderContext_.device = GraphicsDeviceManager::Instance().GetDevice();
     renderContext_.deviceContext = deviceContext_;
@@ -2121,9 +2145,17 @@ void GameObjectManager::RenderAll(
         graphicsDeviceManager_.GetFilterParams() = previousFilter_;
         graphicsDeviceManager_.GetRadialBlurParams() = previousRadial_;
         graphicsDeviceManager_.GetMotionBlurParams() = previousMotion_;
+        if (finishImpactShot_)
+        {
+            graphicsDeviceManager_.GetVignetteParams() = previousVignette_;
+            graphicsDeviceManager_.GetXeGtaoParams() = previousGtao_;
+        }
         if (presentation_) presentation_->EndRender();
         return;
     }
+
+    // フラッシュバックには、戦闘HUDや死亡暗転を重ねる前の3D画面を使う。
+    if (!overrideCamera_ && playerDeathDirector) playerDeathDirector->CaptureFlashback(finalRTV_);
 
     // SpriteRenderSubmit
     for (auto& object_ : objects)

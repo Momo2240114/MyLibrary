@@ -61,18 +61,28 @@ void BossFinishWindow::Draw()
             ImGui::BeginDisabled(production_);
             if (ImGui::Button("Play / Restart")) { director_->Stop(); director_->Begin(true); }
             ImGui::SameLine();
+            if (ImGui::Button("Play Bad Ending")) { director_->Stop(); director_->Begin(true, BossFinishDirector::Ending::BAD_END); }
+            ImGui::SameLine();
             if (ImGui::Button("Stop + Restore")) director_->Stop();
             ImGui::SameLine();
-            if (ImGui::Button(director_->IsPaused() ? "Resume" : "Pause")) director_->SetPaused(!director_->IsPaused());
+            const bool badEnding_ = director_->IsBadEnding();
+            const float end_ = badEnding_ ? director_->GetPreviewEndTime(BossFinishDirector::Ending::BAD_END) : director_->GetCaptureTime() + 5.0f;
+            if (badEnding_ && director_->IsPreview() && director_->GetTime() >= end_) director_->SetPaused(true);
+            if (ImGui::Button(director_->IsPaused() ? "Resume" : "Pause"))
+            {
+                if (badEnding_ && director_->GetTime() >= end_) director_->Seek(0.0f);
+                director_->SetPaused(!director_->IsPaused());
+            }
+            ImGui::BeginDisabled(badEnding_);
             if (ImGui::Button("Before Capture"))
             {
                 if (!director_->IsActive()) director_->Begin(true);
-                director_->Seek(director_->GetCaptureTime() + director_->GetSettings().value("HitStop",0.16f) - 1.0f/60.0f);
+                director_->Seek(director_->GetEndingBranchTime() - 1.0f/60.0f);
             }
             ImGui::SameLine();
             if (ImGui::Button("Step 1/60")) director_->Seek(director_->GetTime() + 1.0f/60.0f);
             float time_ = director_->GetTime();
-            if (ImGui::SliderFloat("Timeline", &time_, 0, director_->GetCaptureTime()+5)) director_->Seek(time_);
+            if (ImGui::SliderFloat("Timeline", &time_, 0, end_)) director_->Seek(time_);
             if (ImGui::Button("Recapture")) director_->RequestCapture();
             ImGui::SameLine();
             bool fixed_ = director_->IsShowingFixed();
@@ -84,6 +94,7 @@ void BossFinishWindow::Draw()
                 ImGui::Image((ImTextureID)(intptr_t)texture_, {width_,width_/director_->GetAspect()}, {uv_.x,uv_.y}, {uv_.z,uv_.w});
             }
             if (ImGui::Button("Camera from Editor")) director_->CaptureEditorCamera();
+            ImGui::EndDisabled();
             if (ImGui::Button("Save Preset")) director_->Save();
             ImGui::SameLine();
             if (ImGui::Button("Load Preset")) { director_->Stop(); director_->Load(); }

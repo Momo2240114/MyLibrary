@@ -1,7 +1,9 @@
 #include "PrecompiledHeader.h"
 #include "BossFinishDirector.h"
 #include "GameModeManager.h"
+#include "PlayerDeathDirector.h"
 #include "Engine/GamePlay/Graphics/ModelDissolveComponent.h"
+#include "Engine/GamePlay/Graphics/ModelMaterialComponent.h"
 #include "Engine/Common/DebugLog.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/GamePlay/Camera/CameraManager.h"
@@ -11,10 +13,14 @@
 #include "Engine/GamePlay/System/TimeManager.h"
 #include "Engine/GamePlay/Combat/HealthComponent.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
+#include "Engine/Graphics/Core/CPUResourceLoader.h"
 #include "Engine/Graphics/RenderSystem/SpriteRenderSystem.h"
 #include "Engine/Graphics/Particle/ParticleComponent.h"
 #include "Engine/Graphics/VFX/MeshVFXComponent.h"
+#include "Engine/Graphics/VFX/MaterialOverlayComponent.h"
 #include "Engine/UI/UITextComponent.h"
+#include "Engine/UI/UIVisualEffectComponent.h"
+#include "Engine/UI/TextureMaskTransition.h"
 #include "Engine/Audio/AudioManager.h"
 #include "Engine/Math/Curve/CurveTrack.h"
 #include "Engine/Platform/WindowsDialogHelper.h"
@@ -27,6 +33,29 @@ namespace
 {
     constexpr const char* PRESET_PATH = "Data/Presentation/AnathemaBossFinish.json";
     constexpr float FIXED_STEP = 1.0f / 60.0f;
+    constexpr float BAD_END_COUNTER = 0.95f;
+    constexpr float BAD_END_FLASHBACK = 1.25f;
+    constexpr float BAD_END_FLASHBACK_DURATION = 1.0f;
+    constexpr float BAD_END_KNEEL = BAD_END_FLASHBACK + BAD_END_FLASHBACK_DURATION;
+    constexpr float BAD_END_PIERCE = BAD_END_KNEEL + 1.28f;
+    constexpr float BAD_END_PIERCE_CUE = 0.37f;
+    constexpr float BAD_END_IMPACT_HOLD = 0.16f;
+    constexpr float BAD_END_FALL = BAD_END_PIERCE + 2.29f;
+    constexpr float BAD_END_RISE = BAD_END_FALL + 1.74f;
+    constexpr float BAD_END_WIPE = BAD_END_RISE + 3.0f;
+    constexpr float BAD_END_COVERED = BAD_END_WIPE + 1.32f;
+    constexpr float BAD_END_FINISH = BAD_END_COVERED + 0.55f;
+    constexpr DirectX::XMFLOAT4 BAD_END_RED{1.0f, 0.0f, 0.0f, 1.0f};
+    constexpr DirectX::XMFLOAT4 BAD_END_MUD{0.1f, 0.025f, 0.032f, 1.0f};
+    constexpr const char* BAD_END_MUD_TEXTURE = "Data/Texture/Particle/TransitionViscousMud.png";
+    constexpr const char* BAD_END_EQUIPMENT_TEXTURE = "Data/Texture/VFX/T_Free_Magic_Noise2.PNG";
+    constexpr const char* BAD_END_HAIR_TEXTURE = "Data/Model/Material/BadEndHiar.png";
+
+    float ShotProgress(float time_, float start_, float end_)
+    {
+        const float rate_ = std::clamp((time_ - start_) / (end_ - start_), 0.0f, 1.0f);
+        return rate_ * rate_ * (3.0f - 2.0f * rate_);
+    }
 
     DirectX::XMFLOAT3 ReadPosition(const nlohmann::json& json_)
     {
@@ -284,7 +313,10 @@ BossFinishDirector::PreviewActorInfo BossFinishDirector::GetPreviewActorInfo(boo
     info_.sampleTime = actor_.animator.GetCurrentFadeTime();
     return info_;
 }
-DirectX::XMFLOAT4 BossFinishDirector::GetBackgroundColor() const { return ReadColor(settings.at("Background")); }
+DirectX::XMFLOAT4 BossFinishDirector::GetBackgroundColor() const
+{
+    return IsBadEndingImpactShot() ? DirectX::XMFLOAT4{0,0,0,1} : ReadColor(settings.at("Background"));
+}
 
 void BossFinishDirector::Normalize()
 {
@@ -464,32 +496,10 @@ void BossFinishDirector::PrepareActor(ActorPose& actor_, const char* key_)
         nlohmann::json data_;
         if (!file_) throw std::runtime_error("animation file missing");
         file_ >> data_;
-        actor_.state = data_.at("State").get<AnimState>();
-        const auto model_ = actor_.object ? actor_.object->GetComponent<GltfModelCommponennt>() : nullptr;
-        // モデルごとの並び順に依存せず、指定されたクリップ名を優先して解決する。
-        if (model_ && config_.contains("Animation"))
-        {
-            actor_.state.animationIndex = -1;
-            const auto& animations_ = model_->GetAnimations();
-            for (std::size_t index_ = 0; index_ < animations_.size(); ++index_)
-                if (animations_[index_].name == config_.at("Animation").get<std::string>())
-                { actor_.state.animationIndex = static_cast<int>(index_); break; }
-            actor_.state.name = config_.at("Animation").get<std::string>();
-        }
-        if (!model_ || !model_->IsModelReady() || actor_.state.animationIndex < 0 ||
-            actor_.state.animationIndex >= static_cast<int>(model_->GetAnimations().size()))
-            throw std::runtime_error("actor or animation index unavailable");
-        // 演出専用のポーズ評価では、戦闘イベントによるダメージやVFXの二重生成を防ぐ。
-        actor_.state.events.clear();
-        actor_.state.isLoop = config_.value("Loop", false);
-        actor_.state.playbackSpeed = 0.0f;
-        actor_.state.rootMotion.enable = false;
-        actor_.state.rootMotion.cutVisualWhenDisabled = true;
-        actor_.state.rootMotion.cutVisualPositionX = true;
-        actor_.state.rootMotion.cutVisualPositionZ = true;
-        actor_.animator = ModelAnimator{};
-        actor_.animator.CrossFadeTo(&actor_.state, 0.0f);
-        actor_.ready = true;
+        PrepareActor(actor_, actor_.object, data_.at("State").get<AnimState>(),
+            config_.value("Animation", std::string()), config_.value("Loop", false));
+        if (!actor_.ready) throw std::runtime_error("actor or animation index unavailable");
+        const auto model_ = actor_.object->GetComponent<GltfModelCommponennt>();
         model_->SetRuntimeVisible(true);
         SampleActor(actor_, 0.0f);
     }
@@ -498,6 +508,38 @@ void BossFinishDirector::PrepareActor(ActorPose& actor_, const char* key_)
         status = std::string("Finish actor fallback (") + key_ + "): " + error_.what();
         BS_LOG_INFO(LOG_CATEGORY::GAME, status);
     }
+}
+
+void BossFinishDirector::PrepareActor(ActorPose& actor_, const std::shared_ptr<GameObject>& object_,
+    AnimState state_, const std::string& animation_, bool loop_)
+{
+    actor_.object = object_;
+    actor_.ready = false;
+    actor_.hasRootReference = false;
+    const auto model_ = object_ ? object_->GetComponent<GltfModelCommponennt>() : nullptr;
+    if (!model_ || !model_->IsModelReady()) return;
+    const auto& animations_ = model_->GetAnimations();
+    if (!animation_.empty())
+    {
+        const auto found_ = std::find_if(animations_.begin(), animations_.end(),
+            [&](const auto& clip_) { return clip_.name == animation_; });
+        if (found_ == animations_.end()) return;
+        state_.animationIndex = static_cast<int>(found_ - animations_.begin());
+        state_.name = animation_;
+    }
+    if (state_.animationIndex < 0 || state_.animationIndex >= static_cast<int>(animations_.size())) return;
+    // 専用Animatorから戦闘イベントを実行せず、必要なクリップだけ姿勢を評価する。
+    state_.events.clear();
+    state_.isLoop = loop_;
+    state_.playbackSpeed = 0.0f;
+    state_.rootMotion.enable = false;
+    state_.rootMotion.cutVisualWhenDisabled = actor_.constrainHorizontal;
+    state_.rootMotion.cutVisualPositionX = actor_.constrainHorizontal;
+    state_.rootMotion.cutVisualPositionZ = actor_.constrainHorizontal;
+    actor_.state = std::move(state_);
+    actor_.animator = ModelAnimator{};
+    actor_.animator.CrossFadeTo(&actor_.state, 0.0f);
+    actor_.ready = true;
 }
 
 void BossFinishDirector::SampleActor(ActorPose& actor_, float time_)
@@ -511,7 +553,7 @@ void BossFinishDirector::SampleActor(ActorPose& actor_, float time_)
     actor_.animator.Update(0.0f, model_.get(), nullptr);
     auto poses_ = actor_.animator.GetCurrentPose();
     // SetCurrentTimeでAnimatorのRootMotion基準が初期化されるため、演出側の固定基準で補正する。
-    ConstrainActorPose(actor_, poses_);
+    if (actor_.constrainHorizontal) ConstrainActorPose(actor_, poses_);
     model_->SetNodePoses(poses_);
     model_->UpdateTransform();
 }
@@ -578,7 +620,7 @@ void BossFinishDirector::BlendExecutionPose(ActorPose& source_, ActorPose& execu
     model_->UpdateTransform();
 }
 
-void BossFinishDirector::Begin(bool preview_)
+void BossFinishDirector::Begin(bool preview_, Ending previewEnding_)
 {
     BS_PROFILE_SCOPE("BossFinishDirector::Begin");
     if (active) return;
@@ -592,12 +634,15 @@ void BossFinishDirector::Begin(bool preview_)
     previewPlaybackRate = 1.0f;
     impactReady = false; impactConfirmed = false; completionCommitted = false;
     finishAuthorized = false;
+    ending = preview ? previewEnding_ : Ending::TRUE_END;
     if (!preview) previousBgmVolumes = AudioManager::Instance().CaptureBgmVolumes();
     if (auto mode_ = manager.GetGameModeManager())
     {
         // BOSS_DEFEATEDへ到達した時点で戦闘側の有効打は受付済み。
         // 演出用クリップの準備状態を、もう一度撃破を要求する条件にはしない。
         finishAuthorized = !preview && mode_->GetCurrentGameState() == GameProgressState::BOSS_DEFEATED;
+        if (const auto death_ = manager.GetPlayerDeathDirector(); finishAuthorized && death_ && death_->HasReachedGameOver())
+            ending = Ending::BAD_END;
         previousPlayerLock = mode_->IsPlayerControlLocked(); previousAILock = mode_->IsEnemyAILocked();
         previousPresentation = mode_->IsPresentationPlaying(); previousGameplayLock = mode_->IsGameplayLocked();
         mode_->SetPlayerControlLocked(true); mode_->SetEnemyAILocked(true);
@@ -627,10 +672,35 @@ void BossFinishDirector::Begin(bool preview_)
     PrepareSprites(); CreateEffects(); Evaluate(0.0f, 0.0f);
 }
 
+void BossFinishDirector::ResetBadEnding()
+{
+    if (badEndingTime < 0.0f) return;
+    if (const auto model_ = player.object ? player.object->GetComponent<GltfModelCommponennt>() : nullptr)
+        model_->SetRuntimeSilhouette(previousSilhouette, previousSilhouetteColor);
+    for (const auto& state_ : badEndingMaterialStates)
+        if (const auto component_ = state_.first.lock()) component_->SetRuntimeSuppressed(state_.second);
+    for (const auto& saved_ : savedActors)
+        if (const auto model_ = saved_.object->GetComponent<GltfModelCommponennt>()) model_->ClearPresentationMaterials();
+    badEndingMaterialStates.clear();
+    badEndingTime = -1.0f;
+    badEndingCounter.object.reset();
+    badEndingKneel.object.reset();
+    badEndingPierced.object.reset();
+    badEndingRise.object.reset();
+    badEndingMud.reset();
+    badEndingSpear.reset();
+    badEndingParticles.reset();
+    flashbackSprite.reset();
+    badEndingWipe.reset();
+    effects.clear();
+}
+
 void BossFinishDirector::Stop()
 {
     BS_PROFILE_SCOPE("BossFinishDirector::Stop");
     if (!active) return;
+    ResetBadEnding();
+    ending = Ending::TRUE_END;
     for (auto& saved_ : savedActors)
     {
         if (!saved_.object || saved_.object->IsPendingDestroy()) continue;
@@ -829,6 +899,352 @@ void BossFinishDirector::AdvanceEffects(float from_, float to_)
     }
 }
 
+float BossFinishDirector::GetEndingBranchTime() const
+{
+    return GetCaptureTime() + settings.value("HitStop", 0.16f);
+}
+
+float BossFinishDirector::GetPreviewEndTime(Ending ending_) const
+{
+    return GetEndingBranchTime() + (ending_ == Ending::BAD_END ?
+        BAD_END_FINISH : settings.value("PromptDelay", 2.8f) + 1.0f);
+}
+
+std::span<const BossFinishDirector::EndingCue> BossFinishDirector::GetBadEndingCues() const
+{
+    static constexpr EndingCue CUES[] = {
+        {"Mud approach / Counter", 0.0f, BAD_END_FLASHBACK},
+        {"Flashback", BAD_END_FLASHBACK, BAD_END_KNEEL},
+        {"Kneel", BAD_END_KNEEL, BAD_END_PIERCE},
+        {"Spear / Impact", BAD_END_PIERCE, BAD_END_PIERCE + BAD_END_IMPACT_HOLD},
+        {"Fall", BAD_END_PIERCE + BAD_END_IMPACT_HOLD, BAD_END_FALL},
+        {"Mud gathers", BAD_END_FALL, BAD_END_RISE},
+        {"BadEndPlayer rises", BAD_END_RISE, BAD_END_WIPE},
+        {"Mud wipe / Blackout", BAD_END_WIPE, BAD_END_FINISH}
+    };
+    return CUES;
+}
+
+bool BossFinishDirector::IsBadEndingImpactShot() const
+{
+    return badEndingTime >= BAD_END_PIERCE && badEndingTime < BAD_END_PIERCE + BAD_END_IMPACT_HOLD;
+}
+
+void BossFinishDirector::BeginBadEnding()
+{
+    BS_PROFILE_SCOPE("BossFinishDirector::BeginBadEnding");
+    badEndingPosition = player.object ? player.object->transform->GetWorldPosition() : GetStageAnchor();
+    badEndingFallPosition = badEndingPosition;
+    badEndingCameraEye = camera->GetEye();
+    badEndingCameraFocus = camera->GetFocus();
+    badEndingPierced.constrainHorizontal = false;
+    PrepareActor(badEndingCounter, player.object, {}, "Combo_Attack_01_01_Seq", false);
+    PrepareActor(badEndingKneel, player.object, {}, "Knock_Down_Combat_Start_Seq", false);
+    PrepareActor(badEndingPierced, player.object, {}, "Execution_Target_01_Seq", false);
+    PrepareActor(badEndingRise, player.object, {}, "Get_Up_Combat_Seq", false);
+    if (const auto model_ = player.object ? player.object->GetComponent<GltfModelCommponennt>() : nullptr)
+    {
+        previousSilhouette = model_->HasRuntimeSilhouette();
+        previousSilhouetteColor = model_->GetRuntimeSilhouetteColor();
+    }
+
+    effects.clear();
+    badEndingMud = MakeObject("BadEndingMudPool");
+    badEndingParticles = MakeObject("BadEndingMudParticles");
+    badEndingSpear = MakeObject("BadEndingSpear");
+    effects = {badEndingMud, badEndingParticles, badEndingSpear};
+    for (const auto& effect_ : effects) effect_->SetManager(&manager);
+    const auto mud_ = badEndingMud->AddComponent<MeshVFXComponent>();
+    const auto particles_ = badEndingParticles->AddComponent<ParticleComponent>();
+    const auto spear_ = badEndingSpear->AddComponent<MeshVFXComponent>();
+    try
+    {
+        if (mud_->LoadAsset("Data/VFX/TransitionMudPool.json"))
+        {
+            for (auto& part_ : mud_->GetAsset().parts)
+            {
+                part_.renderEnabled = true;
+                part_.animateScale = false;
+                part_.animateAlpha = false;
+                part_.position.x *= 0.48f;
+                part_.position.z *= 0.48f;
+            }
+            mud_->Play();
+        }
+        if (particles_->LoadAsset("Data/Particle/TransitionMudVortex.json"))
+        {
+            for (auto& track_ : particles_->GetTracks())
+            {
+                track_.settings.shapeSize = {4.0f, 2.8f, 4.0f, 0.0f};
+                track_.settings.emissionSize = {0.55f, 0.28f};
+                track_.settings.orbitVelocity *= 0.4f;
+            }
+            particles_->Play();
+        }
+    }
+    catch (const std::exception& error_)
+    {
+        BS_LOG_WARNING(LOG_CATEGORY::GAME, std::string("Bad ending mud effect: ") + error_.what());
+    }
+    MeshVFXAsset spearAsset_;
+    auto& spearPart_ = spearAsset_.parts.emplace_back();
+    spearPart_.modelPath = "__InternalMeshCone__";
+    spearPart_.meshIndex = 0;
+    spearPart_.renderEnabled = true;
+    spearPart_.shapeCylinderRadius = 0.26f;
+    spearPart_.internalMeshSettings.coneTipRadiusRate = 0.015f;
+    spearPart_.internalMeshSettings.coneLength = 1.0f;
+    spearPart_.internalMeshSettings.segments = 14;
+    spearPart_.useMaterialBaseTexture = false;
+    spearPart_.useMaterialNormalTexture = false;
+    spearPart_.emissiveStrength = 0.0f;
+    spearPart_.emissivePulseAmount = 0.0f;
+    spear_->SetAsset(spearAsset_);
+    spear_->Play();
+    if (const auto death_ = manager.GetPlayerDeathDirector(); death_ && death_->GetFlashbackTexture())
+    {
+        Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> view_ = death_->GetFlashbackTexture();
+        Microsoft::WRL::ComPtr<ID3D11Resource> resource_;
+        Microsoft::WRL::ComPtr<ID3D11Texture2D> texture_;
+        view_->GetResource(resource_.GetAddressOf());
+        if (SUCCEEDED(resource_.As(&texture_)))
+        {
+            D3D11_TEXTURE2D_DESC desc_{};
+            texture_->GetDesc(&desc_);
+            flashbackSprite = MakeObject("BadEndingFlashback");
+            const auto sprite_ = flashbackSprite->AddComponent<SpriteRenderer>();
+            sprite_->Deserialize({{"SdrTexture", true}, {"LinearSampling", true}});
+            sprite_->SetPivot(PosOfsset::TOP_L);
+            sprite_->SetTextureResource(view_, desc_);
+            // 描画専用SpriteはSceneに所属しないため、Managerを参照する通常のStartを通さない。
+            const auto blur_ = flashbackSprite->AddComponent<UIVisualEffectComponent>(false);
+            blur_->Deserialize({{"Settings", {{"BlurRadius", 7.0f}}}});
+            blur_->SetStarted(true);
+            blur_->SetProgress(1.0f);
+        }
+    }
+
+    badEndingWipe = std::make_unique<TextureMaskTransition>();
+    TransitionParameters wipe_;
+    wipe_.type = TransitionType::TEXTURE_MASK;
+    wipe_.color = {0.025f, 0.008f, 0.012f, 1.0f};
+    wipe_.edgeColor = {0.19f, 0.04f, 0.048f, 0.82f};
+    wipe_.edgeWidth = 0.065f;
+    wipe_.softness = 0.025f;
+    wipe_.glowIntensity = 0.7f;
+    wipe_.direction = {-0.18f, -1.0f};
+    wipe_.effectSettings = {{"Texture", BAD_END_MUD_TEXTURE}, {"MaskMode", 1}, {"Channel", 4},
+        {"SurfaceStrength", 0.92f}, {"ScrollY", 0.28f}};
+    badEndingWipe->SetParameters(wipe_);
+    if (!badEndingWipe->Initialize()) badEndingWipe.reset();
+}
+
+void BossFinishDirector::ApplyBadEndingMaterials()
+{
+    BS_PROFILE_SCOPE("BossFinishDirector::ApplyBadEndingMaterials");
+    const auto bossModel_ = boss.object ? boss.object->GetComponent<GltfModelCommponennt>() : nullptr;
+    const auto bossMaterials_ = boss.object ? boss.object->GetComponent<ModelMaterialComponent>() : nullptr;
+    if (bossMaterials_ && bossMaterials_->IsEnabled()) bossMaterials_->UpdateLoadState();
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> hair_;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> mud_;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> matte_;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> flatNormal_;
+    auto* device_ = GraphicsDeviceManager::Instance().GetDevice();
+    CPUResourceLoader::LoadTextureFromFile(device_, WindowsDialogHelper::Utf8ToPath(BAD_END_HAIR_TEXTURE).c_str(), hair_.GetAddressOf());
+    CPUResourceLoader::LoadTextureFromFile(device_, WindowsDialogHelper::Utf8ToPath(BAD_END_EQUIPMENT_TEXTURE).c_str(), mud_.GetAddressOf());
+    CPUResourceLoader::CreateDummyTexture(device_, 0xFF00FF00, matte_.GetAddressOf());
+    CPUResourceLoader::CreateDummyTexture(device_, 0xFFFF8080, flatNormal_.GetAddressOf());
+    using Slot = ModelMaterial::TextureSlot;
+    for (const auto& object_ : {player.object, manager.Find(settings["Player"].value("WeaponObject", std::string("Weapon"))), manager.Find("Shield")})
+    {
+        const auto model_ = object_ ? object_->GetComponent<GltfModelCommponennt>() : nullptr;
+        if (!model_ || !model_->IsModelReady()) continue;
+        const auto& meshes_ = model_->GetMeshes();
+        if (std::any_of(meshes_.begin(), meshes_.end(), [](const auto& mesh_) { return !mesh_.material; })) continue;
+        for (const auto& component_ : {std::static_pointer_cast<Component>(object_->GetComponent<ModelMaterialComponent>()),
+            std::static_pointer_cast<Component>(object_->GetComponent<MaterialOverlayComponent>())})
+        {
+            if (!component_) continue;
+            badEndingMaterialStates.emplace_back(component_, component_->IsRuntimeSuppressed());
+            component_->SetRuntimeSuppressed(true);
+        }
+        const bool equipment_ = object_ != player.object;
+        std::vector<GltfModelCommponennt::Material> materials_;
+        materials_.reserve(meshes_.size());
+        for (std::size_t index_ = 0; index_ < meshes_.size(); ++index_)
+        {
+            const auto& mesh_ = meshes_[index_];
+            auto& material_ = materials_.emplace_back(*mesh_.material);
+            const bool isHair_ = material_.name.find("Hair") != std::string::npos;
+            if (isHair_ && !equipment_)
+            {
+                if (hair_) material_.baseMap = hair_;
+            }
+            else if (!equipment_ && bossModel_ && index_ < bossModel_->GetMeshes().size() &&
+                bossModel_->GetMeshes()[index_].material &&
+                bossModel_->GetMeshes()[index_].material->name == material_.name)
+            {
+                const auto& bossMesh_ = bossModel_->GetMeshes()[index_];
+                material_ = *bossMesh_.material;
+                // 敵のメッシュ単位の上書きも引き継ぎ、同じ材質の別パーツを一律の色にしない。
+                if (bossMaterials_ && bossMaterials_->IsEnabled())
+                {
+                    const auto copy_ = [&](Slot slot_, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& map_)
+                    {
+                        map_ = bossMaterials_->ResolveTexture(bossMesh_.materialIndex, slot_, map_.Get(), static_cast<int>(index_));
+                    };
+                    copy_(Slot::BASE_COLOR, material_.baseMap);
+                    copy_(Slot::NORMAL, material_.normalMap);
+                    copy_(Slot::EMISSIVE, material_.emissiveMap);
+                    copy_(Slot::OCCLUSION, material_.occlusionMap);
+                    copy_(Slot::METALNESS_ROUGHNESS, material_.metalnessRoughnessMap);
+                }
+            }
+            else
+            {
+                if (mud_) material_.baseMap = mud_;
+                material_.baseColor = {0.16f, 0.045f, 0.055f, 1.0f};
+                material_.metalness = 0.0f;
+                material_.roughness = 1.0f;
+                material_.occlusionStrength = 0.0f;
+                material_.specularStrength = 0.0f;
+                material_.rimStrength = 0.0f;
+                material_.emissiveColor = {0,0,0};
+                if (matte_) material_.metalnessRoughnessMap = matte_;
+                if (flatNormal_) material_.normalMap = flatNormal_;
+                material_.emissiveMap.Reset();
+                material_.occlusionMap.Reset();
+                material_.alphaMode = GltfModelCommponennt::AlphaMode::Opaque;
+            }
+        }
+        model_->SetPresentationMaterials(std::move(materials_));
+    }
+}
+
+void BossFinishDirector::UpdateBadEnding(float previousTime_, float time_)
+{
+    BS_PROFILE_SCOPE("BossFinishDirector::UpdateBadEnding");
+    badEndingTime = time_;
+    const float yaw_ = settings["Player"].value("Yaw", 0.0f);
+    const float radians_ = DirectX::XMConvertToRadians(yaw_);
+    const auto offset_ = [&](float x_, float y_, float z_)
+    {
+        return Vector3{x_ * std::cos(radians_) + z_ * std::sin(radians_), y_,
+            z_ * std::cos(radians_) - x_ * std::sin(radians_)};
+    };
+    const auto crossed_ = [&](float cue_) { return previousTime_ < cue_ && time_ >= cue_; };
+    const Vector3 playerPosition_{badEndingPosition};
+    const float turn_ = ShotProgress(time_, BAD_END_COUNTER - 0.2f, BAD_END_FLASHBACK);
+    const float hitAge_ = time_ - BAD_END_PIERCE;
+    const float afterHold_ = (std::max)(0.0f, hitAge_ - BAD_END_IMPACT_HOLD);
+    const bool impactShot_ = IsBadEndingImpactShot();
+    const bool emerging_ = time_ >= BAD_END_RISE;
+    const float emerge_ = ShotProgress(time_, BAD_END_RISE, BAD_END_RISE + 1.35f);
+    if (crossed_(BAD_END_RISE)) ApplyBadEndingMaterials();
+
+    if (time_ < BAD_END_FALL || emerging_)
+    {
+        auto position_ = emerging_ ? Vector3{badEndingFallPosition} : playerPosition_;
+        if (emerging_) position_.y -= 0.57f * (1.0f - emerge_);
+        else if (hitAge_ >= 0.0f) position_.y -= 0.66f * (1.0f - ShotProgress(afterHold_, 0.0f, 0.48f));
+        PlaceActor(player.object, position_, yaw_ + 180.0f * turn_);
+        if (emerging_) SampleActor(badEndingRise, (time_ - BAD_END_RISE) * 1.18f);
+        else if (hitAge_ >= 0.0f) SampleActor(badEndingPierced, BAD_END_PIERCE_CUE + afterHold_);
+        else if (time_ >= BAD_END_KNEEL) SampleActor(badEndingKneel, time_ - BAD_END_KNEEL);
+        else if (time_ >= BAD_END_COUNTER + 0.12f) SampleActor(badEndingCounter, time_ - BAD_END_COUNTER - 0.12f);
+        else if (time_ >= BAD_END_COUNTER)
+            BlendExecutionPose(playerExecution, badEndingCounter,
+                GetCaptureTime() - settings["ExecutionStart"].get<float>(),
+                (time_ - BAD_END_COUNTER) / 0.12f);
+    }
+    if (time_ >= BAD_END_FALL - 0.45f && (time_ < BAD_END_FALL || crossed_(BAD_END_FALL)))
+    {
+        if (crossed_(BAD_END_FALL)) SampleActor(badEndingPierced, BAD_END_PIERCE_CUE + afterHold_);
+        auto fallPosition_ = badEndingPosition;
+        ReadNodePosition(player.object, "pelvis", fallPosition_);
+        badEndingFallPosition = {fallPosition_.x, badEndingPosition.y, fallPosition_.z};
+    }
+    if (const auto model_ = player.object ? player.object->GetComponent<GltfModelCommponennt>() : nullptr)
+    {
+        model_->SetRuntimeSilhouette(impactShot_ || previousSilhouette, impactShot_ ? BAD_END_RED : previousSilhouetteColor);
+        if (time_ < BAD_END_COUNTER) model_->UpdateTransform();
+    }
+
+    for (const auto& name_ : {settings["Player"].value("WeaponObject", std::string("Weapon")), std::string("Shield")})
+    {
+        const auto object_ = manager.Find(name_);
+        if (!object_) continue;
+        if (const auto attachment_ = object_->GetComponent<ModelAttachmentComponent>()) attachment_->SyncAttachment();
+        object_->transform->UpdateWorldMatrix();
+        if (const auto model_ = object_->GetComponent<GltfModelCommponennt>()) model_->UpdateTransform();
+    }
+
+    if (hitAge_ < 0.0f || crossed_(BAD_END_PIERCE))
+    {
+        badEndingSpearContact = playerPosition_ + offset_(0.0f, 0.85f, 0.0f);
+        ReadNodePosition(player.object, "spine_02", badEndingSpearContact);
+    }
+    const float thrust_ = ShotProgress(time_, BAD_END_PIERCE - 0.22f, BAD_END_PIERCE);
+    const float retract_ = ShotProgress(afterHold_, 0.25f, 0.78f);
+    auto* spear_ = badEndingSpear->GetComponent<MeshVFXComponent>().get();
+    spear_->SetRuntimeSuppressed(time_ < BAD_END_PIERCE - 0.22f || retract_ >= 1.0f);
+    // 円錐の先端はローカル原点にあるので、胸を通過する位置まで先端を動かす。
+    const Vector3 spearTip_ = Vector3{badEndingSpearContact} +
+        offset_(0.0f, 0.04f, std::lerp(-2.0f, 1.35f, thrust_) - retract_ * 2.1f);
+    PlaceActor(badEndingSpear, spearTip_, yaw_ + 180.0f);
+    const auto spearColor_ = impactShot_ ? BAD_END_RED : DirectX::XMFLOAT4{0.24f,0.045f,0.068f,1.0f};
+    spear_->SetRuntimeAppearance({1, 1, std::lerp(0.5f, 3.4f, thrust_) * (1.0f - retract_)}, spearColor_, spearColor_);
+
+    const float approach_ = ShotProgress(time_, 0.0f, BAD_END_PIERCE - 0.2f);
+    const float gather_ = ShotProgress(time_, BAD_END_FALL - 0.15f, BAD_END_RISE + 0.25f);
+    const Vector3 mudPosition_ = Vector3::Lerp(playerPosition_ + offset_(0, 0, std::lerp(-6.3f, -1.35f, approach_)),
+        Vector3{badEndingFallPosition}, gather_);
+    PlaceActor(badEndingMud, mudPosition_, yaw_);
+    PlaceActor(badEndingParticles, mudPosition_ + offset_(0, 0.45f * emerge_, 0), yaw_);
+    const auto mud_ = badEndingMud->GetComponent<MeshVFXComponent>();
+    const auto particles_ = badEndingParticles->GetComponent<ParticleComponent>();
+    const float step_ = (std::max)(0.0f, time_ - (std::max)(previousTime_, 0.0f));
+    const float spread_ = 0.15f + 0.24f * approach_ + 0.34f * gather_;
+    mud_->SetRuntimeAppearance({spread_, 1.0f, spread_}, BAD_END_MUD, BAD_END_MUD);
+    mud_->SetRuntimeSuppressed(impactShot_);
+    particles_->SetRuntimeSuppressed(impactShot_);
+    particles_->SetEmissionScale(0.85f + 0.7f * approach_ + 1.3f * gather_);
+    for (auto& track_ : particles_->GetTracks())
+        track_.settings.targetPosition = {mudPosition_.x, mudPosition_.y + 0.45f + emerge_ * 0.85f, mudPosition_.z, 1.0f};
+    if (step_ > 0.0f && !impactShot_)
+    {
+        mud_->Update(step_);
+        particles_->Update(step_);
+    }
+
+    if (!preview)
+    {
+        auto& audio_ = AudioManager::Instance();
+        if (crossed_(0.1f)) audio_.PlaySEByPath("Data/Audio/SE/Sonniss/Shadow/TentacleMotion.wav");
+        if (crossed_(BAD_END_FLASHBACK)) audio_.PlaySEByPath("Data/Audio/SE/Sonniss/Presentation/RattlingDowner.wav");
+        if (crossed_(BAD_END_PIERCE)) audio_.PlaySEByPath("Data/Audio/SE/Sonniss/Mud/SplatHit.wav");
+        if (crossed_(BAD_END_FALL + 0.22f)) audio_.PlaySEByPath("Data/Audio/SE/Sonniss/Mud/LiquidHit.wav");
+        if (crossed_(BAD_END_RISE + 0.28f)) audio_.PlaySEByPath("Data/Audio/SE/Sonniss/Boss/MonsterGrowl.wav");
+    }
+
+    if (preview && previewCameraOverride) return;
+    // 倒れ際は泥へ視線を外し、身体を覆ったあとで背後からの出現カットに切り替える。
+    const Vector3 fallPosition_{badEndingFallPosition};
+    const float approachShot_ = ShotProgress(time_, 0.0f, 0.85f);
+    const float floorShot_ = ShotProgress(time_, BAD_END_FALL - 0.45f, BAD_END_FALL - 0.05f);
+    Vector3 eye_ = Vector3::Lerp(Vector3{badEndingCameraEye}, playerPosition_ + offset_(3.5f, 1.5f, 0.7f), approachShot_);
+    const float focusDepth_ = std::lerp(-1.6f, -0.24f, ShotProgress(time_, BAD_END_FLASHBACK, BAD_END_PIERCE));
+    Vector3 focus_ = Vector3::Lerp(Vector3{badEndingCameraFocus}, playerPosition_ + offset_(0.0f, 0.83f, focusDepth_), approachShot_);
+    eye_ = Vector3::Lerp(eye_, fallPosition_ + offset_(2.9f, 1.05f, -2.25f), floorShot_);
+    focus_ = Vector3::Lerp(focus_, fallPosition_ + offset_(0.85f, 0.36f, -0.95f), floorShot_);
+    if (emerging_)
+    {
+        eye_ = fallPosition_ + offset_(std::lerp(0.9f, 0.32f, emerge_), std::lerp(1.3f, 1.72f, emerge_), std::lerp(3.8f, 2.95f, emerge_));
+        focus_ = fallPosition_ + offset_(0.0f, std::lerp(0.44f, 1.21f, emerge_), 0.0f);
+    }
+    camera->SetLookAt(eye_, focus_, {0,1,0});
+}
+
 void BossFinishDirector::Evaluate(float time_, float deltaTime_)
 {
     BS_PROFILE_SCOPE("BossFinishDirector::Evaluate");
@@ -962,9 +1378,29 @@ bool BossFinishDirector::Update(float rawDeltaTime_)
     const float previous_ = elapsed;
     if (!paused) elapsed += delta_ * (preview ? previewPlaybackRate : 1.0f);
     if (!preview) AudioManager::Instance().ApplyBgmVolumes(previousBgmVolumes,1.0f-std::clamp(elapsed/0.7f,0.0f,1.0f));
+    const float branchTime_ = GetEndingBranchTime();
+    if (IsBadEnding() && elapsed >= branchTime_)
+    {
+        if (badEndingTime < 0.0f)
+        {
+            Evaluate(GetCaptureTime(), delta_);
+            BeginBadEnding();
+        }
+        UpdateBadEnding(badEndingTime, (std::min)(elapsed - branchTime_, BAD_END_FINISH));
+        if (badEndingTime >= BAD_END_FINISH)
+        {
+            if (preview) elapsed = branchTime_ + BAD_END_FINISH;
+            else
+            {
+                CompleteFinish();
+                ReturnToTitle();
+            }
+        }
+        return true;
+    }
     // 最初の短い停止は演出時計だけを進め、通常TimeScaleを変更せずに表現する。
     Evaluate((std::max)(elapsed - settings["HitStop"].get<float>(), 0.0f), delta_);
-    const float captureAt_ = GetCaptureTime() + settings["HitStop"].get<float>();
+    const float captureAt_ = branchTime_;
     if (elapsed >= captureAt_ && previous_ < captureAt_) RequestCapture();
     const float hold_ = elapsed - captureAt_;
     if (!preview && completionCommitted && hold_ >= settings["PromptDelay"].get<float>())
@@ -977,16 +1413,29 @@ bool BossFinishDirector::Update(float rawDeltaTime_)
     if (returning)
     {
         returnElapsed += delta_;
-        if (returnElapsed >= settings["ReturnFade"].get<float>() && !titleRequested)
-        {
-            titleRequested = true;
-            manager.GetTimeManager()->ResetToDefaults(static_cast<uint32_t>(TarGetLayerType::All), true);
-            AudioManager::Instance().StopBGM();
-            // 既存のLoading Scene経路を使い、旧Scene破棄で演出のGPU資源も解放する。
-            ActionRegistry::Instance().Call("GoSceneTitle");
-        }
+        if (returnElapsed >= settings["ReturnFade"].get<float>()) ReturnToTitle();
     }
     return true;
+}
+
+void BossFinishDirector::CompleteFinish()
+{
+    if (preview || !finishAuthorized || completionCommitted) return;
+    completionCommitted = true;
+    if (boss.object)
+        if (const auto health_ = boss.object->GetComponent<HealthComponent>()) health_->ConfirmPresentationDeath();
+    if (!IsBadEnding()) AudioManager::Instance().PlaySE(SE_GAMECLEAR);
+    if (auto mode_ = manager.GetGameModeManager()) mode_->NotifySequenceFinished();
+    BS_LOG_INFO(LOG_CATEGORY::GAME, IsBadEnding() ? "Boss finish committed: bad ending" : "Boss finish committed: clear text and title confirmation enabled");
+}
+
+void BossFinishDirector::ReturnToTitle()
+{
+    if (titleRequested) return;
+    titleRequested = true;
+    manager.GetTimeManager()->ResetToDefaults(static_cast<uint32_t>(TarGetLayerType::All), true);
+    AudioManager::Instance().StopBGM();
+    ActionRegistry::Instance().Call("GoSceneTitle");
 }
 
 void BossFinishDirector::Seek(float time_)
@@ -994,25 +1443,48 @@ void BossFinishDirector::Seek(float time_)
     BS_PROFILE_SCOPE("BossFinishDirector::Seek");
     if (!active || !preview) return;
     Normalize();
+    ResetBadEnding();
     PrepareActor(player,"Player"); PrepareActor(boss,"Boss"); PrepareExecution(); PrepareSprites();
     effectsTime = 0.0f;
     CreateEffects();
     capturedView.Reset(); capturedTexture.Reset();
-    elapsed = std::clamp(time_, 0.0f, GetCaptureTime() + settings["PromptDelay"].get<float>() + 5.0f);
-    Evaluate((std::max)(elapsed - settings["HitStop"].get<float>(), 0.0f), 0.0f);
-    paused = true; showFixed = false;
-    if (elapsed >= GetCaptureTime() + settings["HitStop"].get<float>()) RequestCapture();
+    elapsed = std::clamp(time_, 0.0f, IsBadEnding() ? GetPreviewEndTime(ending) : GetPreviewEndTime(ending) + 4.0f);
+    const float branchTime_ = GetEndingBranchTime();
+    paused = true; showFixed = false; captureRequested = false;
+    if (IsBadEnding() && elapsed >= branchTime_)
+    {
+        Evaluate(GetCaptureTime(), 0.0f);
+        BeginBadEnding();
+        const float target_ = (std::min)(elapsed - branchTime_, BAD_END_FINISH);
+        // シークも共通区間の末尾から再評価し、巻き戻した際に泥や材質を持ち越さない。
+        UpdateBadEnding(badEndingTime, 0.0f);
+        while (badEndingTime < target_)
+            UpdateBadEnding(badEndingTime, (std::min)(badEndingTime + FIXED_STEP, target_));
+    }
+    else
+    {
+        Evaluate((std::max)(elapsed - settings["HitStop"].get<float>(), 0.0f), 0.0f);
+        if (elapsed >= branchTime_) RequestCapture();
+    }
 }
 
 void BossFinishDirector::RequestCapture()
 {
-    if (!active) return;
+    if (!active || IsBadEnding()) return;
     captureRequested = true; showFixed = false;
 }
 
 bool BossFinishDirector::ShouldRenderActor(const std::shared_ptr<GameObject>& object_) const
 {
     if (!object_) return false;
+    if (badEndingTime >= 0.0f)
+    {
+        if (IsBadEndingImpactShot()) return object_ == player.object;
+        if (object_->GetName() == settings.value("StageCenterObject", std::string("Stage"))) return true;
+        if (badEndingTime >= BAD_END_FALL && badEndingTime < BAD_END_RISE) return false;
+        return object_ == player.object || object_->GetName() == "Shield" ||
+            object_->GetName() == settings["Player"].value("WeaponObject", std::string("Weapon"));
+    }
     if (object_->GetName() == settings.value("StageCenterObject", std::string("Stage"))) return true;
     if (object_ == player.object || object_ == boss.object) return true;
     for (const auto& name_ : settings.at("Equipment")) if (object_->GetName() == name_.get<std::string>()) return true;
@@ -1092,16 +1564,7 @@ void BossFinishDirector::RenderOutput(SpriteRenderSystem& sprites_, ID3D11Render
     }
     // 撮影要求の有無・成功とは独立して、本番の既定時刻に一度だけ完了させる。
     // 接触診断NGや再撮影で要求を消費しても、クリア文字と決定入力まで必ず進める。
-    if (!preview && finishAuthorized && !completionCommitted &&
-        elapsed >= GetCaptureTime() + settings["HitStop"].get<float>())
-    {
-        completionCommitted = true;
-        if (boss.object)
-            if (const auto health_ = boss.object->GetComponent<HealthComponent>()) health_->ConfirmPresentationDeath();
-        AudioManager::Instance().PlaySE(SE_GAMECLEAR);
-        if (auto mode_ = manager.GetGameModeManager()) mode_->NotifySequenceFinished();
-        BS_LOG_INFO(LOG_CATEGORY::GAME,"Boss finish committed: clear text and title confirmation enabled");
-    }
+    if (!IsBadEnding() && elapsed >= GetEndingBranchTime()) CompleteFinish();
     context_->OMSetRenderTargets(1, &target_, nullptr);
     const auto* states_ = graphics_.GetRenderState();
     context_->OMSetBlendState(states_->GetBlendState(BlendState::Transparency), nullptr, 0xffffffff);
@@ -1111,6 +1574,11 @@ void BossFinishDirector::RenderOutput(SpriteRenderSystem& sprites_, ID3D11Render
     const float width_ = viewport_.Width, height_ = viewport_.Height;
     const float fitWidth_ = (std::min)(width_, height_ * GetAspect()), fitHeight_ = fitWidth_ / GetAspect();
     const float left_ = (width_-fitWidth_)*0.5f, top_ = (height_-fitHeight_)*0.5f;
+    if (badEndingTime >= 0.0f)
+    {
+        RenderBadEnding(sprites_, target_, width_, height_);
+        return;
+    }
     const float held_ = elapsed - GetCaptureTime() - settings["HitStop"].get<float>();
     if (showFixed && capturedView)
     {
@@ -1144,6 +1612,42 @@ void BossFinishDirector::RenderOutput(SpriteRenderSystem& sprites_, ID3D11Render
     if (impactConfirmed && impactAge_ >= 0.0f && impactAge_ < 0.12f)
         DrawSprite(sprites_,solidSprite,0,0,width_,height_,{1,1,1,0.65f * std::exp(-impactAge_ / 0.035f)});
     if (returning) DrawSprite(sprites_,solidSprite,0,0,width_,height_,{0,0,0,std::clamp(returnElapsed/settings["ReturnFade"].get<float>(),0.0f,1.0f)});
+}
+
+void BossFinishDirector::RenderBadEnding(SpriteRenderSystem& sprites_, ID3D11RenderTargetView* target_, float width_, float height_)
+{
+    if (width_ <= 0.0f || height_ <= 0.0f) return;
+    const float time_ = badEndingTime;
+    if (time_ >= BAD_END_FLASHBACK && time_ < BAD_END_KNEEL)
+    {
+        const float attack_ = ShotProgress(time_, BAD_END_FLASHBACK, BAD_END_FLASHBACK + 0.04f);
+        const float decay_ = ShotProgress(time_, BAD_END_KNEEL - 0.13f, BAD_END_KNEEL);
+        const float alpha_ = attack_ * (1.0f - decay_);
+        if (flashbackSprite)
+        {
+            const auto sprite_ = flashbackSprite->GetComponent<SpriteRenderer>();
+            const auto size_ = sprite_->GetTextureSize();
+            const float zoom_ = 1.04f + 0.09f * decay_;
+            const float cropWidth_ = (std::min)(size_.x, size_.y * width_ / height_) / zoom_;
+            const float cropHeight_ = cropWidth_ * height_ / width_;
+            sprite_->SetUVRect((size_.x - cropWidth_) * 0.5f, (size_.y - cropHeight_) * 0.5f, cropWidth_, cropHeight_);
+            DrawSprite(sprites_, flashbackSprite, 0, 0, width_, height_, {1,1,1,alpha_});
+        }
+        else DrawSprite(sprites_, solidSprite, 0, 0, width_, height_, {1,1,1,alpha_ * 0.4f});
+    }
+    if (time_ >= BAD_END_WIPE)
+    {
+        const float progress_ = std::clamp((time_ - BAD_END_WIPE) / (BAD_END_COVERED - BAD_END_WIPE), 0.0f, 1.0f);
+        if (badEndingWipe)
+        {
+            badEndingWipe->SetProgress(progress_);
+            badEndingWipe->Update(time_ - BAD_END_WIPE, false);
+        }
+        if (!badEndingWipe || !badEndingWipe->Render(target_))
+            DrawSprite(sprites_, solidSprite, 0, 0, width_, height_, {0.025f,0.008f,0.012f,progress_});
+        const float black_ = ShotProgress(time_, BAD_END_COVERED, BAD_END_FINISH - 0.15f);
+        if (black_ > 0.0f) DrawSprite(sprites_, solidSprite, 0, 0, width_, height_, {0,0,0,black_});
+    }
 }
 
 void BossFinishDirector::CaptureEditorCamera()

@@ -85,7 +85,7 @@ CinematicEditorWindow::~CinematicEditorWindow() { StopPreview(); }
 bool CinematicEditorWindow::OpenCinematicSequence(const std::string& ownerName_, int sequenceIndex_)
 {
     StopPreview();
-    useSequenceEditor = true;
+    authoringSource = AuthoringSource::ACTION_SEQUENCE;
     return sequenceEditor->Bind(ownerName_, sequenceIndex_);
 }
 
@@ -103,8 +103,8 @@ float CinematicEditorWindow::GetTime() const
 float CinematicEditorWindow::GetEndTime() const
 {
     const auto director_ = GetDirector();
-    return director_ ? director_->GetCaptureTime() + director_->GetSettings().value("HitStop", 0.16f) +
-        director_->GetSettings().value("PromptDelay", 2.8f) + 1.0f : 8.0f;
+    return director_ ? director_->GetPreviewEndTime(authoringSource == AuthoringSource::BAD_END ?
+        BossFinishDirector::Ending::BAD_END : BossFinishDirector::Ending::TRUE_END) : 8.0f;
 }
 
 void CinematicEditorWindow::OnVisibilityChanged(bool visible_)
@@ -168,9 +168,16 @@ void CinematicEditorWindow::StartPreview(bool playing_)
                 return;
             }
         }
-        director_->Begin(true);
+        director_->Begin(true, authoringSource == AuthoringSource::BAD_END ?
+            BossFinishDirector::Ending::BAD_END : BossFinishDirector::Ending::TRUE_END);
         ownsPreview = director_->IsPreview() && director_->IsActive();
         if (ownsPreview) status = director_->GetStatus();
+    }
+    if (playing_ && ownsPreview && director_->GetTime() >= GetEndTime())
+    {
+        director_->SetPreviewCameraOverride(false);
+        exploreCamera = false;
+        director_->Seek(0.0f);
     }
     director_->SetPreviewPlaybackRate(previewRate);
     director_->SetPaused(!playing_);
@@ -202,7 +209,7 @@ void CinematicEditorWindow::RequestSeek(float time_)
 void CinematicEditorWindow::Update(float deltaTime_)
 {
     BS_PROFILE_SCOPE("CinematicEditor::Update");
-    if (useSequenceEditor) { sequenceEditor->Update(deltaTime_); return; }
+    if (authoringSource == AuthoringSource::ACTION_SEQUENCE) { sequenceEditor->Update(deltaTime_); return; }
     const auto director_ = GetDirector();
     if (!isVisible || !director_) return;
     if (ownsFinishScene && !gameObjectManager->IsCinematicSequencePreview())
@@ -215,8 +222,10 @@ void CinematicEditorWindow::Update(float deltaTime_)
         StartPreview(playWhenFinishReady);
     if (ownsPreview) director_->SetPreviewPlaybackRate(previewRate);
     seekCooldown -= (std::max)(deltaTime_, 0.0f);
-    // GPU Particleの再構築をフレーム中に重ねず、ドラッグ中は短い間隔へ集約する。
-    if (seekPending && (seekCooldown <= 0.0f || !ImGui::IsMouseDown(ImGuiMouseButton_Left)))
+    // BadEnd後半は共通区間から再評価するため、ドラッグを離した時点で映像を更新する。
+    const bool draggingBadEnd_ = authoringSource == AuthoringSource::BAD_END &&
+        seekTime >= director_->GetEndingBranchTime() && ImGui::IsMouseDown(ImGuiMouseButton_Left);
+    if (seekPending && !draggingBadEnd_ && (seekCooldown <= 0.0f || !ImGui::IsMouseDown(ImGuiMouseButton_Left)))
     {
         StartPreview(false);
         if (ownsPreview)
@@ -331,7 +340,7 @@ void CinematicEditorWindow::DrawToolbar()
     ImGui::SameLine();
     if (ImGui::Button("Impact")) RequestSeek(director_->GetImpactCueTime());
     ImGui::SameLine();
-    if (ImGui::Button("Capture")) RequestSeek(director_->GetCaptureTime() + director_->GetSettings().value("HitStop", 0.16f));
+    if (ImGui::Button("Ending start")) RequestSeek(director_->GetEndingBranchTime());
     ImGui::SameLine(); ImGui::Text("%s  %.3fs / %dF", dirty ? "*" : "", GetTime(), static_cast<int>(std::round(GetTime() * frameRate)));
 
     ImGui::BeginDisabled(editing);
@@ -385,7 +394,9 @@ void CinematicEditorWindow::DrawPreview()
         if (const auto camera_ = director_->GetCamera()) freeCamera.CaptureFromCamera(*camera_);
     }
     ImGui::SameLine();
+    ImGui::BeginDisabled(authoringSource == AuthoringSource::BAD_END && GetTime() >= director_->GetEndingBranchTime());
     if (ImGui::Button("Add camera key from view")) AddCameraKey();
+    ImGui::EndDisabled();
     ImGui::EndDisabled();
     const auto texture_ = GraphicsDeviceManager::Instance().GetSceneViewSRV();
     const auto available_ = ImGui::GetContentRegionAvail();
@@ -421,6 +432,11 @@ void CinematicEditorWindow::DrawPreview()
 void CinematicEditorWindow::AddEffect(const std::string& path_)
 {
     BS_PROFILE_SCOPE("CinematicEditor::AddEffect");
+    if (authoringSource == AuthoringSource::BAD_END && GetTime() >= GetDirector()->GetEndingBranchTime())
+    {
+        status = "Move the playhead into the shared opening to add a VFX clip.";
+        return;
+    }
     try
     {
         std::ifstream file_(WindowsDialogHelper::Utf8ToPath(path_));
@@ -468,6 +484,20 @@ void CinematicEditorWindow::DrawInspector()
     auto& settings_ = director_->GetSettings();
     ImGui::TextUnformatted("Selection / 本番設定");
     ImGui::Separator();
+    if (selectedType == TrackType::ENDING)
+    {
+        const auto cues_ = director_->GetBadEndingCues();
+        if (selectedIndex >= 0 && selectedIndex < static_cast<int>(cues_.size()))
+        {
+            const auto& cue_ = cues_[selectedIndex];
+            const float branchTime_ = director_->GetEndingBranchTime();
+            ImGui::TextUnformatted(cue_.label);
+            ImGui::Text("%.3fs - %.3fs", branchTime_ + cue_.start, branchTime_ + cue_.end);
+            if (ImGui::Button("Seek to cue")) RequestSeek(branchTime_ + cue_.start);
+        }
+        ImGui::TextWrapped("BadEnd cue times are read-only. Both endings use the same editable opening preset.");
+        return;
+    }
     if (selectedType == TrackType::PLAYER || selectedType == TrackType::BOSS)
     {
         const bool boss_ = selectedType == TrackType::BOSS;
@@ -646,7 +676,7 @@ void CinematicEditorWindow::BuildTracks()
     if (!director_) return;
     const auto& settings_ = director_->GetSettings();
     const float hitStop_ = settings_.value("HitStop", 0.16f);
-    const float capture_ = director_->GetCaptureTime() + hitStop_;
+    const float capture_ = director_->GetEndingBranchTime();
     const auto& player_ = settings_.at("Player");
     const float start_ = hitStop_ + settings_.value("CounterStart", 2.8f);
     const float windup_ = player_.value("WindupTime", 0.35f);
@@ -662,13 +692,24 @@ void CinematicEditorWindow::BuildTracks()
     {
         const auto& effect_ = effects_[index_];
         const bool particle_ = effect_.value("Kind", "Mesh") == "Particle";
-        const float origin_ = effect_.value("TimeAnchor", std::string()) == "Impact" ? director_->GetImpactCueTime() : hitStop_;
+        const auto anchor_ = effect_.value("TimeAnchor", std::string());
+        const float origin_ = anchor_ == "Dissolve" ? director_->GetImpactCueTime() + settings_.value("DissolveDelay", 0.0f) :
+            anchor_ == "Impact" ? director_->GetImpactCueTime() : hitStop_;
         const auto file_ = WindowsDialogHelper::PathToUtf8(WindowsDialogHelper::Utf8ToPath(effect_.value("Asset", std::string())).stem());
         tracks.push_back({TrackType::EFFECT, index_, std::to_string(index_ + 1) + " " + file_, origin_ + effect_.value("Start", 0.0f),
             origin_ + effect_.value("Stop", 1.0f), particle_ ? IM_COL32(55, 180, 140, 240) : IM_COL32(225, 115, 70, 240)});
     }
     tracks.push_back({TrackType::IMPACT, -1, "Impact / Hit hold", director_->GetImpactCueTime(), director_->GetImpactCueTime() + settings_.value("ImpactHold", 0.16f), IM_COL32(225, 75, 80, 250)});
-    tracks.push_back({TrackType::CAPTURE, -1, "Capture / Clear UI", capture_, GetEndTime(), IM_COL32(110, 125, 150, 230)});
+    if (authoringSource == AuthoringSource::BAD_END)
+    {
+        const auto cues_ = director_->GetBadEndingCues();
+        for (int index_ = 0; index_ < static_cast<int>(cues_.size()); ++index_)
+        {
+            const auto& cue_ = cues_[index_];
+            tracks.push_back({TrackType::ENDING, index_, cue_.label, capture_ + cue_.start, capture_ + cue_.end, IM_COL32(154, 60, 72, 240)});
+        }
+    }
+    else tracks.push_back({TrackType::CAPTURE, -1, "TrueEnd / Clear UI", capture_, GetEndTime(), IM_COL32(110, 125, 150, 230)});
 }
 
 void CinematicEditorWindow::ApplyTrackDrag(const Track& track_, float delta_)
@@ -678,7 +719,9 @@ void CinematicEditorWindow::ApplyTrackDrag(const Track& track_, float delta_)
     if (track_.type == TrackType::EFFECT && track_.index >= 0 && track_.index < static_cast<int>(settings_["Effects"].size()))
     {
         auto& effect_ = settings_["Effects"][track_.index];
-        const float origin_ = effect_.value("TimeAnchor", std::string()) == "Impact" ? GetDirector()->GetImpactCueTime() : settings_.value("HitStop", 0.16f);
+        const auto anchor_ = effect_.value("TimeAnchor", std::string());
+        const float origin_ = anchor_ == "Dissolve" ? GetDirector()->GetImpactCueTime() + settings_.value("DissolveDelay", 0.0f) :
+            anchor_ == "Impact" ? GetDirector()->GetImpactCueTime() : settings_.value("HitStop", 0.16f);
         float start_ = dragStart, end_ = dragEnd;
         if (dragMode == DragMode::MOVE)
         {
@@ -772,11 +815,12 @@ void CinematicEditorWindow::DrawTimeline()
         {
             ImGui::SetCursorScreenPos(hitMin_);
             ImGui::InvisibleButton("Clip", ImVec2(hitMax_.x - hitMin_.x, hitMax_.y - hitMin_.y));
-            if (ImGui::IsItemHovered()) ImGui::SetTooltip("%s\n%.3fs - %.3fs\nDrag body: move / VFX edges: resize", track_.label.c_str(), track_.start, track_.end);
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("%s\n%.3fs - %.3fs\n%s", track_.label.c_str(), track_.start, track_.end,
+                track_.type == TrackType::ENDING ? "Click to select cue" : "Drag body: move / VFX edges: resize");
             if (ImGui::IsItemActivated())
             {
                 selectedType = track_.type; selectedIndex = track_.index;
-                draggingTrack = index_; dragMouseX = ImGui::GetIO().MousePos.x;
+                draggingTrack = track_.type == TrackType::ENDING ? -1 : index_; dragMouseX = ImGui::GetIO().MousePos.x;
                 dragStart = track_.start; dragEnd = track_.end;
                 dragMode = track_.type == TrackType::EFFECT && std::abs(dragMouseX - minimum_.x) < 8.0f ? DragMode::START :
                     track_.type == TrackType::EFFECT && std::abs(dragMouseX - maximum_.x) < 8.0f ? DragMode::END : DragMode::MOVE;
@@ -790,6 +834,8 @@ void CinematicEditorWindow::DrawTimeline()
     drawList_->PushClipRect(ImVec2(left_, origin_.y), ImVec2(origin_.x + width_, bottom_), true);
     const float impactX_ = x_(GetDirector()->GetImpactCueTime());
     drawList_->AddLine(ImVec2(impactX_, origin_.y + 20.0f), ImVec2(impactX_, bottom_), IM_COL32(255, 100, 100, 180), 1.0f);
+    const float branchX_ = x_(GetDirector()->GetEndingBranchTime());
+    drawList_->AddLine(ImVec2(branchX_, origin_.y + 20.0f), ImVec2(branchX_, bottom_), IM_COL32(190, 150, 255, 200), 1.0f);
     const float cursorX_ = x_(GetTime());
     drawList_->AddLine(ImVec2(cursorX_, origin_.y), ImVec2(cursorX_, bottom_), IM_COL32(255, 240, 190, 255), 2.0f);
     drawList_->AddTriangleFilled(ImVec2(cursorX_ - 5.0f, origin_.y + 17.0f), ImVec2(cursorX_ + 5.0f, origin_.y + 17.0f), ImVec2(cursorX_, origin_.y + 25.0f), IM_COL32(255, 240, 190, 255));
@@ -802,13 +848,19 @@ void CinematicEditorWindow::Draw()
 {
     BS_PROFILE_SCOPE("CinematicEditor::Draw");
     if (!BeginWorkspaceWindow()) { if (!isVisible) StopPreview(); EndEditorWindow(); return; }
-    int source_ = useSequenceEditor ? 0 : 1;
-    if (ImGui::Combo("Authoring source", &source_, "ActionSequence\0Finish preset\0"))
+    int source_ = static_cast<int>(authoringSource);
+    if (ImGui::Combo("Cinematic event", &source_, "ActionSequence\0BadEnd\0TrueEnd\0"))
     {
         StopPreview();
-        useSequenceEditor = source_ == 0;
+        authoringSource = static_cast<AuthoringSource>(source_);
+        selectedType = TrackType::PLAYER;
+        selectedIndex = selectedCameraKey = -1;
+        viewStart = 0.0f;
+        viewDuration = GetEndTime();
+        loopStart = 0.0f;
+        loopEnd = viewDuration;
     }
-    if (useSequenceEditor)
+    if (authoringSource == AuthoringSource::ACTION_SEQUENCE)
     {
         sequenceEditor->Draw();
         EndEditorWindow();
@@ -831,8 +883,8 @@ void CinematicEditorWindow::Draw()
         ImGui::TableSetupColumn("Inspector", ImGuiTableColumnFlags_WidthFixed, 330.0f);
         ImGui::TableNextColumn();
         ImGui::BeginChild("Track list", ImVec2(0, height_), true);
-        ImGui::TextUnformatted("FINISH / CINEMATIC");
-        ImGui::TextWrapped("Preview uses the actual boss finish runtime. Animation Actions are not executed.");
+        ImGui::TextUnformatted(authoringSource == AuthoringSource::BAD_END ? "BadEnd" : "TrueEnd");
+        ImGui::TextWrapped("Shared opening until %.3fs. Edits to the opening apply to both endings.", director_->GetEndingBranchTime());
         ImGui::Separator();
         for (int index_ = 0; index_ < static_cast<int>(tracks.size()); ++index_)
         {

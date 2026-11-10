@@ -273,6 +273,13 @@ void UIProgressBarComponent::Deserialize(const nlohmann::json& json_)
     // Widget参照はScene読込後のStart/Updateで解決する。
 }
 
+bool UIProgressBarComponent::HasRemainingFill() const
+{
+    const auto trail_ = damageDelayWidget.lock();
+    return currentRate > 0.0f ||
+        (damageDelayRate > 0.0f && trail_ && trail_->IsEnabled() && trail_->IsVisible());
+}
+
 void UIProgressBarComponent::SetTargetRate(float targetRate_)
 {
     targetRate = ClampRate(targetRate_);

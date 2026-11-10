@@ -2,6 +2,8 @@
 
 #include "HealthComponent.h"
 #include "Game/AI/Human/HumanBossAIComponent.h"
+#include "Game/Charcter/Player/PlayerControllerComponent.h"
+#include "Game/GameMode/GameModeManager.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
@@ -170,6 +172,13 @@ void HealthComponent::PublishToBlackboard()
     blackboard_->SetFloat("Health", "Current", currentHealth);
     blackboard_->SetFloat("Health", "Max", maxHealth);
     blackboard_->SetBool("Health", "Dead", IsDead());
+
+    if (owner_->manager && owner_->GetComponent<PlayerControllerComponent>())
+    {
+        const float rate_ = CalculateHealthRatio(currentHealth, maxHealth);
+        if (const auto mode_ = owner_->GetManager().GetGameModeManager(); mode_ && mode_->GetPlayerHpRate() != rate_)
+            mode_->SetPlayerHpRate(rate_);
+    }
 }
 
 void HealthComponent::Gui()

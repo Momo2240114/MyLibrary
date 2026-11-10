@@ -186,7 +186,9 @@ void BattleHudComponent::ApplyElement(HudElement& element_, float alpha_, float 
         // 実行中のフェード値をSceneの初期色へ混入させない。
         sprite_->SetRuntimeColor(color_);
         // 複合入力の未使用セルを描画せず、非表示の要素によるMapとDrawを増やさない。
-        sprite_->SetRuntimeVisible(color_.w > 0.001f);
+        const bool playerHpFill_ = name_ == "PlayerHpCurrent" || name_ == "PlayerHpDamageDelay" || name_ == "PlayerHpHealDelay";
+        // 幅が0のゲージをHUDの透明度更新で再表示すると、最小1pxの塗りが残る。
+        sprite_->SetRuntimeVisible(color_.w > 0.001f && (!playerHpFill_ || rect_.anchorMax.x > rect_.anchorMin.x));
     }
 }
 
@@ -631,6 +633,13 @@ void BattleHudComponent::UpdatePortrait(const std::shared_ptr<PlayerControllerCo
     else if (definition_ && definition_->category == SkillCategory::HEAL) expression_ = 3;
     else if (skill_ || counter_ || action_ == PLAYER_ACTION::COUNTER_ATTACK) expression_ = 4;
     sheet_->SetRuntimeCell(portraitColumns[expression_]);
+}
+
+bool BattleHudComponent::UpdatesPlayerHealthBar(const UIProgressBarComponent* bar_) const
+{
+    const auto owner_ = gameObject.lock();
+    return IsEnabled() && IsStarted() && ShouldLateUpdate() && !freezeHudInformation &&
+        owner_ && !owner_->IsPendingDestroy() && healthBars[1].lock().get() == bar_;
 }
 
 void BattleHudComponent::LateUpdate(float deltaTime_)
