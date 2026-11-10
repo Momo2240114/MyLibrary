@@ -152,24 +152,6 @@ void MovementComponent::LookAtVelocity(float et)
 	 //現在の回転に合成する
 	 Quaternion q = quaternion * turn;
 
-	 //// Roll (X軸周り)
-	 //float sinRoll = 2.0f * (q.y * q.z + q.w * q.x);
-	 //sinRoll = (sinRoll > 1.0f) ? 1.0f : ((sinRoll < -1.0f) ? -1.0f : sinRoll);
-	 //float roll = asinf(sinRoll);
-
-	 //// Pitch (Y軸周り)
-	 //float t0 = -2.0f * (q.x * q.z - q.w * q.y);
-	 //float t1 = 1.0f - 2.0f * (q.x * q.x + q.y * q.y);
-	 //float pitch = atan2f(t0, t1);
-
-	 //// Yaw (Z軸周り)
-	 //float t2 = -2.0f * (q.x * q.y - q.w * q.z);
-	 //float t3 = 1.0f - 2.0f * (q.y * q.y + q.z * q.z);
-	 //float yaw = atan2f(t2, t3);
-
-	 //offsetRotation = { roll, pitch, yaw };
-
-
 	 Vector3 euler = q.ToEuler();
 	 //Vector3 euler = QuaternionToEuler(q);
 
@@ -178,22 +160,7 @@ void MovementComponent::LookAtVelocity(float et)
 	 offsetRotation.y = DirectX::XMConvertToDegrees(euler.y);
 	 offsetRotation.z = DirectX::XMConvertToDegrees(euler.z);
 
-	 //// ★ X軸（Pitch）の回転制限
-	 //if (m_IsPitchLimit)
-	 //{
-		// // 角度が180度を超えて 270~360度側（マイナス方向）になっている場合の補正
-		// if (offsetRotation.x > 180.0f) offsetRotation.x -= 360.0f;
 
-		// // クランプ処理
-		// if (offsetRotation.x < m_MinPitch) offsetRotation.x = m_MinPitch;
-		// if (offsetRotation.x > m_MaxPitch) offsetRotation.x = m_MaxPitch;
-	 //}
-
-
-	 ////ディグリーに変換
-	 //offsetRotation.x = DirectX::XMConvertToDegrees(euler.x);
-	 //offsetRotation.y = DirectX::XMConvertToDegrees(euler.y);
-	 //offsetRotation.z = DirectX::XMConvertToDegrees(euler.z);
 
 
 	 GetGameObject()->transform->SetRotation(offsetRotation);

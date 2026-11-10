@@ -26,6 +26,7 @@ public:
     void Start() override;
     // 全ComponentのUpdate後にHP・入力・演出状態を反映する。
     void LateUpdate(float deltaTime_) override;
+    bool UpdatesPlayerHealthBar(const UIProgressBarComponent* bar_) const;
     // 位置・大きさ・透明度を既存Inspectorから調整する。
     void Gui() override;
     // 配置設定だけを保存し、Object参照や演出タイマーは保存しない。

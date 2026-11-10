@@ -34,6 +34,7 @@ public:
 
     // 外部コードから手動Target Rateを設定する。
     void SetTargetRate(float targetRate_);
+    bool HasRemainingFill() const;
     // 表示対象の切替時に、前の対象の遅延ゲージを残さず初期化する。
     void ResetDisplayedRate(float rate_);
 

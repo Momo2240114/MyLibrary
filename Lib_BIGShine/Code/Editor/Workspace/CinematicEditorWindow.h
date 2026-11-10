@@ -28,7 +28,8 @@ public:
     bool OpenCinematicSequence(const std::string& ownerName_, int sequenceIndex_) override;
 
 private:
-    enum class TrackType { PLAYER, BOSS, CAMERA, EFFECT, IMPACT, CAPTURE };
+    enum class AuthoringSource { ACTION_SEQUENCE, BAD_END, TRUE_END };
+    enum class TrackType { PLAYER, BOSS, CAMERA, EFFECT, IMPACT, CAPTURE, ENDING };
     enum class DragMode { NONE, MOVE, START, END };
     // 表示用トラックは毎フレーム本番設定から再構築し、独自の再生データを持たない。
     struct Track
@@ -80,7 +81,7 @@ private:
     EditorCameraData freeCamera;
     std::unique_ptr<AssetBrowserWindow> assetBrowser;
     std::unique_ptr<CinematicSequenceEditor> sequenceEditor;
-    bool useSequenceEditor = true;
+    AuthoringSource authoringSource = AuthoringSource::ACTION_SEQUENCE;
     std::string presetPath = "Data/Presentation/AnathemaBossFinish.json";
     std::string status;
     TrackType selectedType = TrackType::PLAYER;

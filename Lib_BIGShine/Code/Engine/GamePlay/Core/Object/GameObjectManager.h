@@ -154,7 +154,7 @@ public:
     bool SupportsEditorPlayMode() const { return editorPlayModeEnabled; }
     EditorPlayMode GetEditorPlayMode() const { return editorPlayModeEnabled ? editorPlayMode : EditorPlayMode::PLAY; }
     bool CanStartEditorPlay() const { return editorPlayModeEnabled && editorPlayMode == EditorPlayMode::EDITOR && sceneRuntimeState == SCENE_RUNTIME_STATE::RUNNING; }
-    bool ShouldSimulatePhysics() const { return !cinematicPreviewActive && !gameMenuPaused && !IsBossFinishActive() && !IsPlayerDeathActive() && !loadingPresentation && GetEditorPlayMode() == EditorPlayMode::PLAY && !editorWorkspacePaused && sceneRuntimeState == SCENE_RUNTIME_STATE::RUNNING; }
+    bool ShouldSimulatePhysics() const;
     // Sceneのメニュー停止を物理更新と音声管理にも共有する。
     void SetGameMenuPaused(bool paused_) { gameMenuPaused = paused_; }
     bool IsGameMenuPaused() const { return gameMenuPaused; }

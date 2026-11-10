@@ -4,6 +4,7 @@
 #include "Engine/GamePlay/Transform/Transform.h"
 #include <nlohmann/json.hpp>
 #include <memory>
+#include <span>
 #include <vector>
 
 class GameObjectManager;
@@ -11,11 +12,20 @@ class CameraComponent;
 class SpriteRenderSystem;
 class ParticleComponent;
 class MeshVFXComponent;
+class TextureMaskTransition;
 
 // 人型ボスの決着を通常の戦闘更新から分離し、撮影とタイトル復帰まで管理する。
 class BossFinishDirector
 {
 public:
+    enum class Ending { TRUE_END, BAD_END };
+    struct EndingCue
+    {
+        const char* label;
+        float start;
+        float end;
+    };
+
     explicit BossFinishDirector(GameObjectManager& manager_);
     ~BossFinishDirector();
     // 生のフレーム時間で進行し、trueの間はManager側の通常更新を停止する。
@@ -25,7 +35,7 @@ public:
     bool IsPaused() const { return paused; }
     float GetTime() const { return elapsed; }
     float GetCaptureTime() const;
-    void Begin(bool preview_);
+    void Begin(bool preview_, Ending previewEnding_ = Ending::TRUE_END);
     // プレビュー前のTransform・ポーズを戻し、戦闘再開時の位置飛びを防ぐ。
     void Stop();
     void SetPaused(bool paused_) { paused = paused_; }
@@ -36,6 +46,11 @@ public:
     std::shared_ptr<CameraComponent> GetCamera() const { return camera; }
     const std::vector<std::shared_ptr<GameObject>>& GetEffects() const { return effects; }
     bool ShouldRenderActor(const std::shared_ptr<GameObject>& object_) const;
+    bool IsBadEndingImpactShot() const;
+    bool IsBadEnding() const { return ending == Ending::BAD_END; }
+    float GetEndingBranchTime() const;
+    float GetPreviewEndTime(Ending ending_) const;
+    std::span<const EndingCue> GetBadEndingCues() const;
     // PostEffect後、UI描画前の出力だけを複製し、同じ画像をSDRの2D経路で表示する。
     void RenderOutput(SpriteRenderSystem& sprites_, ID3D11RenderTargetView* target_);
     ID3D11ShaderResourceView* GetCapture() const { return capturedView.Get(); }
@@ -75,6 +90,7 @@ private:
         // シークで変化しない骨格の水平基準を、連続するクリップ間でも共有する。
         DirectX::XMFLOAT3 rootReferencePosition{};
         bool hasRootReference = false;
+        bool constrainHorizontal = true;
     };
     // 装備のAttachment更新で変化する行列も含め、編集前の状態を記録する。
     struct SavedActor
@@ -86,6 +102,8 @@ private:
         std::vector<std::pair<std::weak_ptr<Component>,bool>> colliderStates;
     };
     void PrepareActor(ActorPose& actor_, const char* key_);
+    void PrepareActor(ActorPose& actor_, const std::shared_ptr<GameObject>& object_, AnimState state_,
+        const std::string& animation_, bool loop_);
     void SampleActor(ActorPose& actor_, float time_);
     // 親ノードの移動も含め、骨格の水平位置を演出開始時の基準へ戻す。
     void ConstrainActorPose(ActorPose& actor_, std::vector<GltfModelCommponennt::NodePose>& poses_);
@@ -102,6 +120,13 @@ private:
     void Evaluate(float time_, float deltaTime_);
     void CreateEffects();
     void AdvanceEffects(float from_, float to_);
+    void BeginBadEnding();
+    void ResetBadEnding();
+    void UpdateBadEnding(float previousTime_, float time_);
+    void ApplyBadEndingMaterials();
+    void RenderBadEnding(SpriteRenderSystem& sprites_, ID3D11RenderTargetView* target_, float width_, float height_);
+    void CompleteFinish();
+    void ReturnToTitle();
     void PrepareSprites();
     bool Capture(ID3D11RenderTargetView* target_);
     void DrawSprite(SpriteRenderSystem& sprites_, const std::shared_ptr<GameObject>& object_,
@@ -151,4 +176,24 @@ private:
     bool previousAILock = false;
     bool previousPresentation = false;
     bool previousGameplayLock = false;
+
+    Ending ending = Ending::TRUE_END;
+    float badEndingTime = -1.0f;
+    DirectX::XMFLOAT3 badEndingPosition{};
+    DirectX::XMFLOAT3 badEndingCameraEye{};
+    DirectX::XMFLOAT3 badEndingCameraFocus{};
+    DirectX::XMFLOAT3 badEndingSpearContact{};
+    DirectX::XMFLOAT3 badEndingFallPosition{};
+    ActorPose badEndingCounter;
+    ActorPose badEndingKneel;
+    ActorPose badEndingPierced;
+    ActorPose badEndingRise;
+    std::shared_ptr<GameObject> badEndingMud;
+    std::shared_ptr<GameObject> badEndingSpear;
+    std::shared_ptr<GameObject> badEndingParticles;
+    std::shared_ptr<GameObject> flashbackSprite;
+    std::unique_ptr<TextureMaskTransition> badEndingWipe;
+    std::vector<std::pair<std::weak_ptr<Component>, bool>> badEndingMaterialStates;
+    bool previousSilhouette = false;
+    DirectX::XMFLOAT4 previousSilhouetteColor{};
 };

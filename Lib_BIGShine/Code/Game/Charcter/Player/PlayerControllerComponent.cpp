@@ -1826,6 +1826,7 @@ bool PlayerControllerComponent::IsPlayerControlLockedByGameMode() const
 {
     const std::shared_ptr<GameObject> owner_ = gameObject.lock();
     if (!owner_ || !owner_->manager) return false;
+    if (owner_->GetManager().IsPlayerDeathActive()) return true;
 
     const GameModeManager* gameModeManager_ = owner_->GetManager().GetGameModeManager();
     if (!gameModeManager_) return false;

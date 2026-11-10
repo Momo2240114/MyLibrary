@@ -244,6 +244,9 @@ public:
 
 	// マテリアルデータ取得
 	const std::vector<Material>& GetMaterials() const { return materials; }
+    // 演出中の差し替えはメッシュ単位で保持し、元の材質や保存データには反映しない。
+    void SetPresentationMaterials(std::vector<Material> materials_);
+    void ClearPresentationMaterials();
 
 	// メッシュデータ取得
 	const std::vector<Mesh>& GetMeshes() const { return meshes; }
@@ -414,6 +417,7 @@ private:
 	bool asyncLoadApplied = false;
 	bool usedNaviMeshSystemFlg = false;
 	std::vector<Material>	materials;
+    std::vector<Material> presentationMaterials;
 	std::vector<Mesh>		meshes;
 	std::vector<Node>		nodes;
 	std::vector<NodePose>	bindNodePoses;
