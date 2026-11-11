@@ -107,6 +107,20 @@
             "TypeName": "UITextComponent",
             "UpdateEnabled": true,
             "UpdatePriority": 0
+        },
+        {
+            "TypeName": "UIVisualEffectComponent",
+            "Enabled": true,
+            "RequiredForSceneStart": false,
+            "UpdateEnabled": true,
+            "LateUpdateEnabled": true,
+            "UpdatePriority": 0,
+            "LateUpdatePriority": 0,
+            "Data": {
+                "Preset": "HudBossName",
+                "PlayOnStart": true,
+                "Settings": {}
+            }
         }
     ],
     "Layer": 16,

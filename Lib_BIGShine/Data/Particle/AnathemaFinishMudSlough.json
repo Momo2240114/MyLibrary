@@ -1,0 +1,158 @@
+{
+    "AssetPath": "Data/Particle/AnathemaFinishMudSlough.json",
+    "AssetType": "ParticleEffect",
+    "AssetVersion": 1,
+    "Emitters": [
+        {
+            "Acceleration": [
+                0,
+                0.25,
+                0
+            ],
+            "BlendMode": 0,
+            "BurstCount": 12000,
+            "Color": [
+                0.9,
+                0.45,
+                1.3,
+                1.0
+            ],
+            "ColorEnd": [
+                0.3,
+                0.08,
+                0.5,
+                0.0
+            ],
+            "ColorStart": [
+                0.9,
+                0.45,
+                1.3,
+                1.0
+            ],
+            "ConeAngle": [
+                0.0,
+                0.0
+            ],
+            "Delay": 0.0,
+            "Drag": 0.8,
+            "EmissionMode": 0,
+            "Fade": [
+                0.05,
+                0.35
+            ],
+            "FresnelPower": 0.10000000149011612,
+            "FresnelStrength": 0,
+            "GradientTexturePath": "",
+            "Gravity": 0.05,
+            "LegacyRadius": [
+                0,
+                0
+            ],
+            "Lifespan": [
+                0.55,
+                1.1
+            ],
+            "MaskTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+            "MaxCount": 16384,
+            "MeshVertexSampleCount": 4096,
+            "Name": "FinishDissolveDust",
+            "NoiseFrequency": 0.55,
+            "NoiseSpeed": 0.45,
+            "NoiseStrength": 0.65,
+            "OrbitVelocity": 0.0,
+            "PosOffset": [
+                0,
+                0,
+                0
+            ],
+            "RadialVelocity": 0.0,
+            "RenderType": 0,
+            "RotationSpeed": [
+                -1.1,
+                1.1
+            ],
+            "ShapeEnd": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "ShapeSize": [
+                1,
+                1,
+                1
+            ],
+            "ShapeStart": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "Size": [
+                0.14,
+                0.035
+            ],
+            "SizeRandomEnd": [
+                0.8,
+                1.3
+            ],
+            "SizeRandomStart": [
+                0.75,
+                1.15
+            ],
+            "SpawnDirectionMode": 0,
+            "SpawnShape": 5,
+            "SpawnSpace": 0,
+            "Speed": [
+                0.25,
+                0.9
+            ],
+            "SpriteAnimationFps": 12.0,
+            "SpriteAnimationLoop": 1,
+            "SpriteAnimationRange": [
+                0,
+                0
+            ],
+            "SpriteSheetIndex": [
+                0,
+                0
+            ],
+            "StretchMax": 100.0,
+            "StretchScale": 0.03999999910593033,
+            "TexturePath": "Data/Texture/Particle/TransitionViscousMud.png",
+            "TextureSplitCount": [
+                1,
+                1
+            ],
+            "UseColorOverLife": 1,
+            "UseFresnel": 0,
+            "UseGradient": 0,
+            "UseMask": 0,
+            "UseRandomSize": 1,
+            "UseSpriteAnimation": 0,
+            "VerticalSpawnRange": 0.0,
+            "Wind": [
+                0,
+                0,
+                0
+            ],
+            "gradientDirection": 0,
+            "gradientEndUv": 1.0,
+            "gradientFixedUv": 0.5,
+            "gradientSampleMode": 0,
+            "gradientStartUv": 0.0,
+            "gradientTexturePath": "",
+            "maskTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+            "shadeGradientDirection": 0,
+            "shadeGradientEndUv": 1.0,
+            "shadeGradientFixedUv": 0.5,
+            "shadeGradientSampleMode": 0,
+            "shadeGradientStartUv": 0.0,
+            "shadeGradientTexturePath": "",
+            "texturePath": "Data/Texture/Particle/TransitionViscousMud.png",
+            "useGradientTexture": 0,
+            "useShadeGradientTexture": 0,
+            "MaterialPath": "",
+            "MaterialPaths": []
+        }
+    ],
+    "IsPlaying": false
+}

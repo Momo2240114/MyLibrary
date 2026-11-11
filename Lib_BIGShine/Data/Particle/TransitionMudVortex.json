@@ -1,0 +1,320 @@
+{
+    "AssetPath": "Data/Particle/TransitionMudVortex.json",
+    "AssetType": "ParticleEffect",
+    "AssetVersion": 1,
+    "Emitters": [
+        {
+            "Acceleration": [
+                0,
+                -0.6,
+                0
+            ],
+            "BlendMode": 0,
+            "BurstCount": 110,
+            "Color": [
+                0.065,
+                0.002,
+                0.006,
+                0.94
+            ],
+            "ColorEnd": [
+                0.018,
+                0.001,
+                0.003,
+                0
+            ],
+            "ColorStart": [
+                0.065,
+                0.002,
+                0.006,
+                0.94
+            ],
+            "ConeAngle": [
+                0.0,
+                0.0
+            ],
+            "Delay": 0.0,
+            "Drag": 1.9,
+            "EmissionMode": 0,
+            "Fade": [
+                0.5,
+                1.8
+            ],
+            "FresnelPower": 0.10000000149011612,
+            "FresnelStrength": 0,
+            "GradientTexturePath": "",
+            "Gravity": -0.1,
+            "LegacyRadius": [
+                0,
+                0
+            ],
+            "Lifespan": [
+                2.5,
+                3.8
+            ],
+            "MaskTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+            "MaxCount": 768,
+            "MeshVertexSampleCount": 512,
+            "Name": "VortexChunks0",
+            "NoiseFrequency": 0.38,
+            "NoiseSpeed": 0.28,
+            "NoiseStrength": 0.5,
+            "OrbitVelocity": 9,
+            "PosOffset": [
+                0,
+                0,
+                0
+            ],
+            "RadialVelocity": -1.1,
+            "RenderType": 0,
+            "RotationSpeed": [
+                -1.1,
+                1.1
+            ],
+            "ShapeEnd": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "ShapeSize": [
+                14,
+                14,
+                14
+            ],
+            "ShapeStart": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "Size": [
+                0.9,
+                0.5
+            ],
+            "SizeRandomEnd": [
+                0.8,
+                1.3
+            ],
+            "SizeRandomStart": [
+                0.5,
+                1.8
+            ],
+            "SpawnDirectionMode": 2,
+            "SpawnShape": 3,
+            "SpawnSpace": 0,
+            "Speed": [
+                0.6,
+                1.4
+            ],
+            "SpriteAnimationFps": 12.0,
+            "SpriteAnimationLoop": 1,
+            "SpriteAnimationRange": [
+                0,
+                0
+            ],
+            "SpriteSheetIndex": [
+                0,
+                0
+            ],
+            "StretchMax": 100.0,
+            "StretchScale": 0.03999999910593033,
+            "TexturePath": "Data/Texture/Particle/TransitionViscousMud.png",
+            "TextureSplitCount": [
+                1,
+                1
+            ],
+            "UseColorOverLife": 1,
+            "UseFresnel": 0,
+            "UseGradient": 0,
+            "UseMask": 1,
+            "UseRandomSize": 1,
+            "UseSpriteAnimation": 0,
+            "VerticalSpawnRange": 0.0,
+            "Wind": [
+                0,
+                0,
+                0
+            ],
+            "gradientDirection": 0,
+            "gradientEndUv": 1.0,
+            "gradientFixedUv": 0.5,
+            "gradientSampleMode": 0,
+            "gradientStartUv": 0.0,
+            "gradientTexturePath": "",
+            "maskTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+            "shadeGradientDirection": 0,
+            "shadeGradientEndUv": 1.0,
+            "shadeGradientFixedUv": 0.5,
+            "shadeGradientSampleMode": 0,
+            "shadeGradientStartUv": 0.0,
+            "shadeGradientTexturePath": "",
+            "texturePath": "Data/Texture/Particle/TransitionViscousMud.png",
+            "useGradientTexture": 0,
+            "useShadeGradientTexture": 0,
+            "MaterialPath": "",
+            "MaterialPaths": [],
+            "UseTargetAttraction": 1,
+            "TargetAttractionStrength": 4.2,
+            "TargetAttractionRange": 14,
+            "TargetAttractionFalloff": 0.8
+        },
+        {
+            "Acceleration": [
+                0,
+                -0.6,
+                0
+            ],
+            "BlendMode": 0,
+            "BurstCount": 110,
+            "Color": [
+                0.78,
+                0.008,
+                0.018,
+                0.82
+            ],
+            "ColorEnd": [
+                0.2,
+                0.002,
+                0.006,
+                0
+            ],
+            "ColorStart": [
+                0.78,
+                0.008,
+                0.018,
+                0.82
+            ],
+            "ConeAngle": [
+                0.0,
+                0.0
+            ],
+            "Delay": 0.0,
+            "Drag": 1.9,
+            "EmissionMode": 0,
+            "Fade": [
+                0.5,
+                1.8
+            ],
+            "FresnelPower": 0.10000000149011612,
+            "FresnelStrength": 0,
+            "GradientTexturePath": "",
+            "Gravity": -0.1,
+            "LegacyRadius": [
+                0,
+                0
+            ],
+            "Lifespan": [
+                2.5,
+                3.8
+            ],
+            "MaskTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+            "MaxCount": 768,
+            "MeshVertexSampleCount": 512,
+            "Name": "VortexChunks1",
+            "NoiseFrequency": 0.38,
+            "NoiseSpeed": 0.28,
+            "NoiseStrength": 0.5,
+            "OrbitVelocity": -12,
+            "PosOffset": [
+                0,
+                0,
+                0
+            ],
+            "RadialVelocity": -1.1,
+            "RenderType": 0,
+            "RotationSpeed": [
+                -1.1,
+                1.1
+            ],
+            "ShapeEnd": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "ShapeSize": [
+                14,
+                14,
+                14
+            ],
+            "ShapeStart": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "Size": [
+                0.9,
+                0.5
+            ],
+            "SizeRandomEnd": [
+                0.8,
+                1.3
+            ],
+            "SizeRandomStart": [
+                0.5,
+                1.8
+            ],
+            "SpawnDirectionMode": 2,
+            "SpawnShape": 3,
+            "SpawnSpace": 0,
+            "Speed": [
+                0.6,
+                1.4
+            ],
+            "SpriteAnimationFps": 12.0,
+            "SpriteAnimationLoop": 1,
+            "SpriteAnimationRange": [
+                0,
+                0
+            ],
+            "SpriteSheetIndex": [
+                0,
+                0
+            ],
+            "StretchMax": 100.0,
+            "StretchScale": 0.03999999910593033,
+            "TexturePath": "Data/Texture/Particle/TransitionViscousMud.png",
+            "TextureSplitCount": [
+                1,
+                1
+            ],
+            "UseColorOverLife": 1,
+            "UseFresnel": 0,
+            "UseGradient": 0,
+            "UseMask": 1,
+            "UseRandomSize": 1,
+            "UseSpriteAnimation": 0,
+            "VerticalSpawnRange": 0.0,
+            "Wind": [
+                0,
+                0,
+                0
+            ],
+            "gradientDirection": 0,
+            "gradientEndUv": 1.0,
+            "gradientFixedUv": 0.5,
+            "gradientSampleMode": 0,
+            "gradientStartUv": 0.0,
+            "gradientTexturePath": "",
+            "maskTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+            "shadeGradientDirection": 0,
+            "shadeGradientEndUv": 1.0,
+            "shadeGradientFixedUv": 0.5,
+            "shadeGradientSampleMode": 0,
+            "shadeGradientStartUv": 0.0,
+            "shadeGradientTexturePath": "",
+            "texturePath": "Data/Texture/Particle/TransitionViscousMud.png",
+            "useGradientTexture": 0,
+            "useShadeGradientTexture": 0,
+            "MaterialPath": "",
+            "MaterialPaths": [],
+            "UseTargetAttraction": 1,
+            "TargetAttractionStrength": 4.2,
+            "TargetAttractionRange": 14,
+            "TargetAttractionFalloff": 0.8
+        }
+    ],
+    "IsPlaying": false,
+    "MeshSourceObjectName": "",
+    "EmitDissolveBoundary": false,
+    "DissolveBoundaryBand": 0.24,
+    "AttractionTargetName": "TransitionMudVortex"
+}

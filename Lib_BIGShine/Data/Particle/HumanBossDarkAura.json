@@ -1,0 +1,512 @@
+{
+    "AssetPath": "Data/Particle/HumanBossDarkAura.json",
+    "AssetType": "ParticleEffect",
+    "AssetVersion": 1,
+    "AttractionTargetName": "",
+    "DissolveBoundaryBand": 0.15000000596046448,
+    "EmitDissolveBoundary": false,
+    "Emitters": [
+        {
+            "Acceleration": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "BlendMode": 0,
+            "BurstCount": 40,
+            "Color": [
+                0.03999999910593033,
+                0.012000000104308128,
+                0.07000000029802322,
+                0.3199999928474426
+            ],
+            "ColorEnd": [
+                0.009999999776482582,
+                0.004999999888241291,
+                0.029999999329447746,
+                0.0
+            ],
+            "ColorStart": [
+                0.03921568766236305,
+                0.0117647061124444,
+                0.07058823853731155,
+                0.3921568691730499
+            ],
+            "ConeAngle": [
+                5.0,
+                35.0
+            ],
+            "Delay": 0.0,
+            "Drag": 1.0,
+            "EmissionAxis": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "EmissionMode": 0,
+            "Fade": [
+                0.11999999731779099,
+                0.4000000059604645
+            ],
+            "FresnelPower": 2.0,
+            "FresnelStrength": 1.0,
+            "GradientTexturePath": "",
+            "Gravity": 0.10000000149011612,
+            "LegacyRadius": [
+                0.029999999329447746,
+                0.07999999821186066
+            ],
+            "Lifespan": [
+                0.800000011920929,
+                1.7000000476837158
+            ],
+            "MaskTexturePath": "",
+            "MaterialPath": "",
+            "MaterialPaths": [
+                ""
+            ],
+            "MaxCount": 384,
+            "MeshVertexSampleCount": 192,
+            "Name": "DarkAuraSmoke",
+            "NoiseFrequency": 1.600000023841858,
+            "NoiseSpeed": 0.800000011920929,
+            "NoiseStrength": 0.3499999940395355,
+            "OrbitVelocity": 0.6000000238418579,
+            "PosOffset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "RadialVelocity": 0.11999999731779099,
+            "RenderType": 0,
+            "RotationSpeed": [
+                0.0,
+                0.0
+            ],
+            "ShapeEnd": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "ShapeSize": [
+                0.8500000238418579,
+                0.800000011920929,
+                0.8500000238418579
+            ],
+            "ShapeStart": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "Size": [
+                0.20000000298023224,
+                0.46000000834465027
+            ],
+            "SizeRandomEnd": [
+                1.100000023841858,
+                1.7000000476837158
+            ],
+            "SizeRandomStart": [
+                0.6499999761581421,
+                1.149999976158142
+            ],
+            "SpawnDirectionMode": 0,
+            "SpawnShape": 5,
+            "SpawnSpace": 0,
+            "Speed": [
+                0.25,
+                0.6499999761581421
+            ],
+            "SpriteAnimationFps": 12.0,
+            "SpriteAnimationLoop": 1,
+            "SpriteAnimationRange": [
+                0,
+                0
+            ],
+            "SpriteSheetIndex": [
+                0,
+                0
+            ],
+            "StretchMax": 100.0,
+            "StretchScale": 0.03999999910593033,
+            "TargetAttractionFalloff": 1.0,
+            "TargetAttractionRange": 0.0,
+            "TargetAttractionStrength": 0.0,
+            "TargetPosition": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "TexturePath": "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/smoke_03.png",
+            "TextureSplitCount": [
+                1,
+                1
+            ],
+            "UseColorOverLife": 1,
+            "UseFresnel": 0,
+            "UseGradient": 0,
+            "UseMask": 0,
+            "UseRandomSize": 1,
+            "UseSpriteAnimation": 0,
+            "UseTargetAttraction": 0,
+            "VerticalSpawnRange": 0.0,
+            "Wind": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "gradientDirection": 0,
+            "gradientEndUv": 1.0,
+            "gradientFixedUv": 0.5,
+            "gradientSampleMode": 0,
+            "gradientStartUv": 0.0,
+            "gradientTexturePath": "",
+            "maskTexturePath": "",
+            "shadeGradientDirection": 0,
+            "shadeGradientEndUv": 1.0,
+            "shadeGradientFixedUv": 0.5,
+            "shadeGradientSampleMode": 0,
+            "shadeGradientStartUv": 0.0,
+            "shadeGradientTexturePath": "",
+            "texturePath": "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/smoke_03.png",
+            "useGradientTexture": 0,
+            "useShadeGradientTexture": 0
+        },
+        {
+            "Acceleration": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "BlendMode": 1,
+            "BurstCount": 24,
+            "Color": [
+                0.3499999940395355,
+                0.02500000037252903,
+                0.6499999761581421,
+                0.4000000059604645
+            ],
+            "ColorEnd": [
+                0.12156862765550613,
+                0.003921568859368563,
+                0.3019607961177826,
+                0.772549033164978
+            ],
+            "ColorStart": [
+                0.3490196168422699,
+                0.0235294122248888,
+                0.6509804129600525,
+                0.4431372582912445
+            ],
+            "ConeAngle": [
+                5.0,
+                35.0
+            ],
+            "Delay": 0.0,
+            "Drag": 0.699999988079071,
+            "EmissionAxis": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "EmissionMode": 0,
+            "Fade": [
+                0.07999999821186066,
+                0.2199999988079071
+            ],
+            "FresnelPower": 2.0,
+            "FresnelStrength": 1.0,
+            "GradientTexturePath": "",
+            "Gravity": 0.10000000149011612,
+            "LegacyRadius": [
+                0.029999999329447746,
+                0.07999999821186066
+            ],
+            "Lifespan": [
+                0.4000000059604645,
+                0.8999999761581421
+            ],
+            "MaskTexturePath": "",
+            "MaterialPath": "",
+            "MaterialPaths": [
+                ""
+            ],
+            "MaxCount": 192,
+            "MeshVertexSampleCount": 192,
+            "Name": "DarkAuraVioletWisps",
+            "NoiseFrequency": 1.600000023841858,
+            "NoiseSpeed": 0.800000011920929,
+            "NoiseStrength": 0.3499999940395355,
+            "OrbitVelocity": 2.5,
+            "PosOffset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "RadialVelocity": 0.20000000298023224,
+            "RenderType": 1,
+            "RotationSpeed": [
+                0.0,
+                0.0
+            ],
+            "ShapeEnd": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "ShapeSize": [
+                0.8500000238418579,
+                0.800000011920929,
+                0.8500000238418579
+            ],
+            "ShapeStart": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "Size": [
+                0.17000000178813934,
+                0.5799999833106995
+            ],
+            "SizeRandomEnd": [
+                1.100000023841858,
+                1.7000000476837158
+            ],
+            "SizeRandomStart": [
+                0.6499999761581421,
+                1.149999976158142
+            ],
+            "SpawnDirectionMode": 0,
+            "SpawnShape": 5,
+            "SpawnSpace": 0,
+            "Speed": [
+                0.6000000238418579,
+                1.2000000476837158
+            ],
+            "SpriteAnimationFps": 12.0,
+            "SpriteAnimationLoop": 1,
+            "SpriteAnimationRange": [
+                0,
+                0
+            ],
+            "SpriteSheetIndex": [
+                0,
+                0
+            ],
+            "StretchMax": 0.8500000238418579,
+            "StretchScale": 0.3499999940395355,
+            "TargetAttractionFalloff": 1.0,
+            "TargetAttractionRange": 0.0,
+            "TargetAttractionStrength": 0.0,
+            "TargetPosition": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "TexturePath": "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/smoke_03.png",
+            "TextureSplitCount": [
+                1,
+                1
+            ],
+            "UseColorOverLife": 1,
+            "UseFresnel": 0,
+            "UseGradient": 0,
+            "UseMask": 0,
+            "UseRandomSize": 1,
+            "UseSpriteAnimation": 0,
+            "UseTargetAttraction": 0,
+            "VerticalSpawnRange": 0.0,
+            "Wind": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "gradientDirection": 0,
+            "gradientEndUv": 1.0,
+            "gradientFixedUv": 0.5,
+            "gradientSampleMode": 0,
+            "gradientStartUv": 0.0,
+            "gradientTexturePath": "",
+            "maskTexturePath": "",
+            "shadeGradientDirection": 0,
+            "shadeGradientEndUv": 1.0,
+            "shadeGradientFixedUv": 0.5,
+            "shadeGradientSampleMode": 0,
+            "shadeGradientStartUv": 0.0,
+            "shadeGradientTexturePath": "",
+            "texturePath": "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/smoke_03.png",
+            "useGradientTexture": 0,
+            "useShadeGradientTexture": 0
+        },
+        {
+            "Acceleration": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "BlendMode": 1,
+            "BurstCount": 10,
+            "Color": [
+                0.6499999761581421,
+                0.11999999731779099,
+                1.0,
+                0.800000011920929
+            ],
+            "ColorEnd": [
+                0.20000000298023224,
+                0.01568627543747425,
+                0.501960813999176,
+                1.0
+            ],
+            "ColorStart": [
+                0.6499999761581421,
+                0.11999999731779099,
+                1.0,
+                0.800000011920929
+            ],
+            "ConeAngle": [
+                5.0,
+                35.0
+            ],
+            "Delay": 0.0,
+            "Drag": 0.699999988079071,
+            "EmissionAxis": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "EmissionMode": 0,
+            "Fade": [
+                0.029999999329447746,
+                0.20000000298023224
+            ],
+            "FresnelPower": 2.0,
+            "FresnelStrength": 1.0,
+            "GradientTexturePath": "",
+            "Gravity": 0.10000000149011612,
+            "LegacyRadius": [
+                0.029999999329447746,
+                0.07999999821186066
+            ],
+            "Lifespan": [
+                0.30000001192092896,
+                0.6499999761581421
+            ],
+            "MaskTexturePath": "",
+            "MaterialPath": "",
+            "MaterialPaths": [],
+            "MaxCount": 96,
+            "MeshVertexSampleCount": 192,
+            "Name": "DarkAuraMotes",
+            "NoiseFrequency": 1.600000023841858,
+            "NoiseSpeed": 0.800000011920929,
+            "NoiseStrength": 0.3499999940395355,
+            "OrbitVelocity": 1.2000000476837158,
+            "PosOffset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "RadialVelocity": 0.20000000298023224,
+            "RenderType": 0,
+            "RotationSpeed": [
+                0.0,
+                0.0
+            ],
+            "ShapeEnd": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "ShapeSize": [
+                0.8500000238418579,
+                0.800000011920929,
+                0.8500000238418579
+            ],
+            "ShapeStart": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "Size": [
+                0.02500000037252903,
+                0.33000001311302185
+            ],
+            "SizeRandomEnd": [
+                1.100000023841858,
+                1.7000000476837158
+            ],
+            "SizeRandomStart": [
+                0.6499999761581421,
+                1.149999976158142
+            ],
+            "SpawnDirectionMode": 0,
+            "SpawnShape": 5,
+            "SpawnSpace": 0,
+            "Speed": [
+                0.4000000059604645,
+                1.100000023841858
+            ],
+            "SpriteAnimationFps": 12.0,
+            "SpriteAnimationLoop": 1,
+            "SpriteAnimationRange": [
+                0,
+                0
+            ],
+            "SpriteSheetIndex": [
+                0,
+                0
+            ],
+            "StretchMax": 0.8500000238418579,
+            "StretchScale": 0.3499999940395355,
+            "TargetAttractionFalloff": 1.0,
+            "TargetAttractionRange": 0.0,
+            "TargetAttractionStrength": 0.0,
+            "TargetPosition": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "TexturePath": "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/smoke_03.png",
+            "TextureSplitCount": [
+                1,
+                1
+            ],
+            "UseColorOverLife": 1,
+            "UseFresnel": 0,
+            "UseGradient": 0,
+            "UseMask": 0,
+            "UseRandomSize": 1,
+            "UseSpriteAnimation": 0,
+            "UseTargetAttraction": 0,
+            "VerticalSpawnRange": 0.0,
+            "Wind": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "gradientDirection": 0,
+            "gradientEndUv": 1.0,
+            "gradientFixedUv": 0.5,
+            "gradientSampleMode": 0,
+            "gradientStartUv": 0.0,
+            "gradientTexturePath": "",
+            "maskTexturePath": "",
+            "shadeGradientDirection": 0,
+            "shadeGradientEndUv": 1.0,
+            "shadeGradientFixedUv": 0.5,
+            "shadeGradientSampleMode": 0,
+            "shadeGradientStartUv": 0.0,
+            "shadeGradientTexturePath": "",
+            "texturePath": "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/smoke_03.png",
+            "useGradientTexture": 0,
+            "useShadeGradientTexture": 0
+        }
+    ],
+    "HealthOwnerName": "",
+    "HealthyEmissionMultiplier": 1.0,
+    "IsPlaying": true,
+    "LowHealthEmissionMultiplier": 3.0,
+    "MeshSourceObjectName": "HumanBoss",
+    "ScaleEmissionByHealth": true
+}
