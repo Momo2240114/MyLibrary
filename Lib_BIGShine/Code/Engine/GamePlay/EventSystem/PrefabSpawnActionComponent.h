@@ -17,6 +17,7 @@ struct PrefabSpawnActionEntry
     std::string actorName;
     bool suspendGameplay = false;
     bool saveSpawnedObjects = false;
+    bool showInHierarchy = false; // 保存せずに、本体と子をEditorのObjectリストへ表示する。
 };
 
 // Prefabの先読み、Action生成、生成した階層の所有権を管理する。
@@ -68,6 +69,7 @@ private:
     std::string commitActionName = "CommitActor";
     std::string commitActorName;
     std::string cacheError;
+    std::string lastSpawnStatus = "No spawn action requested";
     bool preloadModels = true;
     bool cachePrepared = false;
 };

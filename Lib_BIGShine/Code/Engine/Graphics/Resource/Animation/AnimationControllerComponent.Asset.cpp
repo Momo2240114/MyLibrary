@@ -12,6 +12,7 @@
 #include "PoseLibraryResourceManager.h"
 #include "IKMapComponent.h"
 #include "Engine/Debug/TracyProfiler.h"
+#include "Engine/GamePlay/Combat/AttackTelegraphRuntime.h"
 
 #include <imgui.h>
 #include <imgui_stdlib.h>
@@ -846,6 +847,8 @@ void AnimationControllerComponent::SaveAsset(const std::string& assetName_)
                 e.eventTemplateType == ANIMATION_EVENT_TEMPLATE_TYPE::VFX_TEMPLATE ? "VFX_TEMPLATE" :
                 e.eventTemplateType == ANIMATION_EVENT_TEMPLATE_TYPE::SOUND_TEMPLATE ? "SOUND_TEMPLATE" : "NONE"},
             {"attackTemplateId", e.attackTemplateId},
+            {"telegraph", AttackTelegraphRuntime::SerializeSettings(e.telegraph)},
+            {"telegraphHitStart", e.telegraphHitStart},
             {"ownerTarget", e.ownerTarget},
             {"meshVFXAssetPath", e.meshVFXAssetPath},
             {"attachNodeName", e.attachNodeName},
@@ -890,6 +893,8 @@ void AnimationControllerComponent::SaveAsset(const std::string& assetName_)
             }
         }
         e.attackTemplateId = j.value("attackTemplateId", std::string{});
+        e.telegraph = AttackTelegraphRuntime::DeserializeSettings(j.value("telegraph", nlohmann::json::object()));
+        e.telegraphHitStart = j.value("telegraphHitStart", false);
         e.ownerTarget = j.value("ownerTarget", std::string("Self"));
         auto readVector3_ = [&j](const char* key_, const DirectX::XMFLOAT3& fallback_)
             {
@@ -929,6 +934,8 @@ void AnimationControllerComponent::SaveAsset(const std::string& assetName_)
             {"rootMotionScale", s.rootMotionScale},
             {"rootMotionScaleCurveName", s.rootMotionScaleCurveName},
             {"speedCurveName", s.speedCurveName},
+            {"playbackSpeedParamName", s.playbackSpeedParamName},
+            {"sampleWeaponHitBoxes", s.sampleWeaponHitBoxes},
             {"events", s.events},
             // Single用
             {"animationIndex", s.animationIndex},
@@ -995,6 +1002,8 @@ void from_json(const nlohmann::json& j, AnimState& s)
     s.rootMotionScale = j.value("rootMotionScale", 1.0f);
     s.rootMotionScaleCurveName = j.value("rootMotionScaleCurveName", "");
     s.speedCurveName = j.value("speedCurveName", "");
+    s.playbackSpeedParamName = j.value("playbackSpeedParamName", "");
+    s.sampleWeaponHitBoxes = j.value("sampleWeaponHitBoxes", false);
 
     // Single用復元
     s.animationIndex = j.value("animationIndex", -1);

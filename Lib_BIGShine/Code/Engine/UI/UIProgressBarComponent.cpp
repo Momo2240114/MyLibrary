@@ -106,6 +106,7 @@ void UIProgressBarComponent::Start()
     BS_PROFILE_SCOPE("UIProgressBarComponent::Start");
     // 保存値を安全範囲へ丸め、参照Widgetを解決して初期表示へ反映する。
     targetRate = ClampRate(targetRate);
+    observedTargetRate = targetRate;
     currentRate = ClampRate(currentRate);
     damageDelayRate = ClampRate(damageDelayRate);
     healDelayRate = ClampRate(healDelayRate);
@@ -121,18 +122,25 @@ void UIProgressBarComponent::Update(float deltaTime_)
     if ((!backgroundWidgetId.empty() && backgroundWidget.expired()) ||
         (!flashWidgetId.empty() && (flashWidget.expired() || flashSprite.expired())) ||
         (!edgeHighlightWidgetId.empty() && (edgeHighlightWidget.expired() || edgeHighlightSprite.expired())) ||
-        currentWidget.expired() ||
-        damageDelayWidget.expired() || healDelayWidget.expired())
+        (!currentWidgetId.empty() && currentWidget.expired()) ||
+        (!damageDelayWidgetId.empty() && damageDelayWidget.expired()) ||
+        (!healDelayWidgetId.empty() && healDelayWidget.expired()))
     {
         // 対象WidgetやSpriteが後から生成/破棄された場合に再解決する。
         ResolveWidgets();
     }
 
-    const float previousTargetRate_ = targetRate;
+    const float previousTargetRate_ = observedTargetRate;
     targetRate = ResolveTargetRate();
+    observedTargetRate = targetRate;
 
     // 目標値が変化した瞬間にFlashを開始し、減少/増加で色を切り替える。
     const float targetDelta_ = targetRate - previousTargetRate_;
+    const float safeDeltaTime_ = (std::max)(0.0f, deltaTime_);
+    // 被弾が続いた場合は待機時間を取り直し、最後の被弾から遅延表示を開始する。
+    if (targetDelta_ < -0.0001f) damageDelayTimer = damageDelayDuration;
+    const float damageFollowTime_ = (std::max)(0.0f, safeDeltaTime_ - damageDelayTimer);
+    damageDelayTimer = (std::max)(0.0f, damageDelayTimer - safeDeltaTime_);
     if (std::fabs(targetDelta_) > 0.0001f)
     {
         flashTimer = (std::max)(0.0f, flashDuration);
@@ -146,7 +154,7 @@ void UIProgressBarComponent::Update(float deltaTime_)
         // ダメージ時は現在値を即座に減らし、DamageDelayだけ遅れて追わせる。
         currentRate = targetRate;
         healDelayRate = targetRate;
-        damageDelayRate = MoveRate(damageDelayRate, targetRate, decreaseDelaySpeed, deltaTime_);
+        damageDelayRate = MoveRate(damageDelayRate, targetRate, decreaseDelaySpeed, damageFollowTime_);
     }
     else if (targetRate > currentRate)
     {
@@ -158,7 +166,7 @@ void UIProgressBarComponent::Update(float deltaTime_)
     else
     {
         // 目標値が変わっていない間も、遅延BarだけはTargetへ近づけ続ける。
-        damageDelayRate = MoveRate(damageDelayRate, targetRate, decreaseDelaySpeed, deltaTime_);
+        damageDelayRate = MoveRate(damageDelayRate, targetRate, decreaseDelaySpeed, damageFollowTime_);
         healDelayRate = targetRate;
     }
 
@@ -189,6 +197,8 @@ void UIProgressBarComponent::Gui()
         ImGui::DragFloat("Target Rate", &targetRate, 0.01f, 0.0f, 1.0f);
     }
     ImGui::DragFloat("Decrease Delay Speed", &decreaseDelaySpeed, 0.01f, 0.01f, 10.0f);
+    ImGui::DragFloat("Damage Delay Duration", &damageDelayDuration, 0.01f, 0.0f, 3.0f);
+    ImGui::Checkbox("Crop Fill UV", &cropFillUV);
     ImGui::DragFloat("Increase Delay Speed", &increaseDelaySpeed, 0.01f, 0.01f, 10.0f);
     ImGui::DragFloat("Flash Duration", &flashDuration, 0.01f, 0.0f, 3.0f);
     ImGui::DragFloat("Edge Highlight Width", &edgeHighlightWidth, 0.5f, 1.0f, 64.0f);
@@ -221,6 +231,8 @@ void UIProgressBarComponent::Serialize(nlohmann::json& json_) const
     json_["DamageDelayRate"] = damageDelayRate;
     json_["HealDelayRate"] = healDelayRate;
     json_["DecreaseDelaySpeed"] = decreaseDelaySpeed;
+    json_["DamageDelayDuration"] = damageDelayDuration;
+    json_["CropFillUV"] = cropFillUV;
     json_["IncreaseDelaySpeed"] = increaseDelaySpeed;
     json_["FlashDuration"] = flashDuration;
     json_["FlashTimer"] = flashTimer;
@@ -247,6 +259,8 @@ void UIProgressBarComponent::Deserialize(const nlohmann::json& json_)
     damageDelayRate = ClampRate(json_.value("DamageDelayRate", currentRate));
     healDelayRate = ClampRate(json_.value("HealDelayRate", currentRate));
     decreaseDelaySpeed = (std::max)(0.01f, json_.value("DecreaseDelaySpeed", decreaseDelaySpeed));
+    damageDelayDuration = (std::max)(0.0f, json_.value("DamageDelayDuration", damageDelayDuration));
+    cropFillUV = json_.value("CropFillUV", cropFillUV);
     increaseDelaySpeed = (std::max)(0.01f, json_.value("IncreaseDelaySpeed", increaseDelaySpeed));
     flashDuration = (std::max)(0.0f, json_.value("FlashDuration", flashDuration));
     flashTimer = (std::max)(0.0f, json_.value("FlashTimer", flashTimer));
@@ -259,9 +273,27 @@ void UIProgressBarComponent::Deserialize(const nlohmann::json& json_)
     // Widget参照はScene読込後のStart/Updateで解決する。
 }
 
+bool UIProgressBarComponent::HasRemainingFill() const
+{
+    const auto trail_ = damageDelayWidget.lock();
+    return currentRate > 0.0f ||
+        (damageDelayRate > 0.0f && trail_ && trail_->IsEnabled() && trail_->IsVisible());
+}
+
 void UIProgressBarComponent::SetTargetRate(float targetRate_)
 {
     targetRate = ClampRate(targetRate_);
+}
+
+void UIProgressBarComponent::ResetDisplayedRate(float rate_)
+{
+    BS_PROFILE_SCOPE("UIProgressBarComponent::ResetDisplayedRate");
+    targetRate = currentRate = damageDelayRate = healDelayRate = ClampRate(rate_);
+    observedTargetRate = targetRate;
+    damageDelayTimer = 0.0f;
+    flashTimer = 0.0f;
+    ApplyLayoutRates();
+    ApplyEffectVisuals();
 }
 
 void UIProgressBarComponent::ResolveWidgets()
@@ -339,6 +371,19 @@ void UIProgressBarComponent::ApplyRateToWidget(UIWidgetComponent* widget_, float
     rectTransform_.pivot.x = 0.0f;
     rectTransform_.anchoredPosition.x = 0.0f;
     widget_->MarkLayoutDirty();
+    if (cropFillUV)
+    {
+        // 表示幅と同じ割合で元画像の右端を切り、ゲージ模様や端部の引き伸ばしを防ぐ。
+        const auto object_ = widget_->GetGameObject();
+        const auto sprite_ = object_ ? object_->GetComponent<SpriteRenderer>() : nullptr;
+        if (sprite_)
+        {
+            const auto textureSize_ = sprite_->GetTextureSize();
+            sprite_->SetUVRect(0.0f, 0.0f, textureSize_.x * ClampRate(rate_), textureSize_.y);
+            // Widgetは最小1pxへ丸められるため、残量0ではSprite自体を描画対象から外す。
+            sprite_->SetRuntimeVisible(rate_ > 0.0f);
+        }
+    }
 }
 
 void UIProgressBarComponent::ApplyFlashLayout()
@@ -411,13 +456,13 @@ void UIProgressBarComponent::ApplyEffectVisuals()
 
     if (const std::shared_ptr<SpriteRenderer> sprite_ = flashSprite.lock())
     {
-        sprite_->SetColor(WithAlpha(activeFlashColor, activeFlashColor.w * easedFlashRate_));
+        sprite_->SetRuntimeColor(WithAlpha(activeFlashColor, activeFlashColor.w * easedFlashRate_));
     }
 
     if (const std::shared_ptr<SpriteRenderer> sprite_ = edgeHighlightSprite.lock())
     {
         const float alpha_ = std::clamp(edgeHighlightBaseAlpha + easedFlashRate_ * 0.35f, 0.0f, 1.0f);
-        sprite_->SetColor(WithAlpha(edgeHighlightColor, edgeHighlightColor.w * alpha_));
+        sprite_->SetRuntimeColor(WithAlpha(edgeHighlightColor, edgeHighlightColor.w * alpha_));
     }
 }
 

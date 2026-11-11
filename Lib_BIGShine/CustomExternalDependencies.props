@@ -133,7 +133,7 @@
   <!-- ========================================= -->
   <!-- Debug -->
   <!-- ========================================= -->
-	<ItemDefinitionGroup Condition="'$(Configuration)'=='Debug' and '$(Platform)'=='x64'">
+	<ItemDefinitionGroup Condition="('$(Configuration)'=='Debug' or '$(Configuration)'=='Engine_Debug' or '$(Configuration)'=='Game_Debug') and '$(Platform)'=='x64'">
 		<ClCompile>
 			<PreprocessorDefinitions>
 				TRACY_ENABLE;
@@ -151,7 +151,7 @@
 		</Link>
 	</ItemDefinitionGroup>
 
-  <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug' and '$(Platform)'=='Win32'">
+  <ItemDefinitionGroup Condition="('$(Configuration)'=='Debug' or '$(Configuration)'=='Engine_Debug' or '$(Configuration)'=='Game_Debug') and '$(Platform)'=='Win32'">
     <Link>
       <AdditionalLibraryDirectories>
         $(VC_LibraryPath_x86);
@@ -164,7 +164,7 @@
   <!-- ========================================= -->
   <!-- Release -->
   <!-- ========================================= -->
-  <ItemDefinitionGroup Condition="'$(Configuration)'=='Release' and '$(Platform)'=='x64'">
+  <ItemDefinitionGroup Condition="('$(Configuration)'=='Release' or '$(Configuration)'=='Engine_Release') and '$(Platform)'=='x64'">
     <ClCompile>
       <PreprocessorDefinitions>
         TRACY_ENABLE;
@@ -192,7 +192,7 @@
     </Link>
   </ItemDefinitionGroup>
 
-  <ItemDefinitionGroup Condition="'$(Configuration)'=='Shipping' and '$(Platform)'=='x64'">
+  <ItemDefinitionGroup Condition="('$(Configuration)'=='Shipping' or '$(Configuration)'=='Game_Release') and '$(Platform)'=='x64'">
     <Link>
       <AdditionalLibraryDirectories>
         $(ProjectDir)External\DirectXTK-main\Bin\Desktop_2022\x64\Release;
@@ -202,7 +202,7 @@
       </AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)'=='Release' and '$(Platform)'=='Win32'">
+  <ItemDefinitionGroup Condition="('$(Configuration)'=='Release' or '$(Configuration)'=='Engine_Release') and '$(Platform)'=='Win32'">
     <Link>
       <AdditionalLibraryDirectories>
         $(ProjectDir)External\PhisXLib\lib\x64\release;
@@ -215,7 +215,7 @@
 	<!-- ========================================= -->
 	<!-- Tracy Client -->
 	<!-- ========================================= -->
-	<ItemGroup Condition="'$(Platform)'=='x64' and ('$(Configuration)'=='Debug' or '$(Configuration)'=='Release')">
+	<ItemGroup Condition="'$(Platform)'=='x64' and (('$(Configuration)'=='Debug' or '$(Configuration)'=='Engine_Debug' or '$(Configuration)'=='Game_Debug') or ('$(Configuration)'=='Release' or '$(Configuration)'=='Engine_Release'))">
 		<ClCompile Include="$(ProjectDir)External\Tracy\public\TracyClient.cpp">
 			<PrecompiledHeader>NotUsing</PrecompiledHeader>
 			<DisableSpecificWarnings>4828;%(DisableSpecificWarnings)</DisableSpecificWarnings>

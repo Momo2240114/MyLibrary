@@ -305,6 +305,13 @@ void TrailMeshComponent::SetLifeTime(float lifeTime_)
     lifeTime = (std::max)(lifeTime_, 0.001f);
 }
 
+void TrailMeshComponent::SetCrossSectionHeight(float height_)
+{
+    crossSectionHeight = (std::max)(height_, 0.0f);
+    CreateBuffers();
+    meshDirty = true;
+}
+
 void TrailMeshComponent::SetMaxSampleCount(size_t maxSampleCount_)
 {
     maxSampleCount = (std::max)(maxSampleCount_, static_cast<size_t>(2));
@@ -347,18 +354,19 @@ bool TrailMeshComponent::CreateBuffers()
     if (!device_) return false;
 
     const size_t renderSampleCount_ = CalculateRenderSampleCount(maxSampleCount, smoothStep);
+    const size_t crossSectionVertexCount_ = crossSectionHeight > 0.0f ? 3 : 2;
 
     // Trailは毎フレーム形状が変わるため、VB/IBはCPU書き込み可能なDynamicバッファにする。
     D3D11_BUFFER_DESC vertexDescription_{};
     vertexDescription_.ByteWidth = static_cast<UINT>(
-        sizeof(GltfModelCommponennt::Vertex) * renderSampleCount_ * 2);
+        sizeof(GltfModelCommponennt::Vertex) * renderSampleCount_ * crossSectionVertexCount_);
     vertexDescription_.Usage = D3D11_USAGE_DYNAMIC;
     vertexDescription_.BindFlags = D3D11_BIND_VERTEX_BUFFER;
     vertexDescription_.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
     D3D11_BUFFER_DESC indexDescription_{};
     indexDescription_.ByteWidth = static_cast<UINT>(
-        sizeof(uint32_t) * (renderSampleCount_ - 1) * 6);
+        sizeof(uint32_t) * (renderSampleCount_ - 1) * (crossSectionVertexCount_ - 1) * 6);
     indexDescription_.Usage = D3D11_USAGE_DYNAMIC;
     indexDescription_.BindFlags = D3D11_BIND_INDEX_BUFFER;
     indexDescription_.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
@@ -421,8 +429,9 @@ void TrailMeshComponent::RebuildMesh()
     }
     renderSamples_.push_back(samples.back());
 
-    vertices.reserve(renderSamples_.size() * 2);
-    indices.reserve((renderSamples_.size() - 1) * 6);
+    const uint32_t crossSectionVertexCount_ = crossSectionHeight > 0.0f ? 3u : 2u;
+    vertices.reserve(renderSamples_.size() * crossSectionVertexCount_);
+    indices.reserve((renderSamples_.size() - 1) * (crossSectionVertexCount_ - 1) * 6);
     for (size_t sampleIndex_ = 0; sampleIndex_ < renderSamples_.size(); ++sampleIndex_)
     {
         // 進行方向と左右幅から法線/接線を求め、MeshVFXのマテリアル計算に渡す。
@@ -475,19 +484,31 @@ void TrailMeshComponent::RebuildMesh()
         rightVertex_.position = renderSamples_[sampleIndex_].rightPosition;
         rightVertex_.texcoord = { 1.0f, v_ };
         vertices.push_back(leftVertex_);
+        if (crossSectionHeight > 0.0f)
+        {
+            // 左右端を地面に残し、中央の稜線を持ち上げて泥の断面を立体化する。
+            auto ridgeVertex_ = leftVertex_;
+            ridgeVertex_.position = CalculateCenter(leftVertex_.position, rightVertex_.position);
+            ridgeVertex_.position.y += crossSectionHeight;
+            ridgeVertex_.texcoord = {0.5f,v_};
+            vertices.push_back(ridgeVertex_);
+        }
         vertices.push_back(rightVertex_);
     }
 
     for (uint32_t sampleIndex_ = 0;
         sampleIndex_ + 1 < static_cast<uint32_t>(renderSamples_.size()); ++sampleIndex_)
     {
-        // 隣り合う左右2頂点を四角形としてつなぎ、帯状のTrailメッシュを作る。
-        const uint32_t currentLeft_ = sampleIndex_ * 2;
-        const uint32_t currentRight_ = currentLeft_ + 1;
-        const uint32_t nextLeft_ = currentLeft_ + 2;
-        const uint32_t nextRight_ = currentLeft_ + 3;
-        indices.insert(indices.end(),
-            { currentLeft_, currentRight_, nextLeft_, currentRight_, nextRight_, nextLeft_ });
+        // 平面は1面、厚み付きは稜線の左右2面をつなぐ。頂点数とGPU容量を同じ断面数で揃える。
+        for (uint32_t sectionIndex_ = 0; sectionIndex_ + 1 < crossSectionVertexCount_; ++sectionIndex_)
+        {
+            const uint32_t currentLeft_ = sampleIndex_ * crossSectionVertexCount_ + sectionIndex_;
+            const uint32_t currentRight_ = currentLeft_ + 1;
+            const uint32_t nextLeft_ = currentLeft_ + crossSectionVertexCount_;
+            const uint32_t nextRight_ = nextLeft_ + 1;
+            indices.insert(indices.end(),
+                {currentLeft_,currentRight_,nextLeft_,currentRight_,nextRight_,nextLeft_});
+        }
     }
 }
 
@@ -633,6 +654,7 @@ void TrailMeshComponent::Gui()
     MeshVFXComponent::Gui();
     ImGui::SeparatorText("Trail Mesh");
     ImGui::Checkbox("Emitting", &emitting);
+    if (ImGui::DragFloat("Cross Section Height", &crossSectionHeight, 0.02f, 0.0f, 5.0f)) SetCrossSectionHeight(crossSectionHeight);
     if (ImGui::DragFloat("Life Time", &lifeTime, 0.01f, 0.001f, 10.0f)) SetLifeTime(lifeTime);
     if (ImGui::DragFloat("Minimum Sample Distance", &minimumSampleDistance, 0.001f, 0.0f, 10.0f))
     {
@@ -747,6 +769,7 @@ void TrailMeshComponent::Serialize(nlohmann::json& json_) const
     MeshVFXComponent::Serialize(json_);
     // MeshVFXの見た目設定に加え、Trail固有のサンプル寿命と粒子発生設定を保存する。
     json_["TrailLifeTime"] = lifeTime;
+    json_["TrailCrossSectionHeight"] = crossSectionHeight;
     json_["TrailMaxSampleCount"] = maxSampleCount;
     json_["TrailMinimumSampleDistance"] = minimumSampleDistance;
     json_["TrailSmoothStep"] = smoothStep;
@@ -775,6 +798,7 @@ void TrailMeshComponent::Deserialize(const nlohmann::json& json_)
     MeshVFXComponent::Deserialize(json_);
     // 読み込み値は描画バッファ確保に使うため、最低値を丸めてから状態を初期化する。
     lifeTime = (std::max)(json_.value("TrailLifeTime", 0.35f), 0.001f);
+    crossSectionHeight = (std::max)(json_.value("TrailCrossSectionHeight", 0.0f), 0.0f);
     maxSampleCount = (std::max)(json_.value("TrailMaxSampleCount", static_cast<size_t>(64)),
         static_cast<size_t>(2));
     minimumSampleDistance = (std::max)(json_.value("TrailMinimumSampleDistance", 0.01f), 0.0f);

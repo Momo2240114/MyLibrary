@@ -83,12 +83,14 @@
                     1.0,
                     1.0,
                     1.0,
-                    0.0
+                    1.0
                 ],
+                "LinearSampling": false,
                 "LocalSize": [
                     796.0,
                     134.0
                 ],
+                "SdrTexture": false,
                 "ShaderID": 0,
                 "TexturePath": "",
                 "Visible": true,
@@ -113,6 +115,7 @@
                 ],
                 "FontPath": "Data/Font/NotoSansJP-Regular.otf",
                 "FontSize": 38.0,
+                "FontStrokeWidth": 0.0,
                 "HorizontalAlign": "CENTER",
                 "MaxWidth": 780.0,
                 "Padding": 8.0,

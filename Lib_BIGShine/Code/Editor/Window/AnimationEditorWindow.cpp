@@ -18,6 +18,7 @@
 #include "Engine/Graphics/Resource/Animation/PoseLibraryResourceManager.h"
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
 #include "Engine/GamePlay/Combat/AttackTemplateManager.h"
+#include "Engine/GamePlay/Combat/AttackTelegraphRuntime.h"
 #include "Engine/Math/Curve/CurveComponent.h"
 #include "ImSequencer.h"
 #include "ImGuizmo.h"
@@ -2407,6 +2408,12 @@ void AnimationEditorWindow::DrawEventSequencer(
     const bool isVFXEvent_ =
         ev_.eventTemplateType ==
         ANIMATION_EVENT_TEMPLATE_TYPE::VFX_TEMPLATE;
+
+    // 従来の有効化Actionにも予兆設定を保存でき、Templateイベントの設定とは分けて編集する。
+    if (!isAttackTemplateEvent_) ImGui::Checkbox("Telegraph Hit Start", &ev_.telegraphHitStart);
+    if (!isAttackTemplateEvent_ && (ev_.telegraphHitStart || (ev_.startAction.find("Enable") != std::string::npos &&
+        ev_.startAction.find("HitBox") != std::string::npos)))
+        AttackTelegraphRuntime::DrawSettings(ev_.telegraph, gameObjectManager, modelComp->GetGameObject());
 
     if (isAttackTemplateEvent_)
     {

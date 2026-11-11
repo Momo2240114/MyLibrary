@@ -1,0 +1,41 @@
+{
+    "AssetType": "CurveTrack",
+    "AssetVersion": 1,
+    "Curve": {
+        "Name": "HumanBoss.ChargeTravel",
+        "Type": 3,
+        "Color": 4282694655,
+        "Visible": true,
+        "Points": [
+            [
+                0,
+                0
+            ],
+            [
+                0.5,
+                0.5
+            ],
+            [
+                1,
+                1
+            ]
+        ],
+        "PointOptions": [
+            {
+                "InterpolationType": 1,
+                "LeftTangent": 0,
+                "RightTangent": 0
+            },
+            {
+                "InterpolationType": 1,
+                "LeftTangent": 0,
+                "RightTangent": 0
+            },
+            {
+                "InterpolationType": 1,
+                "LeftTangent": 0,
+                "RightTangent": 0
+            }
+        ]
+    }
+}

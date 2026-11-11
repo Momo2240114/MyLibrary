@@ -1,5 +1,5 @@
-Texture2D sceneTex : register(t0); // Œ³‚Ì•`‰æŒ‹‰Ê
-Texture2D bloomTex : register(t1); // ‚Ú‚©‚µ‚½Œ‹‰Ê
+Texture2D sceneTex : register(t0); // å…ƒã®æç”»çµæœ
+Texture2D bloomTex : register(t1); // ã¼ã‹ã—ãŸçµæœ
 SamplerState sam : register(s0);
 
 cbuffer CbBloom : register(b0)
@@ -13,7 +13,7 @@ cbuffer CbBloom : register(b0)
     float g_toneMappingEnabled;
 };
 
-// Slot 1: ƒJƒ‰[ƒtƒBƒ‹ƒ^[—p
+// Slot 1: ã‚«ãƒ©ãƒ¼ãƒ•ã‚£ãƒ«ã‚¿ãƒ¼ç”¨
 cbuffer CbColorFilter : register(b1)
 {
     float g_hueShift;
@@ -24,7 +24,7 @@ cbuffer CbColorFilter : register(b1)
     float g_filterIntensity;
 };
 
-// RGB‚ğHSV(F‘Š, Ê“x, –¾“x)‚É•ÏŠ·
+// RGBã‚’HSV(è‰²ç›¸, å½©åº¦, æ˜åº¦)ã«å¤‰æ›
 float3 RGBtoHSV(float3 c)
 {
     float4 K = float4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
@@ -35,7 +35,7 @@ float3 RGBtoHSV(float3 c)
     return float3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
 }
 
-// HSV‚ğRGB‚É•ÏŠ·
+// HSVã‚’RGBã«å¤‰æ›
 float3 HSVtoRGB(float3 c)
 {
     float4 K = float4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
@@ -58,41 +58,43 @@ float4 main(float4 pos : SV_POSITION, float2 uv : TEXCOORD0) : SV_TARGET
     float3 base = sceneTex.Sample(sam, uv).rgb;
     float3 bloom = bloomTex.Sample(sam, uv).rgb;
 
-    // ˆÀ‘S‚Ì‚½‚ßNaN/InfƒK[ƒh
+    // å®‰å…¨ã®ãŸã‚NaN/Infã‚¬ãƒ¼ãƒ‰
     if (any(isnan(bloom)) || any(isinf(bloom)))
         bloom = 0;
 
-    // 1. ƒuƒ‹[ƒ€‡¬
+    // 1. ãƒ–ãƒ«ãƒ¼ãƒ åˆæˆ
     float3 combined = base + (bloom * g_intensity);
 
-    // Bloom‡¬Œã‚ÌHDRƒJƒ‰[‚ğLDR‚Ö•ÏŠ·
+    // éœ²å‡ºã¨ToneMappingã‚’ä¸€ã‹æ‰€ã«é›†ç´„ã—ã€è¡¨ç¤ºç”¨ã®è‰²ã¸å¤‰æ›ã™ã‚‹ã€‚
+    combined = max(0.0f, combined) * max(0.0f, g_exposure);
     if (g_toneMappingEnabled > 0.5f)
-        combined = ToneMapACES(max(0.0f, combined) * max(0.0f, g_exposure));
+        combined = ToneMapACES(combined);
+    combined = pow(max(combined, 0.0f), 1.0f / 2.2f);
 
-    float3 original = combined; // ƒtƒBƒ‹ƒ^“K—p‘O‚ÌF‚ğ•Û‘¶
+    float3 original = combined; // ãƒ•ã‚£ãƒ«ã‚¿é©ç”¨å‰ã®è‰²ã‚’ä¿å­˜
 
-    // --- 2. ƒJƒ‰[ƒtƒBƒ‹ƒ^[ˆ— ---
-    // A. ƒRƒ“ƒgƒ‰ƒXƒg (0.5‚ğŠî€‚ÉƒXƒP[ƒŠƒ“ƒO)
+    // --- 2. ã‚«ãƒ©ãƒ¼ãƒ•ã‚£ãƒ«ã‚¿ãƒ¼å‡¦ç† ---
+    // A. ã‚³ãƒ³ãƒˆãƒ©ã‚¹ãƒˆ (0.5ã‚’åŸºæº–ã«ã‚¹ã‚±ãƒ¼ãƒªãƒ³ã‚°)
     combined = (combined - 0.5f) * g_contrast + 0.5f;
 
-    // B. ”’•‰»iÊ“x 0 ‚Ìˆ—‚ğ HSV •ÏŠ·‘O‚ÉŒvZ‚·‚é‚Æ‚‘¬j
-    // ‹P“xiLuminancejŒW”‚ğ—p‚¢‚Ä³Šm‚ÈƒOƒŒ[ƒXƒP[ƒ‹‚ğì¬
+    // B. ç™½é»’åŒ–ï¼ˆå½©åº¦ 0 ã®å‡¦ç†ã‚’ HSV å¤‰æ›å‰ã«è¨ˆç®—ã™ã‚‹ã¨é«˜é€Ÿï¼‰
+    // è¼åº¦ï¼ˆLuminanceï¼‰ä¿‚æ•°ã‚’ç”¨ã„ã¦æ­£ç¢ºãªã‚°ãƒ¬ãƒ¼ã‚¹ã‚±ãƒ¼ãƒ«ã‚’ä½œæˆ
     float gray = dot(combined, float3(0.299, 0.587, 0.114));
     combined = lerp(combined, float3(gray, gray, gray), 1.0f - g_saturation);
 
-    // C. F‘ŠE–¾“x‚Ì’²® (Ê“x‚Í B ‚Åˆ—Ï‚İ‚Ì‚½‚ß hsv.y ‚Í‚»‚Ì‚Ü‚Ü)
+    // C. è‰²ç›¸ãƒ»æ˜åº¦ã®èª¿æ•´ (å½©åº¦ã¯ B ã§å‡¦ç†æ¸ˆã¿ã®ãŸã‚ hsv.y ã¯ãã®ã¾ã¾)
     float3 hsv = RGBtoHSV(max(0.0f, combined));
     hsv.x = frac(hsv.x + g_hueShift);
     hsv.z *= g_brightness;
     combined = HSVtoRGB(hsv);
 
-    // D. ƒJƒ‰[ƒoƒ‰ƒ“ƒX / ƒI[ƒo[ƒŒƒC
-    // g_colorBalance ‚ğuæZv‚Å‚Í‚È‚­u–Ú•W‚ÌFv‚Æ‚µ‚Äˆµ‚¤ê‡
-    // —á: combined = lerp(combined, g_targetColor.rgb, g_targetColorIntensity);
+    // D. ã‚«ãƒ©ãƒ¼ãƒãƒ©ãƒ³ã‚¹ / ã‚ªãƒ¼ãƒãƒ¼ãƒ¬ã‚¤
+    // g_colorBalance ã‚’ã€Œä¹—ç®—ã€ã§ã¯ãªãã€Œç›®æ¨™ã®è‰²ã€ã¨ã—ã¦æ‰±ã†å ´åˆ
+    // ä¾‹: combined = lerp(combined, g_targetColor.rgb, g_targetColorIntensity);
     combined *= g_colorBalance;
 
-    // 3. ÅIƒuƒŒƒ“ƒh
-    // g_filterIntensity ‚ğ 1.0 ‚É‚·‚ê‚ÎƒtƒBƒ‹ƒ^[Š®‘S“K—pA0.0 ‚È‚ç“K—p‚È‚µ
+    // 3. æœ€çµ‚ãƒ–ãƒ¬ãƒ³ãƒ‰
+    // g_filterIntensity ã‚’ 1.0 ã«ã™ã‚Œã°ãƒ•ã‚£ãƒ«ã‚¿ãƒ¼å®Œå…¨é©ç”¨ã€0.0 ãªã‚‰é©ç”¨ãªã—
     float3 finalColor = lerp(original, combined, g_filterIntensity);
 
     return float4(finalColor, 1.0);
@@ -103,12 +105,12 @@ float4 main(float4 pos : SV_POSITION, float2 uv : TEXCOORD0) : SV_TARGET
 //    float3 base = sceneTex.Sample(sam, uv).rgb;
 //    float3 bloom = bloomTex.Sample(sam, uv).rgb;
 
-//    // ˆÀ‘S‚Ì‚½‚ßNaN/InfƒK[ƒh
+//    // å®‰å…¨ã®ãŸã‚NaN/Infã‚¬ãƒ¼ãƒ‰
 //    if (any(isnan(bloom)) || any(isinf(bloom)))
 //        bloom = 0;
 
-//    // ’Pƒ‰ÁZ‚Å‚Í‚È‚­A‹­‚·‚¬‚éŒõ‚ğ­‚µƒ}ƒCƒ‹ƒh‚É‚·‚é
-//    // (1.0 + bloom) ‚ÅŠ„‚éŠÈˆÕƒg[ƒ“ƒ}ƒbƒv“I‚Èˆ—‚ğ‹²‚Ş‚ÆlŠp‚¢”j•Ğ‚ªÁ‚¦‚â‚·‚¢‚Å‚·
+//    // å˜ç´”åŠ ç®—ã§ã¯ãªãã€å¼·ã™ãã‚‹å…‰ã‚’å°‘ã—ãƒã‚¤ãƒ«ãƒ‰ã«ã™ã‚‹
+//    // (1.0 + bloom) ã§å‰²ã‚‹ç°¡æ˜“ãƒˆãƒ¼ãƒ³ãƒãƒƒãƒ—çš„ãªå‡¦ç†ã‚’æŒŸã‚€ã¨å››è§’ã„ç ´ç‰‡ãŒæ¶ˆãˆã‚„ã™ã„ã§ã™
 //    float3 finalBloom = bloom * g_intensity;
     
 //    return float4(base + finalBloom, 1.0);

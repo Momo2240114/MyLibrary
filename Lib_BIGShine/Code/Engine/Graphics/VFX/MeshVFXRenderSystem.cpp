@@ -290,14 +290,14 @@ bool MeshVFXTextureMixer::Initialize(ID3D11Device* device_)
     if (!device_) return false;
     if (FAILED(CPUResourceLoader::LoadVertexShader(
         device_,
-        "Shader/FullScreenVS.cso",
+        "Data/Shader/FullScreenVS.cso",
         nullptr,
         0,
         nullptr,
         fullScreenVertexShader.ReleaseAndGetAddressOf()))) return false;
     if (FAILED(CPUResourceLoader::LoadPixelShader(
         device_,
-        "Shader/MeshVFXTextureMixPS.cso",
+        "Data/Shader/MeshVFXTextureMixPS.cso",
         mixPixelShader.ReleaseAndGetAddressOf()))) return false;
     if (FAILED(CPUResourceLoader::CreateConstantBuffer(
         device_,

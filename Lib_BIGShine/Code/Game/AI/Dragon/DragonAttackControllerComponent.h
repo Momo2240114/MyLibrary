@@ -21,6 +21,8 @@ class DragonAttackControllerComponent : public Component
 public:
     const std::string& GetName() const override;
     void Start() override;
+    // 本体の破棄時にも独立した攻撃Objectと予告範囲を終了する。
+    void OnDestroy() override;
     void Update(float deltaTime_) override;
     void Gui() override;
     void Serialize(nlohmann::json& json_) const override;
@@ -62,12 +64,17 @@ public:
     void ShowStampDangerArea();
 
 private:
+    // 無効化・撃破・破棄済みのドラゴンから予告や攻撃を再生成しない。
+    bool CanSpawnAttack() const;
+
     struct RuntimeAttack
     {
         std::shared_ptr<GameObject> object;
         std::shared_ptr<GameObject> dangerAreaObject;
         std::weak_ptr<AttackEffectHitComponent> hitComponent;
         std::weak_ptr<MeshVFXComponent> dangerAreaVFX;
+        // 回転攻撃の各節が残す軌跡。攻撃の中断・終了時にまとめて破棄する。
+        std::vector<std::shared_ptr<GameObject>> spinTailTrailObjects;
         DirectX::XMFLOAT3 sourceLocalOffset = { 0.0f, 0.0f, 0.0f };
         DirectX::XMFLOAT3 dangerAreaLocalOffset = { 0.0f, 0.0f, 0.0f };
         float dangerAreaRadius = 1.0f;
@@ -91,7 +98,7 @@ private:
         bool followBreathSource = false;
         bool followStampSource = false;
         bool followTail = false;
-        // 回転攻撃だけを根元から先端まで追従させ、予兆は本体中心の扇型にする。
+        // 回転攻撃は尻尾の各節へ追従させ、予兆は本体中心の円にする。
         bool coverTailSpan = false;
         bool tailSpanResolved = false;
         bool tailAttackPlaying = false;
@@ -186,6 +193,8 @@ private:
     void SpawnSpinSweepDangerArea(float lifeTime_, bool reuseExisting_ = false);
     // 根元と先端から、半径を維持した尻尾カプセルのWorld行列を更新する。
     bool ApplyTailSpanTransform(RuntimeAttack& runtime_);
+    // 攻撃判定が有効な間だけ、尻尾の各節から発光する軌跡を生成する。
+    void UpdateSpinTailTrails(RuntimeAttack& runtime_, bool emitting_);
     void SpawnStampRockVFX(const DirectX::XMFLOAT3& centerPosition_);
     void SpawnStampRockVFXAt(
         const PendingStampRock& pendingRock_);
@@ -316,6 +325,8 @@ private:
     float tailHalfHeight = 1.8f;
     // 回転攻撃の根元から先端までを覆うカプセル半径。
     float spinTailRadius = 3.0f;
+    bool spinTailTrailEnabled = true; // 回転攻撃中の視認性を補う軌跡の表示設定。
+    float spinTailTrailLifeTime = 0.2f; // 軌跡の残像時間。攻撃終了時は即座に消す。
 
     std::string stampRockVFXAssetPath = "Data/VFX/DragonStampRock.json";
     // 空の場合は敵本体原点を基準にし、必要な場合だけ部位Objectからスタンプを発生させる。

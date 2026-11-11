@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Engine/Core/BuildConfig.h"
 #include <windows.h>
 #include <tchar.h>
 #include <sstream>
@@ -22,7 +23,12 @@
 #define SCREEN_WIDTH 1920
 #define SCREEN_HEIGHT 1080
 #define FULLSCREEN FALSE
-#define APPLICATION_NAME L"BigShine"
+// ビルド対象の名称を、ウィンドウクラスとタイトルで共通使用する。
+#if defined(BS_APP_GAME) || defined(BS_BUILD_SHIPPING)
+#define APPLICATION_NAME L"ANATHEMA"
+#else
+#define APPLICATION_NAME L"BigShine Engine"
+#endif
 
 // Win32ウィンドウ、メインループ、Scene、基本描画Systemを束ねるアプリケーション本体。
 class framework
@@ -50,7 +56,7 @@ private:
 	bool uninitialize();
 	void GuiDraw();
 private:
-	// FPS計測はhigh_resolution_timerの累積時間を使い、1秒ごとにWindowタイトルへ反映する。
+	// FPS計測は累積時間を使い、開発用構成だけでWindowタイトルへ反映する。
 	high_resolution_timer tictoc;
 	uint32_t frames_per_second{ 0 };
 	float count_by_seconds{ 0.0f };
@@ -64,8 +70,10 @@ private:
 			outs.precision(6);
 			//outs << L"Silent Escape";
 			//SetWindowTextW(hwnd, outs.str().c_str());
-			outs << "FPS : " << fps << " / " << "Frame Time : " << mspf << " (ms)";
+			outs << APPLICATION_NAME << L" | FPS : " << fps << " / " << "Frame Time : " << mspf << " (ms)";
+#if !defined(BS_APP_GAME) && !defined(BS_BUILD_SHIPPING)
 			SetWindowTextW(hwnd, outs.str().c_str());
+#endif
 
 			// 次の1秒平均を取り直すため、フレーム数だけリセットして時間基準を進める。
 

@@ -10,6 +10,7 @@
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/Graphics/VFX/MaterialOverlayComponent.h"
+#include "Engine/GamePlay/Combat/HitReactionComponent.h"
 #include "Engine/GamePlay/Graphics/ModelMaterialComponent.h"
 #include "Engine/GamePlay/Graphics/ModelDissolveComponent.h"
 #include "Engine/Debug/TracyProfiler.h"
@@ -222,7 +223,7 @@ void ModelRenderSystem::Initialize(ID3D11Device* device)
 
 	CPUResourceLoader::LoadVertexShader(
 		device,
-		"Shader/OutlineVS.cso",
+		"Data/Shader/OutlineVS.cso",
 		GltfModelCommponennt::InputElementDescs.data(),
 		static_cast<UINT>(GltfModelCommponennt::InputElementDescs.size()),
 		outlineInputLayout.GetAddressOf(),
@@ -230,12 +231,12 @@ void ModelRenderSystem::Initialize(ID3D11Device* device)
 
 	CPUResourceLoader::LoadPixelShader(
 		device,
-		"Shader/OutlinePS.cso",
+		"Data/Shader/OutlinePS.cso",
 		outlinePixelShader.GetAddressOf());
 
 	CPUResourceLoader::LoadVertexShader(
 		device,
-		"Shader/ToonPBRStaticVS.cso",
+		"Data/Shader/ToonPBRStaticVS.cso",
 		GltfModelCommponennt::InputElementDescs.data(),
 		static_cast<UINT>(GltfModelCommponennt::InputElementDescs.size()),
 		gBufferInputLayout.GetAddressOf(),
@@ -243,7 +244,7 @@ void ModelRenderSystem::Initialize(ID3D11Device* device)
 
 	CPUResourceLoader::LoadVertexShader(
 		device,
-		"Shader/ToonPBRSkinnedVS.cso",
+		"Data/Shader/ToonPBRSkinnedVS.cso",
 		GltfModelCommponennt::InputElementDescs.data(),
 		static_cast<UINT>(GltfModelCommponennt::InputElementDescs.size()),
 		nullptr,
@@ -251,18 +252,22 @@ void ModelRenderSystem::Initialize(ID3D11Device* device)
 
 	CPUResourceLoader::LoadPixelShader(
 		device,
-		"Shader/GBufferPS.cso",
+		"Data/Shader/GBufferPS.cso",
 		gBufferPixelShader.GetAddressOf());
 
 	CPUResourceLoader::LoadPixelShader(
 		device,
-		"Shader/GpuDebugSimpleGBufferPS.cso",
+		"Data/Shader/GpuDebugSimpleGBufferPS.cso",
 		gBufferSimplePixelShader.GetAddressOf());
 
 	CPUResourceLoader::CreateConstantBuffer(
 		device,
 		sizeof(CbGBufferMaterial),
 		gBufferMaterialConstantBuffer.GetAddressOf());
+	CPUResourceLoader::CreateConstantBuffer(
+		device,
+		sizeof(CbSeparateMaterialMaps),
+		separateMaterialMapsConstantBuffer.GetAddressOf());
 	CPUResourceLoader::CreateConstantBuffer(
 		device,
 		sizeof(CbModelDissolve),
@@ -750,6 +755,7 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 		// CbScene構造体に int numPointLights; を追加してください
 		cbScene.numPointLights = (int)pointLights.size();
 		cbScene.numSpotLights = (int)spotLights.size();
+        cbScene.outputLinearColor = rc.useHdrOutput ? 1.0f : 0.0f;
 
 
 		const DirectX::XMFLOAT3& eye = rc.camera->GetEye();
@@ -1056,25 +1062,53 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 	// 元のマテリアルとメッシュを保持し、パーツごとの各スロットの差し替えを優先する。
 	auto bindMaterialTextures_ = [&](GltfModelCommponennt& model_, const GltfModelCommponennt::Mesh& mesh_, int meshIndex_)
 		{
+			BS_PROFILE_SCOPE("RenderModels::BindMaterialTextures");
 			const auto owner_ = model_.GetGameObject();
 			const auto materialComponent_ = owner_ ? owner_->GetComponent<ModelMaterialComponent>() : nullptr;
-			if (!materialComponent_ || !materialComponent_->IsEnabled() || !mesh_.material) return;
-			BS_PROFILE_SCOPE("RenderModels::BindMaterialTextures");
-			materialComponent_->UpdateLoadState();
-			ID3D11ShaderResourceView* textures_[] =
+			const bool hasOverride_ = materialComponent_ && materialComponent_->IsEnabled() && mesh_.material;
+			if (hasOverride_) materialComponent_->UpdateLoadState();
+			ID3D11ShaderResourceView* textures_[ModelMaterial::TEXTURE_SLOT_COUNT] =
 			{
-				mesh_.material->baseMap.Get(),
-				mesh_.material->normalMap.Get(),
-				mesh_.material->emissiveMap.Get(),
-				mesh_.material->occlusionMap.Get(),
-				mesh_.material->metalnessRoughnessMap.Get()
+				mesh_.material ? mesh_.material->baseMap.Get() : nullptr,
+				mesh_.material ? mesh_.material->normalMap.Get() : nullptr,
+				mesh_.material ? mesh_.material->emissiveMap.Get() : nullptr,
+				mesh_.material ? mesh_.material->occlusionMap.Get() : nullptr,
+				mesh_.material ? mesh_.material->metalnessRoughnessMap.Get() : nullptr,
+				nullptr, nullptr
 			};
-			for (std::size_t index_ = 0; index_ < ModelMaterial::TEXTURE_SLOT_COUNT; ++index_)
+			if (hasOverride_)
 			{
-				textures_[index_] = materialComponent_->ResolveTexture(
-					mesh_.materialIndex, static_cast<ModelMaterial::TextureSlot>(index_), textures_[index_], meshIndex_);
+				for (std::size_t index_ = 0; index_ < ModelMaterial::TEXTURE_SLOT_COUNT; ++index_)
+				{
+					textures_[index_] = materialComponent_->ResolveTexture(
+						mesh_.materialIndex, static_cast<ModelMaterial::TextureSlot>(index_), textures_[index_], meshIndex_);
+				}
+				dc->PSSetShaderResources(0, 5, textures_);
 			}
-			dc->PSSetShaderResources(0, static_cast<UINT>(ModelMaterial::TEXTURE_SLOT_COUNT), textures_);
+			// t5/t6はライト用のため、追加マップは空いているt19/t20へ分けて設定する。
+			ID3D11ShaderResourceView* separateMaps_[] =
+			{
+				textures_[static_cast<std::size_t>(ModelMaterial::TextureSlot::METALLIC)],
+				textures_[static_cast<std::size_t>(ModelMaterial::TextureSlot::ROUGHNESS)]
+			};
+			CbSeparateMaterialMaps constants_{};
+			constants_.useMetallicMap = separateMaps_[0] ? 1u : 0u;
+			constants_.useRoughnessMap = separateMaps_[1] ? 1u : 0u;
+			if (hasOverride_)
+			{
+				// 描画前に参照成分を確定し、採用した画像と同じ設定元からGPUへ送る。
+				const auto resolveChannel_ = [&](ModelMaterial::MaterialValue value_)
+				{
+					return static_cast<uint32_t>(materialComponent_->ResolveChannel(mesh_.materialIndex, value_, meshIndex_));
+				};
+				constants_.packedMetallicChannel = resolveChannel_(ModelMaterial::MaterialValue::PACKED_METALLIC);
+				constants_.packedRoughnessChannel = resolveChannel_(ModelMaterial::MaterialValue::PACKED_ROUGHNESS);
+				constants_.metallicChannel = resolveChannel_(ModelMaterial::MaterialValue::METALLIC);
+				constants_.roughnessChannel = resolveChannel_(ModelMaterial::MaterialValue::ROUGHNESS);
+			}
+			dc->UpdateSubresource(separateMaterialMapsConstantBuffer.Get(), 0, nullptr, &constants_, 0, 0);
+			dc->PSSetConstantBuffers(12, 1, separateMaterialMapsConstantBuffer.GetAddressOf());
+			dc->PSSetShaderResources(19, _countof(separateMaps_), separateMaps_);
 		};
 
 	// 不透明・半透明の両経路で同じNoiseと方向分布を使用する。
@@ -1185,7 +1219,21 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 			material_.roughness = mesh.material->roughness;
 			material_.occlusionStrength = mesh.material->occlusionStrength;
 			material_.toonPbrBlend = mesh.material->toonPbrBlend;
+            material_.normalScale = mesh.material->normalScale;
+            material_.specularStrength = mesh.material->specularStrength;
+            material_.rimStrength = mesh.material->rimStrength;
+            material_.styleParams = { mesh.material->shadowTint.x, mesh.material->shadowTint.y,
+                mesh.material->shadowTint.z, mesh.material->specularToonBlend };
 			material_.shadingModel = static_cast<int>(shaderId_);
+            // GBufferPSの単色出力を選び、共有Materialや通常モデルの描画は変更しない。
+            if (model_.HasRuntimeSilhouette())
+            {
+                constexpr int LOADING_SILHOUETTE_SHADING_MODEL = -1;
+                material_.baseColor = model_.GetRuntimeSilhouetteColor();
+                material_.shadingModel = LOADING_SILHOUETTE_SHADING_MODEL;
+                material_.emissiveColor = {0.0f, 0.0f, 0.0f};
+                material_.rimStrength = 0.0f;
+            }
 			material_.uvScale = mesh.material->uvScale;
 			material_.uvOffset = mesh.material->uvOffset;
 			material_.uvRotation = mesh.material->uvRotation;
@@ -1206,6 +1254,11 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 			};
 			dc->PSSetShaderResources(0, _countof(materialSrvs_), materialSrvs_);
 			bindMaterialTextures_(model_, mesh, meshIndex_);
+            if (model_.HasRuntimeSilhouette())
+            {
+                ID3D11ShaderResourceView* silhouetteTexture_ = whiteTextureSRV.Get();
+                dc->PSSetShaderResources(0, 1, &silhouetteTexture_);
+            }
 
 			ID3D11SamplerState* materialSampler_ = rc.renderState->GetSamplerState(
 				mesh.material->uvAddressMode == GltfModelCommponennt::UV_ADDRESS_MODE::CLAMP
@@ -1280,6 +1333,19 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 					}
 				}
 			}
+            // 共有マテリアルを変更せず、被弾したモデルの描画定数だけを短時間赤く上書きする。
+            const auto damageOwner_ = model_.GetGameObject();
+            const auto hitReaction_ = damageOwner_ ? damageOwner_->GetComponent<HitReactionComponent>() : nullptr;
+            const float damageFlashWeight_ = hitReaction_ && hitReaction_->IsEnabled() && !model_.HasRuntimeSilhouette()
+                ? hitReaction_->GetDamageFlashWeight() : 0.0f;
+            if (damageFlashWeight_ > 0.0f)
+            {
+                overlayConstants_ = {};
+                overlayConstants_.enabled = 1u;
+                overlayConstants_.color = { 1.0f, 0.005f, 0.005f, 1.0f };
+                overlayConstants_.alpha = damageFlashWeight_;
+                overlayConstants_.emissiveStrength = 1.5f;
+            }
 			dc->UpdateSubresource(materialOverlayConstantBuffer.Get(), 0, nullptr, &overlayConstants_, 0, 0);
 			dc->PSSetShaderResources(9, _countof(overlaySrvs_), overlaySrvs_);
 			if (isSkinnedMeshResult_)
@@ -1301,6 +1367,8 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 
 	auto drawOutlineMesh = [&](GltfModelCommponennt& model_, const GltfModelCommponennt::Mesh& mesh, int meshIndex_)
 		{
+            // 単色表示では背面拡張の輪郭を重ねず、身体や装備の内部に黒い線を残さない。
+            if (model_.HasRuntimeSilhouette()) return;
 			const auto owner_ = model_.GetGameObject();
 			const auto dissolve_ = owner_ ? owner_->GetComponent<ModelDissolveComponent>() : nullptr;
 			// 消滅中に通常の輪郭だけが残るのを防ぐ。
@@ -1316,6 +1384,8 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 			dc->UpdateSubresource(outlineConstantBuffer.Get(), 0, nullptr, &cbOutline, 0, 0);
 
 			uploadSkeletonConstants_(model_, meshIndex_);
+			// 通常の静的メッシュ描画でb6が解除されるため、輪郭用の変形行列を描画ごとに設定する。
+			dc->VSSetConstantBuffers(6, 1, skeletonConstantBuffer.GetAddressOf());
 
 			UINT stride = sizeof(GltfModelCommponennt::Vertex);
 			UINT offset = 0;
@@ -1360,6 +1430,7 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 	}
 	else
 	{
+        dc->PSSetConstantBuffers(7, 1, sceneConstantBuffer.GetAddressOf());
 		graphics_.RenderSkyBox(rc);
 	}
 
@@ -1489,6 +1560,7 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 				graphics_.GetGBufferMaterialSRV(),
 				graphics_.GetGBufferEmissiveSRV(),
 				graphics_.GetMainDepthSRV(),
+				graphics_.GetGBufferStyleSRV(),
 				lightSRV.Get(),
 				spotLightSRV.Get(),
 				sceneConstantBuffer.Get(),
@@ -1500,6 +1572,8 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 		}
 
 		graphics_.SetSceneRenderTarget();
+        // Deferred照明の後始末で解除されたCamera情報をSkyBoxへ戻す。
+        dc->PSSetConstantBuffers(7, 1, sceneConstantBuffer.GetAddressOf());
 		graphics_.RenderSkyBox(rc);
 
 		{
@@ -1560,11 +1634,31 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 			return lhs.distance > rhs.distance;
 	});
 
+    // RT切り替えで解除された共通照明を半透明モデルへ再設定する。
+    dc->PSSetConstantBuffers(7, 1, sceneConstantBuffer.GetAddressOf());
+    dc->PSSetConstantBuffers(8, 1, cascadeShadowConstantBuffer.GetAddressOf());
+    dc->PSSetShaderResources(5, 1, lightSRV.GetAddressOf());
+    dc->PSSetShaderResources(6, 1, spotLightSRV.GetAddressOf());
+    if (rc.cascadeShadowMap)
+    {
+        ID3D11ShaderResourceView* shadowSrvs_[CascadeShadowMap::CascadeCount] = {};
+        for (int index_ = 0; index_ < CascadeShadowMap::CascadeCount; ++index_)
+        {
+            shadowSrvs_[index_] = rc.cascadeShadowMap->GetSRV(index_);
+        }
+        dc->PSSetShaderResources(13, _countof(shadowSrvs_), shadowSrvs_);
+    }
+    ID3D11SamplerState* shadowSampler_ = rc.renderState->GetSamplerState(SamplerState::LinearBorder);
+    dc->PSSetSamplers(1, 1, &shadowSampler_);
+
 	// 半透明描画処理
 	if (!depthOnlyMainPass_)
 	{
 		BS_PROFILE_SCOPE("RenderModels::TransparentModels");
 		BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::Main::TransparentModels");
+        // 不透明パスの状態を残さず、遠い順のモデルをAlpha合成する。
+        dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Transparency), nullptr, 0xFFFFFFFF);
+        dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestOnly), 0);
 
 		for (const TransparencyDrawInfo& transparencyDrawInfo : transparencyDrawInfos)
 		{
@@ -1597,7 +1691,14 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 			shader->End(rc);
 		}
 	}
+    dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Opaque), nullptr, 0xFFFFFFFF);
+    dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
 	BS_PROFILE_PLOT("Render.ModelSubmitCount", static_cast<int64_t>(modelSubmitCount_));
+	// 後続パスに単独マップや使用フラグを持ち越さない。
+	ID3D11ShaderResourceView* nullSeparateMaps_[2] = {};
+	dc->PSSetShaderResources(19, _countof(nullSeparateMaps_), nullSeparateMaps_);
+	ID3D11Buffer* nullSeparateConstants_ = nullptr;
+	dc->PSSetConstantBuffers(12, 1, &nullSeparateConstants_);
 	BS_PROFILE_PLOT("Render.MeshSubmitCount", static_cast<int64_t>(meshSubmitCount_));
 	BS_PROFILE_PLOT("Render.SkeletonUploadCount", static_cast<int64_t>(skeletonUploadCount_));
 	BS_PROFILE_PLOT("Render.SkeletonBufferUpdateCount", static_cast<int64_t>(renderProfileFrame.total.skeletonBufferUpdateCount));

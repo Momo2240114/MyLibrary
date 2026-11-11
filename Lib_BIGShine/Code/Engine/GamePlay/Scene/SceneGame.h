@@ -7,10 +7,12 @@
 class SceneGame :public SceneBase
 {
 public:
-	SceneGame()
+	// 直接生成は従来の編集起動、Scene Action経由は即時プレイとして扱う。
+	SceneGame(bool startImmediately_ = false) : startImmediately(startImmediately_)
 	{
 		std::string name = "GameScene";
 		sceneName = name;
+        isEditorSuppressed = startImmediately_ && !SceneManager::IsEditorPlaySessionActive();
 	}
 
 	void Initialize();
@@ -22,5 +24,10 @@ public:
 	void Render(float elapsedTime);
 
 	void DrawGUI();
+    bool IsEditorDestination() const override { return !startImmediately && !SceneManager::IsEditorPlaySessionActive(); }
+    bool RequiresFreeCursor() const override;
+
+private:
+    bool startImmediately = false;
 
 };

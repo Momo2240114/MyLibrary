@@ -178,12 +178,12 @@ bool GraphicsDeviceManager::InitializeSkyBox()
     };
 
     // ---- CSO パスをプロジェクトに合わせて変更してください ----
-    CPUResourceLoader::CreateVSFromCSO(device.Get(), "Shader/SkyBoxVS.cso",
+    CPUResourceLoader::CreateVSFromCSO(device.Get(), "Data/Shader/SkyBoxVS.cso",
         skyBoxVertexShader.GetAddressOf(),
         skyBoxInputLayout.GetAddressOf(),
         inputElementDescription_, _countof(inputElementDescription_));
 
-    CPUResourceLoader::CreatePSFromCSO(device.Get(), "Shader/SkyBoxPS.cso",
+    CPUResourceLoader::CreatePSFromCSO(device.Get(), "Data/Shader/SkyBoxPS.cso",
         skyBoxPixelShader.GetAddressOf());
     // ----------------------------------------------------------
 
@@ -423,6 +423,8 @@ void GraphicsDeviceManager::Shutdown()
     gBufferMaterialSRV.Reset();
     gBufferEmissiveRTV.Reset();
     gBufferEmissiveSRV.Reset();
+    gBufferStyleRTV.Reset();
+    gBufferStyleSRV.Reset();
     swapChain.Reset();
     skyBoxVertexBuffer.Reset();
     skyBoxIndexBuffer.Reset();
@@ -460,7 +462,7 @@ void GraphicsDeviceManager::OnResize(int newWidth_, int newHeight_)
         return;
     }
 
-    // 追加：リサイズ中は描画を止める or コンテキストをクリア
+    // リサイズ中は描画を止める or コンテキストをクリア
     immediateContext->OMSetRenderTargets(0, nullptr, nullptr);
     immediateContext->ClearState(); // 念のため一度すべて解除
 
@@ -473,7 +475,7 @@ void GraphicsDeviceManager::OnResize(int newWidth_, int newHeight_)
     depthStencilView.Reset();
     depthStencilTexture.Reset(); // 深度テクスチャ自体もリセットが必要
 
-    // --- 【修正】シーン用バッファとブルームもリセット ---
+    // --- シーン用バッファとブルームもリセット ---
     sceneRTV.Reset();
     sceneSRV.Reset();
     sceneViewRTV.Reset();
@@ -490,6 +492,8 @@ void GraphicsDeviceManager::OnResize(int newWidth_, int newHeight_)
     gBufferMaterialSRV.Reset();
     gBufferEmissiveRTV.Reset();
     gBufferEmissiveSRV.Reset();
+    gBufferStyleRTV.Reset();
+    gBufferStyleSRV.Reset();
 
     // swapChain->ResizeBuffers() を呼び出し
     HRESULT result_ = swapChain->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0);
@@ -579,7 +583,7 @@ void GraphicsDeviceManager::BeginFrame(const float clearColor_[4])
     immediateContext->ClearRenderTargetView(renderTargetView.Get(), clearColor_);
     ClearSceneRenderTargets(clearColor_);
 
-    // --- 変更点：描画先を「シーンバッファ」に固定する ---
+    // --- 描画先を「シーンバッファ」に固定する ---
     // これにより、GameObjectManagerの通常の描画がすべてHDRテクスチャに描き込まれます
     ID3D11RenderTargetView* renderTargets_[] = { sceneRTV.Get(), sceneNormalRTV.Get() };
     immediateContext->OMSetRenderTargets(2, renderTargets_, depthStencilView.Get());
@@ -673,6 +677,7 @@ void GraphicsDeviceManager::ClearSceneRenderTargets(const float clearColor_[4])
     immediateContext->ClearRenderTargetView(gBufferNormalRTV.Get(), black);
     immediateContext->ClearRenderTargetView(gBufferMaterialRTV.Get(), black);
     immediateContext->ClearRenderTargetView(gBufferEmissiveRTV.Get(), black);
+    immediateContext->ClearRenderTargetView(gBufferStyleRTV.Get(), black);
     immediateContext->ClearDepthStencilView(
         depthStencilView.Get(),
         D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
@@ -721,6 +726,7 @@ void GraphicsDeviceManager::SetGBufferRenderTargets()
         gBufferNormalRTV.Get(),
         gBufferMaterialRTV.Get(),
         gBufferEmissiveRTV.Get(),
+        gBufferStyleRTV.Get(),
     };
     immediateContext->OMSetRenderTargets(_countof(rtvs_), rtvs_, depthStencilView.Get());
     immediateContext->RSSetViewports(1, &viewport);
@@ -737,6 +743,7 @@ void GraphicsDeviceManager::ResolveBloom(const RenderContext& rc) {
 
 void GraphicsDeviceManager::RenderSkyBox(const RenderContext& rc)
 {
+    if (rc.suppressSkybox) return;
     ID3D11DeviceContext* deviceContext_ = immediateContext.Get();
 
     // IBL specular_pmrem を t10 にバインド
@@ -899,7 +906,7 @@ void GraphicsDeviceManager::DrawPostEffectGuiContent()
             xeGtaoParams = XeGtaoSystem::Parameters{};
         }
     }
-    // --- 【追加】ラジアルブラー設定 ---
+    // --- ラジアルブラー設定 ---
     if (ImGui::CollapsingHeader("Radial Blur", ImGuiTreeNodeFlags_DefaultOpen))
     {
         // 1. ブラー半径 (Blur Radius)
@@ -1106,7 +1113,7 @@ bool GraphicsDeviceManager::CreateDepthStencil()
     texture2dDesc_.SampleDesc.Count = 1;
     texture2dDesc_.SampleDesc.Quality = 0;
     texture2dDesc_.Usage = D3D11_USAGE_DEFAULT;
-    // 重要：深度書き込み用(DS)と、シェーダー読み込み用(SR)の両方を指定
+    // 深度書き込み用(DS)と、シェーダー読み込み用(SR)の両方を指定
     texture2dDesc_.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
     texture2dDesc_.CPUAccessFlags = 0;
     texture2dDesc_.MiscFlags = 0;
@@ -1265,6 +1272,7 @@ bool GraphicsDeviceManager::CreateSceneViewRenderTarget(int width_, int height_)
 
 bool GraphicsDeviceManager::CreateGBufferTargets(int width_, int height_)
 {
+    BS_PROFILE_SCOPE("GraphicsDeviceManager::CreateGBufferTargets");
     struct Target_
     {
         DXGI_FORMAT format_;
@@ -1278,6 +1286,7 @@ bool GraphicsDeviceManager::CreateGBufferTargets(int width_, int height_)
         { DXGI_FORMAT_R16G16B16A16_FLOAT, &gBufferNormalRTV, &gBufferNormalSRV },
         { DXGI_FORMAT_R8G8B8A8_UNORM, &gBufferMaterialRTV, &gBufferMaterialSRV },
         { DXGI_FORMAT_R16G16B16A16_FLOAT, &gBufferEmissiveRTV, &gBufferEmissiveSRV },
+        { DXGI_FORMAT_R8G8B8A8_UNORM, &gBufferStyleRTV, &gBufferStyleSRV },
     };
 
     for (Target_& target_ : targets_)

@@ -67,6 +67,16 @@ bool SkillExecution::CanExecute(const std::shared_ptr<GameObject>& owner_,
             error_ = "Animation State not found: " + phase_.animationState;
             return false;
         }
+        // 空中発動用Stateも事前に検証し、発動後に素材不足で終了することを防ぐ。
+        if (!phase_.airAnimationState.empty())
+        {
+            const auto airState_ = animation_->GetStates().find(phase_.airAnimationState);
+            if (airState_ == animation_->GetStates().end() || !airState_->second)
+            {
+                error_ = "Air Animation State not found: " + phase_.airAnimationState;
+                return false;
+            }
+        }
         if (phase_.playAnimationFromSequence &&
             !owner_->GetLocalRegistry().HasAction(owner_->BuildActionName(phase_.animationState)) &&
             !owner_->GetLocalRegistry().HasAction(phase_.animationState))

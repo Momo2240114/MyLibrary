@@ -9,6 +9,7 @@
 
 class SpriteRenderer;
 class UIWidgetComponent;
+struct UITextFontResource;
 
 enum class UI_TEXT_HORIZONTAL_ALIGN
 {
@@ -68,6 +69,8 @@ private:
     std::string text = "Text";
     std::string fontPath = "Data/Font/NotoSansJP-Regular.otf";
     float fontSize = 24.0f;
+    // 同色の輪郭線で字画を補強する。0なら既存の文字描画を維持する。
+    float fontStrokeWidth = 0.0f;
     DirectX::XMFLOAT4 color = { 1.0f, 1.0f, 1.0f, 1.0f };
     float maxWidth = 0.0f;
     float padding = 4.0f;
@@ -77,6 +80,8 @@ private:
     UI_TEXT_VERTICAL_ALIGN verticalAlign = UI_TEXT_VERTICAL_ALIGN::CENTER;
     // trueならTexture再生成が必要。
     bool dirty = true;
+    // 同じフォントの解析結果を共有し、HPや残り秒数の更新ではファイルを再読込しない。
+    std::shared_ptr<UITextFontResource> fontResource;
 
     // 生成したTextureを表示するSpriteRendererと、Size反映先のWidget。
     std::weak_ptr<SpriteRenderer> spriteRenderer;

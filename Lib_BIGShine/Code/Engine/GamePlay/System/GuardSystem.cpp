@@ -1,4 +1,5 @@
 #include "PrecompiledHeader.h"
+#include "Engine/Audio/AudioManager.h"
 
 #include "GuardSystem.h"
 
@@ -17,6 +18,18 @@
 
 namespace
 {
+    // 盾や武器に判定がある場合も親を辿り、プレイヤー本人の反応だけをPadへ通知する。
+    std::shared_ptr<GameObject> FindPlayerOwner(std::shared_ptr<GameObject> object_)
+    {
+        while (object_)
+        {
+            if (object_->GetLayer() == LayerType::Player) return object_;
+            const auto parent_ = object_->transform ? object_->transform->parent.lock() : nullptr;
+            object_ = parent_ ? parent_->gameObject.lock() : nullptr;
+        }
+        return nullptr;
+    }
+
     constexpr const char* DEFENDER_NORMAL_GUARD_ACTION = "OnGuardSucceeded";
     constexpr const char* ATTACKER_NORMAL_GUARDED_ACTION = "OnAttackGuarded";
 }
@@ -85,6 +98,8 @@ bool GuardSystem::HandleGuard(
         BS_LOG_WARNING(LOG_CATEGORY::GAME, "[Guard] Rejected: attacker or defender missing.");
         return false;
     }
+    // 扇形の安全側では広域Sphereが重なってもガード成立にしない。
+    if (!hitBox_.IsWithinAttackSector(defender_.get())) return false;
     if (!hitBox_.IsEnabled() || !guardCollider_.IsEnabled())
     {
         return false;
@@ -133,6 +148,16 @@ bool GuardSystem::HandleGuard(
     event_.attackTag = hitBox_.attackTag;
 
     frameGuardEvents.push_back(event_);
+    if (const auto player_ = FindPlayerOwner(defender_))
+        player_->ExecuteAction(event_.guardBroken ? "Controller.RumbleGuardBreak" : "Controller.RumbleGuard");
+    else if (const auto attackingPlayer_ = FindPlayerOwner(attacker_))
+        attackingPlayer_->ExecuteAction("Controller.RumbleAttackGuarded");
+    // 成立したガードの接触点で剣戟音を鳴らし、崩された場合だけ重い衝突音へ切り替える。
+    const auto soundPosition_ = event_.hasContact || !defender_->transform
+        ? event_.guardPosition : defender_->transform->GetWorldPosition();
+    AudioManager::Instance().PlaySpatialAttackSound(event_.guardBroken
+        ? "Data/Audio/SE/Sonniss/Combat/MetalWeaponHit.wav" : "Data/Audio/SE/Sword-Fight-1.wav",
+        soundPosition_, event_.guardBroken ? 0.65f : 0.5f, 8.0f, 80.0f);
     // GuardBreakのHP処理を一度だけ行い、通常HitReactionとの二重再生を防ぐ。
     if (event_.guardBroken)
     {

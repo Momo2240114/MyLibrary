@@ -886,6 +886,13 @@
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
                         "startTime": 0.0833333358168602
+                    },
+                    {
+                        "actionStart": "BeginWeakComboWarp",
+                        "startTime": 0.0,
+                        "endTime": 0.0,
+                        "eventTemplateType": "NONE",
+                        "label": "BeginWeakComboWarp"
                     }
                 ],
                 "loop": false,
@@ -908,8 +915,9 @@
                 "sequenceClips": [],
                 "sequencer": "",
                 "speed": 1.5,
-                "speedCurveName": "",
-                "type": 0
+                "speedCurveName": "Player.WeakCombo4.Speed",
+                "type": 0,
+                "sampleWeaponHitBoxes": true
             },
             {
                 "animIndexA": -1,
@@ -1944,6 +1952,13 @@
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
                         "startTime": 1.2166666984558105
+                    },
+                    {
+                        "actionStart": "BeginWeakComboWarp",
+                        "startTime": 0.0,
+                        "endTime": 0.0,
+                        "eventTemplateType": "NONE",
+                        "label": "BeginWeakComboWarp"
                     }
                 ],
                 "loop": false,
@@ -1966,8 +1981,9 @@
                 "sequenceClips": [],
                 "sequencer": "",
                 "speed": 1.5,
-                "speedCurveName": "",
-                "type": 0
+                "speedCurveName": "Player.WeakCombo3.Speed",
+                "type": 0,
+                "sampleWeaponHitBoxes": true
             },
             {
                 "animIndexA": -1,
@@ -2381,6 +2397,13 @@
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
                         "startTime": 1.3333333730697632
+                    },
+                    {
+                        "actionStart": "BeginWeakComboWarp",
+                        "startTime": 0.0,
+                        "endTime": 0.0,
+                        "eventTemplateType": "NONE",
+                        "label": "BeginWeakComboWarp"
                     }
                 ],
                 "loop": false,
@@ -2403,8 +2426,9 @@
                 "sequenceClips": [],
                 "sequencer": "",
                 "speed": 2.0,
-                "speedCurveName": "",
-                "type": 0
+                "speedCurveName": "Player.WeakCombo1.Speed",
+                "type": 0,
+                "sampleWeaponHitBoxes": true
             },
             {
                 "animIndexA": -1,
@@ -2744,6 +2768,13 @@
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
                         "startTime": 0.10000000149011612
+                    },
+                    {
+                        "actionStart": "BeginWeakComboWarp",
+                        "startTime": 0.0,
+                        "endTime": 0.0,
+                        "eventTemplateType": "NONE",
+                        "label": "BeginWeakComboWarp"
                     }
                 ],
                 "loop": false,
@@ -2766,8 +2797,9 @@
                 "sequenceClips": [],
                 "sequencer": "",
                 "speed": 2.0,
-                "speedCurveName": "",
-                "type": 0
+                "speedCurveName": "Player.WeakCombo2.Speed",
+                "type": 0,
+                "sampleWeaponHitBoxes": true
             },
             {
                 "animIndexA": -1,
@@ -2846,7 +2878,7 @@
             {
                 "animIndexA": -1,
                 "animIndexB": -1,
-                "animationIndex": 23,
+                "animationIndex": 165,
                 "blend2DBackwardAnimationIndex": -1,
                 "blend2DBackwardLeft90AnimationIndex": -1,
                 "blend2DBackwardLeft90PhaseOffset": 0.0,
@@ -11973,6 +12005,540 @@
                 "speed": 1.0,
                 "speedCurveName": "RisingJudgment.LandingSpeed",
                 "type": 0
+            },
+            {
+                "animIndexA": -1,
+                "animIndexB": -1,
+                "animationIndex": 128,
+                "blend2DBackwardAnimationIndex": -1,
+                "blend2DBackwardLeft90AnimationIndex": -1,
+                "blend2DBackwardLeft90PhaseOffset": 0.0,
+                "blend2DBackwardLeftAnimationIndex": -1,
+                "blend2DBackwardLeftPhaseOffset": 0.0,
+                "blend2DBackwardPhaseOffset": 0.0,
+                "blend2DBackwardRight90AnimationIndex": -1,
+                "blend2DBackwardRight90PhaseOffset": 0.0,
+                "blend2DBackwardRightAnimationIndex": -1,
+                "blend2DBackwardRightPhaseOffset": 0.0,
+                "blend2DDefaultInput": [
+                    0.0,
+                    1.0
+                ],
+                "blend2DForwardAnimationIndex": -1,
+                "blend2DForwardLeft90AnimationIndex": -1,
+                "blend2DForwardLeft90PhaseOffset": 0.0,
+                "blend2DForwardLeftAnimationIndex": -1,
+                "blend2DForwardLeftPhaseOffset": 0.0,
+                "blend2DForwardPhaseOffset": 0.0,
+                "blend2DForwardRight90AnimationIndex": -1,
+                "blend2DForwardRight90PhaseOffset": 0.0,
+                "blend2DForwardRightAnimationIndex": -1,
+                "blend2DForwardRightPhaseOffset": 0.0,
+                "blend2DIdleAnimationIndex": -1,
+                "blend2DIdlePhaseOffset": 0.0,
+                "blend2DIdleThreshold": 0.05000000074505806,
+                "blend2DLeftAnimationIndex": -1,
+                "blend2DLeftPhaseOffset": 0.0,
+                "blend2DParamName": "MoveInput",
+                "blend2DRightAnimationIndex": -1,
+                "blend2DRightPhaseOffset": 0.0,
+                "blend2DSyncNormalizedTime": true,
+                "blend2DUseEightDirections": false,
+                "blend2DUseForwardBackwardLateral": false,
+                "blend2DUseIdleStop": false,
+                "blendDefaultWeight": 0.5,
+                "blendMaskRootNodes": [],
+                "blendParamName": "BlendAlpha",
+                "blendParameterMax": 1.0,
+                "blendParameterMin": 0.0,
+                "blendPhaseOffsetA": 0.0,
+                "blendPhaseOffsetB": 0.0,
+                "blendSyncNormalizedTime": true,
+                "blendUseMask": false,
+                "customAnimIndex": -1,
+                "events": [],
+                "loop": false,
+                "name": "Execution_Target_03_Seq",
+                "rootMotion": {
+                    "applyPositionX": false,
+                    "applyPositionY": false,
+                    "applyPositionZ": false,
+                    "applyRotationX": false,
+                    "applyRotationY": false,
+                    "applyRotationZ": false,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": false,
+                    "cutVisualPositionZ": true,
+                    "enable": false,
+                    "sourceNodeName": "pelvis",
+                    "cutVisualWhenDisabled": true
+                },
+                "rootMotionScale": 0.0,
+                "rootMotionScaleCurveName": "",
+                "sequenceClips": [],
+                "sequencer": "",
+                "speed": 1.0,
+                "speedCurveName": "",
+                "type": 0
+            },
+            {
+                "animIndexA": -1,
+                "animIndexB": -1,
+                "animationIndex": 210,
+                "blend2DBackwardAnimationIndex": -1,
+                "blend2DBackwardLeft90AnimationIndex": -1,
+                "blend2DBackwardLeft90PhaseOffset": 0.0,
+                "blend2DBackwardLeftAnimationIndex": -1,
+                "blend2DBackwardLeftPhaseOffset": 0.0,
+                "blend2DBackwardPhaseOffset": 0.0,
+                "blend2DBackwardRight90AnimationIndex": -1,
+                "blend2DBackwardRight90PhaseOffset": 0.0,
+                "blend2DBackwardRightAnimationIndex": -1,
+                "blend2DBackwardRightPhaseOffset": 0.0,
+                "blend2DDefaultInput": [
+                    0.0,
+                    1.0
+                ],
+                "blend2DForwardAnimationIndex": -1,
+                "blend2DForwardLeft90AnimationIndex": -1,
+                "blend2DForwardLeft90PhaseOffset": 0.0,
+                "blend2DForwardLeftAnimationIndex": -1,
+                "blend2DForwardLeftPhaseOffset": 0.0,
+                "blend2DForwardPhaseOffset": 0.0,
+                "blend2DForwardRight90AnimationIndex": -1,
+                "blend2DForwardRight90PhaseOffset": 0.0,
+                "blend2DForwardRightAnimationIndex": -1,
+                "blend2DForwardRightPhaseOffset": 0.0,
+                "blend2DIdleAnimationIndex": -1,
+                "blend2DIdlePhaseOffset": 0.0,
+                "blend2DIdleThreshold": 0.05000000074505806,
+                "blend2DLeftAnimationIndex": -1,
+                "blend2DLeftPhaseOffset": 0.0,
+                "blend2DParamName": "MoveInput",
+                "blend2DRightAnimationIndex": -1,
+                "blend2DRightPhaseOffset": 0.0,
+                "blend2DSyncNormalizedTime": true,
+                "blend2DUseEightDirections": false,
+                "blend2DUseForwardBackwardLateral": false,
+                "blend2DUseIdleStop": false,
+                "blendDefaultWeight": 0.5,
+                "blendMaskRootNodes": [],
+                "blendParamName": "BlendAlpha",
+                "blendParameterMax": 1.0,
+                "blendParameterMin": 0.0,
+                "blendPhaseOffsetA": 0.0,
+                "blendPhaseOffsetB": 0.0,
+                "blendSyncNormalizedTime": true,
+                "blendUseMask": false,
+                "customAnimIndex": -1,
+                "events": [],
+                "loop": false,
+                "name": "Roll_Combat_F",
+                "rootMotion": {
+                    "applyPositionX": true,
+                    "applyPositionY": false,
+                    "applyPositionZ": true,
+                    "applyRotationX": false,
+                    "applyRotationY": false,
+                    "applyRotationZ": false,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": false,
+                    "cutVisualPositionZ": true,
+                    "enable": true,
+                    "sourceNodeName": "pelvis",
+                    "cutVisualWhenDisabled": true
+                },
+                "rootMotionScale": 0.02,
+                "rootMotionScaleCurveName": "",
+                "sequenceClips": [],
+                "sequencer": "",
+                "speed": 1.0,
+                "speedCurveName": "",
+                "type": 0
+            },
+            {
+                "animIndexA": -1,
+                "animIndexB": -1,
+                "animationIndex": 130,
+                "blend2DBackwardAnimationIndex": -1,
+                "blend2DBackwardLeft90AnimationIndex": -1,
+                "blend2DBackwardLeft90PhaseOffset": 0.0,
+                "blend2DBackwardLeftAnimationIndex": -1,
+                "blend2DBackwardLeftPhaseOffset": 0.0,
+                "blend2DBackwardPhaseOffset": 0.0,
+                "blend2DBackwardRight90AnimationIndex": -1,
+                "blend2DBackwardRight90PhaseOffset": 0.0,
+                "blend2DBackwardRightAnimationIndex": -1,
+                "blend2DBackwardRightPhaseOffset": 0.0,
+                "blend2DDefaultInput": [
+                    0.0,
+                    1.0
+                ],
+                "blend2DForwardAnimationIndex": -1,
+                "blend2DForwardLeft90AnimationIndex": -1,
+                "blend2DForwardLeft90PhaseOffset": 0.0,
+                "blend2DForwardLeftAnimationIndex": -1,
+                "blend2DForwardLeftPhaseOffset": 0.0,
+                "blend2DForwardPhaseOffset": 0.0,
+                "blend2DForwardRight90AnimationIndex": -1,
+                "blend2DForwardRight90PhaseOffset": 0.0,
+                "blend2DForwardRightAnimationIndex": -1,
+                "blend2DForwardRightPhaseOffset": 0.0,
+                "blend2DIdleAnimationIndex": -1,
+                "blend2DIdlePhaseOffset": 0.0,
+                "blend2DIdleThreshold": 0.05000000074505806,
+                "blend2DLeftAnimationIndex": -1,
+                "blend2DLeftPhaseOffset": 0.0,
+                "blend2DParamName": "MoveInput",
+                "blend2DRightAnimationIndex": -1,
+                "blend2DRightPhaseOffset": 0.0,
+                "blend2DSyncNormalizedTime": true,
+                "blend2DUseEightDirections": false,
+                "blend2DUseForwardBackwardLateral": false,
+                "blend2DUseIdleStop": false,
+                "blendDefaultWeight": 0.5,
+                "blendMaskRootNodes": [],
+                "blendParamName": "BlendAlpha",
+                "blendParameterMax": 1.0,
+                "blendParameterMin": 0.0,
+                "blendPhaseOffsetA": 0.0,
+                "blendPhaseOffsetB": 0.0,
+                "blendSyncNormalizedTime": true,
+                "blendUseMask": false,
+                "customAnimIndex": -1,
+                "events": [],
+                "loop": false,
+                "name": "Get_Up_Seq",
+                "rootMotion": {
+                    "applyPositionX": false,
+                    "applyPositionY": false,
+                    "applyPositionZ": false,
+                    "applyRotationX": false,
+                    "applyRotationY": false,
+                    "applyRotationZ": false,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": false,
+                    "cutVisualPositionZ": true,
+                    "enable": false,
+                    "sourceNodeName": "pelvis",
+                    "cutVisualWhenDisabled": true
+                },
+                "rootMotionScale": 0.0,
+                "rootMotionScaleCurveName": "",
+                "sequenceClips": [],
+                "sequencer": "",
+                "speed": 1.0,
+                "speedCurveName": "",
+                "type": 0
+            },
+            {
+                "animIndexA": -1,
+                "animIndexB": -1,
+                "animationIndex": 147,
+                "blend2DBackwardAnimationIndex": -1,
+                "blend2DBackwardLeft90AnimationIndex": -1,
+                "blend2DBackwardLeft90PhaseOffset": 0.0,
+                "blend2DBackwardLeftAnimationIndex": -1,
+                "blend2DBackwardLeftPhaseOffset": 0.0,
+                "blend2DBackwardPhaseOffset": 0.0,
+                "blend2DBackwardRight90AnimationIndex": -1,
+                "blend2DBackwardRight90PhaseOffset": 0.0,
+                "blend2DBackwardRightAnimationIndex": -1,
+                "blend2DBackwardRightPhaseOffset": 0.0,
+                "blend2DDefaultInput": [
+                    0.0,
+                    1.0
+                ],
+                "blend2DForwardAnimationIndex": -1,
+                "blend2DForwardLeft90AnimationIndex": -1,
+                "blend2DForwardLeft90PhaseOffset": 0.0,
+                "blend2DForwardLeftAnimationIndex": -1,
+                "blend2DForwardLeftPhaseOffset": 0.0,
+                "blend2DForwardPhaseOffset": 0.0,
+                "blend2DForwardRight90AnimationIndex": -1,
+                "blend2DForwardRight90PhaseOffset": 0.0,
+                "blend2DForwardRightAnimationIndex": -1,
+                "blend2DForwardRightPhaseOffset": 0.0,
+                "blend2DIdleAnimationIndex": -1,
+                "blend2DIdlePhaseOffset": 0.0,
+                "blend2DIdleThreshold": 0.05000000074505806,
+                "blend2DLeftAnimationIndex": -1,
+                "blend2DLeftPhaseOffset": 0.0,
+                "blend2DParamName": "MoveInput",
+                "blend2DRightAnimationIndex": -1,
+                "blend2DRightPhaseOffset": 0.0,
+                "blend2DSyncNormalizedTime": true,
+                "blend2DUseEightDirections": false,
+                "blend2DUseForwardBackwardLateral": false,
+                "blend2DUseIdleStop": false,
+                "blendDefaultWeight": 0.5,
+                "blendMaskRootNodes": [],
+                "blendParamName": "BlendAlpha",
+                "blendParameterMax": 1.0,
+                "blendParameterMin": 0.0,
+                "blendPhaseOffsetA": 0.0,
+                "blendPhaseOffsetB": 0.0,
+                "blendSyncNormalizedTime": true,
+                "blendUseMask": false,
+                "customAnimIndex": -1,
+                "events": [],
+                "loop": false,
+                "name": "PlayerDeath",
+                "rootMotion": {
+                    "applyPositionX": false,
+                    "applyPositionY": false,
+                    "applyPositionZ": false,
+                    "applyRotationX": false,
+                    "applyRotationY": false,
+                    "applyRotationZ": false,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": false,
+                    "cutVisualPositionZ": true,
+                    "enable": false,
+                    "sourceNodeName": "pelvis",
+                    "cutVisualWhenDisabled": true
+                },
+                "rootMotionScale": 0.0,
+                "rootMotionScaleCurveName": "",
+                "sequenceClips": [],
+                "sequencer": "",
+                "speed": 1.0,
+                "speedCurveName": "",
+                "type": 0
+            },
+            {
+                "animIndexA": -1,
+                "animIndexB": -1,
+                "animationIndex": 129,
+                "blend2DBackwardAnimationIndex": -1,
+                "blend2DBackwardLeft90AnimationIndex": -1,
+                "blend2DBackwardLeft90PhaseOffset": 0.0,
+                "blend2DBackwardLeftAnimationIndex": -1,
+                "blend2DBackwardLeftPhaseOffset": 0.0,
+                "blend2DBackwardPhaseOffset": 0.0,
+                "blend2DBackwardRight90AnimationIndex": -1,
+                "blend2DBackwardRight90PhaseOffset": 0.0,
+                "blend2DBackwardRightAnimationIndex": -1,
+                "blend2DBackwardRightPhaseOffset": 0.0,
+                "blend2DDefaultInput": [
+                    0.0,
+                    1.0
+                ],
+                "blend2DForwardAnimationIndex": -1,
+                "blend2DForwardLeft90AnimationIndex": -1,
+                "blend2DForwardLeft90PhaseOffset": 0.0,
+                "blend2DForwardLeftAnimationIndex": -1,
+                "blend2DForwardLeftPhaseOffset": 0.0,
+                "blend2DForwardPhaseOffset": 0.0,
+                "blend2DForwardRight90AnimationIndex": -1,
+                "blend2DForwardRight90PhaseOffset": 0.0,
+                "blend2DForwardRightAnimationIndex": -1,
+                "blend2DForwardRightPhaseOffset": 0.0,
+                "blend2DIdleAnimationIndex": -1,
+                "blend2DIdlePhaseOffset": 0.0,
+                "blend2DIdleThreshold": 0.05000000074505806,
+                "blend2DLeftAnimationIndex": -1,
+                "blend2DLeftPhaseOffset": 0.0,
+                "blend2DParamName": "MoveInput",
+                "blend2DRightAnimationIndex": -1,
+                "blend2DRightPhaseOffset": 0.0,
+                "blend2DSyncNormalizedTime": true,
+                "blend2DUseEightDirections": false,
+                "blend2DUseForwardBackwardLateral": false,
+                "blend2DUseIdleStop": false,
+                "blendDefaultWeight": 0.5,
+                "blendMaskRootNodes": [],
+                "blendParamName": "BlendAlpha",
+                "blendParameterMax": 1.0,
+                "blendParameterMin": 0.0,
+                "blendPhaseOffsetA": 0.0,
+                "blendPhaseOffsetB": 0.0,
+                "blendSyncNormalizedTime": true,
+                "blendUseMask": false,
+                "customAnimIndex": -1,
+                "events": [],
+                "loop": false,
+                "name": "PlayerRevive",
+                "rootMotion": {
+                    "applyPositionX": false,
+                    "applyPositionY": false,
+                    "applyPositionZ": false,
+                    "applyRotationX": false,
+                    "applyRotationY": false,
+                    "applyRotationZ": false,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": false,
+                    "cutVisualPositionZ": true,
+                    "enable": false,
+                    "sourceNodeName": "pelvis",
+                    "cutVisualWhenDisabled": true
+                },
+                "rootMotionScale": 0.0,
+                "rootMotionScaleCurveName": "",
+                "sequenceClips": [],
+                "sequencer": "",
+                "speed": 1.0,
+                "speedCurveName": "",
+                "type": 0
+            },
+            {
+                "animIndexA": -1,
+                "animIndexB": -1,
+                "animationIndex": 254,
+                "blend2DBackwardAnimationIndex": -1,
+                "blend2DBackwardPhaseOffset": 0.0,
+                "blend2DDefaultInput": [
+                    0.0,
+                    1.0
+                ],
+                "blend2DForwardAnimationIndex": -1,
+                "blend2DForwardPhaseOffset": 0.0,
+                "blend2DLeftAnimationIndex": -1,
+                "blend2DLeftPhaseOffset": 0.0,
+                "blend2DParamName": "MoveInput",
+                "blend2DRightAnimationIndex": -1,
+                "blend2DRightPhaseOffset": 0.0,
+                "blend2DSyncNormalizedTime": true,
+                "blendDefaultWeight": 0.5,
+                "blendMaskRootNodes": [],
+                "blendParamName": "BlendAlpha",
+                "blendParameterMax": 1.0,
+                "blendParameterMin": 0.0,
+                "blendPhaseOffsetA": 0.0,
+                "blendPhaseOffsetB": 0.0,
+                "blendSyncNormalizedTime": true,
+                "blendUseMask": false,
+                "customAnimIndex": -1,
+                "events": [],
+                "loop": false,
+                "name": "Run_Fast_Combat_IP_Start_Seq",
+                "rootMotion": {
+                    "applyPositionX": false,
+                    "applyPositionY": false,
+                    "applyPositionZ": false,
+                    "applyRotationX": false,
+                    "applyRotationY": false,
+                    "applyRotationZ": false,
+                    "enable": false,
+                    "sourceNodeName": "root",
+                    "cutVisualWhenDisabled": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": false,
+                    "cutVisualPositionZ": true
+                },
+                "rootMotionScale": 1.0,
+                "rootMotionScaleCurveName": "",
+                "sequencer": "",
+                "speed": 1.0,
+                "speedCurveName": "",
+                "type": 0,
+                "playbackSpeedParamName": "GroundPlaybackRate"
+            },
+            {
+                "animIndexA": -1,
+                "animIndexB": -1,
+                "animationIndex": 253,
+                "blend2DBackwardAnimationIndex": -1,
+                "blend2DBackwardPhaseOffset": 0.0,
+                "blend2DDefaultInput": [
+                    0.0,
+                    1.0
+                ],
+                "blend2DForwardAnimationIndex": -1,
+                "blend2DForwardPhaseOffset": 0.0,
+                "blend2DLeftAnimationIndex": -1,
+                "blend2DLeftPhaseOffset": 0.0,
+                "blend2DParamName": "MoveInput",
+                "blend2DRightAnimationIndex": -1,
+                "blend2DRightPhaseOffset": 0.0,
+                "blend2DSyncNormalizedTime": true,
+                "blendDefaultWeight": 0.5,
+                "blendMaskRootNodes": [],
+                "blendParamName": "BlendAlpha",
+                "blendParameterMax": 1.0,
+                "blendParameterMin": 0.0,
+                "blendPhaseOffsetA": 0.0,
+                "blendPhaseOffsetB": 0.0,
+                "blendSyncNormalizedTime": true,
+                "blendUseMask": false,
+                "customAnimIndex": -1,
+                "events": [],
+                "loop": true,
+                "name": "Run_Fast_Combat_IP_Loop_Seq",
+                "rootMotion": {
+                    "applyPositionX": false,
+                    "applyPositionY": false,
+                    "applyPositionZ": false,
+                    "applyRotationX": false,
+                    "applyRotationY": false,
+                    "applyRotationZ": false,
+                    "enable": false,
+                    "sourceNodeName": "root",
+                    "cutVisualWhenDisabled": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": false,
+                    "cutVisualPositionZ": true
+                },
+                "rootMotionScale": 1.0,
+                "rootMotionScaleCurveName": "",
+                "sequencer": "",
+                "speed": 1.0,
+                "speedCurveName": "",
+                "type": 0,
+                "playbackSpeedParamName": "GroundPlaybackRate"
+            },
+            {
+                "animIndexA": -1,
+                "animIndexB": -1,
+                "animationIndex": 255,
+                "blend2DBackwardAnimationIndex": -1,
+                "blend2DBackwardPhaseOffset": 0.0,
+                "blend2DDefaultInput": [
+                    0.0,
+                    1.0
+                ],
+                "blend2DForwardAnimationIndex": -1,
+                "blend2DForwardPhaseOffset": 0.0,
+                "blend2DLeftAnimationIndex": -1,
+                "blend2DLeftPhaseOffset": 0.0,
+                "blend2DParamName": "MoveInput",
+                "blend2DRightAnimationIndex": -1,
+                "blend2DRightPhaseOffset": 0.0,
+                "blend2DSyncNormalizedTime": true,
+                "blendDefaultWeight": 0.5,
+                "blendMaskRootNodes": [],
+                "blendParamName": "BlendAlpha",
+                "blendParameterMax": 1.0,
+                "blendParameterMin": 0.0,
+                "blendPhaseOffsetA": 0.0,
+                "blendPhaseOffsetB": 0.0,
+                "blendSyncNormalizedTime": true,
+                "blendUseMask": false,
+                "customAnimIndex": -1,
+                "events": [],
+                "loop": false,
+                "name": "Run_Fast_Combat_IP_Stop_Seq",
+                "rootMotion": {
+                    "applyPositionX": false,
+                    "applyPositionY": false,
+                    "applyPositionZ": false,
+                    "applyRotationX": false,
+                    "applyRotationY": false,
+                    "applyRotationZ": false,
+                    "enable": false,
+                    "sourceNodeName": "root",
+                    "cutVisualWhenDisabled": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": false,
+                    "cutVisualPositionZ": true
+                },
+                "rootMotionScale": 1.0,
+                "rootMotionScaleCurveName": "",
+                "sequencer": "",
+                "speed": 1.0,
+                "speedCurveName": "",
+                "type": 0,
+                "playbackSpeedParamName": "GroundPlaybackRate"
             }
         ]
     },
@@ -12495,16 +13061,116 @@
             "posY": 0.0,
             "scopeId": "SubGraph_5",
             "stateName": "Block_Walk_End_Blend"
+        },
+        {
+            "childScopeId": "",
+            "id": 9006,
+            "inputPin": 9007,
+            "nodeType": 0,
+            "outputPin": 9008,
+            "posX": 1500,
+            "posY": 900,
+            "scopeId": "Root",
+            "stateName": "Execution_Target_03_Seq"
+        },
+        {
+            "childScopeId": "",
+            "id": 9009,
+            "inputPin": 9010,
+            "nodeType": 0,
+            "outputPin": 9011,
+            "posX": 1800,
+            "posY": 900,
+            "scopeId": "Root",
+            "stateName": "Roll_Combat_F"
+        },
+        {
+            "childScopeId": "",
+            "id": 9012,
+            "inputPin": 9013,
+            "nodeType": 0,
+            "outputPin": 9014,
+            "posX": 2100,
+            "posY": 900,
+            "scopeId": "Root",
+            "stateName": "Get_Up_Seq"
+        },
+        {
+            "childScopeId": "",
+            "id": 9030,
+            "inputPin": 9031,
+            "nodeType": 0,
+            "outputPin": 9032,
+            "posX": 1500,
+            "posY": 1300,
+            "scopeId": "Root",
+            "stateName": "PlayerDeath"
+        },
+        {
+            "childScopeId": "",
+            "id": 9033,
+            "inputPin": 9034,
+            "nodeType": 0,
+            "outputPin": 9035,
+            "posX": 1880,
+            "posY": 1300,
+            "scopeId": "Root",
+            "stateName": "PlayerRevive"
+        },
+        {
+            "childScopeId": "",
+            "id": 9039,
+            "inputPin": 9040,
+            "nodeType": 0,
+            "outputPin": 9041,
+            "posX": 470.0,
+            "posY": -150.0,
+            "scopeId": "Root",
+            "stateName": "Run_Fast_Combat_IP_Start_Seq"
+        },
+        {
+            "childScopeId": "",
+            "id": 9042,
+            "inputPin": 9043,
+            "nodeType": 0,
+            "outputPin": 9044,
+            "posX": 730.0,
+            "posY": -150.0,
+            "scopeId": "Root",
+            "stateName": "Run_Fast_Combat_IP_Loop_Seq"
+        },
+        {
+            "childScopeId": "",
+            "id": 9045,
+            "inputPin": 9046,
+            "nodeType": 0,
+            "outputPin": 9047,
+            "posX": 990.0,
+            "posY": -150.0,
+            "scopeId": "Root",
+            "stateName": "Run_Fast_Combat_IP_Stop_Seq"
         }
     ],
     "GraphTransitions": [
         {
             "conditions": [
                 {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
                     "op": 0,
                     "param": "IsJustGuard",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.05000000074505806,
@@ -12533,6 +13199,12 @@
                     "param": "GuardInput",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.07999999821186066,
@@ -12545,10 +13217,22 @@
         {
             "conditions": [
                 {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
                     "op": 0,
                     "param": "IsIdle",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -12559,7 +13243,14 @@
             "to": "SS_Idle"
         },
         {
-            "conditions": [],
+            "conditions": [
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                }
+            ],
             "duration": 0.20000000298023224,
             "from": "__Start__",
             "id": 47,
@@ -12570,21 +13261,51 @@
         {
             "conditions": [
                 {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
                     "op": 0,
                     "param": "IsMove",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "type": 0,
+                    "param": "IsRunLoop",
+                    "op": 0,
+                    "threshold": 1.0
+                },
+                {
+                    "type": 0,
+                    "param": "GroundSoftStop",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
-            "duration": 0.20000000298023224,
+            "duration": 0.08,
             "from": "__Any__",
             "id": 48,
             "logic": 0,
             "scopeId": "Root",
-            "to": "SS_Sprint"
+            "to": "Run_Fast_Combat_IP_Loop_Seq"
         },
         {
             "conditions": [
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
                 {
                     "op": 0,
                     "param": "AttackEnter",
@@ -12596,6 +13317,12 @@
                     "param": "IsAirAttack",
                     "threshold": 0.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -12618,6 +13345,12 @@
                     "param": "AttackType",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -12634,6 +13367,12 @@
                     "param": "ComboIndex",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -12650,6 +13389,12 @@
                     "param": "AttackType",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -12666,6 +13411,12 @@
                     "param": "AttackType",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -12682,6 +13433,12 @@
                     "param": "AttackType",
                     "threshold": 4.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.10000000149011612,
@@ -12698,6 +13455,12 @@
                     "param": "AttackType",
                     "threshold": 4.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.10000000149011612,
@@ -12714,6 +13477,12 @@
                     "param": "ComboIndex",
                     "threshold": 2.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -12730,6 +13499,12 @@
                     "param": "AttackType",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -12746,6 +13521,12 @@
                     "param": "ComboIndex",
                     "threshold": 3.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -12762,6 +13543,12 @@
                     "param": "AttackType",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -12774,6 +13561,12 @@
         {
             "conditions": [
                 {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
                     "op": 0,
                     "param": "IsDodge",
                     "threshold": 1.0,
@@ -12784,6 +13577,12 @@
                     "param": "IsAirDodge",
                     "threshold": 0.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -12800,6 +13599,12 @@
                     "param": "AttackType",
                     "threshold": 2.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -12816,6 +13621,12 @@
                     "param": "AttackType",
                     "threshold": 2.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -12828,10 +13639,22 @@
         {
             "conditions": [
                 {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
                     "op": 0,
                     "param": "IsJumpStart",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -12872,14 +13695,38 @@
                     "param": "IsAirDodge",
                     "threshold": 0.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "type": 0,
+                    "param": "IsMove",
+                    "op": 0,
+                    "threshold": 1.0
+                },
+                {
+                    "type": 0,
+                    "param": "IsRunLoop",
+                    "op": 0,
+                    "threshold": 1.0
+                },
+                {
+                    "type": 0,
+                    "param": "GroundSoftStop",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
-            "duration": 0.20000000298023224,
+            "duration": 0.08,
             "from": "Air_State",
             "id": 154,
             "logic": 0,
             "scopeId": "Root",
-            "to": "SS_Sprint"
+            "to": "Run_Fast_Combat_IP_Loop_Seq"
         },
         {
             "conditions": [
@@ -12888,6 +13735,12 @@
                     "param": "IsJumpEnd",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -12904,6 +13757,12 @@
                     "param": "IsJumpLoop",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -12914,7 +13773,14 @@
             "to": "Jump_Combat_Loop_0_Seq_0"
         },
         {
-            "conditions": [],
+            "conditions": [
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                }
+            ],
             "duration": 0.20000000298023224,
             "from": "__Entry__:SubGraph_2",
             "id": 143,
@@ -12929,6 +13795,12 @@
                     "param": "",
                     "threshold": 0.0,
                     "type": 1
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -12945,6 +13817,12 @@
                     "param": "IsJumpDouble",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -12967,6 +13845,12 @@
                     "param": "MoveInput",
                     "threshold": 0.10000000149011612,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -12989,6 +13873,12 @@
                     "param": "MoveInput",
                     "threshold": 0.10000000149011612,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13017,6 +13907,12 @@
                     "param": "IsGrounded",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13045,6 +13941,12 @@
                     "param": "IsGrounded",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13067,6 +13969,12 @@
                     "param": "ComboIndex",
                     "threshold": 0.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13083,6 +13991,12 @@
                     "param": "ComboIndex",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13099,6 +14013,12 @@
                     "param": "ComboIndex",
                     "threshold": 2.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13115,6 +14035,12 @@
                     "param": "ComboIndex",
                     "threshold": 3.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13131,6 +14057,12 @@
                     "param": "IsAirStrongAttack",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.0,
@@ -13147,6 +14079,12 @@
                     "param": "IsAirStrongChargeAttack",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.0,
@@ -13163,6 +14101,12 @@
                     "param": "IsAirDodge",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.0,
@@ -13179,6 +14123,12 @@
                     "param": "IsAirStrongAttack",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.0,
@@ -13195,6 +14145,12 @@
                     "param": "IsAirStrongChargeAttack",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.0,
@@ -13211,6 +14167,12 @@
                     "param": "IsAirDodge",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.0,
@@ -13227,6 +14189,12 @@
                     "param": "IsAirStrongAttack",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.0,
@@ -13243,6 +14211,12 @@
                     "param": "IsAirStrongChargeAttack",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.0,
@@ -13259,6 +14233,12 @@
                     "param": "IsAirDodge",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.0,
@@ -13275,6 +14255,12 @@
                     "param": "IsAirStrongAttack",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.0,
@@ -13291,6 +14277,12 @@
                     "param": "IsAirStrongChargeAttack",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.0,
@@ -13307,6 +14299,12 @@
                     "param": "IsAirDodge",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.0,
@@ -13323,6 +14321,12 @@
                     "param": "IsAirStrongAttack",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13339,6 +14343,12 @@
                     "param": "IsAirStrongChargeAttack",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13355,6 +14365,12 @@
                     "param": "IsAirDodge",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13377,6 +14393,12 @@
                     "param": "ComboIndex",
                     "threshold": 0.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13393,6 +14415,12 @@
                     "param": "IsAirStrongAttack",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13409,6 +14437,12 @@
                     "param": "IsAirStrongChargeAttack",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13425,6 +14459,12 @@
                     "param": "IsAirDodge",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13447,6 +14487,12 @@
                     "param": "MoveInput",
                     "threshold": 0.10000000149011612,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13475,6 +14521,12 @@
                     "param": "IsGrounded",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13485,7 +14537,14 @@
             "to": "__Exit__:SubGraph_2"
         },
         {
-            "conditions": [],
+            "conditions": [
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                }
+            ],
             "duration": 0.20000000298023224,
             "from": "Air_Attack_State",
             "id": 202,
@@ -13500,6 +14559,12 @@
                     "param": "",
                     "threshold": 0.0,
                     "type": 1
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13516,6 +14581,12 @@
                     "param": "",
                     "threshold": 0.0,
                     "type": 1
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13532,6 +14603,12 @@
                     "param": "",
                     "threshold": 0.0,
                     "type": 1
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13548,6 +14625,12 @@
                     "param": "",
                     "threshold": 0.0,
                     "type": 1
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13564,6 +14647,12 @@
                     "param": "",
                     "threshold": 0.0,
                     "type": 1
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13580,6 +14669,12 @@
                     "param": "",
                     "threshold": 0.0,
                     "type": 1
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13596,6 +14691,12 @@
                     "param": "",
                     "threshold": 0.0,
                     "type": 1
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13612,6 +14713,12 @@
                     "param": "",
                     "threshold": 0.0,
                     "type": 1
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13628,6 +14735,12 @@
                     "param": "IsJumpDouble",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13644,6 +14757,12 @@
                     "param": "IsAirWeakAttack",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13660,6 +14779,12 @@
                     "param": "IsAirStrongAttack",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13676,6 +14801,12 @@
                     "param": "IsAirStrongChargeAttack",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13692,6 +14823,12 @@
                     "param": "IsAirDodge",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13708,6 +14845,12 @@
                     "param": "IsAirWeakAttack",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13724,6 +14867,12 @@
                     "param": "IsAirStrongAttack",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13740,6 +14889,12 @@
                     "param": "IsAirStrongChargeAttack",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13756,6 +14911,12 @@
                     "param": "IsAirDodge",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13772,6 +14933,12 @@
                     "param": "IsAirWeakAttack",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13788,6 +14955,12 @@
                     "param": "IsAirStrongAttack",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13804,6 +14977,12 @@
                     "param": "IsAirStrongChargeAttack",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13820,6 +14999,12 @@
                     "param": "IsAirDodge",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13832,10 +15017,22 @@
         {
             "conditions": [
                 {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
                     "op": 0,
                     "param": "HitTrigger",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13858,6 +15055,12 @@
                     "param": "IsAirHitKnockdown",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13880,6 +15083,12 @@
                     "param": "IsAirHitKnockdown",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13902,6 +15111,12 @@
                     "param": "IsHitHeavy",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13924,6 +15139,12 @@
                     "param": "IsHitMedium",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13934,7 +15155,14 @@
             "to": "SS_HitGround_Medium"
         },
         {
-            "conditions": [],
+            "conditions": [
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                }
+            ],
             "duration": 0.20000000298023224,
             "from": "__Entry__:SubGraph_4",
             "id": 261,
@@ -13949,6 +15177,12 @@
                     "param": "",
                     "threshold": 0.0,
                     "type": 1
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13965,6 +15199,12 @@
                     "param": "",
                     "threshold": 0.0,
                     "type": 1
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13981,6 +15221,12 @@
                     "param": "",
                     "threshold": 0.0,
                     "type": 1
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -13997,6 +15243,12 @@
                     "param": "",
                     "threshold": 0.0,
                     "type": 1
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -14013,6 +15265,12 @@
                     "param": "IsGrounded",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -14029,6 +15287,12 @@
                     "param": "",
                     "threshold": 0.0,
                     "type": 1
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -14051,6 +15315,12 @@
                     "param": "IsGuard",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.07999999821186066,
@@ -14061,7 +15331,14 @@
             "to": "Guard_State"
         },
         {
-            "conditions": [],
+            "conditions": [
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                }
+            ],
             "duration": 0.10000000149011612,
             "from": "__Entry__:SubGraph_5",
             "id": 317,
@@ -14076,6 +15353,12 @@
                     "param": "",
                     "threshold": 0.0,
                     "type": 1
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.12000000476837158,
@@ -14092,6 +15375,12 @@
                     "param": "GuardInput",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.07999999821186066,
@@ -14108,6 +15397,12 @@
                     "param": "",
                     "threshold": 0.0,
                     "type": 1
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.12000000476837158,
@@ -14130,6 +15425,12 @@
                     "param": "IsGuard",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.07999999821186066,
@@ -14152,6 +15453,12 @@
                     "param": "IsGuard",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.07999999821186066,
@@ -14174,6 +15481,12 @@
                     "param": "IsGuard",
                     "threshold": 1.0,
                     "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
                 }
             ],
             "duration": 0.07999999821186066,
@@ -14182,9 +15495,817 @@
             "logic": 0,
             "scopeId": "Root",
             "to": "Guard_State"
+        },
+        {
+            "BlackboardRequestRoute": false,
+            "conditions": [
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "type": 2,
+                    "param": "EnemyExecutionStart",
+                    "op": 0,
+                    "threshold": 1.0
+                }
+            ],
+            "duration": 0.05,
+            "to": "Execution_Target_03_Seq",
+            "id": 9015,
+            "logic": 0,
+            "scopeId": "Root",
+            "from": "__Any__"
+        },
+        {
+            "BlackboardRequestRoute": false,
+            "conditions": [
+                {
+                    "type": 2,
+                    "param": "EnemyExecutionRoll",
+                    "op": 0,
+                    "threshold": 1.0
+                }
+            ],
+            "duration": 0.05,
+            "to": "Roll_Combat_F",
+            "id": 9016,
+            "logic": 0,
+            "scopeId": "Root",
+            "from": "Execution_Target_03_Seq"
+        },
+        {
+            "BlackboardRequestRoute": false,
+            "conditions": [
+                {
+                    "type": 2,
+                    "param": "EnemyExecutionGetUp",
+                    "op": 0,
+                    "threshold": 1.0
+                }
+            ],
+            "duration": 0.05,
+            "to": "Get_Up_Seq",
+            "id": 9017,
+            "logic": 0,
+            "scopeId": "Root",
+            "from": "Execution_Target_03_Seq"
+        },
+        {
+            "BlackboardRequestRoute": false,
+            "conditions": [
+                {
+                    "type": 1,
+                    "param": "",
+                    "op": 0,
+                    "threshold": 1.0
+                }
+            ],
+            "duration": 0.05,
+            "to": "SS_Idle",
+            "id": 9018,
+            "logic": 0,
+            "scopeId": "Root",
+            "from": "Roll_Combat_F"
+        },
+        {
+            "BlackboardRequestRoute": false,
+            "conditions": [
+                {
+                    "type": 1,
+                    "param": "",
+                    "op": 0,
+                    "threshold": 1.0
+                }
+            ],
+            "duration": 0.05,
+            "to": "SS_Idle",
+            "id": 9019,
+            "logic": 0,
+            "scopeId": "Root",
+            "from": "Get_Up_Seq"
+        },
+        {
+            "BlackboardRequestRoute": false,
+            "conditions": [
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "type": 2,
+                    "param": "EnemyExecutionAbort",
+                    "op": 0,
+                    "threshold": 1.0
+                }
+            ],
+            "duration": 0.05,
+            "to": "SS_Idle",
+            "id": 9020,
+            "logic": 0,
+            "scopeId": "Root",
+            "from": "__Any__"
+        },
+        {
+            "BlackboardRequestRoute": false,
+            "conditions": [
+                {
+                    "type": 2,
+                    "param": "PlayerDied",
+                    "op": 0,
+                    "threshold": 1.0
+                },
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 1.0
+                }
+            ],
+            "duration": 0.15,
+            "from": "__Any__",
+            "to": "PlayerDeath",
+            "id": 9036,
+            "logic": 0,
+            "scopeId": "Root"
+        },
+        {
+            "BlackboardRequestRoute": false,
+            "conditions": [
+                {
+                    "type": 2,
+                    "param": "PlayerContinue",
+                    "op": 0,
+                    "threshold": 1.0
+                },
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 1.0
+                }
+            ],
+            "duration": 0.15,
+            "from": "PlayerDeath",
+            "to": "PlayerRevive",
+            "id": 9037,
+            "logic": 0,
+            "scopeId": "Root"
+        },
+        {
+            "BlackboardRequestRoute": false,
+            "conditions": [
+                {
+                    "type": 1,
+                    "param": "",
+                    "op": 0,
+                    "threshold": 1.0
+                },
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 1.0
+                }
+            ],
+            "duration": 0.15,
+            "from": "PlayerRevive",
+            "to": "SS_Idle",
+            "id": 9038,
+            "logic": 0,
+            "scopeId": "Root"
+        },
+        {
+            "conditions": [
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "op": 0,
+                    "param": "IsMove",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "type": 0,
+                    "param": "IsRunStart",
+                    "op": 0,
+                    "threshold": 1.0
+                },
+                {
+                    "type": 0,
+                    "param": "GroundSoftStop",
+                    "op": 0,
+                    "threshold": 0.0
+                }
+            ],
+            "duration": 0.08,
+            "from": "__Any__",
+            "id": 9048,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "Run_Fast_Combat_IP_Start_Seq"
+        },
+        {
+            "conditions": [
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "op": 0,
+                    "param": "IsMove",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "type": 0,
+                    "param": "IsRunEnd",
+                    "op": 0,
+                    "threshold": 1.0
+                },
+                {
+                    "type": 0,
+                    "param": "GroundSoftStop",
+                    "op": 0,
+                    "threshold": 0.0
+                }
+            ],
+            "duration": 0.06,
+            "from": "__Any__",
+            "id": 9049,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "Run_Fast_Combat_IP_Stop_Seq"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "GuardInput",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "op": 0,
+                    "param": "IsGuard",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                }
+            ],
+            "duration": 0.07999999821186066,
+            "from": "Run_Fast_Combat_IP_Start_Seq",
+            "id": 9050,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "Guard_State"
+        },
+        {
+            "conditions": [
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "op": 0,
+                    "param": "IsIdle",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                }
+            ],
+            "duration": 0.1,
+            "from": "Run_Fast_Combat_IP_Start_Seq",
+            "id": 9051,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "SS_Idle"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "GuardInput",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "op": 0,
+                    "param": "IsGuard",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                }
+            ],
+            "duration": 0.07999999821186066,
+            "from": "Run_Fast_Combat_IP_Loop_Seq",
+            "id": 9052,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "Guard_State"
+        },
+        {
+            "conditions": [
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "op": 0,
+                    "param": "IsIdle",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                }
+            ],
+            "duration": 0.1,
+            "from": "Run_Fast_Combat_IP_Loop_Seq",
+            "id": 9053,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "SS_Idle"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "GuardInput",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "op": 0,
+                    "param": "IsGuard",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                }
+            ],
+            "duration": 0.07999999821186066,
+            "from": "Run_Fast_Combat_IP_Stop_Seq",
+            "id": 9054,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "Guard_State"
+        },
+        {
+            "conditions": [
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "op": 0,
+                    "param": "IsIdle",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                }
+            ],
+            "duration": 0.1,
+            "from": "Run_Fast_Combat_IP_Stop_Seq",
+            "id": 9055,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "SS_Idle"
+        },
+        {
+            "conditions": [
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "op": 0,
+                    "param": "IsMove",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "type": 0,
+                    "param": "IsRunStart",
+                    "op": 0,
+                    "threshold": 1.0
+                },
+                {
+                    "type": 0,
+                    "param": "GroundSoftStop",
+                    "op": 0,
+                    "threshold": 0.0
+                }
+            ],
+            "duration": 0.08,
+            "from": "SS_Idle",
+            "id": 9056,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "Run_Fast_Combat_IP_Start_Seq"
+        },
+        {
+            "conditions": [
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "op": 0,
+                    "param": "IsMove",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "type": 0,
+                    "param": "IsRunLoop",
+                    "op": 0,
+                    "threshold": 1.0
+                },
+                {
+                    "type": 0,
+                    "param": "GroundSoftStop",
+                    "op": 0,
+                    "threshold": 0.0
+                }
+            ],
+            "duration": 0.08,
+            "from": "Run_Fast_Combat_IP_Start_Seq",
+            "id": 9057,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "Run_Fast_Combat_IP_Loop_Seq"
+        },
+        {
+            "conditions": [
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "op": 0,
+                    "param": "IsMove",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "type": 0,
+                    "param": "IsRunEnd",
+                    "op": 0,
+                    "threshold": 1.0
+                },
+                {
+                    "type": 0,
+                    "param": "GroundSoftStop",
+                    "op": 0,
+                    "threshold": 0.0
+                }
+            ],
+            "duration": 0.06,
+            "from": "Run_Fast_Combat_IP_Start_Seq",
+            "id": 9058,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "Run_Fast_Combat_IP_Stop_Seq"
+        },
+        {
+            "conditions": [
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "op": 0,
+                    "param": "IsMove",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "type": 0,
+                    "param": "IsRunEnd",
+                    "op": 0,
+                    "threshold": 1.0
+                },
+                {
+                    "type": 0,
+                    "param": "GroundSoftStop",
+                    "op": 0,
+                    "threshold": 0.0
+                }
+            ],
+            "duration": 0.06,
+            "from": "Run_Fast_Combat_IP_Loop_Seq",
+            "id": 9059,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "Run_Fast_Combat_IP_Stop_Seq"
+        },
+        {
+            "conditions": [
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "op": 0,
+                    "param": "IsMove",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "type": 0,
+                    "param": "IsRunStart",
+                    "op": 0,
+                    "threshold": 1.0
+                },
+                {
+                    "type": 0,
+                    "param": "GroundSoftStop",
+                    "op": 0,
+                    "threshold": 0.0
+                }
+            ],
+            "duration": 0.08,
+            "from": "Run_Fast_Combat_IP_Stop_Seq",
+            "id": 9060,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "Run_Fast_Combat_IP_Start_Seq"
+        },
+        {
+            "conditions": [
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "op": 0,
+                    "param": "IsMove",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "type": 0,
+                    "param": "IsRunLoop",
+                    "op": 0,
+                    "threshold": 1.0
+                },
+                {
+                    "type": 0,
+                    "param": "GroundSoftStop",
+                    "op": 0,
+                    "threshold": 0.0
+                }
+            ],
+            "duration": 0.08,
+            "from": "Run_Fast_Combat_IP_Stop_Seq",
+            "id": 9061,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "Run_Fast_Combat_IP_Loop_Seq"
+        },
+        {
+            "conditions": [
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "op": 0,
+                    "param": "IsMove",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "type": 0,
+                    "param": "GroundSoftStop",
+                    "op": 0,
+                    "threshold": 1.0
+                }
+            ],
+            "duration": 0.08,
+            "from": "__Any__",
+            "id": 9062,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "SS_Idle"
+        },
+        {
+            "conditions": [
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "op": 0,
+                    "param": "IsMove",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "type": 0,
+                    "param": "GroundSoftStop",
+                    "op": 0,
+                    "threshold": 1.0
+                }
+            ],
+            "duration": 0.08,
+            "from": "Run_Fast_Combat_IP_Start_Seq",
+            "id": 9063,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "SS_Idle"
+        },
+        {
+            "conditions": [
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "op": 0,
+                    "param": "IsMove",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "type": 0,
+                    "param": "GroundSoftStop",
+                    "op": 0,
+                    "threshold": 1.0
+                }
+            ],
+            "duration": 0.08,
+            "from": "Run_Fast_Combat_IP_Loop_Seq",
+            "id": 9064,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "SS_Idle"
+        },
+        {
+            "conditions": [
+                {
+                    "type": 0,
+                    "param": "DeathSequenceActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "op": 0,
+                    "param": "IsMove",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "type": 0,
+                    "param": "EnemyExecutionActive",
+                    "op": 0,
+                    "threshold": 0.0
+                },
+                {
+                    "type": 0,
+                    "param": "GroundSoftStop",
+                    "op": 0,
+                    "threshold": 1.0
+                }
+            ],
+            "duration": 0.08,
+            "from": "Run_Fast_Combat_IP_Stop_Seq",
+            "id": 9065,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "SS_Idle"
         }
     ],
     "StateAssets": {
+        "Heal_Air": "Data/Animation/StateData/Player/States/Heal_Air_01.json",
         "AirDodge_Blend": "Data\\Animation\\StateData\\Player\\States\\AirDodge_Blend.json",
         "Block_Hit_Break_Seq": "Data\\Animation\\StateData\\Player\\States\\Block_Hit_Break_Seq.json",
         "Block_Hit_Seq": "Data\\Animation\\StateData\\Player\\States\\Block_Hit_Seq.json",
@@ -14245,7 +16366,15 @@
         "SS_Run": "Data\\Animation\\StateData\\Player\\States\\SS_Run.json",
         "SS_Sp_Skill1": "Data\\Animation\\StateData\\Player\\States\\SS_Sp_Skill1.json",
         "SS_Sprint": "Data\\Animation\\StateData\\Player\\States\\SS_Sprint.json",
-        "Walk_Block_Loop_B_0_Seq": "Data\\Animation\\StateData\\Player\\States\\Walk_Block_Loop_B_0_Seq.json"
+        "Walk_Block_Loop_B_0_Seq": "Data\\Animation\\StateData\\Player\\States\\Walk_Block_Loop_B_0_Seq.json",
+        "Execution_Target_03_Seq": "Data/Animation/StateData/Player/States/Execution_Target_03_Seq.json",
+        "Roll_Combat_F": "Data/Animation/StateData/Player/States/Roll_Combat_F.json",
+        "Get_Up_Seq": "Data/Animation/StateData/Player/States/Get_Up_Seq.json",
+        "PlayerDeath": "Data/Animation/StateData/Player/States/PlayerDeath.json",
+        "PlayerRevive": "Data/Animation/StateData/Player/States/PlayerRevive.json",
+        "Run_Fast_Combat_IP_Start_Seq": "Data\\Animation\\StateData\\Player\\States\\Run_Fast_Combat_IP_Start_Seq.json",
+        "Run_Fast_Combat_IP_Loop_Seq": "Data\\Animation\\StateData\\Player\\States\\Run_Fast_Combat_IP_Loop_Seq.json",
+        "Run_Fast_Combat_IP_Stop_Seq": "Data\\Animation\\StateData\\Player\\States\\Run_Fast_Combat_IP_Stop_Seq.json"
     },
     "UseTransitionGraph": true
 }

@@ -58,11 +58,17 @@ public:
 private:
     bool pendingDestroy = false;
     bool combatReady = true;
+    float runtimePlaybackRate = 1.0f; // 演出・暴走用の共通時計倍率。保存データには書き込まない。
+    bool runtimeHierarchyVisible = false; // Scene保存対象とは独立した、実行時ObjectのHierarchy表示。
     std::vector<std::pair<std::string, std::string>> globalActions;
 public:
     bool IsPendingDestroy() const { return pendingDestroy; }
     bool IsCombatReady() const { return combatReady && !pendingDestroy; }
     void SetCombatReady(bool ready_) { combatReady = ready_; }
+    void SetRuntimePlaybackRate(float rate_) { runtimePlaybackRate = (std::clamp)(rate_, 0.1f, 3.0f); }
+    float GetRuntimePlaybackRate() const { return runtimePlaybackRate; }
+    bool IsRuntimeHierarchyVisible() const { return runtimeHierarchyVisible; }
+    void SetRuntimeHierarchyVisible(bool visible_) { runtimeHierarchyVisible = visible_; }
     // 削除予約時点で更新・戦闘・物理・Actionを停止する。複数回の通知は無視する。
     void PrepareForDestroy();
     // 起動待ちのPrefab階層全体が、演出Actionを受け取れる状態か判定する。

@@ -1844,6 +1844,8 @@ DirectX::XMFLOAT3 CameraLockOnComponent::CalculateCollisionLookAt(
     float compressionRate_,
     float liftRate_) const
 {
+    // 人型用プロファイルでは、ドラゴン向けの縦補正を候補計算から外す。
+    if (!enableCollisionVerticalCorrection) return baseLookAtPosition_;
     // 衝突でカメラが近づいたとき、足元や敵が切れない注視点候補を複数作って最も収まりがよいものを選ぶ。
     const DirectX::XMFLOAT3 weightedLookAt_ = CalculateWeightedLookAt(
         playerTopPosition_,
@@ -1934,6 +1936,8 @@ DirectX::XMFLOAT3 CameraLockOnComponent::CalculateFramingCameraPosition(
     const DirectX::XMFLOAT3& targetPosition_,
     float compressionRate_) const
 {
+    // 人型用プロファイルでは、ドラゴン向けの縦補正を候補計算から外す。
+    if (!enableCollisionVerticalCorrection) return cameraPosition_;
     // 縦方向に画面外へ出そうな場合は、注視点から後ろ方向へカメラを少し引いて構図を回復する。
     DirectX::XMFLOAT2 playerTopScreen_{};
     DirectX::XMFLOAT2 playerBottomScreen_{};
@@ -2341,6 +2345,7 @@ void CameraLockOnComponent::Gui()
         0.0f,
         10.0f);
     ImGui::DragFloat("framingSmoothSpeed", &framingSmoothSpeed, 0.1f, 0.1f, 100.0f);
+    ImGui::Checkbox("Collision Vertical Correction", &enableCollisionVerticalCorrection);
     ImGui::DragFloat("Collision LookAt Lower Height", &collisionLookAtLowerHeight, 0.05f, 0.0f, 5.0f);
     ImGui::DragFloat("Collision LookAt Search Radius", &collisionLookAtSearchRadius, 0.05f, 0.0f, 8.0f);
     ImGui::DragFloat("Collision LookAt Speed", &collisionLookAtInterpolationSpeed, 0.1f, 0.1f, 100.0f);
@@ -2476,6 +2481,7 @@ void CameraLockOnComponent::Gui()
 
 void CameraLockOnComponent::Serialize(nlohmann::json& json_) const
 {
+    if (runtimeSettingsActive) { json_ = originalRuntimeSettings; return; }
     // カメラ構図、壁際補正、入力切替しきい値を保存し、エディタ調整値をシーンへ保持する。
     json_["playerTargetName"] = playerTargetName;
     json_["lockOnTargetName"] = lockOnTargetName;
@@ -2521,6 +2527,7 @@ void CameraLockOnComponent::Serialize(nlohmann::json& json_) const
         verticalFocusCorrectionStrength;
     json_["framingSmoothSpeed"] = framingSmoothSpeed;
     json_["collisionLookAtLowerHeight"] = collisionLookAtLowerHeight;
+    json_["enableCollisionVerticalCorrection"] = enableCollisionVerticalCorrection;
     json_["collisionLookAtSearchRadius"] = collisionLookAtSearchRadius;
     json_["collisionLookAtInterpolationSpeed"] =
         collisionLookAtInterpolationSpeed;
@@ -2569,7 +2576,13 @@ void CameraLockOnComponent::Serialize(nlohmann::json& json_) const
 
 void CameraLockOnComponent::Deserialize(const nlohmann::json& json_)
 {
+    runtimeSettingsActive = false;
+    originalRuntimeSettings = nlohmann::json{};
     hasRuntimeArenaBounds = false;
+    // 設定で対象名を切り替えた際、旧ドラゴンの弱参照を再利用しない。
+    playerTarget.reset();
+    lockOnTarget.reset();
+    lockOnFocusTarget.reset();
     // 旧データや手編集データでも壊れにくいよう、既定値を入れながら読み込み後に範囲をクランプする。
     playerTargetName = json_.value("playerTargetName", std::string{});
     lockOnTargetName = json_.value("lockOnTargetName", std::string{});
@@ -2624,6 +2637,7 @@ void CameraLockOnComponent::Deserialize(const nlohmann::json& json_)
     framingSmoothSpeed = json_.value("framingSmoothSpeed", 16.0f);
     collisionLookAtLowerHeight =
         json_.value("collisionLookAtLowerHeight", 1.1f);
+    enableCollisionVerticalCorrection = json_.value("enableCollisionVerticalCorrection", true);
     collisionLookAtSearchRadius =
         json_.value("collisionLookAtSearchRadius", 1.8f);
     collisionLookAtInterpolationSpeed =
@@ -2749,3 +2763,22 @@ void CameraLockOnComponent::Deserialize(const nlohmann::json& json_)
 }
 
 REGISTER_COMPONENT(CameraLockOnComponent, "CameraLockOnComponent")
+
+// 元の設定は一度だけ保存し、第二形態のカメラ設定を実行時へ適用する。
+void CameraLockOnComponent::ApplyRuntimeSettings(const nlohmann::json& settings_)
+{
+    BS_PROFILE_SCOPE("CameraLockOnComponent::ApplyRuntimeSettings");
+    nlohmann::json original_;
+    Serialize(original_);
+    Deserialize(settings_);
+    ClearCompositionCorrection();
+    originalRuntimeSettings = std::move(original_);
+    runtimeSettingsActive = true;
+}
+
+void CameraLockOnComponent::ClearRuntimeSettings()
+{
+    if (!runtimeSettingsActive) return;
+    const auto original_ = originalRuntimeSettings;
+    Deserialize(original_);
+}

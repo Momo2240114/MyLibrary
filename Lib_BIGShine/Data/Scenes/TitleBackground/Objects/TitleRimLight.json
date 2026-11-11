@@ -1,0 +1,57 @@
+{
+    "CollisionMask": 0,
+    "Components": [
+        {
+            "Data": {
+                "Color": [
+                    1.0,
+                    0.035,
+                    0.018
+                ],
+                "InnerAngle": 20.0,
+                "Intensity": 2.0,
+                "LocalRotation": [
+                    28.0,
+                    155.0,
+                    0.0
+                ],
+                "OffsetPosition": [
+                    4.0,
+                    2.8,
+                    2.5
+                ],
+                "OuterAngle": 30.0,
+                "Range": 8.0,
+                "Type": 1
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": true,
+            "TypeName": "LightComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        }
+    ],
+    "Layer": 1,
+    "Name": "TitleRimLight",
+    "ParentName": "",
+    "RequiredForSceneStart": true,
+    "Transform": {
+        "Pos": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

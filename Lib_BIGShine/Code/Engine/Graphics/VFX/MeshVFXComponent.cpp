@@ -57,6 +57,7 @@ namespace
     constexpr const char* INTERNAL_MESH_BREATH_BEAM_MODEL_PATH = "__InternalMeshBreathBeam__";
     constexpr const char* INTERNAL_MESH_DANGER_AREA_MODEL_PATH = "__InternalMeshDangerArea__";
     constexpr const char* INTERNAL_MESH_DANGER_FAN_MODEL_PATH = "__InternalMeshDangerFan__";
+    constexpr const char* INTERNAL_MESH_DANGER_BOX_MODEL_PATH = "__InternalMeshDangerBox__";
 
     constexpr int INTERNAL_MESH_CYLINDER_SEGMENTS = 256;
     constexpr int INTERNAL_MESH_SLASH_SEGMENTS = 96;
@@ -854,6 +855,24 @@ namespace
         }
 
         AddRibbonStrip(mesh_, innerPoints_, outerPoints_);
+        return CreateStaticMeshBuffers(device_, mesh_) ? resource_ : nullptr;
+    }
+
+    // 攻撃判定と同じ幅・長さの帯を、地面に沿う長方形として生成する。
+    std::shared_ptr<ModelResource> CreateInternalMeshDangerBoxModelResource(ID3D11Device* device_, float halfWidth_, float length_)
+    {
+        BS_PROFILE_SCOPE("CreateInternalMeshDangerBoxModelResource");
+        if (!device_) return nullptr;
+        auto resource_ = CreateGeneratedModelResource(INTERNAL_MESH_DANGER_BOX_MODEL_PATH);
+        auto& mesh_ = resource_->meshes[0];
+        const float width_ = (std::max)(halfWidth_, 0.01f);
+        const float halfLength_ = (std::max)(length_ * 0.5f, 0.01f);
+        mesh_.vertices = {
+            CreateInternalMeshSlashVertex({ -width_, 0.0f, -halfLength_ }, 0.0f, 0.0f),
+            CreateInternalMeshSlashVertex({ -width_, 0.0f, halfLength_ }, 0.0f, 1.0f),
+            CreateInternalMeshSlashVertex({ width_, 0.0f, halfLength_ }, 1.0f, 1.0f),
+            CreateInternalMeshSlashVertex({ width_, 0.0f, -halfLength_ }, 1.0f, 0.0f) };
+        mesh_.indices = { 0u, 1u, 2u, 0u, 2u, 3u };
         return CreateStaticMeshBuffers(device_, mesh_) ? resource_ : nullptr;
     }
 
@@ -1678,6 +1697,7 @@ void MeshVFXComponent::Gui()
             else if (part_.modelPath == INTERNAL_MESH_SLASH_GROUND_MODEL_PATH) slashPresetPreview_ = "Ground Slash";
             else if (part_.modelPath == INTERNAL_MESH_DANGER_AREA_MODEL_PATH) slashPresetPreview_ = "Danger Area";
             else if (part_.modelPath == INTERNAL_MESH_DANGER_FAN_MODEL_PATH) slashPresetPreview_ = "Danger Fan";
+            else if (part_.modelPath == INTERNAL_MESH_DANGER_BOX_MODEL_PATH) slashPresetPreview_ = "Danger Box";
 
             if (ImGui::BeginCombo("Internal Slash Mesh", slashPresetPreview_))
             {
@@ -1699,6 +1719,7 @@ void MeshVFXComponent::Gui()
                     { "Ground Slash", INTERNAL_MESH_SLASH_GROUND_MODEL_PATH },
                     { "Danger Area", INTERNAL_MESH_DANGER_AREA_MODEL_PATH },
                     { "Danger Fan", INTERNAL_MESH_DANGER_FAN_MODEL_PATH },
+                    { "Danger Box", INTERNAL_MESH_DANGER_BOX_MODEL_PATH },
                 };
 
                 for (const SlashPresetEntry& preset_ : presets_)
@@ -2044,7 +2065,8 @@ void MeshVFXComponent::Gui()
                 part_.modelPath == INTERNAL_MESH_CONE_MODEL_PATH ||
                 part_.modelPath == INTERNAL_MESH_CAPSULE_MODEL_PATH ||
                 part_.modelPath == INTERNAL_MESH_DANGER_AREA_MODEL_PATH ||
-                part_.modelPath == INTERNAL_MESH_DANGER_FAN_MODEL_PATH)
+                part_.modelPath == INTERNAL_MESH_DANGER_FAN_MODEL_PATH ||
+                part_.modelPath == INTERNAL_MESH_DANGER_BOX_MODEL_PATH)
             {
                 const char* radiusLabel_ = "Internal Cylinder Radius";
                 if (part_.modelPath == INTERNAL_MESH_CONE_MODEL_PATH)
@@ -2063,6 +2085,10 @@ void MeshVFXComponent::Gui()
                 {
                     radiusLabel_ = "Danger Fan Range";
                 }
+                else if (part_.modelPath == INTERNAL_MESH_DANGER_BOX_MODEL_PATH)
+                {
+                    radiusLabel_ = "Danger Box Half Width";
+                }
                 if (ImGui::DragFloat(radiusLabel_, &part_.shapeCylinderRadius, 0.01f, 0.0001f, 100.0f))
                 {
                     LoadPartResource(static_cast<size_t>(partIndex_));
@@ -2075,7 +2101,8 @@ void MeshVFXComponent::Gui()
                 part_.modelPath == INTERNAL_MESH_SLASH_RAISED_CRESCENT_MODEL_PATH ||
                 part_.modelPath == INTERNAL_MESH_BREATH_BEAM_MODEL_PATH ||
                 part_.modelPath == INTERNAL_MESH_DANGER_AREA_MODEL_PATH ||
-                part_.modelPath == INTERNAL_MESH_DANGER_FAN_MODEL_PATH;
+                part_.modelPath == INTERNAL_MESH_DANGER_FAN_MODEL_PATH ||
+                part_.modelPath == INTERNAL_MESH_DANGER_BOX_MODEL_PATH;
             if (isEditableInternalMesh_ && ImGui::TreeNode("Internal Mesh Shape"))
             {
                 MeshVFXInternalMeshSettings& settings_ = part_.internalMeshSettings;
@@ -2109,7 +2136,7 @@ void MeshVFXComponent::Gui()
                         0.001f,
                         100.0f);
                 }
-                else if (part_.modelPath == INTERNAL_MESH_DANGER_AREA_MODEL_PATH)
+                else if (part_.modelPath == INTERNAL_MESH_DANGER_AREA_MODEL_PATH || part_.modelPath == INTERNAL_MESH_DANGER_BOX_MODEL_PATH)
                 {
                     shapeChanged_ |= ImGui::DragFloat(
                         "Danger Area Length",
@@ -3322,6 +3349,11 @@ void MeshVFXComponent::LoadPartResource(size_t partIndex_)
     else if (part_.modelPath == INTERNAL_MESH_SLASH_GROUND_MODEL_PATH)
     {
         runtimePart_.modelResource = CreateInternalMeshSlashGroundModelResource(device_);
+    }
+    else if (part_.modelPath == INTERNAL_MESH_DANGER_BOX_MODEL_PATH)
+    {
+        runtimePart_.modelResource = CreateInternalMeshDangerBoxModelResource(device_,
+            part_.shapeCylinderRadius, part_.internalMeshSettings.capsuleLength);
     }
     else if (part_.modelPath == INTERNAL_MESH_DANGER_AREA_MODEL_PATH)
     {

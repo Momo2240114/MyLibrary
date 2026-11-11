@@ -26,6 +26,8 @@ public:
     // RootMotion回転上限もBlackboardの要求として扱う。
     void RequestYawLimit(float degrees_);
     void ClearYawLimit();
+    // 遷移先がない攻撃中断も、グラフへの要求として未発生予兆を破棄する。
+    void RequestCancelAttackTelegraphs();
     // 未登録Assetと予定RootMotionの問い合わせをエンジン側へ渡す。
     bool LoadMissingStateAsset(const std::string& state_, const std::string& path_);
     bool EstimateRootMotion(const std::string& state_, float start_, float end_,

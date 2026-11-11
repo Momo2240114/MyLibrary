@@ -16,11 +16,40 @@
 #include <cstring>
 #include <gdiplus.h>
 #include <vector>
+#include <unordered_map>
 
 #pragma comment(lib, "Gdiplus.lib")
 
+// FontFamilyより後にPrivateFontCollectionが破棄されるよう、同じ所有単位で保持する。
+struct UITextFontResource
+{
+    Gdiplus::PrivateFontCollection collection;
+    Gdiplus::FontFamily family;
+    bool loaded = false;
+};
+
 namespace
 {
+    // 文字Textureだけを更新する際に、同一フォントのファイル読込と解析を繰り返さない。
+    std::shared_ptr<UITextFontResource> AcquireTextFontResource(const std::wstring& fontPath_, bool forceReload_ = false)
+    {
+        static std::unordered_map<std::wstring, std::weak_ptr<UITextFontResource>> fontResources_;
+        const auto iterator_ = fontResources_.find(fontPath_);
+        if (!forceReload_ && iterator_ != fontResources_.end())
+            if (const auto resource_ = iterator_->second.lock()) return resource_;
+
+        BS_PROFILE_SCOPE("UITextComponent::LoadSharedFont");
+        auto resource_ = std::make_shared<UITextFontResource>();
+        if (!fontPath_.empty() && resource_->collection.AddFontFile(fontPath_.c_str()) == Gdiplus::Ok &&
+            resource_->collection.GetFamilyCount() > 0)
+        {
+            int familyCount_ = 0;
+            resource_->loaded = resource_->collection.GetFamilies(1, &resource_->family, &familyCount_) == Gdiplus::Ok && familyCount_ > 0;
+        }
+        fontResources_[fontPath_] = resource_;
+        return resource_;
+    }
+
     // Serialize文字列とEditor Combo表示をEnum順に合わせる。
     const char* UI_TEXT_HORIZONTAL_ALIGN_NAMES[] =
     {
@@ -184,6 +213,7 @@ void UITextComponent::Gui()
     DrawTextInput("Text", text, changed_);
     DrawTextInput("Font Path", fontPath, changed_);
     changed_ |= ImGui::DragFloat("Font Size", &fontSize, 1.0f, 4.0f, 256.0f);
+    changed_ |= ImGui::DragFloat("Text Weight (px)", &fontStrokeWidth, 0.05f, 0.0f, 2.0f);
     changed_ |= ImGuiColorEditor::DrawColorEdit4("Color", &color.x);
     changed_ |= ImGui::DragFloat("Max Width", &maxWidth, 1.0f, 0.0f, 4096.0f);
     changed_ |= ImGui::DragFloat("Padding", &padding, 1.0f, 0.0f, 256.0f);
@@ -220,6 +250,8 @@ void UITextComponent::Gui()
 
     if (ImGui::Button("Rebuild Text Texture"))
     {
+        // Editorからの明示的な再生成では、差し替えたフォントファイルも読み直せるようにする。
+        if (EnsureGdiplusStarted()) fontResource = AcquireTextFontResource(ResolveFontPath(),true);
         MarkDirty();
         RebuildTextTexture();
     }
@@ -233,6 +265,7 @@ void UITextComponent::Serialize(nlohmann::json& json_) const
     json_["Text"] = text;
     json_["FontPath"] = fontPath;
     json_["FontSize"] = fontSize;
+    json_["FontStrokeWidth"] = fontStrokeWidth;
     json_["Color"] = { color.x, color.y, color.z, color.w };
     json_["MaxWidth"] = maxWidth;
     json_["Padding"] = padding;
@@ -248,6 +281,7 @@ void UITextComponent::Deserialize(const nlohmann::json& json_)
     text = json_.value("Text", text);
     fontPath = json_.value("FontPath", fontPath);
     fontSize = json_.value("FontSize", fontSize);
+    fontStrokeWidth = json_.value("FontStrokeWidth", 0.0f);
     if (json_.contains("Color") && json_["Color"].is_array() && json_["Color"].size() >= 4)
     {
         color.x = json_["Color"][0].get<float>();
@@ -308,22 +342,10 @@ void UITextComponent::RebuildTextTexture()
     const std::wstring text_ = ConvertUtf8ToWide(text);
     const std::wstring fontPath_ = ResolveFontPath();
 
-    // 指定FontをPrivateFontCollectionへ読み込み、失敗時はArialへフォールバックする。
-    Gdiplus::PrivateFontCollection fontCollection_;
-    const bool loadedPrivateFont_ =
-        !fontPath_.empty() &&
-        fontCollection_.AddFontFile(fontPath_.c_str()) == Gdiplus::Ok &&
-        fontCollection_.GetFamilyCount() > 0;
-
-    Gdiplus::FontFamily privateFontFamily_;
+    // 同じFontを使うText間で解析結果を共有し、失敗時のArialへのフォールバックを維持する。
+    fontResource = AcquireTextFontResource(fontPath_);
     Gdiplus::FontFamily fallbackFontFamily_(L"Arial");
-    const Gdiplus::FontFamily* fontFamily_ = &fallbackFontFamily_;
-    if (loadedPrivateFont_)
-    {
-        int familyCount_ = 1;
-        fontCollection_.GetFamilies(1, &privateFontFamily_, &familyCount_);
-        fontFamily_ = &privateFontFamily_;
-    }
+    const Gdiplus::FontFamily* fontFamily_ = fontResource->loaded ? &fontResource->family : &fallbackFontFamily_;
 
     Gdiplus::Font font_(fontFamily_, fontSize, Gdiplus::FontStyleRegular, Gdiplus::UnitPixel);
     Gdiplus::StringFormat stringFormat_;
@@ -393,6 +415,38 @@ void UITextComponent::RebuildTextTexture()
         bitmap_.UnlockBits(&bitmapData_);
     }
 
+    if (fontStrokeWidth > 0.0f)
+    {
+        BS_PROFILE_SCOPE("UITextComponent::ThickenGlyphs");
+        // 描画済み字形のAlphaだけを補強し、既存の日本語フォールバックと字形を維持する。
+        // Texture再生成時だけ実行するため、毎フレームの描画枚数やフォント読込は増えない。
+        const auto originalPixels_ = pixels_;
+        const float strength_ = fontStrokeWidth * 0.5f;
+        for (int row_ = 0; row_ < textureHeight_; ++row_)
+            for (int column_ = 0; column_ < textureWidth_; ++column_)
+            {
+                const auto offset_ = (static_cast<std::size_t>(row_) * textureWidth_ + column_) * 4;
+                auto expandedAlpha_ = originalPixels_[offset_ + 3];
+                for (int offsetY_ = -1; offsetY_ <= 1; ++offsetY_)
+                    for (int offsetX_ = -1; offsetX_ <= 1; ++offsetX_)
+                    {
+                        const int sourceY_ = row_ + offsetY_;
+                        const int sourceX_ = column_ + offsetX_;
+                        if (sourceY_ < 0 || sourceY_ >= textureHeight_ || sourceX_ < 0 || sourceX_ >= textureWidth_) continue;
+                        const auto sourceOffset_ = (static_cast<std::size_t>(sourceY_) * textureWidth_ + sourceX_) * 4;
+                        const auto neighborAlpha_ = static_cast<unsigned char>(std::round(originalPixels_[sourceOffset_ + 3] * strength_));
+                        expandedAlpha_ = (std::max)(expandedAlpha_, neighborAlpha_);
+                    }
+                if (expandedAlpha_ > originalPixels_[offset_ + 3])
+                {
+                    pixels_[offset_] = blue_;
+                    pixels_[offset_ + 1] = green_;
+                    pixels_[offset_ + 2] = red_;
+                    pixels_[offset_ + 3] = expandedAlpha_;
+                }
+            }
+    }
+
     if (CreateTextureFromPixels(pixels_, textureWidth_, textureHeight_) && autoSizeWidget)
     {
         // Text Textureの大きさに合わせてWidgetのRectも更新する。
@@ -448,8 +502,8 @@ bool UITextComponent::CreateTextureFromPixels(
     {
         // 作成したSRVをSpriteRendererへ渡し、Textを通常Spriteと同じ描画経路へ乗せる。
         spriteRenderer_->SetTextureResource(shaderResourceView_, textureDesc_);
-        // Text再生成時も、表示演出が設定したSpriteの透明度を引き継ぐ。
-        spriteRenderer_->SetColor({ 1.0f, 1.0f, 1.0f, spriteRenderer_->GetColor().w });
+        // 演出の透明度はRuntime側で維持し、保存用の色へ書き戻さない。
+        spriteRenderer_->SetColor({ 1.0f, 1.0f, 1.0f, spriteRenderer_->GetConfiguredColor().w });
     }
     return true;
 }
@@ -481,6 +535,7 @@ void UITextComponent::NormalizeSettings()
 {
     // GDI+やTexture生成で極端な値にならないよう、Editor入力を制限する。
     fontSize = std::clamp(fontSize, 4.0f, 256.0f);
+    fontStrokeWidth = std::isfinite(fontStrokeWidth) ? std::clamp(fontStrokeWidth, 0.0f, 2.0f) : 0.0f;
     maxWidth = (std::max)(0.0f, maxWidth);
     padding = std::clamp(padding, 0.0f, 256.0f);
 }

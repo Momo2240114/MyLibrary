@@ -1,6 +1,7 @@
 #include "PrecompiledHeader.h"
 
 #include "AttackTemplateManager.h"
+#include "AttackTelegraphRuntime.h"
 
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
@@ -397,6 +398,7 @@ bool AttackTemplateManager::LoadTemplate(const std::string& path_)
     if (json_.value("AssetType", std::string("AttackTemplate")) != "AttackTemplate") return false;
 
     AttackTemplate result_{};
+    result_.telegraph = AttackTelegraphRuntime::DeserializeSettings(json_.value("telegraph", Json_::object()));
     result_.id = json_.value("id", std::filesystem::path(path_).stem().string());
     result_.displayName = json_.value("displayName", result_.id);
     const Json_ owner_ = json_.value("owner", Json_::object());
@@ -422,6 +424,7 @@ bool AttackTemplateManager::LoadTemplate(const std::string& path_)
     result_.knockBackType = ReadEnum(attack_, "knockBackType", KNOCK_BACK_TYPE::OWNER_FORWARD);
     result_.hitGroupId = attack_.value("hitGroupId", 0u);
     result_.allowMultiHit = attack_.value("allowMultiHit", false);
+    result_.feedback = json_.value("feedback", AttackFeedbackSettings{});
     const Json_ cameraShake_ = json_.value("cameraShake", Json_::object());
     result_.cameraShake.enabled = cameraShake_.value("enabled", true);
     result_.cameraShake.powerLevel =
@@ -592,6 +595,7 @@ bool AttackTemplateManager::SaveTemplate(const AttackTemplate& attackTemplate_)
     Json_ json_ = {
         { "AssetType", "AttackTemplate" }, { "AssetVersion", 1 },
         { "id", attackTemplate_.id }, { "displayName", attackTemplate_.displayName },
+        { "telegraph", AttackTelegraphRuntime::SerializeSettings(attackTemplate_.telegraph) },
         { "owner", { { "ownerTarget", static_cast<int>(attackTemplate_.ownerTarget) },
             { "canHitOwner", attackTemplate_.canHitOwner } } },
         { "attack", { { "damage", attackTemplate_.damage },
@@ -611,6 +615,7 @@ bool AttackTemplateManager::SaveTemplate(const AttackTemplate& attackTemplate_)
             { "knockBackType", static_cast<int>(attackTemplate_.knockBackType) },
             { "hitGroupId", attackTemplate_.hitGroupId },
             { "allowMultiHit", attackTemplate_.allowMultiHit } } },
+        { "feedback", attackTemplate_.feedback },
         { "cameraShake", { { "enabled", attackTemplate_.cameraShake.enabled },
             { "powerLevel", static_cast<int>(attackTemplate_.cameraShake.powerLevel) },
             { "receiveDuration", attackTemplate_.cameraShake.receiveDuration },
@@ -814,6 +819,7 @@ bool AttackTemplateManager::DrawEditorContent(
     }
 
     bool saved_ = false;
+    AttackTelegraphRuntime::DrawSettings(attackTemplate_->telegraph, gameObjectManager_);
     const std::vector<std::string> emptyAssets_{};
     EffectManager* effectManager_ = gameObjectManager_
         ? &gameObjectManager_->GetEffectManager()
@@ -993,6 +999,19 @@ bool AttackTemplateManager::DrawEditorContent(
         ImGui::Checkbox(
             "Allow Multi Hit",
             &attackTemplate_->allowMultiHit);
+
+        ImGui::SeparatorText("Controller Rumble / Attack Audio");
+        auto& feedback_ = attackTemplate_->feedback;
+        ImGui::Checkbox("Controller Rumble Enabled", &feedback_.rumbleEnabled);
+        ImGui::DragFloat("Attack Start Strength", &feedback_.startStrength, 0.01f, 0.0f, 1.0f);
+        ImGui::DragFloat("Attack Hit Strength", &feedback_.attackStrength, 0.01f, 0.0f, 1.0f);
+        ImGui::DragFloat("Receive Hit Strength", &feedback_.receiveStrength, 0.01f, 0.0f, 1.0f);
+        ImGui::DragFloat("Rumble Duration", &feedback_.duration, 0.01f, 0.0f, 2.0f);
+        ImGui::InputText("Attack Start Sound Path", &feedback_.startSoundPath);
+        ImGui::InputText("Attack Hit Sound Path", &feedback_.hitSoundPath);
+        ImGui::DragFloat("Attack Sound Volume", &feedback_.volume, 0.01f, 0.0f, 1.0f);
+        ImGui::DragFloat("Attack Sound Min Distance", &feedback_.minDistance, 0.1f, 0.01f, 100.0f);
+        ImGui::DragFloat("Attack Sound Max Distance", &feedback_.maxDistance, 0.1f, 0.01f, 1000.0f);
 
         ImGui::SeparatorText("Camera Shake");
         ImGui::Checkbox("Camera Shake Enabled", &attackTemplate_->cameraShake.enabled);
@@ -1358,9 +1377,11 @@ bool AttackTemplateManager::DrawEditorContent(
                             ATTACK_HIT_SHAPE::NONE,
                             ATTACK_HIT_SHAPE::SPHERE,
                             ATTACK_HIT_SHAPE::CAPSULE,
-                            ATTACK_HIT_SHAPE::SPHERE_GROUP
+                            ATTACK_HIT_SHAPE::SPHERE_GROUP,
+                            ATTACK_HIT_SHAPE::FAN,
+                            ATTACK_HIT_SHAPE::BOX
                         };
-                        const char* shapeNames_[] = { "None", "Sphere", "Capsule", "Sphere Group" };
+                        const char* shapeNames_[] = { "None", "Sphere", "Capsule", "Sphere Group", "Fan", "Box" };
                         int shapeType_ = 0;
                         for (int index_ = 0; index_ < IM_ARRAYSIZE(supportedShapes_); ++index_)
                         {
@@ -1375,9 +1396,20 @@ bool AttackTemplateManager::DrawEditorContent(
                         DrawVector3("Hit Offset", shape_.localOffset);
                         DrawVector3("Hit Rotation", shape_.localRotation);
                         DrawVector3("Hit Scale", shape_.localScale);
-                        ImGui::DragFloat("Radius", &shape_.radius, 0.01f, 0.01f);
+                        ImGui::DragFloat(shape_.shape == ATTACK_HIT_SHAPE::BOX ? "Box Half Width" : "Radius", &shape_.radius, 0.01f, 0.01f);
+                        if (shape_.shape == ATTACK_HIT_SHAPE::FAN)
+                        {
+                            ImGui::DragFloat("Fan Range", &shape_.range, .1f, .01f, 100.0f);
+                            ImGui::DragFloat("Fan Angle", &shape_.angle, .5f, .1f, 360.0f);
+                            ImGui::DragFloat("Fan Half Height", &shape_.halfHeight, .1f, 0.0f, 10.0f);
+                        }
                         if (shape_.shape == ATTACK_HIT_SHAPE::CAPSULE)
                             ImGui::DragFloat("Half Height", &shape_.halfHeight, 0.01f, 0.0f);
+                        if (shape_.shape == ATTACK_HIT_SHAPE::BOX)
+                        {
+                            ImGui::DragFloat("Box Length", &shape_.range, 0.1f, 0.01f, 200.0f);
+                            ImGui::DragFloat("Box Half Height", &shape_.halfHeight, 0.1f, 0.0f, 10.0f);
+                        }
                         ImGui::DragFloat("Active Start", &shape_.activeStartTime, 0.01f, 0.0f);
                         ImGui::DragFloat("Active End", &shape_.activeEndTime, 0.01f, shape_.activeStartTime);
                         ImGui::DragFloat("Hit Interval", &shape_.hitInterval, 0.01f, 0.0f);

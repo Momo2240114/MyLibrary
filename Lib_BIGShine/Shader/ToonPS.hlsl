@@ -1,5 +1,5 @@
 // ToonPS.hlsl
-#include "Scene.hlsli" // ‚±‚ê‚ÅCbScene‚âStructuredBuffer‚ªŽg‚¦‚é‚æ‚¤‚É‚È‚é
+#include "Scene.hlsli" // ã“ã‚Œã§CbSceneã‚„StructuredBufferãŒä½¿ãˆã‚‹ã‚ˆã†ã«ãªã‚‹
 #include "ModelCommon.hlsli"
 
 
@@ -23,25 +23,25 @@ Texture2D EmissiveMap : register(t2);
 Texture2D AOMap : register(t3);
 Texture2D MetalRoughMap : register(t4);
 
-//  IBL—p‚ÌƒeƒNƒXƒ`ƒƒ‚ÆƒTƒ“ƒvƒ‰[‚ð“o˜^I
+//  IBLç”¨ã®ãƒ†ã‚¯ã‚¹ãƒãƒ£ã¨ã‚µãƒ³ãƒ—ãƒ©ãƒ¼ã‚’ç™»éŒ²ï¼
 TextureCube diffuse_iem : register(t10);
-TextureCube specular_pmrem : register(t11); // ‚à‚µ‹à‘®Œõ‘ò•—‚ÌƒnƒCƒ‰ƒCƒg‚à“ü‚ê‚½‚¯‚ê‚Î
+TextureCube specular_pmrem : register(t11); // ã‚‚ã—é‡‘å±žå…‰æ²¢é¢¨ã®ãƒã‚¤ãƒ©ã‚¤ãƒˆã‚‚å…¥ã‚ŒãŸã‘ã‚Œã°
 Texture2D lut_ggx : register(t12);
 SamplerState linearSampler : register(s0);
 
 
 //{
-//    // ‰e‚Ì‹«ŠEü‚ðƒpƒLƒb‚Æ‚³‚¹‚é
+//    // å½±ã®å¢ƒç•Œç·šã‚’ãƒ‘ã‚­ãƒƒã¨ã•ã›ã‚‹
 //    float toonShade = smoothstep(shadeStep - shadeFeather, shadeStep + shadeFeather, NdotL);
     
-//    // ‰e‚Ì•”•ª‚É‚Í­‚µÊ“x‚ðæ‚¹AŠ¦FŠñ‚è‚É‚·‚é‚ÆƒAƒjƒ‚ç‚µ‚¢[‚Ý‚ªo‚é
+//    // å½±ã®éƒ¨åˆ†ã«ã¯å°‘ã—å½©åº¦ã‚’ä¹—ã›ã€å¯’è‰²å¯„ã‚Šã«ã™ã‚‹ã¨ã‚¢ãƒ‹ãƒ¡ã‚‰ã—ã„æ·±ã¿ãŒå‡ºã‚‹
 //    float3 shadowColor = albedo * 0.5f;
-//    shadowColor *= float3(0.8f, 0.9f, 1.0f); // ‰e‚É­‚µÂ‚Ý‚ð‰Á‚¦‚é
+//    shadowColor *= float3(0.8f, 0.9f, 1.0f); // å½±ã«å°‘ã—é’ã¿ã‚’åŠ ãˆã‚‹
     
 //    return lerp(shadowColor, albedo, toonShade) * lightCol;
 //}
 
-// ƒg[ƒ“ƒ}ƒbƒsƒ“ƒOŠÖ”iPBR‘¤‚Æ‰æ–Ê‚Ìƒg[ƒ“‚ð‡‚í‚¹‚é‚½‚ß‚É“ˆêj
+// ãƒˆãƒ¼ãƒ³ãƒžãƒƒãƒ”ãƒ³ã‚°é–¢æ•°ï¼ˆPBRå´ã¨ç”»é¢ã®ãƒˆãƒ¼ãƒ³ã‚’åˆã‚ã›ã‚‹ãŸã‚ã«çµ±ä¸€ï¼‰
 float3 ACESFilm(float3 x)
 {
     float a = 2.51f;
@@ -52,11 +52,11 @@ float3 ACESFilm(float3 x)
     return saturate((x * (a * x + b)) / (x * (c * x + d) + e));
 }
 
-// ‰e‚Ì‹«ŠEü‚ð§Œä‚·‚éToon‚Ì–½
+// å½±ã®å¢ƒç•Œç·šã‚’åˆ¶å¾¡ã™ã‚‹Toonã®å‘½
 float ToonRamp(float value)
 {
     float toonAmount = 0.0f;
-    // ‚»‚ê‚¼‚ê‚ÌƒXƒeƒbƒviè‡’lj‚É‘Î‚µ‚ÄA‘Î‰ž‚·‚éŒÂ•Ê‚ÌƒtƒFƒU[iƒ{ƒJƒV•j‚ð“K—p‚µ‚Ü‚·
+    // ãã‚Œãžã‚Œã®ã‚¹ãƒ†ãƒƒãƒ—ï¼ˆé–¾å€¤ï¼‰ã«å¯¾ã—ã¦ã€å¯¾å¿œã™ã‚‹å€‹åˆ¥ã®ãƒ•ã‚§ã‚¶ãƒ¼ï¼ˆãƒœã‚«ã‚·å¹…ï¼‰ã‚’é©ç”¨ã—ã¾ã™
     toonAmount += smoothstep(shadeSteps.x - shadeFeathers.x, shadeSteps.x + shadeFeathers.x, value);
     toonAmount += smoothstep(shadeSteps.y - shadeFeathers.y, shadeSteps.y + shadeFeathers.y, value);
     toonAmount += smoothstep(shadeSteps.z - shadeFeathers.z, shadeSteps.z + shadeFeathers.z, value);
@@ -64,27 +64,27 @@ float ToonRamp(float value)
     return toonAmount * 0.25f;
 }
 
-// ƒAƒjƒ’²‚Ì‰A‰eF‚ðŒˆ’è‚·‚éi1†‰e‚ð‘z’èB­‚µÂ‚Ý‚ðŠÜ‚Ü‚¹‚Ä”ü‚µ‚­‚·‚éj
+// ã‚¢ãƒ‹ãƒ¡èª¿ã®é™°å½±è‰²ã‚’æ±ºå®šã™ã‚‹ï¼ˆ1å·å½±ã‚’æƒ³å®šã€‚å°‘ã—é’ã¿ã‚’å«ã¾ã›ã¦ç¾Žã—ãã™ã‚‹ï¼‰
 float3 CalculateToonDiffuse(float3 albedo, float toonAmount)
 {
     float3 shadowColor = albedo * 0.45f;
-    shadowColor *= float3(0.85f, 0.92f, 1.0f); // ‰e‚É“§–¾Š´‚ð—^‚¦‚éŠ¦F•â³
+    shadowColor *= float3(0.85f, 0.92f, 1.0f); // å½±ã«é€æ˜Žæ„Ÿã‚’ä¸Žãˆã‚‹å¯’è‰²è£œæ­£
     return lerp(shadowColor, albedo, toonAmount);
 }
 
-// ‚·‚×‚Ä‚ÌŒÂ•Êƒ‰ƒCƒgi•½sE“_EƒXƒ|ƒbƒgj‚©‚çƒsƒ…ƒA‚ÈToonƒ‰ƒCƒeƒBƒ“ƒO‚ð“±‚­ŠÖ”
+// ã™ã¹ã¦ã®å€‹åˆ¥ãƒ©ã‚¤ãƒˆï¼ˆå¹³è¡Œãƒ»ç‚¹ãƒ»ã‚¹ãƒãƒƒãƒˆï¼‰ã‹ã‚‰ãƒ”ãƒ¥ã‚¢ãªToonãƒ©ã‚¤ãƒ†ã‚£ãƒ³ã‚°ã‚’å°Žãé–¢æ•°
 float3 DirectToonLighting(float3 base, float3 N, float3 V, float3 L, float3 lightColorIntensity)
 {
     float NdotL = saturate(dot(N, L));
     float toonLight = ToonRamp(NdotL);
 
-    // 1. ŠgŽU”½ŽËiToonDiffusej
+    // 1. æ‹¡æ•£åå°„ï¼ˆToonDiffuseï¼‰
     float3 diffuseResult = CalculateToonDiffuse(base, toonLight) * lightColorIntensity * toonLight;
 
-    // 2. ‹¾–Ê”½ŽËiƒAƒjƒ’²‚ÌƒpƒLƒb‚Æ‚µ‚½ƒVƒƒ[ƒv‚ÈƒnƒCƒ‰ƒCƒgj
+    // 2. é¡é¢åå°„ï¼ˆã‚¢ãƒ‹ãƒ¡èª¿ã®ãƒ‘ã‚­ãƒƒã¨ã—ãŸã‚·ãƒ£ãƒ¼ãƒ—ãªãƒã‚¤ãƒ©ã‚¤ãƒˆï¼‰
     float3 H = normalize(L + V);
     float NdotH = saturate(dot(N, H));
-    float specIntensity = pow(NdotH, 120.0f); // ”ñí‚É‰s‚¢ƒnƒCƒ‰ƒCƒg
+    float specIntensity = pow(NdotH, 120.0f); // éžå¸¸ã«é‹­ã„ãƒã‚¤ãƒ©ã‚¤ãƒˆ
     float3 toonSpec = (specIntensity > 0.4f ? 1.0f : 0.0f) * lightColorIntensity * 0.5f;
 
     return diffuseResult + toonSpec;
@@ -96,26 +96,27 @@ PS_OUT main(VS_OUT pin)
     if (base.a < 0.1f)
         discard;
 
-    // –@üƒ}ƒbƒv‚É‚æ‚éƒfƒBƒe[ƒ‹“WŠJ
+    // æ³•ç·šãƒžãƒƒãƒ—ã«ã‚ˆã‚‹ãƒ‡ã‚£ãƒ†ãƒ¼ãƒ«å±•é–‹
     float3 N = normalize(pin.normal);
-    float3 T = normalize(pin.tangent);
-    float3 B = normalize(cross(N, T));
+    float3 T = normalize(pin.tangent.xyz);
+    T = normalize(T - N * dot(N, T));
+    float3 B = normalize(cross(N, T)) * pin.tangent.w;
     float3x3 TBN = float3x3(T, B, N);
     float3 normalSample = NormalMap.Sample(linearSampler, pin.texcoord).xyz * 2.0f - 1.0f;
     N = normalize(mul(normalSample, TBN));
 
     float3 V = normalize(cameraPosition.xyz - pin.position);
 
-    // ƒpƒ‰ƒ[ƒ^ƒTƒ“ƒvƒŠƒ“ƒOiToonPBR‚Æ‚Ìƒf[ƒ^ŒÝŠ·‚ðˆÛŽj
-    float2 metalRoughSample = MetalRoughMap.Sample(linearSampler, pin.texcoord).gr;
+    // ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ï¼ˆToonPBRã¨ã®ãƒ‡ãƒ¼ã‚¿äº’æ›ã‚’ç¶­æŒï¼‰
+    float2 metalRoughSample = MetalRoughMap.Sample(linearSampler, pin.texcoord).bg;
     float roughnessParm = saturate(metalRoughSample.g * roughness);
     roughnessParm = max(roughnessParm, 0.04f);
 
-    // ’~Ï‚³‚ê‚éƒ_ƒCƒŒƒNƒgƒ‰ƒCƒg‚ÌŠí
+    // è“„ç©ã•ã‚Œã‚‹ãƒ€ã‚¤ãƒ¬ã‚¯ãƒˆãƒ©ã‚¤ãƒˆã®å™¨
     float3 totalDirectLighting = 0.0f;
 
     // =============================================================
-    // 1. •½sŒõŒ¹iŽåŒõŒ¹ { ƒLƒƒƒXƒP[ƒhƒVƒƒƒhƒEj
+    // 1. å¹³è¡Œå…‰æºï¼ˆä¸»å…‰æº ï¼‹ ã‚­ãƒ£ã‚¹ã‚±ãƒ¼ãƒ‰ã‚·ãƒ£ãƒ‰ã‚¦ï¼‰
     // =============================================================
     {
         float3 L = normalize(-lightDirection.xyz);
@@ -129,7 +130,7 @@ PS_OUT main(VS_OUT pin)
     }
 
     // =============================================================
-    // 2. “_ŒõŒ¹iPoint Lightsjƒ‹[ƒv
+    // 2. ç‚¹å…‰æºï¼ˆPoint Lightsï¼‰ãƒ«ãƒ¼ãƒ—
     // =============================================================
     [loop]
     for (int i = 0; i < numPointLights; i++)
@@ -150,7 +151,7 @@ PS_OUT main(VS_OUT pin)
     }
 
     // =============================================================
-    // 3. ƒXƒ|ƒbƒgƒ‰ƒCƒgiSpot Lightsjƒ‹[ƒv
+    // 3. ã‚¹ãƒãƒƒãƒˆãƒ©ã‚¤ãƒˆï¼ˆSpot Lightsï¼‰ãƒ«ãƒ¼ãƒ—
     // =============================================================
     [loop]
     for (int j = 0; j < numSpotLights; j++)
@@ -180,36 +181,36 @@ PS_OUT main(VS_OUT pin)
     }
 
     // =============================================================
-    // 4. ƒgƒD[ƒ“—¬EŠÂ‹«ŒõiIBLj‚Ì’²’â
+    // 4. ãƒˆã‚¥ãƒ¼ãƒ³æµãƒ»ç’°å¢ƒå…‰ï¼ˆIBLï¼‰ã®èª¿åœ
     // =============================================================
-    // ”wŒi‚ÌŠÂ‹«ŒõiŠgŽU¬•ªj‚ðƒTƒ“ƒvƒŠƒ“ƒO
+    // èƒŒæ™¯ã®ç’°å¢ƒå…‰ï¼ˆæ‹¡æ•£æˆåˆ†ï¼‰ã‚’ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°
     float3 envIrradiance = diffuse_iem.Sample(linearSampler, N).rgb;
     
-    // ŽåŒõŒ¹‚Ì“–‚½‚è‹ï‡iNdotLj‚ðƒx[ƒX‚ÉAŠÂ‹«Œõ‚ÌuToonRampv‚ðŒvŽZ
+    // ä¸»å…‰æºã®å½“ãŸã‚Šå…·åˆï¼ˆNdotLï¼‰ã‚’ãƒ™ãƒ¼ã‚¹ã«ã€ç’°å¢ƒå…‰ã®ã€ŒToonRampã€ã‚’è¨ˆç®—
     float mainNdotL = saturate(dot(N, normalize(-lightDirection.xyz)));
     float toonEnvMask = ToonRamp(mainNdotL);
 
-    // UTSiUnityChanToonShaderj•—‚ÌIBL§ŒäF
-    // “úŒüitoonEnvMask‚ª1j‚Å‚ÍŠÂ‹«Œõ‚Ì‰e‹¿‚ð—}‚¦A‰ei0j‚É‚È‚é‚Ù‚Ç”wŒi‚ÌŠÂ‹«Œõ‚ÌFienvIrradiancej‚ª”ü‚µ‚­—n‚¯ž‚Þ‚æ‚¤‚É‚µ‚Ü‚·B
+    // UTSï¼ˆUnityChanToonShaderï¼‰é¢¨ã®IBLåˆ¶å¾¡ï¼š
+    // æ—¥å‘ï¼ˆtoonEnvMaskãŒ1ï¼‰ã§ã¯ç’°å¢ƒå…‰ã®å½±éŸ¿ã‚’æŠ‘ãˆã€å½±ï¼ˆ0ï¼‰ã«ãªã‚‹ã»ã©èƒŒæ™¯ã®ç’°å¢ƒå…‰ã®è‰²ï¼ˆenvIrradianceï¼‰ãŒç¾Žã—ãæº¶ã‘è¾¼ã‚€ã‚ˆã†ã«ã—ã¾ã™ã€‚
     float3 iblDiffuse = base.rgb * envIrradiance * lerp(0.6f, 0.2f, toonEnvMask);
 
-    // ƒXƒyƒLƒ…ƒ‰IBLiŽüˆÍ‚ÌŒiF‚ª”¯‚â‹à‘®‚ÌƒnƒCƒ‰ƒCƒg‚É‚Ù‚ñ‚Ì‚è‰f‚èž‚Þ•\Œ»j
+    // ã‚¹ãƒšã‚­ãƒ¥ãƒ©IBLï¼ˆå‘¨å›²ã®æ™¯è‰²ãŒé«ªã‚„é‡‘å±žã®ãƒã‚¤ãƒ©ã‚¤ãƒˆã«ã»ã‚“ã®ã‚Šæ˜ ã‚Šè¾¼ã‚€è¡¨ç¾ï¼‰
     float3 R = normalize(reflect(-V, N));
     uint width, height, mipMaps;
     specular_pmrem.GetDimensions(0, width, height, mipMaps);
     float lod = roughnessParm * float(mipMaps - 1);
     float3 envSpecular = specular_pmrem.SampleLevel(linearSampler, R, lod).rgb;
     
-    // ‰f‚èž‚Ý‚Ì‹­‚³‚ðƒ‰ƒtƒlƒX‚Å‹É’[‚Éƒ}ƒXƒN‚µAƒAƒjƒ‚ÌƒnƒCƒ‰ƒCƒgŠ´‚ð•Û‚Â
+    // æ˜ ã‚Šè¾¼ã¿ã®å¼·ã•ã‚’ãƒ©ãƒ•ãƒã‚¹ã§æ¥µç«¯ã«ãƒžã‚¹ã‚¯ã—ã€ã‚¢ãƒ‹ãƒ¡ã®ãƒã‚¤ãƒ©ã‚¤ãƒˆæ„Ÿã‚’ä¿ã¤
     float3 iblSpecular = envSpecular * (1.0f - roughnessParm) * 0.1f;
 
-    // ŽÕ•ÁiAOj‚ÆŽ©ŒÈ”­ŒõiEmissivej‚Ì“K—p
+    // é®è”½ï¼ˆAOï¼‰ã¨è‡ªå·±ç™ºå…‰ï¼ˆEmissiveï¼‰ã®é©ç”¨
     float aoSample = AOMap.Sample(linearSampler, pin.texcoord).r;
     float ao = lerp(1.0f, aoSample, occlusionStrength);
     float3 emissive = EmissiveMap.Sample(linearSampler, pin.texcoord).rgb * emissiveColor.rgb;
 
     // =============================================================
-    // 5. ÅIF‚ÌŒ‹‡‚Æƒ|ƒXƒgˆ—
+    // 5. æœ€çµ‚è‰²ã®çµåˆã¨ãƒã‚¹ãƒˆå‡¦ç†
     // =============================================================
     float3 finalColor =
         totalDirectLighting +
@@ -217,9 +218,15 @@ PS_OUT main(VS_OUT pin)
         iblSpecular +
         emissive;
 
-    // ƒ|ƒXƒgƒvƒƒZƒXiPBR‘¤‚ÆŠ®‘S‚Éƒg[ƒ“‚ð‡‚í‚¹‚é‚½‚ß‚ÌACESToneMapping & Gammaj
-    finalColor = ACESFilm(finalColor);
-    finalColor = pow(max(finalColor, 0.0f), 1.0f / 2.2f);
+    // Bloomã¨åŠé€æ˜Žåˆæˆã¸ç·šå½¢HDRã‚’æ¸¡ã—ã€è¡¨ç¤ºå¤‰æ›ã¯æœ€çµ‚åˆæˆã§è¡Œã†ã€‚
+    finalColor = max(finalColor, 0.0f);
+
+
+    // PostEffectã®ãªã„Editorãƒ—ãƒ¬ãƒ“ãƒ¥ãƒ¼ã ã‘ã€ã“ã“ã§è¡¨ç¤ºç”¨ã®è‰²ã¸å¤‰æ›ã™ã‚‹ã€‚
+    if (outputLinearColor < 0.5f)
+    {
+        finalColor = pow(max(ACESFilm(finalColor), 0.0f), 1.0f / 2.2f);
+    }
 
     PS_OUT output;
     output.color = float4(finalColor, base.a);

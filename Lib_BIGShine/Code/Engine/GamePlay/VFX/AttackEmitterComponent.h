@@ -147,6 +147,8 @@ class AttackEmitterComponent : public Component, public IActionProvider
 public:
     const std::string& GetName() const override { return componentName; }
     void Start() override;
+    // 発生元の破棄時に、所有する判定と独立した見た目のEffectも停止する。
+    void OnDestroy() override;
     void Gui() override;
     void Serialize(nlohmann::json& json_) const override;
     void Deserialize(const nlohmann::json& json_) override;

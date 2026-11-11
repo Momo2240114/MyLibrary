@@ -17,7 +17,7 @@ public:
     // カメラの演出用優先度を切り替えるActionを登録する。
     void Start() override;
     // 指定した優先度の間だけ、このカメラの演出Actionを許可する。
-    bool CanPlayEventAction() const { return !useEventPriority || priority == eventPriority; }
+    bool CanPlayEventAction() const { return !useEventPriority || GetPriority() == eventPriority; }
 
     void ScreenToWorld(const Vector2& screen, Vector3& world);
 
@@ -103,6 +103,7 @@ public:
         ImGui::DragInt("Priority", &priority);
         ImGui::Checkbox("Use Event Priority", &useEventPriority);
         if (useEventPriority) ImGui::DragInt("Event Priority", &eventPriority);
+        ImGui::Text("Effective Priority: %d", GetPriority());
 
         ImGui::Separator();
 
@@ -141,7 +142,8 @@ public:
     {
         return DirectX::XMLoadFloat4x4(&view) * DirectX::XMLoadFloat4x4(&projection);
     }
-    int GetPriority() { return priority; }
+    // 保存用の通常優先度を保ったまま、演出中だけ選択用の優先度を上書きする。
+    int GetPriority() const { return useEventPriority && eventPriorityActive ? eventPriority : priority; }
     // 現在の状態
     bool IsTransitioning() const { return _isMoving; }
 
@@ -213,9 +215,9 @@ private:
     bool _isMoving;
 
     int priority = 0;
-    // 演出の有効条件と、終了時に復元するシーン開始時の優先度。
+    // 通常優先度と演出優先度を分離し、演出中のScene保存で通常値を失わないようにする。
     bool useEventPriority = false;
     int eventPriority = 8;
-    int initialPriority = 0;
+    bool eventPriorityActive = false; // 実行時だけの状態。Sceneには保存しない。
 };
 

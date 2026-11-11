@@ -23,6 +23,10 @@ public:
     void Gui() override;
     void Serialize(nlohmann::json& json_) const override;
     void Deserialize(const nlohmann::json& json_) override;
+    // 第二形態の設定を実行時だけ使用し、保存時は元の設定を維持する。
+    void ApplyRuntimeSettings(const nlohmann::json& settings_);
+    // プレビュー終了時に、切替前の設定へ戻す。
+    void ClearRuntimeSettings();
 
     // LockOnなど別ComponentがCamera制御を握る間、TPS入力更新を止める。
     void SetControlSuppressed(bool suppressed_);
@@ -82,4 +86,6 @@ private:
     float returnBlendDuration = 0.35f;
     DirectX::XMFLOAT3 returnBlendStartPosition{ 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 returnBlendStartLookAt{ 0.0f, 0.0f, 0.0f };
+    bool runtimeSettingsActive = false;
+    nlohmann::json originalRuntimeSettings;
 };

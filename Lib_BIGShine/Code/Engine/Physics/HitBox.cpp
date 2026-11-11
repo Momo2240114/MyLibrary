@@ -6,8 +6,11 @@
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/Debug/TracyProfiler.h"
+#include "Engine/Math/CollisionMath.h"
 
 #include <algorithm>
+#include <cmath>
+#include "Engine/GamePlay/Transform/Transform.h"
 
 
 HitBox::HitBox()
@@ -110,11 +113,49 @@ void HitBox::ClearHitTargets()
     hitTargetCounts.clear();
 }
 
+void HitBox::SetAttackSector(float range_, float angle_, float halfHeight_)
+{
+    sectorRange = (std::max)(0.0f, range_);
+    sectorAngle = std::clamp(angle_, 0.1f, 360.0f);
+    sectorHalfHeight = (std::max)(0.0f, halfHeight_);
+}
+
+void HitBox::SetAttackBox(float halfWidth_, float halfHeight_, float halfLength_)
+{
+    attackBoxHalfExtents = { (std::max)(0.0f, halfWidth_), (std::max)(0.0f, halfHeight_), (std::max)(0.0f, halfLength_) };
+}
+
+bool HitBox::IsWithinAttackSector(GameObject* target_) const
+{
+    if (sectorRange <= 0.0f && attackBoxHalfExtents.x <= 0.0f) return true;
+    const auto owner_ = gameObject.lock();
+    if (!owner_ || !owner_->transform || !target_ || !target_->transform) return false;
+    const auto center_ = owner_->transform->GetWorldPosition();
+    const auto position_ = target_->transform->GetWorldPosition();
+    if (attackBoxHalfExtents.x > 0.0f)
+    {
+        // Guard、JustGuard、Dodgeも使用する共通判定で、帯の間の安全地帯を維持する。
+        DirectX::XMFLOAT3 localPosition_{};
+        DirectX::XMStoreFloat3(&localPosition_, DirectX::XMVector3TransformCoord(DirectX::XMLoadFloat3(&position_),
+            DirectX::XMMatrixInverse(nullptr, owner_->transform->GetWorldMatrix())));
+        return std::abs(localPosition_.x) <= attackBoxHalfExtents.x &&
+            std::abs(localPosition_.y) <= attackBoxHalfExtents.y && std::abs(localPosition_.z) <= attackBoxHalfExtents.z;
+    }
+    const float dx_ = position_.x - center_.x;
+    const float dz_ = position_.z - center_.z;
+    const float distance_ = std::sqrt(dx_ * dx_ + dz_ * dz_);
+    if (distance_ > sectorRange || std::abs(position_.y - center_.y) > sectorHalfHeight) return false;
+    if (distance_ < 0.0001f) return true;
+    const float yaw_ = DirectX::XMConvertToRadians(owner_->transform->GetWorldRotation().y);
+    const float dot_ = (dx_ * std::sin(yaw_) + dz_ * std::cos(yaw_)) / distance_;
+    return dot_ >= std::cos(DirectX::XMConvertToRadians(sectorAngle * 0.5f));
+}
+
 bool HitBox::CanHit(GameObject* target_) const
 {
     // ownerへの自爆判定と、同一Activation内の多重Hitをここで止める。
     // AttackSystem側のattackInstanceId履歴とあわせて、HitBox単体でも最低限の重複防止を持つ。
-    if (target_ == nullptr) return false;
+    if (target_ == nullptr || !IsWithinAttackSector(target_)) return false;
     if (!canHitOwner && ownerObject == target_) return false;
     if (!allowMultiHit) return alreadyHitTargets.count(target_) == 0u;
     if (maxHitCount <= 0) return true;
@@ -187,6 +228,10 @@ void HitBox::Activate()
 
 void HitBox::Deactivate()
 {
+    // 中断経路からの無効化では、未処理の途中姿勢も同時に破棄する。
+    frameSweepSamples.clear();
+    frameSweepOwner.reset();
+    deactivateAfterFrameSweep = false;
     BS_PROFILE_SCOPE("HitBox::Deactivate");
 
     // 攻撃受付終了時はColliderを無効化し、Trigger状態とHit済み対象を破棄する。
@@ -195,11 +240,80 @@ void HitBox::Deactivate()
     ClearHitTargets();
 }
 
+// 判定窓を1フレームで通過しても、同じ攻撃IDのまま物理判定を一度通す。
+void HitBox::AddFrameSweepSample(const Capsule& capsule_)
+{
+    if (frameSweepSamples.empty())
+    {
+        const auto owner_ = GetAttackOwner();
+        frameSweepOwner = owner_;
+        if (owner_ && owner_->transform) frameSweepOwnerPosition = owner_->transform->GetWorldPosition();
+    }
+    if (!IsEnabled())
+    {
+        deactivateAfterFrameSweep = true;
+        ++activationId;
+        if (activationId == 0) ++activationId;
+        SetEnabled(true);
+    }
+    frameSweepSamples.push_back(capsule_);
+}
+
+// 窓内の姿勢と姿勢間を調べ、現在の終端姿勢だけによる当たり抜けを抑える。
+CollisionManifold HitBox::CheckFrameSweep(const Capsule& other_, Capsule& contactCapsule_) const
+{
+    if (frameSweepSamples.empty()) return CollisionMath::CapsuleVsCapsule(contactCapsule_, other_);
+    BS_PROFILE_SCOPE("HitBox::CheckFrameSweep");
+    DirectX::XMVECTOR displacement_ = DirectX::XMVectorZero();
+    if (const auto owner_ = frameSweepOwner.lock(); owner_ && owner_->transform)
+    {
+        const auto position_ = owner_->transform->GetWorldPosition();
+        displacement_ = DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&position_), DirectX::XMLoadFloat3(&frameSweepOwnerPosition));
+    }
+    for (std::size_t index_ = 0; index_ < frameSweepSamples.size(); ++index_)
+    {
+        const auto& current_ = frameSweepSamples[index_];
+        const auto& previous_ = frameSweepSamples[index_ > 0 ? index_ - 1 : index_];
+        const float travel_ = (std::max)(
+            DirectX::XMVectorGetX(DirectX::XMVector3Length(DirectX::XMVectorSubtract(current_.p0, previous_.p0))),
+            DirectX::XMVectorGetX(DirectX::XMVector3Length(DirectX::XMVectorSubtract(current_.p1, previous_.p1))));
+        const int steps_ = std::clamp(static_cast<int>(std::ceil(travel_ / (std::max)(current_.radius * 0.5f, 0.01f))), 1, 32);
+        for (int step_ = 0; step_ <= steps_; ++step_)
+        {
+            const float rate_ = static_cast<float>(step_) / steps_;
+            Capsule sample_{};
+            sample_.p0 = DirectX::XMVectorAdd(DirectX::XMVectorLerp(previous_.p0, current_.p0, rate_), displacement_);
+            sample_.p1 = DirectX::XMVectorAdd(DirectX::XMVectorLerp(previous_.p1, current_.p1, rate_), displacement_);
+            // 補間点間の隙間は半間隔の拡張で覆い、細い高速軌道を取りこぼさない。
+            sample_.radius = (std::max)(previous_.radius, current_.radius) + travel_ / steps_ * 0.5f;
+            const auto manifold_ = CollisionMath::CapsuleVsCapsule(sample_, other_);
+            if (manifold_.isHit)
+            {
+                contactCapsule_ = sample_;
+                return manifold_;
+            }
+        }
+    }
+    return {};
+}
+
+// フレームを越えて判定窓やサンプルを持ち越さず、通常の有効状態だけを残す。
+void HitBox::FinishFrameSweep()
+{
+    frameSweepSamples.clear();
+    frameSweepOwner.reset();
+    if (deactivateAfterFrameSweep) Deactivate();
+    deactivateAfterFrameSweep = false;
+}
+
 void HitBox::Gui()
 {
     // 攻撃判定のDamage、HitStop、VFX、SE、CameraShake、Action名、Blackboard参照先をEditorで調整する。
     CapsuleCollider::Gui();
     ImGui::SeparatorText("Attack");
+    ImGui::DragFloat("Sector Range (0 = disabled)", &sectorRange, 0.1f, 0.0f, 100.0f);
+    ImGui::DragFloat("Sector Angle", &sectorAngle, 0.5f, 0.1f, 360.0f);
+    ImGui::DragFloat("Sector Half Height", &sectorHalfHeight, 0.1f, 0.0f, 10.0f);
     ImGui::DragFloat("Legacy Damage", &damage, 0.1f, 0.0f, 99999.0f);
     ImGui::DragFloat("Damage Rate", &damageRate, 0.01f, 0.0f, 100.0f);
     ImGui::DragFloat("Fixed Damage", &fixedDamage, 0.1f, -99999.0f, 99999.0f);
@@ -365,6 +479,9 @@ void HitBox::Serialize(nlohmann::json& j_) const
     j_["AttackInstanceId"] = attackInstanceId;
     j_["HitGroupId"] = hitGroupId;
     j_["AllowMultiHit"] = allowMultiHit;
+    j_["SectorRange"] = sectorRange;
+    j_["SectorAngle"] = sectorAngle;
+    j_["SectorHalfHeight"] = sectorHalfHeight;
     j_["CanHitOwner"] = canHitOwner;
     j_["GuardBreak"] = guardBreak;
     j_["CanBeGuarded"] = canBeGuarded;
@@ -396,6 +513,7 @@ void HitBox::Serialize(nlohmann::json& j_) const
     j_["HitSoundVolume"] = hitSoundVolume;
     j_["HitSoundMuffled"] = hitSoundMuffled;
     j_["HitSoundMuffledCutoff"] = hitSoundMuffledCutoff;
+    j_["Feedback"] = feedback;
     j_["CameraShakeEnabled"] = cameraShakeEnabled;
     j_["CameraShakeReceiveDuration"] = cameraShakeReceiveDuration;
     j_["CameraShakeReceivePositionStrength"] = cameraShakeReceivePositionStrength;
@@ -433,6 +551,7 @@ void HitBox::Deserialize(const nlohmann::json& j_)
     attackInstanceId = j_.value("AttackInstanceId", 0u);
     hitGroupId = j_.value("HitGroupId", 0u);
     allowMultiHit = j_.value("AllowMultiHit", false);
+    SetAttackSector(j_.value("SectorRange", 0.0f), j_.value("SectorAngle", 360.0f), j_.value("SectorHalfHeight", 1.0f));
     canHitOwner = j_.value("CanHitOwner", false);
     guardBreak = j_.value("GuardBreak", false);
     canBeGuarded = j_.value("CanBeGuarded", true);
@@ -468,6 +587,7 @@ void HitBox::Deserialize(const nlohmann::json& j_)
     hitSoundVolume = (std::max)(j_.value("HitSoundVolume", 1.0f), 0.0f);
     hitSoundMuffled = j_.value("HitSoundMuffled", false);
     hitSoundMuffledCutoff = (std::max)(j_.value("HitSoundMuffledCutoff", 1200.0f), 10.0f);
+    feedback = j_.value("Feedback", AttackFeedbackSettings{});
     cameraShakeEnabled = j_.value("CameraShakeEnabled", true);
     cameraShakeReceiveDuration =
         (std::max)(j_.value("CameraShakeReceiveDuration", 0.12f), 0.0f);

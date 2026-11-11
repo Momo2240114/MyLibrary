@@ -1,0 +1,310 @@
+{
+    "ColliderComponents": [
+        {
+            "Data": {
+                "CanBeCharacterGround": true,
+                "ColliderName": "",
+                "CollisionOwnerObjectName": "",
+                "CollisionRole": 0,
+                "ContainmentMode": 0,
+                "DebugPrimitiveColor": [
+                    0.0,
+                    1.0,
+                    0.0,
+                    1.0
+                ],
+                "GravityScale": 1.0,
+                "HalfHeight": 10.0,
+                "IsStatic": false,
+                "IsTrigger": false,
+                "Mass": 0.0,
+                "Offset": [
+                    0.0,
+                    -11.5,
+                    0.0
+                ],
+                "PhysicsControlsTransform": false,
+                "Radius": 80.0,
+                "RotateVelocityThreshold": 0.0010000000474974513,
+                "Segments": 16,
+                "ShapeRenderFlg": false,
+                "UseGravity": false,
+                "UsePhysicsResponse": true,
+                "VelocityRotationMode": 0,
+                "shapeSizeScale": 1.0
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "CylinderCollider",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "CanBeCharacterGround": true,
+                "ColliderName": "",
+                "CollisionOwnerObjectName": "",
+                "CollisionRole": 0,
+                "ContainmentMode": 0,
+                "Convex": false,
+                "DebugPrimitiveColor": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0
+                ],
+                "GravityScale": 1.0,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "Mass": 0.0,
+                "Offset": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "PhysicsControlsTransform": false,
+                "RotateVelocityThreshold": 0.0010000000474974513,
+                "ShapeRenderFlg": false,
+                "UseGravity": false,
+                "UsePhysicsResponse": true,
+                "VelocityRotationMode": 0,
+                "shapeSizeScale": 1.0
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": true,
+            "TypeName": "MeshCollider",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        }
+    ],
+    "CollisionMask": 0,
+    "Components": [
+        {
+            "Data": {
+                "LocalScale": 90.0,
+                "LocalScaleXYZ": [
+                    90.0,
+                    1.0,
+                    90.0
+                ],
+                "MaterialOverrides": [
+                    {
+                        "alphaCutoff": 0.5,
+                        "alphaMode": 0,
+                        "baseColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "disableOutline": false,
+                        "emissiveColor": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "id": 0,
+                        "metalness": 0.0,
+                        "name": "Stage_Center_Circle",
+                        "normalScale": 1.0,
+                        "occlusionStrength": 1.0,
+                        "outlineThicknessOffset": 1.0,
+                        "rimStrength": 0.05999999865889549,
+                        "roughness": 0.5,
+                        "shaderId": 3,
+                        "shadowTint": [
+                            0.3824999928474426,
+                            0.414000004529953,
+                            0.44999998807907104
+                        ],
+                        "specularStrength": 1.0,
+                        "specularToonBlend": 0.25,
+                        "toonPbrBlend": 1.0,
+                        "uvAddressMode": 1,
+                        "uvOffset": [
+                            0.0,
+                            0.0
+                        ],
+                        "uvRotation": 0.0,
+                        "uvScale": [
+                            1.0,
+                            1.0
+                        ]
+                    },
+                    {
+                        "alphaCutoff": 0.5,
+                        "alphaMode": 0,
+                        "baseColor": [
+                            0.5799999833106995,
+                            0.5400000214576721,
+                            0.5,
+                            1.0
+                        ],
+                        "disableOutline": false,
+                        "emissiveColor": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "id": 1,
+                        "metalness": 0.0,
+                        "name": "Stage_Border_Ring",
+                        "normalScale": 0.8500000238418579,
+                        "occlusionStrength": 1.0,
+                        "outlineThicknessOffset": 1.0,
+                        "rimStrength": 0.05999999865889549,
+                        "roughness": 0.7200000286102295,
+                        "shaderId": 3,
+                        "shadowTint": [
+                            0.3824999928474426,
+                            0.414000004529953,
+                            0.44999998807907104
+                        ],
+                        "specularStrength": 1.0,
+                        "specularToonBlend": 0.25,
+                        "toonPbrBlend": 1.0,
+                        "uvAddressMode": 1,
+                        "uvOffset": [
+                            0.0,
+                            0.0
+                        ],
+                        "uvRotation": 0.0,
+                        "uvScale": [
+                            1.0,
+                            1.0
+                        ]
+                    },
+                    {
+                        "alphaCutoff": 0.5,
+                        "alphaMode": 0,
+                        "baseColor": [
+                            0.41999998688697815,
+                            0.36000001430511475,
+                            0.3199999928474426,
+                            1.0
+                        ],
+                        "disableOutline": false,
+                        "emissiveColor": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "id": 2,
+                        "metalness": 0.0,
+                        "name": "Stage_Outer_Tile_Floor",
+                        "normalScale": 0.699999988079071,
+                        "occlusionStrength": 1.0,
+                        "outlineThicknessOffset": 1.0,
+                        "rimStrength": 0.05999999865889549,
+                        "roughness": 0.8500000238418579,
+                        "shaderId": 3,
+                        "shadowTint": [
+                            0.3824999928474426,
+                            0.414000004529953,
+                            0.44999998807907104
+                        ],
+                        "specularStrength": 1.0,
+                        "specularToonBlend": 0.25,
+                        "toonPbrBlend": 1.0,
+                        "uvAddressMode": 0,
+                        "uvOffset": [
+                            0.0,
+                            0.0
+                        ],
+                        "uvRotation": 0.0,
+                        "uvScale": [
+                            4.0,
+                            4.0
+                        ]
+                    },
+                    {
+                        "alphaCutoff": 0.5,
+                        "alphaMode": 0,
+                        "baseColor": [
+                            0.7200000286102295,
+                            0.6800000071525574,
+                            0.6399999856948853,
+                            1.0
+                        ],
+                        "disableOutline": false,
+                        "emissiveColor": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "id": 3,
+                        "metalness": 0.0,
+                        "name": "Stage_Outer_Trim",
+                        "normalScale": 1.0,
+                        "occlusionStrength": 1.0,
+                        "outlineThicknessOffset": 1.0,
+                        "rimStrength": 0.05999999865889549,
+                        "roughness": 0.6499999761581421,
+                        "shaderId": 3,
+                        "shadowTint": [
+                            0.3824999928474426,
+                            0.414000004529953,
+                            0.44999998807907104
+                        ],
+                        "specularStrength": 1.0,
+                        "specularToonBlend": 0.25,
+                        "toonPbrBlend": 1.0,
+                        "uvAddressMode": 1,
+                        "uvOffset": [
+                            0.0,
+                            0.0
+                        ],
+                        "uvRotation": 0.0,
+                        "uvScale": [
+                            1.0,
+                            1.0
+                        ]
+                    }
+                ],
+                "ModelName": "./Data/Model/Stage/Stage_Floor05.gltf",
+                "RootMotionName": "",
+                "ShaderID": 1,
+                "StaticModel": true,
+                "UsedNaviMeshSystemFlg": false,
+                "_RootRotationOffset": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                }
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": true,
+            "TypeName": "GltfModel",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        }
+    ],
+    "Layer": 1,
+    "Name": "TitleStage",
+    "ParentName": "",
+    "RequiredForSceneStart": true,
+    "Transform": {
+        "Pos": [
+            1.9705034901562613e-06,
+            -0.026371777057647705,
+            -9.673185559222475e-06
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

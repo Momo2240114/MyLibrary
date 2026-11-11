@@ -81,6 +81,8 @@ public:
     void RecreatePhysXActor();
     void ReleasePhysXActor();
     CollisionRole GetCollisionRole() const { return collisionRole; }
+    // 直前のCCT移動が側面で制限されたかを、地上移動の実速度補正へ公開する。
+    bool WasHorizontalMovementBlocked() const { return horizontalMovementBlocked; }
 
     // collisionOwnerObjectName が指定されていれば、その GameObject を判定上の所有者として解決する。
     std::shared_ptr<GameObject> ResolveCollisionOwnerObject();
@@ -144,6 +146,7 @@ protected:
     physx::PxRigidActor* actor = nullptr;
     physx::PxController* characterController = nullptr;
     bool actorIsStatic = false;
+    bool horizontalMovementBlocked = false; // 物理ステップ間だけ保持するCCTの結果。
 
 private:
     // Character role の場合に PxController を作成する。

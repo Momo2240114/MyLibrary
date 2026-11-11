@@ -1,0 +1,196 @@
+{
+    "AssetType": "MeshVFX",
+    "AssetVersion": 1,
+    "MeshVFX": {
+        "IsPlaying": false,
+        "PlaybackSpeed": 1,
+        "Parts": [
+            {
+                "RenderEnabled": true,
+                "ModelPath": "Data/Model/VFX/Sphere.glb",
+                "MeshIndex": 0,
+                "Loop": true,
+                "Duration": 8.0,
+                "Color": [
+                    0.04,
+                    0.008,
+                    0.07,
+                    1.0
+                ],
+                "Alpha": 0.95,
+                "AnimateAlpha": false,
+                "AlphaStart": 1,
+                "AlphaEnd": 0,
+                "BlendMode": 0,
+                "EmissiveStrength": 0.3,
+                "Position": [
+                    0,
+                    0,
+                    0
+                ],
+                "Rotation": [
+                    0,
+                    0,
+                    0
+                ],
+                "Scale": [
+                    0.48,
+                    0.48,
+                    0.48
+                ],
+                "BaseTexturePath": "",
+                "UseMaterialBaseTexture": false,
+                "UseMaterialNormalTexture": false,
+                "UseGradientTexture": false,
+                "UseMask": false,
+                "MaskLayers": [
+                    {
+                        "Path": "Data/Texture/Trail/T_TrailMask_22.PNG",
+                        "BlendMode": 0,
+                        "Invert": false
+                    }
+                ],
+                "MaskUVScale": [
+                    1,
+                    1
+                ],
+                "MaskUVSpeed": [
+                    1.5,
+                    0
+                ],
+                "UseNoise": true,
+                "NoiseTexturePaths": [
+                    "Data/Texture/VFX/T_Free_Magic_Noise1_normal.PNG"
+                ],
+                "NoiseUVScale": [
+                    1,
+                    2
+                ],
+                "NoiseUVSpeed": [
+                    3,
+                    0
+                ],
+                "NoiseStrength": 0.12,
+                "UseFresnel": false,
+                "UseNormal": false,
+                "UseEdgeHighlight": false,
+                "UseDissolveEdge": false,
+                "UseBackFaceBoost": false,
+                "InternalMeshCylinderRadius": 1,
+                "InternalMeshSettings": {
+                    "CapsuleLength": 0
+                },
+                "AnimateScale": false,
+                "ScaleStart": [
+                    0.12,
+                    1,
+                    0.12
+                ],
+                "ScaleEnd": [
+                    1,
+                    1,
+                    1
+                ],
+                "MeshRotationSpeed": [
+                    45,
+                    100,
+                    20
+                ]
+            },
+            {
+                "RenderEnabled": true,
+                "ModelPath": "Data/Model/VFX/Sphere.glb",
+                "MeshIndex": 0,
+                "Loop": true,
+                "Duration": 8.0,
+                "Color": [
+                    0.55,
+                    0.12,
+                    1.0,
+                    1.0
+                ],
+                "Alpha": 0.65,
+                "AnimateAlpha": false,
+                "AlphaStart": 1,
+                "AlphaEnd": 0,
+                "BlendMode": 1,
+                "EmissiveStrength": 3.0,
+                "Position": [
+                    0,
+                    0,
+                    0
+                ],
+                "Rotation": [
+                    0,
+                    0,
+                    0
+                ],
+                "Scale": [
+                    0.66,
+                    0.66,
+                    0.66
+                ],
+                "BaseTexturePath": "",
+                "UseMaterialBaseTexture": false,
+                "UseMaterialNormalTexture": false,
+                "UseGradientTexture": false,
+                "UseMask": true,
+                "MaskLayers": [
+                    {
+                        "Path": "Data/Texture/Trail/T_TrailMask_22.PNG",
+                        "BlendMode": 0,
+                        "Invert": false
+                    }
+                ],
+                "MaskUVScale": [
+                    1,
+                    1
+                ],
+                "MaskUVSpeed": [
+                    1.5,
+                    0
+                ],
+                "UseNoise": true,
+                "NoiseTexturePaths": [
+                    "Data/Texture/VFX/T_Free_Magic_Noise1_normal.PNG"
+                ],
+                "NoiseUVScale": [
+                    1,
+                    2
+                ],
+                "NoiseUVSpeed": [
+                    3,
+                    0
+                ],
+                "NoiseStrength": 0.12,
+                "UseFresnel": true,
+                "UseNormal": false,
+                "UseEdgeHighlight": false,
+                "UseDissolveEdge": false,
+                "UseBackFaceBoost": false,
+                "InternalMeshCylinderRadius": 1,
+                "InternalMeshSettings": {
+                    "CapsuleLength": 0
+                },
+                "AnimateScale": false,
+                "ScaleStart": [
+                    0.12,
+                    1,
+                    0.12
+                ],
+                "ScaleEnd": [
+                    1,
+                    1,
+                    1
+                ],
+                "MeshRotationSpeed": [
+                    65,
+                    -140,
+                    35
+                ],
+                "FresnelPower": 2.5,
+                "FresnelStrength": 1.5
+            }
+        ]
+    }
+}

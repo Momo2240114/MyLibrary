@@ -42,7 +42,7 @@
                 "FixedDamageKey": "FixedDamage",
                 "GravityScale": 1.0,
                 "GuardBreak": false,
-                "HalfHeight": 1.0,
+                "HalfHeight": 2.2,
                 "HitGroupId": 0,
                 "HitImpactEffectAssetPath": "",
                 "HitMeshVFXAssetPath": "",
@@ -83,7 +83,7 @@
                     0.0
                 ],
                 "PhysicsControlsTransform": false,
-                "Radius": 30.0,
+                "Radius": 66.0,
                 "RotateVelocityThreshold": 0.0010000000474974513,
                 "ShapeRenderFlg": false,
                 "SourceAction": "",
@@ -93,7 +93,8 @@
                 "UseGravity": false,
                 "UsePhysicsResponse": false,
                 "VelocityRotationMode": 0,
-                "shapeSizeScale": 1.0
+                "shapeSizeScale": 1.0,
+                "NodeSegmentScale": 2.2
             },
             "Enabled": false,
             "LateUpdateEnabled": true,

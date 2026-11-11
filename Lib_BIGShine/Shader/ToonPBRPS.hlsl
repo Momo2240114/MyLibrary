@@ -15,6 +15,10 @@ cbuffer CbMesh : register(b0)
     
     float4 shadeFeathers;
     float4 shadeSteps;
+    float4 styleParams;
+    float specularStrength;
+    float rimStrength;
+    float2 stylePadding;
 }
 
 Texture2D BaseMap : register(t0);
@@ -95,8 +99,7 @@ float3 SpecularIBL(float3 N, float3 V, float roughness, float3 f0)
 
 float3 ToonDiffuseColor(float3 base, float toonAmount)
 {
-    float3 shadowColor = base * 0.45f;
-    shadowColor *= float3(0.85f, 0.92f, 1.0f);
+    float3 shadowColor = base * styleParams.rgb;
     return lerp(shadowColor, base, toonAmount);
 }
 
@@ -123,9 +126,10 @@ float3 DirectToonPBR(float3 base, float3 N, float3 V, float3 L, float3 light, fl
     float specMask = smoothstep(0.25f, 0.75f, saturate(max(toonSpec.r, max(toonSpec.g, toonSpec.b)) * (1.0f - roughness)));
     toonSpec *= lerp(0.35f, 1.0f, specMask);
  
-    float3 pbrResult = (pbrDiffuse + pbrSpec) * light * NdotL;
-    float3 toonResult = (toonDiffuse + toonSpec) * light * toonLight;
-    return lerp(pbrResult, toonResult, saturate(toonPbrBlend));
+    // 拡散光だけをセル調へ寄せ、反射は独立したToon化率で混ぜる。
+    float3 diffuseResult_ = lerp(pbrDiffuse * NdotL, toonDiffuse * toonLight, saturate(toonPbrBlend));
+    float3 specularResult_ = lerp(pbrSpec * NdotL, toonSpec * NdotL, saturate(styleParams.w));
+    return (diffuseResult_ + specularResult_ * max(specularStrength, 0.0f)) * light;
 }
 
 PS_OUT main(VS_OUT pin)
@@ -147,23 +151,24 @@ PS_OUT main(VS_OUT pin)
         discard;
   
     float3 N = normalize(pin.normal);
-    float3 T = normalize(pin.tangent);
+    float3 T = normalize(pin.tangent.xyz);
 
     T = normalize(T - N * dot(N, T));
-    float3 B = normalize(cross(N, T));
+    float3 B = normalize(cross(N, T)) * pin.tangent.w;
 
     float3x3 TBN = float3x3(T, B, N);
 
     float3 normalSample = NormalMap.Sample(LinearSampler, pin.texcoord).xyz * 2.0f - 1.0f;
     normalSample.xy *= normalScale;
-    normalSample.z = sqrt(saturate(1.0f - dot(normalSample.xy, normalSample.xy)));
 
     N = normalize(mul(normalSample, TBN));
     float3 V = normalize(cameraPosition.xyz - pin.position);
 
-    float2 metalRoughSample = MetalRoughMap.Sample(LinearSampler, pin.texcoord).gr;
-    float metalness = saturate(metalRoughSample.r * metalnessParam);
-    float roughness = saturate(metalRoughSample.g * roughnessParam);
+    float4 metalRoughSample = MetalRoughMap.Sample(LinearSampler, pin.texcoord);
+    float2 materialValues_ = ApplySeparateMaterialMaps(
+        metalRoughSample, float2(metalnessParam, roughnessParam), LinearSampler, pin.texcoord);
+    float metalness = saturate(materialValues_.r);
+    float roughness = saturate(materialValues_.g);
     roughness = max(roughness, 0.04f);
 
     float3 f0 = lerp(float3(0.04f, 0.04f, 0.04f), base.rgb, metalness);
@@ -236,22 +241,32 @@ PS_OUT main(VS_OUT pin)
 
     float aoSample = AOMap.Sample(LinearSampler, pin.texcoord).r;
     float ao = lerp(1.0f, aoSample, occlusionStrength);
-    float toonAo = lerp(ao, 1.0f, toonPbrBlend * 0.7f);
 
     float3 emissive = EmissiveMap.Sample(LinearSampler, pin.texcoord).rgb * emissiveColor.rgb;
     emissive += dissolveEdgeColor.rgb * dissolveEdge_ * dissolveParams.z;
 
-    float iblDiffuseStrength = lerp(0.2f, 0.05f, toonPbrBlend);
-    float iblSpecularStrength = lerp(0.15f, 0.03f * metalness, toonPbrBlend);
+    // Toonでも反射を残し、金属や濡れた材質の立体感を補う。
+    float iblDiffuseStrength = lerp(1.0f, 0.4f, toonPbrBlend);
+    float iblSpecularStrength = lerp(1.0f, 0.35f, saturate(styleParams.w)) * max(specularStrength, 0.0f);
 
     float3 finalColor =
     totalDirectLighting +
-    iblDiffuse * toonAo * iblDiffuseStrength +
+    iblDiffuse * ao * iblDiffuseStrength +
     iblSpecular * iblSpecularStrength +
     emissive;
     
-    finalColor = ACESFilm(finalColor);
-    finalColor = pow(max(finalColor, 0.0f), 1.0f / 2.2f);
+    // Bloomと半透明合成へ線形HDRを渡し、表示変換は最終合成で行う。
+    finalColor = max(finalColor, 0.0f);
+    // 暗い背景でも輪郭を読めるよう、直接光とは別に弱いRimを加える。
+    float rim_ = pow(1.0f - saturate(abs(dot(N, V))), 3.0f) * max(rimStrength, 0.0f);
+    finalColor += rim_ * lerp(base.rgb, float3(1.0f, 1.0f, 1.0f), 0.5f);
+
+
+    // PostEffectのないEditorプレビューだけ、ここで表示用の色へ変換する。
+    if (outputLinearColor < 0.5f)
+    {
+        finalColor = pow(max(ACESFilm(finalColor), 0.0f), 1.0f / 2.2f);
+    }
 
     PS_OUT output;
     output.color = float4(finalColor, base.a);

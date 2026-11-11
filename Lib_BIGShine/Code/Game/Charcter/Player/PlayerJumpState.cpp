@@ -20,6 +20,7 @@ void PlayerJumpState::Enter()
     if (!player_) return;
 
     const bool resumeLoop_ = player_->ConsumeJumpLoopResumeRequest();
+    // 空中行動の終了時に既に接地していれば、再度踏み切らず着地処理から再開する。
     const bool resumeLanding_ = resumeLoop_ && player_->IsGrounded();
     BS_LOG_INFO(
         LOG_CATEGORY::GAME,

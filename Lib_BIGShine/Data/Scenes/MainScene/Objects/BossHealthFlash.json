@@ -36,7 +36,7 @@
                 "Version": 1,
                 "Visible": true,
                 "WidgetId": "BossHealthFlash",
-                "ZOrder": 4
+                "ZOrder": 35
             },
             "Enabled": true,
             "LateUpdateEnabled": true,
@@ -60,12 +60,14 @@
                     1.0,
                     0.18000000715255737,
                     0.07999999821186066,
-                    0.0
+                    1.0
                 ],
+                "LinearSampling": false,
                 "LocalSize": [
                     760.0,
                     20.0
                 ],
+                "SdrTexture": false,
                 "ShaderID": 0,
                 "TexturePath": "",
                 "Visible": true,

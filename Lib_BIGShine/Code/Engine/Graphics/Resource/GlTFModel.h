@@ -103,6 +103,7 @@ public:
 		CLAMP
 	};
 
+	// モデル材質の物性値、セル調の表現設定、共有テクスチャを保持する。
 	struct Material
 	{
 		int id; //マテリアルを一意に識別するためのID
@@ -120,6 +121,15 @@ public:
 		float				alphaCutoff = 0.5f;
 		float				toonPbrBlend = 0.5f;
 		float				normalScale = 1.0f;
+		// 拡散光のセル調を保ったまま、反射と輪郭光を材質ごとに調整する。
+		float specularToonBlend = 0.25f;
+		float specularStrength = 1.0f;
+		float rimStrength = 0.06f;
+		DirectX::XMFLOAT3 shadowTint = { 0.3825f, 0.414f, 0.45f };
+		// 既存のMaterialバイナリ配置とは分離して表現設定を保存する。
+		void SerializeStyleSettings(nlohmann::json& json_) const;
+		// 設定のない古いJSONでは初期値を維持する。
+		void DeserializeStyleSettings(const nlohmann::json& json_);
 		DirectX::XMFLOAT2	uvScale = { 1.0f, 1.0f };
 		DirectX::XMFLOAT2	uvOffset = { 0.0f, 0.0f };
 		float				uvRotation = 0.0f;
@@ -234,6 +244,9 @@ public:
 
 	// マテリアルデータ取得
 	const std::vector<Material>& GetMaterials() const { return materials; }
+    // 演出中の差し替えはメッシュ単位で保持し、元の材質や保存データには反映しない。
+    void SetPresentationMaterials(std::vector<Material> materials_);
+    void ClearPresentationMaterials();
 
 	// メッシュデータ取得
 	const std::vector<Mesh>& GetMeshes() const { return meshes; }
@@ -335,6 +348,10 @@ public:
 
 	void ShowNodeDetailsUI(const Node* node);
 
+    // ロード画面の実行時上書き。共有Materialや保存設定には反映しない。
+    void SetRuntimeSilhouette(bool enabled_, const DirectX::XMFLOAT4& color_) { runtimeSilhouette = enabled_; runtimeSilhouetteColor = color_; }
+    bool HasRuntimeSilhouette() const { return runtimeSilhouette; }
+    const DirectX::XMFLOAT4& GetRuntimeSilhouetteColor() const { return runtimeSilhouetteColor; }
 	ModelShaderID  GetShaderID() { return shaderId; };
 	void SetShaderID(ModelShaderID id_) { shaderId = id_; }
 
@@ -390,6 +407,8 @@ private:
 private:
 	DirectX::XMMATRIX MakeLocalScaleMatrix() const;
 	ModelShaderID shaderId = ModelShaderID::PBR;
+    bool runtimeSilhouette = false;
+    DirectX::XMFLOAT4 runtimeSilhouetteColor{1.0f, 1.0f, 1.0f, 1.0f};
 	std::string modelName = "";
 	std::string modelFullPass = "";
 	ModelLoadHandle modelLoadHandle;
@@ -398,6 +417,7 @@ private:
 	bool asyncLoadApplied = false;
 	bool usedNaviMeshSystemFlg = false;
 	std::vector<Material>	materials;
+    std::vector<Material> presentationMaterials;
 	std::vector<Mesh>		meshes;
 	std::vector<Node>		nodes;
 	std::vector<NodePose>	bindNodePoses;

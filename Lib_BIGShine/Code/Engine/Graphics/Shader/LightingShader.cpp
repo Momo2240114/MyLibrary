@@ -9,7 +9,7 @@ LightingShader::LightingShader(ID3D11Device* device)
     // ※ 頂点レイアウト(InputLayout)は不要（VS内部でIDから頂点を生成するため）
     CPUResourceLoader::LoadVertexShader(
         device,
-        "Shader/FullScreenVS.cso",
+        "Data/Shader/FullScreenVS.cso",
         nullptr, 0, // InputLayoutはnullptrでよい
         nullptr,
         vertexShader.GetAddressOf());
@@ -17,7 +17,7 @@ LightingShader::LightingShader(ID3D11Device* device)
     // 2. ピクセルシェーダーの読み込み (計算ロジックが入ったもの)
     CPUResourceLoader::LoadPixelShader(
         device,
-        "Shader/LightingPS.cso",
+        "Data/Shader/LightingPS.cso",
         pixelShader.GetAddressOf());
 
     CPUResourceLoader::CreateConstantBuffer(
@@ -40,6 +40,7 @@ void LightingShader::Execute(const RenderContext& rc,
     ID3D11ShaderResourceView* material,
     ID3D11ShaderResourceView* emissive,
     ID3D11ShaderResourceView* depth,
+    ID3D11ShaderResourceView* styleSRV_,
     ID3D11ShaderResourceView* pointLightSRV,  // 追加
     ID3D11ShaderResourceView* spotLightSRV,
     ID3D11Buffer* sceneConstantBuffer,
@@ -74,6 +75,8 @@ void LightingShader::Execute(const RenderContext& rc,
 
     ID3D11ShaderResourceView* srvs[] = { color, normal, material, emissive, depth };
     dc->PSSetShaderResources(0, _countof(srvs), srvs);
+    // Lightのt5/t6とIBLのt10以降を避け、表現設定はt7へ割り当てる。
+    dc->PSSetShaderResources(7, 1, &styleSRV_);
 
     ID3D11ShaderResourceView* shadowSrvs_[CascadeShadowMap::CascadeCount] = {};
     if (rc.cascadeShadowMap)
@@ -111,6 +114,8 @@ void LightingShader::Execute(const RenderContext& rc,
     // 5. 解除 (バインドしたものをすべてnullptrにする)
     ID3D11ShaderResourceView* nullGBufferSRVs[5] = {};
     dc->PSSetShaderResources(0, _countof(nullGBufferSRVs), nullGBufferSRVs);
+    ID3D11ShaderResourceView* nullStyleSRV_ = nullptr;
+    dc->PSSetShaderResources(7, 1, &nullStyleSRV_);
     ID3D11ShaderResourceView* nullLightSRVs_[2] = {};
     dc->PSSetShaderResources(5, _countof(nullLightSRVs_), nullLightSRVs_);
     ID3D11ShaderResourceView* nullIblSRVs[3] = {};

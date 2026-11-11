@@ -62,10 +62,11 @@
             "applyRotationY": false,
             "applyRotationZ": false,
             "cutVisualPositionX": true,
-            "cutVisualPositionY": true,
+            "cutVisualPositionY": false,
             "cutVisualPositionZ": true,
-            "enable": true,
-            "sourceNodeName": ""
+            "enable": false,
+            "sourceNodeName": "pelvis",
+            "cutVisualWhenDisabled": true
         },
         "rootMotionScale": 0,
         "rootMotionScaleCurveName": "",

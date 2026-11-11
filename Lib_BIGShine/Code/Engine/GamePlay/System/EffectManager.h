@@ -86,6 +86,7 @@ struct ImpactEffectSpawnRequest
     MeshVFXSpawnRequest meshVFX;
     bool spawnDecal = false;
     DecalSpawnRequest decal;
+    std::weak_ptr<GameObject> attackOwner; // 判定なしのHit演出も攻撃者と一緒に停止する。
 };
 
 // 攻撃演出のVFX、追従、HitBox設定をまとめる
@@ -120,6 +121,7 @@ struct SlashEffectSpawnSetting
     std::string hitEffectPath;
     uint32_t hitGroupId = 0u;
     bool allowMultiHit = false;
+    AttackFeedbackSettings feedback; // 武器と派生エフェクトで同じ振動・音声設定を使用する。
     bool cameraShakeEnabled = true;
     float cameraShakeReceiveDuration = 0.12f;
     float cameraShakeReceivePositionStrength = 0.025f;
@@ -156,7 +158,10 @@ void from_json(const nlohmann::json& json_, SlashEffectSpawnSetting& setting_);
 class EffectManager
 {
 public:
-    void Initialize(GameObjectManager* gameObjectManager_);
+    void Initialize(GameObjectManager* gameObjectManager_, bool preloadEffects_ = true);
+    // 既存の先読みをAsset単位で再開し、ロード画面へフレーム間の制御を返す。
+    bool AdvancePreload(float budgetMilliseconds_);
+    float GetPreloadProgress() const;
     void Update(float deltaTime_);
     void Clear();
     void RefreshAssetCache();
@@ -180,7 +185,8 @@ public:
     void SpawnImpactEffectAsset(
         const std::string& assetNameOrPath_,
         const DirectX::XMFLOAT3& position_,
-        const DirectX::XMFLOAT3& normal_);
+        const DirectX::XMFLOAT3& normal_,
+        const std::shared_ptr<GameObject>& attackOwner_ = nullptr);
     std::shared_ptr<GameObject> SpawnSlashEffect(
         const AttackEffectSpawnRequest& request_);
     std::shared_ptr<GameObject> SpawnAttackEffect(
@@ -196,8 +202,11 @@ public:
     void StopEffect(const std::shared_ptr<GameObject>& object_, const Component* lifetimeOwner_ = nullptr);
     // Poolで再利用されたObjectを、古い所有側が別の演出として操作しないよう確認する。
     bool IsEffectOwnedBy(const std::shared_ptr<GameObject>& object_, const Component* lifetimeOwner_) const;
-    // 行動を中断した攻撃者の生成済み判定と遅延生成予約をまとめて閉じる。
-    void StopAttackEffects(const std::shared_ptr<GameObject>& owner_);
+    // 行動終了後も継続する指定済みEffectを除き、攻撃者の判定と遅延生成予約を閉じる。
+    void StopAttackEffects(const std::shared_ptr<GameObject>& owner_,
+        const std::vector<std::weak_ptr<GameObject>>& preservedEffects_ = {});
+    // 判定を持たない攻撃VFXにも所有者を記録し、寿命やPool再利用とは独立して停止する。
+    void RegisterAttackEffectOwner(const std::shared_ptr<GameObject>& object_, const std::shared_ptr<GameObject>& owner_);
 
     const std::vector<std::string>& GetParticleAssetPaths() const
     {
@@ -250,6 +259,8 @@ public:
     }
 
 private:
+    std::size_t incrementalPreloadCursor = 0;
+
     enum class EFFECT_POOL_TYPE
     {
         NONE,
@@ -284,6 +295,7 @@ private:
     {
         std::weak_ptr<GameObject> object;
         std::weak_ptr<HitBox> hitBox;
+        std::weak_ptr<GameObject> attackOwner;
         std::string assetPath;
         EFFECT_POOL_TYPE poolType = EFFECT_POOL_TYPE::NONE;
         float lifeTimer = 0.0f;

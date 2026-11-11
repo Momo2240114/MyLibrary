@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- 既存構成の出力先は維持し、追加したx64構成だけを独立したフォルダーへ出力する。 -->
+  <PropertyGroup>
+    <BSApplicationKind>Engine</BSApplicationKind>
+    <BSApplicationDefinition>BS_APP_ENGINE</BSApplicationDefinition>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Game_Debug' or '$(Configuration)'=='Game_Release' or '$(Configuration)'=='Shipping'">
+    <BSApplicationKind>Game</BSApplicationKind>
+    <BSApplicationDefinition>BS_APP_GAME</BSApplicationDefinition>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Engine_Debug' or '$(Configuration)'=='Engine_Release' or '$(Configuration)'=='Game_Debug' or '$(Configuration)'=='Game_Release'">
+    <BSSeparateApplication>true</BSSeparateApplication>
+    <OutDir>$(ProjectDir)Build\$(BSApplicationKind)\</OutDir>
+    <IntDir>$(ProjectDir)Build\Intermediate\$(Platform)\$(Configuration)\</IntDir>
+    <LocalDebuggerWorkingDirectory Condition="'$(BSApplicationKind)'=='Engine'">$(ProjectDir)</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerWorkingDirectory Condition="'$(BSApplicationKind)'=='Game'">$(OutDir)</LocalDebuggerWorkingDirectory>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Engine_Debug' or '$(Configuration)'=='Game_Debug'">
+    <OutDir>$(ProjectDir)Build\$(BSApplicationKind)\Debug\</OutDir>
+    <LocalDebuggerWorkingDirectory Condition="'$(BSApplicationKind)'=='Game'">$(OutDir)</LocalDebuggerWorkingDirectory>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(BSSeparateApplication)'=='true' and '$(BSApplicationKind)'=='Engine'">
+    <TargetName>BigShine</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(BSSeparateApplication)'=='true' and '$(BSApplicationKind)'=='Game'">
+    <TargetName>ANATHEMA</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(BSSeparateApplication)'=='true'">
+    <LocalDebuggerCommand>$(OutDir)$(TargetName).exe</LocalDebuggerCommand>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PreprocessorDefinitions Condition="'$(BSSeparateApplication)'=='true'">$(BSApplicationDefinition);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <!-- RCにはC++のプリプロセッサ定義が自動継承されないため、対象を明示する。 -->
+    <ResourceCompile>
+      <PreprocessorDefinitions>$(BSApplicationDefinition);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)Data\Icons;$(ProjectDir)Code\Engine\Core;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <Culture>0x0411</Culture>
+    </ResourceCompile>
+    <Link>
+      <ProgramDatabaseFile Condition="'$(BSSeparateApplication)'=='true'">$(IntDir)$(TargetName).pdb</ProgramDatabaseFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <!-- Copyタスクの差分判定を使い、通常ビルドでの画像変換や全アセット再コピーを避ける。 -->
+  <Target Name="StageSeparateApplication" AfterTargets="Build" Condition="'$(BSSeparateApplication)'=='true'">
+    <ItemGroup>
+      <BSRuntimeDll Include="$(ProjectDir)PhysX_64.dll;$(ProjectDir)PhysXCommon_64.dll;$(ProjectDir)PhysXCooking_64.dll;$(ProjectDir)PhysXFoundation_64.dll" />
+      <BSRuntimeDll Include="$(ProjectDir)PVDRuntime_64.dll" Condition="Exists('$(ProjectDir)PVDRuntime_64.dll')" />
+      <!-- ゲームが参照するData階層は保ち、Editor専用データとリソース定義は配布先へ含めない。 -->
+      <BSGameData Include="$(ProjectDir)Data\**\*" Exclude="$(ProjectDir)Data\Editor\**\*;$(ProjectDir)Data\DebugLog\**\*;$(ProjectDir)Data\Icons\**\*" Condition="'$(BSApplicationKind)'=='Game'" />
+    </ItemGroup>
+    <Copy SourceFiles="@(BSRuntimeDll)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(BSGameData)" DestinationFiles="@(BSGameData->'$(OutDir)Data\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" Condition="'$(BSApplicationKind)'=='Game'" />
+    <Copy SourceFiles="$(ProjectDir)Tools\Build\GamePackage.json" DestinationFiles="$(OutDir)GamePackage.json" SkipUnchangedFiles="true" Condition="'$(BSApplicationKind)'=='Game'" />
+    <Copy SourceFiles="$(ProjectDir)ReadMe.txt" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" Condition="'$(BSApplicationKind)'=='Game' and Exists('$(ProjectDir)ReadMe.txt')" />
+    <!-- Editorの起動条件をゲーム用ガイドと分けて同梱する。 -->
+    <Copy SourceFiles="$(ProjectDir)ReadMe_Editor.txt" DestinationFiles="$(OutDir)ReadMe.txt" SkipUnchangedFiles="true" Condition="'$(BSApplicationKind)'=='Engine'" />
+  </Target>
+</Project>

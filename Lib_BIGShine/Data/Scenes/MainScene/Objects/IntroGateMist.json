@@ -4,6 +4,9 @@
         {
             "Data": {
                 "AssetPath": "Data/Particle/IntroGateMist.json",
+                "AttractionTargetName": "",
+                "DissolveBoundaryBand": 0.15000000596046448,
+                "EmitDissolveBoundary": false,
                 "Emitters": [
                     {
                         "Acceleration": [
@@ -170,7 +173,12 @@
                         "useShadeGradientTexture": 0
                     }
                 ],
-                "IsPlaying": false
+                "HealthOwnerName": "",
+                "HealthyEmissionMultiplier": 1.0,
+                "IsPlaying": false,
+                "LowHealthEmissionMultiplier": 3.0,
+                "MeshSourceObjectName": "",
+                "ScaleEmissionByHealth": false
             },
             "Enabled": true,
             "LateUpdateEnabled": true,

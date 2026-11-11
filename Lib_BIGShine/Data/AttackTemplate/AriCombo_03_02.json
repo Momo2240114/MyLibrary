@@ -11,6 +11,13 @@
         "knockBackType": 0
     },
     "attackEffects": [],
+    "feedback": {
+        "startSoundPath": "Data/Audio/SE/Sword-Practice-2.wav",
+        "hitSoundPath": "Data/Audio/SE/Swordsmanship-2.wav",
+        "volume": 0.75,
+        "minDistance": 8.0,
+        "maxDistance": 80.0
+    },
     "displayName": "AriCombo_03_02",
     "hitEffect": {
         "hitMeshVfxAssetPath": "",

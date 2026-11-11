@@ -1,14 +1,15 @@
 #pragma once
 
-#include "IScene.h"
+#include "SceneBase.h"
 #include "Engine/Graphics/Resource/ModelLoadTypes.h"
 
-class SceneStartUp : public Scene
+class SceneStartUp : public SceneBase
 {
 public:
     SceneStartUp()
     {
-        sceneName = "StartUpScene";
+        sceneName = "StartupPresentation";
+        isLoadingPresentation = true;
     }
 
     void Initialize() override;
@@ -18,7 +19,7 @@ public:
     void DrawGUI() override;
 
 private:
-    // Titleへ進む前に必ず完了させるCriticalモデル先読みハンドル。
+    // 最初のシーンへ進む前に必ず完了させるCriticalモデル先読みハンドル。
     PreloadHandle criticalPreloadHandle;
 
     // Loading表示の簡単なアニメーション用経過時間。

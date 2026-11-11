@@ -44,8 +44,18 @@
 #include "Engine/GamePlay/EventSystem/TimeScaleDirector.h"
 #include "Engine/UI/NumberSwitcher.h"
 #include "Engine/UI/UIProgressBarComponent.h"
+#include "Engine/UI/BattleHudComponent.h"
+#include "Engine/UI/MenuNavigationComponent.h"
+#include "Engine/UI/ScreenFadeComponent.h"
+#include "Engine/UI/ScreenTransitionComponent.h"
+#include "Engine/UI/LoadingPresentationComponent.h"
+#include "Engine/UI/GameMenuComponent.h"
+#include "Engine/UI/ScenePresentationComponent.h"
 #include "Engine/UI/UISpriteSheetComponent.h"
 #include "Engine/UI/UITextComponent.h"
+#include "Engine/UI/UIMotionComponent.h"
+#include "Engine/UI/UIVisualEffectComponent.h"
+#include "Engine/UI/UIEffectsGalleryComponent.h"
 #include "Engine/UI/BossNamePresentationComponent.h"
 #include "Engine/GamePlay/EventSystem/ActorPresentationActionComponent.h"
 #include "Engine/UI/UIVertexModifierComponent.h"
@@ -77,6 +87,7 @@
 #include "Game/GameMode/GameModeObjectToggleComponent.h"
 #include "Game/AI/Dragon/DragonAIComponent.h"
 #include "Game/AI/Human/HumanBossAIComponent.h"
+#include "Game/AI/Human/HumanBossAITraceComponent.h"
 #include "Game/AI/Human/HumanBossActionComponent.h"
 #include "Game/AI/Dragon/DragonBodyPartHurtBoxComponent.h"
 #include "Game/AI/Dragon/DragonBodyPartManagerComponent.h"
@@ -162,8 +173,18 @@ void RegisterAllComponents()
     registry.Register<WidgetBoardComponent>("WidgetBoardComponent");
     registry.Register<UIWidgetComponent>("UIWidgetComponent");
     registry.Register<UIProgressBarComponent>("UIProgressBarComponent");
+    registry.Register<BattleHudComponent>("BattleHudComponent");
+    registry.Register<MenuNavigationComponent>("MenuNavigationComponent");
+    registry.Register<ScreenFadeComponent>("ScreenFadeComponent");
+    registry.Register<ScreenTransitionComponent>("ScreenTransitionComponent");
+    registry.Register<LoadingPresentationComponent>("LoadingPresentationComponent");
+    registry.Register<GameMenuComponent>("GameMenuComponent");
+    registry.Register<ScenePresentationComponent>("ScenePresentationComponent");
     registry.Register<UISpriteSheetComponent>("UISpriteSheetComponent");
     registry.Register<UITextComponent>("UITextComponent");
+    registry.Register<UIMotionComponent>("UIMotionComponent");
+    registry.Register<UIVisualEffectComponent>("UIVisualEffectComponent");
+    registry.Register<UIEffectsGalleryComponent>("UIEffectsGalleryComponent");
     registry.Register<BossNamePresentationComponent>("BossNamePresentationComponent");
     registry.Register<ActorPresentationActionComponent>("ActorPresentationActionComponent");
     registry.Register<UIVertexModifierComponent>("UIVertexModifierComponent");
@@ -198,6 +219,7 @@ void RegisterAllComponents()
     registry.Register<GameModeObjectToggleComponent>("GameModeObjectToggleComponent");
     registry.Register<DragonAIComponent>("DragonAIComponent");
     registry.Register<HumanBossAIComponent>("HumanBossAIComponent");
+    registry.Register<HumanBossAITraceComponent>("HumanBossAITraceComponent");
     registry.Register<HumanBossActionComponent>("HumanBossActionComponent");
     registry.Register<DragonBodyPartHurtBoxComponent>("DragonBodyPartHurtBoxComponent");
     registry.Register<DragonBodyPartManagerComponent>("DragonBodyPartManagerComponent");

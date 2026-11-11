@@ -1,4 +1,6 @@
 #include "PrecompiledHeader.h"
+#include "Engine/Audio/AudioManager.h"
+#include "Game/AI/Human/HumanBossAIComponent.h"
 
 #include "JustGuardSystem.h"
 
@@ -20,6 +22,18 @@
 
 namespace
 {
+    // 防御側と攻撃側の親階層を確認し、敵が成功した場合はプレイヤーの攻撃失敗として通知する。
+    std::shared_ptr<GameObject> FindPlayerOwner(std::shared_ptr<GameObject> object_)
+    {
+        while (object_)
+        {
+            if (object_->GetLayer() == LayerType::Player) return object_;
+            const auto parent_ = object_->transform ? object_->transform->parent.lock() : nullptr;
+            object_ = parent_ ? parent_->gameObject.lock() : nullptr;
+        }
+        return nullptr;
+    }
+
     void PlayJustGuardCameraAction(const JustGuardEvent& event_)
     {
         // ジャストガード成立位置を実カメラのCameraActionへ渡し、演出側の設定で再生する。
@@ -165,6 +179,8 @@ bool JustGuardSystem::HandleJustGuard(
         BS_LOG_WARNING(LOG_CATEGORY::GAME, "[JustGuard] Rejected: collider cannot guard this attack.");
         return false;
     }
+    // 格子の帯から外れた対象では、広域判定だけでJustGuardを成立させない。
+    if (!hitBox_.IsWithinAttackSector(defender_.get())) return false;
     if (!RegisterJustGuard(
         hitBox_.attackInstanceId,
         hitBox_.hitGroupId,
@@ -193,6 +209,15 @@ bool JustGuardSystem::HandleJustGuard(
     event_.attackTag = hitBox_.attackTag;
 
     frameJustGuardEvents.push_back(event_);
+    if (const auto player_ = FindPlayerOwner(defender_))
+        player_->ExecuteAction("Controller.RumbleJustGuard");
+    else if (const auto attackingPlayer_ = FindPlayerOwner(attacker_))
+        attackingPlayer_->ExecuteAction("Controller.RumbleJustGuarded");
+    // ジャストガード成立時だけ成功音を鳴らし、共通DSPでBGMより軽いこもりを重ねる。
+    const auto soundPosition_ = event_.hasContact || !defender_->transform
+        ? event_.guardPosition : defender_->transform->GetWorldPosition();
+    AudioManager::Instance().PlaySpatialAttackSound("Data/Audio/SE/Sword-Fight-1.wav",
+        soundPosition_, 0.75f, 8.0f, 80.0f);
     BS_LOG_SUCCESS(LOG_CATEGORY::GAME, "[JustGuard] Event accepted. Publishing blackboard/action.");
     PublishJustGuardToBlackboard(event_);
     PublishJustGuardToAttacker(event_);
@@ -340,6 +365,14 @@ void JustGuardSystem::PublishJustGuardToAttacker(const JustGuardEvent& event_)
 
 void JustGuardSystem::PublishJustGuardToAttackHitBox(const JustGuardEvent& event_)
 {
+    // 独立生成した突進・範囲攻撃は親階層にBossがいないため、攻撃Ownerへ直接通知する。
+    // 通常のProjectile反射やジャスト回避の経路は変更しない。
+    if (const auto attacker_ = event_.attacker.lock())
+        if (const auto bossAI_ = attacker_->GetComponent<HumanBossAIComponent>(); bossAI_ && bossAI_->IsBerserkActive())
+        {
+            bossAI_->NotifyBerserkJustGuard();
+            return;
+        }
 
     if (!event_.hitBox || event_.hitBox->justGuardedActionName.empty()) return;
 
@@ -358,6 +391,8 @@ void JustGuardSystem::PublishJustGuardToAttackHitBox(const JustGuardEvent& event
             if (blackboard_)
             {
                 blackboard_->SetBool("GuardReaction", "AttackGuarded", false);
+                // 表示側が同じフラグの継続と新しい被ジャストガードを区別できるよう、攻撃IDも公開する。
+                blackboard_->SetInt("GuardReaction", "AttackInstanceId", static_cast<int>(event_.attackInstanceId));
                 blackboard_->SetBool("GuardReaction", "AttackJustGuarded", true);
                 blackboard_->SetTrigger("GuardReaction", "AttackJustGuardedTrigger");
                 blackboard_->SetVector3("GuardReaction", "JustGuardPosition", event_.guardPosition);

@@ -1,0 +1,7 @@
+{
+    "SceneName": "StartupPresentation",
+    "ObjectList": [
+        "LoadingCamera",
+        "StartupUI"
+    ]
+}

@@ -1226,6 +1226,8 @@ void AnimationControllerComponent::Gui()
             ImGui::TextDisabled("Events still use the same Animation Sequence Editor timeline.");
         }
         ImGui::DragFloat("Speed", &editingState->playbackSpeed, 0.05f);
+        ImGui::InputText("Speed Multiplier Parameter", &editingState->playbackSpeedParamName);
+        ImGui::Checkbox("Sample Weapon Hit Boxes", &editingState->sampleWeaponHitBoxes);
         ImGui::Checkbox("Loop", &editingState->isLoop);
 
 
@@ -1235,8 +1237,9 @@ void AnimationControllerComponent::Gui()
 
             // RootMotionは見た目のノード移動を抜き取り、GameObject側へ移動量として適用するための設定。
             ImGui::Checkbox("Enable Root Motion", &editingState->rootMotion.enable);
+            ImGui::Checkbox("Cut Visual Motion When Disabled", &editingState->rootMotion.cutVisualWhenDisabled);
 
-            if (editingState->rootMotion.enable)
+            if (editingState->rootMotion.enable || editingState->rootMotion.cutVisualWhenDisabled)
             {
                 ImGui::Indent();
 
@@ -1296,7 +1299,7 @@ void AnimationControllerComponent::Gui()
                     }
                     ImGui::EndPopup();
                 }
-                ImGui::TextDisabled("Source-node movement is always removed while Root Motion is enabled.");
+                ImGui::TextDisabled("Position cuts also work with Root Motion disabled when visual cutting is enabled.");
 
                 ImGui::Text("Apply Position to GameObject:");
                 ImGui::Checkbox("X##Pos", &editingState->rootMotion.applyPositionX); ImGui::SameLine();

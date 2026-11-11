@@ -43,7 +43,7 @@ void AudioSource::Play(bool loop_)
 
     sound->setMode((loop_ ? FMOD_LOOP_NORMAL : FMOD_LOOP_OFF) | FMOD_2D);
 
-    FMOD_RESULT result_ = system->playSound(sound, nullptr, true, &channel);
+    FMOD_RESULT result_ = system->playSound(sound, channelGroup, true, &channel);
     _ASSERT_EXPR_A(result_ == FMOD_OK, FMOD_ErrorString(result_));
     ApplySettings(channel, settings_);
     channel->setPaused(false);
@@ -62,7 +62,7 @@ void AudioSource::PlayOneShot(const AudioPlaybackSettings& settings_)
 
     // 主チャンネルとは別のChannelを取得し、同じSoundの重複再生を成立させる。
     FMOD::Channel* newChannel_ = nullptr;
-    FMOD_RESULT result_ = system->playSound(sound, nullptr, true, &newChannel_);
+    FMOD_RESULT result_ = system->playSound(sound, channelGroup, true, &newChannel_);
     _ASSERT_EXPR_A(result_ == FMOD_OK, FMOD_ErrorString(result_));
 
     ApplySettings(newChannel_, settings_);

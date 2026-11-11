@@ -1,0 +1,71 @@
+{
+    "Name": "TitleLogo",
+    "Layer": 16,
+    "CollisionMask": 0,
+    "ParentName": "",
+    "RequiredForSceneStart": true,
+    "Transform": {
+        "Pos": [
+            0,
+            0,
+            0
+        ],
+        "Rot": [
+            0,
+            0,
+            0
+        ],
+        "Scale": [
+            1,
+            1,
+            1
+        ]
+    },
+    "Components": [
+        {
+            "TypeName": "SpriteRenderer",
+            "Enabled": true,
+            "RequiredForSceneStart": true,
+            "Data": {
+                "TexturePath": "Data/Sprite/UI/Title/TitleLogo.png",
+                "LocalSize": [
+                    1000,
+                    564
+                ],
+                "CatPos": [
+                    0,
+                    0
+                ],
+                "CatSize": [
+                    1670,
+                    942
+                ],
+                "Color": [
+                    1,
+                    1,
+                    1,
+                    1
+                ],
+                "Visible": true,
+                "LinearSampling": true,
+                "SdrTexture": true,
+                "ShaderID": 0,
+                "pivotType": 0
+            }
+        },
+        {
+            "TypeName": "UIVisualEffectComponent",
+            "Enabled": true,
+            "RequiredForSceneStart": false,
+            "UpdateEnabled": true,
+            "LateUpdateEnabled": true,
+            "UpdatePriority": 0,
+            "LateUpdatePriority": 0,
+            "Data": {
+                "Preset": "MenuHeading",
+                "PlayOnStart": true,
+                "Settings": {}
+            }
+        }
+    ]
+}

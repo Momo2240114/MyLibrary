@@ -4,6 +4,11 @@
 
 #include "GameModeBlackboardKeys.h"
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
+#include "Engine/Audio/AudioManager.h"
+#include "Engine/Debug/TracyProfiler.h"
+#include "Engine/GamePlay/Core/Object/GameObjectManager.h"
+#include "Game/AI/Human/HumanBossAIComponent.h"
+#include "Game/AI/Human/HumanBossActionComponent.h"
 
 namespace
 {
@@ -39,6 +44,35 @@ void GameModeManager::Update(float deltaTime_)
     WriteBlackboard();
 }
 
+void GameModeManager::UpdateBattleMusic(GameObjectManager& manager_)
+{
+    BS_PROFILE_SCOPE("GameModeManager::UpdateBattleMusic");
+    // 死亡・形態移行・撃破演出では、Sequenceと専用Directorの音声制御を優先する。
+    if (cinematicPreview || presentationPlaying || gameplayLocked || battlePaused ||
+        (currentGameState != GameProgressState::PHASE_1_BATTLE &&
+            currentGameState != GameProgressState::PHASE_2_BATTLE)) return;
+
+    size_t musicIndex_ = currentGameState == GameProgressState::PHASE_1_BATTLE
+        ? BGM_GAME : BGM_HUMAN_BOSS;
+    if (currentGameState == GameProgressState::PHASE_2_BATTLE)
+    {
+        bool berserk_ = false;
+        bool special_ = false;
+        for (const auto& boss_ : manager_.FindComponents<HumanBossAIComponent>())
+        {
+            const auto owner_ = boss_ ? boss_->GetGameObject() : nullptr;
+            if (!boss_ || !boss_->IsEnabled() || !owner_ || owner_->IsPendingDestroy()) continue;
+            berserk_ = berserk_ || boss_->IsBerserkActive();
+            const auto action_ = owner_->GetComponent<HumanBossActionComponent>();
+            special_ = special_ || (action_ && action_->IsEnabled() && action_->IsSpecialMusicActive());
+        }
+        // 大技を最優先にし、終了後は暴走が続いていれば暴走曲へ戻す。
+        if (special_) musicIndex_ = BGM_SPECIAL_ATTACK;
+        else if (berserk_) musicIndex_ = BGM_BERSERK;
+    }
+    AudioManager::Instance().SwitchBGM(musicIndex_);
+}
+
 // 戦闘開始前の状態へ戻し、ロックやAI方針が前回戦闘から残らないようにする。
 void GameModeManager::ResetBattleState()
 {
@@ -54,6 +88,7 @@ void GameModeManager::ResetBattleState()
     sequenceStartAttempted = false;
 
     phaseTransitionPreview = false;
+    cinematicPreview = false;
 
     currentBattlePhase = 0;
     playerHpRate = 1.0f;
@@ -80,6 +115,15 @@ void GameModeManager::BeginGameSceneFlow()
     }
 
     BeginBossIntro();
+}
+
+void GameModeManager::BeginCinematicPreview(GameProgressState context_)
+{
+    BS_PROFILE_SCOPE("GameModeManager::BeginCinematicPreview");
+    cinematicPreview = true;
+    sequenceStartRequested = false;
+    sequenceStartAttempted = false;
+    SetGameState(context_);
 }
 
 void GameModeManager::SetGameplayLocked(bool locked_)
@@ -197,27 +241,27 @@ void GameModeManager::WriteBlackboard()
     globalBlackboard.SetBool(
         GameModeBlackboardKeys::CATEGORY_GAME,
         GameModeBlackboardKeys::GAMEPLAY_LOCKED,
-        gameplayLocked);
+        IsGameplayLocked());
 
     globalBlackboard.SetBool(
         GameModeBlackboardKeys::CATEGORY_GAME,
         GameModeBlackboardKeys::PLAYER_CONTROL_LOCKED,
-        playerControlLocked);
+        IsPlayerControlLocked());
 
     globalBlackboard.SetBool(
         GameModeBlackboardKeys::CATEGORY_GAME,
         GameModeBlackboardKeys::ENEMY_AI_LOCKED,
-        enemyAILocked);
+        IsEnemyAILocked());
 
     globalBlackboard.SetBool(
         GameModeBlackboardKeys::CATEGORY_GAME,
         GameModeBlackboardKeys::PRESENTATION_PLAYING,
-        presentationPlaying);
+        IsPresentationPlaying());
 
     globalBlackboard.SetBool(
         GameModeBlackboardKeys::CATEGORY_GAME,
         GameModeBlackboardKeys::BATTLE_PAUSED,
-        battlePaused);
+        IsBattlePaused());
 
     // Battleカテゴリには現在フェーズとHP割合を保存し、UIやAIが同じ値を参照できるようにする。
     globalBlackboard.SetInt(
@@ -318,7 +362,8 @@ void GameModeManager::RegisterGlobalActions()
     registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, "DisableEnemyAI", [this]() { SetEnemyAILocked(true); });
     registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, "EnableEnemyAI", [this]() { SetEnemyAILocked(false); });
     // 形態移行はSceneのSequence登録を待ち、演出を飛ばして戦闘を再開しない。
-    registry_.RegisterAction("Sequence", SEQUENCE_BOSS_DEFEATED, [this]() { NotifySequenceFinished(); });
+    // 決着はGameObjectManagerの専用Directorが生の時間で更新する。
+    registry_.RegisterAction("Sequence", SEQUENCE_BOSS_DEFEATED, []() {});
     // 単体再生もSequenceへ委ね、Managerはプレビューのロックと終了状態だけを管理する。
     const char* PREVIEW_PHASES[] = { "DragonDeath", "DragonDissolve", "StageCorruption", "MudAttack",
         "PlayerCounter", "HumanFormation", "SwordClash", "PlayerKnockdown" };
@@ -482,12 +527,13 @@ void GameModeManager::ApplyStateLocks()
         currentGameState == GameProgressState::BOSS_INTRO ||
         currentGameState == GameProgressState::PHASE_1_DEFEAT ||
         currentGameState == GameProgressState::PHASE_2_INTRO ||
-        currentGameState == GameProgressState::BOSS_DEFEATED;
+        currentGameState == GameProgressState::BOSS_DEFEATED ||
+        currentGameState == GameProgressState::RESULT;
 
     presentationPlaying = isSequenceState_;
     playerControlLocked = isSequenceState_;
     enemyAILocked = isSequenceState_;
-    gameplayLocked = false;
+    gameplayLocked = currentGameState == GameProgressState::BOSS_DEFEATED || currentGameState == GameProgressState::RESULT;
     battlePaused = false;
 
     switch (currentGameState)

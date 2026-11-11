@@ -67,7 +67,11 @@ public:
     void Show(size_t templateIndex_);
 
     // 確定済みの着地点へ追尾しない円形予兆を生成する。
-    void ShowAt(const DangerAreaTemplate& template_, const DirectX::XMFLOAT3& position_);
+    std::shared_ptr<GameObject> ShowAt(const DangerAreaTemplate& template_, const DirectX::XMFLOAT3& position_, float yawDegrees_ = 0.0f);
+    // 生成済みの予兆だけを回転・伸長し、毎フレームのObject生成を避ける。
+    void UpdateAt(const std::shared_ptr<GameObject>& object_, const DirectX::XMFLOAT3& position_,
+        float yawDegrees_, float lengthScale_ = 1.0f);
+    void OnDestroy() override { StopAll(); }
     // 所有者の強制中断時に、このComponentが生成した予兆を解除する。
     void StopAll();
 
@@ -84,6 +88,7 @@ private:
         std::weak_ptr<MeshVFXComponent> meshVFX;
         size_t templateIndex = 0u;
         float lifeTimer = 0.0f;
+        float groundOffset = 0.03f;
         bool fixedPosition = false; // 着地点を固定した予兆は所有者を追従しない。
     };
 

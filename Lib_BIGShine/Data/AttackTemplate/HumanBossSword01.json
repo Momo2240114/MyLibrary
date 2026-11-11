@@ -1,4 +1,23 @@
 {
+    "telegraph": {
+        "enabled": true,
+        "leadFrames": 12.0,
+        "berserkLeadFrames": 9.0,
+        "particleName": "EnemyAttackWarning",
+        "attachNodeName": "head",
+        "localOffset": [
+            0.0,
+            0.3,
+            0.0
+        ],
+        "fallbackOffset": [
+            0.0,
+            2.0,
+            0.0
+        ],
+        "particleScale": 1.0,
+        "lifeTime": 0.15
+    },
   "AssetType": "AttackTemplate",
   "AssetVersion": 1,
   "attack": {
@@ -14,6 +33,13 @@
     "targetAirLiftPower": 0.0
   },
   "attackEffects": [],
+  "feedback": {
+    "startSoundPath": "Data/Audio/SE/Sword-Practice-2.wav",
+    "hitSoundPath": "Data/Audio/SE/Swordsmanship-3.wav",
+    "volume": 0.75,
+    "minDistance": 8.0,
+    "maxDistance": 80.0
+  },
   "cameraShake": {
     "attackScale": 0.5,
     "enabled": true,
@@ -63,9 +89,9 @@
         0
       ],
       "localScale": [
-        55,
-        55,
-        55
+        121.0,
+        121.0,
+        121.0
       ],
       "alpha": 1,
       "followOwner": true,
@@ -82,7 +108,7 @@
     "enabled": true,
     "endNodeName": "TrailEnd",
     "hitBoxName": "Sword",
-    "radius": 26.0,
+    "radius": 57.2,
     "startNodeName": "TrailStart"
   }
 }

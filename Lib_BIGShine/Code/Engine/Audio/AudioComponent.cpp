@@ -300,7 +300,7 @@ void AudioComponent::Serialize(nlohmann::json& json_) const
 // JSONから設定を復元し、数値項目は安全な範囲へ補正する。
 void AudioComponent::Deserialize(const nlohmann::json& json_)
 {
-    audioPath = json_.value("AudioPath", std::string("Data/Audio/SE/TitleSelect.wav"));
+    audioPath = json_.value("AudioPath", std::string("Data/Audio/SE/Sword-Fight-1.wav"));
     workspacePath = json_.value("WorkspacePath", std::string("Data/Audio/AudioWorkspace.json"));
     workspacePresetName = json_.value("WorkspacePresetName", std::string{});
     actionPrefix = json_.value("ActionPrefix", std::string{});

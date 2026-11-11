@@ -20,7 +20,7 @@ bool MotionBlurSystem::Initialize(ID3D11Device* device_, int width_, int height_
 
     // FullScreenVSは全Passで共有する。
     if (FAILED(CPUResourceLoader::LoadVertexShader(
-        device_, "Shader/FullScreenVS.cso", nullptr, 0, nullptr, fullScreenVs.GetAddressOf())))
+        device_, "Data/Shader/FullScreenVS.cso", nullptr, 0, nullptr, fullScreenVs.GetAddressOf())))
     {
         return false;
     }
@@ -33,10 +33,10 @@ bool MotionBlurSystem::Initialize(ID3D11Device* device_, int width_, int height_
     PixelShaderSource pixelShaderSources_[] =
     {
         // Velocity生成、Tile最大値、近傍最大値、最終Blurの4Pass。
-        { "Shader/MotionVelocityPS.cso", &velocityPixelShader },
-        { "Shader/MotionVelocityTileMaxPS.cso", &tileMaxPixelShader },
-        { "Shader/MotionVelocityNeighborMaxPS.cso", &neighborMaxPixelShader },
-        { "Shader/MotionBlurPS.cso", &pixelShader },
+        { "Data/Shader/MotionVelocityPS.cso", &velocityPixelShader },
+        { "Data/Shader/MotionVelocityTileMaxPS.cso", &tileMaxPixelShader },
+        { "Data/Shader/MotionVelocityNeighborMaxPS.cso", &neighborMaxPixelShader },
+        { "Data/Shader/MotionBlurPS.cso", &pixelShader },
     };
     for (PixelShaderSource& source_ : pixelShaderSources_)
     {

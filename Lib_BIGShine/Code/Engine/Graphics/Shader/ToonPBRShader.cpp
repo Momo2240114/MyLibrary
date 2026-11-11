@@ -23,7 +23,7 @@ ToonPBRShader::ToonPBRShader(ID3D11Device* device)
     // Static Mesh用Vertex Shader。InputLayoutはStatic/Skinnedで同じ頂点定義を使う。
     CPUResourceLoader::LoadVertexShader(
         device,
-        "Shader/ToonPBRStaticVS.cso",
+        "Data/Shader/ToonPBRStaticVS.cso",
         GltfModelCommponennt::InputElementDescs.data(),
         static_cast<UINT>(GltfModelCommponennt::InputElementDescs.size()),
         inputLayout.GetAddressOf(),
@@ -32,7 +32,7 @@ ToonPBRShader::ToonPBRShader(ID3D11Device* device)
     // Skinned Mesh用Vertex Shader。Bone変形はShader側で行う。
     CPUResourceLoader::LoadVertexShader(
         device,
-        "Shader/ToonPBRSkinnedVS.cso",
+        "Data/Shader/ToonPBRSkinnedVS.cso",
         GltfModelCommponennt::InputElementDescs.data(),
         static_cast<UINT>(GltfModelCommponennt::InputElementDescs.size()),
         nullptr,
@@ -41,7 +41,7 @@ ToonPBRShader::ToonPBRShader(ID3D11Device* device)
     // PBR TextureとToon段階設定を組み合わせて最終色を作るPixel Shader。
     CPUResourceLoader::LoadPixelShader(
         device,
-        "Shader/ToonPBRPS.cso",
+        "Data/Shader/ToonPBRPS.cso",
         pixelShader.GetAddressOf());
 
     // MeshごとのMaterial値を送るConstantBuffer。
@@ -110,6 +110,10 @@ void ToonPBRShader::Update(const RenderContext& rc, const GltfModelCommponennt::
     cb.occlusionStrength = mesh.material->occlusionStrength;
     cb.toonPbrBlend = mesh.material->toonPbrBlend;
     cb.normalScale = mesh.material->normalScale;
+    cb.styleParams = { mesh.material->shadowTint.x, mesh.material->shadowTint.y,
+        mesh.material->shadowTint.z, mesh.material->specularToonBlend };
+    cb.specularStrength = mesh.material->specularStrength;
+    cb.rimStrength = mesh.material->rimStrength;
 
     dc->UpdateSubresource(meshConstantBuffer.Get(), 0, 0, &cb, 0, 0);
 

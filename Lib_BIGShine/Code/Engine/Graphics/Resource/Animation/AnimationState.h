@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 #include <DirectXMath.h>
+#include "Engine/GamePlay/Combat/AttackTelegraphSettings.h"
 
 #include "imgui_node_editor.h"
 #include "imgui_node_editor_internal.h"
@@ -40,6 +41,8 @@ struct AnimBlackboardWrite
 
 struct RootMotionSettings {
     bool enable = false;        // この処理を起動するか否か
+    // RootMotionを適用しない演出でも、抽出元ノードの見た目の移動を除去する。
+    bool cutVisualWhenDisabled = false;
     std::string sourceNodeName; // 空の場合はモデル側のRootMotionNameを使用
     bool applyPositionX = true; // X軸の移動を許すか
     bool applyPositionY = true; // Y軸の移動を許すか
@@ -71,6 +74,10 @@ struct AnimEvent
     std::vector<AnimBlackboardWrite> blackboardWrites;
     ANIMATION_EVENT_TEMPLATE_TYPE eventTemplateType = ANIMATION_EVENT_TEMPLATE_TYPE::NONE;
     std::string attackTemplateId;
+    // 従来のHitBox有効化Action用。AttackTemplateイベントではTemplate側の設定を使う。
+    AttackTelegraphSettings telegraph;
+    // 動的Actionでも、このイベントが判定を直接開始する場合に明示して予兆の基準にする。
+    bool telegraphHitStart = false;
     std::string ownerTarget = "Self";
     bool attackTemplateRuntimeActive = false;
     bool previousCanBeGuarded = true; // 一時的な攻撃属性を終了・中断後に元のHitBox設定へ戻す。
@@ -186,6 +193,10 @@ struct AnimState
     bool isLoop = true;
     // 使用するカーブの名前（空なら従来の playbackSpeed を使用）
     std::string speedCurveName = "";
+    // 空欄なら従来どおり再生し、指定時だけ現在カテゴリのFloat値を速度倍率へ使う。
+    std::string playbackSpeedParamName;
+    // 高速な武器モーションだけ、判定区間内の途中姿勢も同じ戦闘判定へ渡す。
+    bool sampleWeaponHitBoxes = false;
     // 将来的にはここに「ノードの座標」などのエディタ用データが入る
     // イベントリスト
     std::vector<AnimEvent> events;
@@ -265,6 +276,7 @@ void from_json(const nlohmann::json& j, AnimState& s);
 inline void to_json(nlohmann::json& j, const RootMotionSettings& r) {
     j = nlohmann::json{
         {"enable", r.enable},
+        {"cutVisualWhenDisabled", r.cutVisualWhenDisabled},
         {"sourceNodeName", r.sourceNodeName},
         {"applyPositionX", r.applyPositionX},
         {"applyPositionY", r.applyPositionY},
@@ -280,6 +292,7 @@ inline void to_json(nlohmann::json& j, const RootMotionSettings& r) {
 
 inline void from_json(const nlohmann::json& j, RootMotionSettings& r) {
     r.enable = j.value("enable", false);
+    r.cutVisualWhenDisabled = j.value("cutVisualWhenDisabled", false);
     r.sourceNodeName = j.value("sourceNodeName", "");
     r.applyPositionX = j.value("applyPositionX", true);
     r.applyPositionY = j.value("applyPositionY", true);

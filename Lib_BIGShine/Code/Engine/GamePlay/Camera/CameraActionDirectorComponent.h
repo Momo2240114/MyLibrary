@@ -84,6 +84,9 @@ struct CameraActionPreset
     float secondaryRadius = 1.0f;
     float framingPadding = 1.15f;
     float minimumFramingDistance = 3.0f;
+    // 低い構図では、主対象の原点からの高さを保ちつつ全体を画面内へ収める。
+    bool useFramingEyeHeight = false;
+    float framingEyeHeight = 1.6f;
     std::string targetObjectName; // 指定時はScene内のObject位置を注視基準にする。
 
     CAMERA_ACTION_TARGET_MODE targetMode =
@@ -161,6 +164,8 @@ public:
 
     // 現在の演出を止める。immediate_ が true なら補間なしで通常制御へ戻す。
     void StopAction(bool immediate_);
+    // 開始側が所有する演出だけを終了し、途中で優先された別の演出を止めない。
+    void StopActionByName(const std::string& actionName_, bool immediate_ = false);
 
 private:
     // 所有 GameObject から Camera/TPS/LockOn/Blackboard などの参照を取り直す。

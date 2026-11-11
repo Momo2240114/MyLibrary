@@ -1,0 +1,11 @@
+{
+    "StageCenterObject": "Stage",
+    "CameraRise": 5.0,
+    "CenterPull": 0.18,
+    "CameraMoveTime": 2.0,
+    "DeathHold": 0.35,
+    "FadeOutTime": 0.8,
+    "ContinueDelay": 0.35,
+    "FadeInTime": 0.6,
+    "CameraReturnTime": 1.0
+}

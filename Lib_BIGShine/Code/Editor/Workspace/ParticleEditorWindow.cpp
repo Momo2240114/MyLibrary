@@ -744,6 +744,8 @@ void ParticleEditorWindow::RenderPreview(const ImVec2& previewSize_)
     RenderContext renderContext_{};
     DecalManager decalManager_;
     renderContext_.device = device_;
+    // このプレビューは直接ImGuiへ表示するため、モデル内で表示変換を行う。
+    renderContext_.useHdrOutput = false;
     renderContext_.deviceContext = context_;
     renderContext_.renderState = graphics_.GetRenderState();
     renderContext_.camera = &previewCamera;

@@ -4,12 +4,14 @@
 
 #include"Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include"Engine/GamePlay/Camera/CameraComponent.h"
+#include "Engine/GamePlay/Camera/CameraManager.h"
 
 #include"Engine/Physics/BoxCollider.h"
 #include"Engine/Physics/CapsuleCollider.h"
 #include"Engine/GamePlay/Serialize/ActionRegistry.h"
 #include"Engine/GamePlay/Input/KeyInput.h"
 #include "Engine/Audio/AudioManager.h"
+#include "Engine/UI/ScreenTransitionManager.h"
 #include "Editor/Window/HierarchyWindow.h"
 #include "Editor/Window/InspectorWindow.h"
 #include "Editor/Window/ShaderWindow.h"
@@ -35,11 +37,14 @@
 #include "Editor/Window/StartupResourceEditorWindow.h"
 #include "Editor/Window/TimeManagerWindow.h"
 #include "Editor/Window/GameModeWindow.h"
+#include "Editor/Window/BossFinishWindow.h"
+#include "Game/GameMode/PlayerDeathDirector.h"
 #include "Editor/Window/DebugLogWindow.h"
 #include "Editor/Window/EditorSceneViewWindow.h"
 #include "Editor/NodeEditor/AnimNodeEditorWindow.h"
 #include "Editor/NodeEditor/NodeGraphMonitorWindow.h"
 #include "Editor/Workspace/ParticleEditorWindow.h"
+#include "Editor/Workspace/CinematicEditorWindow.h"
 #include "Editor/Workspace/PlayerStateEditorWindow.h"
 #include "Editor/Workspace/AudioWorkspaceWindow.h"
 #include "Editor/Workspace/AIBehaviorEditorWindow.h"
@@ -48,14 +53,24 @@
 #include "Editor/Workspace/UIWidgetEditorWindow.h"
 #include "Editor/Workspace/PrefabWorkspaceWindow.h"
 #include <imgui.h>
+#include "Engine/Core/GameRuntimeSettings.h"
 
 std::shared_ptr<GameObjectManager> SceneBase::GetGameObjectManager()
 { 
 	return _GameObjectManager;
 }
 
+// 同時に存在するロード画面と次SceneのAction登録先を、主スレッドで切り替える。
+void SceneBase::ActivateContext()
+{
+    if (actionRegistry) ActionRegistry::SetInstance(actionRegistry);
+}
+
 void SceneBase::Finalize()
 {
+    ActivateContext();
+    // RetryでSceneを再初期化する場合も、参照先Managerが生存している間にEditorを破棄する。
+    editorWindowManager.reset();
 	// RenderSystem と ActionRegistry を先に解放し、Scene 内参照を次シーンへ持ち越さない。
 	m_SpriteRenderSystem.Finalize();
 	m_ShapeRenderSystem.Finalize();
@@ -63,7 +78,7 @@ void SceneBase::Finalize()
 
 
 	if (_GameObjectManager) {
-		_GameObjectManager->Clear();
+		_GameObjectManager->Clear(false);
 		_GameObjectManager.reset(); //メモリ解放
 	}
 }
@@ -72,9 +87,16 @@ void SceneBase::Initialize()
 {
 	// シーン独自のマネージャーを生成する
 	_GameObjectManager = std::make_shared<GameObjectManager>();
-	_GameObjectManager->Initialize(); // マネージャーの初期化
+    // ロード中は全Effectの一括生成を避け、表示側は配置した演出だけを準備する。
+	_GameObjectManager->Initialize(isLoadingPresentation || isLoadingPreparation);
+	if (SceneManager::IsEditorPlaySessionActive()) _GameObjectManager->EnableEditorPlayMode();
 	_GameObjectManager->SetModelRenderSystem(&m_ModelRenderSystem);
+    _GameObjectManager->SetLoadingPresentation(isLoadingPresentation);
 
+    // ゲーム専用起動ではエディターWindow自体を生成しない。
+    isEditorVisible = !GameRuntimeSettings::IsGameOnly() && !isLoadingPresentation && !isEditorSuppressed;
+    if (isEditorVisible)
+    {
 	editorWindowManager = std::make_unique<EditorWindowManager>(_GameObjectManager.get());
 
 	// EditorWindow は実ファイル階層ではなく、用途別の UI としてここで一括登録する。
@@ -93,6 +115,7 @@ void SceneBase::Initialize()
 	editorWindowManager->AddWindow(std::make_unique<StartupResourceEditorWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<TimeManagerWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<GameModeWindow>(_GameObjectManager.get()));
+    editorWindowManager->AddWindow(std::make_unique<BossFinishWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<DebugLogWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<EditorSceneViewWindow>(
 		_GameObjectManager.get(),
@@ -106,6 +129,7 @@ void SceneBase::Initialize()
 	editorWindowManager->AddWindow(std::make_unique<AnimNodeEditorWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<NodeGraphMonitorWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<ParticleEditorWindow>(_GameObjectManager.get()));
+    editorWindowManager->AddWindow(std::make_unique<CinematicEditorWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<PlayerStateEditorWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<AudioWorkspaceWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<AIBehaviorEditorWindow>(_GameObjectManager.get()));
@@ -119,6 +143,9 @@ void SceneBase::Initialize()
 	editorWindowManager->AddWindow(std::make_unique<VFXMaterialEditorWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<VFXMaterialPreviewWindow>(_GameObjectManager.get()));
 
+    }
+    if (GameRuntimeSettings::IsGameOnly()) _GameObjectManager->SetShapeRenderEnabled(false);
+
 	actionRegistry = std::make_shared<ActionRegistry>();
 	ActionRegistry::SetInstance(actionRegistry);
 
@@ -130,7 +157,8 @@ void SceneBase::Initialize()
 
 void SceneBase::Update(float elapsedTime)
 {
-	if (KeyInput::KeyPressedIn(KeyInput::Key::K_F1))
+    ActivateContext();
+	if (!GameRuntimeSettings::IsGameOnly() && !isLoadingPresentation && !isEditorSuppressed && KeyInput::KeyPressedIn(KeyInput::Key::K_F1))
 	{
 		// F1 でエディタ表示を切り替える。非表示時も Scene の更新は通常通り進む。
 		isEditorVisible = !isEditorVisible;
@@ -141,17 +169,27 @@ void SceneBase::Update(float elapsedTime)
 		editorWindowManager->Update(elapsedTime);
 	}
 
-	if (isEditorVisible && editorWindowManager && editorWindowManager->ShouldPauseScene())
+	const bool workspacePaused_ = isEditorVisible && editorWindowManager && editorWindowManager->ShouldPauseScene();
+	_GameObjectManager->SetEditorWorkspacePaused(workspacePaused_);
+	if (_GameObjectManager->SupportsEditorPlayMode() && ImGui::IsKeyPressed(ImGuiKey_Escape, false))
+	{
+		// Escでカーソルを解放し、実行中でも停止ボタンを操作できるようにする。
+		_GameObjectManager->SetPlayInputCaptured(false);
+		isEditorVisible = true;
+	}
+	if (workspacePaused_ && !_GameObjectManager->SupportsEditorPlayMode())
 	{
 		// エディタが Pause を要求している間は GameObject の Update だけ止める。
 		return;
 	}
 
-	_GameObjectManager->Update(elapsedTime);
+    // 表示専用Sceneも共通経路で更新し、Sceneクラスに演出Componentの呼出を持たせない。
+    _GameObjectManager->Update(elapsedTime);
 }
 
 void SceneBase::Render(float elapsedTime)
 {
+    ActivateContext();
 	if (isEditorVisible &&
 		editorWindowManager &&
 		editorWindowManager->ShouldPauseScene() &&
@@ -169,7 +207,13 @@ void SceneBase::Render(float elapsedTime)
     ID3D11RenderTargetView* finalRenderTargetView_ = useDockedSceneView_
         ? GraphicsDeviceManager::Instance().GetSceneViewRenderTargetView()
         : nullptr;
-    _GameObjectManager->RenderAll(m_SpriteRenderSystem, m_ModelRenderSystem, finalRenderTargetView_);
+    const auto editorCamera_ = _GameObjectManager->SupportsEditorPlayMode() &&
+        _GameObjectManager->GetEditorPlayMode() == EditorPlayMode::EDITOR ?
+        _GameObjectManager->GetCameraManager()->GetEditorCamera() : nullptr;
+    _GameObjectManager->RenderAll(m_SpriteRenderSystem, m_ModelRenderSystem, finalRenderTargetView_, editorCamera_.get(), isLoadingPresentation);
+
+    if (_GameObjectManager->IsCinematicSequencePreview())
+        ScreenTransitionManager::Instance().Render(finalRenderTargetView_);
 
     if (useDockedSceneView_)
     {
@@ -215,8 +259,9 @@ void SceneBase::DrawGUI()
 		}
 	}
 
-	if(isEditorVisible)
+	if(isEditorVisible && editorWindowManager)
 	{
 		editorWindowManager->DrawAll();
 	}
+    // 死亡メニューはSceneのSprite描画で表示し、Editor GUIには重ねない。
 }

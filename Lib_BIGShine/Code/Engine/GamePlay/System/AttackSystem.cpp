@@ -1,10 +1,12 @@
 #include "PrecompiledHeader.h"
+#include "Game/AI/Human/HumanBossAIComponent.h"
 
 #include "AttackSystem.h"
 
 #include "Engine/Debug/TracyProfiler.h"
 #include "Engine/GamePlay/Combat/CombatStatsComponent.h"
 #include "Engine/GamePlay/Camera/CameraShakeComponent.h"
+#include "Engine/GamePlay/Input/ControllerInput.h"
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/GamePlay/Core/Component/CharacterMovementComponent.h"
@@ -213,8 +215,13 @@ void AttackSystem::HandleHit(
     }
     if (!hitBox_.canHitOwner && IsSameHierarchy(attacker_, target_)) return;
     if (!hitBox_.IsEnabled() || !hurtBox_.IsEnabled()) return;
+    // 暴走の無敵はヒット成立前に判定し、HPだけでなくHitStop・被弾Action・押し出しも発生させない。
+    // 防御側プレイヤーのジャストガード通知と、スタン中のとどめ受付には影響しない。
+    if (const auto bossAI_ = target_->GetComponent<HumanBossAIComponent>(); bossAI_ && bossAI_->IsBerserkInvulnerable()) return;
     if (!hitBox_.CanHit(target_.get())) return;
     if (!hurtBox_.CanReceiveHit(hitBox_)) return;
+    if (const auto bossAI_ = target_->GetComponent<HumanBossAIComponent>(); bossAI_ &&
+        (hitBox_.damage > 0.0f || hitBox_.damageRate > 0.0f || hitBox_.fixedDamage > 0.0f) && bossAI_->TryBeginFinalFinish(attacker_)) return;
     if (!RegisterAttackHit(
         hitBox_.attackInstanceId,
         hitBox_.hitGroupId,
@@ -266,10 +273,12 @@ void AttackSystem::HandleHit(
     event_.hitMeshVFXLifeTime = hitBox_.hitMeshVFXLifeTime;
     event_.hitMeshVFXNormalOffset = hitBox_.hitMeshVFXNormalOffset;
     event_.hitImpactEffectAssetPath = hitBox_.hitImpactEffectAssetPath;
-    event_.hitSoundPath = hitBox_.hitSoundPath;
-    event_.hitSoundVolume = hitBox_.hitSoundVolume;
+    // テンプレートに音声が指定された場合だけ優先し、既存HitBoxの音声設定も維持する。
+    event_.hitSoundPath = hitBox_.feedback.hitSoundPath.empty() ? hitBox_.hitSoundPath : hitBox_.feedback.hitSoundPath;
+    event_.hitSoundVolume = hitBox_.feedback.hitSoundPath.empty() ? hitBox_.hitSoundVolume : hitBox_.feedback.volume;
     event_.hitSoundMuffled = hitBox_.hitSoundMuffled;
     event_.hitSoundMuffledCutoff = hitBox_.hitSoundMuffledCutoff;
+    event_.feedback = hitBox_.feedback;
     event_.cameraShakeEnabled = hitBox_.cameraShakeEnabled;
     event_.cameraShakeReceiveDuration = hitBox_.cameraShakeReceiveDuration;
     event_.cameraShakeReceivePositionStrength =
@@ -284,6 +293,18 @@ void AttackSystem::HandleHit(
     // 受け手のBlackboardとCameraShakeへ公開し、Health/HitReactionなどはAction側で処理する。
     PublishHitToBlackboard(event_);
     PlayCameraShake(event_);
+    // 命中が確定した経路だけで振動し、敵同士の接触ではPadへ通知しない。
+    if (event_.feedback.rumbleEnabled && (IsPlayerObject(target_) || IsPlayerObject(attacker_)))
+    {
+        const float strength_ = IsPlayerObject(target_)
+            ? event_.feedback.receiveStrength : event_.feedback.attackStrength;
+        // 既存の技ごとの強弱と無効設定を保ち、命中・被弾の両モーターを強める。
+        constexpr float HIT_RUMBLE_GAIN = 1.6f;
+        constexpr float HIT_RUMBLE_DURATION_SCALE = 1.25f;
+        ControllerInput::Instance().PlayRumble(strength_ * HIT_RUMBLE_GAIN, strength_ * 0.9f,
+            event_.feedback.duration * HIT_RUMBLE_DURATION_SCALE,
+            IsPlayerObject(target_) ? 3 : 2);
+    }
 
     if (event_.attackerAirLiftPower > 0.0f)
     {
@@ -477,12 +498,14 @@ void AttackSystem::PlayCameraShake(const AttackHitEvent& event_) const
     const bool playerIsAttacker_ = IsPlayerObject(attacker_);
     if (!playerIsTarget_ && !playerIsAttacker_) return;
 
-    const float scale_ = playerIsTarget_
+    // 技ごとの設定を基準に振幅を増やし、攻撃命中時も短すぎない衝撃を残す。
+    constexpr float HIT_SHAKE_GAIN = 2.0f;
+    const float scale_ = (playerIsTarget_
         ? 1.0f
-        : event_.cameraShakeAttackScale;
+        : event_.cameraShakeAttackScale) * HIT_SHAKE_GAIN;
     const float durationScale_ = playerIsTarget_
-        ? 1.0f
-        : event_.cameraShakeAttackScale;
+        ? 1.15f
+        : std::sqrt((std::max)(event_.cameraShakeAttackScale, 0.0f));
     const std::vector<std::shared_ptr<CameraShakeComponent>> cameraShakes_ =
         target_->GetManager().FindComponents<CameraShakeComponent>();
     if (cameraShakes_.empty()) return;

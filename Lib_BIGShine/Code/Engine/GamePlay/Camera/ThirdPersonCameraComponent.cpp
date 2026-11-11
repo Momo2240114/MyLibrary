@@ -3,6 +3,7 @@
 #include "ThirdPersonCameraComponent.h"
 
 #include "CameraComponent.h"
+#include "Engine/Debug/TracyProfiler.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/GamePlay/Input/KeyConfig.h"
@@ -59,6 +60,7 @@ void ThirdPersonCameraComponent::Start()
 
 void ThirdPersonCameraComponent::LateUpdate(float deltaTime_)
 {
+    BS_PROFILE_SCOPE("ThirdPersonCameraComponent::LateUpdate");
     ResolveCamera();
     ResolveTarget();
     // LockOnなどが制御中ならTPS側ではCameraを動かさない。
@@ -76,16 +78,15 @@ void ThirdPersonCameraComponent::LateUpdate(float deltaTime_)
     // 復帰先の通常Camera位置は計算し続け、演出中の手動入力だけを停止する。
     if (!returnBlendActive && (!gameMode_ || !gameMode_->IsPlayerControlLocked()))
     {
-        // StickとMouse入力を合成し、Pitch/Yawへ反映する。
+        // スティックは微調整しやすい二乗応答にし、マウスの移動量はフレーム時間を掛けずに角度へ変換する。
         const KeyConfig& keyConfig_ = KeyConfig::Instance();
-        const float lookX_ =
-            keyConfig_.GetAxis("Camera_LookStickX") +
-            keyConfig_.GetRawAxis("Camera_LookMouseX") * mouseSensitivity;
-        const float lookY_ =
-            -keyConfig_.GetAxis("Camera_LookStickY") +
-            keyConfig_.GetRawAxis("Camera_LookMouseY") * mouseSensitivity;
-        currentYaw += -lookX_ * lookSpeedX * deltaTime_;
-        currentPitch += -lookY_ * lookSpeedY * deltaTime_;
+        const float stickX_ = keyConfig_.GetAxis("Camera_LookStickX");
+        const float stickY_ = keyConfig_.GetAxis("Camera_LookStickY");
+        const float mouseX_ = keyConfig_.GetRawAxis("Camera_LookMouseX") * mouseSensitivity;
+        const float mouseY_ = keyConfig_.GetRawAxis("Camera_LookMouseY") * mouseSensitivity;
+        currentYaw -= stickX_ * std::abs(stickX_) * lookSpeedX * deltaTime_ + mouseX_;
+        currentYaw = std::remainder(currentYaw, 360.0f);
+        currentPitch += stickY_ * std::abs(stickY_) * lookSpeedY * deltaTime_ - mouseY_;
         currentPitch = std::clamp(currentPitch, minPitch, maxPitch);
     }
 
@@ -133,7 +134,8 @@ void ThirdPersonCameraComponent::LateUpdate(float deltaTime_)
         DirectX::XMVectorScale(DirectX::XMLoadFloat3(&front_), distance));
     DirectX::XMFLOAT3 cameraPosition_{};
     DirectX::XMStoreFloat3(&cameraPosition_, cameraPositionVector_);
-    DirectX::XMFLOAT3 lookAtPosition_ = followPosition_;
+    // 視点と注視点に同じ追従中心を使い、移動時に視線だけが先行して旋回するのを防ぐ。
+    DirectX::XMFLOAT3 lookAtPosition_ = smoothedCameraCenter;
     if (returnBlendActive)
     {
         // 外部Camera制御から戻るときは、現在Camera位置から通常TPS位置へBlendする。
@@ -145,7 +147,7 @@ void ThirdPersonCameraComponent::LateUpdate(float deltaTime_)
             blendRate_);
         lookAtPosition_ = LerpFloat3(
             returnBlendStartLookAt,
-            followPosition_,
+            smoothedCameraCenter,
             blendRate_);
         if (returnBlendTimer >= returnBlendDuration)
         {
@@ -299,6 +301,7 @@ void ThirdPersonCameraComponent::Gui()
 
 void ThirdPersonCameraComponent::Serialize(nlohmann::json& json_) const
 {
+    if (runtimeSettingsActive) { json_ = originalRuntimeSettings; return; }
     // RuntimeのBlend状態は保存せず、Camera設定とTarget名だけを保存する。
     json_["targetName"] = targetName;
     json_["baseDistance"] = baseDistance;
@@ -318,6 +321,9 @@ void ThirdPersonCameraComponent::Serialize(nlohmann::json& json_) const
 
 void ThirdPersonCameraComponent::Deserialize(const nlohmann::json& json_)
 {
+    runtimeSettingsActive = false;
+    target.reset();
+    originalRuntimeSettings = nlohmann::json{};
     // 旧distance KeyもbaseDistanceとして読み、過去Sceneとの互換性を保つ。
     targetName = json_.value("targetName", std::string{});
     baseDistance = json_.value("baseDistance", json_.value("distance", 6.0f));
@@ -446,3 +452,21 @@ void ThirdPersonCameraComponent::SetTarget(std::shared_ptr<GameObject> target_)
 }
 
 REGISTER_COMPONENT(ThirdPersonCameraComponent, "ThirdPersonCameraComponent")
+
+// 元の設定は一度だけ保存し、第二形態のカメラ設定を実行時へ適用する。
+void ThirdPersonCameraComponent::ApplyRuntimeSettings(const nlohmann::json& settings_)
+{
+    BS_PROFILE_SCOPE("ThirdPersonCameraComponent::ApplyRuntimeSettings");
+    nlohmann::json original_;
+    Serialize(original_);
+    Deserialize(settings_);
+    originalRuntimeSettings = std::move(original_);
+    runtimeSettingsActive = true;
+}
+
+void ThirdPersonCameraComponent::ClearRuntimeSettings()
+{
+    if (!runtimeSettingsActive) return;
+    const auto original_ = originalRuntimeSettings;
+    Deserialize(original_);
+}

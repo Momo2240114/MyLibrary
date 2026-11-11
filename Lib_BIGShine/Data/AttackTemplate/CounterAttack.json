@@ -148,6 +148,13 @@
             "speed": 0.0
         }
     ],
+    "feedback": {
+        "startSoundPath": "Data/Audio/SE/Sword-Practice-2.wav",
+        "hitSoundPath": "Data/Audio/SE/Swordsmanship-3.wav",
+        "volume": 0.85,
+        "minDistance": 8.0,
+        "maxDistance": 80.0
+    },
     "cameraShake": {
         "attackScale": 0.550000011920929,
         "enabled": true,

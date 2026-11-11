@@ -678,7 +678,7 @@
           "attackTemplateId": "",
           "blackboardWrites": [],
           "callEndOnStateExit": true,
-          "endTime": 0.25,
+          "endTime": 0.4,
           "eventTemplateType": "NONE",
           "label": "JustGuardWindow",
           "localPosition": [

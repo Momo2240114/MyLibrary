@@ -19,17 +19,24 @@ struct HumanBossMindSettings
     float dodgeDelayMultiplier = 1.0f;
     float guardDelayMultiplier = 0.85f;
     float justGuardDelayMultiplier = 1.2f;
+    // 強攻撃は短い反応待ちで受け流しを狙い、通常の防御抽選より優先する。
+    float heavyReactionDelayMultiplier = 0.65f;
     float repeatPredictionDiscount = 0.4f;
     float reactionBudgetMax = 3.0f;
     float reactionBudgetRecovery = 0.7f;
     float dodgeCost = 1.0f;
     float guardCost = 0.65f;
     float justGuardCost = 1.5f;
+    float justGuardCounterDelay = 0.2f; // 弾かれたプレイヤーのひるみを見せてから専用反撃へ移る。
     float sameReactionPenalty = 0.35f;
     float readErrorChance = 0.15f;
     float decisionLockTime = 0.3f;
+    // Phase補正で待機が短くなっても、攻撃後に相手の出方を見る時間を残す。
+    float minimumObservationTime = 1.0f;
     float guardReadThreshold = 0.35f;
     float guardHoldThreshold = 0.45f;
+    // この時間ガードを継続した近距離の相手へ、予兆付きの拘束攻撃を仕掛ける。
+    float guardExecutionHoldThreshold = 1.2f;
     float dodgeReadThreshold = 0.25f;
     float weakReadBoost = 3.0f;
     float guardReadBoost = 2.0f;
@@ -48,6 +55,10 @@ struct HumanBossMindSettings
     float hitEscapeRecovery = 0.15f;
     // 連続被弾からの復帰中は弱い衝撃で待ち時間を再設定させない。
     float hitEscapeProtection = 0.6f;
+    // 振りの遅い強攻撃も連続被弾として数え、毎回最初のひるみへ戻ることを防ぐ。
+    float hitEscapeChainWindow = 2.5f;
+    // 強攻撃の衝撃値400まで復帰を保護し、連続ひるみを断ち切る。
+    float hitEscapeArmor = 400.0f;
     float postHitRepositionTime = 0.8f;
     // 空中強攻撃の短い予兆と、攻撃後の離脱・着地へ対応する調整値。
     float airHeavyReactionDelayMultiplier = 0.55f;

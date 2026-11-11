@@ -26,15 +26,15 @@ bool BloomSystem::Initialize(ID3D11Device* device, int width, int height)
 
     CPUResourceLoader::LoadVertexShader(
         device,
-        "Shader/FullScreenVS.cso",
+        "Data/Shader/FullScreenVS.cso",
         nullptr, 0,
         nullptr, // InputLayoutも不要
         fullScreenVS.GetAddressOf());
 
     // 各ピクセルシェーダー
-    CPUResourceLoader::LoadPixelShader(device, "Shader/BrightPassPS.cso", brightPS.GetAddressOf());
-    CPUResourceLoader::LoadPixelShader(device, "Shader/KawaseBlurPS.cso", kawasePS.GetAddressOf());
-    CPUResourceLoader::LoadPixelShader(device, "Shader/CompositePS.cso", compositePS.GetAddressOf());
+    CPUResourceLoader::LoadPixelShader(device, "Data/Shader/BrightPassPS.cso", brightPS.GetAddressOf());
+    CPUResourceLoader::LoadPixelShader(device, "Data/Shader/KawaseBlurPS.cso", kawasePS.GetAddressOf());
+    CPUResourceLoader::LoadPixelShader(device, "Data/Shader/CompositePS.cso", compositePS.GetAddressOf());
     
     // 3. 定数バッファの作成
     D3D11_BUFFER_DESC cbDesc = {};

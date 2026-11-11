@@ -330,8 +330,17 @@ void AttackEmitterComponent::RegisterActions()
     }
 }
 
+void AttackEmitterComponent::OnDestroy()
+{
+    BS_PROFILE_SCOPE("AttackEmitterComponent::OnDestroy");
+    const auto owner_ = GetGameObject();
+    if (owner_ && owner_->manager) owner_->GetManager().GetEffectManager().StopAttackEffects(owner_);
+}
+
 void AttackEmitterComponent::Emit(size_t templateIndex_)
 {
+    const auto owner_ = GetGameObject();
+    if (!IsEnabled() || !owner_ || !owner_->manager || !owner_->IsCombatReady()) return;
     BS_PROFILE_SCOPE("AttackEmitterComponent::Emit");
     if (templateIndex_ >= templates.size()) return;
     const AttackEmitterTemplate& template_ = templates[templateIndex_];
@@ -361,6 +370,8 @@ void AttackEmitterComponent::EmitWithFrame(
 
 void AttackEmitterComponent::EmitByName(const std::string& templateName_)
 {
+    const auto owner_ = GetGameObject();
+    if (!IsEnabled() || !owner_ || !owner_->manager || !owner_->IsCombatReady()) return;
     for (size_t index_ = 0; index_ < templates.size(); ++index_)
     {
         if (templates[index_].name == templateName_ ||
@@ -378,6 +389,8 @@ void AttackEmitterComponent::EmitByNameAt(
     const DirectX::XMFLOAT3& direction_)
 {
     BS_PROFILE_SCOPE("AttackEmitterComponent::EmitByNameAt");
+    const auto owner_ = GetGameObject();
+    if (!IsEnabled() || !owner_ || !owner_->manager || !owner_->IsCombatReady()) return;
 
     const EmitFrame frame_ = BuildEmitFrameAt(position_, direction_);
     for (size_t index_ = 0; index_ < templates.size(); ++index_)
@@ -595,10 +608,12 @@ void AttackEmitterComponent::SpawnEntry(
         }
         else if (entry_.type == ATTACK_EMITTER_ENTRY_TYPE::IMPACT_EFFECT)
         {
-            effectManager_.SpawnImpactEffectAsset(entry_.assetPath, position_, direction_);
+            effectManager_.SpawnImpactEffectAsset(entry_.assetPath, position_, direction_, GetGameObject());
         }
 
         if (!spawnedObject_ || !spawnedObject_->transform) return;
+        // Particleや溜め炎など、HitBoxのない見た目にも発生元を紐付ける。
+        effectManager_.RegisterAttackEffectOwner(spawnedObject_, GetGameObject());
 
         if (template_.shapeType == ATTACK_EMITTER_SHAPE_TYPE::PROJECTILE &&
             followTarget_ &&

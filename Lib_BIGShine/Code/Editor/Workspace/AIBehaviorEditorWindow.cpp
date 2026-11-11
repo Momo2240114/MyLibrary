@@ -13,6 +13,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <utility>
 #include <imgui.h>
 #include <imgui_stdlib.h>
 
@@ -21,6 +22,8 @@ namespace ed = ax::NodeEditor;
 namespace
 {
     constexpr float SPLITTER_SIZE = 6.0f;
+    // native Groupの本文とは別に、移動操作を受け付ける見出し領域を確保する。
+    constexpr float COMMENT_BOX_HEADER_HEIGHT = 36.0f;
 
     // ノード種別ごとの色を固定し、グラフを見た時に処理カテゴリを直感的に判別できるようにする。
     ImU32 GetNodeColor(AI_BEHAVIOR_NODE_TYPE type_)
@@ -65,48 +68,7 @@ namespace
             type_ == AI_BEHAVIOR_NODE_TYPE::SUB_GRAPH;
     }
 
-    void DrawStraightLink(
-        ImDrawList* drawList_,
-        const ImVec2& startPosition_,
-        const ImVec2& endPosition_,
-        ImU32 color_,
-        float thickness_ = 3.0f)
-    {
-        // node_editor標準リンクは透明にし、実行状態を強調できる独自の直線リンクを重ねて描く。
-        drawList_->AddLine(startPosition_, endPosition_, color_, thickness_);
 
-        ImVec2 direction_(
-            endPosition_.x - startPosition_.x,
-            endPosition_.y - startPosition_.y);
-        const float length_ = std::sqrt(direction_.x * direction_.x + direction_.y * direction_.y);
-        if (length_ <= 0.001f) return;
-
-        direction_.x /= length_;
-        direction_.y /= length_;
-
-        const ImVec2 center_(
-            startPosition_.x + (endPosition_.x - startPosition_.x) * 0.5f,
-            startPosition_.y + (endPosition_.y - startPosition_.y) * 0.5f);
-        const ImVec2 perpendicular_(-direction_.y, direction_.x);
-        constexpr float arrowLength_ = 14.0f;
-        constexpr float arrowWidth_ = 8.0f;
-
-        const ImVec2 tip_(
-            center_.x + direction_.x * arrowLength_,
-            center_.y + direction_.y * arrowLength_);
-        const ImVec2 backCenter_(
-            center_.x - direction_.x * arrowLength_,
-            center_.y - direction_.y * arrowLength_);
-        const ImVec2 left_(
-            backCenter_.x + perpendicular_.x * arrowWidth_,
-            backCenter_.y + perpendicular_.y * arrowWidth_);
-        const ImVec2 right_(
-            backCenter_.x - perpendicular_.x * arrowWidth_,
-            backCenter_.y - perpendicular_.y * arrowWidth_);
-
-        drawList_->AddTriangleFilled(tip_, left_, right_, IM_COL32(255, 210, 80, 255));
-        drawList_->AddTriangle(tip_, left_, right_, IM_COL32(70, 45, 0, 255), 2.0f);
-    }
 }
 
 AIBehaviorEditorWindow::AIBehaviorEditorWindow(GameObjectManager* manager_)
@@ -334,6 +296,16 @@ void AIBehaviorEditorWindow::DrawToolbar(const BehaviorGraphTarget& target_)
         if (ImGui::Button("Reset Tree")) ResetGraphRuntime(target_);
         ImGui::SameLine();
         if (ImGui::Button("Focus")) restoreNodePositions = true;
+        if (auto graph_ = GetGraph(target_))
+        {
+            ImGui::SameLine();
+            if (ImGui::Button("Organize Action Areas"))
+            {
+                graph_->OrganizeActionAreas();
+                restoreNodePositions = true;
+                selectedNodeId = 0;
+            }
+        }
     }
 }
 
@@ -378,6 +350,7 @@ void AIBehaviorEditorWindow::DrawAssetBrowserPanel()
 
 void AIBehaviorEditorWindow::DrawGraph(const BehaviorGraphTarget& target_)
 {
+    BS_PROFILE_SCOPE("AIBehaviorEditorWindow::DrawGraph");
     AIBehaviorGraph* graphPointer_ = GetGraph(target_);
     if (!graphPointer_)
     {
@@ -397,64 +370,80 @@ void AIBehaviorEditorWindow::DrawGraph(const BehaviorGraphTarget& target_)
     if (target_.humanBossAI) activeActionName = target_.humanBossAI->GetCurrentGraphActionName();
 
     DrawGraphAssetBar(target_);
-    ImGui::TextDisabled("Right-click the graph background to create nodes.");
+    if (ImGui::Button("Create Comment Box from Selection"))
+    {
+        ed::SetCurrentEditor(nodeEditorContext);
+        CreateAreaFromSelection(graph_);
+        ed::SetCurrentEditor(nullptr);
+    }
+    ImGui::SameLine();
+    ImGui::Checkbox("Order by X Position", &graph_.GetPriorityFromPositions());
+    ImGui::Checkbox("Focus selected links", &focusSelectedLinks);
+    ImGui::TextDisabled("Drag a comment box by its title. Right-click the background to create nodes.");
 
     ed::SetCurrentEditor(nodeEditorContext);
-    ed::PushStyleColor(ed::StyleColor_HovLinkBorder, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
-    ed::PushStyleColor(ed::StyleColor_SelLinkBorder, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
-    ed::PushStyleColor(ed::StyleColor_HighlightLinkBorder, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+    ed::PushStyleColor(ed::StyleColor_HovLinkBorder, ImVec4(0.5f, 0.75f, 1.0f, 0.8f));
+    ed::PushStyleColor(ed::StyleColor_SelLinkBorder, ImVec4(1.0f, 0.8f, 0.3f, 0.9f));
+    ed::PushStyleColor(ed::StyleColor_HighlightLinkBorder, ImVec4(0.5f, 0.75f, 1.0f, 0.4f));
+    // ピンが上下に配置されているため、リンクの接線も上下方向へそろえる。
+    ed::PushStyleVar(ed::StyleVar_SourceDirection, ImVec2(0.0f, 1.0f));
+    ed::PushStyleVar(ed::StyleVar_TargetDirection, ImVec2(0.0f, -1.0f));
+    ed::PushStyleVar(ed::StyleVar_LinkStrength, 80.0f);
     ed::Begin("AI Behavior Workspace Graph", ImVec2(0.0f, 0.0f));
 
-    pinPositions.clear();
+    const bool restorePositions_ = restoreNodePositions;
+    if (restorePositions_)
+    {
+        // 描画前に復元し、保存サイズとGroup本文サイズの差が毎フレーム加算されるのを防ぐ。
+        for (const auto& node_ : graph_.GetNodes())
+            ed::SetNodePosition(ed::NodeId(node_.id), ImVec2(node_.position.x, node_.position.y));
+        for (const auto& area_ : graph_.GetAreas())
+        {
+            ed::SetNodePosition(ed::NodeId(area_.id), ImVec2(area_.position.x, area_.position.y));
+            ed::SetGroupSize(ed::NodeId(area_.id), ImVec2(area_.size.x,
+                (std::max)(area_.size.y - COMMENT_BOX_HEADER_HEIGHT, 1.0f)));
+        }
+        restoreNodePositions = false;
+    }
+    for (auto& area_ : graph_.GetAreas()) DrawArea(area_);
 
-    // 先に全ノードを描画してピン中心座標を記録し、その後でリンクを独自描画する。
+    // ピンを登録してから標準の曲線リンクを描き、表示と当たり判定を一致させる。
     for (AIBehaviorNode& node_ : graph_.GetNodes())
     {
         DrawNode(node_);
     }
 
+    const AIBehaviorArea* selectedArea_ = nullptr;
+    for (const auto& area_ : graph_.GetAreas())
+        if (area_.id == selectedNodeId) { selectedArea_ = &area_; break; }
+    const bool hasLinkFocus_ = focusSelectedLinks && (selectedArea_ || graph_.FindNode(selectedNodeId));
+    const auto belongsToFocus_ = [selectedArea_, this](uintptr_t nodeId_)
+    {
+        if (selectedArea_) return std::find(selectedArea_->nodeIds.begin(), selectedArea_->nodeIds.end(), nodeId_) != selectedArea_->nodeIds.end();
+        return nodeId_ == selectedNodeId;
+    };
     for (const AIBehaviorLink& link_ : graph_.GetLinks())
     {
-        const AIBehaviorNode* fromNode_ = graph_.FindNode(link_.fromNodeId);
-        const AIBehaviorNode* toNode_ = graph_.FindNode(link_.toNodeId);
-        const bool activeLink_ =
-            (fromNode_ && IsRuntimeActiveNode(*fromNode_)) ||
-            (toNode_ && IsRuntimeActiveNode(*toNode_));
-        const ImU32 linkColor_ = activeLink_
-            ? IM_COL32(80, 255, 150, 255)
-            : IM_COL32(230, 230, 230, 255);
-        const float linkThickness_ = activeLink_ ? 5.0f : 3.0f;
-
-        ed::Link(
-            ed::LinkId(link_.id),
-            ed::PinId(link_.fromPinId),
-            ed::PinId(link_.toPinId),
-            ImVec4(0.0f, 0.0f, 0.0f, 0.0f),
-            1.0f);
-        const auto fromPosition_ = pinPositions.find(link_.fromPinId);
-        const auto toPosition_ = pinPositions.find(link_.toPinId);
-        if (fromPosition_ != pinPositions.end() && toPosition_ != pinPositions.end())
-        {
-            DrawStraightLink(
-                ImGui::GetWindowDrawList(),
-                fromPosition_->second,
-                toPosition_->second,
-                linkColor_,
-                linkThickness_);
-        }
+        const auto fromNode_ = graph_.FindNode(link_.fromNodeId);
+        const auto toNode_ = graph_.FindNode(link_.toNodeId);
+        const bool activeLink_ = fromNode_ && toNode_ && IsRuntimeActiveNode(*fromNode_) && IsRuntimeActiveNode(*toNode_);
+        const bool focusedLink_ = hasLinkFocus_ && (belongsToFocus_(link_.fromNodeId) || belongsToFocus_(link_.toNodeId));
+        // 全リンクを同じレーンへ集めず、無関係な線は薄くして注目中の経路を読み取れるようにする。
+        const ImVec4 color_ = activeLink_ ? ImVec4(0.3f, 1.0f, 0.6f, 0.95f) : focusedLink_
+            ? ImVec4(0.55f, 0.8f, 1.0f, 0.9f) : ImVec4(0.55f, 0.62f, 0.73f, hasLinkFocus_ ? 0.055f : 0.4f);
+        const float thickness_ = activeLink_ ? 2.5f : focusedLink_ ? 2.0f : 1.0f;
+        ed::Link(ed::LinkId(link_.id), ed::PinId(link_.fromPinId), ed::PinId(link_.toPinId), color_, thickness_);
     }
+    if (restorePositions_) ed::NavigateToContent();
 
-    if (restoreNodePositions)
+    if (focusAreaId != 0)
     {
-        // Focus要求時は保存済み座標をnode_editorへ戻し、画面全体が収まる位置へ移動する。
-        for (AIBehaviorNode& node_ : graph_.GetNodes())
-        {
-            ed::SetNodePosition(ed::NodeId(node_.id), ImVec2(node_.position.x, node_.position.y));
-        }
-        ed::NavigateToContent();
-        restoreNodePositions = false;
+        // ノード座標を動かすCenterNodeOnScreenではなく、選択領域へ表示範囲を移す。
+        ed::ClearSelection();
+        ed::SelectNode(ed::NodeId(focusAreaId));
+        ed::NavigateToSelection(true);
+        focusAreaId = 0;
     }
-
     if (nodeToPlaceId != 0)
     {
         // 追加直後のノードは右クリック位置へ配置し、次の追加位置は少しずらして重なりを避ける。
@@ -522,7 +511,11 @@ void AIBehaviorEditorWindow::DrawGraph(const BehaviorGraphTarget& target_)
         {
             if (ed::AcceptDeletedItem())
             {
-                graph_.RemoveNode(static_cast<uintptr_t>(nodeId_.Get()));
+                const uintptr_t deletedId_ = static_cast<uintptr_t>(nodeId_.Get());
+                auto& areas_ = graph_.GetAreas();
+                areas_.erase(std::remove_if(areas_.begin(), areas_.end(),
+                    [deletedId_](const AIBehaviorArea& area_) { return area_.id == deletedId_; }), areas_.end());
+                graph_.RemoveNode(deletedId_);
             }
         }
     }
@@ -554,9 +547,17 @@ void AIBehaviorEditorWindow::DrawGraph(const BehaviorGraphTarget& target_)
         const ImVec2 position_ = ed::GetNodePosition(ed::NodeId(node_.id));
         node_.position = { position_.x, position_.y };
     }
-    UpdatePriorityFromNodePositions(graph_);
+    for (auto& area_ : graph_.GetAreas())
+    {
+        const ImVec2 position_ = ed::GetNodePosition(ed::NodeId(area_.id));
+        const ImVec2 size_ = ed::GetNodeSize(ed::NodeId(area_.id));
+        area_.position = { position_.x, position_.y };
+        if (size_.x > 0.0f && size_.y > 0.0f) area_.size = { size_.x, size_.y };
+    }
+    if (graph_.GetPriorityFromPositions()) UpdatePriorityFromNodePositions(graph_);
 
     ed::End();
+    ed::PopStyleVar(3);
     ed::PopStyleColor(3);
     ed::SetCurrentEditor(nullptr);
 }
@@ -651,6 +652,79 @@ void AIBehaviorEditorWindow::DrawInspector(const BehaviorGraphTarget& target_)
         return;
     }
 
+    // 領域名を一覧から選んで移動できるため、全体表示で文字が小さくても目的の行動へ到達できる。
+    if (ImGui::CollapsingHeader("Comment Boxes", ImGuiTreeNodeFlags_DefaultOpen))
+    {
+        // 行動Boxが増えても、タイトル・説明の編集欄を一覧の下で操作できる高さに収める。
+        ImGui::BeginChild("CommentBoxList", ImVec2(0.0f, 180.0f), true);
+        for (auto& area_ : graphPointer_->GetAreas())
+        {
+            ImGui::PushID(static_cast<int>(area_.id));
+            if (ImGui::Selectable(area_.name.c_str(), selectedNodeId == area_.id))
+            { selectedNodeId = area_.id; focusAreaId = area_.id; }
+            ImGui::PopID();
+        }
+        ImGui::EndChild();
+    }
+    auto& areas_ = graphPointer_->GetAreas();
+    for (auto& area_ : areas_)
+    {
+        if (area_.id != selectedNodeId) continue;
+        ImGui::SeparatorText("Comment Box Settings");
+        ImGui::InputText("Box Title", &area_.name);
+        ImGui::InputTextMultiline("Description", &area_.comment, ImVec2(0.0f, 90.0f));
+        ImGui::ColorEdit4("Area Color", &area_.color.x);
+        if (target_.dragonAI && target_.owner)
+        {
+            // 比較の現在値を読むだけに留め、ActionやTriggerを追跡表示のために実行しない。
+            ImGui::SeparatorText("Dragon Decision Context");
+            ImGui::Text("Current action: %s", GetDragonActionName(target_.dragonAI->GetCurrentAction()));
+            ImGui::TextWrapped("Live values below describe the current Blackboard, not a recorded past decision. Positive weights do not guarantee selection.");
+            const auto localBlackboard_ = target_.owner->GetComponent<BlackboardComponent>();
+            for (const uintptr_t id_ : area_.nodeIds)
+            {
+                const auto member_ = graphPointer_->FindNode(id_);
+                if (!member_) continue;
+                if (member_->type == AI_BEHAVIOR_NODE_TYPE::BLACKBOARD_CONDITION)
+                {
+                    ImGui::PushID(static_cast<int>(id_));
+                    ImGui::TextWrapped("%s", member_->name.c_str());
+                    const auto value_ = localBlackboard_ && member_->blackboardScope == AI_BLACKBOARD_SCOPE::LOCAL
+                        ? localBlackboard_->GetValue(member_->blackboardCategory, member_->blackboardKey) : nullptr;
+                    ImGui::TextWrapped("%s/%s", member_->blackboardCategory.c_str(), member_->blackboardKey.c_str());
+                    if (!value_) ImGui::TextDisabled("Current: unavailable in the local Blackboard");
+                    else ImGui::Text("Current (numeric): %.3f", BlackboardComponent::ToFloat(*value_));
+                    const float expected_ = member_->valueType == AI_BLACKBOARD_VALUE_TYPE::BOOL ? (member_->boolValue ? 1.0f : 0.0f) :
+                        member_->valueType == AI_BLACKBOARD_VALUE_TYPE::INT ? static_cast<float>(member_->intValue) : member_->floatValue;
+                    constexpr const char* COMPARES[] = { "Exists", "Not exists", "==", "!=", ">", ">=", "<", "<=" };
+                    const int compare_ = static_cast<int>(member_->compareType);
+                    ImGui::Text("Required: %s %.3f | Priority %d", compare_ >= 0 && compare_ < 8 ? COMPARES[compare_] : "Unknown", expected_, member_->priority);
+                    ImGui::Separator();
+                    ImGui::PopID();
+                }
+            }
+            // 共有候補では複数の参照元を併記し、どの条件群から到達するか確認できるようにする。
+            for (const auto& link_ : graphPointer_->GetLinks())
+            {
+                if (std::find(area_.nodeIds.begin(), area_.nodeIds.end(), link_.toNodeId) == area_.nodeIds.end() ||
+                    std::find(area_.nodeIds.begin(), area_.nodeIds.end(), link_.fromNodeId) != area_.nodeIds.end()) continue;
+                const auto source_ = graphPointer_->FindNode(link_.fromNodeId);
+                if (source_) ImGui::TextWrapped("Incoming: %s (priority %d)", source_->name.c_str(), source_->priority);
+            }
+        }
+        ImGui::TextWrapped("Drag the area to move its contents. Resize using its border.");
+        if (ImGui::Button("Fit Area to Members"))
+        { graphPointer_->FitArea(area_); restoreNodePositions = true; }
+        ImGui::SameLine();
+        if (ImGui::Button("Remove Area"))
+        {
+            const uintptr_t removedId_ = area_.id;
+            areas_.erase(std::remove_if(areas_.begin(), areas_.end(),
+                [removedId_](const AIBehaviorArea& value_) { return value_.id == removedId_; }), areas_.end());
+            selectedNodeId = 0;
+        }
+        return;
+    }
     AIBehaviorNode* node_ = graphPointer_->FindNode(selectedNodeId);
     if (!node_)
     {
@@ -663,7 +737,9 @@ void AIBehaviorEditorWindow::DrawInspector(const BehaviorGraphTarget& target_)
     ImGui::InputText("Name", &node_->name);
     ImGui::InputTextMultiline("Comment", &node_->comment, ImVec2(0.0f, 70.0f));
     ImGui::InputInt("Priority", &node_->priority);
-    ImGui::TextDisabled("Priority is also updated from child node X position. Left node = higher priority.");
+    ImGui::TextWrapped(graphPointer_->GetPriorityFromPositions()
+        ? "Priority follows X position: left nodes run first."
+        : "Priority is explicit: moving nodes keeps the evaluation order.");
     ImGui::DragFloat("Weight", &node_->weight, 0.05f, 0.0f, 100.0f);
 
     if (node_->type == AI_BEHAVIOR_NODE_TYPE::BLACKBOARD_CONDITION ||
@@ -862,12 +938,11 @@ void AIBehaviorEditorWindow::DrawNode(AIBehaviorNode& node_)
             ImVec2(inputCenter_.x - inTextSize_.x * 0.5f, inputCenter_.y - inTextSize_.y * 0.5f),
             IM_COL32(20, 20, 20, 255),
             "IN");
-        pinPositions[node_.inputPinId] = inputCenter_;
     }
 
     if (node_.outputPinId != 0)
     {
-        // 出力ピンの中心座標を保存し、後でリンクの始点として使う。
+        // 出力ピンを下辺へ置き、曲線リンクを子ノードへ接続する。
         const ImVec2 outputMin_(
             nodeMin_.x + (nodeWidth_ - portWidth_) * 0.5f,
             nodeMax_.y - portHeight_ * 0.5f);
@@ -888,7 +963,6 @@ void AIBehaviorEditorWindow::DrawNode(AIBehaviorNode& node_)
             ImVec2(outputCenter_.x - outTextSize_.x * 0.5f, outputCenter_.y - outTextSize_.y * 0.5f),
             IM_COL32(255, 245, 245, 255),
             "OUT");
-        pinPositions[node_.outputPinId] = outputCenter_;
     }
 
     ImGui::SetCursorScreenPos(nodeMax_);
@@ -1104,4 +1178,59 @@ const char* AIBehaviorEditorWindow::GetNodeTypeName(AI_BEHAVIOR_NODE_TYPE type_)
     case AI_BEHAVIOR_NODE_TYPE::SUB_GRAPH: return "Sub Graph";
     default: return "Unknown";
     }
+}
+
+void AIBehaviorEditorWindow::DrawArea(AIBehaviorArea& area_)
+{
+    BS_PROFILE_SCOPE("AIBehaviorEditorWindow::DrawArea");
+    ed::PushStyleVar(ed::StyleVar_NodePadding, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+    ed::PushStyleColor(ed::StyleColor_GroupBg, ImVec4(area_.color.x, area_.color.y, area_.color.z, area_.color.w));
+    ed::PushStyleColor(ed::StyleColor_GroupBorder, ImVec4(area_.color.x, area_.color.y, area_.color.z, 0.8f));
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));
+    ed::BeginNode(ed::NodeId(area_.id));
+    const ImVec2 min_ = ImGui::GetCursorScreenPos();
+    // Groupより前の実レイアウトをHeaderとして認識させ、タイトル全体でドラッグできるようにする。
+    ImGui::Dummy(ImVec2(area_.size.x, COMMENT_BOX_HEADER_HEIGHT));
+    ed::Group(ImVec2(area_.size.x, (std::max)(area_.size.y - COMMENT_BOX_HEADER_HEIGHT, 1.0f)));
+    const ImVec2 max_ = ImGui::GetItemRectMax();
+    ed::EndNode();
+    ImGui::PopStyleVar();
+    // 確保したHeaderへ文字を重ね、文字の描画でBoxの保存サイズを変えない。
+    if (auto drawList_ = ed::GetNodeBackgroundDrawList(ed::NodeId(area_.id)))
+    {
+        drawList_->AddRectFilled(min_, ImVec2(max_.x, min_.y + COMMENT_BOX_HEADER_HEIGHT),
+            ImGui::ColorConvertFloat4ToU32(ImVec4(area_.color.x, area_.color.y, area_.color.z, 0.9f)), 5.0f);
+        // タイトルと説明はBox内で切り取り、隣の行動Boxやノードへ文字を重ねない。
+        drawList_->PushClipRect(ImVec2(min_.x + 8.0f, min_.y + 4.0f), ImVec2(max_.x - 8.0f, min_.y + 34.0f), true);
+        drawList_->AddText(ImVec2(min_.x + 12.0f, min_.y + 10.0f), IM_COL32(245, 248, 255, 255), area_.name.c_str());
+        drawList_->PopClipRect();
+        if (!area_.comment.empty())
+        {
+            drawList_->PushClipRect(ImVec2(min_.x + 10.0f, min_.y + 42.0f), ImVec2(max_.x - 10.0f, min_.y + 88.0f), true);
+            drawList_->AddText(ImGui::GetFont(), ImGui::GetFontSize(), ImVec2(min_.x + 12.0f, min_.y + 44.0f),
+                IM_COL32(225, 234, 242, 255), area_.comment.c_str(), nullptr, (std::max)(max_.x - min_.x - 24.0f, 1.0f));
+            drawList_->PopClipRect();
+        }
+    }
+    ed::PopStyleColor(2);
+    ed::PopStyleVar();
+}
+
+void AIBehaviorEditorWindow::CreateAreaFromSelection(AIBehaviorGraph& graph_)
+{
+    BS_PROFILE_SCOPE("AIBehaviorEditorWindow::CreateAreaFromSelection");
+    std::vector<ed::NodeId> selection_(graph_.GetNodes().size() + graph_.GetAreas().size());
+    const int count_ = ed::GetSelectedNodes(selection_.data(), static_cast<int>(selection_.size()));
+    AIBehaviorArea area_;
+    for (int index_ = 0; index_ < count_; ++index_)
+    {
+        const uintptr_t id_ = static_cast<uintptr_t>(selection_[index_].Get());
+        if (graph_.FindNode(id_)) area_.nodeIds.push_back(id_);
+    }
+    if (area_.nodeIds.empty()) { graphAssetStatus = "Select one or more behavior nodes first."; return; }
+    area_.id = graph_.GenerateId();
+    graph_.FitArea(area_);
+    selectedNodeId = area_.id;
+    graph_.GetAreas().push_back(std::move(area_));
+    restoreNodePositions = true;
 }

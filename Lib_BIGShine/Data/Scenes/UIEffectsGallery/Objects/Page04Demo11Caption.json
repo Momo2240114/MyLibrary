@@ -1,0 +1,106 @@
+{
+    "Name": "Page04Demo11Caption",
+    "Layer": 16,
+    "CollisionMask": 0,
+    "ParentName": "GalleryBoard",
+    "RequiredForSceneStart": true,
+    "Transform": {
+        "Pos": [
+            0,
+            0,
+            0
+        ],
+        "Rot": [
+            0,
+            0,
+            0
+        ],
+        "Scale": [
+            1,
+            1,
+            1
+        ]
+    },
+    "Components": [
+        {
+            "TypeName": "UIWidgetComponent",
+            "Enabled": true,
+            "UpdateEnabled": true,
+            "LateUpdateEnabled": true,
+            "UpdatePriority": 0,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": true,
+            "Data": {
+                "WidgetId": "Page04Demo11Caption",
+                "RaycastTarget": false,
+                "InputEnabled": false,
+                "ZOrder": 4,
+                "RectTransform": {
+                    "AnchorMin": [
+                        0.5,
+                        0.5
+                    ],
+                    "AnchorMax": [
+                        0.5,
+                        0.5
+                    ],
+                    "Pivot": [
+                        0.5,
+                        0.5
+                    ],
+                    "AnchoredPosition": [
+                        155,
+                        218
+                    ],
+                    "SizeDelta": [
+                        252,
+                        32
+                    ]
+                }
+            }
+        },
+        {
+            "TypeName": "UITextComponent",
+            "Enabled": true,
+            "UpdateEnabled": true,
+            "LateUpdateEnabled": true,
+            "UpdatePriority": 0,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": true,
+            "Data": {
+                "Text": "Light afterimage",
+                "FontPath": "Data/Font/NotoSansJP-Regular.otf",
+                "FontSize": 15,
+                "Color": [
+                    0.88,
+                    0.95,
+                    1,
+                    1
+                ],
+                "MaxWidth": 236,
+                "Padding": 8,
+                "AutoSizeWidget": false,
+                "HorizontalAlign": "CENTER",
+                "VerticalAlign": "CENTER"
+            }
+        },
+        {
+            "TypeName": "SpriteRenderer",
+            "Enabled": true,
+            "UpdateEnabled": true,
+            "LateUpdateEnabled": true,
+            "UpdatePriority": 0,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": true,
+            "Data": {
+                "Color": [
+                    1,
+                    1,
+                    1,
+                    1
+                ],
+                "LinearSampling": true
+            }
+        }
+    ]
+}

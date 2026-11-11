@@ -1,0 +1,107 @@
+{
+    "Name": "GalleryFocusHint",
+    "Layer": 16,
+    "CollisionMask": 0,
+    "ParentName": "GalleryBoard",
+    "RequiredForSceneStart": true,
+    "Transform": {
+        "Pos": [
+            0,
+            0,
+            0
+        ],
+        "Rot": [
+            0,
+            0,
+            0
+        ],
+        "Scale": [
+            1,
+            1,
+            1
+        ]
+    },
+    "Components": [
+        {
+            "TypeName": "UIWidgetComponent",
+            "Enabled": true,
+            "UpdateEnabled": true,
+            "LateUpdateEnabled": true,
+            "UpdatePriority": 0,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": true,
+            "Data": {
+                "WidgetId": "GalleryFocusHint",
+                "RaycastTarget": false,
+                "InputEnabled": false,
+                "ZOrder": 140,
+                "RectTransform": {
+                    "AnchorMin": [
+                        0.5,
+                        0.5
+                    ],
+                    "AnchorMax": [
+                        0.5,
+                        0.5
+                    ],
+                    "Pivot": [
+                        0.5,
+                        0.5
+                    ],
+                    "AnchoredPosition": [
+                        0,
+                        286
+                    ],
+                    "SizeDelta": [
+                        1120,
+                        42
+                    ]
+                }
+            }
+        },
+        {
+            "TypeName": "SpriteRenderer",
+            "Enabled": true,
+            "UpdateEnabled": true,
+            "LateUpdateEnabled": true,
+            "UpdatePriority": 0,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": true,
+            "Data": {
+                "Color": [
+                    1,
+                    1,
+                    1,
+                    1
+                ],
+                "LinearSampling": true,
+                "Visible": false
+            }
+        },
+        {
+            "TypeName": "UITextComponent",
+            "Enabled": true,
+            "UpdateEnabled": true,
+            "LateUpdateEnabled": true,
+            "UpdatePriority": 0,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": true,
+            "Data": {
+                "Text": "CLICK ANYWHERE / ESC TO RETURN",
+                "FontPath": "Data/Font/NotoSansJP-Regular.otf",
+                "FontSize": 20,
+                "Color": [
+                    0.9,
+                    0.96,
+                    1,
+                    1
+                ],
+                "MaxWidth": 1104,
+                "Padding": 8,
+                "AutoSizeWidget": false,
+                "HorizontalAlign": "CENTER",
+                "VerticalAlign": "CENTER"
+            }
+        }
+    ]
+}

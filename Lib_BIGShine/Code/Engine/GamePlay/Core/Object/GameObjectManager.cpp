@@ -1,8 +1,14 @@
 #include "PrecompiledHeader.h"
+#include "Engine/UI/LoadingPresentationComponent.h"
+#include "Engine/UI/GameMenuComponent.h"
+#include "Game/GameMode/BossFinishDirector.h"
+#include "Engine/UI/ScreenTransitionManager.h"
+#include "Game/GameMode/PlayerDeathDirector.h"
 #include "Engine/GamePlay/System/CombatObservationSystem.h"
 
 #include "GameObjectManager.h"
 #include "Engine/Audio/AudioManager.h"
+#include "Engine/GamePlay/Input/ControllerInput.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include "Engine/Physics/ColliderComponent.h"
 #include "Engine/Physics/MeshCollider.h"
@@ -42,7 +48,11 @@
 #include "Engine/Common/DebugLog.h"
 #include "Engine/UI/UIVertexModifierComponent.h"
 #include "Engine/UI/UIWidgetComponent.h"
+#include "Engine/UI/UITextComponent.h"
 #include "Engine/UI/WidgetBoardComponent.h"
+#include "Engine/UI/ScenePresentationComponent.h"
+#include "Engine/UI/MenuNavigationComponent.h"
+#include "Engine/UI/ScreenFadeComponent.h"
 
 #include "Engine/Debug/TracyProfiler.h"
 #include "Engine/Platform/WindowsDialogHelper.h"
@@ -140,7 +150,7 @@ namespace
     }
 }
 
-void GameObjectManager::Initialize()
+void GameObjectManager::Initialize(bool deferEffectPreload_)
 {
     // Scene全体で共有するSystemを生成し、相互参照と描画Systemを初期化する。
     collisionStepSystem->SetAttackSystem(attackSystem.get());
@@ -169,9 +179,11 @@ void GameObjectManager::Initialize()
 
     gameModeManager = std::make_shared<GameModeManager>();
     gameModeManager->Start();
+    bossFinishDirector = std::make_shared<BossFinishDirector>(*this);
+    playerDeathDirector = std::make_shared<PlayerDeathDirector>(*this);
 
     timeManager = std::make_shared<TimeManager>();
-    effectManager->Initialize(this);
+    effectManager->Initialize(this, !deferEffectPreload_);
     RegisterAttackCallbacks();
     EnsureCombatObservationRuntime();
     ModelResourceManager::Instance().LoadPreloadSettings();
@@ -265,8 +277,298 @@ void GameObjectManager::NotifyObjectNameChanged(
     }
 }
 
+bool GameObjectManager::IsBossFinishActive() const
+{
+    return (bossFinishDirector && bossFinishDirector->IsActive()) ||
+        (gameModeManager && gameModeManager->GetCurrentGameState() == GameProgressState::BOSS_DEFEATED);
+}
+
+bool GameObjectManager::IsPlayerDeathActive() const
+{
+    return playerDeathDirector && playerDeathDirector->IsActive();
+}
+
+bool GameObjectManager::ShouldSimulatePhysics() const
+{
+    return !cinematicPreviewActive && !gameMenuPaused && !IsBossFinishActive() &&
+        !(playerDeathDirector && playerDeathDirector->IsWorldPaused()) && !loadingPresentation &&
+        GetEditorPlayMode() == EditorPlayMode::PLAY && !editorWorkspacePaused &&
+        sceneRuntimeState == SCENE_RUNTIME_STATE::RUNNING;
+}
+
+void GameObjectManager::RequestPlayerDeath(const std::shared_ptr<GameObject>& player_)
+{
+    if (playerDeathDirector && !loadingPresentation && GetEditorPlayMode() == EditorPlayMode::PLAY)
+        playerDeathDirector->RequestDeath(player_);
+}
+
+void GameObjectManager::RequestCinematicEditor(const std::string& ownerName_, int sequenceIndex_)
+{
+    requestedCinematicOwner = ownerName_;
+    requestedCinematicSequence = sequenceIndex_;
+}
+
+bool GameObjectManager::ConsumeCinematicEditorRequest(std::string& ownerName_, int& sequenceIndex_)
+{
+    if (requestedCinematicOwner.empty()) return false;
+    ownerName_ = std::move(requestedCinematicOwner);
+    requestedCinematicOwner.clear();
+    sequenceIndex_ = requestedCinematicSequence;
+    requestedCinematicSequence = -1;
+    return true;
+}
+
+bool GameObjectManager::BeginCinematicSequencePreview(const std::string& ownerName_, int sequenceIndex_, const nlohmann::json& sequenceData_, GameProgressState context_, bool prepareFinish_)
+{
+    BS_PROFILE_SCOPE("CinematicSequence::Begin");
+    if (!CanStartEditorPlay() || SceneManager::IsEditorPlaySessionActive() || cinematicPreviewActive || IsBossFinishActive() || IsPlayerDeathActive()) return false;
+    const auto sourceOwner_ = Find(ownerName_);
+    const auto sourceSequence_ = sourceOwner_ ? sourceOwner_->GetComponent<ActionSequence>() : nullptr;
+    if (!sourceOwner_ || sourceOwner_->IsPendingDestroy() || !sourceSequence_ || !sourceSequence_->IsEnabled() || !sourceSequence_->ShouldUpdate()) return false;
+    if (!sequenceData_.contains("Sequences") || !sequenceData_["Sequences"].is_array() || sequenceIndex_ < 0 || sequenceIndex_ >= static_cast<int>(sequenceData_["Sequences"].size())) return false;
+    const auto& sequences_ = sequenceData_["Sequences"];
+    int leadInIndex_ = -1;
+    if (sequences_[sequenceIndex_].value("name", std::string()) == "Phase2Intro")
+    {
+        for (int index_ = 0; index_ < static_cast<int>(sequences_.size()); ++index_)
+            if (sequences_[index_].value("name", std::string()) == "Phase1Defeat")
+            {
+                leadInIndex_ = index_;
+                break;
+            }
+    }
+    auto original_ = CaptureEditorSnapshot();
+    if (!original_["Objects"].contains(ownerName_)) return false;
+    auto runtime_ = original_;
+    bool found_ = false;
+    for (auto& component_ : runtime_["Objects"][ownerName_]["Components"])
+        if (component_.value("TypeName", std::string()) == "ActionSequence") { component_["Data"] = sequenceData_; found_ = true; break; }
+    if (!found_) return false;
+    cinematicOriginalScene = std::move(original_);
+    cinematicRuntimeScene = std::move(runtime_);
+    cinematicOwnerName = ownerName_;
+    cinematicSequenceIndex = sequenceIndex_;
+    cinematicLeadInIndex = leadInIndex_;
+    cinematicPrepareFinish = prepareFinish_;
+    cinematicPreparing = false;
+    cinematicPreviewError.clear();
+    cinematicContext = leadInIndex_ >= 0 ? GameProgressState::PHASE_1_DEFEAT : context_;
+    cinematicPreviewActive = cinematicRebuild = true;
+    cinematicStopRequested = cinematicStarted = false;
+    cinematicPaused = true;
+    cinematicTime = cinematicRemainder = 0.0f;
+    cinematicReplayTarget = -1.0f;
+    playInputCaptured = false;
+    ControllerInput::Instance().StopRumble();
+    AudioManager::Instance().SetEditorPlayPaused(true);
+    return true;
+}
+
+void GameObjectManager::StopCinematicSequencePreview()
+{
+    // GUIやAction走査中にSceneを破棄せず、次のUpdateで復元する。
+    if (cinematicPreviewActive) cinematicStopRequested = true;
+}
+
+void GameObjectManager::SeekCinematicSequencePreview(float time_)
+{
+    if (!cinematicPreviewActive || !std::isfinite(time_)) return;
+    cinematicReplayTarget = std::clamp(time_, 0.0f, 600.0f);
+    cinematicRebuild = true;
+    cinematicPaused = true;
+    AudioManager::Instance().SetEditorPlayPaused(true);
+}
+
+void GameObjectManager::SetCinematicSequenceRate(float rate_)
+{
+    cinematicRate = std::isfinite(rate_) ? std::clamp(rate_, 0.1f, 2.0f) : 1.0f;
+}
+
+void GameObjectManager::SetCinematicSequencePaused(bool paused_)
+{
+    cinematicPaused = paused_;
+    if (paused_) ControllerInput::Instance().StopRumble();
+}
+
+bool GameObjectManager::IsCinematicFinishReady() const
+{
+    return cinematicPreviewActive && cinematicPrepareFinish && cinematicStarted &&
+        !cinematicPreparing && !cinematicStopRequested;
+}
+
+void GameObjectManager::UpdateCinematicSequencePreview(float deltaTime_)
+{
+    BS_PROFILE_SCOPE("CinematicSequence::Update");
+    constexpr float FIXED_STEP = 1.0f / 60.0f;
+    constexpr int MAX_STEPS = 8;
+    if (pendingEditorPlayCommand == EditorPlayCommand::STOP) cinematicStopRequested = true;
+    pendingEditorPlayCommand = EditorPlayCommand::NONE;
+    if (cinematicStopRequested)
+    {
+        const auto snapshot_ = cinematicOriginalScene;
+        cinematicPreviewActive = cinematicStopRequested = false;
+        cinematicReplayTarget = -1.0f;
+        // Editor Playと同じ復元経路で、生成・削除・マテリアル変更もまとめて戻す。
+        RestoreEditorSnapshot(snapshot_);
+        return;
+    }
+    if (cinematicRebuild)
+    {
+        BS_PROFILE_SCOPE("CinematicSequence::Rebuild");
+        cinematicReloading = true;
+        editorPlayMode = EditorPlayMode::PLAY;
+        beginGameSceneFlowAfterRead = false;
+        try { LoadSceneData(cinematicRuntimeScene.value("SceneName", std::string("MainScene")), cinematicRuntimeScene); }
+        catch (...)
+        {
+            cinematicReloading = false;
+            cinematicPreviewError = "Could not reload the preview Scene.";
+            cinematicStopRequested = true;
+            return;
+        }
+        cinematicReloading = false;
+        gameModeManager->BeginCinematicPreview(cinematicContext);
+        cinematicRebuild = cinematicStarted = false;
+        cinematicPreparing = cinematicLeadInIndex >= 0 || cinematicPrepareFinish;
+        cinematicPreparationTime = 0.0f;
+        cinematicTime = cinematicRemainder = 0.0f;
+        return;
+    }
+    if (sceneRuntimeState != SCENE_RUNTIME_STATE::RUNNING)
+    {
+        if (sceneRuntimeState == SCENE_RUNTIME_STATE::FAILED)
+        {
+            cinematicPreviewError = "Could not load the preview Scene.";
+            cinematicStopRequested = true;
+            return;
+        }
+        AdvanceSceneLoading(deltaTime_);
+        return;
+    }
+    if (!cinematicStarted)
+    {
+        const auto owner_ = Find(cinematicOwnerName);
+        const auto sequence_ = owner_ ? owner_->GetComponent<ActionSequence>() : nullptr;
+        if (!sequence_ || !sequence_->IsEnabled() || !sequence_->ShouldUpdate())
+        {
+            cinematicPreviewError = "The preview ActionSequence is unavailable.";
+            cinematicStopRequested = true;
+            return;
+        }
+        cinematicStarted = true;
+        // Phase2Introが使うカメラ、生成物、ステージ状態を本番の完了Action経由で引き継ぐ。
+        sequence_->StartSequence(cinematicLeadInIndex >= 0 ? cinematicLeadInIndex : cinematicSequenceIndex);
+    }
+    if (IsCinematicFinishReady())
+    {
+        if (bossFinishDirector && bossFinishDirector->IsActive()) bossFinishDirector->Update(deltaTime_);
+        return;
+    }
+    const bool replay_ = cinematicReplayTarget >= 0.0f;
+    const auto owner_ = cinematicPreparing && cinematicLeadInIndex >= 0 ? Find(cinematicOwnerName) : nullptr;
+    const auto sequence_ = owner_ ? owner_->GetComponent<ActionSequence>() : nullptr;
+    if (!cinematicPreparing && !replay_ && cinematicPaused) return;
+    if (!cinematicPreparing && !replay_) cinematicRemainder += std::clamp(std::isfinite(deltaTime_) ? deltaTime_ : 0.0f, 0.0f, 0.1f) * cinematicRate;
+    for (int index_ = 0; index_ < MAX_STEPS; ++index_)
+    {
+        const float remaining_ = cinematicPreparing ? FIXED_STEP : replay_ ? cinematicReplayTarget - cinematicTime : cinematicRemainder;
+        if (remaining_ <= 0.00001f || (!replay_ && remaining_ < FIXED_STEP)) break;
+        const float step_ = (std::min)(FIXED_STEP, remaining_);
+        // ActionSequenceのWaitForObject、Animation、カメラ、VFXを本番と同じ順番で進める。
+        ScreenTransitionManager::Instance().Update(step_);
+        UpdateRunningRuntime(step_);
+        if (replay_ || cinematicPreparing) ControllerInput::Instance().StopRumble();
+        if (cinematicStopRequested) return;
+        if (cinematicPreparing)
+        {
+            cinematicPreparationTime += step_;
+            const auto state_ = gameModeManager->GetCurrentGameState();
+            if (sequence_ && state_ == GameProgressState::PHASE_2_INTRO)
+            {
+                // Phase2Introの開始要求だけを処理し、タイムラインの0秒で時計を進めない。
+                gameModeManager->Update(0.0f);
+            }
+            const bool ready_ = cinematicPrepareFinish ? state_ == GameProgressState::PHASE_2_BATTLE :
+                state_ == GameProgressState::PHASE_2_INTRO && sequence_ && sequence_->GetPlayingSequenceName() == "Phase2Intro";
+            if (ready_)
+            {
+                cinematicPreparing = false;
+                AudioManager::Instance().StopSE();
+                break;
+            }
+            if (cinematicPreparationTime >= 600.0f)
+            {
+                cinematicPreviewError = "Phase transition did not reach the requested cinematic.";
+                cinematicStopRequested = true;
+                return;
+            }
+            continue;
+        }
+        cinematicTime += step_;
+        if (!replay_) cinematicRemainder -= step_;
+    }
+    if (!cinematicPreparing && replay_ && cinematicTime >= cinematicReplayTarget - 0.00001f)
+    {
+        cinematicReplayTarget = -1.0f;
+        AudioManager::Instance().StopSE();
+    }
+}
+
 void GameObjectManager::Update(float elapsedTime_)
 {
+    if (gameMenuPaused)
+    {
+        const auto menus_ = FindComponents<GameMenuComponent>();
+        if (!menus_.empty() && std::none_of(menus_.begin(),menus_.end(),[](const auto& menu_) { return menu_ && menu_->IsPausingWorld(); })) gameMenuPaused = false;
+    }
+    const bool menuWasPaused_ = gameMenuPaused;
+    // UIの更新はScene側の個別呼び出しにせず、通常Updateの入口で生時間を渡す。
+    const auto uiObjects_ = objects;
+    for (const auto& object_ : uiObjects_)
+    {
+        if (!object_ || object_->IsPendingDestroy()) continue;
+        const auto components_ = object_->components;
+        for (const auto& component_ : components_)
+            if (component_ && component_->IsStarted() && component_->IsEnabled() && component_->ShouldUpdate()) component_->UpdateUnscaled(elapsedTime_);
+    }
+    if (loadingPresentation)
+    {
+        UpdateLoadingPresentation(elapsedTime_);
+        // 表示JSONの欠損時も通常Componentを生成し、ロード失敗・再試行UIを維持する。
+        if (sceneRuntimeState == SCENE_RUNTIME_STATE::FAILED && FindComponents<LoadingPresentationComponent>().empty())
+        {
+            const auto fallback_ = Create("LoadingFallback");
+            fallback_->saveFlg = false;
+            const auto component_ = fallback_->GetOrAddComponent<LoadingPresentationComponent>(false);
+            component_->Start(); component_->SetStarted(true); component_->UpdateUnscaled(elapsedTime_);
+        }
+        return;
+    }
+    if (gameMenuPaused || menuWasPaused_) { if (editorPlayModeEnabled) ProcessEditorPlayCommand(); return; }
+
+    if (cinematicPreviewActive) { UpdateCinematicSequencePreview(elapsedTime_); return; }
+    // 決着中もEditorのStop要求は処理し、プレビューの専用更新で復元操作を塞がない。
+    if (editorPlayModeEnabled && bossFinishDirector && bossFinishDirector->IsActive()) ProcessEditorPlayCommand();
+    // Editorの一時停止やTimeScaleより先に、生の時間で専用プレビューを更新する。
+    if (sceneRuntimeState == SCENE_RUNTIME_STATE::RUNNING && bossFinishDirector && bossFinishDirector->Update(elapsedTime_)) return;
+    if (editorPlayModeEnabled)
+    {
+        ProcessEditorPlayCommand();
+        if (editorPlayMode == EditorPlayMode::EDITOR)
+        {
+            UpdateEditorScene(elapsedTime_);
+            return;
+        }
+        if (editorPlayMode == EditorPlayMode::PAUSED || editorWorkspacePaused)
+        {
+            // 停止中もGPU転送は完了させるが、ゲーム時計とStartは進めない。
+            ModelResourceManager::Instance().UpdateAsyncLoads(GraphicsDeviceManager::Instance().GetDevice(), 2.0f);
+            return;
+        }
+    }
+    // Stop/Pauseを処理した後に死亡演出だけを進め、敵のUpdateとLateUpdateへ入らない。
+    if (!loadingPresentation && sceneRuntimeState == SCENE_RUNTIME_STATE::RUNNING &&
+        playerDeathDirector && playerDeathDirector->Update(elapsedTime_)) return;
     // Scene Runtime状態に応じて、Load待ち、初期化、通常更新を切り替える。
     switch (sceneRuntimeState)
     {
@@ -430,6 +732,7 @@ void GameObjectManager::UpdateRunningRuntime(float elapsedTime_)
         PhysXSystem::SetTimeScale(worldScale_);
     }
 
+    if (!cinematicPreviewActive)
     {
         BS_PROFILE_SCOPE("CollisionStepSystem::SyncFromPhysics");
         // Physicsから現在のCollider状態を取り込み、Game側Component更新の前提にする。
@@ -451,7 +754,7 @@ void GameObjectManager::UpdateRunningRuntime(float elapsedTime_)
             if (!object_) continue;
 
             const float scale_ = timeManager->GetCachedScale(object_->GetLayerBit());
-            float objectDeltaTime_ = elapsedTime_ * scale_;
+            float objectDeltaTime_ = elapsedTime_ * scale_ * object_->GetRuntimePlaybackRate();
             if (useUnscaledCameraDelta_ && object_->GetComponent<CameraComponent>())
             {
                 objectDeltaTime_ = elapsedTime_;
@@ -497,11 +800,15 @@ void GameObjectManager::UpdateRunningRuntime(float elapsedTime_)
         }
     }
 
+    if (!cinematicPreviewActive)
     {
         BS_PROFILE_SCOPE("CollisionStepSystem::Step");
         // Game側で決まった速度やCollider状態を元に、Collision/Attack/Guard判定を進める。
         collisionStepSystem->Step(worldDeltaTime_);
     }
+
+    // 致死ダメージが出たフレームも、衝突走査を抜けた時点で演出へ受け渡す。
+    if (!cinematicPreviewActive && !loadingPresentation && playerDeathDirector && playerDeathDirector->Update(0.0f)) return;
 
     {
         BS_PROFILE_SCOPE("GameObjectManager::ObjectsLateUpdate");
@@ -518,7 +825,7 @@ void GameObjectManager::UpdateRunningRuntime(float elapsedTime_)
             if (!object_) continue;
 
             const float scale_ = timeManager->GetCachedScale(object_->GetLayerBit());
-            float objectDeltaTime_ = elapsedTime_ * scale_;
+            float objectDeltaTime_ = elapsedTime_ * scale_ * object_->GetRuntimePlaybackRate();
             if (useUnscaledCameraDelta_ && object_->GetComponent<CameraComponent>())
             {
                 objectDeltaTime_ = elapsedTime_;
@@ -589,12 +896,111 @@ void GameObjectManager::UpdateRunningRuntime(float elapsedTime_)
             cameraManager->GetActiveCamera().get(),
             elapsedTime_);
     }
+    // AIと衝突判定の更新後に選曲し、同フレームの暴走開始・大技終了を反映する。
+    if (!loadingPresentation && gameModeManager) gameModeManager->UpdateBattleMusic(*this);
+}
+
+// I/O待ちはPollだけ行い、Component生成は予算内で少しずつ主スレッドへ戻す。
+void GameObjectManager::LoadSceneAsync(const std::string& sceneName_, bool beginGameSceneFlow_)
+{
+    BS_PROFILE_SCOPE("GameObjectManager::LoadSceneAsync");
+    if (sceneReadRequest || incrementalSceneLoad)
+    {
+        BS_LOG_WARNING(LOG_CATEGORY::CORE, "A scene load is already in progress.");
+        return;
+    }
+    loadedSceneName = sceneName_;
+    stagedSceneLoad = true;
+    beginGameSceneFlowAfterRead = beginGameSceneFlow_;
+    sceneObjectCursor = 0;
+    sceneFinalizeCursor = 0;
+    sceneFinalizeStage = 0;
+    sceneRuntimeState = SCENE_RUNTIME_STATE::LOADING;
+    sceneLoadProgress = 0.0f;
+    sceneRuntimeError.clear();
+    sceneLoadOperation = "Read scene JSON";
+    sceneReadRequest = std::make_unique<SceneLoadRequest>(sceneName_);
+}
+
+bool GameObjectManager::PumpSceneLoad()
+{
+    BS_PROFILE_SCOPE("GameObjectManager::PumpSceneLoad");
+    try
+    {
+        if (sceneReadRequest)
+        {
+            sceneLoadProgress = 0.2f * sceneReadRequest->GetProgress();
+            if (!sceneReadRequest->IsFinished()) return false;
+            std::string error_;
+            if (!sceneReadRequest->TakeResult(pendingSceneDocument, error_))
+            {
+                sceneReadRequest.reset();
+                FailSceneRuntime(error_);
+                return false;
+            }
+            sceneReadRequest.reset();
+            incrementalSceneLoad = true;
+            sceneObjectCursor = 0;
+            LoadSceneData(loadedSceneName, pendingSceneDocument);
+            // LoadSceneDataのResetBattleStateより後、ComponentのStartより前に開始要求を渡す。
+            if (beginGameSceneFlowAfterRead && gameModeManager) gameModeManager->BeginGameSceneFlow();
+            beginGameSceneFlowAfterRead = false;
+            sceneLoadProgress = 0.2f;
+            sceneLoadOperation = "Create scene objects";
+            return false;
+        }
+        if (!incrementalSceneLoad) return sceneRuntimeState != SCENE_RUNTIME_STATE::FAILED;
+        const auto start_ = std::chrono::steady_clock::now();
+        const auto& names_ = pendingSceneDocument.at("ObjectList");
+        do
+        {
+            if (sceneObjectCursor >= names_.size()) break;
+            const auto name_ = names_.at(sceneObjectCursor++).get<std::string>();
+            if (sceneObjectSaveBaselines.count(name_) != 0) continue;
+            const auto& data_ = pendingSceneDocument.at("Objects").at(name_);
+            auto object_ = Create(name_);
+            object_->SetManager(this);
+            object_->Load(data_);
+            sceneObjectSaveOrder.push_back(name_);
+            sceneObjectSaveBaselines.emplace(name_, data_);
+        } while (std::chrono::duration<float, std::milli>(std::chrono::steady_clock::now() - start_).count() < 2.0f);
+        sceneLoadProgress = 0.2f + 0.4f * (names_.empty() ? 1.0f :
+            static_cast<float>(sceneObjectCursor) / static_cast<float>(names_.size()));
+        if (sceneObjectCursor < names_.size()) return false;
+        ResolveHierarchy();
+        pendingSceneDocument = nlohmann::json();
+        incrementalSceneLoad = false;
+        sceneLoadOperation = "Prepare model and component resources";
+        return true;
+    }
+    catch (const std::exception& exception_)
+    {
+        incrementalSceneLoad = false;
+        pendingSceneDocument = nlohmann::json();
+        FailSceneRuntime(exception_.what());
+        return false;
+    }
+}
+
+// 遷移先の通常Updateは呼ばず、ロードに必要な処理だけを進める。
+void GameObjectManager::AdvanceSceneLoading(float deltaTime_)
+{
+    BS_PROFILE_SCOPE("GameObjectManager::AdvanceSceneLoading");
+    try
+    {
+        if (sceneRuntimeState == SCENE_RUNTIME_STATE::FAILED || sceneRuntimeState == SCENE_RUNTIME_STATE::RUNNING) return;
+        if (editorPlayModeEnabled && editorPlayMode == EditorPlayMode::EDITOR) UpdateEditorScene(deltaTime_);
+        else if (sceneRuntimeState == SCENE_RUNTIME_STATE::INITIALIZING) FinalizeSceneInitialization();
+        else UpdateLoadingRuntime(deltaTime_);
+    }
+    catch (const std::exception& exception_) { FailSceneRuntime(exception_.what()); }
 }
 
 void GameObjectManager::UpdateLoadingRuntime(float elapsedTime_)
 {
     (void)elapsedTime_;
     BS_PROFILE_SCOPE("SceneLoading::Update");
+    if (!PumpSceneLoad()) return;
 
     {
         BS_PROFILE_SCOPE("ModelResourceManager::UpdateAsyncLoads");
@@ -603,10 +1009,30 @@ void GameObjectManager::UpdateLoadingRuntime(float elapsedTime_)
             2.0f);
     }
 
+    if (stagedSceneLoad && !loadingPresentation && !effectManager->AdvancePreload(2.0f))
+    {
+        sceneLoadOperation = "Prepare effect resource pools";
+        sceneLoadProgress = 0.6f + 0.1f * effectManager->GetPreloadProgress();
+        return;
+    }
+    if (stagedSceneLoad) sceneLoadOperation = "Prepare model and component resources";
     ProcessPendingStarts();
 
     // 必須ObjectのAssetとRuntime準備が揃うまではRUNNINGへ進めない。
-    sceneLoadProgress = ModelResourceManager::Instance().GetLoadProgress();
+    if (stagedSceneLoad)
+    {
+        std::size_t readyCount_ = 0;
+        for (const auto& object_ : objects)
+        {
+            if (!object_) continue;
+            if (object_->HasRuntimeFailure()) { FailSceneRuntime("A scene resource failed to load."); return; }
+            if (object_->IsReadyToStart() && object_->IsRuntimeReady()) ++readyCount_;
+        }
+        sceneLoadProgress = 0.7f + 0.25f * (objects.empty() ? 1.0f :
+            static_cast<float>(readyCount_) / static_cast<float>(objects.size()));
+        if (!pendingStarts.empty()) return;
+    }
+    else sceneLoadProgress = ModelResourceManager::Instance().GetLoadProgress();
 
     if (HasRequiredRuntimeFailure())
     {
@@ -617,6 +1043,7 @@ void GameObjectManager::UpdateLoadingRuntime(float elapsedTime_)
     if (!WaitRequiredAssets()) return;
     if (!WaitRuntimeReady()) return;
 
+    sceneLoadOperation = "Finalize scene";
     sceneRuntimeState = SCENE_RUNTIME_STATE::INITIALIZING;
 }
 
@@ -630,12 +1057,19 @@ void GameObjectManager::ProcessPendingStarts()
     std::vector<std::shared_ptr<GameObject>> startList_ = std::move(pendingStarts);
     std::vector<std::shared_ptr<GameObject>> readyStartList_;
     pendingStarts.clear();
+    const auto startBudget_ = std::chrono::steady_clock::now();
 
     {
         BS_PROFILE_SCOPE("PendingStarts::StartComponents");
 
         for (auto& object_ : startList_)
         {
+            if ((stagedSceneLoad || loadingPresentation) &&
+                std::chrono::duration<float, std::milli>(std::chrono::steady_clock::now() - startBudget_).count() >= 2.0f)
+            {
+                pendingStarts.push_back(object_);
+                continue;
+            }
             if (!object_ || object_->IsPendingDestroy()) continue;
             bool isReadyToStart_ = false;
             {
@@ -768,6 +1202,46 @@ bool GameObjectManager::HasRequiredRuntimeFailure()
 void GameObjectManager::FinalizeSceneInitialization()
 {
     BS_PROFILE_SCOPE("SceneLoading::FinalizeInitialization");
+    if (stagedSceneLoad)
+    {
+        // 同期経路の確定順を保ち、各Objectの処理間で表示へ制御を返す。
+        const auto start_ = std::chrono::steady_clock::now();
+        if (sceneFinalizeStage == 3)
+        {
+            collisionStepSystem->PrepareInitialPhysicsState(0.0f);
+            sceneFinalizeStage = 4;
+            sceneFinalizeCursor = 0;
+            return;
+        }
+        while (sceneFinalizeCursor < objects.size())
+        {
+            const auto object_ = objects[sceneFinalizeCursor++];
+            if (object_)
+            {
+                if (sceneFinalizeStage == 0 || sceneFinalizeStage == 4) object_->UpdateTransform();
+                else if (sceneFinalizeStage == 1)
+                {
+                    for (const auto& meshCollider_ : object_->GetComponents<MeshCollider>())
+                        if (meshCollider_ && meshCollider_->IsEnabled()) meshCollider_->Update(0.0f);
+                }
+                else if (sceneFinalizeStage == 2)
+                {
+                    if (const auto attachment_ = object_->GetComponent<ModelAttachmentComponent>(); attachment_ && attachment_->IsEnabled())
+                        attachment_->SyncAttachment();
+                }
+            }
+            if (std::chrono::duration<float, std::milli>(std::chrono::steady_clock::now() - start_).count() >= 2.0f) return;
+        }
+        if (sceneFinalizeStage < 4)
+        {
+            ++sceneFinalizeStage;
+            sceneFinalizeCursor = 0;
+            return;
+        }
+        sceneLoadProgress = 1.0f;
+        sceneRuntimeState = SCENE_RUNTIME_STATE::RUNNING;
+        return;
+    }
 
     // Load完了後にTransformとCameraを一度確定し、通常更新へ移る準備をする。
     for (const std::shared_ptr<GameObject>& object_ : objects)
@@ -812,8 +1286,26 @@ void GameObjectManager::FailSceneRuntime(const std::string& message_)
     BS_LOG_ERROR(LOG_CATEGORY::GAME, "[SceneRuntime] " + sceneRuntimeError);
 }
 
-void GameObjectManager::Clear()
+void GameObjectManager::Clear(bool rebuildEffectPools_)
 {
+    // 試写用の再読込だけは、元Sceneへ戻すためのメモリを保持する。
+    if (!cinematicReloading)
+    {
+        cinematicPreviewActive = cinematicStopRequested = cinematicRebuild = cinematicPreparing = false;
+        cinematicOriginalScene = nlohmann::json();
+        cinematicRuntimeScene = nlohmann::json();
+        cinematicTime = cinematicRemainder = 0.0f;
+        cinematicReplayTarget = -1.0f;
+        cinematicPaused = true;
+    }
+    if (playerDeathDirector)
+    {
+        playerDeathDirector->Stop();
+        playerDeathDirector->ClearDeathHistory();
+    }
+    if (bossFinishDirector) bossFinishDirector->Stop();
+    // ロード中の破棄でも、CPU読込の終了を待ってからSceneの所有物を解放する。
+    sceneReadRequest.reset();
     // 外部にshared_ptrが残っていても、Sceneを離れる時点で物理と予約を終了する。
     const auto retiringObjects_ = objects;
     for (const auto& object_ : retiringObjects_) if (object_) object_->PrepareForDestroy();
@@ -832,6 +1324,7 @@ void GameObjectManager::Clear()
     }
 
     selectedObject = nullptr;
+    if (cameraManager) cameraManager->ResetRuntimeState();
 
     collisionStepSystem->Clear();
     attackSystem->Clear();
@@ -841,6 +1334,9 @@ void GameObjectManager::Clear()
     // 外部に残った参照から破棄済みManagerへアクセスさせない。
     for (const auto& object_ : retiringObjects_) if (object_) object_->SetManager(nullptr);
     objects.clear();
+    sceneObjectSaveBaselines.clear();
+    sceneObjectSaveOrder.clear();
+    runtimeDeletedSceneObjects.clear();
     objectNameIndex.clear();
     pendingStarts.clear();
     pendingDestroys.clear();
@@ -849,7 +1345,8 @@ void GameObjectManager::Clear()
 
     // Scene objects were removed, so cached effect pool objects must be
     // recreated and registered with this manager before the next scene runs.
-    effectManager->RebuildRuntimePools();
+    // Scene破棄時は再利用しないため、GPU資源を作り直さない。
+    if (rebuildEffectPools_) effectManager->RebuildRuntimePools();
 }
 
 void GameObjectManager::AddObject(std::shared_ptr<GameObject> object_)
@@ -1042,6 +1539,7 @@ void GameObjectManager::Gui()
 
 void GameObjectManager::DrawHierarchyGui()
 {
+    BS_PROFILE_SCOPE("GameObjectManager::DrawHierarchyGui");
     // Scene内Objectの作成、選択、階層表示、Prefab生成を行うHierarchy UI。
     static char createName_[64] = "GameObject";
 
@@ -1105,14 +1603,20 @@ void GameObjectManager::DrawHierarchyGui()
 
     ImGui::Separator();
 
+    // 保存しない人型ボスも表示できるよう、保存可否と表示可否を分ける。
+    ImGui::Checkbox("Show Runtime Objects", &showRuntimeObjects);
+
     GameObject* objectToDelete_ = nullptr;
 
     // 内部IDなので英語のまま
     ImGui::BeginChild("HierarchyRegion", ImVec2(0, 0), true);
 
-    for (auto& object_ : objects)
+    // 削除の終了処理でPool返却が発生しても、表示中の走査を無効化しない。
+    const auto hierarchyObjects_ = objects;
+    for (const auto& object_ : hierarchyObjects_)
     {
-        if (!object_ || !object_->saveFlg) continue;
+        if (!object_ || object_->IsPendingDestroy() ||
+            (!object_->saveFlg && !object_->IsRuntimeHierarchyVisible() && !showRuntimeObjects)) continue;
         if (object_->transform->parent.expired())
         {
             DrawHierarchyNode(object_, &objectToDelete_);
@@ -1178,7 +1682,7 @@ void GameObjectManager::DrawInspectorGui()
     ImGui::SeparatorText(selectedObject->GetName().c_str());
     selectedObject->Gui();
 
-    auto cameraComponent_ = cameraManager->GetActiveCamera();
+    auto cameraComponent_ = editorPlayModeEnabled && editorPlayMode == EditorPlayMode::EDITOR ? cameraManager->GetEditorCamera() : cameraManager->GetActiveCamera();
     if (cameraComponent_) {
         ImGuizmo::BeginFrame();
         DirectX::XMFLOAT4X4 view_ = cameraComponent_->GetView();
@@ -1218,6 +1722,9 @@ void GameObjectManager::DrawSceneModals()
 
         ImGui::InputText(IM_U8("ファイル名##SceneModal_FilenameInput"), sceneState.name, IM_ARRAYSIZE(sceneState.name));
 
+        const bool runtimeScene_ = editorPlayModeEnabled && editorPlayMode != EditorPlayMode::EDITOR;
+        if (runtimeScene_) ImGui::TextUnformatted("Stop Play Mode to save the editor scene.");
+        ImGui::BeginDisabled(runtimeScene_);
         if (ImGui::Button(IM_U8("保存##SceneModal_SaveSceneButton"), ImVec2(120, 0)))
         {
             SaveScene(sceneState.name);
@@ -1225,6 +1732,7 @@ void GameObjectManager::DrawSceneModals()
             ImGui::CloseCurrentPopup();
         }
 
+        ImGui::EndDisabled();
         ImGui::SameLine();
 
         if (ImGui::Button(IM_U8("キャンセル##SceneModal_SaveCancelButton"), ImVec2(120, 0)))
@@ -1262,6 +1770,9 @@ void GameObjectManager::DrawSceneModals()
             ImGui::EndCombo();
         }
 
+        const bool runtimeScene_ = editorPlayModeEnabled && editorPlayMode != EditorPlayMode::EDITOR;
+        if (runtimeScene_) ImGui::TextUnformatted("Stop Play Mode to load an editor scene.");
+        ImGui::BeginDisabled(runtimeScene_);
         if (ImGui::Button(IM_U8("読み込み##SceneModal_LoadSceneButton"), ImVec2(120, 0)))
         {
             if (strlen(sceneState.name) > 0)
@@ -1272,6 +1783,7 @@ void GameObjectManager::DrawSceneModals()
             ImGui::CloseCurrentPopup();
         }
 
+        ImGui::EndDisabled();
         ImGui::SameLine();
 
         if (ImGui::Button(IM_U8("キャンセル##SceneModal_LoadCancelButton"), ImVec2(120, 0)))
@@ -1302,8 +1814,9 @@ void GameObjectManager::DrawHierarchyNode(std::shared_ptr<GameObject> object_, G
     bool opened_ = ImGui::TreeNodeEx(
         (void*)(uintptr_t)object_.get(),
         flags_,
-        "%s",
-        object_->GetName().c_str());
+        "%s%s",
+        object_->GetName().c_str(),
+        object_->saveFlg ? "" : " [Runtime]");
 
     static std::weak_ptr<GameObject> pressedObject_;
     static ImVec2 pressedMousePos_ = ImVec2(0.0f, 0.0f);
@@ -1376,11 +1889,13 @@ void GameObjectManager::DrawHierarchyNode(std::shared_ptr<GameObject> object_, G
 
     if (opened_)
     {
-        for (auto& childTransform_ : object_->transform->children)
+        const auto children_ = object_->transform->children;
+        for (const auto& childTransform_ : children_)
         {
             if (auto childObject_ = childTransform_->gameObject.lock())
             {
-                if (!childObject_->saveFlg) continue;
+                if (childObject_->IsPendingDestroy() ||
+                    (!childObject_->saveFlg && !childObject_->IsRuntimeHierarchyVisible() && !showRuntimeObjects)) continue;
                 DrawHierarchyNode(childObject_, objectToDelete_);
             }
         }
@@ -1396,15 +1911,60 @@ void GameObjectManager::RenderAll(
     const CameraComponent* overrideCamera_,
     bool clearSceneRenderTargets_)
 {
+    if (loadingPresentation && sceneRuntimeState != SCENE_RUNTIME_STATE::RUNNING)
+    {
+        GraphicsDeviceManager::Instance().SetBackBufferRenderTarget();
+        RenderUI();
+        return;
+    }
     // 3D、VFX、Particle、PostEffect、Spriteの順にScene全体を描画する。
     BS_PROFILE_SCOPE("Render::All");
     auto deviceContext_ = GraphicsDeviceManager::Instance().GetContext();
     auto& graphicsDeviceManager_ = GraphicsDeviceManager::Instance();
+    const bool finishActive_ = bossFinishDirector && bossFinishDirector->IsActive();
+    const bool finishImpactShot_ = finishActive_ && bossFinishDirector->IsBadEndingImpactShot();
+    const auto previousBloom_ = graphicsDeviceManager_.GetBloomParams();
+    const auto previousFilter_ = graphicsDeviceManager_.GetFilterParams();
+    const auto previousRadial_ = graphicsDeviceManager_.GetRadialBlurParams();
+    const auto previousMotion_ = graphicsDeviceManager_.GetMotionBlurParams();
+    const auto previousVignette_ = graphicsDeviceManager_.GetVignetteParams();
+    const auto previousGtao_ = graphicsDeviceManager_.GetXeGtaoParams();
+    if (finishActive_)
+    {
+        // 戦闘終了時の残留Blurを撮影へ持ち込まず、描画終了時に共有設定を元へ戻す。
+        graphicsDeviceManager_.GetRadialBlurParams().blurRadius = 0.0f;
+        graphicsDeviceManager_.GetMotionBlurParams().enabled = false;
+        graphicsDeviceManager_.GetBloomParams().intensity = 0.3f;
+        graphicsDeviceManager_.GetBloomParams().exposure = 1.1f;
+        graphicsDeviceManager_.GetFilterParams() = BloomSystem::CbColorFilter{};
+    }
+    if (finishImpactShot_)
+    {
+        // 赤いシルエットと黒背景に、通常画面の色や発光を重ねない。
+        graphicsDeviceManager_.GetBloomParams().enabled = false;
+        graphicsDeviceManager_.GetBloomParams().toneMappingEnabled = false;
+        graphicsDeviceManager_.GetBloomParams().exposure = 1.0f;
+        graphicsDeviceManager_.GetVignetteParams().enabled = false;
+        graphicsDeviceManager_.GetXeGtaoParams().enabled = false;
+    }
+    // ロード画面と次Sceneが共存しても、PostEffectへ渡す描画Systemは現在のSceneに合わせる。
+    // Retryで次Sceneを破棄した後も、破棄済みのMotionVelocity描画Systemを参照させない。
+    graphicsDeviceManager_.GetPostRenderSystem().GetMotionBlurSystem().SetObjectVelocityRenderer(motionVelocityRenderSystem.get());
     auto tracyGpuContext_ = graphicsDeviceManager_.GetTracyGpuContext();
 
-    if (clearSceneRenderTargets_)
+    std::shared_ptr<ScenePresentationComponent> presentation_;
+    if (GetEditorPlayMode() == EditorPlayMode::PLAY)
+        for (const auto& object_ : objects)
+        {
+            if (!object_ || object_->IsPendingDestroy()) continue;
+            const auto component_ = object_->GetComponent<ScenePresentationComponent>();
+            if (component_ && component_->IsEnabled() && component_->IsStarted()) { presentation_ = component_; break; }
+        }
+    if (presentation_ && !finishImpactShot_) presentation_->BeginRender();
+    if (clearSceneRenderTargets_ || finishActive_)
     {
-        const float clearColor_[4] = { 0.5f, 0.5f, 0.5f, 1.0f };
+        const auto color_ = finishActive_ ? bossFinishDirector->GetBackgroundColor() : presentation_ ? presentation_->GetClearColor() : DirectX::XMFLOAT4{0.5f,0.5f,0.5f,1.0f};
+        const float clearColor_[4] = { color_.x, color_.y, color_.z, color_.w };
         // 別視点のEditor SceneViewは通常描画後に再度Scene中間バッファを使うため、ここで描画結果を分離する。
         graphicsDeviceManager_.ClearSceneRenderTargets(clearColor_);
     }
@@ -1460,7 +2020,7 @@ void GameObjectManager::RenderAll(
         auto decalComponent_ = object_->GetComponent<DecalComponent>();
 
         // デカールの収集
-        if (decalComponent_ && decalComponent_->IsEnabled())
+        if (!finishImpactShot_ && decalComponent_ && decalComponent_->IsEnabled())
         {
             decalComponent_->SubmitDecal(decalManager_);
         }
@@ -1471,15 +2031,24 @@ void GameObjectManager::RenderAll(
 
     for (auto& object_ : objects)
     {
+        if (finishActive_ && !bossFinishDirector->ShouldRenderActor(object_)) continue;
         auto modelComponent_ = object_->GetComponent<GltfModelCommponennt>();
         if (modelComponent_)
             modelSystem_.PushSubmit(modelComponent_->GetShaderID(), modelComponent_);
     }
     RenderContext renderContext_;
+    // 貫通カットだけ空を外し、黒背景にシルエットを重ねる。
+    renderContext_.suppressSkybox = finishImpactShot_;
 
     renderContext_.device = GraphicsDeviceManager::Instance().GetDevice();
     renderContext_.deviceContext = deviceContext_;
-    renderContext_.camera = overrideCamera_ ? overrideCamera_ : cameraManager->GetActiveCamera().get();
+    // 表示用Cameraを直接使い、通常Cameraの切替補間で構図や影の参照位置をずらさない。
+    const auto presentationCamera_ = presentation_ ? presentation_->GetCamera() : nullptr;
+    const auto deathCamera_ = playerDeathDirector ? playerDeathDirector->GetCamera() : nullptr;
+    renderContext_.camera = finishActive_ ? bossFinishDirector->GetCamera().get() : deathCamera_ ? deathCamera_.get() : overrideCamera_ ? overrideCamera_ : presentationCamera_ ? presentationCamera_.get() : cameraManager->GetActiveCamera().get();
+    // 死亡演出などで通常更新が止まっていても、実際に表示するカメラをListenerへ反映する。
+    if (renderContext_.camera != cameraManager->GetActiveCamera().get())
+        AudioManager::Instance().UpdateListenerFromCamera(renderContext_.camera, 0.0f);
     renderContext_.renderState = GraphicsDeviceManager::Instance().GetRenderState();
     renderContext_.lights = &lightManager_;
     renderContext_.decal = &decalManager_;
@@ -1503,7 +2072,7 @@ void GameObjectManager::RenderAll(
     }
 
 
-    if(shapeRenderEnabled)
+    if(shapeRenderEnabled && !finishActive_ && !cinematicPreviewActive)
     {
         BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::Shape Render");
         GraphicsDeviceManager::Instance().GetShapeRendererSystem().Render(deviceContext_, renderContext_.camera->GetView(), renderContext_.camera->GetProjection());
@@ -1515,6 +2084,7 @@ void GameObjectManager::RenderAll(
 
     for (auto& obj : objects)
     {
+        if (finishActive_) continue;
         if (!obj) continue;
         for (const auto& meshVFX_ : obj->GetComponents<MeshVFXComponent>())
         {
@@ -1526,6 +2096,8 @@ void GameObjectManager::RenderAll(
     }
     {
         BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::MeshVFX");
+        if (finishActive_) for (const auto& effect_ : bossFinishDirector->GetEffects())
+            if (const auto mesh_ = effect_->GetComponent<MeshVFXComponent>(); mesh_ && mesh_->IsEnabled()) meshVFXRenderSystem->PushSubmit(mesh_.get());
         meshVFXRenderSystem->RenderAll(renderContext_);
     }
 
@@ -1535,6 +2107,7 @@ void GameObjectManager::RenderAll(
 
     for (auto& obj : objects)
     {
+        if (finishActive_) continue;
         if (!obj) continue;
 
         auto particle = obj->GetComponent<ParticleComponent>();
@@ -1546,6 +2119,8 @@ void GameObjectManager::RenderAll(
 
     {
         BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::Particle");
+        if (finishActive_) for (const auto& effect_ : bossFinishDirector->GetEffects())
+            if (const auto particle_ = effect_->GetComponent<ParticleComponent>(); particle_ && particle_->IsEnabled()) particleRenderSystem->PushSubmit(particle_.get());
         particleRenderSystem->RenderAll(renderContext_);
     }
 
@@ -1562,9 +2137,31 @@ void GameObjectManager::RenderAll(
     }
 
 
+    // 決着撮影はPostEffect後の3Dだけを複製し、戦闘UI・LockOn・Editor描画を混ぜない。
+    if (finishActive_)
+    {
+        bossFinishDirector->RenderOutput(spriteSystem_, finalRTV_);
+        graphicsDeviceManager_.GetBloomParams() = previousBloom_;
+        graphicsDeviceManager_.GetFilterParams() = previousFilter_;
+        graphicsDeviceManager_.GetRadialBlurParams() = previousRadial_;
+        graphicsDeviceManager_.GetMotionBlurParams() = previousMotion_;
+        if (finishImpactShot_)
+        {
+            graphicsDeviceManager_.GetVignetteParams() = previousVignette_;
+            graphicsDeviceManager_.GetXeGtaoParams() = previousGtao_;
+        }
+        if (presentation_) presentation_->EndRender();
+        return;
+    }
+
+    // フラッシュバックには、戦闘HUDや死亡暗転を重ねる前の3D画面を使う。
+    if (!overrideCamera_ && playerDeathDirector) playerDeathDirector->CaptureFlashback(finalRTV_);
+
     // SpriteRenderSubmit
     for (auto& object_ : objects)
     {
+        // 編集画面では実行用の全画面フェードを描画せず、Sceneの配置を確認できるようにする。
+        if (GetEditorPlayMode() == EditorPlayMode::EDITOR && object_->GetComponent<ScreenFadeComponent>()) continue;
         auto sr = object_->GetComponent<SpriteRenderer>();
         if (sr && sr->IsEnabled() && !object_->IsPendingDestroy())
         {
@@ -1598,12 +2195,19 @@ void GameObjectManager::RenderAll(
     {
         BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::Sprite");
         spriteSystem_.RenderAll(deviceContext_);
+        // PostEffectと戦闘HUDの後に通常UIを重ね、ポーズ中・死亡中も同じ描画経路を使用する。
+        for (const auto& menu_ : FindComponents<GameMenuComponent>())
+            if (menu_ && menu_->IsStarted() && menu_->IsEnabled()) menu_->RenderMenu(spriteSystem_);
+        if (playerDeathDirector) playerDeathDirector->RenderOutput(spriteSystem_);
     }
 
     // Sprite描画で変更した2D用ステートを戻し、後続のImGui/Viewport描画へ状態を残さない。
     deviceContext_->OMSetBlendState(renderContext_.renderState->GetBlendState(BlendState::Opaque), nullptr, 0xFFFFFFFF);
     deviceContext_->OMSetDepthStencilState(renderContext_.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
     deviceContext_->RSSetState(renderContext_.renderState->GetRasterizerState(RasterizerState::SolidCullBack));
+    if (presentation_) presentation_->EndRender();
+    // 追加のEditor視点では画面UIを重複表示しない。
+    if (!overrideCamera_) RenderUI();
 }
 
 void GameObjectManager::RegisterMotionVelocityComponent(
@@ -1648,9 +2252,27 @@ void GameObjectManager::Destroy(std::string objectName_)
 }
 
 
+void GameObjectManager::DestroyRuntimeObject(const std::shared_ptr<GameObject>& object_)
+{
+    BS_PROFILE_SCOPE("GameObjectManager::DestroyRuntimeObject");
+    if (!object_ || object_->IsPendingDestroy() || object_->manager != this) return;
+    // 破棄処理で親子参照が外れる前に、Sceneへ戻す必要がある配置Object名だけを記録する。
+    const auto preserveHierarchy_ = [this](auto&& self_, const std::shared_ptr<GameObject>& actor_) -> void
+    {
+        if (!actor_) return;
+        if (actor_->saveFlg && sceneObjectSaveBaselines.find(actor_->GetName()) != sceneObjectSaveBaselines.end())
+            runtimeDeletedSceneObjects.insert(actor_->GetName());
+        if (actor_->transform)
+            for (const auto& child_ : actor_->transform->children)
+                if (child_) self_(self_, child_->gameObject.lock());
+    };
+    preserveHierarchy_(preserveHierarchy_, object_);
+    Destroy(object_);
+}
+
 // ヘルパー関数：親→子の順番で名前をリストに追加する
 void CollectObjectNames(const std::shared_ptr<GameObject>& obj, nlohmann::json& listJson) {
-    if (!obj || !obj->saveFlg) return;
+    if (!obj || !obj->saveFlg || obj->IsPendingDestroy()) return;
 
     // 自分の名前を登録
     listJson["ObjectList"].push_back(obj->nameComponent->name);
@@ -1676,6 +2298,12 @@ void CollectPrefabObjects(const std::shared_ptr<GameObject>& object_, std::vecto
 
 void GameObjectManager::SaveScene(const std::string& sceneName_)
 {
+    BS_PROFILE_SCOPE("GameObjectManager::SaveScene");
+    if (editorPlayModeEnabled && editorPlayMode != EditorPlayMode::EDITOR)
+    {
+        BS_LOG_WARNING(LOG_CATEGORY::CORE, "Stop Play Mode before saving the editor scene.");
+        return;
+    }
     // SceneListとObject個別JSONに分けて保存し、親子順はSceneList側へ記録する。
     std::string basePath = "Data/Scenes/" + sceneName_ + "/";
     std::string objectsPath = basePath + "Objects/";
@@ -1705,22 +2333,45 @@ void GameObjectManager::SaveScene(const std::string& sceneName_)
 
     // 1. 各オブジェクトの個別ファイルを保存
     // (ここは順不同でOKなので、まずは全ファイルを書き出す)
+    std::unordered_set<std::string> savedObjectNames_;
     for (auto& obj : objects) {
-        if (!obj->saveFlg) continue;
+        if (!obj || !obj->saveFlg || obj->IsPendingDestroy()) continue;
 
         std::string filePath = objectsPath + obj->nameComponent->name + ".json";
         nlohmann::json objJson = obj->Save();
         std::ofstream file(filePath);
         if (file.is_open()) {
             file << objJson.dump(4);
+            savedObjectNames_.insert(obj->GetName());
+            runtimeDeletedSceneObjects.erase(obj->GetName());
+            // 保存した編集内容を次の実行時削除でも維持する。追加Objectも保存後は保護対象にする。
+            if (sceneObjectSaveBaselines.find(obj->GetName()) == sceneObjectSaveBaselines.end())
+                sceneObjectSaveOrder.push_back(obj->GetName());
+            sceneObjectSaveBaselines[obj->GetName()] = std::move(objJson);
         }
     }
 
     // 2. リスト JSON に「親 → 子」の順で名前を記録
     // 親がいない（ルート）オブジェクトを探して、そこから再帰を開始する
     for (auto& obj : objects) {
-        if (obj->saveFlg && obj->transform->parent.lock() == nullptr) {
+        if (obj && obj->saveFlg && !obj->IsPendingDestroy() && obj->transform->parent.lock() == nullptr) {
             CollectObjectNames(obj, listJson);
+        }
+    }
+
+    // 演出で消えた配置Objectは、死亡・溶解後の状態ではなく保存元JSONで補完する。
+    // 名前が同じ生存Objectを保存済みなら、その最新の編集内容を優先する。
+    for (const auto& name_ : sceneObjectSaveOrder)
+    {
+        if (runtimeDeletedSceneObjects.find(name_) == runtimeDeletedSceneObjects.end() ||
+            savedObjectNames_.find(name_) != savedObjectNames_.end()) continue;
+        const auto iterator_ = sceneObjectSaveBaselines.find(name_);
+        if (iterator_ == sceneObjectSaveBaselines.end()) continue;
+        std::ofstream objectFile_(objectsPath + name_ + ".json");
+        if (objectFile_.is_open())
+        {
+            objectFile_ << iterator_->second.dump(4);
+            listJson["ObjectList"].push_back(name_);
         }
     }
 
@@ -1736,28 +2387,48 @@ void GameObjectManager::SaveScene(const std::string& sceneName_)
 void GameObjectManager::LoadScene(const std::string& sceneName_)
 {
     BS_PROFILE_SCOPE("GameObjectManager::LoadScene");
-    // SceneListに記録された順番でObject JSONを読み込み、最後に親子関係を復元する。
-    const double loadSceneStartTimeMs_ = GetSceneProfileMilliseconds();
-    BS_PROFILE_PLOT("ModelLoad.LoadSceneStartTime", loadSceneStartTimeMs_);
+    if (editorPlayModeEnabled && editorPlayMode != EditorPlayMode::EDITOR && !loadedSceneName.empty())
+    {
+        BS_LOG_WARNING(LOG_CATEGORY::CORE, "Stop Play Mode before loading another editor scene.");
+        return;
+    }
+    std::ifstream listFile_("Data/Scenes/" + sceneName_ + "/SceneList.json");
+    if (!listFile_)
+    {
+        FailSceneRuntime("SceneList.json not found: " + sceneName_);
+        return;
+    }
+    nlohmann::json sceneData_;
+    try { listFile_ >> sceneData_; }
+    catch (const std::exception& exception_)
+    {
+        FailSceneRuntime(std::string("SceneList.json is invalid: ") + exception_.what());
+        return;
+    }
+    LoadSceneData(sceneName_, sceneData_);
+}
 
-    Clear(); // 現在のシーンをクリア
-    std::string basePath = "Data/Scenes/" + sceneName_ + "/";
-    std::string listFilePath = basePath + "SceneList.json";
+void GameObjectManager::LoadSceneData(const std::string& sceneName_, const nlohmann::json& sceneData_)
+{
+    BS_PROFILE_SCOPE("GameObjectManager::LoadSceneData");
+    // 同期Loadやスナップショット復元へ切り替えた場合は、古い段階ロードを引き継がない。
+    if (&sceneData_ != &pendingSceneDocument)
+    {
+        incrementalSceneLoad = false;
+        stagedSceneLoad = false;
+        pendingSceneDocument = nlohmann::json();
+    }
+    const double loadSceneStartTimeMs_ = GetSceneProfileMilliseconds();
+    BS_PROFILE_PLOT("ModelLoad.LoadSceneStartTime",loadSceneStartTimeMs_);
+    Clear();
+    loadedSceneName = sceneName_;
+    pendingEditorSelection.clear();
+    editorCameraInitialized = false;
+    const std::string basePath = "Data/Scenes/" + sceneName_ + "/";
+    const auto& listJson = sceneData_;
     sceneRuntimeState = SCENE_RUNTIME_STATE::LOADING;
     sceneLoadProgress = 0.0f;
     sceneRuntimeError.clear();
-
-    std::ifstream listFile(listFilePath);
-    if (!listFile.is_open()) {
-        printf("Error: SceneList.json not found!\n");
-        FailSceneRuntime("SceneList.json not found: " + listFilePath);
-        return;
-    }
-    nlohmann::json listJson;
-    {
-        BS_PROFILE_SCOPE("LoadScene::ReadSceneListJson");
-        listFile >> listJson;
-    }
 
     ActionRegistry::Instance().Clear();
     RegisterAllActions();
@@ -1797,6 +2468,9 @@ void GameObjectManager::LoadScene(const std::string& sceneName_)
 
 
 
+    // CPU解析済みJSONを使用する要求では、Object生成を次のフレーム以降へ分割する。
+    if (incrementalSceneLoad) return;
+
     {
         BS_PROFILE_SCOPE("LoadScene::BuildModelLoadRequestList");
         const double enqueueLoadGroupStartTimeMs_ = GetSceneProfileMilliseconds();
@@ -1817,13 +2491,25 @@ void GameObjectManager::LoadScene(const std::string& sceneName_)
                 }
                 std::string filePath = basePath + "Objects/" + objName + ".json";
 
-                std::ifstream file(filePath);
-                if (file.is_open()) {
-                    nlohmann::json objJson;
+                nlohmann::json objJson;
+                if (sceneData_.contains("Objects"))
+                {
+                    const auto iterator_ = sceneData_["Objects"].find(objName);
+                    if (iterator_ == sceneData_["Objects"].end())
                     {
-                        BS_PROFILE_SCOPE("LoadScene::ReadObjectJson");
-                        file >> objJson;
+                        FailSceneRuntime("Snapshot object missing: " + objName);
+                        return;
                     }
+                    objJson = *iterator_;
+                }
+                else
+                {
+                    BS_PROFILE_SCOPE("LoadScene::ReadObjectJson");
+                    std::ifstream file_(filePath);
+                    if (!file_) continue;
+                    file_ >> objJson;
+                }
+                {
 
                     // オブジェクト生成
                     auto obj = Create(objName);
@@ -1835,6 +2521,9 @@ void GameObjectManager::LoadScene(const std::string& sceneName_)
                         BS_PROFILE_SCOPE("LoadScene::GameObjectLoad");
                         obj->Load(objJson);
                     }
+                    // ComponentのStartで実行状態が変わる前の配置データだけを記録する。
+                    sceneObjectSaveOrder.push_back(objName);
+                    sceneObjectSaveBaselines.emplace(objName, std::move(objJson));
                 }
             }
         }
@@ -1853,6 +2542,206 @@ void GameObjectManager::LoadScene(const std::string& sceneName_)
     //}
 
     printf("Scene '%s' loaded from SceneList.json\n", sceneName_.c_str());
+}
+
+// 独立したWorkspaceのManagerには適用せず、Sceneのテスト実行だけを制御する。
+void GameObjectManager::EnableEditorPlayMode()
+{
+    editorPlayModeEnabled = true;
+    editorPlayMode = SceneManager::IsEditorPlaySessionActive() ? EditorPlayMode::PLAY : EditorPlayMode::EDITOR;
+}
+
+// 戦闘中のHPや生成Objectを初期状態へ混ぜず、Play開始時と同じSceneを配布する。
+nlohmann::json GameObjectManager::CaptureStandaloneScene()
+{
+    BS_PROFILE_SCOPE("GameObjectManager::CaptureStandaloneScene");
+    if (SceneManager::IsEditorPlaySessionActive()) return SceneManager::GetEditorPlaySnapshot();
+    return CaptureEditorSnapshot();
+}
+
+nlohmann::json GameObjectManager::CaptureEditorSnapshot()
+{
+    BS_PROFILE_SCOPE("EditorPlayMode::CaptureSnapshot");
+    // 未保存の配置、階層、設定、選択と編集カメラをメモリへ退避する。
+    nlohmann::json snapshot_ = {{"SceneName", loadedSceneName}, {"ObjectList", nlohmann::json::array()},
+        {"Objects", nlohmann::json::object()}, {"EditorSelection", selectedObject ? selectedObject->GetName() : ""}};
+    for (const auto& object_ : objects)
+    {
+        if (!object_ || !object_->saveFlg || object_->IsPendingDestroy()) continue;
+        snapshot_["Objects"][object_->GetName()] = object_->Save();
+        if (object_->transform && !object_->transform->parent.lock()) CollectObjectNames(object_, snapshot_);
+    }
+    const auto& bloom_ = GraphicsDeviceManager::Instance().GetBloomParams();
+    snapshot_["GraphicsSettings"]["Bloom"] = {{"enabled", bloom_.enabled}, {"threshold", bloom_.threshold},
+        {"intensity", bloom_.intensity}, {"kawaseScale", bloom_.kawaseScale}, {"blurPasses", bloom_.blurPasses},
+        {"toneMappingEnabled", bloom_.toneMappingEnabled}, {"exposure", bloom_.exposure}};
+    SaveCurrentIBLSettings(snapshot_["GraphicsSettings"]);
+    if (modelRenderSystem) modelRenderSystem->SerializeGraphicsSettings(snapshot_["GraphicsSettings"]);
+    if (cameraManager)
+        if (const auto camera_ = cameraManager->GetEditorCamera()) camera_->Serialize(snapshot_["EditorCamera"]);
+    return snapshot_;
+}
+
+void GameObjectManager::RestoreEditorSnapshot(const nlohmann::json& snapshot_)
+{
+    BS_PROFILE_SCOPE("EditorPlayMode::RestoreSnapshot");
+    editorPlayModeEnabled = true;
+    editorPlayMode = EditorPlayMode::EDITOR;
+    editorPlayRoot = false;
+    playInputCaptured = false;
+    editorWorkspacePaused = false;
+    AudioManager::Instance().SetEditorPlayPaused(false);
+    AudioManager::Instance().ResetPresentationAudio();
+    ControllerInput::Instance().StopRumble();
+    AudioManager::Instance().StopBGM();
+    AudioManager::Instance().StopSE();
+    PhysXSystem::SetTimeScale(1.0f);
+    LoadSceneData(snapshot_.value("SceneName", std::string("MainScene")), snapshot_);
+    pendingEditorSelection = snapshot_.value("EditorSelection", std::string{});
+    if (cameraManager && snapshot_.contains("EditorCamera"))
+        if (const auto camera_ = cameraManager->GetEditorCamera())
+        {
+            camera_->Deserialize(snapshot_["EditorCamera"]);
+            editorCameraInitialized = true;
+        }
+}
+
+void GameObjectManager::ProcessEditorPlayCommand()
+{
+    // 通常フレームでは切替処理とスナップショット操作を行わない。
+    if (pendingEditorPlayCommand == EditorPlayCommand::NONE) return;
+    BS_PROFILE_SCOPE("EditorPlayMode::ProcessCommand");
+    const auto command_ = pendingEditorPlayCommand;
+    pendingEditorPlayCommand = EditorPlayCommand::NONE;
+    if (command_ == EditorPlayCommand::STOP && editorPlayMode != EditorPlayMode::EDITOR)
+    {
+        if (editorPlayRoot)
+        {
+            const auto snapshot_ = SceneManager::GetEditorPlaySnapshot();
+            SceneManager::EndEditorPlaySession();
+            RestoreEditorSnapshot(snapshot_);
+        }
+        else
+        {
+            editorPlayMode = EditorPlayMode::PAUSED;
+            SceneManager::RequestReturnToEditor();
+        }
+        return;
+    }
+    if (command_ == EditorPlayCommand::PLAY && CanStartEditorPlay())
+    {
+        BS_PROFILE_SCOPE("EditorPlayMode::EnterPlay");
+        const auto snapshot_ = CaptureEditorSnapshot();
+        SceneManager::BeginEditorPlaySession(snapshot_);
+        editorPlayMode = EditorPlayMode::PLAY;
+        editorPlayRoot = true;
+        playInputCaptured = false;
+        AudioManager::Instance().ResetPresentationAudio();
+        ControllerInput::Instance().StopRumble();
+        AudioManager::Instance().StopBGM();
+        AudioManager::Instance().StopSE();
+        LoadSceneData(loadedSceneName, snapshot_);
+        if (gameModeManager) gameModeManager->BeginGameSceneFlow();
+    }
+    else if (command_ == EditorPlayCommand::PAUSE && editorPlayMode != EditorPlayMode::EDITOR)
+    {
+        editorPlayMode = editorPlayMode == EditorPlayMode::PAUSED ? EditorPlayMode::PLAY : EditorPlayMode::PAUSED;
+        if (editorPlayMode == EditorPlayMode::PAUSED)
+        {
+            playInputCaptured = false;
+            ControllerInput::Instance().StopRumble();
+        }
+        AudioManager::Instance().SetEditorPlayPaused(editorPlayMode == EditorPlayMode::PAUSED);
+    }
+}
+
+void GameObjectManager::UpdateEditorScene(float deltaTime_)
+{
+    BS_PROFILE_SCOPE("EditorPlayMode::UpdateEditorScene");
+    (void)deltaTime_;
+    if (sceneRuntimeState == SCENE_RUNTIME_STATE::FAILED) return;
+    if (!PumpSceneLoad()) return;
+    ModelResourceManager::Instance().UpdateAsyncLoads(GraphicsDeviceManager::Instance().GetDevice(), 2.0f);
+    if (stagedSceneLoad && !loadingPresentation && !effectManager->AdvancePreload(2.0f))
+    {
+        sceneLoadOperation = "Prepare effect resource pools";
+        sceneLoadProgress = 0.6f + 0.1f * effectManager->GetPreloadProgress();
+        return;
+    }
+    if (stagedSceneLoad) sceneLoadOperation = "Prepare editor visual resources";
+    bool ready_ = true;
+    bool failed_ = false;
+    // AIや戦闘のStartは呼ばず、編集表示と明示的なUI試写に必要なComponentだけを準備する。
+    for (const auto& object_ : objects)
+    {
+        if (!object_ || object_->IsPendingDestroy()) continue;
+        object_->UpdateTransform();
+        ready_ &= object_->IsReadyToStart();
+        failed_ |= object_->HasRuntimeFailure();
+        const auto components_ = object_->components;
+        for (const auto& component_ : components_)
+        {
+            if (!component_ || !component_->IsEnabled()) continue;
+            const auto& name_ = component_->GetName();
+            const bool editorVisual_ = name_ == "SpriteRenderer" || name_ == "UITextComponent" ||
+                name_ == "UIWidgetComponent" || name_ == "WidgetBoardComponent" ||
+                name_ == "UIMotionComponent" || name_ == "UIVisualEffectComponent" ||
+                name_ == "UIEffectsGalleryComponent";
+            if (!editorVisual_) continue;
+            if (!component_->IsStarted())
+            {
+                component_->Start();
+                component_->SetStarted(true);
+            }
+            component_->Update(0.0f);
+        }
+        if (const auto model_ = object_->GetComponent<GltfModelCommponennt>())
+        {
+            model_->UpdateLoadState();
+            model_->UpdateTransform();
+        }
+        if (const auto camera_ = object_->GetComponent<CameraComponent>()) camera_->UpdateViewProjection(0.0f);
+        if (const auto light_ = object_->GetComponent<LightComponent>()) light_->Update(0.0f);
+    }
+    for (const auto& object_ : objects)
+    {
+        if (!object_ || object_->IsPendingDestroy()) continue;
+        if (const auto attachment_ = object_->GetComponent<ModelAttachmentComponent>(); attachment_ && attachment_->IsEnabled())
+            attachment_->SyncAttachment();
+    }
+    if (!editorCameraInitialized && cameraManager)
+    {
+        std::shared_ptr<CameraComponent> source_;
+        for (const auto& object_ : objects)
+            if (object_ && !object_->IsPendingDestroy())
+                if (const auto camera_ = object_->GetComponent<CameraComponent>(); camera_ && camera_->IsEnabled() &&
+                    (!source_ || camera_->GetPriority() > source_->GetPriority())) source_ = camera_;
+        if (source_)
+        {
+            cameraManager->GetEditorCamera()->CopyFrom(source_.get());
+            editorCameraInitialized = true;
+        }
+    }
+    // 編集中の削除要求を反映し、ゲームのStart待ちリストは実行しない。
+    const auto destroys_ = std::move(pendingDestroys);
+    pendingDestroys.clear();
+    for (const auto& object_ : destroys_) ApplyDestroys(object_);
+    if (failed_) { FailSceneRuntime("Editor scene asset failed to load."); return; }
+    if (stagedSceneLoad)
+    {
+        std::size_t readyCount_ = 0;
+        for (const auto& object_ : objects)
+            if (object_ && object_->IsReadyToStart()) ++readyCount_;
+        sceneLoadProgress = ready_ ? 1.0f : 0.7f + 0.25f * (objects.empty() ? 1.0f :
+            static_cast<float>(readyCount_) / static_cast<float>(objects.size()));
+    }
+    else sceneLoadProgress = ready_ ? 1.0f : ModelResourceManager::Instance().GetLoadProgress();
+    sceneRuntimeState = ready_ ? SCENE_RUNTIME_STATE::RUNNING : SCENE_RUNTIME_STATE::LOADING;
+    if (ready_ && !pendingEditorSelection.empty())
+    {
+        selectedObject = Find(pendingEditorSelection);
+        pendingEditorSelection.clear();
+    }
 }
 
 void GameObjectManager::ResolveHierarchy()
@@ -1995,6 +2884,11 @@ void GameObjectManager::ApplyDestroys(std::shared_ptr<GameObject> object_)
 // プレハブ保存
 void GameObjectManager::SaveAsPrefab(std::shared_ptr<GameObject> object_, const std::string& prefabName_)
 {
+    if (editorPlayModeEnabled && editorPlayMode != EditorPlayMode::EDITOR)
+    {
+        BS_LOG_WARNING(LOG_CATEGORY::CORE, "Stop Play Mode before saving a scene object as a prefab.");
+        return;
+    }
     // 指定Object単体をPrefab JSONとして保存する。
     if (!object_) return;
 
@@ -2182,13 +3076,10 @@ void GameObjectManager::RegisterAttackCallbacks()
             if (!event_.hitSoundPath.empty())
             {
                 AudioManager& audioManager_ = AudioManager::Instance();
-                audioManager_.AddAudioFromFile(event_.hitSoundPath, false);
-                audioManager_.SetVolumeByPath(event_.hitSoundPath, event_.hitSoundVolume);
-                audioManager_.SetMuffledByPath(
-                    event_.hitSoundPath,
-                    event_.hitSoundMuffled,
-                    event_.hitSoundMuffledCutoff);
-                audioManager_.PlaySEByPath(event_.hitSoundPath);
+                // 命中位置を音源にし、プレイヤーと敵の攻撃音をカメラ基準で定位させる。
+                audioManager_.PlaySpatialAttackSound(event_.hitSoundPath, event_.hitPosition,
+                    event_.hitSoundVolume, event_.feedback.minDistance, event_.feedback.maxDistance,
+                    event_.hitSoundMuffled, event_.hitSoundMuffledCutoff);
             }
         });
 }
@@ -2212,4 +3103,68 @@ void GameObjectManager::EnsureGlobalActionObjects()
     const std::shared_ptr<ActionSequence> sequence_ =
         eventPool_->GetOrAddComponent<ActionSequence>(false);
     if (sequence_) sequence_->SetRegisterGlobal(true);
+}
+
+
+// ロード画面の専用Objectだけを更新し、戦闘・時間補正・Physicsは呼び出さない。
+void GameObjectManager::UpdateLoadingPresentation(float deltaTime_)
+{
+    BS_PROFILE_SCOPE("GameObjectManager::UpdateLoadingPresentation");
+    if (SupportsEditorPlayMode())
+    {
+        ProcessEditorPlayCommand();
+        if (GetEditorPlayMode() == EditorPlayMode::PAUSED || SceneManager::IsRestoringEditorScene()) return;
+    }
+    AdvanceSceneLoading(deltaTime_);
+    if (sceneRuntimeState != SCENE_RUNTIME_STATE::RUNNING) return;
+    for (const auto& object_ : objects)
+    {
+        if (!object_ || object_->IsPendingDestroy()) continue;
+        const auto components_ = object_->components;
+        for (const auto& component_ : components_)
+        {
+            if (!component_ || !component_->IsEnabled() || !component_->IsStarted()) continue;
+            const auto& name_ = component_->GetName();
+            if (name_ == "AnimationControllerComponent" || name_ == "ParticleComponent" ||
+                name_ == "MeshVFXComponent" || name_ == "SpriteRenderer" ||
+                name_ == "UITextComponent" || name_ == "UIAnimationPlayerComponent" ||
+                name_ == "UIWidgetComponent" || name_ == "WidgetBoardComponent" || name_ == "LightComponent")
+                component_->Update(deltaTime_);
+        }
+        object_->UpdateTransform();
+        if (const auto model_ = object_->GetComponent<GltfModelCommponennt>()) model_->UpdateTransformIfDirty();
+        if (const auto camera_ = object_->GetComponent<CameraComponent>()) camera_->UpdateViewProjection(deltaTime_);
+    }
+    // 表示用リソースの更新後に演出、入力、暗転を進め、通常戦闘の更新から分離する。
+    for (const auto& object_ : objects)
+    {
+        if (!object_ || object_->IsPendingDestroy()) continue;
+        const auto presentation_ = object_->GetComponent<ScenePresentationComponent>();
+        if (presentation_ && presentation_->IsStarted() && presentation_->IsEnabled() && presentation_->ShouldUpdate()) presentation_->Update(deltaTime_);
+    }
+    for (const auto& object_ : objects)
+    {
+        if (!object_ || object_->IsPendingDestroy()) continue;
+        const auto menu_ = object_->GetComponent<MenuNavigationComponent>();
+        if (menu_ && menu_->IsStarted() && menu_->IsEnabled() && menu_->ShouldUpdate()) menu_->Update(deltaTime_);
+    }
+    for (const auto& object_ : objects)
+    {
+        if (!object_ || object_->IsPendingDestroy()) continue;
+        const auto fade_ = object_->GetComponent<ScreenFadeComponent>();
+        if (fade_ && fade_->IsStarted() && fade_->IsEnabled() && fade_->ShouldUpdate()) fade_->Update(deltaTime_);
+    }
+    cameraManager->Update(deltaTime_, objects);
+}
+
+// InspectorのGuiとは分離し、通常Renderとロード失敗時の双方からUIを提出する。
+void GameObjectManager::RenderUI()
+{
+    BS_PROFILE_SCOPE("GameObjectManager::RenderUI");
+    for (const auto& object_ : objects)
+    {
+        if (!object_ || object_->IsPendingDestroy()) continue;
+        for (const auto& component_ : object_->components)
+            if (component_ && component_->IsStarted() && component_->IsEnabled()) component_->RenderUI();
+    }
 }

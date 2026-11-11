@@ -685,9 +685,8 @@ void CollisionStepSystem::StepCombatPairs()
                 bool isOverlapping_ = false;
                 if (hitBox_->IsEnabled() && justDodgeCollider_->IsEnabled())
                 {
-                    const CollisionManifold manifold_ = CollisionMath::CapsuleVsCapsule(
-                        hitCapsules_[hitIndex_],
-                        justDodgeCapsules_[dodgeIndex_]);
+                    const CollisionManifold manifold_ = hitBox_->CheckFrameSweep(
+                        justDodgeCapsules_[dodgeIndex_], hitCapsules_[hitIndex_]);
                     isOverlapping_ = manifold_.isHit;
                 }
 
@@ -737,9 +736,8 @@ void CollisionStepSystem::StepCombatPairs()
                 GuardContact contact_{};
                 if (hitBox_->IsEnabled() && guardCollider_->IsEnabled())
                 {
-                    const CollisionManifold manifold_ = CollisionMath::CapsuleVsCapsule(
-                        hitCapsules_[hitIndex_],
-                        guardCapsules_[guardIndex_]);
+                    const CollisionManifold manifold_ = hitBox_->CheckFrameSweep(
+                        guardCapsules_[guardIndex_], hitCapsules_[hitIndex_]);
                     isOverlapping_ = manifold_.isHit;
                     if (isOverlapping_)
                     {
@@ -833,9 +831,8 @@ void CollisionStepSystem::StepCombatPairs()
                 AttackHitContact contact_{};
                 if (hitBox_->IsEnabled() && hurtBox_->IsEnabled())
                 {
-                    const CollisionManifold manifold_ = CollisionMath::CapsuleVsCapsule(
-                        hitCapsules_[hitIndex_],
-                        hurtCapsules_[hurtIndex_]);
+                    const CollisionManifold manifold_ = hitBox_->CheckFrameSweep(
+                        hurtCapsules_[hurtIndex_], hitCapsules_[hitIndex_]);
                     isOverlapping_ = manifold_.isHit;
                     if (isOverlapping_)
                     {
@@ -898,4 +895,6 @@ void CollisionStepSystem::StepCombatPairs()
         }
     }
 
+    // 同じ軌道を全防御判定と命中判定で使い終えてから、一時判定だけを閉じる。
+    for (const auto& hitBox_ : hitBoxes_) hitBox_->FinishFrameSweep();
 }

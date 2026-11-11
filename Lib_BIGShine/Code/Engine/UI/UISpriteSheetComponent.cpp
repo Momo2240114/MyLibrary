@@ -99,6 +99,25 @@ void UISpriteSheetComponent::Deserialize(const nlohmann::json& json_)
     NormalizeSettings();
 }
 
+// HUDからの一時的なセル変更はScene保存値へ反映しない。
+void UISpriteSheetComponent::SetRuntimeCell(int columnIndex_, int rowIndex_)
+{
+    const int column_ = std::clamp(columnIndex_, 0, (std::max)(1, columnCount) - 1);
+    const int row_ = std::clamp(rowIndex_, 0, (std::max)(1, rowCount) - 1);
+    if (runtimeColumnIndex == column_ && runtimeRowIndex == row_) return;
+    runtimeColumnIndex = column_;
+    runtimeRowIndex = row_;
+    if (spriteRenderer.expired()) ResolveSpriteRenderer();
+    ApplySlice();
+}
+
+// 表示をInspectorで設定したセルへ戻す。
+void UISpriteSheetComponent::ClearRuntimeCell()
+{
+    runtimeColumnIndex = runtimeRowIndex = -1;
+    ApplySlice();
+}
+
 void UISpriteSheetComponent::ApplySlice()
 {
     BS_PROFILE_SCOPE("UISpriteSheetComponent::ApplySlice");
@@ -112,8 +131,8 @@ void UISpriteSheetComponent::ApplySlice()
     const float usableHeight_ = (std::max)(1.0f, textureSize_.y - paddingTop - paddingBottom);
     const float cellWidth_ = usableWidth_ / static_cast<float>((std::max)(1, columnCount));
     const float cellHeight_ = usableHeight_ / static_cast<float>((std::max)(1, rowCount));
-    const float left_ = paddingLeft + cellWidth_ * static_cast<float>(columnIndex);
-    const float top_ = paddingTop + cellHeight_ * static_cast<float>(rowIndex);
+    const float left_ = paddingLeft + cellWidth_ * static_cast<float>(runtimeColumnIndex >= 0 ? std::clamp(runtimeColumnIndex, 0, columnCount - 1) : columnIndex);
+    const float top_ = paddingTop + cellHeight_ * static_cast<float>(runtimeRowIndex >= 0 ? std::clamp(runtimeRowIndex, 0, rowCount - 1) : rowIndex);
 
     // SpriteRenderer側はPixel単位のUV Rectを受け取り、描画時にTexture座標へ変換する。
     spriteRenderer_->SetUVRect(left_, top_, cellWidth_, cellHeight_);

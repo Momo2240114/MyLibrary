@@ -617,6 +617,7 @@ static bool IsNodeInBlendMask(
 }
 void ModelAnimator::SetCurrentTime(float time_)
 {
+    attackTelegraphs.Reset();
     current.time = (std::max)(0.0f, time_);
     previous = current;
     isTransitioning = false;
@@ -967,7 +968,10 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
             }
         }
         current.sampleDuration = baseDuration;
-        current.Update(et, baseDuration, curvecomp, owner);
+        weaponSampleState = current.state;
+        weaponSampleStartTime = current.time;
+        weaponSampleEndTime = current.time;
+        current.Update(et, baseDuration, curvecomp, owner, &attackTelegraphs, blackboard_, &weaponSampleEndTime);
     }
 
     // ------------------------------------------------------------
@@ -1012,7 +1016,8 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
     // ステート指定のRootMotionノードを優先し、未指定時はモデル設定または"root"ノードを使用する。
     auto resolveRootNodeIndex_ = [&](const AnimState* state_)
         {
-            if (!state_ || !state_->rootMotion.enable) return -1;
+            // 演出の移動固定は、GameObjectへのRootMotion適用とは独立して処理する。
+            if (!state_ || (!state_->rootMotion.enable && !state_->rootMotion.cutVisualWhenDisabled)) return -1;
 
             const std::string rootName_ = state_->rootMotion.sourceNodeName.empty()
                 ? model->GetRootMotionName()
@@ -1078,7 +1083,7 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
         const bool sourceNodeChanged_ = (previousRootMotionNodeIndex != currentRootNodeIndex_);
         const bool resetBasePosition_ = isFirstFrame || stateChanged_ || sourceNodeChanged_;
         // ステート固有倍率にカーブ値を掛け、時間帯ごとのRootMotion強度を決定する。
-        float rootMotionScale_ = current.state->rootMotionScale;
+        float rootMotionScale_ = current.state->rootMotion.enable ? current.state->rootMotionScale : 0.0f;
         if (curvecomp && !current.state->rootMotionScaleCurveName.empty())
         {
             float normalizedTime_ = (baseDuration > 0.0f) ? (current.time / baseDuration) : 0.0f;
@@ -1096,6 +1101,17 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
             {
                 rootMotionBasePosition = rawPos_;
                 rootMotionBaseRotation = prevRootRotation;
+            }
+            if (current.state->sampleWeaponHitBoxes)
+            {
+                SamplePose(current.state, 0.0f, baseDuration, rootMotionLoopStartPose, 0);
+                rootMotionBasePosition = rootMotionLoopStartPose[currentRootNodeIndex_].position;
+                Vector3 delta_ = rawPos_ - rootMotionBasePosition;
+                if (!current.state->rootMotion.applyPositionX) delta_.x = 0.0f;
+                if (!current.state->rootMotion.applyPositionY) delta_.y = 0.0f;
+                if (!current.state->rootMotion.applyPositionZ) delta_.z = 0.0f;
+                currentRootMotionDelta.deltaPosition = Vector3::TransformNormal(delta_,
+                    getParentGlobalMatrix_(tempPoseA, currentRootNodeIndex_)) * rootMotionScale_;
             }
             prevTime = current.time;
             _prevRootMotionState = current.state;
@@ -1266,6 +1282,22 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
 }
 
 
+// 現在フレームで通過した攻撃区間を、既存AttackTemplateの武器判定へ渡す。
+void ModelAnimator::SampleWeaponHitBoxes(const std::shared_ptr<GameObject>& owner_, GltfModelCommponennt* model_)
+{
+    if (!weaponSampleState || !weaponSampleState->sampleWeaponHitBoxes ||
+        weaponSampleState->type != AnimStateType::Single || !model_ ||
+        weaponSampleEndTime <= weaponSampleStartTime) return;
+    // 被弾などの中断後は判定を残さず、弱コンボ内の次段への移行だけ同じ剣撃として扱う。
+    if (current.state != weaponSampleState && (!current.state ||
+        !current.state->sampleWeaponHitBoxes)) return;
+    BS_PROFILE_SCOPE("ModelAnimator::SampleWeaponHitBoxes");
+    for (auto& event_ : const_cast<AnimState*>(weaponSampleState)->events)
+        if (event_.eventTemplateType == ANIMATION_EVENT_TEMPLATE_TYPE::ATTACK_TEMPLATE)
+            AttackTemplateRuntime::SampleWeaponInterval(owner_, event_, model_, *weaponSampleState,
+                weaponSampleStartTime, weaponSampleEndTime);
+}
+
 void ModelAnimator::UpdateBlend(float et, GltfModelCommponennt* model, int indexA, int indexB, float alpha, bool loop, float speed)
 {
     if (!model) return;
@@ -1308,6 +1340,8 @@ void ModelAnimator::CrossFadeTo(const AnimState* newState, float duration, std::
     if (current.state == newState && !restart_) return;
 
     CallStateExitEndActions(current, owner);
+    // Exit Actionが旧攻撃の予兆を停止しても、新しい区間の再開始は抑制しない。
+    attackTelegraphs.Reset();
     previousRootMotionBasePosition = rootMotionBasePosition;
     previousRootMotionBaseRotation = rootMotionBaseRotation;
     previous = current;
@@ -1488,88 +1522,110 @@ void ModelAnimator::ComputeCustomAnimationPose(const CustomAnimation& customAnim
         }
     }
 }
-void ModelAnimator::ActiveSlot::Update(float et, float duration, CurveComponent* curveComp, std::shared_ptr<GameObject> owner)
+void ModelAnimator::ActiveSlot::Update(float et, float duration, CurveComponent* curveComp, std::shared_ptr<GameObject> owner, AttackTelegraphRuntime* telegraphs_, const BlackboardCategory* blackboard_, float* advancedTime_)
 {
     if (!state) return;
 
     const AnimState* updatingState_ = state;
 
-    float currentSpeed = state->playbackSpeed;
-
-    // ★カーブの指定があり、コンポーネントが存在する場合
-    // Trackが無いActorでは設定済み再生速度へ戻し、GetValueの既定値0による停止を防ぐ。
-    if (curveComp && !state->speedCurveName.empty() && curveComp->HasTrack(state->speedCurveName))
+    // カーブの横軸は変更後のアニメーション時間/duration、値は絶対再生速度。
+    const auto evaluateSpeed_ = [&](float sampleTime_)
     {
-        // アニメーションの正規化時間 (0.0 - 1.0) を計算
-        float normalizedTime = (duration > 0.0f) ? (time / duration) : 0.0f;
-
-        // 指定された名前のカーブから速度を取得
-        currentSpeed = curveComp->GetValue(state->speedCurveName, normalizedTime);
+        float speed_ = state->playbackSpeed;
+        if (curveComp && !state->speedCurveName.empty() && curveComp->HasTrack(state->speedCurveName))
+            speed_ = curveComp->GetValue(state->speedCurveName, duration > 0.0f ? sampleTime_ / duration : 0.0f);
+        for (const auto& event_ : state->events)
+            if (event_.overridePlaybackSpeed && sampleTime_ >= event_.startTime && sampleTime_ <= event_.endTime)
+                speed_ = (std::max)(event_.playbackSpeed, 0.01f);
+        if (blackboard_ && !state->playbackSpeedParamName.empty())
+        {
+            const auto parameter_ = blackboard_->find(state->playbackSpeedParamName);
+            if (parameter_ != blackboard_->end())
+            {
+                const float multiplier_ = BlackboardComponent::ToFloat(parameter_->second);
+                if (std::isfinite(multiplier_)) speed_ *= std::clamp(multiplier_, 0.01f, 10.0f);
+            }
+        }
+        return std::isfinite(speed_) ? (std::max)(speed_, 0.0f) : 0.0f;
+    };
+    const float prevTime = time;
+    float remainingTime_ = (std::max)(et, 0.0f);
+    constexpr float MAXIMUM_SPEED_INTEGRATION_STEP = 1.0f / 240.0f;
+    // 小さな時間幅で中点積分し、低FPSでも溜め区間を飛ばして速度を固定しない。
+    if (!state->sampleWeaponHitBoxes)
+    {
+        // 既存Stateは従来の時間更新を維持し、弱コンボの調整を他行動へ波及させない。
+        time += remainingTime_ * evaluateSpeed_(time);
+        remainingTime_ = 0.0f;
     }
-
-    for (const AnimEvent& event_ : state->events)
+    while (remainingTime_ > 0.000001f)
     {
-        if (event_.overridePlaybackSpeed &&
-            time >= event_.startTime &&
-            time <= event_.endTime)
-        {
-            currentSpeed = (std::max)(event_.playbackSpeed, 0.01f);
-        }
+        const float step_ = state->speedCurveName.empty() ? remainingTime_ : (std::min)(remainingTime_, MAXIMUM_SPEED_INTEGRATION_STEP);
+        const float midpoint_ = time + evaluateSpeed_(time) * step_ * 0.5f;
+        time += evaluateSpeed_(midpoint_) * step_;
+        remainingTime_ -= step_;
     }
+    if (state->sampleWeaponHitBoxes && !state->isLoop) time = (std::min)(time, duration);
+    if (advancedTime_) *advancedTime_ = time;
+    if (et <= 0.0f) return;
 
-    float prevTime = time;
-    time += et * currentSpeed;
-    if (et == 0.0f) return;
+    // 速度カーブ・イベント速度・TimeScaleを反映済みの、攻撃判定と同じ時間で予兆を判定する。
+    if (telegraphs_) telegraphs_->Advance(owner, *state, prevTime, time);
 
-    // イベントの発火判定
-    for (auto& ev : const_cast<AnimState*>(state)->events)
+    // 配列の並び順ではなくアニメーション時刻順に、開始・更新・終了を処理する。
+    struct EventBoundary
     {
-        // 1. 開始イベント (startTime を跨いだ瞬間)
-        if (!ev.isFired && time >= ev.startTime)
+        float sampleTime;
+        std::size_t eventIndex;
+        int phase;
+    };
+    std::vector<EventBoundary> boundaries_;
+    auto& events_ = const_cast<AnimState*>(state)->events;
+    for (std::size_t index_ = 0; index_ < events_.size(); ++index_)
+    {
+        const auto& event_ = events_[index_];
+        if (!event_.isFired && time >= event_.startTime)
+            boundaries_.push_back({ event_.startTime, index_, 0 });
+        const bool intersectsWindow_ = state->sampleWeaponHitBoxes
+            ? prevTime <= event_.endTime : time <= event_.endTime;
+        if (time >= event_.startTime && intersectsWindow_ && !event_.isEndFired)
+            boundaries_.push_back({ (std::min)(time, event_.endTime), index_, 1 });
+        if (!event_.isEndFired && prevTime <= event_.endTime && time >= event_.endTime)
+            boundaries_.push_back({ event_.endTime, index_, 2 });
+    }
+    if (state->sampleWeaponHitBoxes) std::stable_sort(boundaries_.begin(), boundaries_.end(), [](const EventBoundary& left_, const EventBoundary& right_)
+    {
+        if (left_.sampleTime != right_.sampleTime) return left_.sampleTime < right_.sampleTime;
+        return left_.phase < right_.phase;
+    });
+    for (const auto& boundary_ : boundaries_)
+    {
+        auto& event_ = events_[boundary_.eventIndex];
+        if (boundary_.phase == 0)
         {
-            if (ev.eventTemplateType == ANIMATION_EVENT_TEMPLATE_TYPE::ATTACK_TEMPLATE)
-            {
-                AttackTemplateRuntime::Start(owner, ev);
-            }
-            if (ev.eventTemplateType == ANIMATION_EVENT_TEMPLATE_TYPE::VFX_TEMPLATE ||
-                !ev.meshVFXAssetPath.empty())
-            {
-                SpawnAnimationMeshVFXEvent(owner, ev);
-            }
-            ApplyAnimationBlackboardWrites(owner, ev.blackboardWrites);
-            if (!ev.startAction.empty()) {
-                CallAnimationAction(owner, ev.startAction);
-                if (state != updatingState_) return;
-            }
-            ev.isFired = true;
+            if (event_.eventTemplateType == ANIMATION_EVENT_TEMPLATE_TYPE::ATTACK_TEMPLATE)
+                AttackTemplateRuntime::Start(owner, event_);
+            if (event_.eventTemplateType == ANIMATION_EVENT_TEMPLATE_TYPE::VFX_TEMPLATE || !event_.meshVFXAssetPath.empty())
+                SpawnAnimationMeshVFXEvent(owner, event_);
+            ApplyAnimationBlackboardWrites(owner, event_.blackboardWrites);
+            event_.isFired = true;
+            if (!event_.startAction.empty()) CallAnimationAction(owner, event_.startAction);
         }
-
-        // 2. 更新イベント (範囲内にいる間ずっと)
-        if (time >= ev.startTime && time <= ev.endTime)
+        else if (boundary_.phase == 1)
         {
-            if (ev.eventTemplateType == ANIMATION_EVENT_TEMPLATE_TYPE::ATTACK_TEMPLATE)
-            {
-                AttackTemplateRuntime::Update(owner, ev, time - ev.startTime);
-            }
-            if (!ev.updateAction.empty()) {
-                CallAnimationAction(owner, ev.updateAction);
-                if (state != updatingState_) return;
-            }
+            if (event_.eventTemplateType == ANIMATION_EVENT_TEMPLATE_TYPE::ATTACK_TEMPLATE)
+                AttackTemplateRuntime::Update(owner, event_, boundary_.sampleTime - event_.startTime);
+            if (!event_.updateAction.empty()) CallAnimationAction(owner, event_.updateAction);
         }
-
-        // 3. End event, fired when endTime is crossed.
-        if (!ev.isEndFired && prevTime <= ev.endTime && time >= ev.endTime)
+        else
         {
-            if (ev.eventTemplateType == ANIMATION_EVENT_TEMPLATE_TYPE::ATTACK_TEMPLATE)
-            {
-                AttackTemplateRuntime::End(owner, ev);
-            }
-            if (!ev.endAction.empty()) {
-                CallAnimationAction(owner, ev.endAction);
-                if (state != updatingState_) return;
-            }
-            ev.isEndFired = true;
+            if (event_.eventTemplateType == ANIMATION_EVENT_TEMPLATE_TYPE::ATTACK_TEMPLATE)
+                AttackTemplateRuntime::End(owner, event_);
+            event_.isEndFired = true;
+            if (!event_.endAction.empty()) CallAnimationAction(owner, event_.endAction);
         }
+        // キャンセルやコンボ遷移後に、旧Stateのイベントを発生させない。
+        if (state != updatingState_) return;
     }
 
     // ループ処理とフラグのリセット

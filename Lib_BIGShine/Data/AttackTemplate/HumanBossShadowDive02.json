@@ -47,7 +47,7 @@
             0.1,
             0
           ],
-          "radius": 5,
+          "radius": 11.0,
           "activeStartTime": 0,
           "activeEndTime": 0.25,
           "allowMultiHit": false
@@ -55,6 +55,13 @@
       ]
     }
   ],
+  "feedback": {
+    "startSoundPath": "Data/Audio/SE/Sonniss/Presentation/BassDropFast.wav",
+    "hitSoundPath": "Data/Audio/SE/Sonniss/Mud/SplatHit.wav",
+    "volume": 0.5,
+    "minDistance": 8.0,
+    "maxDistance": 100.0
+  },
   "cameraShake": {
     "attackScale": 0.5,
     "enabled": true,

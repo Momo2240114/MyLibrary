@@ -4,7 +4,7 @@
     "State": {
         "animIndexA": -1,
         "animIndexB": -1,
-        "animationIndex": 227,
+        "animationIndex": 254,
         "blend2DBackwardAnimationIndex": -1,
         "blend2DBackwardLeft90AnimationIndex": -1,
         "blend2DBackwardLeft90PhaseOffset": 0.0,
@@ -52,7 +52,7 @@
         "blendUseMask": false,
         "customAnimIndex": -1,
         "events": [],
-        "loop": true,
+        "loop": false,
         "name": "TransitionHumanApproach",
         "rootMotion": {
             "applyPositionX": false,
@@ -62,16 +62,17 @@
             "applyRotationY": false,
             "applyRotationZ": false,
             "cutVisualPositionX": true,
-            "cutVisualPositionY": true,
+            "cutVisualPositionY": false,
             "cutVisualPositionZ": true,
             "enable": false,
-            "sourceNodeName": ""
+            "sourceNodeName": "pelvis",
+            "cutVisualWhenDisabled": true
         },
         "rootMotionScale": 0,
         "rootMotionScaleCurveName": "",
         "sequenceClips": [],
         "sequencer": "",
-        "speed": 1,
+        "speed": 1.25,
         "speedCurveName": "",
         "type": 0
     }

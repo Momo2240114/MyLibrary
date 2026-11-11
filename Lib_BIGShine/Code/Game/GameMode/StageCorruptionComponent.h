@@ -30,6 +30,8 @@ public:
     void Restore();
     // 途中再生の準備でも使用できる、侵食済みの端点へ切り替える。
     void Complete();
+    // HumanBoss用Sceneのカメラ設定を第二形態に適用する。
+    void ApplyCameraProfile();
 
 private:
     // 見た目と物理壁へ同じ半径を渡し、発生済みの粒子は寿命まで残す。
@@ -39,6 +41,10 @@ private:
     std::string secondParticleName = "Phase2Environment";
     std::string targetBarrierAssetPath = "Data/Scenes/HumanBossTest/Objects/Wall.json";
     std::string curveName;
+    std::string cameraObjectName = "MainCamera";
+    std::string targetCameraAssetPath = "Data/Scenes/HumanBossTest/Objects/MainCamera.json";
+    nlohmann::json targetCameraProfile;
+    bool cameraProfileApplied = false;
     std::string status;
     float duration = 4.0f;
     bool smoothTransition = true;

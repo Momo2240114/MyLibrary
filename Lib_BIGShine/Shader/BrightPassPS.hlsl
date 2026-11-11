@@ -14,15 +14,20 @@ float4 main(float4 pos : SV_POSITION, float2 uv : TEXCOORD0) : SV_TARGET
 {
     float4 color = tex.Sample(sam, uv);
     
-    // 1. ˆÀ‘SƒK[ƒhFNaN‚â‹É’[‚È’l‚ğ‚±‚±‚ÅÌ‚Ä‚é
+    // 1. å®‰å…¨ã‚¬ãƒ¼ãƒ‰ï¼šNaNã‚„æ¥µç«¯ãªå€¤ã‚’ã“ã“ã§æ¨ã¦ã‚‹
     if (any(isnan(color)) || any(isinf(color)))
         return float4(0, 0, 0, 1);
 
     float m = max(color.r, max(color.g, color.b));
-    float3 extracted = (m > g_threshold) ? color.rgb : 0.0;
+    // é–¾å€¤ä»˜è¿‘ã‚’æ»‘ã‚‰ã‹ã«æŠ½å‡ºã—ã€æ˜ã‚‹ã•ã®å¤‰åŒ–ã§BloomãŒè·³ã­ã‚‹ã®ã‚’æŠ‘ãˆã‚‹ã€‚
+    float knee_ = max(g_threshold * 0.5f, 0.0001f);
+    float soft_ = clamp(m - g_threshold + knee_, 0.0f, 2.0f * knee_);
+    soft_ = soft_ * soft_ / (4.0f * knee_);
+    float contribution_ = max(m - g_threshold, soft_) / max(m, 0.0001f);
+    float3 extracted = color.rgb * contribution_;
     
-    // 2. ‹P“x‚ÌãŒÀ‚ğ§ŒÀ (1.0‚ğ’´‚¦‚½’l‚ğ”F‚ß‚Â‚ÂAˆÙí’l5.0ˆÈã‚ÍƒJƒbƒg)
-    // ‚±‚ê‚É‚æ‚èA1ƒsƒNƒZƒ‹‚ª‹‘å‚ÈlŠp‚É‚È‚é‚Ì‚ğ–h‚°‚Ü‚·
+    // 2. è¼åº¦ã®ä¸Šé™ã‚’åˆ¶é™ (1.0ã‚’è¶…ãˆãŸå€¤ã‚’èªã‚ã¤ã¤ã€ç•°å¸¸å€¤5.0ä»¥ä¸Šã¯ã‚«ãƒƒãƒˆ)
+    // ã“ã‚Œã«ã‚ˆã‚Šã€1ãƒ”ã‚¯ã‚»ãƒ«ãŒå·¨å¤§ãªå››è§’ã«ãªã‚‹ã®ã‚’é˜²ã’ã¾ã™
     extracted = clamp(extracted, 0.0, 5.0);
 
     return float4(extracted, 1.0);
@@ -31,11 +36,11 @@ float4 main(float4 pos : SV_POSITION, float2 uv : TEXCOORD0) : SV_TARGET
 //{
 //    float4 color = tex.Sample(sam, uv);
     
-//    // ‹P“x‚ğŒvZ
+//    // è¼åº¦ã‚’è¨ˆç®—
 //    float brightness = dot(color.rgb, float3(0.2126, 0.7152, 0.0722));
     
-//    // ƒ\ƒtƒgƒj[‚ÌÀ‘•Fè‡’l‚Ì­‚µè‘O‚©‚çŠŠ‚ç‚©‚É’Šo‚µn‚ß‚é
-//    // 0.1 ‚È‚Ç‚Ì•ikneej‚ğ‚½‚¹‚é‚±‚Æ‚ÅAŒõ‚Ì—ÖŠs‚ª_‚ç‚©‚­‚È‚è‚Ü‚·
+//    // ã‚½ãƒ•ãƒˆãƒ‹ãƒ¼ã®å®Ÿè£…ï¼šé–¾å€¤ã®å°‘ã—æ‰‹å‰ã‹ã‚‰æ»‘ã‚‰ã‹ã«æŠ½å‡ºã—å§‹ã‚ã‚‹
+//    // 0.1 ãªã©ã®å¹…ï¼ˆkneeï¼‰ã‚’æŒãŸã›ã‚‹ã“ã¨ã§ã€å…‰ã®è¼ªéƒ­ãŒæŸ”ã‚‰ã‹ããªã‚Šã¾ã™
 //    float knee = 0.1;
 //    float soft = brightness - g_threshold + knee;
 //    soft = clamp(soft, 0, 2.0 * knee);

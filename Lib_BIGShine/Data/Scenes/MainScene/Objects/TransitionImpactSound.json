@@ -25,7 +25,7 @@
         {
             "TypeName": "AudioComponent",
             "Data": {
-                "AudioPath": "Data/Audio/SE/heartbeat2.wav",
+                "AudioPath": "Data/Audio/SE/Sonniss/Presentation/BassDropFast.wav",
                 "IsBGM": false,
                 "Loop": false,
                 "PlayOnStart": false,

@@ -1,0 +1,226 @@
+{
+    "PopIn": {
+        "Duration": 0.6,
+        "Easing": 5,
+        "ScaleFrom": [
+            0.35,
+            0.35
+        ],
+        "ScaleTo": [
+            1,
+            1
+        ],
+        "AlphaFrom": 0,
+        "AlphaTo": 1
+    },
+    "FadeIn": {
+        "Duration": 0.8,
+        "AlphaFrom": 0,
+        "AlphaTo": 1
+    },
+    "FadeOut": {
+        "Duration": 0.8,
+        "AlphaFrom": 1,
+        "AlphaTo": 0
+    },
+    "SlideLeft": {
+        "OffsetFrom": [
+            -180,
+            0
+        ],
+        "OffsetTo": [
+            0,
+            0
+        ],
+        "AlphaFrom": 0,
+        "AlphaTo": 1,
+        "Easing": 4
+    },
+    "SlideRight": {
+        "OffsetFrom": [
+            180,
+            0
+        ],
+        "OffsetTo": [
+            0,
+            0
+        ],
+        "AlphaFrom": 0,
+        "AlphaTo": 1,
+        "Easing": 4
+    },
+    "SlideUp": {
+        "OffsetFrom": [
+            0,
+            100
+        ],
+        "OffsetTo": [
+            0,
+            0
+        ],
+        "AlphaFrom": 0,
+        "AlphaTo": 1,
+        "Easing": 4
+    },
+    "SlideDown": {
+        "OffsetFrom": [
+            0,
+            -100
+        ],
+        "OffsetTo": [
+            0,
+            0
+        ],
+        "AlphaFrom": 0,
+        "AlphaTo": 1,
+        "Easing": 4
+    },
+    "Float": {
+        "Duration": 2.4,
+        "Loop": true,
+        "OffsetAmplitude": [
+            0,
+            12
+        ]
+    },
+    "Sway": {
+        "Duration": 3,
+        "Loop": true,
+        "RotationAmplitude": 4
+    },
+    "Pulse": {
+        "Duration": 1.8,
+        "Loop": true,
+        "ScaleAmplitude": [
+            0.06,
+            0.06
+        ]
+    },
+    "Heartbeat": {
+        "Duration": 0.8,
+        "Loop": true,
+        "ScaleAmplitude": [
+            0.09,
+            0.09
+        ],
+        "Cycles": 2
+    },
+    "Shake": {
+        "Duration": 0.7,
+        "Loop": true,
+        "OffsetAmplitude": [
+            4,
+            0
+        ],
+        "Cycles": 7
+    },
+    "Blink": {
+        "Duration": 1.1,
+        "Loop": true,
+        "AlphaFrom": 0.65,
+        "AlphaTo": 0.65,
+        "AlphaAmplitude": 0.35
+    },
+    "Rotate": {
+        "Duration": 5,
+        "Loop": true,
+        "RotationFrom": 0,
+        "RotationTo": 360,
+        "Easing": 0
+    },
+    "FlipScale": {
+        "Duration": 0.7,
+        "ScaleFrom": [
+            0.01,
+            1
+        ],
+        "ScaleTo": [
+            1,
+            1
+        ],
+        "Easing": 5
+    },
+    "SquashStretch": {
+        "Duration": 1.4,
+        "Loop": true,
+        "ScaleAmplitude": [
+            0.1,
+            -0.08
+        ]
+    },
+    "ZoomOut": {
+        "Duration": 0.8,
+        "ScaleFrom": [
+            1.8,
+            1.8
+        ],
+        "ScaleTo": [
+            1,
+            1
+        ],
+        "AlphaFrom": 0,
+        "AlphaTo": 1,
+        "Easing": 4
+    },
+    "SpinIn": {
+        "Duration": 0.8,
+        "RotationFrom": -35,
+        "ScaleFrom": [
+            0.5,
+            0.5
+        ],
+        "AlphaFrom": 0,
+        "Easing": 5
+    },
+    "Bounce": {
+        "Duration": 1.5,
+        "Loop": true,
+        "OffsetAmplitude": [
+            0,
+            -18
+        ],
+        "ScaleAmplitude": [
+            0.03,
+            -0.03
+        ]
+    },
+    "SwingIn": {
+        "Duration": 0.9,
+        "OffsetFrom": [
+            0,
+            -60
+        ],
+        "RotationFrom": -25,
+        "Easing": 5
+    },
+    "DelayedPop": {
+        "Duration": 0.6,
+        "Delay": 0.4,
+        "ScaleFrom": [
+            0.1,
+            0.1
+        ],
+        "AlphaFrom": 0,
+        "Easing": 5
+    },
+    "TrailSweep": {
+        "Duration": 1.8,
+        "Loop": true,
+        "OffsetAmplitude": [
+            42,
+            0
+        ],
+        "RotationAmplitude": 8
+    },
+    "Breathing": {
+        "Duration": 3.6,
+        "Loop": true,
+        "ScaleAmplitude": [
+            0.025,
+            0.025
+        ],
+        "AlphaFrom": 0.9,
+        "AlphaTo": 0.9,
+        "AlphaAmplitude": 0.1
+    }
+}

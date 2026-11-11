@@ -1,4 +1,5 @@
 #pragma once
+#include <atomic>
 
 
 #include "Engine/GamePlay/Scene/SceneManager.h"
@@ -23,6 +24,9 @@ public:
 	// GUI描画処理
 	virtual void DrawGUI() {}
 
+    // タイトルなどマウスで操作するSceneは、ゲーム専用起動でもカーソルを解放する。
+    virtual bool RequiresFreeCursor() const { return false; }
+
 	//準備完了しているか
 	bool IsReady()const { return ready; }
 
@@ -37,7 +41,8 @@ protected:
 		SceneManager::ChangeScene(std::make_unique<T>());
 	}
 
-	bool ready;
+	// ロードスレッドの初期化結果を、Scene切替側へ確実に公開する。
+	std::atomic<bool> ready{false};
 
 	std::shared_ptr<ActionRegistry> actionRegistry;
 

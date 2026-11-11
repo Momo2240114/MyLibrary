@@ -1,0 +1,17 @@
+{
+    "LogoPath": "Data/Icons/BigShine/Source/BigShine_Simplified.png",
+    "LogoCenterX": 0.5,
+    "LogoTop": 0.20,
+    "LogoWidth": 0.14,
+    "AccentColor": [0.30, 0.68, 0.95],
+    "LightColor": [0.72, 0.91, 1.0],
+    "ProgressLeft": 0.28,
+    "ProgressTop": 0.68,
+    "ProgressWidth": 0.44,
+    "BackgroundSpeed": 0.06,
+    "ParticleIntensity": 0.4,
+    "LoadingText": "PREPARING YOUR WORKSPACE",
+    "ReadyText": "READY TO CREATE",
+    "FailureText": "PREPARATION FAILED",
+    "ShowHints": false
+}

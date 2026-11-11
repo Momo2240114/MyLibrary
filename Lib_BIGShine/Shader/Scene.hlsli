@@ -1,5 +1,5 @@
-#ifndef SCENE_HLSLI // ‚à‚µ’è‹`‚³‚ê‚Ä‚¢‚È‚¯‚ê‚Îc
-#define SCENE_HLSLI // ’è‹`‚·‚é
+#ifndef SCENE_HLSLI // ã‚‚ã—å®šç¾©ã•ã‚Œã¦ã„ãªã‘ã‚Œã°â€¦
+#define SCENE_HLSLI // å®šç¾©ã™ã‚‹
 
 cbuffer CbScene : register(b7)
 {
@@ -10,15 +10,17 @@ cbuffer CbScene : register(b7)
     
     float4 z_buffer_parameteres;
     
-    // “_ŒõŒ¹ŠÇ——p
-    int numPointLights; // Œ»İƒV[ƒ“‚É‚ ‚é—LŒø‚Èƒ|ƒCƒ“ƒgƒ‰ƒCƒg”
-    int numSpotLights; // Œ»İƒV[ƒ“‚É‚ ‚é—LŒø‚ÈƒXƒ|ƒbƒgƒ‰ƒCƒg”
-    float2 scenePadding; // 16ƒoƒCƒg‹«ŠE‡‚í‚¹
+    // ç‚¹å…‰æºç®¡ç†ç”¨
+    int numPointLights; // ç¾åœ¨ã‚·ãƒ¼ãƒ³ã«ã‚ã‚‹æœ‰åŠ¹ãªãƒã‚¤ãƒ³ãƒˆãƒ©ã‚¤ãƒˆæ•°
+    int numSpotLights; // ç¾åœ¨ã‚·ãƒ¼ãƒ³ã«ã‚ã‚‹æœ‰åŠ¹ãªã‚¹ãƒãƒƒãƒˆãƒ©ã‚¤ãƒˆæ•°
+    // PostEffectã‚’é€šã™ã‚·ãƒ¼ãƒ³ã¨ã€ç›´æ¥è¡¨ç¤ºã™ã‚‹Editorãƒ—ãƒ¬ãƒ“ãƒ¥ãƒ¼ã‚’åŒºåˆ¥ã™ã‚‹ã€‚
+    float outputLinearColor;
+    float scenePadding; // 16ãƒã‚¤ãƒˆå¢ƒç•Œåˆã‚ã›
     
     row_major float4x4 invViewProjection;
 };
 
-// --- \‘¢‘Ì’è‹` (C++‚ÌPointLightData‚Æˆê’v‚³‚¹‚é) ---
+// --- æ§‹é€ ä½“å®šç¾© (C++ã®PointLightDataã¨ä¸€è‡´ã•ã›ã‚‹) ---
 struct PointLightData
 {
     float3 position;
@@ -34,13 +36,13 @@ struct SpotLightData
     float3 direction;
     float intensity;
     float3 color;
-    float innerAngle; // “x”–@A‚Ü‚½‚Íƒ‰ƒWƒAƒ“i¡‰ñ‚ÍŒvZ“à‚Åcos‚É•ÏŠ·j
+    float innerAngle; // åº¦æ•°æ³•ã€ã¾ãŸã¯ãƒ©ã‚¸ã‚¢ãƒ³ï¼ˆä»Šå›ã¯è¨ˆç®—å†…ã§cosã«å¤‰æ›ï¼‰
     float outerAngle;
     float padding;
 };
 
-// --- \‘¢‰»ƒoƒbƒtƒ@ (t5) ---
+// --- æ§‹é€ åŒ–ãƒãƒƒãƒ•ã‚¡ (t5) ---
 StructuredBuffer<PointLightData> pointLights : register(t5);
-StructuredBuffer<SpotLightData> spotLights : register(t6); // ’Ç‰Á
+StructuredBuffer<SpotLightData> spotLights : register(t6); // è¿½åŠ 
 
-#endif // SCENE_HLSLI ‚ÌI‚í‚è
+#endif // SCENE_HLSLI ã®çµ‚ã‚ã‚Š

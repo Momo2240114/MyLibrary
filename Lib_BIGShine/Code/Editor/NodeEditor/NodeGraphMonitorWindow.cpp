@@ -232,14 +232,14 @@ NodeGraphMonitorWindow::NodeGraphMonitorWindow(GameObjectManager* manager_)
 
 void NodeGraphMonitorWindow::Draw()
 {
-    // 描画開始前に対象を解決しておき、メニュー・概要・グラフ本体で同じ参照を使う。
-    std::shared_ptr<GameObject> targetObject_ = ResolveTargetObject();
-
     if (!BeginEditorWindow(nullptr, ImGuiWindowFlags_MenuBar))
     {
         EndEditorWindow();
         return;
     }
+
+    // 非表示タブでは対象検索を省き、表示中だけシーン内Objectから監視対象を解決する。
+    std::shared_ptr<GameObject> targetObject_ = ResolveTargetObject();
 
     if (ImGui::BeginMenuBar())
     {

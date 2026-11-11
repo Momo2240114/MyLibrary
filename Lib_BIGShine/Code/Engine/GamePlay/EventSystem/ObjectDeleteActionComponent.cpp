@@ -56,7 +56,8 @@ void ObjectDeleteActionComponent::DeleteObject(const std::shared_ptr<GameObject>
         for (const auto& child_ : actor_->transform->children) if (child_) if (const auto childObject_ = child_->gameObject.lock()) self_(self_, childObject_);
     };
     releaseTargets_(releaseTargets_, object_);
-    owner_->GetManager().Destroy(object_);
+    // 演出による破棄は配置そのものの削除と分け、途中でScene保存しても初期配置を失わない。
+    owner_->GetManager().DestroyRuntimeObject(object_);
 }
 
 void ObjectDeleteActionComponent::CleanupSpawnedObjects(bool includeCommitted_)

@@ -1,0 +1,94 @@
+{
+    "AssetType": "CurveTrack",
+    "AssetVersion": 1,
+    "Curve": {
+        "Name": "Player.WeakCombo3.Speed",
+        "Type": 3,
+        "Color": 4282694655,
+        "Visible": true,
+        "Points": [
+            [
+                0.0,
+                1.75
+            ],
+            [
+                0.053333329094781154,
+                1.5
+            ],
+            [
+                0.1333333227369529,
+                1.4
+            ],
+            [
+                0.20666665024227696,
+                2.6
+            ],
+            [
+                0.3199999745686869,
+                2.6
+            ],
+            [
+                0.39999996821085865,
+                1.7
+            ],
+            [
+                0.4999999602635733,
+                1.6
+            ],
+            [
+                1.0,
+                1.6
+            ]
+        ],
+        "PointOptions": [
+            {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+            },
+            {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+            },
+            {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+            },
+            {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+            },
+            {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+            },
+            {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+            },
+            {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+            },
+            {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+            }
+        ]
+    },
+    "MinBounds": [
+        0.0,
+        0.0
+    ],
+    "MaxBounds": [
+        1.0,
+        3.2
+    ]
+}

@@ -26,8 +26,9 @@ enum class SkillPhaseEnd
 struct SkillPhase
 {
     std::string animationState;
+    std::string airAnimationState; // 空なら通常Stateを使用し、Playerの空中発動時だけ再生Stateを切り替える。
     std::string sequence;
-    // 空なら補正なし。敵の実行担当が段ごとの既存MotionWarpプリセットを選ぶ。
+    // 空なら補正なし。プレイヤーと敵の実行担当が段ごとのMotionWarpプリセットを選ぶ。
     std::string motionWarpPreset;
     bool continueSequence = false; // 前段と同じSequenceを継続し、コンボ全段の予約を維持する。
     bool playAnimationFromSequence = false; // 時刻0のSequence Actionで再生し、Phase側の直接再生を省く。

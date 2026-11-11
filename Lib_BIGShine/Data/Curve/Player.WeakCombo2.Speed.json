@@ -1,0 +1,103 @@
+{
+    "AssetType": "CurveTrack",
+    "AssetVersion": 1,
+    "Curve": {
+        "Name": "Player.WeakCombo2.Speed",
+        "Type": 3,
+        "Color": 4282694655,
+        "Visible": true,
+        "Points": [
+            [
+                0.0,
+                2.15
+            ],
+            [
+                0.024193546340319345,
+                1.8
+            ],
+            [
+                0.05322580194870256,
+                1.75
+            ],
+            [
+                0.09677418536127738,
+                2.75
+            ],
+            [
+                0.20322578925868248,
+                2.75
+            ],
+            [
+                0.2516128819393212,
+                2.15
+            ],
+            [
+                0.3967741599812372,
+                2.05
+            ],
+            [
+                0.5564515658273449,
+                2.1
+            ],
+            [
+                1.0,
+                2.1
+            ]
+        ],
+        "PointOptions": [
+            {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+            },
+            {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+            },
+            {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+            },
+            {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+            },
+            {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+            },
+            {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+            },
+            {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+            },
+            {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+            },
+            {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+            }
+        ]
+    },
+    "MinBounds": [
+        0.0,
+        0.0
+    ],
+    "MaxBounds": [
+        1.0,
+        3.2
+    ]
+}

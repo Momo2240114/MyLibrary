@@ -7,6 +7,8 @@
 #include "Engine/Graphics/VFX/MeshVFXComponent.h"
 #include "Engine/Math/Curve/CurveComponent.h"
 #include "Engine/GamePlay/Camera/CameraLockOnComponent.h"
+#include "Engine/GamePlay/Camera/ThirdPersonCameraComponent.h"
+#include "Engine/GamePlay/Camera/CameraCollisionComponent.h"
 #include <algorithm>
 #include <cmath>
 #include <fstream>
@@ -32,6 +34,11 @@ void StageCorruptionComponent::RegisterActions()
     {
         const auto owner_ = weakOwner_.lock();
         if (const auto component_ = owner_ ? owner_->GetComponent<StageCorruptionComponent>() : nullptr) component_->Restore();
+    });
+    owner_->RegisterGlobalAction("StageCorruption", "ApplyCameraProfile", [weakOwner_]()
+    {
+        const auto owner_ = weakOwner_.lock();
+        if (const auto component_ = owner_ ? owner_->GetComponent<StageCorruptionComponent>() : nullptr) component_->ApplyCameraProfile();
     });
     owner_->RegisterGlobalAction("StageCorruption", "Complete", [weakOwner_]()
     {
@@ -113,6 +120,16 @@ void StageCorruptionComponent::Begin()
 
 void StageCorruptionComponent::Restore()
 {
+    BS_PROFILE_SCOPE("StageCorruptionComponent::Restore");
+    const auto profileOwner_ = GetGameObject();
+    const auto cameraObject_ = profileOwner_ && profileOwner_->manager ? profileOwner_->GetManager().Find(cameraObjectName) : nullptr;
+    if (cameraObject_)
+    {
+        if (const auto camera_ = cameraObject_->GetComponent<CameraLockOnComponent>()) camera_->ClearRuntimeSettings();
+        if (const auto camera_ = cameraObject_->GetComponent<ThirdPersonCameraComponent>()) camera_->ClearRuntimeSettings();
+        if (const auto camera_ = cameraObject_->GetComponent<CameraCollisionComponent>()) camera_->ClearRuntimeSettings();
+    }
+    cameraProfileApplied = false;
     if (!Prepare()) return;
     playing = false;
     elapsed = 0.0f;
@@ -201,12 +218,61 @@ void StageCorruptionComponent::Apply(float rate_)
     }
 }
 
+void StageCorruptionComponent::ApplyCameraProfile()
+{
+    BS_PROFILE_SCOPE("StageCorruptionComponent::ApplyCameraProfile");
+    if (cameraProfileApplied) return;
+    const auto owner_ = GetGameObject();
+    if (!owner_ || !owner_->manager || !Prepare()) return;
+    const auto object_ = owner_->GetManager().Find(cameraObjectName);
+    if (!object_) { status = "Gameplay camera missing"; return; }
+    try
+    {
+        if (targetCameraProfile.is_null())
+        {
+            std::ifstream file_(targetCameraAssetPath);
+            if (!file_.is_open()) { status = "HumanBoss camera asset unavailable"; return; }
+            file_ >> targetCameraProfile;
+        }
+        // 対象の生成前でも適用できるよう、LockOnは戦闘引渡しActionが有効化する。
+        for (const auto& component_ : targetCameraProfile.at("Components"))
+        {
+            const auto type_ = component_.value("TypeName", std::string{});
+            auto settings_ = component_.at("Data");
+            if (type_ == "CameraLockOnComponent")
+            {
+                settings_["lockOnEnabled"] = false;
+                settings_["enableCollisionVerticalCorrection"] = false;
+                if (const auto camera_ = object_->GetComponent<CameraLockOnComponent>()) camera_->ApplyRuntimeSettings(settings_);
+            }
+            else if (type_ == "ThirdPersonCameraComponent")
+            {
+                if (const auto camera_ = object_->GetComponent<ThirdPersonCameraComponent>()) camera_->ApplyRuntimeSettings(settings_);
+            }
+            else if (type_ == "CameraCollisionComponent")
+            {
+                if (const auto camera_ = object_->GetComponent<CameraCollisionComponent>()) camera_->ApplyRuntimeSettings(settings_);
+            }
+        }
+        cameraProfileApplied = true;
+        // プロファイル読込で設定を切り替えた後も、移行中の実際のバリア半径を優先する。
+        Apply(currentRate);
+    }
+    catch (const nlohmann::json::exception&)
+    {
+        status = "HumanBoss camera asset is invalid";
+    }
+}
+
 void StageCorruptionComponent::Gui()
 {
     ImGui::InputText("Barrier Object", &barrierName);
     ImGui::InputText("First Environment", &firstParticleName);
     ImGui::InputText("Second Environment", &secondParticleName);
     ImGui::InputText("HumanBoss Barrier Asset", &targetBarrierAssetPath);
+    ImGui::InputText("Gameplay Camera", &cameraObjectName);
+    if (ImGui::InputText("HumanBoss Camera Asset", &targetCameraAssetPath)) { targetCameraProfile = nlohmann::json{}; cameraProfileApplied = false; }
+    if (ImGui::Button("Apply Second Form Camera")) ApplyCameraProfile();
     ImGui::InputText("Curve Track", &curveName);
     ImGui::Checkbox("Smooth Transition", &smoothTransition);
     ImGui::DragFloat("Duration", &duration, 0.05f, 0.0f, 60.0f);
@@ -229,7 +295,7 @@ void StageCorruptionComponent::Serialize(nlohmann::json& json_) const
 {
     json_ = { {"BarrierName", barrierName}, {"FirstParticleName", firstParticleName},
         {"SecondParticleName", secondParticleName}, {"TargetBarrierAssetPath", targetBarrierAssetPath},
-        {"CurveName", curveName}, {"Duration", duration}, {"SmoothTransition", smoothTransition},
+        {"CameraObjectName", cameraObjectName}, {"TargetCameraAssetPath", targetCameraAssetPath}, {"CurveName", curveName}, {"Duration", duration}, {"SmoothTransition", smoothTransition},
         {"TargetColor", {targetColor.x, targetColor.y, targetColor.z, targetColor.w}},
         {"TargetEdgeColor", {targetEdgeColor.x, targetEdgeColor.y, targetEdgeColor.z, targetEdgeColor.w}} };
 }
@@ -241,6 +307,10 @@ void StageCorruptionComponent::Deserialize(const nlohmann::json& json_)
     secondParticleName = json_.value("SecondParticleName", std::string("Phase2Environment"));
     targetBarrierAssetPath = json_.value("TargetBarrierAssetPath", std::string("Data/Scenes/HumanBossTest/Objects/Wall.json"));
     curveName = json_.value("CurveName", std::string{});
+    cameraObjectName = json_.value("CameraObjectName", std::string("MainCamera"));
+    targetCameraAssetPath = json_.value("TargetCameraAssetPath", std::string("Data/Scenes/HumanBossTest/Objects/MainCamera.json"));
+    targetCameraProfile = nlohmann::json{};
+    cameraProfileApplied = false;
     duration = (std::max)(json_.value("Duration", 4.0f), 0.0f);
     smoothTransition = json_.value("SmoothTransition", true);
     if (json_.contains("TargetColor") && json_["TargetColor"].is_array() && json_["TargetColor"].size() == 4)

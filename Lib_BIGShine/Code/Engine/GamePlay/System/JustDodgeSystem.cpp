@@ -126,6 +126,8 @@ void JustDodgeSystem::HandleJustDodge(
         BS_LOG_WARNING(LOG_CATEGORY::GAME, "[JustDodge] Rejected: attacker or dodger missing.");
         return;
     }
+    // 扇形の安全側では広域判定だけを理由にJustDodgeを成立させない。
+    if (!hitBox_.IsWithinAttackSector(dodger_.get())) return;
     if (!hitBox_.IsEnabled() || !justDodgeCollider_.IsEnabled())
     {
         BS_LOG_WARNING(LOG_CATEGORY::GAME, "[JustDodge] Rejected: HitBox or JustDodgeCollider disabled.");

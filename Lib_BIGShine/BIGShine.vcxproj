@@ -25,6 +25,22 @@
       <Configuration>Shipping</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Engine_Debug|x64">
+      <Configuration>Engine_Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Engine_Release|x64">
+      <Configuration>Engine_Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Game_Debug|x64">
+      <Configuration>Game_Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Game_Release|x64">
+      <Configuration>Game_Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{0DDBE550-8551-4506-9A5A-4DD100C00C48}</ProjectGuid>
@@ -47,13 +63,13 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+  <PropertyGroup Condition="('$(Configuration)|$(Platform)'=='Debug|x64' or '$(Configuration)|$(Platform)'=='Engine_Debug|x64' or '$(Configuration)|$(Platform)'=='Game_Debug|x64')" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+  <PropertyGroup Condition="('$(Configuration)|$(Platform)'=='Release|x64' or '$(Configuration)|$(Platform)'=='Engine_Release|x64')" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
@@ -67,7 +83,7 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'" Label="Configuration">
+  <PropertyGroup Condition="('$(Configuration)|$(Platform)'=='Shipping|x64' or '$(Configuration)|$(Platform)'=='Game_Release|x64')" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
@@ -75,8 +91,10 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-  <ImportGroup Label="ExtensionSettings"></ImportGroup>
-  <ImportGroup Label="Shared"></ImportGroup>
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(ProjectDir)CustomExternalDependencies.props" />
@@ -85,11 +103,11 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(ProjectDir)CustomExternalDependencies.props" />
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+  <ImportGroup Label="PropertySheets" Condition="('$(Configuration)|$(Platform)'=='Debug|x64' or '$(Configuration)|$(Platform)'=='Engine_Debug|x64' or '$(Configuration)|$(Platform)'=='Game_Debug|x64')">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(ProjectDir)CustomExternalDependencies.props" />
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+  <ImportGroup Label="PropertySheets" Condition="('$(Configuration)|$(Platform)'=='Release|x64' or '$(Configuration)|$(Platform)'=='Engine_Release|x64')">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(ProjectDir)CustomExternalDependencies.props" />
   </ImportGroup>
@@ -97,7 +115,7 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(ProjectDir)CustomExternalDependencies.props" />
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">
+  <ImportGroup Label="PropertySheets" Condition="('$(Configuration)|$(Platform)'=='Shipping|x64' or '$(Configuration)|$(Platform)'=='Game_Release|x64')">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(ProjectDir)CustomExternalDependencies.props" />
   </ImportGroup>
@@ -108,7 +126,7 @@
     <LibraryPath>$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
     <MultiProcFXC>true</MultiProcFXC>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+  <PropertyGroup Condition="('$(Configuration)|$(Platform)'=='Debug|x64' or '$(Configuration)|$(Platform)'=='Engine_Debug|x64' or '$(Configuration)|$(Platform)'=='Game_Debug|x64')">
     <LinkIncremental>true</LinkIncremental>
     <MultiProcFXC>true</MultiProcFXC>
   </PropertyGroup>
@@ -116,7 +134,7 @@
     <LinkIncremental>false</LinkIncremental>
     <MultiProcFXC>true</MultiProcFXC>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+  <PropertyGroup Condition="('$(Configuration)|$(Platform)'=='Release|x64' or '$(Configuration)|$(Platform)'=='Engine_Release|x64')">
     <LinkIncremental>false</LinkIncremental>
     <MultiProcFXC>true</MultiProcFXC>
   </PropertyGroup>
@@ -124,13 +142,14 @@
     <LinkIncremental>false</LinkIncremental>
     <MultiProcFXC>true</MultiProcFXC>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">
+  <PropertyGroup Condition="('$(Configuration)|$(Platform)'=='Shipping|x64' or '$(Configuration)|$(Platform)'=='Game_Release|x64')">
     <LinkIncremental>false</LinkIncremental>
     <MultiProcFXC>true</MultiProcFXC>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PrecompiledHeader></PrecompiledHeader>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>USE_IMGUI;WIN32;BS_BUILD_DEBUG;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -143,18 +162,21 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
-      <IgnoreSpecificDefaultLibraries></IgnoreSpecificDefaultLibraries>
-      <IgnoreAllDefaultLibraries></IgnoreAllDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+      <IgnoreAllDefaultLibraries>
+      </IgnoreAllDefaultLibraries>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <FxCompile>
       <ShaderModel>5.0</ShaderModel>
-      <ObjectFileOutput>$(ProjectDir)Shader\%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput>$(ProjectDir)Data\Shader\%(Filename).cso</ObjectFileOutput>
     </FxCompile>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+  <ItemDefinitionGroup Condition="('$(Configuration)|$(Platform)'=='Debug|x64' or '$(Configuration)|$(Platform)'=='Engine_Debug|x64' or '$(Configuration)|$(Platform)'=='Game_Debug|x64')">
     <ClCompile>
-      <PrecompiledHeader></PrecompiledHeader>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>BS_BUILD_DEBUG;BS_FORCE_ENABLE_TRACY;TRACY_ENABLE;TRACY_ON_DEMAND;TRACY_NO_SYSTEM_TRACING;TRACY_NO_SAMPLING;TRACY_NO_CONTEXT_SWITCH;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -171,13 +193,14 @@
     </Link>
     <FxCompile>
       <ShaderModel>5.0</ShaderModel>
-      <ObjectFileOutput>$(ProjectDir)Shader\%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput>$(ProjectDir)Data\Shader\%(Filename).cso</ObjectFileOutput>
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader></PrecompiledHeader>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -197,13 +220,14 @@
     </Link>
     <FxCompile>
       <ShaderModel>5.0</ShaderModel>
-      <ObjectFileOutput>$(ProjectDir)Shader\%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput>$(ProjectDir)Data\Shader\%(Filename).cso</ObjectFileOutput>
     </FxCompile>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+  <ItemDefinitionGroup Condition="('$(Configuration)|$(Platform)'=='Release|x64' or '$(Configuration)|$(Platform)'=='Engine_Release|x64')">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader></PrecompiledHeader>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -223,13 +247,14 @@
     </Link>
     <FxCompile>
       <ShaderModel>5.0</ShaderModel>
-      <ObjectFileOutput>$(ProjectDir)Shader\%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput>$(ProjectDir)Data\Shader\%(Filename).cso</ObjectFileOutput>
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DevelopmentEditor|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader></PrecompiledHeader>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -249,13 +274,14 @@
     </Link>
     <FxCompile>
       <ShaderModel>5.0</ShaderModel>
-      <ObjectFileOutput>$(ProjectDir)Shader\%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput>$(ProjectDir)Data\Shader\%(Filename).cso</ObjectFileOutput>
     </FxCompile>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">
+  <ItemDefinitionGroup Condition="('$(Configuration)|$(Platform)'=='Shipping|x64' or '$(Configuration)|$(Platform)'=='Game_Release|x64')">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader></PrecompiledHeader>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -275,30 +301,30 @@
     </Link>
     <FxCompile>
       <ShaderModel>5.0</ShaderModel>
-      <ObjectFileOutput>$(ProjectDir)Shader\%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput>$(ProjectDir)Data\Shader\%(Filename).cso</ObjectFileOutput>
       <AdditionalOptions>/O3 %(AdditionalOptions)</AdditionalOptions>
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Platform)'=='x64'">
     <ClCompile>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      <AdditionalOptions Condition="('$(Configuration)|$(Platform)'=='Debug|x64' or '$(Configuration)|$(Platform)'=='Engine_Debug|x64' or '$(Configuration)|$(Platform)'=='Game_Debug|x64')">
         /utf-8 %(AdditionalOptions)
       </AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      <AdditionalOptions Condition="('$(Configuration)|$(Platform)'=='Release|x64' or '$(Configuration)|$(Platform)'=='Engine_Release|x64')">
         /utf-8 %(AdditionalOptions)
       </AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='DevelopmentEditor|x64'">
         /utf-8 %(AdditionalOptions)
       </AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">
+      <AdditionalOptions Condition="('$(Configuration)|$(Platform)'=='Shipping|x64' or '$(Configuration)|$(Platform)'=='Game_Release|x64')">
         /utf-8 %(AdditionalOptions)
       </AdditionalOptions>
-      <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ProgramDatabase</DebugInformationFormat>
-      <EnableParallelCodeGeneration Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</EnableParallelCodeGeneration>
-      <EnableParallelCodeGeneration Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</EnableParallelCodeGeneration>
+      <DebugInformationFormat Condition="('$(Configuration)|$(Platform)'=='Debug|x64' or '$(Configuration)|$(Platform)'=='Engine_Debug|x64' or '$(Configuration)|$(Platform)'=='Game_Debug|x64')">ProgramDatabase</DebugInformationFormat>
+      <EnableParallelCodeGeneration Condition="('$(Configuration)|$(Platform)'=='Debug|x64' or '$(Configuration)|$(Platform)'=='Engine_Debug|x64' or '$(Configuration)|$(Platform)'=='Game_Debug|x64')">true</EnableParallelCodeGeneration>
+      <EnableParallelCodeGeneration Condition="('$(Configuration)|$(Platform)'=='Release|x64' or '$(Configuration)|$(Platform)'=='Engine_Release|x64')">true</EnableParallelCodeGeneration>
       <EnableParallelCodeGeneration Condition="'$(Configuration)|$(Platform)'=='DevelopmentEditor|x64'">true</EnableParallelCodeGeneration>
-      <EnableParallelCodeGeneration Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">true</EnableParallelCodeGeneration>
+      <EnableParallelCodeGeneration Condition="('$(Configuration)|$(Platform)'=='Shipping|x64' or '$(Configuration)|$(Platform)'=='Game_Release|x64')">true</EnableParallelCodeGeneration>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -337,6 +363,28 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Code\Engine\UI\TransitionParameters.cpp" />
+    <ClCompile Include="Code\Engine\UI\TransitionSequence.cpp" />
+    <ClCompile Include="Code\Engine\UI\ITransitionEffect.cpp" />
+    <ClCompile Include="Code\Engine\UI\ShaderTransitionEffect.cpp" />
+    <ClCompile Include="Code\Engine\UI\ScreenTransitionManager.cpp" />
+    <ClCompile Include="Code\Engine\UI\ScreenTransitionComponent.cpp" />
+    <ClCompile Include="Code\Engine\UI\LoadingPresentation.cpp" />
+    <ClCompile Include="Code\Engine\UI\LoadingPresentationComponent.cpp" />
+    <ClCompile Include="Code\Engine\UI\GameMenuComponent.cpp" />
+    <ClCompile Include="Code\Engine\UI\FadeTransition.cpp" />
+    <ClCompile Include="Code\Engine\UI\RadialTransition.cpp" />
+    <ClCompile Include="Code\Engine\UI\SlashTransition.cpp" />
+    <ClCompile Include="Code\Engine\UI\DissolveTransition.cpp" />
+    <ClCompile Include="Code\Engine\UI\ShutterTransition.cpp" />
+    <ClCompile Include="Code\Engine\UI\WipeTransition.cpp" />
+    <ClCompile Include="Code\Engine\UI\TextureMaskTransition.cpp" />
+    <ClCompile Include="Code\Editor\Window\BossFinishWindow.cpp" />
+    <ClCompile Include="Code\Game\AI\Human\HumanBossAIComponent.Berserk.cpp" />
+    <ClCompile Include="Code\Game\GameMode\BossFinishDirector.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Scene\SceneLoadRequest.cpp" />
+    <ClCompile Include="Code\Editor\GamePackageExporter.cpp" />
+    <ClCompile Include="Code\Engine\Core\GameRuntimeSettings.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\EventSystem\ObjectDeleteActionComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\EventSystem\PrefabSpawnActionComponent.cpp" />
     <ClCompile Include="Code\Game\GameMode\StageCorruptionComponent.cpp" />
@@ -360,6 +408,8 @@
     <ClCompile Include="Code\Editor\Workspace\EditorRenderTarget.cpp" />
     <ClCompile Include="Code\Editor\Workspace\AudioWorkspaceWindow.cpp" />
     <ClCompile Include="Code\Editor\Workspace\ParticleEditorWindow.cpp" />
+    <ClCompile Include="Code\Editor\Workspace\CinematicEditorWindow.cpp" />
+    <ClCompile Include="Code\Editor\Workspace\CinematicSequenceEditor.cpp" />
     <ClCompile Include="Code\Editor\Workspace\PlayerStateEditorWindow.cpp" />
     <ClCompile Include="Code\Editor\Workspace\PrefabWorkspaceWindow.cpp" />
     <ClCompile Include="Code\Editor\Workspace\UIWidgetEditorWindow.cpp" />
@@ -544,6 +594,7 @@
     <ClCompile Include="Code\Engine\GamePlay\Combat\AttackTemplateManager.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Combat\AttackEffectHitComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Combat\AttackTemplateRuntime.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Combat\AttackTelegraphRuntime.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Combat\CombatStatsComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Combat\ProjectileMotionComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\VFX\DangerAreaComponent.cpp" />
@@ -565,6 +616,12 @@
     <ClCompile Include="Code\Engine\UI\NumberSwitcher.cpp" />
     <ClCompile Include="Code\Engine\UI\UIAnimationPlayerComponent.cpp" />
     <ClCompile Include="Code\Engine\UI\UIProgressBarComponent.cpp" />
+    <ClCompile Include="Code\Engine\UI\BattleHudComponent.cpp" />
+    <ClCompile Include="Code\Engine\UI\MenuNavigationComponent.cpp" />
+    <ClCompile Include="Code\Engine\UI\MenuPresentation.cpp" />
+    <ClCompile Include="Code\Engine\UI\ScreenFadeComponent.cpp" />
+    <ClCompile Include="Code\Engine\UI\ScenePresentationComponent.cpp" />
+    <ClCompile Include="Code\Engine\UI\InputIconAtlas.cpp" />
     <ClCompile Include="Code\Engine\UI\UISpriteSheetComponent.cpp" />
     <ClCompile Include="Code\Engine\UI\UITextComponent.cpp" />
     <ClCompile Include="Code\Engine\UI\BossNamePresentationComponent.cpp" />
@@ -574,7 +631,9 @@
     <ClCompile Include="Code\Engine\UI\WidgetBoardComponent.cpp" />
     <ClCompile Include="Code\Game\AI\Human\HumanBossAIComponent.Mind.cpp" />
     <ClCompile Include="Code\Game\AI\Human\HumanBossAIComponent.cpp" />
+    <ClCompile Include="Code\Game\AI\Human\HumanBossAITraceComponent.cpp" />
     <ClCompile Include="Code\Game\AI\Human\HumanBossActionComponent.cpp" />
+    <ClCompile Include="Code\Game\AI\Human\HumanBossActionComponent.Ranged.cpp" />
     <ClCompile Include="Code\Game\AI\Dragon\DragonAIComponent.cpp" />
     <ClCompile Include="Code\Game\AI\Dragon\DragonAttackControllerComponent.cpp" />
     <ClCompile Include="Code\Game\AI\Dragon\DragonBodyPartHurtBoxComponent.cpp" />
@@ -583,6 +642,7 @@
     <ClCompile Include="Code\Game\Charcter\Player\PlayerActionState.cpp" />
     <ClCompile Include="Code\Game\Charcter\Player\PlayerAttackState.cpp" />
     <ClCompile Include="Code\Game\Charcter\Player\PlayerControllerComponent.cpp" />
+    <ClCompile Include="Code\Game\Charcter\Player\PlayerControllerComponent.Execution.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Combat\JustDodgeReactionComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Combat\JustGuardReactionComponent.cpp" />
     <ClCompile Include="Code\Game\Charcter\Player\PlayerDodgeState.cpp" />
@@ -665,6 +725,12 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Code\Editor\Window\BossFinishWindow.h" />
+    <ClInclude Include="Code\Game\GameMode\BossFinishDirector.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Scene\SceneLoadRequest.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Scene\LoadingTypes.h" />
+    <ClInclude Include="Code\Editor\GamePackageExporter.h" />
+    <ClInclude Include="Code\Engine\Core\GameRuntimeSettings.h" />
     <ClInclude Include="Code\Engine\GamePlay\EventSystem\ObjectDeleteActionComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\EventSystem\PrefabSpawnActionComponent.h" />
     <ClInclude Include="Code\Game\GameMode\StageCorruptionComponent.h" />
@@ -684,6 +750,8 @@
     <ClInclude Include="Code\Editor\Workspace\AudioWorkspaceWindow.h" />
     <ClInclude Include="Code\Editor\Workspace\EditorWorkspaceWindow.h" />
     <ClInclude Include="Code\Editor\Workspace\ParticleEditorWindow.h" />
+    <ClInclude Include="Code\Editor\Workspace\CinematicEditorWindow.h" />
+    <ClInclude Include="Code\Editor\Workspace\CinematicSequenceEditor.h" />
     <ClInclude Include="Code\Editor\Workspace\PlayerStateEditorWindow.h" />
     <ClInclude Include="Code\Editor\Workspace\PrefabWorkspaceWindow.h" />
     <ClInclude Include="Code\Editor\Workspace\UIWidgetEditorWindow.h" />
@@ -909,6 +977,8 @@
     <ClInclude Include="Code\Engine\GamePlay\Combat\AttackTemplateManager.h" />
     <ClInclude Include="Code\Engine\GamePlay\Combat\AttackEffectHitComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Combat\AttackTemplateRuntime.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Combat\AttackTelegraphRuntime.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Combat\AttackTelegraphSettings.h" />
     <ClInclude Include="Code\Engine\GamePlay\Combat\CombatDamageTypes.h" />
     <ClInclude Include="Code\Engine\GamePlay\Combat\CombatStatsComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Combat\ProjectileMotionComponent.h" />
@@ -924,6 +994,7 @@
     <ClInclude Include="Code\Engine\UI\UIButton.h" />
     <ClInclude Include="Code\Game\AI\Human\HumanBossMind.h" />
     <ClInclude Include="Code\Game\AI\Human\HumanBossAIComponent.h" />
+    <ClInclude Include="Code\Game\AI\Human\HumanBossAITraceComponent.h" />
     <ClInclude Include="Code\Game\AI\Human\HumanBossActionComponent.h" />
     <ClInclude Include="Code\Game\AI\Dragon\DragonAIComponent.h" />
     <ClInclude Include="Code\Game\AI\Dragon\DragonAttackControllerComponent.h" />
@@ -947,6 +1018,15 @@
     <ClInclude Include="Code\Engine\UI\UIAnimationPlayerComponent.h" />
     <ClInclude Include="Code\Engine\UI\ImGuiColorEditor.h" />
     <ClInclude Include="Code\Engine\UI\UIProgressBarComponent.h" />
+    <ClInclude Include="Code\Engine\UI\BattleHudComponent.h" />
+    <ClInclude Include="Code\Engine\UI\MenuNavigationComponent.h" />
+    <ClInclude Include="Code\Engine\UI\MenuPresentation.h" />
+    <ClInclude Include="Shader\Transition\TransitionCommon.hlsli" />
+    <ClInclude Include="Shader\Transition\ShapeMaskTransition.hlsli" />
+    <ClInclude Include="Code\Engine\UI\ScreenFadeComponent.h" />
+    <ClInclude Include="Code\Engine\UI\LoadingPresentation.h" />
+    <ClInclude Include="Code\Engine\UI\ScenePresentationComponent.h" />
+    <ClInclude Include="Code\Engine\UI\InputIconAtlas.h" />
     <ClInclude Include="Code\Engine\UI\UISpriteSheetComponent.h" />
     <ClInclude Include="Code\Engine\UI\UITextComponent.h" />
     <ClInclude Include="Code\Engine\UI\BossNamePresentationComponent.h" />
@@ -973,6 +1053,15 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="CustomExternalDependencies.props" />
+    <None Include="Data\Animation\StateData\Player\States\Heal_Air_01.json" />
+    <None Include="Data\Animation\StateData\Player\States\Run_Fast_Combat_IP_Start_Seq.json" />
+    <None Include="Data\Curve\Player.WeakCombo1.Speed.json" />
+    <None Include="Data\Curve\Player.WeakCombo2.Speed.json" />
+    <None Include="Data\Curve\Player.WeakCombo3.Speed.json" />
+    <None Include="Data\Curve\Player.WeakCombo4.Speed.json" />
+    <None Include="Data\Animation\StateData\Player\States\Run_Fast_Combat_IP_Loop_Seq.json" />
+    <None Include="Data\Animation\StateData\Player\States\Run_Fast_Combat_IP_Stop_Seq.json" />
+    <None Include="Data\Particle\PlayerHeal.json" />
     <None Include="Data\Animation\StateData\DragonFirstForm_Test\States\DragonGroundStamp.json" />
     <None Include="Shader\Basic.hlsli" />
     <None Include="Shader\bidirectional_reflectance_distribution_function.hlsli" />
@@ -996,20 +1085,20 @@
     <FxCompile Include="Shader\BasicPS.hlsl">
       <ShaderType>Pixel</ShaderType>
       <ShaderModel>5.0</ShaderModel>
-      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)Shader\%(Filename).cso</ObjectFileOutput>
-      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)Shader\%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)Data\Shader\%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="('$(Configuration)|$(Platform)'=='Release|x64' or '$(Configuration)|$(Platform)'=='Engine_Release|x64')">$(ProjectDir)Data\Shader\%(Filename).cso</ObjectFileOutput>
     </FxCompile>
     <FxCompile Include="Shader\BasicVS.hlsl">
       <ShaderType>Vertex</ShaderType>
       <ShaderModel>5.0</ShaderModel>
-      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)Shader\%(Filename).cso</ObjectFileOutput>
-      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)Shader\%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)Data\Shader\%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="('$(Configuration)|$(Platform)'=='Release|x64' or '$(Configuration)|$(Platform)'=='Engine_Release|x64')">$(ProjectDir)Data\Shader\%(Filename).cso</ObjectFileOutput>
     </FxCompile>
     <FxCompile Include="Shader\BrightPassPS.hlsl">
       <ShaderType>Pixel</ShaderType>
       <ShaderModel>5.0</ShaderModel>
-      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)Shader\%(Filename).cso</ObjectFileOutput>
-      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)Shader\%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)Data\Shader\%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="('$(Configuration)|$(Platform)'=='Release|x64' or '$(Configuration)|$(Platform)'=='Engine_Release|x64')">$(ProjectDir)Data\Shader\%(Filename).cso</ObjectFileOutput>
     </FxCompile>
     <FxCompile Include="Shader\color_filter_ps.hlsl">
       <ShaderType>Pixel</ShaderType>
@@ -1029,6 +1118,34 @@
     </FxCompile>
     <FxCompile Include="Shader\Decal_VS.hlsl">
       <ShaderType>Vertex</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\Transition\FadeTransitionPS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\Transition\RadialTransitionPS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\Transition\SlashTransitionPS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\Transition\DissolveTransitionPS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\Transition\ShutterTransitionPS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\Transition\WipeTransitionPS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\Transition\TextureMaskTransitionPS.hlsl">
+      <ShaderType>Pixel</ShaderType>
       <ShaderModel>5.0</ShaderModel>
     </FxCompile>
     <FxCompile Include="Shader\FullScreenVS.hlsl">
@@ -1246,8 +1363,24 @@
     <ClCompile Include="Code\Engine\GamePlay\Graphics\ModelMaterialComponent.cpp" />
     <ClInclude Include="Code\Engine\GamePlay\Graphics\ModelMaterialComponent.h" />
   </ItemGroup>
+  <Import Project="ApplicationBuild.props" />
+  <ItemGroup>
+    <ResourceCompile Include="Data\Icons\Icons.rc" />
+    <ClInclude Include="Code\Engine\Core\ApplicationResources.h" />
+    <Image Include="Data\Icons\BigShine\BigShine.ico" />
+    <Image Include="Data\Icons\ANATHEMA\ANATHEMA.ico" />
+    <None Include="ApplicationBuild.props" />
+    <None Include="Tools\Build\GamePackage.json" />
+    <None Include="ApplicationBuild.md" />
+    <None Include="ReadMe_Editor.txt" />
+    <ClCompile Include="Code\Game\GameMode\PlayerDeathDirector.cpp" />
+    <ClInclude Include="Code\Game\GameMode\PlayerDeathDirector.h" />
+    <ClCompile Include="Code\Game\Charcter\Player\PlayerDeathState.cpp" />
+    <ClInclude Include="Code\Game\Charcter\Player\PlayerDeathState.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets"></ImportGroup>
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
   <ItemGroup>
     <ClCompile Include="Code\Game\Charcter\Player\PlayerSkillDefinition.cpp" />
   </ItemGroup>
@@ -1265,5 +1398,120 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\Game\Charcter\Player\PlayerSkillState.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Code\Engine\UI\TransitionParameters.h" />
+    <ClInclude Include="Code\Engine\UI\TransitionSequence.h" />
+    <ClInclude Include="Code\Engine\UI\ITransitionEffect.h" />
+    <ClInclude Include="Code\Engine\UI\ShaderTransitionEffect.h" />
+    <ClInclude Include="Code\Engine\UI\ScreenTransitionManager.h" />
+    <ClInclude Include="Code\Engine\UI\ScreenTransitionComponent.h" />
+    <ClInclude Include="Code\Engine\UI\LoadingPresentationComponent.h" />
+    <ClInclude Include="Code\Engine\UI\GameMenuComponent.h" />
+    <ClInclude Include="Code\Engine\UI\FadeTransition.h" />
+    <ClInclude Include="Code\Engine\UI\RadialTransition.h" />
+    <ClInclude Include="Code\Engine\UI\SlashTransition.h" />
+    <ClInclude Include="Code\Engine\UI\DissolveTransition.h" />
+    <ClInclude Include="Code\Engine\UI\ShutterTransition.h" />
+    <ClInclude Include="Code\Engine\UI\WipeTransition.h" />
+    <ClInclude Include="Code\Engine\UI\TextureMaskTransition.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Code\Engine\UI\UIPresentationPresets.cpp" />
+    <ClCompile Include="Code\Engine\UI\UIMotionComponent.cpp" />
+    <ClCompile Include="Code\Engine\UI\UIVisualEffectComponent.cpp" />
+    <ClCompile Include="Code\Engine\UI\UIEffectsGalleryComponent.cpp" />
+    <ClCompile Include="Code\Engine\UI\DiamondTransition.cpp" />
+    <ClCompile Include="Code\Engine\UI\CurtainTransition.cpp" />
+    <ClCompile Include="Code\Engine\UI\CheckerTransition.cpp" />
+    <ClCompile Include="Code\Engine\UI\SpiralTransition.cpp" />
+    <ClCompile Include="Code\Engine\UI\GlassTransition.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Code\Engine\UI\UIPresentationPresets.h" />
+    <ClInclude Include="Code\Engine\UI\UIMotionComponent.h" />
+    <ClInclude Include="Code\Engine\UI\UIVisualEffectComponent.h" />
+    <ClInclude Include="Code\Engine\UI\UIEffectsGalleryComponent.h" />
+    <ClInclude Include="Code\Engine\UI\DiamondTransition.h" />
+    <ClInclude Include="Code\Engine\UI\CurtainTransition.h" />
+    <ClInclude Include="Code\Engine\UI\CheckerTransition.h" />
+    <ClInclude Include="Code\Engine\UI\SpiralTransition.h" />
+    <ClInclude Include="Code\Engine\UI\GlassTransition.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shader\UIVisualEffectPS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\Transition\DiamondTransitionPS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\Transition\CurtainTransitionPS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\Transition\CheckerTransitionPS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\Transition\SpiralTransitionPS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\Transition\GlassTransitionPS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shader\Transition\GlassTransitionVS.hlsl">
+      <ShaderType>Vertex</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Data\UI\SceneTransitions.json" />
+    <None Include="Data\UI\UIMotionPresets.json" />
+    <None Include="Data\UI\UIVisualEffectPresets.json" />
+    <None Include="Data\Scenes\UIEffectsGallery\SceneList.json" />
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card01.json" />
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card01Label.json" />
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card02.json" />
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card02Label.json" />
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card03.json" />
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card03Label.json" />
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card04.json" />
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card04Label.json" />
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card05.json" />
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card05Label.json" />
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card06.json" />
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card06Label.json" />
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card07.json" />
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card07Label.json" />
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card08.json" />
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card08Label.json" />
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card09.json" />
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card09Label.json" />
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card10.json" />
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card10Label.json" />
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card11.json" />
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card11Label.json" />
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card12.json" />
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\Card12Label.json" />
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\GalleryBoard.json" />
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\GalleryCamera.json" />
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\GalleryHeading.json" />
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\GalleryHint.json" />
+    <None Include="Data\Scenes\UIEffectsGallery\Objects\GallerySpriteExample.json" />
+    <None Include="Data\Texture\TransitionMasks\Checker.png" />
+    <None Include="Data\Texture\TransitionMasks\Diamond.png" />
+    <None Include="Data\Texture\TransitionMasks\Ink.png" />
+    <None Include="Data\Texture\TransitionMasks\Linear.png" />
+    <None Include="Data\Texture\TransitionMasks\Radial.png" />
+    <None Include="Data\Texture\TransitionMasks\RadialFlipbook.png" />
+    <None Include="Data\Texture\TransitionMasks\Spiral.png" />
+    <None Include="Data\Texture\TransitionMasks\Stripes.png" />
+    <None Include="Data\Texture\TransitionMasks\Waves.png" />
   </ItemGroup>
 </Project>

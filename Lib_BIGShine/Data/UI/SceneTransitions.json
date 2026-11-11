@@ -1,0 +1,1348 @@
+{
+    "Profiles": {
+        "BigShine": {
+            "TransitionType": "SHUTTER",
+            "DurationOut": 0.55,
+            "DurationIn": 0.65,
+            "Delay": 0.0,
+            "Color": [
+                0.008,
+                0.014,
+                0.025,
+                1.0
+            ],
+            "EdgeColor": [
+                0.48,
+                0.83,
+                1.0,
+                0.8
+            ],
+            "EdgeWidth": 0.008,
+            "Direction": [
+                1.0,
+                0.0
+            ],
+            "Easing": "EASE_IN_OUT_CUBIC",
+            "NoiseScale": 6.0,
+            "NoiseSpeed": 0.2,
+            "GlowIntensity": 1.0,
+            "CenterPosition": [
+                0.5,
+                0.5
+            ],
+            "PanelCount": 8,
+            "PanelDelay": 0.045,
+            "Softness": 0.003,
+            "BoundaryCurve": 0.0
+        },
+        "ANATHEMA": {
+            "TransitionType": "SLASH",
+            "DurationOut": 0.65,
+            "DurationIn": 0.7,
+            "Delay": 0.0,
+            "Color": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "EdgeColor": [
+                0.72,
+                1.0,
+                0.85,
+                1.0
+            ],
+            "EdgeWidth": 0.009,
+            "Direction": [
+                0.86,
+                -0.51
+            ],
+            "Easing": "EASE_IN_OUT_CUBIC",
+            "NoiseScale": 8.0,
+            "NoiseSpeed": 0.28,
+            "GlowIntensity": 1.8,
+            "CenterPosition": [
+                0.5,
+                0.5
+            ],
+            "PanelCount": 8,
+            "PanelDelay": 0.04,
+            "Softness": 0.005,
+            "BoundaryCurve": 0.0
+        }
+    },
+    "Scenes": {
+        "MainScene": {
+            "ANATHEMA": {
+                "TransitionType": "DISSOLVE",
+                "EdgeColor": [
+                    0.32,
+                    0.025,
+                    0.045,
+                    0.85
+                ],
+                "GlowIntensity": 1.1,
+                "NoiseScale": 10.0
+            }
+        }
+    },
+    "Presets": {
+        "DefaultFade": {
+            "TransitionType": "FADE",
+            "DurationOut": 0.6,
+            "DurationIn": 0.65,
+            "HoldDuration": 0.15
+        },
+        "QuickBlackout": {
+            "TransitionType": "FADE",
+            "DurationOut": 0.2,
+            "DurationIn": 0.25,
+            "HoldDuration": 0
+        },
+        "BossPhaseTransition": {
+            "TransitionType": "FADE",
+            "DurationOut": 0.6,
+            "DurationIn": 0.35,
+            "HoldDuration": 0,
+            "Easing": "EASE_IN_OUT_CUBIC"
+        },
+        "SlashTransition": {
+            "TransitionType": "SLASH",
+            "DurationOut": 0.65,
+            "DurationIn": 0.7,
+            "Delay": 0.0,
+            "Color": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "EdgeColor": [
+                0.72,
+                1.0,
+                0.85,
+                1.0
+            ],
+            "EdgeWidth": 0.009,
+            "Direction": [
+                0.86,
+                -0.51
+            ],
+            "Easing": "EASE_IN_OUT_CUBIC",
+            "NoiseScale": 8.0,
+            "NoiseSpeed": 0.28,
+            "GlowIntensity": 1.8,
+            "CenterPosition": [
+                0.5,
+                0.5
+            ],
+            "PanelCount": 8,
+            "PanelDelay": 0.04,
+            "Softness": 0.005,
+            "BoundaryCurve": 0.0
+        },
+        "MudDissolve": {
+            "TransitionType": "DISSOLVE",
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.32,
+                0.025,
+                0.045,
+                1
+            ],
+            "NoiseScale": 10,
+            "GlowIntensity": 1.1
+        },
+        "EngineShutter": {
+            "TransitionType": "SHUTTER",
+            "DurationOut": 0.55,
+            "DurationIn": 0.65,
+            "Delay": 0.0,
+            "Color": [
+                0.008,
+                0.014,
+                0.025,
+                1.0
+            ],
+            "EdgeColor": [
+                0.48,
+                0.83,
+                1.0,
+                0.8
+            ],
+            "EdgeWidth": 0.008,
+            "Direction": [
+                1.0,
+                0.0
+            ],
+            "Easing": "EASE_IN_OUT_CUBIC",
+            "NoiseScale": 6.0,
+            "NoiseSpeed": 0.2,
+            "GlowIntensity": 1.0,
+            "CenterPosition": [
+                0.5,
+                0.5
+            ],
+            "PanelCount": 8,
+            "PanelDelay": 0.045,
+            "Softness": 0.003,
+            "BoundaryCurve": 0.0
+        },
+        "TitleTransition": {
+            "TransitionType": "SLASH",
+            "DurationOut": 0.65,
+            "DurationIn": 0.7,
+            "Delay": 0.0,
+            "Color": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "EdgeColor": [
+                0.72,
+                1.0,
+                0.85,
+                1.0
+            ],
+            "EdgeWidth": 0.009,
+            "Direction": [
+                0.86,
+                -0.51
+            ],
+            "Easing": "EASE_IN_OUT_CUBIC",
+            "NoiseScale": 8.0,
+            "NoiseSpeed": 0.28,
+            "GlowIntensity": 1.8,
+            "CenterPosition": [
+                0.5,
+                0.5
+            ],
+            "PanelCount": 8,
+            "PanelDelay": 0.04,
+            "Softness": 0.005,
+            "BoundaryCurve": 0.0
+        },
+        "TextureMask": {
+            "TransitionType": "TEXTURE_MASK",
+            "Effect": {
+                "Texture": "",
+                "Invert": false,
+                "ScaleX": 1,
+                "ScaleY": 1,
+                "OffsetX": 0,
+                "OffsetY": 0,
+                "Rotation": 0
+            },
+            "Softness": 0.015
+        },
+        "Fade_Ink": {
+            "TransitionType": "FADE",
+            "DurationOut": 0.65,
+            "DurationIn": 0.65,
+            "Easing": "EASE_IN_OUT_CUBIC",
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.7,
+                1,
+                0.85,
+                0.8
+            ]
+        },
+        "Fade_WhiteFlash": {
+            "TransitionType": "FADE",
+            "DurationOut": 0.16,
+            "DurationIn": 0.4,
+            "Easing": "EASE_IN_OUT_CUBIC",
+            "Color": [
+                0.94,
+                1,
+                0.97,
+                1
+            ],
+            "EdgeColor": [
+                0.7,
+                1,
+                0.85,
+                0.8
+            ]
+        },
+        "Fade_MidnightBlue": {
+            "TransitionType": "FADE",
+            "DurationOut": 0.65,
+            "DurationIn": 0.65,
+            "Easing": "EASE_IN_OUT_CUBIC",
+            "Color": [
+                0.012,
+                0.028,
+                0.065,
+                1
+            ],
+            "EdgeColor": [
+                0.7,
+                1,
+                0.85,
+                0.8
+            ]
+        },
+        "Radial_Center": {
+            "TransitionType": "RADIAL",
+            "DurationOut": 0.65,
+            "DurationIn": 0.65,
+            "Easing": "EASE_IN_OUT_CUBIC",
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.7,
+                1,
+                0.85,
+                0.8
+            ]
+        },
+        "Radial_BottomLeft": {
+            "TransitionType": "RADIAL",
+            "DurationOut": 0.65,
+            "DurationIn": 0.65,
+            "Easing": "EASE_IN_OUT_CUBIC",
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.7,
+                1,
+                0.85,
+                0.8
+            ],
+            "CenterPosition": [
+                0.12,
+                0.85
+            ]
+        },
+        "Radial_UpperRight": {
+            "TransitionType": "RADIAL",
+            "DurationOut": 0.65,
+            "DurationIn": 0.65,
+            "Easing": "EASE_IN_OUT_CUBIC",
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.7,
+                1,
+                0.85,
+                0.8
+            ],
+            "CenterPosition": [
+                0.82,
+                0.18
+            ]
+        },
+        "Slash_Jade": {
+            "TransitionType": "SLASH",
+            "DurationOut": 0.65,
+            "DurationIn": 0.65,
+            "Easing": "EASE_IN_OUT_CUBIC",
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.72,
+                1,
+                0.85,
+                1
+            ],
+            "Direction": [
+                0.86,
+                -0.51
+            ],
+            "GlowIntensity": 2
+        },
+        "Slash_CrossDirection": {
+            "TransitionType": "SLASH",
+            "DurationOut": 0.65,
+            "DurationIn": 0.65,
+            "Easing": "EASE_IN_OUT_CUBIC",
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.7,
+                1,
+                0.85,
+                0.8
+            ],
+            "Direction": [
+                -0.86,
+                -0.51
+            ]
+        },
+        "Slash_QuickCut": {
+            "TransitionType": "SLASH",
+            "DurationOut": 0.32,
+            "DurationIn": 0.42,
+            "Easing": "EASE_OUT_CUBIC",
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.7,
+                1,
+                0.85,
+                0.8
+            ]
+        },
+        "Mud_Crawl": {
+            "TransitionType": "DISSOLVE",
+            "DurationOut": 0.65,
+            "DurationIn": 0.65,
+            "Easing": "EASE_IN_OUT_CUBIC",
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.32,
+                0.025,
+                0.045,
+                1
+            ],
+            "NoiseScale": 8
+        },
+        "Mud_FineGrain": {
+            "TransitionType": "DISSOLVE",
+            "DurationOut": 0.65,
+            "DurationIn": 0.65,
+            "Easing": "EASE_IN_OUT_CUBIC",
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.22,
+                0.01,
+                0.02,
+                1
+            ],
+            "NoiseScale": 30,
+            "Softness": 0.01
+        },
+        "Mud_Ember": {
+            "TransitionType": "DISSOLVE",
+            "DurationOut": 0.65,
+            "DurationIn": 0.65,
+            "Easing": "EASE_IN_OUT_CUBIC",
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.6,
+                0.1,
+                0.03,
+                1
+            ],
+            "NoiseScale": 4,
+            "GlowIntensity": 2.2
+        },
+        "Shutter_Engine": {
+            "TransitionType": "SHUTTER",
+            "DurationOut": 0.65,
+            "DurationIn": 0.65,
+            "Easing": "EASE_IN_OUT_CUBIC",
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.5,
+                0.85,
+                1,
+                1
+            ],
+            "PanelCount": 8,
+            "PanelDelay": 0.045
+        },
+        "Shutter_ManyPanels": {
+            "TransitionType": "SHUTTER",
+            "DurationOut": 0.65,
+            "DurationIn": 0.65,
+            "Easing": "EASE_IN_OUT_CUBIC",
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.7,
+                1,
+                0.85,
+                0.8
+            ],
+            "PanelCount": 18,
+            "PanelDelay": 0.025
+        },
+        "Shutter_Snap": {
+            "TransitionType": "SHUTTER",
+            "DurationOut": 0.3,
+            "DurationIn": 0.4,
+            "Easing": "EASE_IN_OUT_CUBIC",
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.7,
+                1,
+                0.85,
+                0.8
+            ],
+            "PanelCount": 5,
+            "PanelDelay": 0.05
+        },
+        "Wipe_Left": {
+            "TransitionType": "WIPE",
+            "DurationOut": 0.65,
+            "DurationIn": 0.65,
+            "Easing": "EASE_IN_OUT_CUBIC",
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.7,
+                1,
+                0.85,
+                0.8
+            ],
+            "Direction": [
+                1,
+                0
+            ]
+        },
+        "Wipe_Right": {
+            "TransitionType": "WIPE",
+            "DurationOut": 0.65,
+            "DurationIn": 0.65,
+            "Easing": "EASE_IN_OUT_CUBIC",
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.7,
+                1,
+                0.85,
+                0.8
+            ],
+            "Direction": [
+                -1,
+                0
+            ]
+        },
+        "Wipe_Down": {
+            "TransitionType": "WIPE",
+            "DurationOut": 0.65,
+            "DurationIn": 0.65,
+            "Easing": "EASE_IN_OUT_CUBIC",
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.7,
+                1,
+                0.85,
+                0.8
+            ],
+            "Direction": [
+                0,
+                1
+            ]
+        },
+        "Wipe_Up": {
+            "TransitionType": "WIPE",
+            "DurationOut": 0.65,
+            "DurationIn": 0.65,
+            "Easing": "EASE_IN_OUT_CUBIC",
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.7,
+                1,
+                0.85,
+                0.8
+            ],
+            "Direction": [
+                0,
+                -1
+            ]
+        },
+        "Wipe_Diagonal": {
+            "TransitionType": "WIPE",
+            "DurationOut": 0.65,
+            "DurationIn": 0.65,
+            "Easing": "EASE_IN_OUT_CUBIC",
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.7,
+                1,
+                0.85,
+                0.8
+            ],
+            "Direction": [
+                0.8,
+                -0.6
+            ]
+        },
+        "Wipe_Curved": {
+            "TransitionType": "WIPE",
+            "DurationOut": 0.65,
+            "DurationIn": 0.65,
+            "Easing": "EASE_IN_OUT_CUBIC",
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.7,
+                1,
+                0.85,
+                0.8
+            ],
+            "Direction": [
+                1,
+                0
+            ],
+            "BoundaryCurve": 0.28
+        },
+        "Wipe_SoftLight": {
+            "TransitionType": "WIPE",
+            "DurationOut": 0.65,
+            "DurationIn": 0.65,
+            "Easing": "EASE_IN_OUT_CUBIC",
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.7,
+                1,
+                0.85,
+                0.8
+            ],
+            "Softness": 0.07,
+            "EdgeWidth": 0.06,
+            "GlowIntensity": 1.8
+        },
+        "Diamond_Center": {
+            "TransitionType": "DIAMOND",
+            "DurationOut": 0.65,
+            "DurationIn": 0.65,
+            "Easing": "EASE_IN_OUT_CUBIC",
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.7,
+                1,
+                0.85,
+                0.8
+            ],
+            "Direction": [
+                1,
+                0
+            ]
+        },
+        "Diamond_Tilt": {
+            "TransitionType": "DIAMOND",
+            "DurationOut": 0.65,
+            "DurationIn": 0.65,
+            "Easing": "EASE_IN_OUT_CUBIC",
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.7,
+                1,
+                0.85,
+                0.8
+            ],
+            "Direction": [
+                0.8,
+                0.6
+            ]
+        },
+        "Diamond_OffCenter": {
+            "TransitionType": "DIAMOND",
+            "DurationOut": 0.65,
+            "DurationIn": 0.65,
+            "Easing": "EASE_IN_OUT_CUBIC",
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.7,
+                1,
+                0.85,
+                0.8
+            ],
+            "CenterPosition": [
+                0.25,
+                0.6
+            ]
+        },
+        "Curtain_Vertical": {
+            "TransitionType": "CURTAIN",
+            "DurationOut": 0.65,
+            "DurationIn": 0.65,
+            "Easing": "EASE_IN_OUT_CUBIC",
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.7,
+                1,
+                0.85,
+                0.8
+            ],
+            "Direction": [
+                1,
+                0
+            ]
+        },
+        "Curtain_Horizontal": {
+            "TransitionType": "CURTAIN",
+            "DurationOut": 0.65,
+            "DurationIn": 0.65,
+            "Easing": "EASE_IN_OUT_CUBIC",
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.7,
+                1,
+                0.85,
+                0.8
+            ],
+            "Direction": [
+                0,
+                1
+            ]
+        },
+        "Curtain_Diagonal": {
+            "TransitionType": "CURTAIN",
+            "DurationOut": 0.65,
+            "DurationIn": 0.65,
+            "Easing": "EASE_IN_OUT_CUBIC",
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.7,
+                1,
+                0.85,
+                0.8
+            ],
+            "Direction": [
+                0.8,
+                0.6
+            ]
+        },
+        "Checker_Coarse": {
+            "TransitionType": "CHECKER",
+            "DurationOut": 0.65,
+            "DurationIn": 0.65,
+            "Easing": "EASE_IN_OUT_CUBIC",
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.7,
+                1,
+                0.85,
+                0.8
+            ],
+            "PanelCount": 6,
+            "PanelDelay": 0.4
+        },
+        "Checker_Fine": {
+            "TransitionType": "CHECKER",
+            "DurationOut": 0.65,
+            "DurationIn": 0.65,
+            "Easing": "EASE_IN_OUT_CUBIC",
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.7,
+                1,
+                0.85,
+                0.8
+            ],
+            "PanelCount": 20,
+            "PanelDelay": 0.35
+        },
+        "Checker_Snap": {
+            "TransitionType": "CHECKER",
+            "DurationOut": 0.35,
+            "DurationIn": 0.65,
+            "Easing": "EASE_IN_OUT_CUBIC",
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.7,
+                1,
+                0.85,
+                0.8
+            ],
+            "PanelCount": 12,
+            "PanelDelay": 0.2
+        },
+        "Spiral_Single": {
+            "TransitionType": "SPIRAL",
+            "DurationOut": 0.65,
+            "DurationIn": 0.65,
+            "Easing": "EASE_IN_OUT_CUBIC",
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.7,
+                1,
+                0.85,
+                0.8
+            ],
+            "NoiseScale": 1
+        },
+        "Spiral_Multiple": {
+            "TransitionType": "SPIRAL",
+            "DurationOut": 0.65,
+            "DurationIn": 0.65,
+            "Easing": "EASE_IN_OUT_CUBIC",
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.4,
+                0.8,
+                1,
+                1
+            ],
+            "NoiseScale": 9
+        },
+        "Spiral_Offset": {
+            "TransitionType": "SPIRAL",
+            "DurationOut": 0.65,
+            "DurationIn": 0.65,
+            "Easing": "EASE_IN_OUT_CUBIC",
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.7,
+                1,
+                0.85,
+                0.8
+            ],
+            "NoiseScale": 6,
+            "CenterPosition": [
+                0.3,
+                0.4
+            ]
+        },
+        "Mask_Linear": {
+            "TransitionType": "TEXTURE_MASK",
+            "DurationOut": 0.8,
+            "DurationIn": 0.8,
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.7,
+                0.95,
+                1,
+                1
+            ],
+            "EdgeWidth": 0.012,
+            "GlowIntensity": 0.6,
+            "Effect": {
+                "Texture": "Data/Texture/TransitionMasks/Linear.png",
+                "MaskMode": 0
+            }
+        },
+        "Mask_Radial": {
+            "TransitionType": "TEXTURE_MASK",
+            "DurationOut": 0.8,
+            "DurationIn": 0.8,
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.7,
+                0.95,
+                1,
+                1
+            ],
+            "EdgeWidth": 0.012,
+            "GlowIntensity": 0.6,
+            "Effect": {
+                "Texture": "Data/Texture/TransitionMasks/Radial.png",
+                "MaskMode": 0
+            }
+        },
+        "Mask_Diamond": {
+            "TransitionType": "TEXTURE_MASK",
+            "DurationOut": 0.8,
+            "DurationIn": 0.8,
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.7,
+                0.95,
+                1,
+                1
+            ],
+            "EdgeWidth": 0.012,
+            "GlowIntensity": 0.6,
+            "Effect": {
+                "Texture": "Data/Texture/TransitionMasks/Diamond.png",
+                "MaskMode": 0
+            }
+        },
+        "Mask_Stripes": {
+            "TransitionType": "TEXTURE_MASK",
+            "DurationOut": 0.8,
+            "DurationIn": 0.8,
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.7,
+                0.95,
+                1,
+                1
+            ],
+            "EdgeWidth": 0.012,
+            "GlowIntensity": 0.6,
+            "Effect": {
+                "Texture": "Data/Texture/TransitionMasks/Stripes.png",
+                "MaskMode": 0
+            }
+        },
+        "Mask_Waves": {
+            "TransitionType": "TEXTURE_MASK",
+            "DurationOut": 0.8,
+            "DurationIn": 0.8,
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.7,
+                0.95,
+                1,
+                1
+            ],
+            "EdgeWidth": 0.012,
+            "GlowIntensity": 0.6,
+            "Effect": {
+                "Texture": "Data/Texture/TransitionMasks/Waves.png",
+                "MaskMode": 0
+            }
+        },
+        "Mask_Checker": {
+            "TransitionType": "TEXTURE_MASK",
+            "DurationOut": 0.8,
+            "DurationIn": 0.8,
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.7,
+                0.95,
+                1,
+                1
+            ],
+            "EdgeWidth": 0.012,
+            "GlowIntensity": 0.6,
+            "Effect": {
+                "Texture": "Data/Texture/TransitionMasks/Checker.png",
+                "MaskMode": 0
+            }
+        },
+        "Mask_Spiral": {
+            "TransitionType": "TEXTURE_MASK",
+            "DurationOut": 0.8,
+            "DurationIn": 0.8,
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.7,
+                0.95,
+                1,
+                1
+            ],
+            "EdgeWidth": 0.012,
+            "GlowIntensity": 0.6,
+            "Effect": {
+                "Texture": "Data/Texture/TransitionMasks/Spiral.png",
+                "MaskMode": 0
+            }
+        },
+        "Mask_Ink": {
+            "TransitionType": "TEXTURE_MASK",
+            "DurationOut": 0.8,
+            "DurationIn": 0.8,
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.7,
+                0.95,
+                1,
+                1
+            ],
+            "EdgeWidth": 0.012,
+            "GlowIntensity": 0.6,
+            "Effect": {
+                "Texture": "Data/Texture/TransitionMasks/Ink.png",
+                "MaskMode": 0
+            }
+        },
+        "Mask_InkWipe": {
+            "TransitionType": "TEXTURE_MASK",
+            "Direction": [
+                1,
+                0
+            ],
+            "DurationOut": 1,
+            "DurationIn": 0.8,
+            "Effect": {
+                "Texture": "Data/Texture/TransitionMasks/Ink.png",
+                "MaskMode": 1,
+                "SurfaceStrength": 0.4
+            }
+        },
+        "Mask_RadialWaves": {
+            "TransitionType": "TEXTURE_MASK",
+            "DurationOut": 0.9,
+            "DurationIn": 0.9,
+            "Effect": {
+                "Texture": "Data/Texture/TransitionMasks/Waves.png",
+                "MaskMode": 2,
+                "SurfaceStrength": 0.3
+            }
+        },
+        "Mask_RadialFlipbook": {
+            "TransitionType": "TEXTURE_MASK",
+            "DurationOut": 1,
+            "DurationIn": 1,
+            "Effect": {
+                "Texture": "Data/Texture/TransitionMasks/RadialFlipbook.png",
+                "MaskMode": 3,
+                "Columns": 4,
+                "Rows": 4,
+                "FrameCount": 16
+            }
+        },
+        "Glass_Shatter": {
+            "TransitionType": "GLASS",
+            "DurationOut": 1.2,
+            "DurationIn": 1,
+            "PanelCount": 4,
+            "NoiseSpeed": 1.2,
+            "EdgeColor": [
+                0.7,
+                0.9,
+                1,
+                1
+            ],
+            "EdgeWidth": 0.004,
+            "GlowIntensity": 0.7,
+            "Effect": {
+                "ShardRotation": 0.8
+            }
+        },
+        "Glass_LargeShards": {
+            "TransitionType": "GLASS",
+            "DurationOut": 1.2,
+            "DurationIn": 1,
+            "PanelCount": 2,
+            "NoiseSpeed": 0.8,
+            "EdgeColor": [
+                0.7,
+                0.9,
+                1,
+                1
+            ],
+            "EdgeWidth": 0.004,
+            "GlowIntensity": 0.7,
+            "Effect": {
+                "ShardRotation": 0.5
+            }
+        },
+        "Glass_FineShards": {
+            "TransitionType": "GLASS",
+            "DurationOut": 1.2,
+            "DurationIn": 1,
+            "PanelCount": 6,
+            "NoiseSpeed": 1.4,
+            "EdgeColor": [
+                0.7,
+                0.9,
+                1,
+                1
+            ],
+            "EdgeWidth": 0.004,
+            "GlowIntensity": 0.7,
+            "Effect": {
+                "ShardRotation": 1.2
+            }
+        },
+        "Shape_Iris_Diamond": {
+            "TransitionType": "DIAMOND",
+            "DurationOut": 0.65,
+            "DurationIn": 0.65,
+            "Easing": "EASE_IN_OUT_CUBIC",
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.7,
+                1,
+                0.85,
+                0.8
+            ],
+            "Direction": [
+                1,
+                0
+            ],
+            "Effect": {
+                "Texture": "Data/Texture/TransitionMasks/Diamond.png",
+                "Channel": 0,
+                "Invert": true,
+                "ShapeThreshold": 0.5,
+                "ShapeEndScale": 1.0,
+                "Rotation": 0.0,
+                "CompletionFill": 0.08
+            },
+            "Softness": 0.006
+        },
+        "Shape_Tiles_Diamond": {
+            "TransitionType": "CHECKER",
+            "DurationOut": 0.65,
+            "DurationIn": 0.65,
+            "Easing": "EASE_IN_OUT_CUBIC",
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.7,
+                1,
+                0.85,
+                0.8
+            ],
+            "PanelCount": 6,
+            "PanelDelay": 0.4,
+            "Effect": {
+                "Texture": "Data/Texture/TransitionMasks/Diamond.png",
+                "Channel": 0,
+                "Invert": true,
+                "ShapeThreshold": 0.5,
+                "ShapeEndScale": 3.0,
+                "Rotation": 0.0,
+                "CompletionFill": 0.08
+            },
+            "Softness": 0.006
+        },
+        "Shape_Iris_Circle": {
+            "TransitionType": "DIAMOND",
+            "DurationOut": 0.65,
+            "DurationIn": 0.65,
+            "Easing": "EASE_IN_OUT_CUBIC",
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.7,
+                1,
+                0.85,
+                0.8
+            ],
+            "Direction": [
+                1,
+                0
+            ],
+            "Effect": {
+                "Texture": "Data/Texture/TransitionMasks/Radial.png",
+                "Channel": 0,
+                "Invert": true,
+                "ShapeThreshold": 0.5,
+                "ShapeEndScale": 1.0,
+                "Rotation": 0.0,
+                "CompletionFill": 0.08
+            },
+            "Softness": 0.006
+        },
+        "Shape_Tiles_Circle": {
+            "TransitionType": "CHECKER",
+            "DurationOut": 0.65,
+            "DurationIn": 0.65,
+            "Easing": "EASE_IN_OUT_CUBIC",
+            "Color": [
+                0,
+                0,
+                0,
+                1
+            ],
+            "EdgeColor": [
+                0.7,
+                1,
+                0.85,
+                0.8
+            ],
+            "PanelCount": 6,
+            "PanelDelay": 0.4,
+            "Effect": {
+                "Texture": "Data/Texture/TransitionMasks/Radial.png",
+                "Channel": 0,
+                "Invert": true,
+                "ShapeThreshold": 0.5,
+                "ShapeEndScale": 3.0,
+                "Rotation": 0.0,
+                "CompletionFill": 0.08
+            },
+            "Softness": 0.006
+        }
+    }
+}

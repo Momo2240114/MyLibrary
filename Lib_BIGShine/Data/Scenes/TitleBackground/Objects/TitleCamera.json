@@ -1,0 +1,57 @@
+{
+    "CollisionMask": 0,
+    "Components": [
+        {
+            "Data": {
+                "aspect": 1.7777777910232544,
+                "eye": [
+                    0,
+                    2.7,
+                    -9.5
+                ],
+                "farZ": 400,
+                "focus": [
+                    0,
+                    1.8,
+                    0
+                ],
+                "fovY": 42,
+                "nearZ": 0.1,
+                "priority": 10,
+                "up": [
+                    0.0,
+                    1.0,
+                    0.0
+                ]
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "CameraComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        }
+    ],
+    "Layer": 1,
+    "Name": "TitleCamera",
+    "ParentName": "",
+    "RequiredForSceneStart": false,
+    "Transform": {
+        "Pos": [
+            0,
+            2.7,
+            -9.5
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

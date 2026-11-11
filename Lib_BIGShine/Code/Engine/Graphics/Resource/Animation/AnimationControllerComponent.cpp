@@ -384,10 +384,14 @@ void AnimationControllerComponent::Update(float deltaTime_)
         BS_PROFILE_SCOPE("Animation::RootMotion");
 
         const AnimState* activeState_ = animator.GetCurrentState();
-        if (activeState_ && activeState_->rootMotion.enable)
+        const auto warpOwner_ = GetGameObject();
+        const auto activeWarp_ = warpOwner_ ? warpOwner_->GetComponent<MotionWarpComponent>() : nullptr;
+        // その場攻撃でも明示対象への追加補正は更新し、保存されたRootMotion設定は維持する。
+        if (activeState_ && (activeState_->rootMotion.enable || (activeWarp_ && activeWarp_->RequiresRootMotionUpdate())))
         {
             // アニメーションのRootノードから算出された、このフレーム分の移動・回転差分を取得する。
             auto rootMotionDelta_ = animator.GetRootMotionDelta();
+            if (!activeState_->rootMotion.enable) rootMotionDelta_ = ModelAnimator::RootMotionDelta{};
             auto transform_ = GetGameObject()->transform;
 
             if (transform_)
@@ -481,6 +485,9 @@ void AnimationControllerComponent::Update(float deltaTime_)
         BS_PROFILE_SCOPE("Animation::UpdateModelTransform");
         modelComponent->UpdateTransformIfDirty();
     }
+    // 最新のノード姿勢とRootMotion移動を反映してから、頭部のワールド位置を参照する。
+    animator.SampleWeaponHitBoxes(GetGameObject(), modelComponent);
+    animator.FlushAttackTelegraphs(GetGameObject());
     PublishGraphFeedback();
 }
 

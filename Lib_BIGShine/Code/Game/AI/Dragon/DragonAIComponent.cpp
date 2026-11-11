@@ -2,6 +2,7 @@
 #include "Engine/GamePlay/System/CombatObservationSystem.h"
 
 #include "DragonAIComponent.h"
+#include "DragonAttackControllerComponent.h"
 
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
 #include "Engine/GamePlay/Core/Component/CharacterMovementComponent.h"
@@ -723,7 +724,7 @@ void DragonAIComponent::Deserialize(const nlohmann::json& json_)
     animationBlendDuration = json_.value("AnimationBlendDuration", 0.2f);
     limitTurnRootMotion = json_.value("LimitTurnRootMotion", true);
     turnRootMotionLimitPaddingDegrees = json_.value("TurnRootMotionLimitPaddingDegrees", 2.0f);
-    spinTailRotationDegrees = json_.value("SpinTailRotationDegrees", 180.0f);
+    spinTailRotationDegrees = json_.value("SpinTailRotationDegrees", 360.0f);
     crackedAggressionMultiplier = json_.value("CrackedAggressionMultiplier", 1.10f);
     darkLeakAggressionMultiplier = json_.value("DarkLeakAggressionMultiplier", 1.25f);
     collapseAggressionMultiplier = json_.value("CollapseAggressionMultiplier", 1.45f);
@@ -2566,7 +2567,7 @@ void DragonAIComponent::StartAction(DRAGON_ACTION_TYPE action_)
     }
     if (action_ == DRAGON_ACTION_TYPE::SPIN_TAIL_SWEEP)
     {
-        // RMなしのTurn90を使うため、180度回転は毎フレームのAI更新で補間する。
+        // RMなしのTurn90を使うため、一周分の回転は毎フレームのAI更新で補間する。
         BeginSpinTailSweepRotation();
     }
 
@@ -2997,6 +2998,9 @@ void DragonAIComponent::DisableTailHitBoxes()
 
 void DragonAIComponent::DisableSequencerHitBoxes()
 {
+    // 完了・被弾・演出停止で、同じアニメーションが残っても予兆を再生成しない。
+    if (const auto animation_ = AnimationGraphBridgeComponent::Acquire(GetGameObject()))
+        animation_->RequestCancelAttackTelegraphs();
     DisableBiteHitBox();
     DisableTailHitBoxes();
 }
@@ -3330,6 +3334,8 @@ void DragonAIComponent::RegisterRuntimeActions()
         const auto dragon_ = owner_ ? owner_->GetComponent<DragonAIComponent>() : nullptr;
         if (!dragon_) return;
         dragon_->StopSkill();
+        // Skill終了Actionに依存せず、予告だけの攻撃と生成済みEffectも確実に停止する。
+        if (const auto attacks_ = owner_->GetComponent<DragonAttackControllerComponent>()) attacks_->StopAttack();
         dragon_->DisableSequencerHitBoxes();
         dragon_->ClearTailIK();
         dragon_->StopMovement();

@@ -6,6 +6,7 @@ struct GBUFFER_OUT
     float4 normal : SV_TARGET1;
     float4 material : SV_TARGET2;
     float4 emissive : SV_TARGET3;
+    float4 style : SV_TARGET4;
 };
 
 GBUFFER_OUT main(VS_OUT input_)
@@ -17,5 +18,6 @@ GBUFFER_OUT main(VS_OUT input_)
     output_.material = float4(1.0f, 0.5f, 0.0f, 1.0f);
     output_.emissive = float4(0.0f, 0.0f, 0.0f, 1.0f);
 
+    output_.style = float4(0.3825f, 0.414f, 0.45f, 0.25f);
     return output_;
 }
