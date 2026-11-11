@@ -420,3 +420,30 @@ FodyWeavers.xsd
 # Specific large glTF asset
 /Lib_BIGShine/Data/Model/SwordPlayer/CombatGirls_Sword_Shield.gltf
 /Lib_BIGShine/Data/Model/Enemy/CombatGirls_Sword_Shield.gltf
+
+
+# Ignore all Markdown files by default
+*.md
+
+# Keep Markdown files in External directories
+!**/External/**/*.md
+
+
+!AGENTS.md
+!**/AGENTS.md
+
+# Keep Markdown files from external libraries
+# (including paths used before moving them into External)
+!**/DirectXTK-main/**/*.md
+!**/json-develop/**/*.md
+!**/tinygltf-release/**/*.md
+!**/SDL3/**/*.md
+!**/cereal/**/*.md
+!**/cereal-master/**/*.md
+!**/recastnavigation/**/*.md
+!**/ImFileDialog-main/**/*.md
+!**/ImGuiColorTextEdit-master/**/*.md
+!**/imgui-node-editor/**/*.md
+
+# Ignore temporary Markdown cleanup lists
+/delete-md-paths.txt
