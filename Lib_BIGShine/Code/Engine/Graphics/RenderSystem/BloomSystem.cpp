@@ -149,7 +149,16 @@ void BloomSystem::Execute(
 
     dc->PSSetShader(compositePS.Get(), nullptr, 0);
     ID3D11ShaderResourceView* inputs[] = { sceneSRV, currentSRV };
-    dc->PSSetConstantBuffers(0, 1, constantBuffer.GetAddressOf()); // ★これを追加（b0スロット）
+    CbColorFilter neutralFilter_{};
+    neutralFilter_.filterIntensity = 0.0f;
+    D3D11_MAPPED_SUBRESOURCE mapped_{};
+    if (SUCCEEDED(dc->Map(filterBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped_)))
+    {
+        memcpy(mapped_.pData, &neutralFilter_, sizeof(CbColorFilter));
+        dc->Unmap(filterBuffer.Get(), 0);
+    }
+    ID3D11Buffer* cbs_[] = { constantBuffer.Get(), filterBuffer.Get() };
+    dc->PSSetConstantBuffers(0, 2, cbs_);
     dc->PSSetShaderResources(0, 2, inputs);
     DrawFullScreenQuad(dc);
 

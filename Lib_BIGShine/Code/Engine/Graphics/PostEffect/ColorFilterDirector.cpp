@@ -140,6 +140,9 @@ BloomSystem::CbColorFilter ColorFilterDirector::LerpFilter(
         lerp_(from_.colorBalance.y, to_.colorBalance.y),
         lerp_(from_.colorBalance.z, to_.colorBalance.z) };
     result_.filterIntensity = lerp_(from_.filterIntensity, to_.filterIntensity);
+    result_.colorOffset = { lerp_(from_.colorOffset.x, to_.colorOffset.x),
+        lerp_(from_.colorOffset.y, to_.colorOffset.y),
+        lerp_(from_.colorOffset.z, to_.colorOffset.z) };
     return result_;
 }
 
@@ -152,6 +155,7 @@ void ColorFilterDirector::Gui()
     ImGui::SliderFloat("Default Brightness", &defaultParams.brightness, 0.0f, 2.0f);
     ImGui::SliderFloat("Default Contrast", &defaultParams.contrast, 0.0f, 2.0f);
     ImGui::ColorEdit3("Default Balance", &defaultParams.colorBalance.x);
+    ImGui::DragFloat3("Default RGB Offset (Add)", &defaultParams.colorOffset.x, 0.005f, -1.0f, 1.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
     ImGui::SliderFloat("Default Intensity", &defaultParams.filterIntensity, 0.0f, 1.0f);
     if (ImGui::Button("Capture Color Filter"))
     {
@@ -176,6 +180,7 @@ void ColorFilterDirector::Gui()
             ImGui::SliderFloat("Brightness", &wayPoint_.filter.brightness, 0.0f, 2.0f);
             ImGui::SliderFloat("Contrast", &wayPoint_.filter.contrast, 0.0f, 2.0f);
             ImGui::ColorEdit3("Balance", &wayPoint_.filter.colorBalance.x);
+            ImGui::DragFloat3("RGB Offset (Add)", &wayPoint_.filter.colorOffset.x, 0.005f, -1.0f, 1.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
             ImGui::SliderFloat("Intensity", &wayPoint_.filter.filterIntensity, 0.0f, 1.0f);
             ImGui::DragFloat("Time To Target", &wayPoint_.duration, 0.01f, 0.0f, 60.0f);
             ImGui::DragFloat("Hold", &wayPoint_.holdDuration, 0.01f, 0.0f, 60.0f);
@@ -216,7 +221,8 @@ void ColorFilterDirector::Serialize(nlohmann::json& json_) const
         return nlohmann::json{ { "hue", value_.hueShift }, { "sat", value_.saturation },
             { "bri", value_.brightness }, { "con", value_.contrast },
             { "balance", { value_.colorBalance.x, value_.colorBalance.y, value_.colorBalance.z } },
-            { "intensity", value_.filterIntensity } };
+            { "intensity", value_.filterIntensity },
+            { "colorOffset", { value_.colorOffset.x, value_.colorOffset.y, value_.colorOffset.z } } };
     };
     json_["DefaultFilter"] = write_(defaultParams);
     json_["StartWaypointIndex"] = startWaypointIndex;
@@ -247,7 +253,14 @@ void ColorFilterDirector::Deserialize(const nlohmann::json& json_)
         {
             value_.colorBalance = { input_["balance"][0], input_["balance"][1], input_["balance"][2] };
         }
+        const auto offset_ = input_.find("colorOffset");
+        if (offset_ != input_.end() && offset_->is_array() && offset_->size() == 3 &&
+            (*offset_)[0].is_number() && (*offset_)[1].is_number() && (*offset_)[2].is_number())
+        {
+            value_.colorOffset = { (*offset_)[0].get<float>(), (*offset_)[1].get<float>(), (*offset_)[2].get<float>() };
+        }
     };
+    defaultParams.colorOffset = {};
     if (json_.contains("DefaultFilter")) read_(json_["DefaultFilter"], defaultParams);
     editorWaypoints.clear();
     if (json_.contains("ColorFilterWaypoints") && json_["ColorFilterWaypoints"].is_array())

@@ -22,6 +22,7 @@ cbuffer CbColorFilter : register(b1)
     float g_contrast;
     float3 g_colorBalance;
     float g_filterIntensity;
+    float3 g_colorOffset;
 };
 
 // RGBをHSV(色相, 彩度, 明度)に変換
@@ -88,10 +89,7 @@ float4 main(float4 pos : SV_POSITION, float2 uv : TEXCOORD0) : SV_TARGET
     hsv.z *= g_brightness;
     combined = HSVtoRGB(hsv);
 
-    // D. カラーバランス / オーバーレイ
-    // g_colorBalance を「乗算」ではなく「目標の色」として扱う場合
-    // 例: combined = lerp(combined, g_targetColor.rgb, g_targetColorIntensity);
-    combined *= g_colorBalance;
+    combined = combined * g_colorBalance + g_colorOffset;
 
     // 3. 最終ブレンド
     // g_filterIntensity を 1.0 にすればフィルター完全適用、0.0 なら適用なし
@@ -99,19 +97,3 @@ float4 main(float4 pos : SV_POSITION, float2 uv : TEXCOORD0) : SV_TARGET
 
     return float4(finalColor, 1.0);
 }
-
-//float4 main(float4 pos : SV_POSITION, float2 uv : TEXCOORD0) : SV_TARGET
-//{
-//    float3 base = sceneTex.Sample(sam, uv).rgb;
-//    float3 bloom = bloomTex.Sample(sam, uv).rgb;
-
-//    // 安全のためNaN/Infガード
-//    if (any(isnan(bloom)) || any(isinf(bloom)))
-//        bloom = 0;
-
-//    // 単純加算ではなく、強すぎる光を少しマイルドにする
-//    // (1.0 + bloom) で割る簡易トーンマップ的な処理を挟むと四角い破片が消えやすいです
-//    float3 finalBloom = bloom * g_intensity;
-    
-//    return float4(base + finalBloom, 1.0);
-//}

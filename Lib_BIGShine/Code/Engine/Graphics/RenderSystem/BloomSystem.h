@@ -35,7 +35,10 @@ public:
         // RGB バランスと、フィルター全体をどの程度混ぜるか。
         DirectX::XMFLOAT3 colorBalance = { 1.0f, 1.0f, 1.0f };
         float filterIntensity = 1.0f;
+        DirectX::XMFLOAT3 colorOffset = { 0.0f, 0.0f, 0.0f };
+        float padding = 0.0f;
     };
+    static_assert(sizeof(CbColorFilter) == 48);
 
     // 高輝度抽出、Kawase Blur、最終合成に必要な RenderTarget と Shader を作る。
     bool Initialize(ID3D11Device* device, int width, int height);

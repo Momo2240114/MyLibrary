@@ -799,6 +799,7 @@ void GraphicsDeviceManager::ResetFilter()
     filterParams.contrast = 1.0f;
     filterParams.colorBalance = { 1.0f, 1.0f, 1.0f };
     filterParams.filterIntensity = 1.0f;
+    filterParams.colorOffset = {};
 }
 
 void GraphicsDeviceManager::DrawPostEffectGuiContent()
@@ -861,6 +862,7 @@ void GraphicsDeviceManager::DrawPostEffectGuiContent()
 
         // カラーバランス (RGBの乗算)
         ImGui::ColorEdit3("Color Balance", &filterParams.colorBalance.x);
+        ImGui::DragFloat3("RGB Offset (Add)", &filterParams.colorOffset.x, 0.005f, -1.0f, 1.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
 
         // 適用強度
         ImGui::SliderFloat("Filter Intensity", &filterParams.filterIntensity, 0.0f, 1.0f);

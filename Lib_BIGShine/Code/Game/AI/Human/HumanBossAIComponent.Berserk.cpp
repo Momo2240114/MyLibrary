@@ -90,6 +90,9 @@ bool HumanBossAIComponent::UpdateBerserkEntrance()
         filter_.colorBalance.x + (1.0f-filter_.colorBalance.x)*monochrome_,
         filter_.colorBalance.y + (1.0f-filter_.colorBalance.y)*monochrome_,
         filter_.colorBalance.z + (1.0f-filter_.colorBalance.z)*monochrome_};
+    filter_.colorOffset.x *= 1.0f - monochrome_;
+    filter_.colorOffset.y *= 1.0f - monochrome_;
+    filter_.colorOffset.z *= 1.0f - monochrome_;
     filter_.contrast += ((std::max)(filter_.contrast,1.1f)-filter_.contrast)*monochrome_;
     filter_.filterIntensity += (1.0f-filter_.filterIntensity)*envelope_;
     GraphicsDeviceManager::Instance().GetFilterParams() = filter_;
