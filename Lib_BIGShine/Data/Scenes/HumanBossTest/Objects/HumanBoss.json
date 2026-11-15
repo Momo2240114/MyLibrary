@@ -202,7 +202,7 @@
                 "HitMeshVFXLifeTime": 1.0,
                 "HitMeshVFXNormalOffset": 0.0,
                 "HitOncePerActivation": true,
-                "HitParticleAssetPath": "EnemyMudKickHit",
+                "HitParticleAssetPath": "LargeHitSparks_Weak",
                 "HitParticleAxisToAttackerBlend": 0.75,
                 "HitParticleEmitterName": "",
                 "HitParticleLifeTime": 0.6499999761581421,
@@ -12048,19 +12048,6 @@
             "TypeName": "MotionWarpComponent",
             "UpdateEnabled": true,
             "UpdatePriority": 0
-        },
-        {
-            "Data": {
-                "MaxEntries": 256,
-                "RecordingEnabled": true
-            },
-            "Enabled": true,
-            "LateUpdateEnabled": false,
-            "LateUpdatePriority": 0,
-            "RequiredForSceneStart": false,
-            "TypeName": "HumanBossAITraceComponent",
-            "UpdateEnabled": true,
-            "UpdatePriority": 1000
         }
     ],
     "Layer": 2,

@@ -40,8 +40,8 @@ public:
     void PlayBite();
     // 尻尾IKの攻撃有効時間に合わせて通常の薙ぎ払い判定を開始する。
     void PlayTailSweep();
-    // 尻尾IKの攻撃有効時間に合わせて回転薙ぎ払い判定を開始する。
-    void PlaySpinSweep();
+    void PlaySpinSweep(float rotationDuration_ = 0.0f);
+    void StopSpinSweep();
     // 着地や踏みつけの瞬間に、足元周辺へ範囲攻撃と岩VFXを発生させる。
     void PlayStamp();
     // 現在このComponentが生成した攻撃判定を停止する。
@@ -98,10 +98,9 @@ private:
         bool followBreathSource = false;
         bool followStampSource = false;
         bool followTail = false;
-        // 回転攻撃は尻尾の各節へ追従させ、予兆は本体中心の円にする。
-        bool coverTailSpan = false;
-        bool tailSpanResolved = false;
-        bool tailAttackPlaying = false;
+        bool spinSweep = false;
+        bool spinSweepUsesAIRotation = false;
+        bool spinSweepHitActive = false;
         bool followSpinDanger = false;
         bool requireTailAttackActive = false;
         bool hasDangerArea = false;
@@ -139,7 +138,7 @@ private:
         float radius_,
         float halfHeight_,
         const DirectX::XMFLOAT3& localOffset_,
-        float hitInterval_, bool coverTailSpan_ = false);
+        float hitInterval_, bool spinSweep_ = false);
     void ApplyFollowTransform(RuntimeAttack& runtime_);
     void ApplyDangerAreaTransform(RuntimeAttack& runtime_);
     // 地面の法線と範囲内の接地点から、危険範囲を埋めない表示高さを求める。
@@ -189,11 +188,7 @@ private:
         float targetAimBlendOverride_ = -1.0f);
     void SpawnBiteVFX();
     void SpawnStampHit();
-    // 本体の回転方向に沿った扇型予兆を、尻尾全体が届く距離で表示する。
-    void SpawnSpinSweepDangerArea(float lifeTime_, bool reuseExisting_ = false);
-    // 根元と先端から、半径を維持した尻尾カプセルのWorld行列を更新する。
-    bool ApplyTailSpanTransform(RuntimeAttack& runtime_);
-    // 攻撃判定が有効な間だけ、尻尾の各節から発光する軌跡を生成する。
+    float ResolveSpinSweepRadius() const;
     void UpdateSpinTailTrails(RuntimeAttack& runtime_, bool emitting_);
     void SpawnStampRockVFX(const DirectX::XMFLOAT3& centerPosition_);
     void SpawnStampRockVFXAt(
@@ -323,7 +318,6 @@ private:
     float tailKnockBackPower = 8.0f;
     float tailRadius = 1.1f;
     float tailHalfHeight = 1.8f;
-    // 回転攻撃の根元から先端までを覆うカプセル半径。
     float spinTailRadius = 3.0f;
     bool spinTailTrailEnabled = true; // 回転攻撃中の視認性を補う軌跡の表示設定。
     float spinTailTrailLifeTime = 0.2f; // 軌跡の残像時間。攻撃終了時は即座に消す。

@@ -1,0 +1,980 @@
+{
+    "AssetPath": "Data/Particle/DragonBreathProjectile_Fireball.json",
+    "AssetType": "ParticleEffect",
+    "AssetVersion": 1,
+    "Emitters": [
+        {
+            "Acceleration": [
+                0.0,
+                0.0,
+                0.18
+            ],
+            "BlendMode": 1,
+            "BurstCount": 10,
+            "Color": [
+                1.0,
+                0.72,
+                0.18,
+                1.0
+            ],
+            "ColorEnd": [
+                0.95,
+                0.06,
+                0.0,
+                0.24
+            ],
+            "ColorStart": [
+                1.0,
+                0.86,
+                0.26,
+                1.0
+            ],
+            "ConeAngle": [
+                0.0,
+                8.0
+            ],
+            "Delay": 0.0,
+            "Drag": 0.0,
+            "EmissionMode": 0,
+            "Fade": [
+                0.0,
+                0.12
+            ],
+            "FresnelPower": 1.0,
+            "FresnelStrength": 3.0,
+            "GradientTexturePath": "",
+            "Gravity": 0.0,
+            "LegacyRadius": [
+                0.0,
+                0.05
+            ],
+            "Lifespan": [
+                0.10,
+                0.16
+            ],
+            "MaskTexturePath": "Data/Texture/VFX/Dragon/fire.04.jpeg",
+            "MaxCount": 160,
+            "MeshVertexSampleCount": 2048,
+            "Name": "Fireball_Core",
+            "NoiseFrequency": 2.0,
+            "NoiseSpeed": 7.0,
+            "NoiseStrength": 0.15,
+            "OrbitVelocity": 0.0,
+            "PosOffset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "RadialVelocity": 0.0,
+            "RenderType": 0,
+            "RotationSpeed": [
+                -60.0,
+                60.0
+            ],
+            "ShapeEnd": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "ShapeSize": [
+                0.24,
+                0.24,
+                0.24
+            ],
+            "ShapeStart": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "Size": [
+                0.72,
+                1.08
+            ],
+            "SizeRandomEnd": [
+                0.85,
+                1.2
+            ],
+            "SizeRandomStart": [
+                0.9,
+                1.15
+            ],
+            "SpawnDirectionMode": 0,
+            "EmissionAxis": [
+                0.0,
+                0.0,
+                1.0
+            ],
+            "TargetPosition": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "UseTargetAttraction": 0,
+            "TargetAttractionStrength": 0.0,
+            "TargetAttractionRange": 0.0,
+            "TargetAttractionFalloff": 1.0,
+            "SpawnShape": 3,
+            "SpawnSpace": 1,
+            "Speed": [
+                0.0,
+                0.4
+            ],
+            "SpriteAnimationFps": 18.0,
+            "SpriteAnimationLoop": 1,
+            "SpriteAnimationRange": [
+                0,
+                5
+            ],
+            "SpriteSheetIndex": [
+                0,
+                0
+            ],
+            "StretchMax": 1.2,
+            "StretchScale": 0.08,
+            "TexturePath": "Data/Texture/VFX/Dragon/fire.04.jpeg",
+            "TextureSplitCount": [
+                3,
+                2
+            ],
+            "UseColorOverLife": 1,
+            "UseFresnel": 1,
+            "UseGradient": 0,
+            "UseMask": 1,
+            "UseRandomSize": 1,
+            "UseSpriteAnimation": 1,
+            "VerticalSpawnRange": 0.0,
+            "Wind": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "gradientDirection": 0,
+            "gradientEndUv": 1.0,
+            "gradientFixedUv": 0.5,
+            "gradientSampleMode": 0,
+            "gradientStartUv": 0.0,
+            "gradientTexturePath": "",
+            "maskTexturePath": "Data/Texture/VFX/Dragon/fire.04.jpeg",
+            "shadeGradientDirection": 0,
+            "shadeGradientEndUv": 1.0,
+            "shadeGradientFixedUv": 0.5,
+            "shadeGradientSampleMode": 0,
+            "shadeGradientStartUv": 0.0,
+            "shadeGradientTexturePath": "",
+            "texturePath": "Data/Texture/VFX/Dragon/fire.04.jpeg",
+            "useGradientTexture": 0,
+            "useShadeGradientTexture": 0
+        },
+        {
+            "Acceleration": [
+                0.0,
+                0.8,
+                0.0
+            ],
+            "BlendMode": 1,
+            "BurstCount": 34,
+            "Color": [
+                1.0,
+                0.28,
+                0.0,
+                1.0
+            ],
+            "ColorEnd": [
+                0.70,
+                0.0,
+                0.0,
+                0.32
+            ],
+            "ColorStart": [
+                1.0,
+                0.52,
+                0.04,
+                1.0
+            ],
+            "ConeAngle": [
+                0.0,
+                28.0
+            ],
+            "Delay": 0.0,
+            "Drag": 1.8,
+            "EmissionMode": 0,
+            "Fade": [
+                0.02,
+                0.20
+            ],
+            "FresnelPower": 2.0,
+            "FresnelStrength": 1.0,
+            "GradientTexturePath": "",
+            "Gravity": -0.25,
+            "LegacyRadius": [
+                0.0,
+                0.22
+            ],
+            "Lifespan": [
+                0.18,
+                0.32
+            ],
+            "MaskTexturePath": "Data/Texture/VFX/Dragon/fire.00.jpeg",
+            "MaxCount": 360,
+            "MeshVertexSampleCount": 2048,
+            "Name": "Fireball_OuterFlame",
+            "NoiseFrequency": 4.5,
+            "NoiseSpeed": 9.0,
+            "NoiseStrength": 0.75,
+            "OrbitVelocity": 0.45,
+            "PosOffset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "RadialVelocity": 0.35,
+            "RenderType": 0,
+            "RotationSpeed": [
+                -180.0,
+                180.0
+            ],
+            "ShapeEnd": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "ShapeSize": [
+                0.45,
+                0.45,
+                0.45
+            ],
+            "ShapeStart": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "Size": [
+                1.15,
+                2.25
+            ],
+            "SizeRandomEnd": [
+                0.45,
+                1.05
+            ],
+            "SizeRandomStart": [
+                0.75,
+                1.25
+            ],
+            "SpawnDirectionMode": 0,
+            "EmissionAxis": [
+                0.0,
+                0.0,
+                1.0
+            ],
+            "TargetPosition": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "UseTargetAttraction": 0,
+            "TargetAttractionStrength": 0.0,
+            "TargetAttractionRange": 0.0,
+            "TargetAttractionFalloff": 1.0,
+            "SpawnShape": 3,
+            "SpawnSpace": 1,
+            "Speed": [
+                0.2,
+                1.4
+            ],
+            "SpriteAnimationFps": 16.0,
+            "SpriteAnimationLoop": 1,
+            "SpriteAnimationRange": [
+                0,
+                15
+            ],
+            "SpriteSheetIndex": [
+                0,
+                0
+            ],
+            "StretchMax": 2.0,
+            "StretchScale": 0.12,
+            "TexturePath": "Data/Texture/VFX/Dragon/fire.00.jpeg",
+            "TextureSplitCount": [
+                4,
+                4
+            ],
+            "UseColorOverLife": 1,
+            "UseFresnel": 0,
+            "UseGradient": 0,
+            "UseMask": 1,
+            "UseRandomSize": 1,
+            "UseSpriteAnimation": 1,
+            "VerticalSpawnRange": 0.18,
+            "Wind": [
+                0.0,
+                0.45,
+                0.0
+            ],
+            "gradientDirection": 0,
+            "gradientEndUv": 1.0,
+            "gradientFixedUv": 0.5,
+            "gradientSampleMode": 0,
+            "gradientStartUv": 0.0,
+            "gradientTexturePath": "",
+            "maskTexturePath": "Data/Texture/VFX/Dragon/fire.00.jpeg",
+            "shadeGradientDirection": 0,
+            "shadeGradientEndUv": 1.0,
+            "shadeGradientFixedUv": 0.5,
+            "shadeGradientSampleMode": 0,
+            "shadeGradientStartUv": 0.0,
+            "shadeGradientTexturePath": "",
+            "texturePath": "Data/Texture/VFX/Dragon/fire.00.jpeg",
+            "useGradientTexture": 0,
+            "useShadeGradientTexture": 0
+        },
+        {
+            "Acceleration": [
+                0.0,
+                0.55,
+                -0.45
+            ],
+            "BlendMode": 1,
+            "BurstCount": 26,
+            "Color": [
+                0.98,
+                0.22,
+                0.0,
+                1.0
+            ],
+            "ColorEnd": [
+                0.72,
+                0.0,
+                0.0,
+                0.28
+            ],
+            "ColorStart": [
+                1.0,
+                0.42,
+                0.02,
+                0.96
+            ],
+            "ConeAngle": [
+                110.0,
+                180.0
+            ],
+            "Delay": 0.0,
+            "Drag": 2.4,
+            "EmissionMode": 0,
+            "Fade": [
+                0.04,
+                0.26
+            ],
+            "FresnelPower": 2.0,
+            "FresnelStrength": 1.0,
+            "GradientTexturePath": "",
+            "Gravity": -0.15,
+            "LegacyRadius": [
+                0.0,
+                0.20
+            ],
+            "Lifespan": [
+                0.22,
+                0.42
+            ],
+            "MaskTexturePath": "Data/Texture/VFX/Dragon/fire.03.jpeg",
+            "MaxCount": 300,
+            "MeshVertexSampleCount": 2048,
+            "Name": "Fireball_FlameLick",
+            "NoiseFrequency": 5.2,
+            "NoiseSpeed": 7.5,
+            "NoiseStrength": 1.0,
+            "OrbitVelocity": 0.28,
+            "PosOffset": [
+                0.0,
+                0.0,
+                -0.12
+            ],
+            "RadialVelocity": 0.20,
+            "RenderType": 0,
+            "RotationSpeed": [
+                -170.0,
+                170.0
+            ],
+            "ShapeEnd": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "ShapeSize": [
+                0.50,
+                0.50,
+                0.50
+            ],
+            "ShapeStart": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "Size": [
+                0.54,
+                1.32
+            ],
+            "SizeRandomEnd": [
+                0.30,
+                0.86
+            ],
+            "SizeRandomStart": [
+                0.55,
+                1.18
+            ],
+            "SpawnDirectionMode": 3,
+            "EmissionAxis": [
+                0.0,
+                0.08,
+                -1.0
+            ],
+            "TargetPosition": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "UseTargetAttraction": 0,
+            "TargetAttractionStrength": 0.0,
+            "TargetAttractionRange": 0.0,
+            "TargetAttractionFalloff": 1.0,
+            "SpawnShape": 3,
+            "SpawnSpace": 1,
+            "Speed": [
+                1.2,
+                3.6
+            ],
+            "SpriteAnimationFps": 18.0,
+            "SpriteAnimationLoop": 1,
+            "SpriteAnimationRange": [
+                0,
+                9
+            ],
+            "SpriteSheetIndex": [
+                0,
+                0
+            ],
+            "StretchMax": 1.25,
+            "StretchScale": 0.08,
+            "TexturePath": "Data/Texture/VFX/Dragon/fire.03.jpeg",
+            "TextureSplitCount": [
+                5,
+                2
+            ],
+            "UseColorOverLife": 1,
+            "UseFresnel": 0,
+            "UseGradient": 0,
+            "UseMask": 1,
+            "UseRandomSize": 1,
+            "UseSpriteAnimation": 1,
+            "VerticalSpawnRange": 0.14,
+            "Wind": [
+                0.0,
+                0.35,
+                -0.45
+            ],
+            "gradientDirection": 0,
+            "gradientEndUv": 1.0,
+            "gradientFixedUv": 0.5,
+            "gradientSampleMode": 0,
+            "gradientStartUv": 0.0,
+            "gradientTexturePath": "",
+            "maskTexturePath": "Data/Texture/VFX/Dragon/fire.03.jpeg",
+            "shadeGradientDirection": 0,
+            "shadeGradientEndUv": 1.0,
+            "shadeGradientFixedUv": 0.5,
+            "shadeGradientSampleMode": 0,
+            "shadeGradientStartUv": 0.0,
+            "shadeGradientTexturePath": "",
+            "texturePath": "Data/Texture/VFX/Dragon/fire.03.jpeg",
+            "useGradientTexture": 0,
+            "useShadeGradientTexture": 0
+        },
+        {
+            "Acceleration": [
+                0.0,
+                0.0,
+                -1.5
+            ],
+            "BlendMode": 1,
+            "BurstCount": 24,
+            "Color": [
+                0.95,
+                0.18,
+                0.0,
+                1.0
+            ],
+            "ColorEnd": [
+                0.75,
+                0.0,
+                0.0,
+                0.30
+            ],
+            "ColorStart": [
+                1.0,
+                0.46,
+                0.02,
+                1.0
+            ],
+            "ConeAngle": [
+                150.0,
+                180.0
+            ],
+            "Delay": 0.0,
+            "Drag": 3.8,
+            "EmissionMode": 0,
+            "Fade": [
+                0.02,
+                0.30
+            ],
+            "FresnelPower": 2.0,
+            "FresnelStrength": 1.0,
+            "GradientTexturePath": "",
+            "Gravity": 0.0,
+            "LegacyRadius": [
+                0.0,
+                0.18
+            ],
+            "Lifespan": [
+                0.25,
+                0.48
+            ],
+            "MaskTexturePath": "Data/Texture/VFX/Dragon/fire.05.jpeg",
+            "MaxCount": 480,
+            "MeshVertexSampleCount": 2048,
+            "Name": "Fireball_TrailFlame",
+            "NoiseFrequency": 5.0,
+            "NoiseSpeed": 8.0,
+            "NoiseStrength": 1.2,
+            "OrbitVelocity": 0.0,
+            "PosOffset": [
+                0.0,
+                0.0,
+                -0.35
+            ],
+            "RadialVelocity": 0.15,
+            "RenderType": 1,
+            "RotationSpeed": [
+                -120.0,
+                120.0
+            ],
+            "ShapeEnd": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "ShapeSize": [
+                0.30,
+                0.30,
+                0.30
+            ],
+            "ShapeStart": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "Size": [
+                0.45,
+                1.10
+            ],
+            "SizeRandomEnd": [
+                0.35,
+                0.9
+            ],
+            "SizeRandomStart": [
+                0.65,
+                1.25
+            ],
+            "SpawnDirectionMode": 3,
+            "EmissionAxis": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "TargetPosition": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "UseTargetAttraction": 0,
+            "TargetAttractionStrength": 0.0,
+            "TargetAttractionRange": 0.0,
+            "TargetAttractionFalloff": 1.0,
+            "SpawnShape": 3,
+            "SpawnSpace": 1,
+            "Speed": [
+                2.5,
+                5.8
+            ],
+            "SpriteAnimationFps": 12.0,
+            "SpriteAnimationLoop": 1,
+            "SpriteAnimationRange": [
+                0,
+                0
+            ],
+            "SpriteSheetIndex": [
+                0,
+                0
+            ],
+            "StretchMax": 1.8,
+            "StretchScale": 0.20,
+            "TexturePath": "Data/Texture/VFX/Dragon/fire.05.jpeg",
+            "TextureSplitCount": [
+                1,
+                1
+            ],
+            "UseColorOverLife": 1,
+            "UseFresnel": 0,
+            "UseGradient": 0,
+            "UseMask": 1,
+            "UseRandomSize": 1,
+            "UseSpriteAnimation": 0,
+            "VerticalSpawnRange": 0.1,
+            "Wind": [
+                0.0,
+                0.25,
+                -0.5
+            ],
+            "gradientDirection": 0,
+            "gradientEndUv": 1.0,
+            "gradientFixedUv": 0.5,
+            "gradientSampleMode": 0,
+            "gradientStartUv": 0.0,
+            "gradientTexturePath": "",
+            "maskTexturePath": "Data/Texture/VFX/Dragon/fire.05.jpeg",
+            "shadeGradientDirection": 0,
+            "shadeGradientEndUv": 1.0,
+            "shadeGradientFixedUv": 0.5,
+            "shadeGradientSampleMode": 0,
+            "shadeGradientStartUv": 0.0,
+            "shadeGradientTexturePath": "",
+            "texturePath": "Data/Texture/VFX/Dragon/fire.05.jpeg",
+            "useGradientTexture": 0,
+            "useShadeGradientTexture": 0
+        },
+        {
+            "Acceleration": [
+                0.0,
+                -1.0,
+                -0.4
+            ],
+            "BlendMode": 1,
+            "BurstCount": 10,
+            "Color": [
+                1.0,
+                0.48,
+                0.04,
+                1.0
+            ],
+            "ColorEnd": [
+                0.9,
+                0.02,
+                0.0,
+                0.24
+            ],
+            "ColorStart": [
+                1.0,
+                0.78,
+                0.20,
+                1.0
+            ],
+            "ConeAngle": [
+                110.0,
+                180.0
+            ],
+            "Delay": 0.01,
+            "Drag": 1.2,
+            "EmissionMode": 0,
+            "Fade": [
+                0.0,
+                0.18
+            ],
+            "FresnelPower": 2.0,
+            "FresnelStrength": 1.0,
+            "GradientTexturePath": "",
+            "Gravity": 0.0,
+            "LegacyRadius": [
+                0.0,
+                0.20
+            ],
+            "Lifespan": [
+                0.18,
+                0.36
+            ],
+            "MaskTexturePath": "Data/Texture/Particle/Particle02.png",
+            "MaxCount": 240,
+            "MeshVertexSampleCount": 2048,
+            "Name": "Fireball_Sparks",
+            "NoiseFrequency": 2.5,
+            "NoiseSpeed": 4.0,
+            "NoiseStrength": 0.3,
+            "OrbitVelocity": 0.0,
+            "PosOffset": [
+                0.0,
+                0.0,
+                -0.18
+            ],
+            "RadialVelocity": 0.0,
+            "RenderType": 1,
+            "RotationSpeed": [
+                0.0,
+                0.0
+            ],
+            "ShapeEnd": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "ShapeSize": [
+                0.22,
+                0.22,
+                0.22
+            ],
+            "ShapeStart": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "Size": [
+                0.08,
+                0.18
+            ],
+            "SizeRandomEnd": [
+                0.6,
+                1.0
+            ],
+            "SizeRandomStart": [
+                0.8,
+                1.25
+            ],
+            "SpawnDirectionMode": 3,
+            "EmissionAxis": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "TargetPosition": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "UseTargetAttraction": 0,
+            "TargetAttractionStrength": 0.0,
+            "TargetAttractionRange": 0.0,
+            "TargetAttractionFalloff": 1.0,
+            "SpawnShape": 3,
+            "SpawnSpace": 1,
+            "Speed": [
+                5.0,
+                11.0
+            ],
+            "SpriteAnimationFps": 12.0,
+            "SpriteAnimationLoop": 1,
+            "SpriteAnimationRange": [
+                0,
+                0
+            ],
+            "SpriteSheetIndex": [
+                0,
+                0
+            ],
+            "StretchMax": 1.5,
+            "StretchScale": 0.12,
+            "TexturePath": "",
+            "TextureSplitCount": [
+                1,
+                1
+            ],
+            "UseColorOverLife": 1,
+            "UseFresnel": 0,
+            "UseGradient": 0,
+            "UseMask": 1,
+            "UseRandomSize": 1,
+            "UseSpriteAnimation": 0,
+            "VerticalSpawnRange": 0.06,
+            "Wind": [
+                0.0,
+                0.0,
+                -0.2
+            ],
+            "gradientDirection": 0,
+            "gradientEndUv": 1.0,
+            "gradientFixedUv": 0.5,
+            "gradientSampleMode": 0,
+            "gradientStartUv": 0.0,
+            "gradientTexturePath": "",
+            "maskTexturePath": "Data/Texture/Particle/Particle02.png",
+            "shadeGradientDirection": 0,
+            "shadeGradientEndUv": 1.0,
+            "shadeGradientFixedUv": 0.5,
+            "shadeGradientSampleMode": 0,
+            "shadeGradientStartUv": 0.0,
+            "shadeGradientTexturePath": "",
+            "texturePath": "",
+            "useGradientTexture": 0,
+            "useShadeGradientTexture": 0
+        },
+        {
+            "Acceleration": [
+                0.0,
+                1.0,
+                -0.2
+            ],
+            "BlendMode": 0,
+            "BurstCount": 8,
+            "Color": [
+                0.22,
+                0.10,
+                0.06,
+                0.56
+            ],
+            "ColorEnd": [
+                0.05,
+                0.04,
+                0.035,
+                0.0
+            ],
+            "ColorStart": [
+                0.42,
+                0.18,
+                0.08,
+                0.48
+            ],
+            "ConeAngle": [
+                140.0,
+                180.0
+            ],
+            "Delay": 0.03,
+            "Drag": 2.4,
+            "EmissionMode": 0,
+            "Fade": [
+                0.06,
+                0.65
+            ],
+            "FresnelPower": 2.0,
+            "FresnelStrength": 1.0,
+            "GradientTexturePath": "",
+            "Gravity": -0.2,
+            "LegacyRadius": [
+                0.0,
+                0.26
+            ],
+            "Lifespan": [
+                0.50,
+                0.90
+            ],
+            "MaskTexturePath": "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/smoke_05.png",
+            "MaxCount": 180,
+            "MeshVertexSampleCount": 2048,
+            "Name": "Fireball_SmokeWake",
+            "NoiseFrequency": 2.0,
+            "NoiseSpeed": 2.0,
+            "NoiseStrength": 1.8,
+            "OrbitVelocity": 0.08,
+            "PosOffset": [
+                0.0,
+                0.0,
+                -0.45
+            ],
+            "RadialVelocity": 0.12,
+            "RenderType": 0,
+            "RotationSpeed": [
+                -30.0,
+                30.0
+            ],
+            "ShapeEnd": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "ShapeSize": [
+                0.40,
+                0.40,
+                0.40
+            ],
+            "ShapeStart": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "Size": [
+                0.75,
+                1.65
+            ],
+            "SizeRandomEnd": [
+                0.8,
+                1.6
+            ],
+            "SizeRandomStart": [
+                0.45,
+                0.9
+            ],
+            "SpawnDirectionMode": 3,
+            "EmissionAxis": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "TargetPosition": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "UseTargetAttraction": 0,
+            "TargetAttractionStrength": 0.0,
+            "TargetAttractionRange": 0.0,
+            "TargetAttractionFalloff": 1.0,
+            "SpawnShape": 3,
+            "SpawnSpace": 1,
+            "Speed": [
+                0.8,
+                2.2
+            ],
+            "SpriteAnimationFps": 12.0,
+            "SpriteAnimationLoop": 1,
+            "SpriteAnimationRange": [
+                0,
+                0
+            ],
+            "SpriteSheetIndex": [
+                0,
+                0
+            ],
+            "StretchMax": 1.8,
+            "StretchScale": 0.10,
+            "TexturePath": "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/smoke_05.png",
+            "TextureSplitCount": [
+                1,
+                1
+            ],
+            "UseColorOverLife": 1,
+            "UseFresnel": 0,
+            "UseGradient": 0,
+            "UseMask": 1,
+            "UseRandomSize": 1,
+            "UseSpriteAnimation": 0,
+            "VerticalSpawnRange": 0.12,
+            "Wind": [
+                0.0,
+                0.45,
+                -0.35
+            ],
+            "gradientDirection": 0,
+            "gradientEndUv": 1.0,
+            "gradientFixedUv": 0.5,
+            "gradientSampleMode": 0,
+            "gradientStartUv": 0.0,
+            "gradientTexturePath": "",
+            "maskTexturePath": "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/smoke_05.png",
+            "shadeGradientDirection": 0,
+            "shadeGradientEndUv": 1.0,
+            "shadeGradientFixedUv": 0.5,
+            "shadeGradientSampleMode": 0,
+            "shadeGradientStartUv": 0.0,
+            "shadeGradientTexturePath": "",
+            "texturePath": "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/smoke_05.png",
+            "useGradientTexture": 0,
+            "useShadeGradientTexture": 0
+        }
+    ],
+    "IsPlaying": true
+}

@@ -548,6 +548,9 @@ void HumanBossActionComponent::StrikeChargeArea()
     const DirectX::XMFLOAT3 end_ = { start_.x + std::sin(yaw_) * chargeLength,
         start_.y, start_.z + std::cos(yaw_) * chargeLength };
     SpawnElectricStrip(start_, end_, chargeLength, chargeElectricDuration);
+    owner_->GetManager().GetEffectManager().SpawnGroundMark(GroundMarkShape::LIGHTNING_STRIP,
+        { (start_.x + end_.x) * 0.5f, chargeGroundStart.y, (start_.z + end_.z) * 0.5f },
+        radius_, chargeLength * 0.5f + radius_, yaw_);
 
     AttackEffectSpawnTemplate effect_;
     effect_.effectType = ATTACK_EFFECT_TYPE::AREA_OVER_TIME;
@@ -748,6 +751,17 @@ void HumanBossActionComponent::StrikeRagnarokArea()
     AudioManager::Instance().PlaySpatialAttackSound(feedback_.startSoundPath, ragnarokGroundCenter,
         feedback_.volume, feedback_.minDistance, feedback_.maxDistance);
     SpawnRagnarokParticles();
+    const float groundYaw_ = DirectX::XMConvertToRadians(ragnarokYaw);
+    const auto groundFrame_ = DirectX::XMMatrixRotationY(groundYaw_) *
+        DirectX::XMMatrixTranslation(ragnarokGroundCenter.x, ragnarokGroundCenter.y, ragnarokGroundCenter.z);
+    for (const auto& strip_ : ragnarokGrid)
+    {
+        DirectX::XMFLOAT3 center_{};
+        DirectX::XMStoreFloat3(&center_, DirectX::XMVector3TransformCoord(
+            DirectX::XMLoadFloat3(&strip_.position), groundFrame_));
+        owner_->GetManager().GetEffectManager().SpawnGroundMark(GroundMarkShape::LIGHTNING_STRIP,
+            center_, strip_.halfWidth, strip_.length * 0.5f, groundYaw_ + DirectX::XMConvertToRadians(strip_.yaw));
+    }
     // 最後に表示した予兆の角度を引き継ぎ、Phase切替時の角度の飛びを防ぐ。
     ClearRangedArea();
     const auto instance_ = owner_->GetManager().GetAttackSystem().CreateAttackInstance();

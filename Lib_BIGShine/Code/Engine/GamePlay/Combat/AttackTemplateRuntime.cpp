@@ -176,6 +176,18 @@ void AttackTemplateRuntime::Start(
     event_.spawnedAttackEffects.assign(attackTemplate_->attackEffects.size(), false);
     ConfigureWeaponHitBox(owner_, *attackTemplate_, event_.attackTemplateInstanceId);
 
+    if (event_.attackTemplateId == "RashAttack_04_Sheild" && actor_ && actor_->transform)
+    {
+        if (const auto shield_ = FindHitBox(actor_, attackTemplate_->weaponHitBox.hitBoxName))
+        {
+            const auto shape_ = shield_->GetCapsuleData();
+            DirectX::XMFLOAT3 center_{};
+            DirectX::XMStoreFloat3(&center_, DirectX::XMVectorScale(DirectX::XMVectorAdd(shape_.p0, shape_.p1), 0.5f));
+            owner_->GetManager().GetEffectManager().SpawnGroundMark(GroundMarkShape::IMPACT,
+                center_, shape_.radius, shape_.radius);
+        }
+    }
+
     for (const SlashEffectTemplate& slash_ : attackTemplate_->slashEffects)
     {
         if (!slash_.enabled || slash_.vfxPath.empty()) continue;

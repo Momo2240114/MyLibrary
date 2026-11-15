@@ -394,8 +394,6 @@ static ImVec2 CalculateBidirectionalLinkOffset(const AnimTransition& transition_
 
 void AnimationControllerComponent::OnGuiNodeEditor()
 {
-    if (!nodeEditorContext) return;
-
     ImGui::Begin("Animation Graph Editor");
     DrawNodeEditorContent(ANIM_GRAPH_CONNECTION_MODE::LEGACY_TWO_PIN);
     ImGui::End();
@@ -403,6 +401,7 @@ void AnimationControllerComponent::OnGuiNodeEditor()
 
 void AnimationControllerComponent::DrawNodeEditorContent(ANIM_GRAPH_CONNECTION_MODE connectionMode_)
 {
+    PrepareGraphEditor();
     if (!nodeEditorContext) return;
 
     EnsureSpecialGraphNodes();

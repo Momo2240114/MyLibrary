@@ -5,7 +5,6 @@
 #include "Engine/Graphics/Resource/Animation/AnimationState.h"
 
 class AnimationControllerComponent;
-class GltfModelCommponennt;
 
 class AnimNodeEditorWindow : public EditorWorkspaceWindow
 {
@@ -21,8 +20,6 @@ public:
 
 private:
 
-    // 選択中GameObjectから、モデルとAnimationControllerの両方が揃った編集対象を解決する。
-    bool ResolveTarget(GltfModelCommponennt*& modelComp, AnimationControllerComponent*& animController) const;
     void DrawScenePreviewPanel();
     void DrawSceneHierarchyPanel();
     void DrawSceneInspectorPanel();

@@ -37,6 +37,10 @@ public:
 	void DrawGUI();
 
 	std::shared_ptr<GameObjectManager> GetGameObjectManager();
+    bool IsEditorWorkspaceOpen() const
+    {
+        return isEditorVisible && editorWindowManager && editorWindowManager->IsWorkspaceMode();
+    }
     // 表示専用Sceneでは、ロード中もメニュー操作用カーソルを解放する。
     bool RequiresFreeCursor() const override { return isLoadingPresentation; }
 protected:

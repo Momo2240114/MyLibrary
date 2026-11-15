@@ -26,6 +26,7 @@
 #include "Engine/GamePlay/System/EffectManager.h"
 #include "Engine/GamePlay/Input/KeyConfig.h"
 #include "Engine/Graphics/Resource/Animation/AnimationControllerComponent.h"
+#include "Engine/Graphics/Resource/GlTFModel.h"
 #include "Engine/Physics/CharacterCollider.h"
 #include "Engine/Physics/ColliderComponent.h"
 #include "Engine/Physics/HurtBox.h"
@@ -51,6 +52,7 @@
 namespace
 {
     inline constexpr int WEAK_ATTACK_COMBO_COUNT = 4;
+    inline constexpr int RUSH_COMBO_COUNT = 4;
 
     // KeyConfigへ登録するPlayer用Action名。JSONやEditor設定と接続するため文字列は変更しない。
     namespace PlayerInputAction
@@ -291,6 +293,7 @@ void PlayerControllerComponent::Start()
     stateMachine.AddState<PlayerSkillState>(PLAYER_ACTION::SKILL_A, PLAYER_ACTION::SKILL_A);
     stateMachine.AddState<PlayerSkillState>(PLAYER_ACTION::SKILL_B, PLAYER_ACTION::SKILL_B);
     stateMachine.AddState<PlayerAttackState>(PLAYER_ACTION::COUNTER_ATTACK, PLAYER_ACTION::COUNTER_ATTACK);
+    stateMachine.AddState<PlayerAttackState>(PLAYER_ACTION::JUST_DODGE_RUSH, PLAYER_ACTION::JUST_DODGE_RUSH);
     stateMachine.AddState<PlayerSkillState>(PLAYER_ACTION::SKILL_C, PLAYER_ACTION::SKILL_C);
     // 回復も共通SkillStateへ接続し、既存のPhase実行と終了処理を使用する。
     stateMachine.AddState<PlayerSkillState>(PLAYER_ACTION::SKILL_D, PLAYER_ACTION::SKILL_D);
@@ -415,6 +418,9 @@ bool PlayerControllerComponent::IsAnimationStateForAction(
         return stateName_ == "AirDodge_Blend";
     case PLAYER_ACTION::COUNTER_ATTACK:
         return stateName_ == "Run_Attack_01_Seq";
+    case PLAYER_ACTION::JUST_DODGE_RUSH:
+        return stateName_ == "Combo_Attack_03_0" + std::to_string(comboIndex + 1) + "_Seq" ||
+            (comboIndex == 0 && (stateName_ == "Charge_Air_Attack_Start_Seq" || stateName_ == "Charge_Air_Attack_Loop_Seq"));
     default:
         return true;
     }
@@ -473,6 +479,9 @@ void PlayerControllerComponent::UpdateTimelineActionSafety(float deltaTime_)
         }
         return;
     }
+
+    if (currentAction_ == PLAYER_ACTION::JUST_DODGE_RUSH &&
+        (currentState_->name == "Charge_Air_Attack_Start_Seq" || currentState_->name == "Charge_Air_Attack_Loop_Seq")) return;
 
     if (currentState_->isLoop)
     {
@@ -866,8 +875,25 @@ bool PlayerControllerComponent::RequestAction(PLAYER_ACTION nextAction_)
         return false;
     }
 
+    // 確定済みの派生を、連打やガードの押しっぱなしで上書きしない。
+    if (actionRuntime.bufferedAction == PLAYER_ACTION::COUNTER_ATTACK ||
+        actionRuntime.bufferedAction == PLAYER_ACTION::JUST_DODGE_RUSH) return false;
+
     if (currentAction_ == nextAction_)
     {
+        if (currentAction_ == PLAYER_ACTION::JUST_DODGE_RUSH &&
+            (actionRuntime.canBufferInput || actionRuntime.canCombo) &&
+            comboIndex + 1 < RUSH_COMBO_COUNT)
+        {
+            actionRuntime.bufferedAction = nextAction_;
+            actionRuntime.bufferedComboIndex = comboIndex + 1;
+            if (actionRuntime.canCombo)
+            {
+                NotifyComboTransition();
+                return true;
+            }
+            return false;
+        }
         // 同じ弱攻撃入力は即時遷移せず、コンボ段の予約として保持する。
         const bool canQueueCombo_ =
             (currentAction_ == PLAYER_ACTION::WEAK_ATTACK ||
@@ -897,12 +923,16 @@ bool PlayerControllerComponent::RequestAction(PLAYER_ACTION nextAction_)
 
     if (!canChangeImmediately_)
     {
-        // 現在Actionが閉じるまで待つ必要がある入力は、受付窓が開いている時だけBufferへ積む。
-        if (actionRuntime.canBufferInput || actionRuntime.canCombo)
+        const bool isCounter_ = nextAction_ == PLAYER_ACTION::COUNTER_ATTACK || nextAction_ == PLAYER_ACTION::JUST_DODGE_RUSH;
+        const bool canBufferParryAttack_ = currentAction_ == PLAYER_ACTION::JUST_GUARD &&
+            (nextAction_ == PLAYER_ACTION::WEAK_ATTACK || nextAction_ == PLAYER_ACTION::STRONG_ATTACK ||
+                nextAction_ == PLAYER_ACTION::STRONG_CHARGE_ATTACK);
+        if (actionRuntime.canBufferInput || actionRuntime.canCombo || canBufferParryAttack_ ||
+            (isCounter_ && IsPlayerActionTimelineDriven(currentAction_)))
         {
             actionRuntime.bufferedAction = nextAction_;
             actionRuntime.bufferedComboIndex = requestedComboIndex_;
-            if (nextAction_ == PLAYER_ACTION::COUNTER_ATTACK)
+            if (isCounter_)
             {
                 // 反撃入力を先行入力として受け付けた時点でTagを消費し、同じTagでの連続使用を防ぐ。
                 ClearCounterTags();
@@ -913,10 +943,6 @@ bool PlayerControllerComponent::RequestAction(PLAYER_ACTION nextAction_)
 
     pendingComboIndex = requestedComboIndex_;
     stateMachine.ChangeState(nextAction_);
-    if (nextAction_ == PLAYER_ACTION::COUNTER_ATTACK)
-    {
-        ClearCounterTags();
-    }
     return true;
 }
 
@@ -1121,6 +1147,8 @@ void PlayerControllerComponent::EnsureDefaultCancelTransitions()
     AddActionBranchTransition(PLAYER_ACTION::GUARD, PLAYER_ACTION::STRONG_CHARGE_ATTACK);
     AddActionBranchTransition(PLAYER_ACTION::GUARD, PLAYER_ACTION::COUNTER_ATTACK);
     AddActionBranchTransition(PLAYER_ACTION::DODGE, PLAYER_ACTION::COUNTER_ATTACK);
+    AddActionBranchTransition(PLAYER_ACTION::DODGE, PLAYER_ACTION::JUST_DODGE_RUSH);
+    AddActionBranchTransition(PLAYER_ACTION::AIR_DODGE, PLAYER_ACTION::JUST_DODGE_RUSH);
     AddActionBranchTransition(PLAYER_ACTION::AIR_DODGE, PLAYER_ACTION::COUNTER_ATTACK);
     AddActionBranchTransition(PLAYER_ACTION::JUST_GUARD, PLAYER_ACTION::COUNTER_ATTACK);
     AddActionBranchTransition(PLAYER_ACTION::JUST_GUARD, PLAYER_ACTION::WEAK_ATTACK);
@@ -1207,6 +1235,11 @@ void PlayerControllerComponent::SetCanCombo(bool enabled_)
         blackboard->SetBool(PlayerBlackboardCategory::PLAYER, PlayerBlackboardKey::CAN_COMBO, actionRuntime.canCombo);
         blackboard->SetBool(PlayerBlackboardCategory::ANIM, PlayerBlackboardKey::CAN_COMBO, actionRuntime.canCombo);
     }
+    if (enabled_ && GetCurrentAction() == PLAYER_ACTION::JUST_DODGE_RUSH &&
+        actionRuntime.bufferedAction == PLAYER_ACTION::JUST_DODGE_RUSH)
+    {
+        NotifyComboTransition();
+    }
 }
 
 void PlayerControllerComponent::SyncCancelGateBlackboard()
@@ -1282,11 +1315,12 @@ void PlayerControllerComponent::TryConsumeBufferedActionForCancelGate(bool dodge
 
 void PlayerControllerComponent::NotifyComboTransition()
 {
-    // Animation側のコンボ遷移通知で、保存済み弱攻撃入力を次コンボ段として確定する。
+    // 受付を閉じてから、予約された弱攻撃またはラッシュの次段へ進む。
     SetCanBufferInput(false);
     SetCanCombo(false);
     const PLAYER_ACTION currentAction_ = GetCurrentAction();
-    if (GetPlayerAttackType(currentAction_) != PLAYER_ATTACK_TYPE::WEAK ||
+    if ((GetPlayerAttackType(currentAction_) != PLAYER_ATTACK_TYPE::WEAK &&
+            currentAction_ != PLAYER_ACTION::JUST_DODGE_RUSH) ||
         actionRuntime.bufferedAction != currentAction_)
     {
         return;
@@ -1347,10 +1381,11 @@ void PlayerControllerComponent::NotifyActionEnd()
     }
     SyncCancelGateBlackboard();
 
-    if (GetPlayerAttackType(currentAction_) == PLAYER_ATTACK_TYPE::WEAK &&
+    if ((GetPlayerAttackType(currentAction_) == PLAYER_ATTACK_TYPE::WEAK ||
+            currentAction_ == PLAYER_ACTION::JUST_DODGE_RUSH) &&
         actionRuntime.bufferedAction == currentAction_)
     {
-        // 同じ弱攻撃の予約はコンボ通知でのみ進め、行動終了後の新規攻撃としては消費しない。
+        // 派生受付が終了した後に、次段の予約を新規攻撃として消費しない。
         actionRuntime.bufferedAction = PLAYER_ACTION::NONE;
         actionRuntime.bufferedComboIndex = 0;
     }
@@ -1361,7 +1396,8 @@ void PlayerControllerComponent::NotifyActionEnd()
     }
 
     if (IsAirAction(currentAction_) ||
-        (PlayerSkillLoadout::GetSlotIndex(currentAction_) >= 0 && IsAirborneForAction()))
+        ((currentAction_ == PLAYER_ACTION::JUST_DODGE_RUSH || PlayerSkillLoadout::GetSlotIndex(currentAction_) >= 0) &&
+            IsAirborneForAction()))
     {
         const DirectX::XMFLOAT3 input_ = GetMoveInput();
         const bool hasMoveInput_ = input_.x != 0.0f || input_.z != 0.0f;
@@ -1620,6 +1656,12 @@ void PlayerControllerComponent::EnterAction(PLAYER_ACTION action_)
         if (movement) movement->ClearRootMotionDelta();
     }
     previousAction = action_;
+    const bool wasRushing_ = previousAction_ == PLAYER_ACTION::JUST_DODGE_RUSH;
+    const bool isRushing_ = action_ == PLAYER_ACTION::JUST_DODGE_RUSH;
+    if (hurtBox && wasRushing_ != isRushing_)
+    {
+        hurtBox->SetTemporaryInvincible(isRushing_);
+    }
     if (previousAction_ == PLAYER_ACTION::DODGE &&
         action_ != PLAYER_ACTION::DODGE)
     {
@@ -1629,7 +1671,7 @@ void PlayerControllerComponent::EnterAction(PLAYER_ACTION action_)
     {
         airDodgeConsumed = true;
     }
-    if (action_ == PLAYER_ACTION::COUNTER_ATTACK)
+    if (action_ == PLAYER_ACTION::COUNTER_ATTACK || action_ == PLAYER_ACTION::JUST_DODGE_RUSH)
     {
         // 反撃Actionが開始された時点で反撃Tagを消費し、次の入力へ持ち越さない。
         ClearCounterTags();
@@ -1687,7 +1729,8 @@ void PlayerControllerComponent::EnterAction(PLAYER_ACTION action_)
         ResetStrongAttackInput();
     }
 
-    comboIndex = GetPlayerAttackType(action_) == PLAYER_ATTACK_TYPE::WEAK ? pendingComboIndex : 0;
+    const bool usesComboIndex_ = GetPlayerAttackType(action_) == PLAYER_ATTACK_TYPE::WEAK || action_ == PLAYER_ACTION::JUST_DODGE_RUSH;
+    comboIndex = usesComboIndex_ ? pendingComboIndex : 0;
     pendingComboIndex = 0;
     // 通知で進む行動の派生受付は閉じて開始し、アニメーション側の受付開始通知を待つ。
     actionRuntime.canDodgeCancel = !IsPlayerActionTimelineDriven(action_);
@@ -1995,20 +2038,26 @@ void PlayerControllerComponent::ProcessActionInput()
     if (!PlayerInputResolver::IsActionConsumed(keyConfig_, skillInputs, PlayerInputAction::WEAK_ATTACK) &&
         keyConfig_.ActionPressedIn(PlayerInputAction::WEAK_ATTACK))
     {
-        // 成功直後の反撃Tagが残っている間は、通常攻撃入力を反撃Actionへ差し替える。
-        if (HasCounterAttackTag())
+        if (GetCurrentAction() == PLAYER_ACTION::JUST_DODGE_RUSH)
         {
-            RequestAction(PLAYER_ACTION::COUNTER_ATTACK);
+            RequestAction(PLAYER_ACTION::JUST_DODGE_RUSH);
+            return;
+        }
+        // 成功直後の反撃Tagが残っている間は、通常攻撃入力を反撃Actionへ差し替える。
+        const PLAYER_ACTION counter_ = ResolveCounterAttack(true);
+        if (counter_ != PLAYER_ACTION::NONE)
+        {
+            RequestAction(counter_);
             return;
         }
 
         if (RequestAction(isAirborne_ ? PLAYER_ACTION::AIR_WEAK_ATTACK : PLAYER_ACTION::WEAK_ATTACK)) return;
     }
+    const PLAYER_ACTION strongCounter_ = ResolveCounterAttack(false);
     if (!strongConsumed_ && keyConfig_.ActionPressedIn(PlayerInputAction::STRONG_ATTACK) &&
-        HasCounterAttackTag())
+        strongCounter_ != PLAYER_ACTION::NONE)
     {
-        // 反撃Tag中の強攻撃入力も溜め判定へ回さず、即座に反撃Actionとして消費する。
-        RequestAction(PLAYER_ACTION::COUNTER_ATTACK);
+        RequestAction(strongCounter_);
         ResetStrongAttackInput();
         return;
     }
@@ -2305,8 +2354,18 @@ void PlayerControllerComponent::SendActionToBlackboard(PLAYER_ACTION action_)
 }
 
 // 入力や戦闘の境界で実行情報だけを初期化し、物理の重力やImpulseには触れない。
+void PlayerControllerComponent::SetGroundBank(float angle_)
+{
+    if (groundBankAngle == angle_) return;
+    groundBankAngle = angle_;
+    if (const auto owner_ = GetGameObject())
+        if (const auto model_ = owner_->GetComponent<GltfModelCommponennt>())
+            model_->SetLocalRoll(angle_);
+}
+
 void PlayerControllerComponent::ResetGroundMovement()
 {
+    SetGroundBank(0.0f);
     groundMoveSpeed = 0.0f;
     groundTargetSpeed = 0.0f;
     groundPhaseTimer = 0.0f;
@@ -2331,6 +2390,13 @@ void PlayerControllerComponent::UpdateGroundMovement(float deltaTime_)
 {
     BS_PROFILE_SCOPE("PlayerControllerComponent::UpdateGroundMovement");
     const float deltaTimeSafe_ = (std::max)(deltaTime_, 0.0f);
+    constexpr float BANK_RESPONSE = 14.0f;
+    const float bankBlend_ = 1.0f - std::exp(-BANK_RESPONSE * deltaTimeSafe_);
+    const auto blendBank_ = [this, bankBlend_](float targetAngle_)
+    {
+        const float angle_ = std::lerp(groundBankAngle, targetAngle_, bankBlend_);
+        SetGroundBank(targetAngle_ == 0.0f && std::abs(angle_) < 0.01f ? 0.0f : angle_);
+    };
     const auto owner_ = GetGameObject();
     const auto input_ = GetMoveInput();
     const float magnitude_ = std::sqrt(input_.x * input_.x + input_.z * input_.z);
@@ -2405,6 +2471,7 @@ void PlayerControllerComponent::UpdateGroundMovement(float deltaTime_)
         groundReversing = false;
         SendMoveInputToBlackboard(input_);
         SetHorizontalVelocity(groundRequestedVelocity, 1.0f);
+        blendBank_(0.0f);
         if (blackboard) blackboard->SetFloat(PlayerBlackboardCategory::ANIM, "GroundPlaybackRate", 1.0f);
         return;
     }
@@ -2439,7 +2506,14 @@ void PlayerControllerComponent::UpdateGroundMovement(float deltaTime_)
     constexpr float MAXIMUM_GROUND_STEP = 1.0f / 240.0f;
     constexpr float REVERSAL_ANGLE = 120.0f;
     constexpr float REVERSAL_CANCEL_ANGLE = 90.0f;
+    const float fullSpeed_ = (std::max)(moveSpeed, 0.01f);
+    const auto speedWeight_ = [fullSpeed_](float speed_)
+    {
+        const float ratio_ = std::clamp(speed_ / fullSpeed_, 0.0f, 1.0f);
+        return ratio_ * ratio_;
+    };
     DirectX::XMFLOAT3 displacement_{};
+    float bankSum_ = 0.0f;
     float remainingTime_ = deltaTimeSafe_;
     // 固定の小区間で角度と速度を更新し、曲がり角で速度ベクトルを単純補間しない。
     while (remainingTime_ > 0.000001f)
@@ -2464,9 +2538,15 @@ void PlayerControllerComponent::UpdateGroundMovement(float deltaTime_)
         const float previousSpeed_ = groundMoveSpeed;
         if (hasInput_ && !groundReversing)
         {
-            const float turnLimit_ = DirectX::XMConvertToRadians((std::max)(groundDirectionTurnSpeed, 0.0f)) * step_;
-            const float yaw_ = std::atan2(groundMoveDirection.x, groundMoveDirection.z) + std::clamp(difference_, -turnLimit_, turnLimit_);
+            const float speedWeightAtStep_ = speedWeight_(previousSpeed_);
+            const float turnMultiplier_ = std::lerp(1.0f, groundFullSpeedTurnMultiplier, speedWeightAtStep_);
+            const float turnLimit_ = DirectX::XMConvertToRadians(groundDirectionTurnSpeed) * turnMultiplier_ * step_;
+            const float turn_ = std::clamp(difference_, -turnLimit_, turnLimit_);
+            const float yaw_ = std::atan2(groundMoveDirection.x, groundMoveDirection.z) + turn_;
             groundMoveDirection = { std::sin(yaw_), 0.0f, std::cos(yaw_) };
+
+            // 進行方向が実際に曲がった分だけ内側へ傾ける。YawとRollでは右方向の符号が逆になる。
+            if (turnLimit_ > 0.0f) bankSum_ -= (turn_ / turnLimit_) * speedWeightAtStep_ * step_;
         }
         const float changingTime_ = (std::min)(step_, std::abs(targetSpeed_ - previousSpeed_) / speedRate_);
         groundMoveSpeed += std::clamp(targetSpeed_ - previousSpeed_, -speedRate_ * step_, speedRate_ * step_);
@@ -2481,16 +2561,21 @@ void PlayerControllerComponent::UpdateGroundMovement(float deltaTime_)
         ? DirectX::XMFLOAT3{ displacement_.x / deltaTimeSafe_, 0.0f, displacement_.z / deltaTimeSafe_ } : groundCurrentVelocity;
     SetHorizontalVelocity(groundRequestedVelocity, 1.0f, false);
 
-    // 見た目の向きは目標方向へ向け、切り返し中の進行方向とは分離する。
-    // ロックオン中も通常移動は進行入力、ガード中は敵方向という既存の分担を維持する。
+    const float bankTarget_ = deltaTimeSafe_ > 0.000001f
+        ? groundTurnBankAngle * std::clamp(bankSum_ / deltaTimeSafe_, -1.0f, 1.0f) : 0.0f;
+    blendBank_(bankTarget_);
+
+    // 高速で曲がる途中に、体だけ入力方向へ先に向いて横滑りして見えるのを防ぐ。
     if (hasInput_ && owner_ && owner_->transform)
     {
         const float currentYaw_ = DirectX::XMConvertToRadians(owner_->transform->localRotation.y);
-        const float targetYaw_ = std::atan2(targetDirection_.x, targetDirection_.z);
+        const auto& facingDirection_ = groundMoveSpeed > groundStopSpeedThreshold ? groundMoveDirection : targetDirection_;
+        const float targetYaw_ = std::atan2(facingDirection_.x, facingDirection_.z);
         float difference_ = std::remainder(targetYaw_ - currentYaw_, DirectX::XM_2PI);
         if (std::abs(std::abs(difference_) - DirectX::XM_PI) < 0.01f) difference_ = std::abs(difference_) * groundLastTurnSign;
         else if (std::abs(difference_) > 0.01f) groundLastTurnSign = difference_ > 0.0f ? 1.0f : -1.0f;
-        const float turnLimit_ = DirectX::XMConvertToRadians((std::max)(groundTurnSpeed, 0.0f)) * deltaTimeSafe_;
+        const float turnMultiplier_ = std::lerp(1.0f, groundFullSpeedTurnMultiplier, speedWeight_(groundMoveSpeed));
+        const float turnLimit_ = DirectX::XMConvertToRadians(groundTurnSpeed) * turnMultiplier_ * deltaTimeSafe_;
         const float yaw_ = currentYaw_ + std::clamp(difference_, -turnLimit_, turnLimit_);
         SetFacingDirection({ std::sin(yaw_), 0.0f, std::cos(yaw_) });
     }
@@ -2695,7 +2780,7 @@ void PlayerControllerComponent::SendGuardInputToBlackboard(bool guardInput_)
 }
 
 // 成功確定後だけ演出を開始し、復帰は既存TimeManagerと音声Mixerに任せる。
-void PlayerControllerComponent::PlayJustSuccessPresentation()
+void PlayerControllerComponent::PlayJustSuccessPresentation(bool justGuard_)
 {
     BS_PROFILE_SCOPE("PlayerControllerComponent::PlayJustSuccessPresentation");
     const auto owner_ = GetGameObject();
@@ -2704,17 +2789,18 @@ void PlayerControllerComponent::PlayJustSuccessPresentation()
     constexpr uint32_t SLOW_LAYERS = static_cast<uint32_t>(TarGetLayerType::Enemy) |
         static_cast<uint32_t>(TarGetLayerType::EnemyBullet) | static_cast<uint32_t>(TarGetLayerType::PlayerBullet) |
         static_cast<uint32_t>(TarGetLayerType::Environment);
+    const float scale_ = justGuard_ ? (std::max)(justGuardTimeScale, justSuccessTimeScale) : justSuccessTimeScale;
+    const float hold_ = justGuard_ ? justSuccessHoldDuration * 0.6f : justSuccessHoldDuration;
     if (const auto time_ = owner_->GetManager().GetTimeManager())
-        time_->PlayTimedScale(SLOW_LAYERS, justSuccessTimeScale, 0.025f,
-            justSuccessHoldDuration, justSuccessReturnDuration);
-    AudioManager::Instance().PlayTimedMuffle(0.025f + justSuccessHoldDuration + justSuccessReturnDuration,
+        time_->PlayTimedScale(SLOW_LAYERS, scale_, 0.025f, hold_, justSuccessReturnDuration);
+    AudioManager::Instance().PlayTimedMuffle(0.025f + hold_ + justSuccessReturnDuration,
         justSuccessMuffleCutoff);
 }
 
 void PlayerControllerComponent::GrantJustDodgeCounterTag()
 {
     // ジャスト回避成功後、通常攻撃入力を反撃へ差し替えるための短時間Tagを付与する。
-    PlayJustSuccessPresentation();
+    PlayJustSuccessPresentation(false);
     justDodgeCounterTagTimer = (std::max)(counterTagDuration, 0.0f);
     PromoteBufferedAttackToCounterAttack();
     SyncCounterTagsToBlackboard();
@@ -2723,36 +2809,43 @@ void PlayerControllerComponent::GrantJustDodgeCounterTag()
 void PlayerControllerComponent::GrantJustGuardCounterTag()
 {
     // ジャストガード成功後、反撃Tagと回避派生用の受付状態を同時に開く。
-    PlayJustSuccessPresentation();
+    PlayJustSuccessPresentation(true);
     justGuardCounterTagTimer = (std::max)(counterTagDuration, 0.0f);
     SetCanDodgeCancel(true);
     PromoteBufferedAttackToCounterAttack();
     SyncCounterTagsToBlackboard();
 }
 
-bool PlayerControllerComponent::HasCounterAttackTag() const
+PLAYER_ACTION PlayerControllerComponent::ResolveCounterAttack(bool weakAttack_) const
 {
-    return justDodgeCounterTagTimer > 0.0f || justGuardCounterTagTimer > 0.0f;
+    if (justGuardCounterTagTimer > 0.0f) return PLAYER_ACTION::COUNTER_ATTACK;
+    if (justDodgeCounterTagTimer > 0.0f)
+        return weakAttack_ ? PLAYER_ACTION::JUST_DODGE_RUSH : PLAYER_ACTION::COUNTER_ATTACK;
+    return PLAYER_ACTION::NONE;
 }
 
 void PlayerControllerComponent::PromoteBufferedAttackToCounterAttack()
 {
     const PLAYER_ACTION bufferedAction_ = actionRuntime.bufferedAction;
-    const bool isBufferedGroundAttack_ =
+    const bool isBufferedAttack_ =
         bufferedAction_ == PLAYER_ACTION::WEAK_ATTACK ||
         bufferedAction_ == PLAYER_ACTION::STRONG_ATTACK ||
         bufferedAction_ == PLAYER_ACTION::STRONG_CHARGE_ATTACK ||
         bufferedAction_ == PLAYER_ACTION::AIR_WEAK_ATTACK ||
         bufferedAction_ == PLAYER_ACTION::AIR_STRONG_ATTACK ||
         bufferedAction_ == PLAYER_ACTION::AIR_STRONG_CHARGE_ATTACK;
-    if (!isBufferedGroundAttack_)
+    if (!isBufferedAttack_)
     {
         return;
     }
 
     // 反撃Tag付与前に押されていた通常攻撃は、Tag成立後の反撃入力として扱う。
-    actionRuntime.bufferedAction = PLAYER_ACTION::COUNTER_ATTACK;
+    const bool weakAttack_ = bufferedAction_ == PLAYER_ACTION::WEAK_ATTACK || bufferedAction_ == PLAYER_ACTION::AIR_WEAK_ATTACK;
+    const PLAYER_ACTION counter_ = ResolveCounterAttack(weakAttack_);
+    if (counter_ == PLAYER_ACTION::NONE) return;
+    actionRuntime.bufferedAction = counter_;
     actionRuntime.bufferedComboIndex = 0;
+    ClearCounterTags();
     if (actionRuntime.canActionBranch)
     {
         TryConsumeBufferedActionForCancelGate(false);
@@ -2988,7 +3081,8 @@ void PlayerControllerComponent::Gui()
             PLAYER_ACTION::SKILL_B,
             PLAYER_ACTION::SKILL_C,
             PLAYER_ACTION::SKILL_D,
-            PLAYER_ACTION::COUNTER_ATTACK
+            PLAYER_ACTION::COUNTER_ATTACK,
+            PLAYER_ACTION::JUST_DODGE_RUSH
         };
 
         for (const PLAYER_ACTION action_ : actions_)
@@ -3042,6 +3136,8 @@ void PlayerControllerComponent::Gui()
     ImGui::DragFloat("Ground Acceleration (units/s^2)", &groundAcceleration, 1.0f, 0.01f, 2000.00f);
     ImGui::DragFloat("Reversal Brake (units/s^2)", &groundReversalDeceleration, 1.0f, 0.01f, 4000.00f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
     ImGui::DragFloat("Direction Turn Speed (deg/s)", &groundDirectionTurnSpeed, 1.0f, 0.01f, 7200.00f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
+    ImGui::DragFloat("Full-Speed Turn Multiplier", &groundFullSpeedTurnMultiplier, 0.01f, 0.05f, 1.0f, "%.2fx", ImGuiSliderFlags_AlwaysClamp);
+    ImGui::DragFloat("Max Turn Bank (deg)", &groundTurnBankAngle, 0.1f, 0.0f, 25.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
     ImGui::DragFloat("Stop Speed (units/s)", &groundStopSpeedThreshold, 0.001f, 0.001f, 1.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
     ImGui::DragFloat("Ground Deceleration (units/s^2)", &groundDeceleration, 0.01f, 0.01f, 2000.00f);
     ImGui::DragFloat("Facing Turn Speed (deg/s)", &groundTurnSpeed, 0.01f, 0.01f, 7200.00f);
@@ -3104,6 +3200,7 @@ void PlayerControllerComponent::Gui()
     ImGui::DragFloat("Ground Dodge Cooldown", &groundDodgeCooldownDuration, 0.01f, 0.0f, 5.0f, "%.2f");
     ImGui::Checkbox("Just Success Presentation", &justSuccessPresentationEnabled);
     ImGui::DragFloat("Just Success Time Scale", &justSuccessTimeScale, 0.01f, 0.05f, 1.0f);
+    ImGui::DragFloat("Just Guard Time Scale", &justGuardTimeScale, 0.01f, 0.05f, 1.0f);
     ImGui::DragFloat("Just Success Hold", &justSuccessHoldDuration, 0.01f, 0.0f, 2.0f);
     ImGui::DragFloat("Just Success Return", &justSuccessReturnDuration, 0.01f, 0.01f, 2.0f);
     ImGui::DragFloat("Just Success Muffle Cutoff", &justSuccessMuffleCutoff, 10.0f, 100.0f, 22000.0f);
@@ -3288,6 +3385,8 @@ void PlayerControllerComponent::Serialize(nlohmann::json& j_) const
     j_["GroundAcceleration"] = groundAcceleration;
     j_["GroundReversalDeceleration"] = groundReversalDeceleration;
     j_["GroundDirectionTurnSpeed"] = groundDirectionTurnSpeed;
+    j_["GroundFullSpeedTurnMultiplier"] = groundFullSpeedTurnMultiplier;
+    j_["GroundTurnBankAngle"] = groundTurnBankAngle;
     j_["GroundStopSpeedThreshold"] = groundStopSpeedThreshold;
     j_["GroundDeceleration"] = groundDeceleration;
     j_["GroundTurnSpeed"] = groundTurnSpeed;
@@ -3330,6 +3429,7 @@ void PlayerControllerComponent::Serialize(nlohmann::json& j_) const
     j_["GroundDodgeCooldownDuration"] = groundDodgeCooldownDuration;
     j_["JustSuccessPresentationEnabled"] = justSuccessPresentationEnabled;
     j_["JustSuccessTimeScale"] = justSuccessTimeScale;
+    j_["JustGuardTimeScale"] = justGuardTimeScale;
     j_["JustSuccessHoldDuration"] = justSuccessHoldDuration;
     j_["JustSuccessReturnDuration"] = justSuccessReturnDuration;
     j_["JustSuccessMuffleCutoff"] = justSuccessMuffleCutoff;
@@ -3393,6 +3493,8 @@ void PlayerControllerComponent::Deserialize(const nlohmann::json& j_)
     groundAcceleration = std::clamp(j_.value("GroundAcceleration", groundAcceleration), 0.01f, 2000.00f);
     groundReversalDeceleration = std::clamp(j_.value("GroundReversalDeceleration", groundReversalDeceleration), 0.010f, 4000.00f);
     groundDirectionTurnSpeed = std::clamp(j_.value("GroundDirectionTurnSpeed", groundDirectionTurnSpeed), 0.010f, 7200.00f);
+    groundFullSpeedTurnMultiplier = std::clamp(j_.value("GroundFullSpeedTurnMultiplier", 0.20f), 0.05f, 1.0f);
+    groundTurnBankAngle = std::clamp(j_.value("GroundTurnBankAngle", 10.0f), 0.0f, 25.0f);
     groundStopSpeedThreshold = std::clamp(j_.value("GroundStopSpeedThreshold", groundStopSpeedThreshold), 0.001f, 1.00f);
     groundDeceleration = std::clamp(j_.value("GroundDeceleration", groundDeceleration), 0.01f, 2000.00f);
     groundTurnSpeed = std::clamp(j_.value("GroundTurnSpeed", groundTurnSpeed), 0.01f, 7200.00f);
@@ -3451,6 +3553,7 @@ void PlayerControllerComponent::Deserialize(const nlohmann::json& j_)
         0.0f);
     justSuccessPresentationEnabled = j_.value("JustSuccessPresentationEnabled", true);
     justSuccessTimeScale = std::clamp(j_.value("JustSuccessTimeScale", 0.25f), 0.05f, 1.0f);
+    justGuardTimeScale = std::clamp(j_.value("JustGuardTimeScale", 0.65f), 0.05f, 1.0f);
     justSuccessHoldDuration = std::clamp(j_.value("JustSuccessHoldDuration", 0.25f), 0.0f, 2.0f);
     justSuccessReturnDuration = std::clamp(j_.value("JustSuccessReturnDuration", 0.2f), 0.01f, 2.0f);
     justSuccessMuffleCutoff = std::clamp(j_.value("JustSuccessMuffleCutoff", 1200.0f), 100.0f, 22000.0f);
@@ -3556,8 +3659,12 @@ void PlayerControllerComponent::Deserialize(const nlohmann::json& j_)
         {
             const int from_ = transitionJson_.value("From", static_cast<int>(PLAYER_ACTION::NONE));
             const int to_ = transitionJson_.value("To", static_cast<int>(PLAYER_ACTION::NONE));
-            if (from_ < 0 || from_ > static_cast<int>(PLAYER_ACTION::SKILL_D) || from_ == static_cast<int>(PLAYER_ACTION::NONE) ||
-                to_ < 0 || to_ > static_cast<int>(PLAYER_ACTION::SKILL_D) || to_ == static_cast<int>(PLAYER_ACTION::NONE))
+            const auto isEditableAction_ = [](int action_)
+            {
+                return action_ == static_cast<int>(PLAYER_ACTION::JUST_DODGE_RUSH) ||
+                    (action_ >= 0 && action_ <= static_cast<int>(PLAYER_ACTION::SKILL_D) && action_ != static_cast<int>(PLAYER_ACTION::NONE));
+            };
+            if (!isEditableAction_(from_) || !isEditableAction_(to_))
             {
                 continue;
             }
@@ -3629,8 +3736,14 @@ bool PlayerControllerComponent::CanDisplayActionReady(PLAYER_ACTION action_) con
 
     const PLAYER_ACTION currentAction_ = GetCurrentAction();
     if (currentAction_ == action_)
+    {
+        if (action_ == PLAYER_ACTION::JUST_DODGE_RUSH)
+            return (actionRuntime.canBufferInput || actionRuntime.canCombo) &&
+                actionRuntime.bufferedAction != PLAYER_ACTION::JUST_DODGE_RUSH &&
+                comboIndex + 1 < RUSH_COMBO_COUNT;
         return (action_ == PLAYER_ACTION::WEAK_ATTACK || action_ == PLAYER_ACTION::AIR_WEAK_ATTACK) &&
             (actionRuntime.canCombo || actionRuntime.canBufferInput);
+    }
     if (currentAction_ == PLAYER_ACTION::NONE || GetPlayerActionGroup(currentAction_) == PLAYER_ACTION_GROUP::LOCOMOTION) return true;
     // 実際の即時派生とHUDの受付表示を一致させる。
     if (currentAction_ == PLAYER_ACTION::GUARD && action_ == PLAYER_ACTION::JUST_GUARD) return true;

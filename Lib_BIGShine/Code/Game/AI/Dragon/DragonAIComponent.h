@@ -241,6 +241,7 @@ public:
     const std::string& GetBehaviorGraphAssetPath() const { return behaviorGraphAssetPath; }
     void SetBehaviorGraphAssetPath(const std::string& path_) { behaviorGraphAssetPath = path_; }
     DRAGON_ACTION_TYPE GetCurrentAction() const { return runtime.currentAction; }
+    float GetSpinTailSweepProgress() const;
     // 回転攻撃の予兆を、AIが確定した本体の回転角度と方向へ合わせる。
     float GetSpinTailRotationDegrees() const { return spinTailRotationDegrees; }
     float GetSpinTailRotationDirection() const { return spinTailRotationDirection; }

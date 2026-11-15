@@ -27,7 +27,7 @@
     "displayName": "WeakAttack_02",
     "hitEffect": {
         "hitMeshVfxAssetPath": "",
-        "hitParticleAssetPath": "SwordHit_Aqua",
+        "hitParticleAssetPath": "LargeHitSparks_Weak",
         "hitParticleEmitterName": "",
         "hitParticleLifeTime": 0.45,
         "hitParticleNormalOffset": 0.05,

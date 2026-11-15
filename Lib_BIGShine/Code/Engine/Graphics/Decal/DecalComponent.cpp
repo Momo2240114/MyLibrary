@@ -78,6 +78,19 @@ void DecalComponent::SetTexture(const std::string& path_)
         texturePath.c_str());
 }
 
+void DecalComponent::SetGroundSurface(float emissiveStrength_, const std::string& maskPath_)
+{
+    groundSurface = true;
+    groundEmissiveStrength = emissiveStrength_;
+    showDebugBounds = false;
+    groundMask.Reset();
+    if (!maskPath_.empty())
+    {
+        if (auto* device_ = GraphicsDeviceManager::Instance().GetDevice())
+            groundMask = TextureResourceManager::Instance().LoadTexture(device_, maskPath_);
+    }
+}
+
 void DecalComponent::SetMaterial(const std::string& path_)
 {
     BS_PROFILE_SCOPE("DecalComponent::SetMaterial");
@@ -181,6 +194,12 @@ void DecalComponent::SubmitDecal(DecalManager& manager_)
     data_.color = color;
     data_.texture = texture.Get();
     ApplyMaterialToDecalData(data_);
+    data_.groundSurface = groundSurface;
+    if (groundSurface)
+    {
+        data_.emissiveColorAndIntensity.w = groundEmissiveStrength;
+        data_.maskTexture = groundMask;
+    }
     manager_.AddDecal(data_);
 }
 

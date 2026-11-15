@@ -45,6 +45,7 @@ framework::framework(HWND hwnd) : hwnd(hwnd){}
 bool framework::initialize()
 {
 	GraphicsDeviceManager::Instance().Initialize(hwnd, SCREEN_WIDTH, SCREEN_HEIGHT, FULLSCREEN);
+    MouseInput::Instance().RegisterRawMouse(hwnd);
 
 	ImGuiRenderer::Initialize(hwnd,
 		GraphicsDeviceManager::Instance().GetDevice(),
@@ -110,46 +111,63 @@ void framework::update(float elapsedTime_/*Elapsed seconds from last frame*/)
 		BS_PROFILE_SCOPE("Input");
         // 入力を参照しないフレームも状態を進め、次の押下を確実に検出する。
         KeyInput::Update();
-        const auto currentScene_ = SceneManager::GetCurrentScene();
-        const auto gameScene_ = dynamic_cast<SceneBase*>(currentScene_);
-        const bool playerDeathActive_ = gameScene_ && gameScene_->GetGameObjectManager() &&
-            gameScene_->GetGameObjectManager()->IsPlayerDeathActive();
-        const bool isWindowActive_ = GetForegroundWindow() == hwnd;
-        const bool toggleCursor_ = !GameRuntimeSettings::IsGameOnly() && isWindowActive_ &&
-            currentScene_ && !currentScene_->RequiresFreeCursor() &&
-            ImGui::IsKeyPressed(ImGuiKey_F2, false);
-        bool usesEditorPlayMode_ = false;
-        if (const auto scene_ = dynamic_cast<SceneBase*>(SceneManager::GetCurrentScene()))
-            if (const auto manager_ = scene_->GetGameObjectManager(); manager_ && manager_->SupportsEditorPlayMode())
+        const auto scene_ = dynamic_cast<SceneBase*>(SceneManager::GetCurrentScene());
+        const auto manager_ = scene_ ? scene_->GetGameObjectManager() : nullptr;
+        const bool focused_ = GetForegroundWindow() == hwnd && GetFocus() == hwnd && !IsIconic(hwnd);
+        const bool systemKey_ = KeyInput::KeyPressed(VK_LWIN) || KeyInput::KeyPressed(VK_RWIN);
+        const bool editorPlay_ = manager_ && manager_->SupportsEditorPlayMode();
+        const bool canCapture_ = manager_ && manager_->GetEditorPlayMode() == EditorPlayMode::PLAY &&
+            manager_->GetSceneRuntimeState() == SCENE_RUNTIME_STATE::RUNNING &&
+            !manager_->IsEditorStopRequested() && !manager_->IsEditorPauseRequested() &&
+            !manager_->IsCinematicSequencePreview() && !manager_->IsPlayerDeathActive() &&
+            !scene_->IsEditorWorkspaceOpen() && !scene_->RequiresFreeCursor() &&
+            !ScreenTransitionManager::Instance().IsInputBlocked();
+        auto& mouse_ = MouseInput::Instance();
+        const bool releaseKey_ = KeyInput::KeyPressedIn(VK_ESCAPE) ||
+            (editorPlay_ && KeyInput::KeyPressedIn(VK_F1));
+        if (!focused_ || systemKey_ || (mouse_.IsCursorLocked() && releaseKey_))
+        {
+            if (mouse_.IsCursorLockEnabled()) mouseRecaptureRequired = true;
+            if (editorPlay_) manager_->SetPlayInputCaptured(false);
+        }
+
+        bool capture_ = false;
+        if (focused_ && !systemKey_ && canCapture_)
+        {
+            const bool toggle_ = KeyInput::KeyPressedIn(VK_F2) && !ImGui::GetIO().WantTextInput;
+            if (editorPlay_)
             {
-                usesEditorPlayMode_ = true;
-                // クリックやEnterでは捕捉せず、F2を押した実行中のフレームだけ切り替える。
-                if (!isWindowActive_) manager_->SetPlayInputCaptured(false);
-                else if (toggleCursor_ && manager_->GetEditorPlayMode() == EditorPlayMode::PLAY)
+                if (mouseRecaptureRequired) manager_->SetPlayInputCaptured(false);
+                if (toggle_ && !releaseKey_)
                 {
-                    MouseInput::Instance().SetDebugFlag(false);
                     manager_->SetPlayInputCaptured(!manager_->IsPlayInputCaptured());
+                    mouseRecaptureRequired = false;
                 }
-                const bool capture_ = manager_->IsPlayInputCaptured();
-                // 状態が同じ時の再設定で、自由マウスの移動差分を毎フレーム消さない。
-                if (MouseInput::Instance().IsCursorLockEnabled() != capture_)
-                    MouseInput::Instance().SetCursorLockEnabled(capture_);
+                capture_ = manager_->IsPlayInputCaptured() && !mouseRecaptureRequired;
             }
-        // Editor Play非対応の開発用Sceneでも、解放操作はF2へ統一する。
-        if (!usesEditorPlayMode_ && toggleCursor_) MouseInput::Instance().ToggleDebugCursor();
-        // メニューSceneでは自由マウスを使い、本編の配布版はゲーム入力を取得する。
-        // コンテニュー画面では本編の自動捕捉を止め、毎フレーム自由なマウス操作を維持する。
-        if (playerDeathActive_)
-        {
-            if (MouseInput::Instance().IsCursorLockEnabled()) MouseInput::Instance().SetCursorLockEnabled(false);
+            else if (dynamic_cast<SceneGame*>(scene_))
+            {
+                if (toggle_ && !releaseKey_) mouseRecaptureRequired = !mouseRecaptureRequired;
+                // OSから戻った直後は、ゲーム領域をクリックするまでカーソルを自由にする。
+                if (mouseRecaptureRequired && !releaseKey_ && KeyInput::KeyPressedIn(VK_LBUTTON))
+                {
+                    POINT position_{};
+                    RECT client_{};
+                    if (GetCursorPos(&position_) && ScreenToClient(hwnd, &position_) &&
+                        GetClientRect(hwnd, &client_) && PtInRect(&client_, position_))
+                    {
+                        mouseRecaptureRequired = false;
+                    }
+                }
+                capture_ = !mouseRecaptureRequired;
+            }
         }
-        else if (currentScene_ && currentScene_->RequiresFreeCursor())
+        else if (editorPlay_)
         {
-            if (MouseInput::Instance().IsCursorLockEnabled()) MouseInput::Instance().SetCursorLockEnabled(false);
+            manager_->SetPlayInputCaptured(false);
         }
-        else if (GameRuntimeSettings::IsGameOnly() && !MouseInput::Instance().IsCursorLockEnabled())
-            MouseInput::Instance().SetCursorLockEnabled(true);
-		MouseInput::Instance().Update(hwnd);
+        mouse_.SetCursorLockEnabled(capture_);
+        mouse_.Update(hwnd);
 		ControllerInput::Instance().Update();
 		KeyConfig::Instance().UpdateActiveDevice(GetForegroundWindow() == hwnd);
 	}
@@ -335,6 +353,29 @@ int framework::run()
 
 LRESULT framework::handle_message(HWND hWnd_, UINT msg_, WPARAM wParam_, LPARAM lParam_)
 {
+    auto& mouse_ = MouseInput::Instance();
+    if (msg_ == WM_INPUT)
+    {
+        mouse_.OnRawMouseInput(reinterpret_cast<HRAWINPUT>(lParam_));
+        return DefWindowProc(hWnd_, msg_, wParam_, lParam_);
+    }
+    // フォーカス喪失はImGuiの処理より先に扱い、同じフレーム内で戻っても自動再捕捉しない。
+    if (msg_ == WM_KILLFOCUS || (msg_ == WM_ACTIVATEAPP && !wParam_) ||
+        (msg_ == WM_ACTIVATE && LOWORD(wParam_) == WA_INACTIVE) ||
+        (msg_ == WM_SIZE && wParam_ == SIZE_MINIMIZED) ||
+        ((msg_ == WM_KEYDOWN || msg_ == WM_SYSKEYDOWN) && (wParam_ == VK_LWIN || wParam_ == VK_RWIN)) ||
+        msg_ == WM_ENTERSIZEMOVE || msg_ == WM_ENTERMENULOOP || msg_ == WM_DESTROY)
+    {
+        if (mouse_.IsCursorLockEnabled()) mouseRecaptureRequired = true;
+        mouse_.SetCursorLockEnabled(false);
+    }
+    if (msg_ == WM_SETCURSOR && LOWORD(lParam_) == HTCLIENT &&
+        GetForegroundWindow() == hWnd_ && mouse_.IsCursorLocked())
+    {
+        SetCursor(nullptr);
+        return TRUE;
+    }
+
     // Handle the system shortcut before ImGui can consume keyboard input.
     if (msg_ == WM_SYSKEYDOWN &&
         wParam_ == VK_RETURN &&
@@ -371,35 +412,6 @@ LRESULT framework::handle_message(HWND hWnd_, UINT msg_, WPARAM wParam_, LPARAM 
         return 0;
     }
 
-    case WM_KILLFOCUS:
-    {
-        // Alt+Tab、Windowsキー、別ウィンドウ選択などで一時解除
-        MouseInput::Instance().ReleaseCursorLock();
-        return 0;
-    }
-
-    case WM_ACTIVATEAPP:
-    {
-        // wParam_ == FALSE のときアプリが非アクティブ
-        if (wParam_ == FALSE)
-        {
-            MouseInput::Instance().ReleaseCursorLock();
-        }
-        return 0;
-    }
-
-    case WM_SETCURSOR:
-    {
-        // 解放中や非クライアント領域では隠さず、実際に固定中のカーソルだけを抑える。
-        if (LOWORD(lParam_) == HTCLIENT && GetForegroundWindow() == hWnd_ &&
-            MouseInput::Instance().IsCursorLocked())
-        {
-            SetCursor(nullptr);
-            return TRUE;
-        }
-        break;
-    }
-
     case WM_PAINT:
     {
         PAINTSTRUCT ps_{};
@@ -410,7 +422,6 @@ LRESULT framework::handle_message(HWND hWnd_, UINT msg_, WPARAM wParam_, LPARAM 
 
     case WM_DESTROY:
     {
-        MouseInput::Instance().ReleaseCursorLock();
         PostQuitMessage(0);
         return 0;
     }
@@ -428,7 +439,6 @@ LRESULT framework::handle_message(HWND hWnd_, UINT msg_, WPARAM wParam_, LPARAM 
 
     case WM_ENTERSIZEMOVE:
     {
-        MouseInput::Instance().ReleaseCursorLock();
         tictoc.stop();
         return 0;
     }
@@ -452,6 +462,7 @@ bool framework::uninitialize()
 	BS_PROFILE_SCOPE("framework::uninitialize");
 
 	//m_pSceneGame->Finalize();
+    MouseInput::Instance().SetCursorLockEnabled(false);
 	SceneManager::Clear();
     ScreenTransitionManager::Instance().Shutdown();
 

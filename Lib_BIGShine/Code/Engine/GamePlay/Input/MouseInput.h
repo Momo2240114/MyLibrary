@@ -18,7 +18,9 @@ public:
     }
 
     // 毎フレーム更新 (WndProc またはフレームループで呼ぶ)
-    void Update(HWND hwnd);
+    void Update(HWND hwnd_);
+    void RegisterRawMouse(HWND hwnd_);
+    void OnRawMouseInput(HRAWINPUT input_);
 
     // ==========================
     // クリック情報
@@ -66,12 +68,7 @@ public:
         return static_cast<float>(temp);
     }
 
-    void ReleaseCursorLock();
-    // 開発中の明示操作でカーソルの解放状態を切り替える。
-    void ToggleDebugCursor();
-    
-
-    Vector2 GetSubMousePos()
+    Vector2 GetSubMousePos() const
     {
         return m_SubMousePos;
     }
@@ -81,17 +78,16 @@ public:
         m_SubMousePos = delta;
     }
 
-    void CenterCursor(HWND hwnd_);
     
 
     /*void GetWorldRay(const HWND hwnd);*/
     DirectX::XMFLOAT3 GetRayStart() { return RayStart; }
     DirectX::XMFLOAT3 GetRayEnd() { return RayEnd; }
 
-    //mouseの位置を固定するかどうかのフラグ
-    void SetDebugFlag(bool flg) { m_DebugFlag = flg; }
 
 private:
+
+    void ReleaseCursorLock();
 
     MouseInput() = default;
     std::uint64_t wheelRevision = 0;
@@ -125,17 +121,12 @@ private:
     bool m_prevLeft = false;
     bool m_prevRight = false;
 
-    int width;
-    int height;
-
-    Vector2 m_CurrentMousePos;
     Vector2 m_SubMousePos;
 
-    bool m_DebugFlag = false;
-private:
-        bool m_IsCursorLockEnabled = false;
-        bool m_IsCursorLocked = false;
-        bool m_IsCursorVisible = true;
+    Vector2 pendingRawDelta{};
+    bool rawMouseRegistered = false;
+    bool m_IsCursorLockEnabled = false;
+    bool m_IsCursorLocked = false;
 
 public:
     void SetCursorLockEnabled(bool enabled_);

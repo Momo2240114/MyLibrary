@@ -222,10 +222,9 @@ void CinematicEditorWindow::Update(float deltaTime_)
         StartPreview(playWhenFinishReady);
     if (ownsPreview) director_->SetPreviewPlaybackRate(previewRate);
     seekCooldown -= (std::max)(deltaTime_, 0.0f);
-    // BadEnd後半は共通区間から再評価するため、ドラッグを離した時点で映像を更新する。
-    const bool draggingBadEnd_ = authoringSource == AuthoringSource::BAD_END &&
-        seekTime >= director_->GetEndingBranchTime() && ImGui::IsMouseDown(ImGuiMouseButton_Left);
-    if (seekPending && !draggingBadEnd_ && (seekCooldown <= 0.0f || !ImGui::IsMouseDown(ImGuiMouseButton_Left)))
+    // 分岐後は粒子も再シミュレーションするため、ドラッグを離した時点で映像を更新する。
+    const bool draggingEnding_ = seekTime >= director_->GetEndingBranchTime() && ImGui::IsMouseDown(ImGuiMouseButton_Left);
+    if (seekPending && !draggingEnding_ && (seekCooldown <= 0.0f || !ImGui::IsMouseDown(ImGuiMouseButton_Left)))
     {
         StartPreview(false);
         if (ownsPreview)
@@ -391,10 +390,14 @@ void CinematicEditorWindow::DrawPreview()
         director_->SetPaused(true);
         director_->SetShowFixed(false);
         director_->SetPreviewCameraOverride(exploreCamera);
-        if (const auto camera_ = director_->GetCamera()) freeCamera.CaptureFromCamera(*camera_);
+        if (exploreCamera)
+        {
+            if (const auto camera_ = director_->GetCamera()) freeCamera.CaptureFromCamera(*camera_);
+        }
+        else RequestSeek(GetTime());
     }
     ImGui::SameLine();
-    ImGui::BeginDisabled(authoringSource == AuthoringSource::BAD_END && GetTime() >= director_->GetEndingBranchTime());
+    ImGui::BeginDisabled(GetTime() >= director_->GetEndingBranchTime());
     if (ImGui::Button("Add camera key from view")) AddCameraKey();
     ImGui::EndDisabled();
     ImGui::EndDisabled();
@@ -432,7 +435,7 @@ void CinematicEditorWindow::DrawPreview()
 void CinematicEditorWindow::AddEffect(const std::string& path_)
 {
     BS_PROFILE_SCOPE("CinematicEditor::AddEffect");
-    if (authoringSource == AuthoringSource::BAD_END && GetTime() >= GetDirector()->GetEndingBranchTime())
+    if (GetTime() >= GetDirector()->GetEndingBranchTime())
     {
         status = "Move the playhead into the shared opening to add a VFX clip.";
         return;
@@ -462,7 +465,7 @@ void CinematicEditorWindow::AddCameraKey()
     const auto director_ = GetDirector();
     if (!director_ || !ownsPreview) return;
     const auto camera_ = director_->GetCamera();
-    if (!camera_) return;
+    if (!camera_ || GetTime() >= director_->GetEndingBranchTime()) return;
     auto& settings_ = director_->GetSettings();
     auto& keys_ = settings_["Camera"]["Keys"];
     if (!keys_.is_array()) keys_ = nlohmann::json::array();
@@ -486,7 +489,8 @@ void CinematicEditorWindow::DrawInspector()
     ImGui::Separator();
     if (selectedType == TrackType::ENDING)
     {
-        const auto cues_ = director_->GetBadEndingCues();
+        const auto cues_ = authoringSource == AuthoringSource::BAD_END ?
+            director_->GetBadEndingCues() : director_->GetTrueEndingCues();
         if (selectedIndex >= 0 && selectedIndex < static_cast<int>(cues_.size()))
         {
             const auto& cue_ = cues_[selectedIndex];
@@ -495,7 +499,7 @@ void CinematicEditorWindow::DrawInspector()
             ImGui::Text("%.3fs - %.3fs", branchTime_ + cue_.start, branchTime_ + cue_.end);
             if (ImGui::Button("Seek to cue")) RequestSeek(branchTime_ + cue_.start);
         }
-        ImGui::TextWrapped("BadEnd cue times are read-only. Both endings use the same editable opening preset.");
+        ImGui::TextWrapped("Ending cue times are read-only.");
         return;
     }
     if (selectedType == TrackType::PLAYER || selectedType == TrackType::BOSS)
@@ -676,7 +680,7 @@ void CinematicEditorWindow::BuildTracks()
     if (!director_) return;
     const auto& settings_ = director_->GetSettings();
     const float hitStop_ = settings_.value("HitStop", 0.16f);
-    const float capture_ = director_->GetEndingBranchTime();
+    const float branchTime_ = director_->GetEndingBranchTime();
     const auto& player_ = settings_.at("Player");
     const float start_ = hitStop_ + settings_.value("CounterStart", 2.8f);
     const float windup_ = player_.value("WindupTime", 0.35f);
@@ -684,9 +688,9 @@ void CinematicEditorWindow::BuildTracks()
     const float windupSpeed_ = (std::max)(player_.value("WindupSpeed", 0.22f), 0.01f);
     const float end_ = (limit_ <= windup_ * windupSpeed_ ? start_ + limit_ / windupSpeed_ :
         start_ + windup_ + (limit_ - windup_ * windupSpeed_) / (std::max)(player_.value("StrikeSpeed", 1.8f), 0.01f)) + settings_.value("ImpactHold", 0.16f);
-    tracks.push_back({TrackType::PLAYER, -1, "Player / Animation", start_, (std::min)(end_, capture_), IM_COL32(60, 145, 215, 240)});
-    tracks.push_back({TrackType::BOSS, -1, "Boss / Animation", hitStop_, capture_, IM_COL32(165, 85, 190, 240)});
-    tracks.push_back({TrackType::CAMERA, -1, "Camera / Keys", 0.0f, capture_, IM_COL32(215, 168, 60, 240)});
+    tracks.push_back({TrackType::PLAYER, -1, "Player / Animation", start_, (std::min)(end_, branchTime_), IM_COL32(60, 145, 215, 240)});
+    tracks.push_back({TrackType::BOSS, -1, "Boss / Animation", hitStop_, branchTime_, IM_COL32(165, 85, 190, 240)});
+    tracks.push_back({TrackType::CAMERA, -1, "Camera / Keys", 0.0f, branchTime_, IM_COL32(215, 168, 60, 240)});
     const auto& effects_ = settings_.at("Effects");
     for (int index_ = 0; index_ < static_cast<int>(effects_.size()); ++index_)
     {
@@ -700,16 +704,16 @@ void CinematicEditorWindow::BuildTracks()
             origin_ + effect_.value("Stop", 1.0f), particle_ ? IM_COL32(55, 180, 140, 240) : IM_COL32(225, 115, 70, 240)});
     }
     tracks.push_back({TrackType::IMPACT, -1, "Impact / Hit hold", director_->GetImpactCueTime(), director_->GetImpactCueTime() + settings_.value("ImpactHold", 0.16f), IM_COL32(225, 75, 80, 250)});
-    if (authoringSource == AuthoringSource::BAD_END)
+    const bool badEnding_ = authoringSource == AuthoringSource::BAD_END;
+    const auto cues_ = badEnding_ ? director_->GetBadEndingCues() : director_->GetTrueEndingCues();
+    const ImU32 cueColor_ = badEnding_ ? IM_COL32(154, 60, 72, 240) : IM_COL32(204, 151, 54, 240);
+    for (int index_ = 0; index_ < static_cast<int>(cues_.size()); ++index_)
     {
-        const auto cues_ = director_->GetBadEndingCues();
-        for (int index_ = 0; index_ < static_cast<int>(cues_.size()); ++index_)
-        {
-            const auto& cue_ = cues_[index_];
-            tracks.push_back({TrackType::ENDING, index_, cue_.label, capture_ + cue_.start, capture_ + cue_.end, IM_COL32(154, 60, 72, 240)});
-        }
+        const auto& cue_ = cues_[index_];
+        tracks.push_back({TrackType::ENDING, index_, cue_.label, branchTime_ + cue_.start, branchTime_ + cue_.end, cueColor_});
     }
-    else tracks.push_back({TrackType::CAPTURE, -1, "TrueEnd / Clear UI", capture_, GetEndTime(), IM_COL32(110, 125, 150, 230)});
+    if (!badEnding_)
+        tracks.push_back({TrackType::CAPTURE, -1, "TrueEnd / Clear UI", director_->GetClearTime(), GetEndTime(), IM_COL32(110, 125, 150, 230)});
 }
 
 void CinematicEditorWindow::ApplyTrackDrag(const Track& track_, float delta_)
@@ -735,7 +739,11 @@ void CinematicEditorWindow::ApplyTrackDrag(const Track& track_, float delta_)
     else if (track_.type == TrackType::PLAYER)
         settings_["CounterStart"] = std::clamp(quantize_(dragStart + delta_) - settings_.value("HitStop", 0.16f), settings_.value("BlackoutEnd", 0.65f), 15.0f);
     else if (track_.type == TrackType::CAPTURE)
-        settings_["CaptureTime"] = std::clamp(quantize_(dragStart + delta_) - settings_.value("HitStop", 0.16f), settings_.value("CounterStart", 2.8f) + 0.1f, 25.0f);
+    {
+        const float endingDuration_ = GetDirector()->GetClearTime() - GetDirector()->GetEndingBranchTime();
+        settings_["CaptureTime"] = std::clamp(quantize_(dragStart + delta_) - endingDuration_ - settings_.value("HitStop", 0.16f),
+            settings_.value("CounterStart", 2.8f) + 0.1f, 25.0f);
+    }
 }
 
 void CinematicEditorWindow::DrawTimeline()

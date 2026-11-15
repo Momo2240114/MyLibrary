@@ -2,123 +2,69 @@
 
 #include "MouseInput.h"
 
-#include "DirectXMath.h"
-#include"imgui.h"
+void MouseInput::RegisterRawMouse(HWND hwnd_)
+{
+    // INPUTSINKを使わず、フォーカスのあるゲームウィンドウだけで受信する。
+    const RAWINPUTDEVICE mouse_{ 0x01, 0x02, 0, hwnd_ };
+    rawMouseRegistered = RegisterRawInputDevices(&mouse_, 1, sizeof(mouse_)) != FALSE;
+}
 
+void MouseInput::OnRawMouseInput(HRAWINPUT input_)
+{
+    if (!m_IsCursorLocked || !rawMouseRegistered) return;
 
-#include"KeyInput.h"
-#include "Engine/Core/GameRuntimeSettings.h"
-#include "Engine/GamePlay/Scene/IScene.h"
+    RAWINPUT raw_{};
+    UINT size_ = sizeof(raw_);
+    const UINT copied_ = GetRawInputData(input_, RID_INPUT, &raw_, &size_, sizeof(RAWINPUTHEADER));
+    if (copied_ == static_cast<UINT>(-1) || raw_.header.dwType != RIM_TYPEMOUSE) return;
+    if (raw_.data.mouse.usFlags & MOUSE_MOVE_ABSOLUTE) return;
+
+    pendingRawDelta.x += static_cast<float>(raw_.data.mouse.lLastX);
+    pendingRawDelta.y += static_cast<float>(raw_.data.mouse.lLastY);
+}
 
 void MouseInput::Update(HWND hwnd_)
 {
-    // ウィンドウサイズ取得
-    RECT rc_;
-    GetClientRect(hwnd_, &rc_);
+    RECT rect_{};
+    POINT clientPos_{};
+    const bool hasPosition_ = GetCursorPos(&clientPos_) && ScreenToClient(hwnd_, &clientPos_);
+    const bool canLock_ = m_IsCursorLockEnabled && hasPosition_ &&
+        GetForegroundWindow() == hwnd_ && GetFocus() == hwnd_ && !IsIconic(hwnd_) &&
+        (GetAsyncKeyState(VK_LWIN) & 0x8000) == 0 && (GetAsyncKeyState(VK_RWIN) & 0x8000) == 0 &&
+        GetClientRect(hwnd_, &rect_) && rect_.right > 0 && rect_.bottom > 0;
 
-    width = rc_.right - rc_.left;
-    height = rc_.bottom - rc_.top;
-
-    const bool isWindowActive_ = GetForegroundWindow() == hwnd_;
-    const bool isWindowKeyDown_ =
-        (GetAsyncKeyState(VK_LWIN) & 0x8000) != 0 ||
-        (GetAsyncKeyState(VK_RWIN) & 0x8000) != 0;
-
-    // ゲーム操作中として扱うか
-    // Debug中、非アクティブ中、Windowsキー中は固定しない
-    const bool shouldLockCursor_ =
-        m_IsCursorLockEnabled &&
-        !m_DebugFlag &&
-        isWindowActive_ &&
-        !isWindowKeyDown_;
-
-    POINT clientCenter_;
-    clientCenter_.x = width / 2;
-    clientCenter_.y = height / 2;
-
+    const POINT clientCenter_{ rect_.right / 2, rect_.bottom / 2 };
     POINT screenCenter_ = clientCenter_;
-    ClientToScreen(hwnd_, &screenCenter_);
+    const bool wasLocked_ = m_IsCursorLocked;
+    const bool locked_ = canLock_ && ClientToScreen(hwnd_, &screenCenter_) &&
+        GetForegroundWindow() == hwnd_ && SetCursorPos(screenCenter_.x, screenCenter_.y);
 
-    // マウス座標取得
-    POINT p_;
-    GetCursorPos(&p_);
-
-    POINT clientPos_ = p_;
-    ScreenToClient(hwnd_, &clientPos_);
-
-    m_clientPos = clientPos_;
-    m_screenPos = Vector2(
-        static_cast<float>(clientPos_.x),
-        static_cast<float>(clientPos_.y)
-    );
-
-    m_CurrentMousePos = m_screenPos;
-
-    if (shouldLockCursor_)
+    if (locked_)
     {
-        // 固定開始フレームは差分を捨てる
-        if (!m_IsCursorLocked || m_IsFirstMouseUpdate)
+        // 再捕捉直後の移動と中央に戻す操作はカメラ回転へ渡さない。
+        m_SubMousePos = Vector2{};
+        if (wasLocked_)
         {
-            m_SubMousePos = Vector2(0.0f, 0.0f);
-            m_IsFirstMouseUpdate = false;
-            m_IsCursorLocked = true;
-        }
-        else
-        {
-            // 固定中は「中央からどれだけ動いたか」を差分にする
-            m_SubMousePos = Vector2(
+            m_SubMousePos = rawMouseRegistered ? pendingRawDelta : Vector2(
                 static_cast<float>(clientPos_.x - clientCenter_.x),
-                static_cast<float>(clientPos_.y - clientCenter_.y)
-            );
+                static_cast<float>(clientPos_.y - clientCenter_.y));
         }
-
-        // 次フレームも中央基準にする
-        m_CurrentMousePos = Vector2(
-            static_cast<float>(clientCenter_.x),
-            static_cast<float>(clientCenter_.y)
-        );
-
-        m_PrevMousePos = m_CurrentMousePos;
-
-        // カーソルを中央に戻す
-        SetCursorPos(screenCenter_.x, screenCenter_.y);
-
-        // カーソル非表示
-        if (m_IsCursorVisible)
-        {
-            while (ShowCursor(FALSE) >= 0) {}
-            m_IsCursorVisible = false;
-        }
+        m_IsCursorLocked = true;
+        clientPos_ = clientCenter_;
+        SetCursor(nullptr);
     }
     else
     {
-        // 固定解除された瞬間
-        if (m_IsCursorLocked)
-        {
-            m_IsCursorLocked = false;
-            m_IsFirstMouseUpdate = true;
-            m_SubMousePos = Vector2(0.0f, 0.0f);
-        }
-        else if (m_IsFirstMouseUpdate)
-        {
-            m_SubMousePos = Vector2(0.0f, 0.0f);
-            m_IsFirstMouseUpdate = false;
-        }
-        else
-        {
-            // 通常時は前フレームとの差分
-            m_SubMousePos = m_CurrentMousePos - m_PrevMousePos;
-        }
-
-        m_PrevMousePos = m_CurrentMousePos;
-
-        // カーソル表示
-        if (!m_IsCursorVisible)
-        {
-            while (ShowCursor(TRUE) < 0) {}
-            m_IsCursorVisible = true;
-        }
+        if (wasLocked_) ReleaseCursorLock();
+        m_SubMousePos = !hasPosition_ || m_IsFirstMouseUpdate ? Vector2{} :
+            Vector2(static_cast<float>(clientPos_.x), static_cast<float>(clientPos_.y)) - m_PrevMousePos;
     }
+
+    pendingRawDelta = Vector2{};
+    m_IsFirstMouseUpdate = !hasPosition_;
+    m_clientPos = clientPos_;
+    m_screenPos = { static_cast<float>(clientPos_.x), static_cast<float>(clientPos_.y) };
+    m_PrevMousePos = Vector2(m_screenPos);
 
     // マウスボタン状態
     // 中ボタンとサイドボタンも既存の状態取得経路で一度だけ読み取る。
@@ -132,7 +78,7 @@ void MouseInput::Update(HWND hwnd_)
     bool rightNow_ = (rightState_ & 0x8000) != 0;
 
     // 左クリック
-    m_leftPressed = leftNow_ && !m_prevLeft;
+    m_leftPressed = leftNow_ && !m_prevLeft && !(locked_ && !wasLocked_);
     m_leftDown = leftNow_;
     m_leftReleased = !leftNow_ && m_prevLeft;
 
@@ -176,49 +122,18 @@ bool MouseInput::GetButtonState(int buttonCode, int type) const
 
 void MouseInput::ReleaseCursorLock()
 {
+    if (m_IsCursorLocked) SetCursor(LoadCursor(nullptr, IDC_ARROW));
     m_IsCursorLocked = false;
     m_IsFirstMouseUpdate = true;
-    m_SubMousePos = Vector2(0.0f, 0.0f);
-
-    if (!m_IsCursorVisible)
-    {
-        while (ShowCursor(TRUE) < 0) {}
-        m_IsCursorVisible = true;
-    }
-
-    ClipCursor(nullptr);
-    // WM_SETCURSORで消したカーソル画像も戻し、解放直後からEditorを操作できるようにする。
-    SetCursor(LoadCursor(nullptr, IDC_ARROW));
-}
-
-void MouseInput::ToggleDebugCursor()
-{
-    m_DebugFlag = !m_DebugFlag;
-    if (m_DebugFlag) ReleaseCursorLock();
-}
-
-void MouseInput::CenterCursor(HWND hwnd_)
-{
-    RECT rc_;
-    GetClientRect(hwnd_, &rc_);
-
-    POINT center_;
-    center_.x = (rc_.right - rc_.left) / 2;
-    center_.y = (rc_.bottom - rc_.top) / 2;
-
-    ClientToScreen(hwnd_, &center_);
-
-    SetCursorPos(center_.x, center_.y);
+    m_SubMousePos = Vector2{};
+    pendingRawDelta = Vector2{};
 }
 
 void MouseInput::SetCursorLockEnabled(bool enabled_)
 {
+    if (m_IsCursorLockEnabled == enabled_) return;
     m_IsCursorLockEnabled = enabled_;
-
-    if (!enabled_)
-    {
-        ReleaseCursorLock();
-    }
+    if (!enabled_) ReleaseCursorLock();
 }
 
 //void MouseInput::GetWorldRay(const HWND hwnd)

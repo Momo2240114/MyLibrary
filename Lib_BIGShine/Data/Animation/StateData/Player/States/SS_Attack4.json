@@ -89,7 +89,7 @@
                                      "overridePlaybackSpeed":  false,
                                      "ownerTarget":  "Self",
                                      "playbackSpeed":  1.0,
-                                     "startTime":  1.600000023841858
+                                     "startTime":  1.6666666666666667
                                  },
                                  {
                                      "actionEnd":  "",
@@ -130,7 +130,7 @@
                                      "startTime":  1.2833333015441895
                                  },
                                  {
-                                     "actionEnd":  "",
+                                     "actionEnd":  "InputBufferOff",
                                      "actionStart":  "InputBufferOn",
                                      "actionUpdate":  "",
                                      "attachNodeName":  "",
@@ -139,10 +139,10 @@
                                      "blackboardWrites":  [
 
                                                           ],
-                                     "callEndOnStateExit":  false,
-                                     "endTime":  1.5,
+                                     "callEndOnStateExit":  true,
+                                     "endTime":  1.65,
                                      "eventTemplateType":  "NONE",
-                                     "label":  "InputBufferOff",
+                                     "label":  "InputBufferWindow",
                                      "localPosition":  [
                                                            0.0,
                                                            0.0,
@@ -165,7 +165,7 @@
                                      "overridePlaybackSpeed":  false,
                                      "ownerTarget":  "Self",
                                      "playbackSpeed":  1.0,
-                                     "startTime":  0.3333333432674408
+                                     "startTime":  0.25
                                  },
                                  {
                                      "actionEnd":  "Weapon_Trail_Stop",

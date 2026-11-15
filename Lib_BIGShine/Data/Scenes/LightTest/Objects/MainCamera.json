@@ -1,0 +1,108 @@
+{
+    "ColliderComponent": {
+        "Data": {
+            "GravityScale": 1.0,
+            "HalfHeight": 1.0,
+            "IsStatic": false,
+            "IsTrigger": false,
+            "Offset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "Radius": 0.5,
+            "ShapeRenderFlg": true,
+            "UseGravity": false
+        },
+        "Enabled": true,
+        "TypeName": "CapsuleCollider"
+    },
+    "Components": [
+        {
+            "Data": null,
+            "Enabled": true,
+            "TypeName": "Player"
+        },
+        {
+            "Data": {
+                "Color": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "InnerAngle": 20.0,
+                "Intensity": 1.0,
+                "LocalRotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "OffsetPosition": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "OuterAngle": 30.0,
+                "Range": 30.0,
+                "Type": 2
+            },
+            "Enabled": false,
+            "TypeName": "LightComponent"
+        },
+        {
+            "Data": null,
+            "Enabled": true,
+            "TypeName": "Movement"
+        },
+        {
+            "Data": {
+                "aspect": 1.7777777910232544,
+                "eye": [
+                    1.049109935760498,
+                    2.0,
+                    6.338248252868652
+                ],
+                "farZ": 1000.0,
+                "focus": [
+                    0.4760194420814514,
+                    1.7654526233673096,
+                    5.553038120269775
+                ],
+                "fovY": 60.0,
+                "nearZ": 0.10000000149011612,
+                "up": [
+                    0.0,
+                    1.0,
+                    0.0
+                ]
+            },
+            "Enabled": true,
+            "TypeName": "CameraComponent"
+        },
+        {
+            "Data": null,
+            "Enabled": true,
+            "TypeName": "Easing"
+        }
+    ],
+    "Layer": 0,
+    "Name": "MainCamera",
+    "ParentName": "",
+    "Transform": {
+        "Pos": [
+            1.049109935760498,
+            2.0,
+            6.338248252868652
+        ],
+        "Rot": [
+            13.564943313598633,
+            216.12408447265625,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

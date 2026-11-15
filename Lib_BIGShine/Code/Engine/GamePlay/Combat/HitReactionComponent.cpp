@@ -11,6 +11,7 @@
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/GamePlay/System/TimeManager.h"
 #include "Engine/Physics/ColliderComponent.h"
+#include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 
 #include <algorithm>
 #include <cmath>
@@ -116,7 +117,8 @@ void HitReactionComponent::HandleHit()
     blackboard_->GetVector2("Hit", "Direction", hitDirection_);
 
     lastDamage = (std::max)(damage_, 0.0f);
-    // ダメージが成立した受け手だけを赤くし、ガードや無敵で不成立の接触では発光させない。
+    if (lastDamage > 0.0f && owner_->GetLayer() == LayerType::Player)
+        GraphicsDeviceManager::Instance().PlayDamageVignette();
     if (lastDamage > 0.0f && damageFlashEnabled)
     {
         damageFlashStartTime = SDL_GetTicks();
@@ -202,9 +204,12 @@ void HitReactionComponent::HandleHit()
         // 地上/空中とImpactPowerのしきい値から、再生するリアクションActionを選ぶ。
         CallOwnerActions(GetReactionActions(DecideReactionKind(*blackboard_, canReact_)));
     }
-    CallOwnerAction(overlayStartActionName);
-    overlayTimer = (std::max)(overlayDuration, 0.0f);
-    if (overlayTimer <= 0.0f) CallOwnerAction(overlayStopActionName);
+    if (!overlayStartActionName.empty())
+    {
+        CallOwnerAction(overlayStartActionName);
+        overlayTimer = (std::max)(overlayDuration, 0.0f);
+        if (overlayTimer <= 0.0f) CallOwnerAction(overlayStopActionName);
+    }
 }
 
 float HitReactionComponent::GetDamageFlashWeight() const
@@ -503,7 +508,7 @@ void HitReactionComponent::Deserialize(const nlohmann::json& json_)
         "OverlayStopActionName",
         std::string("MaterialOverlay_Stop"));
     overlayDuration = (std::max)(json_.value("OverlayDuration", 0.12f), 0.0f);
-    damageFlashEnabled = json_.value("DamageFlashEnabled", true);
+    damageFlashEnabled = json_.value("DamageFlashEnabled", false);
     damageFlashDuration = std::clamp(json_.value("DamageFlashDuration", 0.18f), 0.01f, 1.0f);
     damageFlashActive = false;
 }

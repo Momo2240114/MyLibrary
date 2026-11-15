@@ -1,1022 +1,4 @@
 {
-    "Areas": [
-        {
-            "Color": [
-                0.16,
-                0.3,
-                0.48,
-                0.18
-            ],
-            "Comment": "この分類の内側に、行動ごとのコメントBoxを配置しています。",
-            "Id": 262,
-            "Name": "01 | ジャストガード後の反撃",
-            "NodeIds": [
-                8,
-                12,
-                120,
-                16,
-                125
-            ],
-            "Position": [
-                0.0,
-                500.0
-            ],
-            "Size": [
-                1018.0,
-                856.0
-            ]
-        },
-        {
-            "Color": [
-                0.24,
-                0.3,
-                0.44,
-                0.18
-            ],
-            "Comment": "この分類の内側に、行動ごとのコメントBoxを配置しています。",
-            "Id": 263,
-            "Name": "02 | 初回特殊攻撃の優先選択",
-            "NodeIds": [
-                226,
-                230,
-                234
-            ],
-            "Position": [
-                1178.0,
-                500.0
-            ],
-            "Size": [
-                678.0,
-                576.0
-            ]
-        },
-        {
-            "Color": [
-                0.32,
-                0.3,
-                0.39999999999999997,
-                0.18
-            ],
-            "Comment": "この分類の内側に、行動ごとのコメントBoxを配置しています。",
-            "Id": 264,
-            "Name": "03 | プレイヤー攻撃への反応",
-            "NodeIds": [
-                20,
-                24,
-                28,
-                40,
-                36,
-                32,
-                48,
-                44
-            ],
-            "Position": [
-                2016.0,
-                500.0
-            ],
-            "Size": [
-                2038.0,
-                856.0
-            ]
-        },
-        {
-            "Color": [
-                0.4,
-                0.3,
-                0.36,
-                0.18
-            ],
-            "Comment": "この分類の内側に、行動ごとのコメントBoxを配置しています。",
-            "Id": 265,
-            "Name": "04 | ガード継続への拘束攻撃",
-            "NodeIds": [
-                238,
-                242,
-                246
-            ],
-            "Position": [
-                4214.0,
-                500.0
-            ],
-            "Size": [
-                678.0,
-                576.0
-            ]
-        },
-        {
-            "Color": [
-                0.16,
-                0.3,
-                0.48,
-                0.18
-            ],
-            "Comment": "この分類の内側に、行動ごとのコメントBoxを配置しています。",
-            "Id": 266,
-            "Name": "05 | HP50%以下の特殊攻撃",
-            "NodeIds": [
-                186,
-                190,
-                194
-            ],
-            "Position": [
-                5052.0,
-                500.0
-            ],
-            "Size": [
-                678.0,
-                576.0
-            ]
-        },
-        {
-            "Color": [
-                0.24,
-                0.3,
-                0.44,
-                0.18
-            ],
-            "Comment": "この分類の内側に、行動ごとのコメントBoxを配置しています。",
-            "Id": 267,
-            "Name": "06 | 遠距離の攻撃選択",
-            "NodeIds": [
-                198,
-                202,
-                206,
-                210,
-                214,
-                218,
-                222
-            ],
-            "Position": [
-                5890.0,
-                500.0
-            ],
-            "Size": [
-                1698.0,
-                856.0
-            ]
-        },
-        {
-            "Color": [
-                0.32,
-                0.3,
-                0.39999999999999997,
-                0.18
-            ],
-            "Comment": "この分類の内側に、行動ごとのコメントBoxを配置しています。",
-            "Id": 268,
-            "Name": "07 | Intentに応じたShadow接続",
-            "NodeIds": [
-                137,
-                141,
-                145,
-                149,
-                153,
-                157,
-                161,
-                170,
-                174,
-                178,
-                182
-            ],
-            "Position": [
-                7748.0,
-                500.0
-            ],
-            "Size": [
-                3058.0,
-                856.0
-            ]
-        },
-        {
-            "Color": [
-                0.4,
-                0.3,
-                0.36,
-                0.18
-            ],
-            "Comment": "この分類の内側に、行動ごとのコメントBoxを配置しています。",
-            "Id": 269,
-            "Name": "08 | 間合いの調整",
-            "NodeIds": [
-                52,
-                56,
-                60
-            ],
-            "Position": [
-                10966.0,
-                500.0
-            ],
-            "Size": [
-                678.0,
-                576.0
-            ]
-        },
-        {
-            "Color": [
-                0.16,
-                0.3,
-                0.48,
-                0.18
-            ],
-            "Comment": "この分類の内側に、行動ごとのコメントBoxを配置しています。",
-            "Id": 270,
-            "Name": "09 | 攻撃距離への接近",
-            "NodeIds": [
-                64,
-                68,
-                72
-            ],
-            "Position": [
-                11804.0,
-                500.0
-            ],
-            "Size": [
-                678.0,
-                576.0
-            ]
-        },
-        {
-            "Color": [
-                0.24,
-                0.3,
-                0.44,
-                0.18
-            ],
-            "Comment": "この分類の内側に、行動ごとのコメントBoxを配置しています。",
-            "Id": 271,
-            "Name": "10 | プレイヤーの観察",
-            "NodeIds": [
-                76,
-                80,
-                84
-            ],
-            "Position": [
-                12642.0,
-                500.0
-            ],
-            "Size": [
-                678.0,
-                576.0
-            ]
-        },
-        {
-            "Color": [
-                0.32,
-                0.3,
-                0.39999999999999997,
-                0.18
-            ],
-            "Comment": "この分類の内側に、行動ごとのコメントBoxを配置しています。",
-            "Id": 272,
-            "Name": "11 | 攻撃の選択",
-            "NodeIds": [
-                88,
-                92,
-                96,
-                100,
-                104,
-                108,
-                112,
-                129,
-                133,
-                166
-            ],
-            "Position": [
-                13480.0,
-                500.0
-            ],
-            "Size": [
-                2718.0,
-                856.0
-            ]
-        },
-        {
-            "Color": [
-                0.4,
-                0.3,
-                0.36,
-                0.18
-            ],
-            "Comment": "プレイヤーの出方を観察する待機行動。",
-            "Id": 273,
-            "Name": "待機・観察",
-            "NodeIds": [
-                116
-            ],
-            "Position": [
-                16358.0,
-                500.0
-            ],
-            "Size": [
-                274.0,
-                244.0
-            ]
-        },
-        {
-            "Color": [
-                0.2,
-                0.42,
-                0.48,
-                0.24
-            ],
-            "Comment": "ジャストガード後の専用反撃を実行する。",
-            "Id": 274,
-            "Name": "受け流し後の反撃",
-            "NodeIds": [
-                16
-            ],
-            "Position": [
-                372.0,
-                1080.0
-            ],
-            "Size": [
-                274.0,
-                244.0
-            ]
-        },
-        {
-            "Color": [
-                0.2,
-                0.42,
-                0.48,
-                0.24
-            ],
-            "Comment": "プレイヤーから離れる方向へ回避する。",
-            "Id": 275,
-            "Name": "後方回避",
-            "NodeIds": [
-                32
-            ],
-            "Position": [
-                3068.0,
-                1080.0
-            ],
-            "Size": [
-                274.0,
-                244.0
-            ]
-        },
-        {
-            "Color": [
-                0.2,
-                0.42,
-                0.48,
-                0.24
-            ],
-            "Comment": "プレイヤーに対して横方向へ回避する。",
-            "Id": 276,
-            "Name": "横回避",
-            "NodeIds": [
-                36
-            ],
-            "Position": [
-                2728.0,
-                1080.0
-            ],
-            "Size": [
-                274.0,
-                244.0
-            ]
-        },
-        {
-            "Color": [
-                0.2,
-                0.42,
-                0.48,
-                0.24
-            ],
-            "Comment": "防御候補としてガードを実行する。",
-            "Id": 277,
-            "Name": "ガード",
-            "NodeIds": [
-                40
-            ],
-            "Position": [
-                2388.0,
-                1080.0
-            ],
-            "Size": [
-                274.0,
-                244.0
-            ]
-        },
-        {
-            "Color": [
-                0.2,
-                0.42,
-                0.48,
-                0.24
-            ],
-            "Comment": "攻撃の到達タイミングに合わせて受け流す。",
-            "Id": 278,
-            "Name": "ジャストガード",
-            "NodeIds": [
-                44
-            ],
-            "Position": [
-                3748.0,
-                1080.0
-            ],
-            "Size": [
-                274.0,
-                244.0
-            ]
-        },
-        {
-            "Color": [
-                0.2,
-                0.42,
-                0.48,
-                0.24
-            ],
-            "Comment": "攻撃への反応を見送り、次の反応まで待機する。",
-            "Id": 279,
-            "Name": "反応の見送り",
-            "NodeIds": [
-                48
-            ],
-            "Position": [
-                3408.0,
-                1080.0
-            ],
-            "Size": [
-                274.0,
-                244.0
-            ]
-        },
-        {
-            "Color": [
-                0.2,
-                0.42,
-                0.48,
-                0.24
-            ],
-            "Comment": "適正距離に応じて後退または横移動する。",
-            "Id": 280,
-            "Name": "間合い調整",
-            "NodeIds": [
-                60
-            ],
-            "Position": [
-                11338.0,
-                800.0
-            ],
-            "Size": [
-                274.0,
-                244.0
-            ]
-        },
-        {
-            "Color": [
-                0.2,
-                0.42,
-                0.48,
-                0.24
-            ],
-            "Comment": "攻撃可能な間合いへプレイヤーを追う。",
-            "Id": 281,
-            "Name": "接近",
-            "NodeIds": [
-                72
-            ],
-            "Position": [
-                12176.0,
-                800.0
-            ],
-            "Size": [
-                274.0,
-                244.0
-            ]
-        },
-        {
-            "Color": [
-                0.2,
-                0.42,
-                0.48,
-                0.24
-            ],
-            "Comment": "プレイヤーの出方を観察する待機行動。",
-            "Id": 282,
-            "Name": "待機・観察",
-            "NodeIds": [
-                84
-            ],
-            "Position": [
-                13014.0,
-                800.0
-            ],
-            "Size": [
-                274.0,
-                244.0
-            ]
-        },
-        {
-            "Color": [
-                0.2,
-                0.42,
-                0.48,
-                0.24
-            ],
-            "Comment": "通常攻撃Aのコンボを実行する。",
-            "Id": 283,
-            "Name": "通常攻撃 A",
-            "NodeIds": [
-                100
-            ],
-            "Position": [
-                13852.0,
-                1080.0
-            ],
-            "Size": [
-                274.0,
-                244.0
-            ]
-        },
-        {
-            "Color": [
-                0.2,
-                0.42,
-                0.48,
-                0.24
-            ],
-            "Comment": "通常攻撃Bのコンボを実行する。",
-            "Id": 284,
-            "Name": "通常攻撃 B",
-            "NodeIds": [
-                104
-            ],
-            "Position": [
-                14192.0,
-                1080.0
-            ],
-            "Size": [
-                274.0,
-                244.0
-            ]
-        },
-        {
-            "Color": [
-                0.2,
-                0.42,
-                0.48,
-                0.24
-            ],
-            "Comment": "遅らせ攻撃の行動を実行する。",
-            "Id": 285,
-            "Name": "ディレイ攻撃",
-            "NodeIds": [
-                108
-            ],
-            "Position": [
-                14532.0,
-                1080.0
-            ],
-            "Size": [
-                274.0,
-                244.0
-            ]
-        },
-        {
-            "Color": [
-                0.2,
-                0.42,
-                0.48,
-                0.24
-            ],
-            "Comment": "ガード崩しの攻撃を実行する。",
-            "Id": 286,
-            "Name": "ガード崩し",
-            "NodeIds": [
-                112
-            ],
-            "Position": [
-                14872.0,
-                1080.0
-            ],
-            "Size": [
-                274.0,
-                244.0
-            ]
-        },
-        {
-            "Color": [
-                0.2,
-                0.42,
-                0.48,
-                0.24
-            ],
-            "Comment": "防御・回避後に選ぶ軽い反撃。",
-            "Id": 287,
-            "Name": "軽い反撃",
-            "NodeIds": [
-                125
-            ],
-            "Position": [
-                712.0,
-                1080.0
-            ],
-            "Size": [
-                274.0,
-                244.0
-            ]
-        },
-        {
-            "Color": [
-                0.2,
-                0.42,
-                0.48,
-                0.24
-            ],
-            "Comment": "プレイヤーの空振りに対する反撃候補。",
-            "Id": 288,
-            "Name": "空振りへの反撃",
-            "NodeIds": [
-                129
-            ],
-            "Position": [
-                15212.0,
-                1080.0
-            ],
-            "Size": [
-                274.0,
-                244.0
-            ]
-        },
-        {
-            "Color": [
-                0.2,
-                0.42,
-                0.48,
-                0.24
-            ],
-            "Comment": "フェイントの行動を実行する。",
-            "Id": 289,
-            "Name": "攻撃フェイント",
-            "NodeIds": [
-                133
-            ],
-            "Position": [
-                15552.0,
-                1080.0
-            ],
-            "Size": [
-                274.0,
-                244.0
-            ]
-        },
-        {
-            "Color": [
-                0.2,
-                0.42,
-                0.48,
-                0.24
-            ],
-            "Comment": "影渡りでプレイヤーへ接近する。",
-            "Id": 290,
-            "Name": "影渡り・接近",
-            "NodeIds": [
-                149
-            ],
-            "Position": [
-                8120.0,
-                1080.0
-            ],
-            "Size": [
-                274.0,
-                244.0
-            ]
-        },
-        {
-            "Color": [
-                0.2,
-                0.42,
-                0.48,
-                0.24
-            ],
-            "Comment": "後退方向への影渡りを実行する。",
-            "Id": 291,
-            "Name": "影渡り・後退",
-            "NodeIds": [
-                153
-            ],
-            "Position": [
-                8460.0,
-                1080.0
-            ],
-            "Size": [
-                274.0,
-                244.0
-            ]
-        },
-        {
-            "Color": [
-                0.2,
-                0.42,
-                0.48,
-                0.24
-            ],
-            "Comment": "横方向への影渡りを実行する。",
-            "Id": 292,
-            "Name": "影渡り・横移動",
-            "NodeIds": [
-                157
-            ],
-            "Position": [
-                8800.0,
-                1080.0
-            ],
-            "Size": [
-                274.0,
-                244.0
-            ]
-        },
-        {
-            "Color": [
-                0.2,
-                0.42,
-                0.48,
-                0.24
-            ],
-            "Comment": "プレイヤーの背後を狙う影渡り。",
-            "Id": 293,
-            "Name": "影渡り・背後",
-            "NodeIds": [
-                161
-            ],
-            "Position": [
-                9140.0,
-                1080.0
-            ],
-            "Size": [
-                274.0,
-                244.0
-            ]
-        },
-        {
-            "Color": [
-                0.2,
-                0.42,
-                0.48,
-                0.24
-            ],
-            "Comment": "単発の強攻撃を実行する。",
-            "Id": 294,
-            "Name": "単発の強攻撃",
-            "NodeIds": [
-                166
-            ],
-            "Position": [
-                15892.0,
-                1080.0
-            ],
-            "Size": [
-                274.0,
-                244.0
-            ]
-        },
-        {
-            "Color": [
-                0.2,
-                0.42,
-                0.48,
-                0.24
-            ],
-            "Comment": "影斬りの攻撃を実行する。",
-            "Id": 295,
-            "Name": "影斬り",
-            "NodeIds": [
-                170
-            ],
-            "Position": [
-                9480.0,
-                1080.0
-            ],
-            "Size": [
-                274.0,
-                244.0
-            ]
-        },
-        {
-            "Color": [
-                0.2,
-                0.42,
-                0.48,
-                0.24
-            ],
-            "Comment": "影潜り攻撃01の行動を実行する。",
-            "Id": 296,
-            "Name": "影潜り攻撃 01",
-            "NodeIds": [
-                174
-            ],
-            "Position": [
-                9820.0,
-                1080.0
-            ],
-            "Size": [
-                274.0,
-                244.0
-            ]
-        },
-        {
-            "Color": [
-                0.2,
-                0.42,
-                0.48,
-                0.24
-            ],
-            "Comment": "影潜り攻撃02の行動を実行する。",
-            "Id": 297,
-            "Name": "影潜り攻撃 02",
-            "NodeIds": [
-                178
-            ],
-            "Position": [
-                10160.0,
-                1080.0
-            ],
-            "Size": [
-                274.0,
-                244.0
-            ]
-        },
-        {
-            "Color": [
-                0.2,
-                0.42,
-                0.48,
-                0.24
-            ],
-            "Comment": "影の領域攻撃を実行する。",
-            "Id": 298,
-            "Name": "影の領域攻撃",
-            "NodeIds": [
-                182
-            ],
-            "Position": [
-                10500.0,
-                1080.0
-            ],
-            "Size": [
-                274.0,
-                244.0
-            ]
-        },
-        {
-            "Color": [
-                0.2,
-                0.42,
-                0.48,
-                0.24
-            ],
-            "Comment": "この枝の発動条件を満たした特殊攻撃。",
-            "Id": 299,
-            "Name": "特殊攻撃・ラグナロク",
-            "NodeIds": [
-                194
-            ],
-            "Position": [
-                5424.0,
-                800.0
-            ],
-            "Size": [
-                274.0,
-                244.0
-            ]
-        },
-        {
-            "Color": [
-                0.2,
-                0.42,
-                0.48,
-                0.24
-            ],
-            "Comment": "遠距離の攻撃候補として影の突進を実行する。",
-            "Id": 300,
-            "Name": "影の突進攻撃",
-            "NodeIds": [
-                210
-            ],
-            "Position": [
-                6262.0,
-                1080.0
-            ],
-            "Size": [
-                274.0,
-                244.0
-            ]
-        },
-        {
-            "Color": [
-                0.2,
-                0.42,
-                0.48,
-                0.24
-            ],
-            "Comment": "遠距離の攻撃候補として影弾を実行する。",
-            "Id": 301,
-            "Name": "影弾",
-            "NodeIds": [
-                214
-            ],
-            "Position": [
-                6602.0,
-                1080.0
-            ],
-            "Size": [
-                274.0,
-                244.0
-            ]
-        },
-        {
-            "Color": [
-                0.2,
-                0.42,
-                0.48,
-                0.24
-            ],
-            "Comment": "影渡りでプレイヤーへ接近する。",
-            "Id": 302,
-            "Name": "影渡り・接近",
-            "NodeIds": [
-                218
-            ],
-            "Position": [
-                6942.0,
-                1080.0
-            ],
-            "Size": [
-                274.0,
-                244.0
-            ]
-        },
-        {
-            "Color": [
-                0.2,
-                0.42,
-                0.48,
-                0.24
-            ],
-            "Comment": "攻撃可能な間合いへプレイヤーを追う。",
-            "Id": 303,
-            "Name": "接近",
-            "NodeIds": [
-                222
-            ],
-            "Position": [
-                7282.0,
-                1080.0
-            ],
-            "Size": [
-                274.0,
-                244.0
-            ]
-        },
-        {
-            "Color": [
-                0.2,
-                0.42,
-                0.48,
-                0.24
-            ],
-            "Comment": "この枝の発動条件を満たした特殊攻撃。",
-            "Id": 304,
-            "Name": "特殊攻撃・ラグナロク",
-            "NodeIds": [
-                234
-            ],
-            "Position": [
-                1550.0,
-                800.0
-            ],
-            "Size": [
-                274.0,
-                244.0
-            ]
-        },
-        {
-            "Color": [
-                0.2,
-                0.42,
-                0.48,
-                0.24
-            ],
-            "Comment": "ガード継続に予兆付きの掴みを仕掛け、予兆後に成立条件を再確認する。",
-            "Id": 305,
-            "Name": "ガード継続への掴み",
-            "NodeIds": [
-                246
-            ],
-            "Position": [
-                4586.0,
-                800.0
-            ],
-            "Size": [
-                274.0,
-                244.0
-            ]
-        }
-    ],
     "Links": [
         {
             "FromNodeId": 1,
@@ -1215,87 +197,87 @@
             "ToPinId": 117
         },
         {
-            "FromNodeId": 8,
-            "FromPinId": 10,
             "Id": 123,
+            "FromNodeId": 8,
             "ToNodeId": 120,
+            "FromPinId": 10,
             "ToPinId": 121
         },
         {
-            "FromNodeId": 120,
-            "FromPinId": 122,
             "Id": 124,
+            "FromNodeId": 120,
             "ToNodeId": 16,
+            "FromPinId": 122,
             "ToPinId": 17
         },
         {
-            "FromNodeId": 120,
-            "FromPinId": 122,
             "Id": 128,
+            "FromNodeId": 120,
             "ToNodeId": 125,
+            "FromPinId": 122,
             "ToPinId": 126
         },
         {
-            "FromNodeId": 96,
-            "FromPinId": 98,
             "Id": 132,
+            "FromNodeId": 96,
             "ToNodeId": 129,
+            "FromPinId": 98,
             "ToPinId": 130
         },
         {
-            "FromNodeId": 96,
-            "FromPinId": 98,
             "Id": 136,
+            "FromNodeId": 96,
             "ToNodeId": 133,
+            "FromPinId": 98,
             "ToPinId": 134
         },
         {
-            "FromNodeId": 4,
-            "FromPinId": 6,
             "Id": 140,
+            "FromNodeId": 4,
             "ToNodeId": 137,
+            "FromPinId": 6,
             "ToPinId": 138
         },
         {
-            "FromNodeId": 137,
-            "FromPinId": 139,
             "Id": 144,
+            "FromNodeId": 137,
             "ToNodeId": 141,
+            "FromPinId": 139,
             "ToPinId": 142
         },
         {
-            "FromNodeId": 137,
-            "FromPinId": 139,
             "Id": 148,
+            "FromNodeId": 137,
             "ToNodeId": 145,
+            "FromPinId": 139,
             "ToPinId": 146
         },
         {
-            "FromNodeId": 145,
-            "FromPinId": 147,
             "Id": 152,
+            "FromNodeId": 145,
             "ToNodeId": 149,
+            "FromPinId": 147,
             "ToPinId": 150
         },
         {
-            "FromNodeId": 145,
-            "FromPinId": 147,
             "Id": 156,
+            "FromNodeId": 145,
             "ToNodeId": 153,
+            "FromPinId": 147,
             "ToPinId": 154
         },
         {
-            "FromNodeId": 145,
-            "FromPinId": 147,
             "Id": 160,
+            "FromNodeId": 145,
             "ToNodeId": 157,
+            "FromPinId": 147,
             "ToPinId": 158
         },
         {
-            "FromNodeId": 145,
-            "FromPinId": 147,
             "Id": 164,
+            "FromNodeId": 145,
             "ToNodeId": 161,
+            "FromPinId": 147,
             "ToPinId": 162
         },
         {
@@ -1306,121 +288,121 @@
             "ToPinId": 167
         },
         {
+            "Id": 173,
             "FromNodeId": 145,
             "FromPinId": 147,
-            "Id": 173,
             "ToNodeId": 170,
             "ToPinId": 171
         },
         {
+            "Id": 177,
             "FromNodeId": 145,
             "FromPinId": 147,
-            "Id": 177,
             "ToNodeId": 174,
             "ToPinId": 175
         },
         {
+            "Id": 181,
             "FromNodeId": 145,
             "FromPinId": 147,
-            "Id": 181,
             "ToNodeId": 178,
             "ToPinId": 179
         },
         {
+            "Id": 185,
             "FromNodeId": 145,
             "FromPinId": 147,
-            "Id": 185,
             "ToNodeId": 182,
             "ToPinId": 183
         },
         {
+            "Id": 189,
             "FromNodeId": 4,
             "FromPinId": 6,
-            "Id": 189,
             "ToNodeId": 186,
             "ToPinId": 187
         },
         {
+            "Id": 193,
             "FromNodeId": 186,
             "FromPinId": 188,
-            "Id": 193,
             "ToNodeId": 190,
             "ToPinId": 191
         },
         {
+            "Id": 197,
             "FromNodeId": 186,
             "FromPinId": 188,
-            "Id": 197,
             "ToNodeId": 194,
             "ToPinId": 195
         },
         {
+            "Id": 201,
             "FromNodeId": 4,
             "FromPinId": 6,
-            "Id": 201,
             "ToNodeId": 198,
             "ToPinId": 199
         },
         {
+            "Id": 205,
             "FromNodeId": 198,
             "FromPinId": 200,
-            "Id": 205,
             "ToNodeId": 202,
             "ToPinId": 203
         },
         {
+            "Id": 209,
             "FromNodeId": 198,
             "FromPinId": 200,
-            "Id": 209,
             "ToNodeId": 206,
             "ToPinId": 207
         },
         {
+            "Id": 213,
             "FromNodeId": 206,
             "FromPinId": 208,
-            "Id": 213,
             "ToNodeId": 210,
             "ToPinId": 211
         },
         {
+            "Id": 217,
             "FromNodeId": 206,
             "FromPinId": 208,
-            "Id": 217,
             "ToNodeId": 214,
             "ToPinId": 215
         },
         {
+            "Id": 221,
             "FromNodeId": 206,
             "FromPinId": 208,
-            "Id": 221,
             "ToNodeId": 218,
             "ToPinId": 219
         },
         {
+            "Id": 225,
             "FromNodeId": 206,
             "FromPinId": 208,
-            "Id": 225,
             "ToNodeId": 222,
             "ToPinId": 223
         },
         {
+            "Id": 229,
             "FromNodeId": 4,
             "FromPinId": 6,
-            "Id": 229,
             "ToNodeId": 226,
             "ToPinId": 227
         },
         {
+            "Id": 233,
             "FromNodeId": 226,
             "FromPinId": 228,
-            "Id": 233,
             "ToNodeId": 230,
             "ToPinId": 231
         },
         {
+            "Id": 237,
             "FromNodeId": 226,
             "FromPinId": 228,
-            "Id": 237,
             "ToNodeId": 234,
             "ToPinId": 235
         },
@@ -1446,7 +428,7 @@
             "ToPinId": 247
         }
     ],
-    "NextId": 306,
+    "NextId": 250,
     "Nodes": [
         {
             "ActionEndCategory": "HumanBossAI",
@@ -1465,8 +447,8 @@
             "Name": "HumanBoss",
             "OutputPinId": 3,
             "Position": [
-                8221.0,
-                0.0
+                305.0,
+                -236.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -1504,8 +486,8 @@
             "Name": "行動の優先判断",
             "OutputPinId": 6,
             "Position": [
-                8221.0,
-                180.0
+                305.0,
+                -92.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -1543,8 +525,8 @@
             "Name": "ジャストガード後の反撃",
             "OutputPinId": 10,
             "Position": [
-                319.0,
-                620.0
+                -1599.0,
+                228.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -1582,8 +564,8 @@
             "Name": "CounterReady",
             "OutputPinId": 14,
             "Position": [
-                64.0,
-                900.0
+                -1711.0,
+                416.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -1621,8 +603,8 @@
             "Name": "COUNTER_ATTACK",
             "OutputPinId": 18,
             "Position": [
-                404.0,
-                1180.0
+                -1503.0,
+                404.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -1660,8 +642,8 @@
             "Name": "プレイヤー攻撃への反応",
             "OutputPinId": 22,
             "Position": [
-                2590.0,
-                620.0
+                -959.0,
+                212.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -1699,8 +681,8 @@
             "Name": "CanReact",
             "OutputPinId": 26,
             "Position": [
-                2080.0,
-                900.0
+                -1183.0,
+                416.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -1738,8 +720,8 @@
             "Name": "防御と回避の選択",
             "OutputPinId": 30,
             "Position": [
-                3100.0,
-                900.0
+                -815.0,
+                448.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -1777,8 +759,8 @@
             "Name": "BACK_DODGE",
             "OutputPinId": 34,
             "Position": [
-                3100.0,
-                1180.0
+                -783.0,
+                736.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -1816,8 +798,8 @@
             "Name": "SIDE_DODGE",
             "OutputPinId": 38,
             "Position": [
-                2760.0,
-                1180.0
+                -1039.0,
+                740.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -1855,8 +837,8 @@
             "Name": "GUARD",
             "OutputPinId": 42,
             "Position": [
-                2420.0,
-                1180.0
+                -1311.0,
+                724.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -1894,8 +876,8 @@
             "Name": "JUST_GUARD",
             "OutputPinId": 46,
             "Position": [
-                3780.0,
-                1180.0
+                -335.0,
+                736.0
             ],
             "Priority": 4,
             "ScopeId": "Root",
@@ -1933,8 +915,8 @@
             "Name": "NoReaction",
             "OutputPinId": 50,
             "Position": [
-                3440.0,
-                1180.0
+                -559.0,
+                736.0
             ],
             "Priority": 3,
             "ScopeId": "Root",
@@ -1972,8 +954,8 @@
             "Name": "間合いの調整",
             "OutputPinId": 54,
             "Position": [
-                11200.0,
-                620.0
+                113.0,
+                452.0
             ],
             "Priority": 6,
             "ScopeId": "Root",
@@ -2011,8 +993,8 @@
             "Name": "NeedsReposition",
             "OutputPinId": 58,
             "Position": [
-                11030.0,
-                900.0
+                -143.0,
+                372.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -2050,8 +1032,8 @@
             "Name": "Reposition",
             "OutputPinId": 62,
             "Position": [
-                11370.0,
-                900.0
+                257.0,
+                388.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -2089,8 +1071,8 @@
             "Name": "攻撃距離への接近",
             "OutputPinId": 66,
             "Position": [
-                12038.0,
-                620.0
+                855.0,
+                488.0
             ],
             "Priority": 7,
             "ScopeId": "Root",
@@ -2128,8 +1110,8 @@
             "Name": "NeedsApproach",
             "OutputPinId": 70,
             "Position": [
-                11868.0,
-                900.0
+                705.0,
+                420.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -2167,8 +1149,8 @@
             "Name": "Approach",
             "OutputPinId": 74,
             "Position": [
-                12208.0,
-                900.0
+                1057.0,
+                420.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -2206,8 +1188,8 @@
             "Name": "プレイヤーの観察",
             "OutputPinId": 78,
             "Position": [
-                12876.0,
-                620.0
+                1613.0,
+                376.0
             ],
             "Priority": 8,
             "ScopeId": "Root",
@@ -2245,8 +1227,8 @@
             "Name": "NeedsObservation",
             "OutputPinId": 82,
             "Position": [
-                12706.0,
-                900.0
+                1361.0,
+                288.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -2284,8 +1266,8 @@
             "Name": "Observe",
             "OutputPinId": 86,
             "Position": [
-                13046.0,
-                900.0
+                1793.0,
+                320.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -2323,8 +1305,8 @@
             "Name": "攻撃の選択",
             "OutputPinId": 90,
             "Position": [
-                14224.0,
-                620.0
+                2465.0,
+                404.0
             ],
             "Priority": 9,
             "ScopeId": "Root",
@@ -2362,8 +1344,8 @@
             "Name": "CanOffense",
             "OutputPinId": 94,
             "Position": [
-                13544.0,
-                900.0
+                2145.0,
+                336.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -2401,8 +1383,8 @@
             "Name": "攻撃パターンの抽選",
             "OutputPinId": 98,
             "Position": [
-                14904.0,
-                900.0
+                2593.0,
+                324.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -2440,8 +1422,8 @@
             "Name": "ComboPattern01 (4 stages)",
             "OutputPinId": 102,
             "Position": [
-                13884.0,
-                1180.0
+                2257.0,
+                544.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -2479,8 +1461,8 @@
             "Name": "ComboPattern02 (4 stages)",
             "OutputPinId": 106,
             "Position": [
-                14224.0,
-                1180.0
+                2513.0,
+                548.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -2518,8 +1500,8 @@
             "Name": "DELAY_ATTACK",
             "OutputPinId": 110,
             "Position": [
-                14564.0,
-                1180.0
+                2737.0,
+                548.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -2557,8 +1539,8 @@
             "Name": "GUARD_BREAK",
             "OutputPinId": 114,
             "Position": [
-                14904.0,
-                1180.0
+                2961.0,
+                548.0
             ],
             "Priority": 3,
             "ScopeId": "Root",
@@ -2596,8 +1578,8 @@
             "Name": "待機と観察",
             "OutputPinId": 118,
             "Position": [
-                16390.0,
-                600.0
+                4049.0,
+                456.0
             ],
             "Priority": 10,
             "ScopeId": "Root",
@@ -2619,254 +1601,254 @@
             "Weight": 1.0
         },
         {
-            "ActionEndCategory": "HumanBossAI",
-            "ActionEndKey": "ActionEnded",
-            "BlackboardCategory": "HumanBossAI",
-            "BlackboardScope": "Local",
-            "BoolValue": true,
-            "CompareType": "Equal",
             "Id": 120,
             "InputPinId": 121,
-            "Name": "Counter段階",
             "OutputPinId": 122,
+            "Type": "RandomSelector",
+            "Name": "Counter段階",
+            "ScopeId": "Root",
             "Position": [
-                574.0,
-                900.0
+                1250,
+                0
             ],
             "Priority": 1,
-            "ScopeId": "Root",
-            "Type": "RandomSelector",
-            "ValueType": "Bool",
-            "WaitForActionEnd": true,
-            "Weight": 1.0
-        },
-        {
-            "ActionEndCategory": "HumanBossAI",
-            "ActionEndKey": "ActionEnded",
-            "ActionName": "HumanBoss_LIGHT_COUNTER",
+            "Weight": 1.0,
             "BlackboardCategory": "HumanBossAI",
             "BlackboardScope": "Local",
-            "BoolValue": true,
             "CompareType": "Equal",
+            "ValueType": "Bool",
+            "BoolValue": true,
+            "ActionEndCategory": "HumanBossAI",
+            "ActionEndKey": "ActionEnded",
+            "WaitForActionEnd": true
+        },
+        {
             "Id": 125,
             "InputPinId": 126,
-            "Name": "通常Guard／Dodge後の軽反撃",
             "OutputPinId": 127,
+            "Type": "PlayAction",
+            "Name": "通常Guard／Dodge後の軽反撃",
+            "ScopeId": "Root",
             "Position": [
-                744.0,
-                1180.0
+                1550,
+                100
             ],
             "Priority": 1,
-            "ScopeId": "Root",
-            "Type": "PlayAction",
-            "ValueType": "Bool",
-            "WaitForActionEnd": true,
-            "Weight": 1.0
-        },
-        {
-            "ActionEndCategory": "HumanBossAI",
-            "ActionEndKey": "ActionEnded",
-            "ActionName": "HumanBoss_WHIFF_PUNISH",
+            "Weight": 1.0,
             "BlackboardCategory": "HumanBossAI",
             "BlackboardScope": "Local",
-            "BoolValue": true,
             "CompareType": "Equal",
+            "ValueType": "Bool",
+            "BoolValue": true,
+            "ActionEndCategory": "HumanBossAI",
+            "ActionEndKey": "ActionEnded",
+            "WaitForActionEnd": true,
+            "ActionName": "HumanBoss_LIGHT_COUNTER"
+        },
+        {
             "Id": 129,
             "InputPinId": 130,
-            "Name": "空振り後の反撃",
             "OutputPinId": 131,
+            "Type": "PlayAction",
+            "Name": "空振り後の反撃",
+            "ScopeId": "Root",
             "Position": [
-                15244.0,
-                1180.0
+                1550,
+                1900
             ],
             "Priority": 4,
-            "ScopeId": "Root",
-            "Type": "PlayAction",
-            "ValueType": "Bool",
-            "WaitForActionEnd": true,
-            "Weight": 1.0
-        },
-        {
-            "ActionEndCategory": "HumanBossAI",
-            "ActionEndKey": "ActionEnded",
-            "ActionName": "HumanBoss_ATTACK_FEINT",
+            "Weight": 1.0,
             "BlackboardCategory": "HumanBossAI",
             "BlackboardScope": "Local",
-            "BoolValue": true,
             "CompareType": "Equal",
+            "ValueType": "Bool",
+            "BoolValue": true,
+            "ActionEndCategory": "HumanBossAI",
+            "ActionEndKey": "ActionEnded",
+            "WaitForActionEnd": true,
+            "ActionName": "HumanBoss_WHIFF_PUNISH"
+        },
+        {
             "Id": 133,
             "InputPinId": 134,
-            "Name": "予兆を見せて攻撃を誘う",
             "OutputPinId": 135,
+            "Type": "PlayAction",
+            "Name": "予兆を見せて攻撃を誘う",
+            "ScopeId": "Root",
             "Position": [
-                15584.0,
-                1180.0
+                1550,
+                2000
             ],
             "Priority": 5,
-            "ScopeId": "Root",
-            "Type": "PlayAction",
-            "ValueType": "Bool",
-            "WaitForActionEnd": true,
-            "Weight": 1.0
-        },
-        {
-            "ActionEndCategory": "HumanBossAI",
-            "ActionEndKey": "ActionEnded",
+            "Weight": 1.0,
             "BlackboardCategory": "HumanBossAI",
             "BlackboardScope": "Local",
-            "BoolValue": true,
             "CompareType": "Equal",
+            "ValueType": "Bool",
+            "BoolValue": true,
+            "ActionEndCategory": "HumanBossAI",
+            "ActionEndKey": "ActionEnded",
+            "WaitForActionEnd": true,
+            "ActionName": "HumanBoss_ATTACK_FEINT"
+        },
+        {
             "Id": 137,
             "InputPinId": 138,
-            "Name": "Intentに応じたShadow接続",
             "OutputPinId": 139,
+            "Type": "Sequence",
+            "Name": "Intentに応じたShadow接続",
+            "ScopeId": "Root",
             "Position": [
-                8577.0,
-                620.0
+                570,
+                520
             ],
             "Priority": 5,
-            "ScopeId": "Root",
-            "Type": "Sequence",
+            "Weight": 1.0,
+            "BlackboardCategory": "HumanBossAI",
+            "BlackboardScope": "Local",
+            "CompareType": "Equal",
             "ValueType": "Bool",
-            "WaitForActionEnd": true,
-            "Weight": 1.0
-        },
-        {
+            "BoolValue": true,
             "ActionEndCategory": "HumanBossAI",
             "ActionEndKey": "ActionEnded",
-            "BlackboardCategory": "HumanBossAI",
-            "BlackboardKey": "CanShadow",
-            "BlackboardScope": "Local",
-            "BoolValue": true,
-            "CompareType": "Equal",
+            "WaitForActionEnd": true
+        },
+        {
             "Id": 141,
             "InputPinId": 142,
-            "Name": "CanShadow",
             "OutputPinId": 143,
+            "Type": "BlackboardCondition",
+            "Name": "CanShadow",
+            "ScopeId": "Root",
             "Position": [
-                7812.0,
-                900.0
+                900,
+                520
             ],
             "Priority": 0,
-            "ScopeId": "Root",
-            "Type": "BlackboardCondition",
-            "ValueType": "Bool",
-            "WaitForActionEnd": true,
-            "Weight": 1.0
-        },
-        {
-            "ActionEndCategory": "HumanBossAI",
-            "ActionEndKey": "ActionEnded",
+            "Weight": 1.0,
             "BlackboardCategory": "HumanBossAI",
             "BlackboardScope": "Local",
-            "BoolValue": true,
             "CompareType": "Equal",
+            "ValueType": "Bool",
+            "BoolValue": true,
+            "ActionEndCategory": "HumanBossAI",
+            "ActionEndKey": "ActionEnded",
+            "WaitForActionEnd": true,
+            "BlackboardKey": "CanShadow"
+        },
+        {
             "Id": 145,
             "InputPinId": 146,
-            "Name": "接近／離脱／PunishのShadow",
             "OutputPinId": 147,
+            "Type": "RandomSelector",
+            "Name": "接近／離脱／PunishのShadow",
+            "ScopeId": "Root",
             "Position": [
-                9342.0,
-                900.0
+                1200,
+                520
             ],
             "Priority": 1,
-            "ScopeId": "Root",
-            "Type": "RandomSelector",
-            "ValueType": "Bool",
-            "WaitForActionEnd": true,
-            "Weight": 1.0
-        },
-        {
-            "ActionEndCategory": "HumanBossAI",
-            "ActionEndKey": "ActionEnded",
-            "ActionName": "HumanBoss_SHADOW_SHIFT_APPROACH",
+            "Weight": 1.0,
             "BlackboardCategory": "HumanBossAI",
             "BlackboardScope": "Local",
-            "BoolValue": true,
             "CompareType": "Equal",
+            "ValueType": "Bool",
+            "BoolValue": true,
+            "ActionEndCategory": "HumanBossAI",
+            "ActionEndKey": "ActionEnded",
+            "WaitForActionEnd": true
+        },
+        {
             "Id": 149,
             "InputPinId": 150,
-            "Name": "SHADOW_SHIFT_APPROACH",
             "OutputPinId": 151,
+            "Type": "PlayAction",
+            "Name": "SHADOW_SHIFT_APPROACH",
+            "ScopeId": "Root",
             "Position": [
-                8152.0,
-                1180.0
+                1550,
+                520
             ],
             "Priority": 0,
-            "ScopeId": "Root",
-            "Type": "PlayAction",
-            "ValueType": "Bool",
-            "WaitForActionEnd": true,
-            "Weight": 1.0
-        },
-        {
-            "ActionEndCategory": "HumanBossAI",
-            "ActionEndKey": "ActionEnded",
-            "ActionName": "HumanBoss_SHADOW_SHIFT_BACK",
+            "Weight": 1.0,
             "BlackboardCategory": "HumanBossAI",
             "BlackboardScope": "Local",
-            "BoolValue": true,
             "CompareType": "Equal",
+            "ValueType": "Bool",
+            "BoolValue": true,
+            "ActionEndCategory": "HumanBossAI",
+            "ActionEndKey": "ActionEnded",
+            "WaitForActionEnd": true,
+            "ActionName": "HumanBoss_SHADOW_SHIFT_APPROACH"
+        },
+        {
             "Id": 153,
             "InputPinId": 154,
-            "Name": "SHADOW_SHIFT_BACK",
             "OutputPinId": 155,
+            "Type": "PlayAction",
+            "Name": "SHADOW_SHIFT_BACK",
+            "ScopeId": "Root",
             "Position": [
-                8492.0,
-                1180.0
+                1550,
+                620
             ],
             "Priority": 1,
-            "ScopeId": "Root",
-            "Type": "PlayAction",
-            "ValueType": "Bool",
-            "WaitForActionEnd": true,
-            "Weight": 1.0
-        },
-        {
-            "ActionEndCategory": "HumanBossAI",
-            "ActionEndKey": "ActionEnded",
-            "ActionName": "HumanBoss_SHADOW_SHIFT_SIDE",
+            "Weight": 1.0,
             "BlackboardCategory": "HumanBossAI",
             "BlackboardScope": "Local",
-            "BoolValue": true,
             "CompareType": "Equal",
+            "ValueType": "Bool",
+            "BoolValue": true,
+            "ActionEndCategory": "HumanBossAI",
+            "ActionEndKey": "ActionEnded",
+            "WaitForActionEnd": true,
+            "ActionName": "HumanBoss_SHADOW_SHIFT_BACK"
+        },
+        {
             "Id": 157,
             "InputPinId": 158,
-            "Name": "SHADOW_SHIFT_SIDE",
             "OutputPinId": 159,
+            "Type": "PlayAction",
+            "Name": "SHADOW_SHIFT_SIDE",
+            "ScopeId": "Root",
             "Position": [
-                8832.0,
-                1180.0
+                1550,
+                720
             ],
             "Priority": 2,
-            "ScopeId": "Root",
-            "Type": "PlayAction",
-            "ValueType": "Bool",
-            "WaitForActionEnd": true,
-            "Weight": 1.0
-        },
-        {
-            "ActionEndCategory": "HumanBossAI",
-            "ActionEndKey": "ActionEnded",
-            "ActionName": "HumanBoss_SHADOW_SHIFT_BEHIND",
+            "Weight": 1.0,
             "BlackboardCategory": "HumanBossAI",
             "BlackboardScope": "Local",
-            "BoolValue": true,
             "CompareType": "Equal",
+            "ValueType": "Bool",
+            "BoolValue": true,
+            "ActionEndCategory": "HumanBossAI",
+            "ActionEndKey": "ActionEnded",
+            "WaitForActionEnd": true,
+            "ActionName": "HumanBoss_SHADOW_SHIFT_SIDE"
+        },
+        {
             "Id": 161,
             "InputPinId": 162,
-            "Name": "SHADOW_SHIFT_BEHIND",
             "OutputPinId": 163,
+            "Type": "PlayAction",
+            "Name": "SHADOW_SHIFT_BEHIND",
+            "ScopeId": "Root",
             "Position": [
-                9172.0,
-                1180.0
+                1550,
+                820
             ],
             "Priority": 3,
-            "ScopeId": "Root",
-            "Type": "PlayAction",
+            "Weight": 1.0,
+            "BlackboardCategory": "HumanBossAI",
+            "BlackboardScope": "Local",
+            "CompareType": "Equal",
             "ValueType": "Bool",
+            "BoolValue": true,
+            "ActionEndCategory": "HumanBossAI",
+            "ActionEndKey": "ActionEnded",
             "WaitForActionEnd": true,
-            "Weight": 1.0
+            "ActionName": "HumanBoss_SHADOW_SHIFT_BEHIND"
         },
         {
             "ActionEndCategory": "HumanBossAI",
@@ -2885,8 +1867,8 @@
             "Name": "HEAVY_SINGLE_ATTACK",
             "OutputPinId": 168,
             "Position": [
-                15924.0,
-                1180.0
+                1450,
+                500
             ],
             "Priority": 5,
             "ScopeId": "Root",
@@ -2908,96 +1890,96 @@
             "Weight": 1.0
         },
         {
-            "ActionEndCategory": "HumanBossAI",
-            "ActionEndKey": "ActionEnded",
-            "ActionName": "HumanBoss_SHADOW_SLASH",
-            "BlackboardCategory": "HumanBossAI",
-            "BlackboardScope": "Local",
-            "BoolValue": true,
-            "CompareType": "Equal",
             "Id": 170,
             "InputPinId": 171,
-            "Name": "SHADOW_SLASH",
             "OutputPinId": 172,
+            "Type": "PlayAction",
+            "Name": "SHADOW_SLASH",
+            "ScopeId": "Root",
             "Position": [
-                9512.0,
-                1180.0
+                1500,
+                920
             ],
             "Priority": 4,
-            "ScopeId": "Root",
-            "Type": "PlayAction",
-            "ValueType": "Bool",
-            "WaitForActionEnd": true,
-            "Weight": 1.0
-        },
-        {
-            "ActionEndCategory": "HumanBossAI",
-            "ActionEndKey": "ActionEnded",
-            "ActionName": "HumanBoss_SHADOW_DIVE_01",
+            "Weight": 1.0,
             "BlackboardCategory": "HumanBossAI",
             "BlackboardScope": "Local",
-            "BoolValue": true,
             "CompareType": "Equal",
+            "ValueType": "Bool",
+            "BoolValue": true,
+            "ActionEndCategory": "HumanBossAI",
+            "ActionEndKey": "ActionEnded",
+            "WaitForActionEnd": true,
+            "ActionName": "HumanBoss_SHADOW_SLASH"
+        },
+        {
             "Id": 174,
             "InputPinId": 175,
-            "Name": "SHADOW_DIVE_01",
             "OutputPinId": 176,
+            "Type": "PlayAction",
+            "Name": "SHADOW_DIVE_01",
+            "ScopeId": "Root",
             "Position": [
-                9852.0,
-                1180.0
+                1680,
+                920
             ],
             "Priority": 5,
-            "ScopeId": "Root",
-            "Type": "PlayAction",
-            "ValueType": "Bool",
-            "WaitForActionEnd": true,
-            "Weight": 1.0
-        },
-        {
-            "ActionEndCategory": "HumanBossAI",
-            "ActionEndKey": "ActionEnded",
-            "ActionName": "HumanBoss_SHADOW_DIVE_02",
+            "Weight": 1.0,
             "BlackboardCategory": "HumanBossAI",
             "BlackboardScope": "Local",
-            "BoolValue": true,
             "CompareType": "Equal",
+            "ValueType": "Bool",
+            "BoolValue": true,
+            "ActionEndCategory": "HumanBossAI",
+            "ActionEndKey": "ActionEnded",
+            "WaitForActionEnd": true,
+            "ActionName": "HumanBoss_SHADOW_DIVE_01"
+        },
+        {
             "Id": 178,
             "InputPinId": 179,
-            "Name": "SHADOW_DIVE_02",
             "OutputPinId": 180,
+            "Type": "PlayAction",
+            "Name": "SHADOW_DIVE_02",
+            "ScopeId": "Root",
             "Position": [
-                10192.0,
-                1180.0
+                1860,
+                920
             ],
             "Priority": 6,
-            "ScopeId": "Root",
-            "Type": "PlayAction",
-            "ValueType": "Bool",
-            "WaitForActionEnd": true,
-            "Weight": 1.0
-        },
-        {
-            "ActionEndCategory": "HumanBossAI",
-            "ActionEndKey": "ActionEnded",
-            "ActionName": "HumanBoss_SHADOW_DOMAIN",
+            "Weight": 1.0,
             "BlackboardCategory": "HumanBossAI",
             "BlackboardScope": "Local",
-            "BoolValue": true,
             "CompareType": "Equal",
+            "ValueType": "Bool",
+            "BoolValue": true,
+            "ActionEndCategory": "HumanBossAI",
+            "ActionEndKey": "ActionEnded",
+            "WaitForActionEnd": true,
+            "ActionName": "HumanBoss_SHADOW_DIVE_02"
+        },
+        {
             "Id": 182,
             "InputPinId": 183,
-            "Name": "SHADOW_DOMAIN",
             "OutputPinId": 184,
+            "Type": "PlayAction",
+            "Name": "SHADOW_DOMAIN",
+            "ScopeId": "Root",
             "Position": [
-                10532.0,
-                1180.0
+                2040,
+                920
             ],
             "Priority": 7,
-            "ScopeId": "Root",
-            "Type": "PlayAction",
+            "Weight": 1.0,
+            "BlackboardCategory": "HumanBossAI",
+            "BlackboardScope": "Local",
+            "CompareType": "Equal",
             "ValueType": "Bool",
+            "BoolValue": true,
+            "ActionEndCategory": "HumanBossAI",
+            "ActionEndKey": "ActionEnded",
             "WaitForActionEnd": true,
-            "Weight": 1.0
+            "ActionName": "HumanBoss_SHADOW_DOMAIN"
         },
         {
             "ActionEndCategory": "HumanBossAI",
@@ -3016,8 +1998,8 @@
             "Name": "HP50%以下の特殊攻撃",
             "OutputPinId": 188,
             "Position": [
-                5286.0,
-                620.0
+                1060,
+                400
             ],
             "Priority": 3,
             "ScopeId": "Root",
@@ -3055,8 +2037,8 @@
             "Name": "CanUseSpecialAttack",
             "OutputPinId": 192,
             "Position": [
-                5116.0,
-                900.0
+                700,
+                400
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -3094,8 +2076,8 @@
             "Name": "SHADOW_RAGNAROK",
             "OutputPinId": 196,
             "Position": [
-                5456.0,
-                900.0
+                880,
+                400
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -3133,8 +2115,8 @@
             "Name": "遠距離の攻撃選択",
             "OutputPinId": 200,
             "Position": [
-                6379.0,
-                620.0
+                1240,
+                400
             ],
             "Priority": 4,
             "ScopeId": "Root",
@@ -3172,8 +2154,8 @@
             "Name": "CanRangedOffense",
             "OutputPinId": 204,
             "Position": [
-                5954.0,
-                900.0
+                700,
+                400
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -3211,8 +2193,8 @@
             "Name": "RangedAttackSelector",
             "OutputPinId": 208,
             "Position": [
-                6804.0,
-                900.0
+                880,
+                400
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -3250,8 +2232,8 @@
             "Name": "SHADOW_CHARGE",
             "OutputPinId": 212,
             "Position": [
-                6294.0,
-                1180.0
+                700,
+                400
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -3289,8 +2271,8 @@
             "Name": "SHADOW_ORB",
             "OutputPinId": 216,
             "Position": [
-                6634.0,
-                1180.0
+                880,
+                400
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -3328,8 +2310,8 @@
             "Name": "SHADOW_SHIFT_APPROACH",
             "OutputPinId": 220,
             "Position": [
-                6974.0,
-                1180.0
+                1060,
+                400
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -3367,8 +2349,8 @@
             "Name": "Approach",
             "OutputPinId": 224,
             "Position": [
-                7314.0,
-                1180.0
+                1240,
+                400
             ],
             "Priority": 3,
             "ScopeId": "Root",
@@ -3406,8 +2388,8 @@
             "Name": "初回特殊攻撃の優先選択",
             "OutputPinId": 228,
             "Position": [
-                1412.0,
-                620.0
+                -700,
+                250
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -3445,8 +2427,8 @@
             "Name": "InitialSpecialReady",
             "OutputPinId": 232,
             "Position": [
-                1242.0,
-                900.0
+                -700,
+                250
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -3484,8 +2466,8 @@
             "Name": "Initial Shadow Ragnarok",
             "OutputPinId": 236,
             "Position": [
-                1582.0,
-                900.0
+                -700,
+                250
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -3523,8 +2505,8 @@
             "Name": "ガード継続への拘束攻撃",
             "OutputPinId": 240,
             "Position": [
-                4448.0,
-                620.0
+                1200.0,
+                700.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -3562,8 +2544,8 @@
             "Name": "GuardExecutionReady",
             "OutputPinId": 244,
             "Position": [
-                4278.0,
-                900.0
+                1200.0,
+                650.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -3601,8 +2583,8 @@
             "Name": "GUARD_EXECUTION",
             "OutputPinId": 248,
             "Position": [
-                4618.0,
-                900.0
+                1200.0,
+                800.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -3624,6 +2606,5 @@
             "Weight": 1.0
         }
     ],
-    "PriorityFromPositions": false,
     "Version": 1
 }

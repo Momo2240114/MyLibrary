@@ -615,6 +615,7 @@
                             1.0,
                             1.0
                         ],
+                        "LeaveFireGroundMark": true,
                         "Name": "DragonBreathLightSingle",
                         "ProjectileAcceleration": 10.0,
                         "ProjectileGravity": 0.0,
@@ -717,6 +718,7 @@
                             1.0,
                             1.0
                         ],
+                        "LeaveFireGroundMark": true,
                         "Name": "DragonBreathLightBeam",
                         "ProjectileAcceleration": 0.0,
                         "ProjectileGravity": 0.0,
@@ -819,6 +821,7 @@
                             1.0,
                             1.0
                         ],
+                        "LeaveFireGroundMark": true,
                         "Name": "DragonBreathLightFan",
                         "ProjectileAcceleration": 0.0,
                         "ProjectileGravity": 0.0,

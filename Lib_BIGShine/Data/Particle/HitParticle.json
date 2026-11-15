@@ -1,0 +1,304 @@
+{
+    "AssetPath": "Data/Particle/HitParticle.json",
+    "AssetType": "ParticleEffect",
+    "AssetVersion": 1,
+    "Emitters": [
+        {
+            "Acceleration": [
+                0.0,
+                9.800000190734863,
+                0.0
+            ],
+            "BlendMode": 1,
+            "BurstCount": 1,
+            "Color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "ColorEnd": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "ColorStart": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "ConeAngle": [
+                0.0,
+                0.0
+            ],
+            "Delay": 0.0,
+            "Drag": 1.059999942779541,
+            "EmissionMode": 1,
+            "Fade": [
+                0.0,
+                0.0
+            ],
+            "FresnelPower": 4.010000228881836,
+            "FresnelStrength": 16.0,
+            "GradientTexturePath": "",
+            "Gravity": -9.800000190734863,
+            "LegacyRadius": [
+                0.0,
+                0.0
+            ],
+            "Lifespan": [
+                0.25,
+                0.25
+            ],
+            "MaskTexturePath": "Data/Texture/Particle/masks for  particles 3/masks for particles 3/17.png",
+            "MaxCount": 1,
+            "MeshVertexSampleCount": 2048,
+            "Name": "Emitter_0",
+            "NoiseFrequency": 1.0,
+            "NoiseSpeed": 1.0,
+            "NoiseStrength": 0.0,
+            "OrbitVelocity": 0.0,
+            "PosOffset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "RadialVelocity": 0.0,
+            "RenderType": 0,
+            "RotationSpeed": [
+                0.0,
+                0.0
+            ],
+            "ShapeEnd": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "ShapeSize": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "ShapeStart": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "Size": [
+                2.0,
+                8.0
+            ],
+            "SizeRandomEnd": [
+                1.0,
+                1.0
+            ],
+            "SizeRandomStart": [
+                1.0,
+                1.0
+            ],
+            "SpawnDirectionMode": 0,
+            "SpawnShape": 0,
+            "SpawnSpace": 0,
+            "Speed": [
+                0.0,
+                0.0
+            ],
+            "SpriteAnimationFps": 12.0,
+            "SpriteAnimationLoop": 1,
+            "SpriteAnimationRange": [
+                0,
+                0
+            ],
+            "SpriteSheetIndex": [
+                0,
+                0
+            ],
+            "StretchMax": 100.0,
+            "StretchScale": 0.03999999910593033,
+            "TexturePath": "",
+            "TextureSplitCount": [
+                1,
+                1
+            ],
+            "UseColorOverLife": 0,
+            "UseFresnel": 1,
+            "UseGradient": 0,
+            "UseMask": 1,
+            "UseRandomSize": 0,
+            "UseSpriteAnimation": 1,
+            "VerticalSpawnRange": 0.0,
+            "Wind": [
+                0.0,
+                9.800000190734863,
+                0.0
+            ],
+            "gradientDirection": 0,
+            "gradientEndUv": 1.0,
+            "gradientFixedUv": 0.5,
+            "gradientSampleMode": 0,
+            "gradientStartUv": 0.0,
+            "gradientTexturePath": "",
+            "maskTexturePath": "Data/Texture/Particle/masks for  particles 3/masks for particles 3/17.png",
+            "shadeGradientDirection": 1,
+            "shadeGradientEndUv": 1.0,
+            "shadeGradientFixedUv": 0.0,
+            "shadeGradientSampleMode": 1,
+            "shadeGradientStartUv": 0.0,
+            "shadeGradientTexturePath": "Data/Texture/Particle/SBS - Gradient Texture Pack - 256x256/256x256/Basic/Angled_05-256x256.png",
+            "texturePath": "",
+            "useGradientTexture": 0,
+            "useShadeGradientTexture": 1
+        },
+        {
+            "Acceleration": [
+                0.0,
+                12.0,
+                0.0
+            ],
+            "BlendMode": 1,
+            "BurstCount": 600,
+            "Color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "ColorEnd": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "ColorStart": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "ConeAngle": [
+                0.0,
+                0.0
+            ],
+            "Delay": 0.0,
+            "Drag": 2.0,
+            "EmissionMode": 1,
+            "Fade": [
+                0.0,
+                0.20000000298023224
+            ],
+            "FresnelPower": 16.0,
+            "FresnelStrength": 32.0,
+            "GradientTexturePath": "Data/Texture/Particle/Sunset.jpg",
+            "Gravity": -9.800000190734863,
+            "LegacyRadius": [
+                0.0,
+                0.0
+            ],
+            "Lifespan": [
+                0.800000011920929,
+                0.800000011920929
+            ],
+            "MaskTexturePath": "Data/Texture/Particle/masks for  particles/masks for  particles/9.png",
+            "MaxCount": 1000,
+            "MeshVertexSampleCount": 2048,
+            "Name": "Emitter_1",
+            "NoiseFrequency": 4.389999866485596,
+            "NoiseSpeed": 13.760000228881836,
+            "NoiseStrength": 16.0,
+            "OrbitVelocity": 0.0,
+            "PosOffset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "RadialVelocity": 0.0,
+            "RenderType": 0,
+            "RotationSpeed": [
+                0.0,
+                0.0
+            ],
+            "ShapeEnd": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "ShapeSize": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "ShapeStart": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "Size": [
+                0.10000000149011612,
+                0.10000000149011612
+            ],
+            "SizeRandomEnd": [
+                1.0,
+                1.0
+            ],
+            "SizeRandomStart": [
+                1.0,
+                1.0
+            ],
+            "SpawnDirectionMode": 0,
+            "SpawnShape": 3,
+            "SpawnSpace": 0,
+            "Speed": [
+                0.0,
+                0.0
+            ],
+            "SpriteAnimationFps": 12.0,
+            "SpriteAnimationLoop": 1,
+            "SpriteAnimationRange": [
+                0,
+                0
+            ],
+            "SpriteSheetIndex": [
+                0,
+                0
+            ],
+            "StretchMax": 100.0,
+            "StretchScale": 0.03999999910593033,
+            "TexturePath": "",
+            "TextureSplitCount": [
+                1,
+                1
+            ],
+            "UseColorOverLife": 0,
+            "UseFresnel": 1,
+            "UseGradient": 0,
+            "UseMask": 1,
+            "UseRandomSize": 0,
+            "UseSpriteAnimation": 0,
+            "VerticalSpawnRange": 0.0,
+            "Wind": [
+                0.0,
+                12.0,
+                0.0
+            ],
+            "gradientDirection": 1,
+            "gradientEndUv": 1.0,
+            "gradientFixedUv": 0.5,
+            "gradientSampleMode": 0,
+            "gradientStartUv": 0.0,
+            "gradientTexturePath": "Data/Texture/Particle/Sunset.jpg",
+            "maskTexturePath": "Data/Texture/Particle/masks for  particles/masks for  particles/9.png",
+            "shadeGradientDirection": 0,
+            "shadeGradientEndUv": 1.0,
+            "shadeGradientFixedUv": 0.5,
+            "shadeGradientSampleMode": 0,
+            "shadeGradientStartUv": 0.0,
+            "shadeGradientTexturePath": "",
+            "texturePath": "",
+            "useGradientTexture": 0,
+            "useShadeGradientTexture": 0
+        }
+    ],
+    "IsPlaying": true
+}

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <windows.h>
+#include <cstdint>
 #include <tchar.h>
 #include <sstream>
 #include <string>
@@ -118,6 +119,9 @@ public:
     void RenderSkyBox(const RenderContext& rc);
     // ブルーム調整用GUI
     void ResetFilter();
+    void PlayDamageVignette();
+    void ResetDamageVignette() { damageVignetteEndTime = 0; }
+    float GetDamageVignetteOpacity() const;
     void DrawPostEffectGuiContent();
     void ShowPostEffectGui();
 private:
@@ -197,6 +201,7 @@ private:
     XeGtaoSystem::Parameters xeGtaoParams;
     MotionBlurSystem::Parameters motionBlurParams;
     VignetteSystem::Parameters vignetteParams;
+    uint64_t damageVignetteEndTime = 0;
 
     CascadeShadowMap cascadeShadowMap;
 

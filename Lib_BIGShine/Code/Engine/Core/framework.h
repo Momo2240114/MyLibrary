@@ -58,6 +58,7 @@ private:
 private:
 	// FPS計測は累積時間を使い、開発用構成だけでWindowタイトルへ反映する。
 	high_resolution_timer tictoc;
+    bool mouseRecaptureRequired = false;
 	uint32_t frames_per_second{ 0 };
 	float count_by_seconds{ 0.0f };
 	void calculate_frame_stats()

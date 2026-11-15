@@ -1,604 +1,4 @@
 {
-    "Areas": [
-        {
-            "Color": [
-                0.18,
-                0.36,
-                0.58,
-                0.22
-            ],
-            "Comment": "空中待機、着地予約、空中攻撃予約を先に確認。着地→空中拡散→空中火球の順で評価する。",
-            "Id": 384,
-            "Name": "判断 01 | 空中行動の優先評価",
-            "NodeIds": [
-                8
-            ],
-            "Position": [
-                0.0,
-                500.0
-            ],
-            "Size": [
-                274.0,
-                244.0
-            ]
-        },
-        {
-            "Color": [
-                0.19,
-                0.43,
-                0.31,
-                0.22
-            ],
-            "Comment": "空中の枝が成立しなければ、背後尻尾→向き直し→近接候補の抽選の順で評価する。",
-            "Id": 385,
-            "Name": "判断 02 | 背後・向き直し・近接",
-            "NodeIds": [
-                11
-            ],
-            "Position": [
-                434.0,
-                500.0
-            ],
-            "Size": [
-                274.0,
-                244.0
-            ]
-        },
-        {
-            "Color": [
-                0.52,
-                0.32,
-                0.16,
-                0.22
-            ],
-            "Comment": "距離と使用可否で候補を絞って重みで抽選。地上待機時は最近の使用履歴による重み補正も適用する。",
-            "Id": 386,
-            "Name": "判断 03 | 地上の距離・移動候補",
-            "NodeIds": [
-                14
-            ],
-            "Position": [
-                868.0,
-                500.0
-            ],
-            "Size": [
-                274.0,
-                244.0
-            ]
-        },
-        {
-            "Color": [
-                0.19,
-                0.43,
-                0.31,
-                0.22
-            ],
-            "Comment": "胴体下の噛みつき、近距離の離陸、正面の噛みつきを条件と重みで選ぶ。",
-            "Id": 387,
-            "Name": "共通条件 | 近接候補の抽選",
-            "NodeIds": [
-                324
-            ],
-            "Position": [
-                1302.0,
-                924.0
-            ],
-            "Size": [
-                274.0,
-                244.0
-            ]
-        },
-        {
-            "Color": [
-                0.18,
-                0.36,
-                0.58,
-                0.22
-            ],
-            "Comment": "空中待機・着地予約・着地攻撃が使用可能、の全条件を満たしたときに着地攻撃を要求する。",
-            "Id": 388,
-            "Name": "行動 01 | 着地攻撃",
-            "NodeIds": [
-                20,
-                24,
-                28,
-                32,
-                36
-            ],
-            "Position": [
-                1736.0,
-                924.0
-            ],
-            "Size": [
-                1358.0,
-                576.0
-            ]
-        },
-        {
-            "Color": [
-                0.18,
-                0.36,
-                0.58,
-                0.22
-            ],
-            "Comment": "空中待機・空中攻撃予約があり、水平距離22以上で空中拡散が使用可能なときに選ぶ。",
-            "Id": 389,
-            "Name": "行動 02 | 空中拡散ブレス",
-            "NodeIds": [
-                40,
-                44,
-                48,
-                52,
-                56,
-                60
-            ],
-            "Position": [
-                3254.0,
-                924.0
-            ],
-            "Size": [
-                1698.0,
-                576.0
-            ]
-        },
-        {
-            "Color": [
-                0.18,
-                0.36,
-                0.58,
-                0.22
-            ],
-            "Comment": "空中待機・空中攻撃予約・空中火球が使用可能。先行する着地と空中拡散の枝が成立しない場合に評価する。",
-            "Id": 390,
-            "Name": "行動 03 | 空中火球",
-            "NodeIds": [
-                64,
-                68,
-                72,
-                76,
-                80
-            ],
-            "Position": [
-                5112.0,
-                924.0
-            ],
-            "Size": [
-                1358.0,
-                576.0
-            ]
-        },
-        {
-            "Color": [
-                0.19,
-                0.43,
-                0.31,
-                0.22
-            ],
-            "Comment": "地上待機で対象が背後におり、尻尾攻撃が使用可能なとき。向き直しや近接抽選より先に評価する。",
-            "Id": 391,
-            "Name": "行動 04 | 背後への尻尾攻撃",
-            "NodeIds": [
-                333,
-                337,
-                341,
-                345,
-                349
-            ],
-            "Position": [
-                6630.0,
-                924.0
-            ],
-            "Size": [
-                1358.0,
-                576.0
-            ]
-        },
-        {
-            "Color": [
-                0.19,
-                0.43,
-                0.31,
-                0.22
-            ],
-            "Comment": "地上待機・対象あり・対象が正面ではない・旋回が使用可能、の全条件で向き直しを要求する。",
-            "Id": 392,
-            "Name": "行動 05 | プレイヤーへ向き直す",
-            "NodeIds": [
-                84,
-                88,
-                92,
-                96,
-                100,
-                104
-            ],
-            "Position": [
-                8148.0,
-                924.0
-            ],
-            "Size": [
-                1698.0,
-                576.0
-            ]
-        },
-        {
-            "Color": [
-                0.19,
-                0.43,
-                0.31,
-                0.22
-            ],
-            "Comment": "地上待機で対象が胴体下におり、噛みつきが使用可能なときの近接抽選候補。",
-            "Id": 393,
-            "Name": "行動 06 | 胴体下への噛みつき",
-            "NodeIds": [
-                108,
-                112,
-                116,
-                120,
-                124
-            ],
-            "Position": [
-                10006.0,
-                1680.0
-            ],
-            "Size": [
-                1358.0,
-                576.0
-            ]
-        },
-        {
-            "Color": [
-                0.19,
-                0.43,
-                0.31,
-                0.22
-            ],
-            "Comment": "地上待機・水平距離6.3以下・離陸が使用可能、の全条件で近接抽選へ参加する。正面条件はない。",
-            "Id": 394,
-            "Name": "行動 07 | 近距離で離陸",
-            "NodeIds": [
-                128,
-                132,
-                136,
-                140,
-                144
-            ],
-            "Position": [
-                11524.0,
-                1680.0
-            ],
-            "Size": [
-                1358.0,
-                576.0
-            ]
-        },
-        {
-            "Color": [
-                0.19,
-                0.43,
-                0.31,
-                0.22
-            ],
-            "Comment": "地上待機・対象が正面・水平距離4.8未満・噛みつきが使用可能、の全条件で近接抽選へ参加する。",
-            "Id": 395,
-            "Name": "行動 08 | 正面の噛みつき",
-            "NodeIds": [
-                148,
-                152,
-                156,
-                160,
-                164,
-                168
-            ],
-            "Position": [
-                13042.0,
-                1680.0
-            ],
-            "Size": [
-                1698.0,
-                576.0
-            ]
-        },
-        {
-            "Color": [
-                0.52,
-                0.32,
-                0.16,
-                0.22
-            ],
-            "Comment": "地上待機・正面・水平距離16以上22未満で火球系を抽選。通常火球と火球薙ぎ払いは遠距離の枝からも共有する。",
-            "Id": 396,
-            "Name": "共通条件 | 中距離の火球系抽選",
-            "NodeIds": [
-                172,
-                176,
-                180,
-                184,
-                188,
-                192
-            ],
-            "Position": [
-                14900.0,
-                924.0
-            ],
-            "Size": [
-                1698.0,
-                576.0
-            ]
-        },
-        {
-            "Color": [
-                0.52,
-                0.32,
-                0.16,
-                0.22
-            ],
-            "Comment": "地上待機・正面・水平距離22以上。共通の通常火球・火球薙ぎ払いと、拡散・前方ブレスから抽選する。",
-            "Id": 397,
-            "Name": "共通条件 | 遠距離の火球・ブレス抽選",
-            "NodeIds": [
-                220,
-                224,
-                228,
-                232,
-                236
-            ],
-            "Position": [
-                16758.0,
-                924.0
-            ],
-            "Size": [
-                1358.0,
-                576.0
-            ]
-        },
-        {
-            "Color": [
-                0.52,
-                0.32,
-                0.16,
-                0.22
-            ],
-            "Comment": "地上待機・対象が正面・水平距離16以上・突進が使用可能なときの地上抽選候補。",
-            "Id": 398,
-            "Name": "行動 09 | 突進",
-            "NodeIds": [
-                264,
-                268,
-                272,
-                276,
-                280,
-                284
-            ],
-            "Position": [
-                18276.0,
-                924.0
-            ],
-            "Size": [
-                1698.0,
-                576.0
-            ]
-        },
-        {
-            "Color": [
-                0.19,
-                0.43,
-                0.31,
-                0.22
-            ],
-            "Comment": "地上待機・損傷段階0以上・回転攻撃が使用可能。現在の設定は低HP限定ではなく、全損傷段階が対象。",
-            "Id": 399,
-            "Name": "行動 10 | 回転尻尾攻撃",
-            "NodeIds": [
-                288,
-                292,
-                296,
-                300,
-                304
-            ],
-            "Position": [
-                20134.0,
-                924.0
-            ],
-            "Size": [
-                1358.0,
-                576.0
-            ]
-        },
-        {
-            "Color": [
-                0.19,
-                0.43,
-                0.31,
-                0.22
-            ],
-            "Comment": "地上待機で対象が存在する場合の接近候補。グラフ上は距離・正面の条件を持たず、他の地上候補と抽選する。",
-            "Id": 400,
-            "Name": "行動 11 | 歩いて接近",
-            "NodeIds": [
-                308,
-                312,
-                316,
-                320
-            ],
-            "Position": [
-                21652.0,
-                924.0
-            ],
-            "Size": [
-                1018.0,
-                576.0
-            ]
-        },
-        {
-            "Color": [
-                0.4,
-                0.26,
-                0.54,
-                0.24
-            ],
-            "Comment": "CanUseFireBallが有効な場合の候補。中距離・遠距離の両方から同じノードを参照する。",
-            "Id": 401,
-            "Name": "行動 12 | 通常火球（共有）",
-            "NodeIds": [
-                196,
-                200,
-                204
-            ],
-            "Position": [
-                22830.0,
-                1680.0
-            ],
-            "Size": [
-                678.0,
-                576.0
-            ]
-        },
-        {
-            "Color": [
-                0.4,
-                0.26,
-                0.54,
-                0.24
-            ],
-            "Comment": "CanUseFireBallSweepが有効な場合の候補。中距離・遠距離の両方から同じノードを参照する。",
-            "Id": 402,
-            "Name": "行動 13 | 火球薙ぎ払い（共有）",
-            "NodeIds": [
-                208,
-                212,
-                216
-            ],
-            "Position": [
-                23668.0,
-                1680.0
-            ],
-            "Size": [
-                678.0,
-                576.0
-            ]
-        },
-        {
-            "Color": [
-                0.52,
-                0.32,
-                0.16,
-                0.22
-            ],
-            "Comment": "中距離の火球系抽選から参照。前方火球が使用可能か確認して実行を要求する。",
-            "Id": 403,
-            "Name": "行動 14 | 前方火球",
-            "NodeIds": [
-                354,
-                357,
-                359
-            ],
-            "Position": [
-                24506.0,
-                1680.0
-            ],
-            "Size": [
-                678.0,
-                576.0
-            ]
-        },
-        {
-            "Color": [
-                0.52,
-                0.32,
-                0.16,
-                0.22
-            ],
-            "Comment": "中距離の火球系抽選から参照。三連火球が使用可能か確認して実行を要求する。",
-            "Id": 404,
-            "Name": "行動 15 | 三連火球",
-            "NodeIds": [
-                361,
-                364,
-                366
-            ],
-            "Position": [
-                25344.0,
-                1680.0
-            ],
-            "Size": [
-                678.0,
-                576.0
-            ]
-        },
-        {
-            "Color": [
-                0.52,
-                0.32,
-                0.16,
-                0.22
-            ],
-            "Comment": "中距離の火球系抽選から参照。ビーム薙ぎ払いが使用可能か確認して実行を要求する。",
-            "Id": 405,
-            "Name": "行動 16 | 火炎ビーム薙ぎ払い",
-            "NodeIds": [
-                368,
-                371,
-                373
-            ],
-            "Position": [
-                26182.0,
-                1680.0
-            ],
-            "Size": [
-                678.0,
-                576.0
-            ]
-        },
-        {
-            "Color": [
-                0.52,
-                0.32,
-                0.16,
-                0.22
-            ],
-            "Comment": "遠距離の火球・ブレス抽選から参照。拡散ブレスが使用可能な場合の候補。",
-            "Id": 406,
-            "Name": "行動 17 | 拡散ブレス",
-            "NodeIds": [
-                240,
-                244,
-                248
-            ],
-            "Position": [
-                27020.0,
-                1680.0
-            ],
-            "Size": [
-                678.0,
-                576.0
-            ]
-        },
-        {
-            "Color": [
-                0.52,
-                0.32,
-                0.16,
-                0.22
-            ],
-            "Comment": "遠距離の火球・ブレス抽選から参照。前方ブレスが使用可能な場合の候補。",
-            "Id": 407,
-            "Name": "行動 18 | 前方ブレス",
-            "NodeIds": [
-                252,
-                256,
-                260
-            ],
-            "Position": [
-                27858.0,
-                1680.0
-            ],
-            "Size": [
-                678.0,
-                576.0
-            ]
-        }
-    ],
     "Links": [
         {
             "FromNodeId": 1,
@@ -1280,7 +680,7 @@
             "ToPinId": 149
         }
     ],
-    "NextId": 408,
+    "NextId": 384,
     "Nodes": [
         {
             "ActionEndCategory": "DragonAI",
@@ -1299,7 +699,7 @@
             "Name": "Dragon Root",
             "OutputPinId": 3,
             "Position": [
-                14173.0,
+                0.0,
                 0.0
             ],
             "Priority": 0,
@@ -1338,8 +738,8 @@
             "Name": "Behind Tail Sweep Sequence",
             "OutputPinId": 335,
             "Position": [
-                7204.0,
-                1044.0
+                -1215.0,
+                848.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -1377,8 +777,8 @@
             "Name": "Ground Idle",
             "OutputPinId": 0,
             "Position": [
-                6694.0,
-                1324.0
+                -1215.0,
+                1018.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -1416,8 +816,8 @@
             "Name": "Target Behind",
             "OutputPinId": 0,
             "Position": [
-                7034.0,
-                1324.0
+                -1215.0,
+                1133.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -1455,8 +855,8 @@
             "Name": "Can Tail Sweep",
             "OutputPinId": 0,
             "Position": [
-                7374.0,
-                1324.0
+                -1215.0,
+                1248.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -1494,8 +894,8 @@
             "Name": "Behind Tail Sweep Action",
             "OutputPinId": 0,
             "Position": [
-                7714.0,
-                1324.0
+                -1215.0,
+                1363.0
             ],
             "Priority": 3,
             "ScopeId": "Root",
@@ -1533,8 +933,8 @@
             "Name": "Dragon Decision Selector",
             "OutputPinId": 6,
             "Position": [
-                14173.0,
-                200.0
+                0.0,
+                180.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -1572,8 +972,8 @@
             "Name": "Air Decision",
             "OutputPinId": 10,
             "Position": [
-                32.0,
-                600.0
+                -1743.0,
+                420.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -1611,8 +1011,8 @@
             "Name": "Ground Turn / Close Decision",
             "OutputPinId": 13,
             "Position": [
-                466.0,
-                600.0
+                -431.0,
+                416.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -1650,8 +1050,8 @@
             "Name": "Ground Ranged / Move Random",
             "OutputPinId": 16,
             "Position": [
-                900.0,
-                600.0
+                1137.0,
+                384.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -1689,8 +1089,8 @@
             "Name": "Air Landing Sequence",
             "OutputPinId": 22,
             "Position": [
-                2310.0,
-                1044.0
+                -2083.0,
+                680.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -1728,8 +1128,8 @@
             "Name": "Air Idle",
             "OutputPinId": 0,
             "Position": [
-                1800.0,
-                1324.0
+                -2083.0,
+                850.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -1767,8 +1167,8 @@
             "Name": "Need Landing",
             "OutputPinId": 0,
             "Position": [
-                2140.0,
-                1324.0
+                -2083.0,
+                965.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -1806,8 +1206,8 @@
             "Name": "Can Landing",
             "OutputPinId": 0,
             "Position": [
-                2480.0,
-                1324.0
+                -2083.0,
+                1080.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -1845,8 +1245,8 @@
             "Name": "Air Landing Action",
             "OutputPinId": 0,
             "Position": [
-                2820.0,
-                1324.0
+                -2083.0,
+                1195.0
             ],
             "Priority": 3,
             "ScopeId": "Root",
@@ -1884,8 +1284,8 @@
             "Name": "Air Spread Breath Sequence",
             "OutputPinId": 42,
             "Position": [
-                3998.0,
-                1044.0
+                -1743.0,
+                680.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -1923,8 +1323,8 @@
             "Name": "Air Idle",
             "OutputPinId": 0,
             "Position": [
-                3318.0,
-                1324.0
+                -1743.0,
+                850.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -1962,8 +1362,8 @@
             "Name": "Need Air Attack",
             "OutputPinId": 0,
             "Position": [
-                3658.0,
-                1324.0
+                -1743.0,
+                965.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -2001,8 +1401,8 @@
             "Name": "Air Far Range",
             "OutputPinId": 0,
             "Position": [
-                3998.0,
-                1324.0
+                -1743.0,
+                1080.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -2040,8 +1440,8 @@
             "Name": "Can Air Spread",
             "OutputPinId": 0,
             "Position": [
-                4338.0,
-                1324.0
+                -1743.0,
+                1195.0
             ],
             "Priority": 3,
             "ScopeId": "Root",
@@ -2079,8 +1479,8 @@
             "Name": "Air Spread Breath Action",
             "OutputPinId": 0,
             "Position": [
-                4678.0,
-                1324.0
+                -1743.0,
+                1310.0
             ],
             "Priority": 4,
             "ScopeId": "Root",
@@ -2118,8 +1518,8 @@
             "Name": "Air Fire Ball Sequence",
             "OutputPinId": 66,
             "Position": [
-                5686.0,
-                1044.0
+                -1403.0,
+                680.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -2157,8 +1557,8 @@
             "Name": "Air Idle",
             "OutputPinId": 0,
             "Position": [
-                5176.0,
-                1324.0
+                -1403.0,
+                850.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -2196,8 +1596,8 @@
             "Name": "Need Air Attack",
             "OutputPinId": 0,
             "Position": [
-                5516.0,
-                1324.0
+                -1403.0,
+                965.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -2235,8 +1635,8 @@
             "Name": "Can Air Fire Ball",
             "OutputPinId": 0,
             "Position": [
-                5856.0,
-                1324.0
+                -1403.0,
+                1080.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -2274,8 +1674,8 @@
             "Name": "Air Fire Ball Action",
             "OutputPinId": 0,
             "Position": [
-                6196.0,
-                1324.0
+                -1403.0,
+                1195.0
             ],
             "Priority": 3,
             "ScopeId": "Root",
@@ -2313,8 +1713,8 @@
             "Name": "Turn To Player Sequence",
             "OutputPinId": 86,
             "Position": [
-                8892.0,
-                1044.0
+                -895.0,
+                848.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -2352,8 +1752,8 @@
             "Name": "Ground Idle",
             "OutputPinId": 0,
             "Position": [
-                8212.0,
-                1324.0
+                -895.0,
+                1018.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -2391,8 +1791,8 @@
             "Name": "Has Target",
             "OutputPinId": 0,
             "Position": [
-                8552.0,
-                1324.0
+                -895.0,
+                1133.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -2430,8 +1830,8 @@
             "Name": "Not Front",
             "OutputPinId": 0,
             "Position": [
-                8892.0,
-                1324.0
+                -895.0,
+                1248.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -2469,8 +1869,8 @@
             "Name": "Can Turn",
             "OutputPinId": 0,
             "Position": [
-                9232.0,
-                1324.0
+                -895.0,
+                1363.0
             ],
             "Priority": 3,
             "ScopeId": "Root",
@@ -2508,8 +1908,8 @@
             "Name": "Turn To Player Action",
             "OutputPinId": 0,
             "Position": [
-                9572.0,
-                1324.0
+                -895.0,
+                1478.0
             ],
             "Priority": 4,
             "ScopeId": "Root",
@@ -2547,8 +1947,8 @@
             "Name": "Under Body Bite Sequence",
             "OutputPinId": 110,
             "Position": [
-                10580.0,
-                1800.0
+                -575.0,
+                848.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -2586,8 +1986,8 @@
             "Name": "Ground Idle",
             "OutputPinId": 0,
             "Position": [
-                10070.0,
-                2080.0
+                -575.0,
+                1018.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -2625,8 +2025,8 @@
             "Name": "Under Body",
             "OutputPinId": 0,
             "Position": [
-                10410.0,
-                2080.0
+                -575.0,
+                1133.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -2664,8 +2064,8 @@
             "Name": "Can Bite",
             "OutputPinId": 0,
             "Position": [
-                10750.0,
-                2080.0
+                -575.0,
+                1248.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -2703,8 +2103,8 @@
             "Name": "Under Body Bite Action",
             "OutputPinId": 0,
             "Position": [
-                11090.0,
-                2080.0
+                -575.0,
+                1363.0
             ],
             "Priority": 3,
             "ScopeId": "Root",
@@ -2742,8 +2142,8 @@
             "Name": "Close TakeOff Sequence",
             "OutputPinId": 130,
             "Position": [
-                12098.0,
-                1800.0
+                -255.0,
+                848.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -2781,8 +2181,8 @@
             "Name": "Ground Idle",
             "OutputPinId": 0,
             "Position": [
-                11588.0,
-                2080.0
+                -255.0,
+                1018.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -2820,8 +2220,8 @@
             "Name": "Close TakeOff Range",
             "OutputPinId": 0,
             "Position": [
-                11928.0,
-                2080.0
+                -255.0,
+                1133.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -2859,8 +2259,8 @@
             "Name": "Can TakeOff",
             "OutputPinId": 0,
             "Position": [
-                12268.0,
-                2080.0
+                -255.0,
+                1248.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -2898,8 +2298,8 @@
             "Name": "Close TakeOff Action",
             "OutputPinId": 0,
             "Position": [
-                12608.0,
-                2080.0
+                -255.0,
+                1363.0
             ],
             "Priority": 3,
             "ScopeId": "Root",
@@ -2937,8 +2337,8 @@
             "Name": "Close Bite Sequence",
             "OutputPinId": 150,
             "Position": [
-                13786.0,
-                1800.0
+                49.0,
+                848.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -2976,8 +2376,8 @@
             "Name": "Ground Idle",
             "OutputPinId": 0,
             "Position": [
-                13106.0,
-                2080.0
+                49.0,
+                1018.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -3015,8 +2415,8 @@
             "Name": "Front Bite",
             "OutputPinId": 0,
             "Position": [
-                13446.0,
-                2080.0
+                49.0,
+                1133.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -3054,8 +2454,8 @@
             "Name": "Bite Range",
             "OutputPinId": 0,
             "Position": [
-                13786.0,
-                2080.0
+                49.0,
+                1248.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -3093,8 +2493,8 @@
             "Name": "Can Bite",
             "OutputPinId": 0,
             "Position": [
-                14126.0,
-                2080.0
+                49.0,
+                1363.0
             ],
             "Priority": 3,
             "ScopeId": "Root",
@@ -3132,8 +2532,8 @@
             "Name": "Close Bite Action",
             "OutputPinId": 0,
             "Position": [
-                14466.0,
-                2080.0
+                49.0,
+                1478.0
             ],
             "Priority": 4,
             "ScopeId": "Root",
@@ -3171,8 +2571,8 @@
             "Name": "Mid Fire Ball Sequence",
             "OutputPinId": 174,
             "Position": [
-                15644.0,
-                1044.0
+                717.0,
+                644.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -3210,8 +2610,8 @@
             "Name": "Ground Idle",
             "OutputPinId": 0,
             "Position": [
-                14964.0,
-                1324.0
+                433.0,
+                880.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -3249,8 +2649,8 @@
             "Name": "Front Fire",
             "OutputPinId": 0,
             "Position": [
-                15304.0,
-                1324.0
+                433.0,
+                1024.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -3288,8 +2688,8 @@
             "Name": "Beyond Bite",
             "OutputPinId": 0,
             "Position": [
-                15644.0,
-                1324.0
+                433.0,
+                1152.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -3327,8 +2727,8 @@
             "Name": "Mid Range",
             "OutputPinId": 0,
             "Position": [
-                15984.0,
-                1324.0
+                449.0,
+                1280.0
             ],
             "Priority": 3,
             "ScopeId": "Root",
@@ -3366,8 +2766,8 @@
             "Name": "Mid Fire Ball Random",
             "OutputPinId": 194,
             "Position": [
-                16324.0,
-                1324.0
+                593.0,
+                1504.0
             ],
             "Priority": 4,
             "ScopeId": "Root",
@@ -3405,8 +2805,8 @@
             "Name": "Fire Ball Choice",
             "OutputPinId": 198,
             "Position": [
-                23064.0,
-                1800.0
+                -47.0,
+                1808.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -3444,8 +2844,8 @@
             "Name": "Can Fire Ball",
             "OutputPinId": 0,
             "Position": [
-                22894.0,
-                2080.0
+                -143.0,
+                1996.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -3483,8 +2883,8 @@
             "Name": "Fire Ball Action",
             "OutputPinId": 0,
             "Position": [
-                23234.0,
-                2080.0
+                65.0,
+                2000.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -3522,8 +2922,8 @@
             "Name": "Fire Ball Sweep Choice",
             "OutputPinId": 210,
             "Position": [
-                23902.0,
-                1800.0
+                1313.0,
+                1904.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -3561,8 +2961,8 @@
             "Name": "Fire Ball Front Choice",
             "OutputPinId": 356,
             "Position": [
-                24740.0,
-                1800.0
+                1665.0,
+                1780.0
             ],
             "Priority": 4,
             "ScopeId": "Root",
@@ -3600,8 +3000,8 @@
             "Name": "Can Fire Ball Front",
             "OutputPinId": 0,
             "Position": [
-                24570.0,
-                2080.0
+                1633.0,
+                1968.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -3639,8 +3039,8 @@
             "Name": "Fire Ball Front Action",
             "OutputPinId": 0,
             "Position": [
-                24910.0,
-                2080.0
+                1841.0,
+                1968.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -3678,8 +3078,8 @@
             "Name": "Fire Ball Triple Choice",
             "OutputPinId": 363,
             "Position": [
-                25578.0,
-                1800.0
+                385.0,
+                1824.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -3717,8 +3117,8 @@
             "Name": "Can Fire Ball Triple",
             "OutputPinId": 0,
             "Position": [
-                25408.0,
-                2080.0
+                273.0,
+                2000.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -3756,8 +3156,8 @@
             "Name": "Fire Ball Triple Action",
             "OutputPinId": 0,
             "Position": [
-                25748.0,
-                2080.0
+                513.0,
+                2000.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -3795,8 +3195,8 @@
             "Name": "Fire Beam Sweep Choice",
             "OutputPinId": 370,
             "Position": [
-                26416.0,
-                1800.0
+                833.0,
+                1824.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -3834,8 +3234,8 @@
             "Name": "Can Fire Beam Sweep",
             "OutputPinId": 0,
             "Position": [
-                26246.0,
-                2080.0
+                737.0,
+                2000.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -3873,8 +3273,8 @@
             "Name": "Fire Beam Sweep Action",
             "OutputPinId": 0,
             "Position": [
-                26586.0,
-                2080.0
+                961.0,
+                2000.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -3912,8 +3312,8 @@
             "Name": "Can Fire Ball Sweep",
             "OutputPinId": 0,
             "Position": [
-                23732.0,
-                2080.0
+                1249.0,
+                2092.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -3951,8 +3351,8 @@
             "Name": "Fire Ball Sweep Action",
             "OutputPinId": 0,
             "Position": [
-                24072.0,
-                2080.0
+                1457.0,
+                2092.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -3990,8 +3390,8 @@
             "Name": "Far Breath Sequence",
             "OutputPinId": 222,
             "Position": [
-                17332.0,
-                1044.0
+                1297.0,
+                644.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -4029,8 +3429,8 @@
             "Name": "Ground Idle",
             "OutputPinId": 0,
             "Position": [
-                16822.0,
-                1324.0
+                1009.0,
+                784.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -4068,8 +3468,8 @@
             "Name": "Front Breath",
             "OutputPinId": 0,
             "Position": [
-                17162.0,
-                1324.0
+                1009.0,
+                928.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -4107,8 +3507,8 @@
             "Name": "Far Range",
             "OutputPinId": 0,
             "Position": [
-                17502.0,
-                1324.0
+                1025.0,
+                1088.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -4146,8 +3546,8 @@
             "Name": "Far Breath Random",
             "OutputPinId": 238,
             "Position": [
-                17842.0,
-                1324.0
+                1121.0,
+                1520.0
             ],
             "Priority": 3,
             "ScopeId": "Root",
@@ -4185,8 +3585,8 @@
             "Name": "Spread Breath Choice",
             "OutputPinId": 242,
             "Position": [
-                27254.0,
-                1800.0
+                2177.0,
+                1796.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -4224,8 +3624,8 @@
             "Name": "Can Spread Breath",
             "OutputPinId": 0,
             "Position": [
-                27084.0,
-                2080.0
+                2081.0,
+                2112.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -4263,8 +3663,8 @@
             "Name": "Spread Breath Action",
             "OutputPinId": 0,
             "Position": [
-                27424.0,
-                2080.0
+                2337.0,
+                2096.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -4302,8 +3702,8 @@
             "Name": "Spread Breath Forward Choice",
             "OutputPinId": 254,
             "Position": [
-                28092.0,
-                1800.0
+                2785.0,
+                1824.0
             ],
             "Priority": 3,
             "ScopeId": "Root",
@@ -4341,8 +3741,8 @@
             "Name": "Can Spread Breath Forward",
             "OutputPinId": 0,
             "Position": [
-                27922.0,
-                2080.0
+                2625.0,
+                2096.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -4380,8 +3780,8 @@
             "Name": "Spread Breath Forward Action",
             "OutputPinId": 0,
             "Position": [
-                28262.0,
-                2080.0
+                2897.0,
+                2096.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -4419,8 +3819,8 @@
             "Name": "Run Charge Sequence",
             "OutputPinId": 266,
             "Position": [
-                19020.0,
-                1044.0
+                1681.0,
+                644.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -4458,8 +3858,8 @@
             "Name": "Ground Idle",
             "OutputPinId": 0,
             "Position": [
-                18340.0,
-                1324.0
+                1489.0,
+                816.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -4497,8 +3897,8 @@
             "Name": "Front Run",
             "OutputPinId": 0,
             "Position": [
-                18680.0,
-                1324.0
+                1489.0,
+                944.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -4536,8 +3936,8 @@
             "Name": "Run Range",
             "OutputPinId": 0,
             "Position": [
-                19020.0,
-                1324.0
+                1489.0,
+                1072.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -4575,8 +3975,8 @@
             "Name": "Can Run",
             "OutputPinId": 0,
             "Position": [
-                19360.0,
-                1324.0
+                1489.0,
+                1200.0
             ],
             "Priority": 3,
             "ScopeId": "Root",
@@ -4614,8 +4014,8 @@
             "Name": "Run Charge Action",
             "OutputPinId": 0,
             "Position": [
-                19700.0,
-                1324.0
+                1729.0,
+                1232.0
             ],
             "Priority": 4,
             "ScopeId": "Root",
@@ -4653,8 +4053,8 @@
             "Name": "Low HP Spin Sequence",
             "OutputPinId": 290,
             "Position": [
-                20708.0,
-                1044.0
+                2017.0,
+                644.0
             ],
             "Priority": 3,
             "ScopeId": "Root",
@@ -4692,8 +4092,8 @@
             "Name": "Ground Idle",
             "OutputPinId": 0,
             "Position": [
-                20198.0,
-                1324.0
+                1921.0,
+                816.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -4731,8 +4131,8 @@
             "Name": "Any Damage Phase",
             "OutputPinId": 0,
             "Position": [
-                20538.0,
-                1324.0
+                1921.0,
+                928.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -4770,8 +4170,8 @@
             "Name": "Can Spin",
             "OutputPinId": 0,
             "Position": [
-                20878.0,
-                1324.0
+                1921.0,
+                1056.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -4809,8 +4209,8 @@
             "Name": "Low HP Spin Action",
             "OutputPinId": 0,
             "Position": [
-                21218.0,
-                1324.0
+                2145.0,
+                1184.0
             ],
             "Priority": 3,
             "ScopeId": "Root",
@@ -4848,8 +4248,8 @@
             "Name": "Walk Approach Sequence",
             "OutputPinId": 310,
             "Position": [
-                22056.0,
-                1044.0
+                2481.0,
+                644.0
             ],
             "Priority": 4,
             "ScopeId": "Root",
@@ -4887,8 +4287,8 @@
             "Name": "Ground Idle",
             "OutputPinId": 0,
             "Position": [
-                21716.0,
-                1324.0
+                2257.0,
+                800.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -4926,8 +4326,8 @@
             "Name": "Has Target",
             "OutputPinId": 0,
             "Position": [
-                22056.0,
-                1324.0
+                2273.0,
+                928.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -4965,8 +4365,8 @@
             "Name": "Walk Approach Action",
             "OutputPinId": 0,
             "Position": [
-                22396.0,
-                1324.0
+                2609.0,
+                928.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -5004,8 +4404,8 @@
             "Name": "Ground Close Random",
             "OutputPinId": 326,
             "Position": [
-                1334.0,
-                1024.0
+                -271.0,
+                624.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -5027,6 +4427,5 @@
             "Weight": 1.0
         }
     ],
-    "PriorityFromPositions": false,
     "Version": 1
 }

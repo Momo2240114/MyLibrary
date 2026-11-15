@@ -61,7 +61,7 @@ struct PlayerAttackAssistSettings
     bool lockTargetOnAttackEnter = true;
     bool allowRetargetDuringAttack = false;
     bool nonLockOnUseNearestFallback = false;
-    float nonLockOnMaximumTargetAngleDegrees = 50.0f;
+    float nonLockOnMaximumTargetAngleDegrees = 75.0f;
     float lockOnMaximumTargetAngleDegrees = 180.0f;
     // 回転量の累積上限と、向き補正を適用するアニメーションの正規化時間。
     float maximumTotalRotationDegrees = 35.0f;
@@ -250,6 +250,8 @@ public:
     float groundAcceleration = 140.0f; // 地上の加速度。単位はワールド単位/秒の二乗。
     float groundReversalDeceleration = 330.0f; // 大きな切り返しだけに使う制動加速度。
     float groundDirectionTurnSpeed = 1440.0f; // 水平速度の向きを変更する最大角速度。
+    float groundFullSpeedTurnMultiplier = 0.20f;
+    float groundTurnBankAngle = 10.0f;
     float groundStopSpeedThreshold = 0.05f; // 微小な残速を停止とみなす速度。
     float groundDeceleration = 160.0f;
     float groundTurnSpeed = 1080.0f; // 毎秒の最大旋回角度。
@@ -267,9 +269,10 @@ public:
     float groundDodgeCooldownDuration = 0.5f;
     float justDodgeInvincibilityDuration = 0.5f; // ジャスト回避成功後に保証する無敵秒数。
     // ジャスト成功時の短いスローと、BGMを強め、SEを軽めにこもらせる演出を調整する。
-    void PlayJustSuccessPresentation();
+    void PlayJustSuccessPresentation(bool justGuard_);
     bool justSuccessPresentationEnabled = true;
     float justSuccessTimeScale = 0.25f;
+    float justGuardTimeScale = 0.65f;
     float justSuccessHoldDuration = 0.25f;
     float justSuccessReturnDuration = 0.2f;
     float justSuccessMuffleCutoff = 1200.0f;
@@ -303,7 +306,7 @@ private:
     bool IsDodgeCancelAction(PLAYER_ACTION action_) const;
     // 地上回避の待ち時間と、着地までの空中回避の使用制限を確認する。
     bool CanStartDodgeAction(PLAYER_ACTION action_) const;
-    bool HasCounterAttackTag() const;
+    PLAYER_ACTION ResolveCounterAttack(bool weakAttack_) const;
     // 反撃Tag成立前に保存された通常攻撃入力を、反撃Actionの先行入力へ差し替える。
     void PromoteBufferedAttackToCounterAttack();
     // 攻撃・地上回避の終了後に、ガード保持入力による復帰を許可するか判定する。
@@ -346,6 +349,7 @@ private:
     void ApplyPendingMovement(); // 予約された水平速度と向きをMovementへ反映する。
     // 地上移動の開始・中断時だけ実行情報を破棄し、他行動の移動やImpulseは変更しない。
     void ResetGroundMovement();
+    void SetGroundBank(float angle_);
 
     bool ForceChangeAction(PLAYER_ACTION action_); // Debug用に強制Action遷移する。
 
@@ -428,6 +432,7 @@ private:
     float groundMoveSpeed = 0.0f;
     float groundPhaseTimer = 0.0f;
     float groundPreviousDeltaTime = 0.0f;
+    float groundBankAngle = 0.0f;
     float groundLastTurnSign = 1.0f;
     bool groundMoveInputActive = false;
     bool groundHasPreviousPosition = false;

@@ -54,7 +54,7 @@
                   "customAnimIndex":  -1,
                   "events":  [
                                  {
-                                     "actionEnd":  "",
+                                     "actionEnd":  "ComboTransition",
                                      "actionStart":  "InputBufferOn",
                                      "actionUpdate":  "",
                                      "attachNodeName":  "",
@@ -64,7 +64,7 @@
 
                                                           ],
                                      "callEndOnStateExit":  false,
-                                     "endTime":  1.3166667222976685,
+                                     "endTime":  0.9833333333333333,
                                      "eventTemplateType":  "NONE",
                                      "label":  "InputBufferOn",
                                      "localPosition":  [
@@ -89,7 +89,7 @@
                                      "overridePlaybackSpeed":  false,
                                      "ownerTarget":  "Self",
                                      "playbackSpeed":  1.0,
-                                     "startTime":  0.06666667014360428
+                                     "startTime":  0.0
                                  },
                                  {
                                      "actionEnd":  "",
@@ -127,45 +127,7 @@
                                      "overridePlaybackSpeed":  false,
                                      "ownerTarget":  "Self",
                                      "playbackSpeed":  1.0,
-                                     "startTime":  1.149999976158142
-                                 },
-                                 {
-                                     "actionEnd":  "",
-                                     "actionStart":  "ComboTransition",
-                                     "actionUpdate":  "",
-                                     "attachNodeName":  "",
-                                     "attachToOwner":  false,
-                                     "attackTemplateId":  "",
-                                     "blackboardWrites":  [
-
-                                                          ],
-                                     "callEndOnStateExit":  false,
-                                     "endTime":  1.1666666269302368,
-                                     "eventTemplateType":  "NONE",
-                                     "label":  "ComboTransition",
-                                     "localPosition":  [
-                                                           0.0,
-                                                           0.0,
-                                                           0.0
-                                                       ],
-                                     "localRotation":  [
-                                                           0.0,
-                                                           0.0,
-                                                           0.0
-                                                       ],
-                                     "localScale":  [
-                                                        1.0,
-                                                        1.0,
-                                                        1.0
-                                                    ],
-                                     "meshVFXAssetPath":  "",
-                                     "meshVFXLifeTime":  1.0,
-                                     "meshVFXPlaybackSpeed":  1.0,
-                                     "mirrorMeshVFX":  false,
-                                     "overridePlaybackSpeed":  false,
-                                     "ownerTarget":  "Self",
-                                     "playbackSpeed":  1.0,
-                                     "startTime":  0.8166666626930237
+                                     "startTime":  1.2166666666666666
                                  },
                                  {
                                      "actionEnd":  "",

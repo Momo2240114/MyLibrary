@@ -512,7 +512,7 @@ MotionWarpResult MotionWarpComponent::ApplyRootMotionWarp(
             return;
         }
         result_.positionWarped = LimitRootMotionToStopDistance(result_.rootMotionDelta.deltaPosition,
-            owner_->transform->GetWorldPosition(), (explicitTargetPreset.discardUnappliedCorrection && request.targetLocked) ? request.targetPosition : target_->transform->GetWorldPosition(), explicitTargetPreset.targetDistance);
+            owner_->transform->GetWorldPosition(), target_->transform->GetWorldPosition(), explicitTargetPreset.targetDistance);
         debugWarpedDelta = result_.rootMotionDelta.deltaPosition;
     };
     auto limitFixedPath_ = [&]()
@@ -857,7 +857,8 @@ MotionWarpResult MotionWarpComponent::ApplyRootMotionWarp(
     // 吸い付き補正の上限とは独立して最終差分を制限し、大きなDeltaでも停止円を越えさせない。
     if (limitPosition_ && LimitRootMotionToStopDistance(
         result_.rootMotionDelta.deltaPosition,
-        ownerPosition_, request.targetPosition, preset_->targetDistance))
+        ownerPosition_, target_ && target_->transform ? target_->transform->GetWorldPosition() : request.targetPosition,
+        preset_->targetDistance))
     {
         result_.positionWarped = true;
     }

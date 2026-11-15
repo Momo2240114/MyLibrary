@@ -4,6 +4,8 @@
 #include "Engine/Debug/TracyProfiler.h"
 
 #include <SDL3/SDL_events.h>
+#include <SDL3/SDL_error.h>
+#include <SDL3/SDL_properties.h>
 #include <SDL3/SDL_hints.h>
 #include <SDL3/SDL_timer.h>
 
@@ -24,10 +26,22 @@ ControllerInput::~ControllerInput()
 void ControllerInput::PlayRumble(float lowStrength_, float highStrength_, float duration_, int priority_)
 {
     BS_PROFILE_SCOPE("ControllerInput::PlayRumble");
-    if (!gamepad || !connected || !std::isfinite(lowStrength_) ||
-        !std::isfinite(highStrength_) || !std::isfinite(duration_) || duration_ <= 0.0f) return;
+    if (!gamepad || !connected)
+    {
+        rumbleStatus = "No gamepad connected";
+        return;
+    }
+    if (!std::isfinite(lowStrength_) || !std::isfinite(highStrength_) || !std::isfinite(duration_) || duration_ <= 0.0f)
+    {
+        rumbleStatus = "Invalid rumble request";
+        return;
+    }
     const Uint64 now_ = SDL_GetTicks();
-    if (now_ < rumbleEndTime && priority_ < rumblePriority) return;
+    if (now_ < rumbleEndTime && priority_ < rumblePriority)
+    {
+        rumbleStatus = "Suppressed by higher priority rumble";
+        return;
+    }
     const Uint32 durationMs_ = static_cast<Uint32>(std::clamp(duration_, 0.001f, 10.0f) * 1000.0f);
     if (SDL_RumbleGamepad(gamepad,
         static_cast<Uint16>(std::clamp(lowStrength_, 0.0f, 1.0f) * 65535.0f),
@@ -36,6 +50,11 @@ void ControllerInput::PlayRumble(float lowStrength_, float highStrength_, float 
     {
         rumbleEndTime = now_ + durationMs_;
         rumblePriority = priority_;
+        rumbleStatus = "SDL accepted rumble";
+    }
+    else
+    {
+        rumbleStatus = SDL_GetError();
     }
 }
 
@@ -131,25 +150,41 @@ bool ControllerInput::TryOpenGamepad()
     }
 
     for (int index_ = 0; index_ < gamepadCount_; ++index_)
-    {
-        gamepad = SDL_OpenGamepad(gamepadIds_[index_]);
-        if (gamepad != nullptr)
-        {
-            break;
-        }
-    }
-
+        if (SelectGamepad(gamepadIds_[index_])) break;
     SDL_free(gamepadIds_);
+    return connected;
+}
 
-    connected = gamepad != nullptr;
-    if (connected)
+bool ControllerInput::SupportsRumble() const
+{
+    return gamepad && connected && SDL_GetBooleanProperty(
+        SDL_GetGamepadProperties(gamepad), SDL_PROP_GAMEPAD_CAP_RUMBLE_BOOLEAN, false);
+}
+
+bool ControllerInput::SelectGamepad(SDL_JoystickID id_)
+{
+    if (!initialized || id_ == 0) return false;
+    if (id_ == GetGamepadId() && connected) return true;
+    SDL_Gamepad* selected_ = SDL_OpenGamepad(id_);
+    if (!selected_)
     {
-        // デバッグ表示用にデバイス名を保持し、取得できない場合はUnknownとして扱う。
-        const char* name_ = SDL_GetGamepadName(gamepad);
-        gamepadName = name_ != nullptr ? name_ : "Unknown Gamepad";
-        gamepadType = SDL_GetGamepadType(gamepad);
+        rumbleStatus = SDL_GetError();
+        return false;
     }
-
+    if (!SDL_GamepadConnected(selected_))
+    {
+        SDL_CloseGamepad(selected_);
+        rumbleStatus = "Selected gamepad disconnected";
+        return false;
+    }
+    CloseGamepad();
+    gamepad = selected_;
+    const char* name_ = SDL_GetGamepadName(gamepad);
+    gamepadName = name_ ? name_ : "Unknown Gamepad";
+    gamepadType = SDL_GetGamepadType(gamepad);
+    CaptureState();
+    previousState = state;
+    rumbleStatus = "No request";
     return connected;
 }
 

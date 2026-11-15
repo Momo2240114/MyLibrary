@@ -20,6 +20,8 @@
 #include "Engine/GamePlay/Combat/AttackTemplateManager.h"
 #include "Engine/GamePlay/Combat/AttackTelegraphRuntime.h"
 #include "Engine/Math/Curve/CurveComponent.h"
+#include "Engine/Debug/TracyProfiler.h"
+#include "Engine/Physics/BoxCollider.h"
 #include "ImSequencer.h"
 #include "ImGuizmo.h"
 #include "imgui_internal.h"
@@ -256,6 +258,22 @@ AnimationEditorWindow::AnimationEditorWindow(GameObjectManager* manager_)
     gameObjectManager = previewGameObjectManager.get();
 }
 
+AnimationEditorWindow::~AnimationEditorWindow()
+{
+    if (!previewGameObjectManager) return;
+    const PhysXSystem::PreviewScene::Scope physicsScope_(previewPhysics);
+    const auto previewObjects_ = previewGameObjectManager->GetObjects();
+    for (const auto& object_ : previewObjects_)
+    {
+        if (object_) object_->PrepareForDestroy();
+    }
+    for (const auto& object_ : previewObjects_)
+    {
+        if (object_) object_->SetManager(nullptr);
+    }
+    previewGameObjectManager.reset();
+}
+
 bool AnimationEditorWindow::ResolveTarget(GltfModelCommponennt*& modelComp, AnimationControllerComponent*& animController) const
 {
     modelComp = nullptr;
@@ -438,6 +456,7 @@ bool AnimationEditorWindow::CopySceneObjectToPreview(
         previewObject_->Load(objectJson_);
     }
 
+    CreatePreviewFloor();
     previewGameObjectManager->ResolveHierarchy();
     auto previewRootObject_ = previewGameObjectManager->Find(sourceObject_->GetName());
     previewGameObjectManager->SetSelectedObject(previewRootObject_);
@@ -452,6 +471,20 @@ bool AnimationEditorWindow::CopySceneObjectToPreview(
     poseEditEnabled = false;
     editorPlaybackEnabled = false;
     return previewRootObject_ != nullptr;
+}
+
+void AnimationEditorWindow::CreatePreviewFloor()
+{
+    // プレビューの原点に置いたモデルが、実シーンの地形なしでも接地できるようにする。
+    constexpr float FLOOR_HALF_HEIGHT = 0.5f;
+    constexpr float FLOOR_HALF_WIDTH = 100.0f;
+    const auto floor_ = previewGameObjectManager->Create("AnimationPreviewFloor");
+    floor_->saveFlg = false;
+    floor_->transform->localPosition.y = -FLOOR_HALF_HEIGHT;
+    const auto collider_ = floor_->AddComponent<BoxCollider>(false);
+    collider_->halfSize = { FLOOR_HALF_WIDTH, FLOOR_HALF_HEIGHT, FLOOR_HALF_WIDTH };
+    collider_->isStatic = true;
+    collider_->shapeRenderEnabled = false;
 }
 
 void AnimationEditorWindow::EnsurePreviewScene()
@@ -471,6 +504,7 @@ void AnimationEditorWindow::EnsurePreviewScene()
     previewParticleRenderSystem.Initialize(graphics_.GetDevice());
     previewMeshVFXRenderSystem.Initialize(graphics_.GetDevice());
 
+    CreatePreviewFloor();
     auto previewObject_ = previewGameObjectManager->Create("AnimationPreviewModel");
     previewObject_->AddComponent<GltfModelCommponennt>();
     previewObject_->AddComponent<AnimationControllerComponent>();
@@ -486,10 +520,20 @@ void AnimationEditorWindow::EnsurePreviewScene()
 
 void AnimationEditorWindow::Update(float deltaTime_)
 {
+    if (!previewPhysics.Initialize()) return;
+    const PhysXSystem::PreviewScene::Scope physicsScope_(previewPhysics);
     EnsurePreviewScene();
     if (autoUpdatePreview && previewGameObjectManager)
     {
-        previewGameObjectManager->Update(deltaTime_);
+        // 読み込みやタブ切り替え後に、大きな時間差で床をすり抜けないようにする。
+        constexpr float MAX_PREVIEW_DELTA = 1.0f / 30.0f;
+        const float previewDelta_ = std::clamp(deltaTime_, 0.0f, MAX_PREVIEW_DELTA);
+        previewGameObjectManager->Update(previewDelta_);
+        if (previewGameObjectManager->ShouldSimulatePhysics())
+        {
+            BS_PROFILE_SCOPE("AnimationPreview::PhysicsStep");
+            PhysXSystem::Step(previewDelta_);
+        }
     }
 
     GltfModelCommponennt* modelComp_ = nullptr;
@@ -1002,6 +1046,8 @@ void AnimationEditorWindow::OnVisibilityChanged(bool visible)
 
 void AnimationEditorWindow::Draw()
 {
+    if (!previewPhysics.Initialize()) return;
+    const PhysXSystem::PreviewScene::Scope physicsScope_(previewPhysics);
     EnsurePreviewScene();
 
     if (!BeginWorkspaceWindow(ImGuiWindowFlags_MenuBar))

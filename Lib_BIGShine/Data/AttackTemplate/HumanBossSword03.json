@@ -44,7 +44,7 @@
   "displayName": "HumanBoss Sword 03",
   "hitEffect": {
     "hitMeshVfxAssetPath": "",
-    "hitParticleAssetPath": "EnemyMudSwordHit",
+    "hitParticleAssetPath": "LargeHitSparks_Weak",
     "hitParticleEmitterName": "",
     "hitParticleLifeTime": 0.5,
     "hitParticleNormalOffset": 0.06,

@@ -833,6 +833,11 @@ void HumanBossActionComponent::StrikeShadowArea()
     const auto& feedback_ = shadowAttackSnapshot->feedback;
     AudioManager::Instance().PlaySpatialAttackSound(feedback_.startSoundPath, shadowLandingPosition,
         feedback_.volume, feedback_.minDistance, feedback_.maxDistance);
+    if (shadowAreaTemplate != "HumanBossShadowDomain")
+    {
+        const float radius_ = shadowAttackSnapshot->attackEffects.front().hitShapes.front().radius;
+        owner_->GetManager().GetEffectManager().SpawnGroundMark(GroundMarkShape::IMPACT, ground_, radius_, radius_);
+    }
     for (const auto& effect_ : shadowAttackSnapshot->attackEffects)
     {
         const auto object_ = owner_->GetManager().GetEffectManager().SpawnAttackEffect(effect_, *shadowAttackSnapshot, owner_.get(), instance_);

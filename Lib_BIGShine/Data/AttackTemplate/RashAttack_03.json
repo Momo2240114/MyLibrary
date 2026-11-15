@@ -1,0 +1,97 @@
+{
+    "AssetType": "AttackTemplate",
+    "AssetVersion": 1,
+    "attack": {
+        "allowMultiHit": false,
+        "attackerAirLiftPower": 0.0,
+        "canBeGuarded": true,
+        "damage": 110.0,
+        "damageApplyType": 0,
+        "damageHitInterval": 0.0,
+        "damageRate": 1.65,
+        "fixedDamage": 0.0,
+        "guardBreak": false,
+        "hitGroupId": 0,
+        "hitStopDuration": 0.03999999910593033,
+        "hitStopScale": 0.11999999731779099,
+        "impactPower": 4.0,
+        "knockBackPower": 1.2000000476837158,
+        "knockBackType": 0,
+        "maxHitCount": 1,
+        "targetAirLiftPower": 0.0
+    },
+    "attackEffects": [],
+    "cameraShake": {
+        "attackScale": 0.5,
+        "enabled": true,
+        "frequency": 24.0,
+        "powerLevel": 1,
+        "priority": 8,
+        "receiveDuration": 0.18000000715255737,
+        "receivePositionStrength": 0.054999999701976776,
+        "receiveRotationStrength": 0.44999998807907104
+    },
+    "displayName": "RashAttack_03",
+    "feedback": {
+        "attackStrength": 0.48,
+        "duration": 0.11999999731779099,
+        "hitSoundPath": "Data/Audio/SE/Swordsmanship-2.wav",
+        "maxDistance": 80.0,
+        "minDistance": 8.0,
+        "receiveStrength": 0.6499999761581421,
+        "rumbleEnabled": true,
+        "startSoundPath": "Data/Audio/SE/Sword-Practice-2.wav",
+        "startStrength": 0.15000000596046448,
+        "volume": 0.75
+    },
+    "hitEffect": {
+        "hitMeshVfxAssetPath": "",
+        "hitMeshVfxLifeTime": 1.0,
+        "hitMeshVfxNormalOffset": 0.0,
+        "hitParticleAssetPath": "LargeHitSparks_Weak",
+        "hitParticleAxisToAttackerBlend": 0.8500000238418579,
+        "hitParticleEmitterName": "",
+        "hitParticleLifeTime": 0.44999998807907104,
+        "hitParticleNormalOffset": 0.05000000074505806,
+        "hitParticleTargetAttractionFalloff": 1.25,
+        "hitParticleTargetAttractionRange": 3.0,
+        "hitParticleTargetAttractionStrength": 1.399999976158142,
+        "hitParticleUseImpactAxis": true,
+        "hitParticleUseTargetAttraction": true,
+        "spawnOnHit": true
+    },
+    "id": "RashAttack_03",
+    "owner": {
+        "canHitOwner": false,
+        "ownerTarget": 0
+    },
+    "slashEffects": [],
+    "telegraph": {
+        "attachNodeName": "",
+        "berserkLeadFrames": 9.0,
+        "enabled": true,
+        "fallbackOffset": [
+            0.0,
+            2.0,
+            0.0
+        ],
+        "leadFrames": 12.0,
+        "lifeTime": 0.15000000596046448,
+        "localOffset": [
+            0.0,
+            0.30000001192092896,
+            0.0
+        ],
+        "particleName": "EnemyAttackWarning",
+        "particleScale": 1.0
+    },
+    "weaponHitBox": {
+        "activeEndTime": 0.18000000715255737,
+        "activeStartTime": 0.019999999552965164,
+        "enabled": true,
+        "endNodeName": "TrailEnd",
+        "hitBoxName": "Sword",
+        "radius": 26.0,
+        "startNodeName": "TrailStart"
+    }
+}

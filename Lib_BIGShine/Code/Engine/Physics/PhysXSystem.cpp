@@ -22,6 +22,7 @@ static CollisionCallback gCollisionCallback;
 static float gTimeScale = 1.0f;
 
 static PxControllerManager* gControllerManager = nullptr;
+static thread_local PhysXSystem::PreviewScene* gActivePreviewScene = nullptr;
 
 
 namespace
@@ -231,6 +232,17 @@ static PxFilterFlags PhysXFilterShader(
     return PxFilterFlag::eDEFAULT;
 }
 
+static PxScene* CreatePhysicsScene()
+{
+    PxSceneDesc desc_(gPhysics->getTolerancesScale());
+    desc_.gravity = PxVec3(0.0f, -9.8f, 0.0f);
+    desc_.cpuDispatcher = gDispatcher;
+    desc_.filterShader = PhysXFilterShader;
+    desc_.simulationEventCallback = &gCollisionCallback;
+    desc_.flags |= PxSceneFlag::eENABLE_CCD;
+    return gPhysics->createScene(desc_);
+}
+
 void PhysXSystem::Initialize()
 {
     // PhysXの基本Object、Scene、PVD、CharacterControllerManagerをまとめて初期化する。
@@ -267,16 +279,8 @@ void PhysXSystem::Initialize()
     // =============================
     // ③ Scene 作成
     // =============================
-    PxSceneDesc desc(gPhysics->getTolerancesScale());
-    desc.gravity = PxVec3(0, -9.8f, 0);
-
     gDispatcher = PxDefaultCpuDispatcherCreate(2);
-    desc.cpuDispatcher = gDispatcher;
-    desc.filterShader = PhysXFilterShader;
-    desc.simulationEventCallback = &gCollisionCallback;
-    desc.flags |= PxSceneFlag::eENABLE_CCD;
-
-    gScene = gPhysics->createScene(desc);
+    gScene = CreatePhysicsScene();
 
     // Character Controller Manager
     gControllerManager = PxCreateControllerManager(*gScene);
@@ -299,6 +303,42 @@ void PhysXSystem::Initialize()
 
     // ★ 共通デフォルトマテリアル（摩擦・反発）
     gDefaultMaterial = gPhysics->createMaterial(0.775f, 0.5f, 0.1f);
+}
+
+bool PhysXSystem::PreviewScene::Initialize()
+{
+    if (scene) return true;
+    if (!gPhysics || !gDispatcher) return false;
+
+    scene = CreatePhysicsScene();
+    if (!scene) return false;
+
+    controllers = PxCreateControllerManager(*scene);
+    if (!controllers)
+    {
+        scene->release();
+        scene = nullptr;
+        return false;
+    }
+    controllers->setOverlapRecoveryModule(true);
+    return true;
+}
+
+PhysXSystem::PreviewScene::~PreviewScene()
+{
+    if (controllers) controllers->release();
+    if (scene) scene->release();
+}
+
+PhysXSystem::PreviewScene::Scope::Scope(PreviewScene& preview_)
+    : previous(gActivePreviewScene)
+{
+    gActivePreviewScene = &preview_;
+}
+
+PhysXSystem::PreviewScene::Scope::~Scope()
+{
+    gActivePreviewScene = previous;
 }
 
 void PhysXSystem::Finalize()
@@ -333,23 +373,26 @@ void PhysXSystem::Step(float dt)
 {
     // Game側TimeScaleを反映したdeltaでPhysX Sceneを進める。
     // scaleが0のHitStop中はsimulateせず、物理状態を止める。
-    const float scaledDt_ = dt * gTimeScale;
-    if (!gScene || scaledDt_ <= 0.0f) return;
-    gScene->simulate(scaledDt_);
-    gScene->fetchResults(true);
+    auto* scene_ = GetScene();
+    const float scaledDt_ = dt * (gActivePreviewScene ? gActivePreviewScene->timeScale : gTimeScale);
+    if (!scene_ || scaledDt_ <= 0.0f) return;
+    scene_->simulate(scaledDt_);
+    scene_->fetchResults(true);
 }
 
 void PhysXSystem::SetTimeScale(float scale_)
 {
     // PhysX側では0から1の範囲だけを受け付け、逆再生や過剰加速はここで防ぐ。
-    gTimeScale = (std::max)(0.0f, (std::min)(scale_, 1.0f));
+    float& timeScale_ = gActivePreviewScene ? gActivePreviewScene->timeScale : gTimeScale;
+    timeScale_ = (std::max)(0.0f, (std::min)(scale_, 1.0f));
 }
 
 void PhysXSystem::ComputeCharacterControllerInteractions(float deltaTime_)
 {
     // CharacterController同士の重なり回復を、ColliderComponent更新前に計算する。
-    if (!gControllerManager || deltaTime_ <= 0.0f) return;
-    gControllerManager->computeInteractions(
+    auto* controllers_ = GetControllerManager();
+    if (!controllers_ || deltaTime_ <= 0.0f) return;
+    controllers_->computeInteractions(
         deltaTime_,
         &gCharacterControllerFilterCallback);
 }
@@ -364,7 +407,7 @@ PxRigidDynamic* PhysXSystem::CreateBox(const PxVec3& pos, const PxVec3& halfSize
         *mat,
         1.0f
     );
-    gScene->addActor(*box);
+    GetScene()->addActor(*box);
 
     //OutputDebugStringA("CreateBox\n");
     return box;
@@ -384,7 +427,7 @@ physx::PxRigidDynamic* PhysXSystem::CreateSphere(const physx::PxVec3& pos, float
         1.0f
     );
 
-    gScene->addActor(*sphere);
+    GetScene()->addActor(*sphere);
     return sphere;
 }
 
@@ -402,7 +445,7 @@ physx::PxRigidDynamic* PhysXSystem::CreateCapsule(const physx::PxVec3& pos, floa
         1.0f
     );
 
-    gScene->addActor(*cap);
+    GetScene()->addActor(*cap);
     return cap;
 }
 
@@ -420,7 +463,7 @@ PxRigidStatic* PhysXSystem::CreateGround(const physx::PxVec3& pos)
         *mat
     );
 
-    gScene->addActor(*ground);
+    GetScene()->addActor(*ground);
     return ground;
 }
 
@@ -445,11 +488,14 @@ physx::PxControllerBehaviorCallback* PhysXSystem::GetCharacterControllerBehavior
 }
 
 PxPhysics* PhysXSystem::GetPhysics() { return gPhysics; }
-PxScene* PhysXSystem::GetScene() { return gScene; }
+PxScene* PhysXSystem::GetScene()
+{
+    return gActivePreviewScene ? gActivePreviewScene->scene : gScene;
+}
 
 PxControllerManager* PhysXSystem::GetControllerManager()
 {
-    return gControllerManager;
+    return gActivePreviewScene ? gActivePreviewScene->controllers : gControllerManager;
 }
 
 PxConvexMesh* PhysXSystem::CreateConvexMesh(const std::vector<DirectX::XMFLOAT3>& vertices_)

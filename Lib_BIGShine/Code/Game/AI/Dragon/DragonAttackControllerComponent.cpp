@@ -296,26 +296,45 @@ void DragonAttackControllerComponent::PlayTailSweep()
         tailHitInterval);
 }
 
-void DragonAttackControllerComponent::PlaySpinSweep()
+void DragonAttackControllerComponent::PlaySpinSweep(float rotationDuration_)
 {
     if (!CanSpawnAttack()) return;
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::PlaySpinSweep");
 
+    EnsureDependencies();
+    for (const RuntimeAttack& runtime_ : runtimeAttacks)
+        if (runtime_.spinSweep) return;
+
+    const auto danger_ = std::find_if(runtimeAttacks.begin(), runtimeAttacks.end(),
+        [](const RuntimeAttack& runtime_) { return runtime_.followSpinDanger; });
+    const float radius_ = danger_ != runtimeAttacks.end() ? danger_->dangerAreaRadius : ResolveSpinSweepRadius();
+
+    const float lifeTime_ = rotationDuration_ > 0.0f ? rotationDuration_ : spinSweepLifeTime;
     SpawnAttackHit(
         "RuntimeDragonSpinSweepHit",
-        spinSweepLifeTime,
+        (std::max)(lifeTime_, 0.01f),
         false,
-        true,
-        true,
+        false,
+        false,
         spinDamage,
         spinDamageRate,
         tailFixedDamage,
         tailImpactPower,
         tailKnockBackPower,
-        spinTailRadius,
-        0.5f,
+        radius_,
+        0.0f,
         { 0.0f, 0.0f, 0.0f },
-        tailHitInterval, true);
+        0.0f, true);
+}
+
+void DragonAttackControllerComponent::StopSpinSweep()
+{
+    std::erase_if(runtimeAttacks, [this](RuntimeAttack& runtime_)
+    {
+        if (!runtime_.spinSweep && !runtime_.followSpinDanger) return false;
+        StopRuntimeAttack(runtime_);
+        return true;
+    });
 }
 
 void DragonAttackControllerComponent::PlayStamp()
@@ -453,7 +472,22 @@ void DragonAttackControllerComponent::ShowSpinSweepDangerArea()
 {
     if (!CanSpawnAttack()) return;
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::ShowSpinSweepDangerArea");
-    SpawnSpinSweepDangerArea(spinSweepLifeTime);
+    for (const RuntimeAttack& runtime_ : runtimeAttacks)
+        if (runtime_.followSpinDanger) return;
+
+    EnsureDependencies();
+    const auto attack_ = std::find_if(runtimeAttacks.begin(), runtimeAttacks.end(),
+        [](const RuntimeAttack& runtime_) { return runtime_.spinSweep; });
+    RuntimeAttack preview_{};
+    preview_.lifeTimer = spinSweepLifeTime;
+    const bool hasAttack_ = attack_ != runtimeAttacks.end();
+    RuntimeAttack& runtime_ = hasAttack_ ? *attack_ : preview_;
+    const float radius_ = hasAttack_ ? runtime_.dangerAreaRadius : ResolveSpinSweepRadius();
+    AttachDangerArea(runtime_, "RuntimeDragonSpinSweepDangerArea", { 0.0f, 0.0f, 0.0f }, radius_, 0.0f);
+    if (!runtime_.hasDangerArea) return;
+    runtime_.followSpinDanger = true;
+    ApplyDangerAreaTransform(runtime_);
+    if (!hasAttack_) runtimeAttacks.push_back(std::move(preview_));
 }
 
 void DragonAttackControllerComponent::ShowStampDangerArea()
@@ -584,32 +618,43 @@ void DragonAttackControllerComponent::UpdateRuntimeAttacks(float deltaTime_)
 
     for (RuntimeAttack& runtime_ : runtimeAttacks)
     {
-        runtime_.lifeTimer -= safeDeltaTime_;
+        if (!runtime_.spinSweepUsesAIRotation) runtime_.lifeTimer -= safeDeltaTime_;
         runtime_.dangerAreaGroundQueryTimer -= safeDeltaTime_;
         ApplyFollowTransform(runtime_);
         ApplyDangerAreaTransform(runtime_);
 
-        if (runtime_.requireTailAttackActive)
+        if (runtime_.spinSweep)
         {
-            const std::shared_ptr<DragonTailCommandIKComponent> tailIK_ = tailIK.lock();
-            const std::shared_ptr<AttackEffectHitComponent> hitComponent_ = runtime_.hitComponent.lock();
-            if (hitComponent_)
+            const auto owner_ = GetGameObject();
+            const auto ai_ = runtime_.spinSweepUsesAIRotation && owner_
+                ? owner_->GetComponent<DragonAIComponent>() : nullptr;
+            const float progress_ = runtime_.spinSweepUsesAIRotation
+                ? (ai_ ? ai_->GetSpinTailSweepProgress() : -1.0f)
+                : 1.0f - runtime_.lifeTimer / (std::max)(spinSweepLifeTime, 0.01f);
+            if (progress_ < 0.0f || !CanSpawnAttack()) runtime_.lifeTimer = 0.0f;
+
+            constexpr float HIT_START_RATE = 0.5f;
+            constexpr float HIT_END_RATE = 0.75f;
+            const bool active_ = runtime_.lifeTimer > 0.0f &&
+                progress_ >= HIT_START_RATE && progress_ < HIT_END_RATE;
+            if (const auto hitComponent_ = runtime_.hitComponent.lock())
             {
-                if (tailIK_ && tailIK_->IsAttackActive() && (!runtime_.coverTailSpan || runtime_.tailSpanResolved))
-                {
-                    // 回転攻撃は有効時間へ入った時だけ再生し、毎フレーム命中履歴を消さない。
-                    if (!runtime_.coverTailSpan || !runtime_.tailAttackPlaying) hitComponent_->Play();
-                    runtime_.tailAttackPlaying = true;
-                }
-                else
-                {
-                    hitComponent_->Stop();
-                    runtime_.tailAttackPlaying = false;
-                }
+                // 回転角が有効範囲へ入った時だけ再生し、命中履歴を維持する。
+                if (active_ && !runtime_.spinSweepHitActive) hitComponent_->Play();
+                if (!active_ && runtime_.spinSweepHitActive) hitComponent_->Stop();
+            }
+            runtime_.spinSweepHitActive = active_;
+            UpdateSpinTailTrails(runtime_, active_);
+        }
+        else if (runtime_.requireTailAttackActive)
+        {
+            const auto tailIK_ = tailIK.lock();
+            if (const auto hitComponent_ = runtime_.hitComponent.lock())
+            {
+                if (tailIK_ && tailIK_->IsAttackActive()) hitComponent_->Play();
+                else hitComponent_->Stop();
             }
         }
-        if (runtime_.coverTailSpan)
-            UpdateSpinTailTrails(runtime_, runtime_.tailAttackPlaying && runtime_.lifeTimer > 0.0f && CanSpawnAttack());
     }
 
     runtimeAttacks.erase(
@@ -661,18 +706,11 @@ std::shared_ptr<AttackEffectHitComponent> DragonAttackControllerComponent::Spawn
     float radius_,
     float halfHeight_,
     const DirectX::XMFLOAT3& localOffset_,
-    float hitInterval_, bool coverTailSpan_)
+    float hitInterval_, bool spinSweep_)
 {
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::SpawnAttackHit");
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_) return nullptr;
-
-    std::vector<DirectX::XMFLOAT3> tailPositions_;
-    if (coverTailSpan_)
-    {
-        const auto tailIK_ = tailIK.lock();
-        if (!tailIK_ || !tailIK_->GetTailWorldPositions(tailPositions_)) return nullptr;
-    }
 
     std::shared_ptr<GameObject> attackObject_ = owner_->GetManager().Create(objectName_);
     if (!attackObject_) return nullptr;
@@ -686,7 +724,7 @@ std::shared_ptr<AttackEffectHitComponent> DragonAttackControllerComponent::Spawn
 
     AttackEffectHitShapeTemplate shape_{};
     shape_.hitBoxName = objectName_ + "_Shape";
-    shape_.shape = ATTACK_HIT_SHAPE::CAPSULE;
+    shape_.shape = spinSweep_ ? ATTACK_HIT_SHAPE::SPHERE : ATTACK_HIT_SHAPE::CAPSULE;
     shape_.localOffset = localOffset_;
     shape_.radius = (std::max)(radius_, 0.01f);
     shape_.halfHeight = (std::max)(halfHeight_, 0.0f);
@@ -699,7 +737,7 @@ std::shared_ptr<AttackEffectHitComponent> DragonAttackControllerComponent::Spawn
     hitComponent_->SetOwner(owner_.get());
     hitComponent_->SetAttackInstanceId(attackInstanceId_);
     hitComponent_->SetHitGroupId(attackInstanceId_);
-    hitComponent_->SetEffectType(ATTACK_EFFECT_TYPE::BREATH);
+    hitComponent_->SetEffectType(spinSweep_ ? ATTACK_EFFECT_TYPE::INSTANT_AREA : ATTACK_EFFECT_TYPE::BREATH);
     hitComponent_->SetLifeTime(lifeTime_);
     hitComponent_->SetDestroyOnLifeEnd(false);
     hitComponent_->SetDamage(damage_);
@@ -718,15 +756,7 @@ std::shared_ptr<AttackEffectHitComponent> DragonAttackControllerComponent::Spawn
     hitComponent_->feedback.minDistance = 8.0f;
     hitComponent_->feedback.maxDistance = 100.0f;
     hitComponent_->SetAllowMultiHit(hitInterval_ > 0.0f);
-    if (coverTailSpan_)
-    {
-        // 同じInstanceとGroupの判定を各節へ配置し、重なった箇所での多重命中を防ぐ。
-        std::vector<AttackEffectHitShapeTemplate> shapes_(tailPositions_.size() - 1, shape_);
-        for (std::size_t index_ = 0; index_ < shapes_.size(); ++index_)
-            shapes_[index_].hitBoxName = objectName_ + "_Segment" + std::to_string(index_);
-        hitComponent_->SetHitShapes(shapes_);
-    }
-    else hitComponent_->SetHitShapes({ shape_ });
+    hitComponent_->SetHitShapes({ shape_ });
 
     RuntimeAttack runtime_{};
     runtime_.object = attackObject_;
@@ -734,14 +764,16 @@ std::shared_ptr<AttackEffectHitComponent> DragonAttackControllerComponent::Spawn
     runtime_.lifeTimer = lifeTime_;
     runtime_.followMouth = followMouth_;
     runtime_.followTail = followTail_;
-    runtime_.coverTailSpan = coverTailSpan_;
+    runtime_.spinSweep = spinSweep_;
+    if (spinSweep_)
+    {
+        const auto ai_ = owner_->GetComponent<DragonAIComponent>();
+        runtime_.spinSweepUsesAIRotation = ai_ && ai_->GetSpinTailSweepProgress() >= 0.0f;
+        runtime_.dangerAreaRadius = shape_.radius;
+    }
     runtime_.requireTailAttackActive = requireTailAttackActive_;
     ApplyFollowTransform(runtime_);
-    if (showDangerAreaOnAttackStart && coverTailSpan_)
-    {
-        SpawnSpinSweepDangerArea(lifeTime_, true);
-    }
-    else if (showDangerAreaOnAttackStart)
+    if (showDangerAreaOnAttackStart && !spinSweep_)
     {
         AttachDangerArea(
             runtime_,
@@ -751,9 +783,10 @@ std::shared_ptr<AttackEffectHitComponent> DragonAttackControllerComponent::Spawn
             halfHeight_ + dangerAreaLengthPadding);
         ApplyDangerAreaTransform(runtime_);
     }
-    if (coverTailSpan_) hitComponent_->Stop();
+    if (spinSweep_) hitComponent_->Stop();
     else hitComponent_->Play();
-    runtimeAttacks.push_back(runtime_);
+    runtimeAttacks.push_back(std::move(runtime_));
+    if (spinSweep_ && showDangerAreaOnAttackStart) ShowSpinSweepDangerArea();
 
     return hitComponent_;
 }
@@ -761,13 +794,6 @@ std::shared_ptr<AttackEffectHitComponent> DragonAttackControllerComponent::Spawn
 void DragonAttackControllerComponent::ApplyFollowTransform(RuntimeAttack& runtime_)
 {
     if (!runtime_.object || !runtime_.object->transform) return;
-    if (runtime_.coverTailSpan)
-    {
-        // 尻尾座標を取得できない間は、原点へ判定を出さない。
-        runtime_.tailSpanResolved = ApplyTailSpanTransform(runtime_);
-        return;
-    }
-
     DirectX::XMFLOAT3 position_{ 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 forward_{ 0.0f, 0.0f, 1.0f };
     bool resolved_ = false;
@@ -1578,19 +1604,6 @@ void DragonAttackControllerComponent::SpawnBiteVFX()
     effects_.RegisterAttackEffectOwner(effects_.SpawnMeshVFX(request_), owner_);
 }
 
-// 各節のカプセルを更新し、根元と先端の直線から外れた尻尾も覆う。
-bool DragonAttackControllerComponent::ApplyTailSpanTransform(RuntimeAttack& runtime_)
-{
-    BS_PROFILE_SCOPE("DragonAttackControllerComponent::ApplyTailSpanTransform");
-    const auto tailIK_ = tailIK.lock();
-    const auto hitComponent_ = runtime_.hitComponent.lock();
-    std::vector<DirectX::XMFLOAT3> positions_;
-    if (!hitComponent_ || !tailIK_ || !tailIK_->GetTailWorldPositions(positions_)) return false;
-    for (std::size_t index_ = 0; index_ + 1 < positions_.size(); ++index_)
-        if (!hitComponent_->SetCapsuleWorldSpan(index_, positions_[index_], positions_[index_ + 1])) return false;
-    return true;
-}
-
 void DragonAttackControllerComponent::UpdateSpinTailTrails(RuntimeAttack& runtime_, bool emitting_)
 {
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::UpdateSpinTailTrails");
@@ -1652,25 +1665,14 @@ void DragonAttackControllerComponent::UpdateSpinTailTrails(RuntimeAttack& runtim
     }
 }
 
-void DragonAttackControllerComponent::SpawnSpinSweepDangerArea(float lifeTime_, bool reuseExisting_)
+float DragonAttackControllerComponent::ResolveSpinSweepRadius() const
 {
-    BS_PROFILE_SCOPE("DragonAttackControllerComponent::SpawnSpinSweepDangerArea");
-    if (reuseExisting_)
-    {
-        // 攻撃開始時は円形の予告を再生成せず、判定寿命に合わせて表示を延長する。
-        for (RuntimeAttack& runtime_ : runtimeAttacks)
-        {
-            if (!runtime_.followSpinDanger) continue;
-            runtime_.lifeTimer = lifeTime_;
-            return;
-        }
-    }
-    EnsureDependencies();
-    const auto owner_ = GetGameObject();
+    const float padding_ = (std::max)(spinTailRadius, 0.01f);
+    const auto owner_ = gameObject.lock();
     const auto tailIK_ = tailIK.lock();
     std::vector<DirectX::XMFLOAT3> positions_;
     if (!owner_ || !owner_->transform || !tailIK_ ||
-        !tailIK_->GetTailWorldPositions(positions_)) return;
+        !tailIK_->GetTailWorldPositions(positions_)) return padding_;
 
     const DirectX::XMFLOAT3 center_ = owner_->transform->GetWorldPosition();
     const auto& root_ = positions_.front();
@@ -1682,15 +1684,7 @@ void DragonAttackControllerComponent::SpawnSpinSweepDangerArea(float lifeTime_, 
         tailLength_ += DirectX::XMVectorGetX(DirectX::XMVector3Length(
             DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&positions_[index_ + 1]), DirectX::XMLoadFloat3(&positions_[index_]))));
 
-    RuntimeAttack runtime_{};
-    runtime_.lifeTimer = lifeTime_;
-    runtime_.followSpinDanger = true;
-    // 回転方向に依存しない円として表示し、本体の旋回中も危険範囲を読み取れるようにする。
-    runtime_.dangerAreaFixedForward = { 0.0f, 0.0f, 1.0f };
-    AttachDangerArea(runtime_, "RuntimeDragonSpinSweepDangerArea", { 0.0f, 0.0f, 0.0f },
-        rootDistance_ + tailLength_ + (std::max)(spinTailRadius, 0.01f), 0.0f);
-    ApplyDangerAreaTransform(runtime_);
-    if (runtime_.hasDangerArea) runtimeAttacks.push_back(runtime_);
+    return rootDistance_ + tailLength_ + padding_;
 }
 
 void DragonAttackControllerComponent::SpawnStampHit()
@@ -1733,7 +1727,7 @@ void DragonAttackControllerComponent::SpawnStampHit()
 
     AttackEffectHitShapeTemplate shape_{};
     shape_.hitBoxName = "RuntimeDragonStampHit_Sphere";
-    shape_.shape = ATTACK_HIT_SHAPE::SPHERE;
+    shape_.shape = ATTACK_HIT_SHAPE::SPHERE;;
     shape_.radius = (std::max)(stampRadius, 0.01f);
     shape_.activeStartTime = 0.0f;
     shape_.activeEndTime = stampLifeTime;
@@ -1785,6 +1779,8 @@ void DragonAttackControllerComponent::SpawnStampHit()
     }
     runtimeAttacks.push_back(runtime_);
 
+    owner_->GetManager().GetEffectManager().SpawnGroundMark(
+        GroundMarkShape::IMPACT, centerPosition_, stampRadius, stampRadius);
     SpawnStampRockVFX(centerPosition_);
 }
 

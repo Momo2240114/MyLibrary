@@ -1946,7 +1946,8 @@ void ModelRenderSystem::RenderDecals(const RenderContext& rc)
 		cb.decalDissolveEdgeColor = decal.dissolveEdgeColor;
 		cb.decalBlendMode = decal.blendMode;
 		cb.decalUseDissolve = decal.useDissolve;
-		cb.decalPadding = { 0.0f, 0.0f };
+		cb.decalGroundSurface = decal.groundSurface ? 1u : 0u;
+		cb.decalPadding = 0.0f;
 
 		dc->UpdateSubresource(decalConstantBuffer.Get(), 0, nullptr, &cb, 0, 0);
 		dc->VSSetConstantBuffers(10, 1, decalConstantBuffer.GetAddressOf());
@@ -1973,7 +1974,9 @@ void ModelRenderSystem::RenderDecals(const RenderContext& rc)
 
 		// --- 2回目：表面描画 (実際のテクスチャ描画) ---
 		// ★テクスチャのアルファを有効にするため Transparency (通常合成) に変更
-		dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Transparency), nullptr, 0xFFFFFFFF);
+		const auto blend_ = decal.groundSurface && decal.emissiveColorAndIntensity.w > 0.0f
+			? BlendState::AdditiveKeepAlpha : BlendState::Transparency;
+		dc->OMSetBlendState(rc.renderState->GetBlendState(blend_), nullptr, 0xFFFFFFFF);
 		decalShader->usePixelShader = true;
 		decalShader->Begin(rc);
 		dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullFront));

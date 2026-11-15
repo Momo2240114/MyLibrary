@@ -51,7 +51,7 @@
     },
     "hitEffect": {
         "spawnOnHit": true,
-        "hitParticleAssetPath": "HitFire",
+        "hitParticleAssetPath": "LargeHitSparks_Weak",
         "hitParticleEmitterName": "",
         "hitParticleLifeTime": 0.35,
         "hitParticleNormalOffset": 0.05,

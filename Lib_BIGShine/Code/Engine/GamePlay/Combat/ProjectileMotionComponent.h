@@ -24,6 +24,8 @@ public:
         float gravity_,
         float maxSpeed_);
 
+    void SetFireGroundMarkRadius(float radius_) { fireGroundMarkRadius = radius_; }
+
     // 通常の直進弾は維持し、必要な弾だけ待機後の制限付き追尾を設定する。
     void ConfigureHoming(const std::shared_ptr<GameObject>& target_, const std::shared_ptr<GameObject>& attacker_,
         float waitTime_, float turnDegreesPerSecond_, float collisionRadius_);
@@ -61,4 +63,5 @@ private:
     float acceleration = 0.0f;
     float gravity = 0.0f;
     float maxSpeed = 0.0f;
+    float fireGroundMarkRadius = 0.0f;
 };

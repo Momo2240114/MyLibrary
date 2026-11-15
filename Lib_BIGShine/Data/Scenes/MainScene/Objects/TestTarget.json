@@ -169,12 +169,14 @@
                 "CommonReactionActionNames": [],
                 "CurrentHealth": 0.0,
                 "DamageActionName": "",
+                "DamageFlashDuration": 0.18000000715255737,
+                "DamageFlashEnabled": false,
                 "HeavyImpactThreshold": 50.0,
                 "HitStopLayerMask": 3,
                 "MaxHealth": 100.0,
                 "MediumImpactThreshold": 20.0,
                 "OverlayDuration": 0.11999999731779099,
-                "OverlayStartActionName": "MaterialOverlay_Start",
+                "OverlayStartActionName": "",
                 "OverlayStopActionName": "MaterialOverlay_Stop",
                 "ReactionActionName": "",
                 "ReactionActionNamesByKind": {
@@ -7921,6 +7923,48 @@
             "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
             "TypeName": "AnimationGraphBridgeComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "ContactDistance": 0.3499999940395355,
+                "ContactEnabled": true,
+                "EffectCooldown": 0.2199999988079071,
+                "Feet": [
+                    {
+                        "BoneName": "PlainsDragon_-L-Hand",
+                        "EffectScale": 1.0,
+                        "Enabled": true,
+                        "ParticleEffect": "Data/Particle/DragonFootDust.json"
+                    },
+                    {
+                        "BoneName": "PlainsDragon_-R-Hand",
+                        "EffectScale": 1.0,
+                        "Enabled": true,
+                        "ParticleEffect": "Data/Particle/DragonFootDust.json"
+                    },
+                    {
+                        "BoneName": "PlainsDragon_-L-Foot",
+                        "EffectScale": 1.0,
+                        "Enabled": true,
+                        "ParticleEffect": "Data/Particle/DragonFootDust.json"
+                    },
+                    {
+                        "BoneName": "PlainsDragon_-R-Foot",
+                        "EffectScale": 1.0,
+                        "Enabled": true,
+                        "ParticleEffect": "Data/Particle/DragonFootDust.json"
+                    }
+                ],
+                "MinimumImpactSpeed": 1.0,
+                "ReleaseDistance": 0.6200000047683716
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 100,
+            "RequiredForSceneStart": false,
+            "TypeName": "FootContactComponent",
             "UpdateEnabled": true,
             "UpdatePriority": 0
         }

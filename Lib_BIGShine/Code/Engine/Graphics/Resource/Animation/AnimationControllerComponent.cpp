@@ -244,6 +244,48 @@ void AnimationControllerComponent::Start()
 
 
 }
+void AnimationControllerComponent::PrepareGraphEditor()
+{
+    // 停止中も、ゲームのStartやUpdateを通さずに編集対象を読み込む。
+    LoadPendingGraphAsset();
+    EnsureNodeEditorContext();
+}
+
+void AnimationControllerComponent::LoadPendingGraphAsset()
+{
+    if (!pendingGraphAssetLoad) return;
+    BS_PROFILE_SCOPE("Animation::PendingGraphAssetLoad");
+
+    pendingGraphAssetLoad = false;
+
+    if (!pendingGraphAssetPath.empty())
+    {
+        // 開幕Actionで選んだStateは、遅延Graph読み込みによるState再構築後にも引き継ぐ。
+        const auto presentationState_ = (presentationControlled || skillControlled) && currentState
+            ? std::make_unique<AnimState>(*currentState) : nullptr;
+        {
+            BS_PROFILE_SCOPE("Animation::LoadGraphAsset");
+            LoadGraphAsset(pendingGraphAssetPath);
+        }
+
+        {
+            BS_PROFILE_SCOPE("Animation::ApplyPendingStateAssets");
+            ApplyPendingStateAssets();
+        }
+
+        {
+            BS_PROFILE_SCOPE("Animation::TryEnterStartState");
+            if (presentationState_)
+            {
+                AddState(presentationState_->name, presentationState_->animationIndex);
+                *states.at(presentationState_->name) = *presentationState_;
+                ChangeState(presentationState_->name, 0.0f);
+            }
+            else TryEnterStartState();
+        }
+    }
+}
+
 void AnimationControllerComponent::Update(float deltaTime_)
 {
     BS_PROFILE_SCOPE("AnimationControllerComponent::Update");
@@ -314,39 +356,7 @@ void AnimationControllerComponent::Update(float deltaTime_)
         curveComponent = owner_ ? owner_->GetComponent<CurveComponent>().get() : nullptr;
     }
 
-    if (pendingGraphAssetLoad)
-    {
-        BS_PROFILE_SCOPE("Animation::PendingGraphAssetLoad");
-
-        pendingGraphAssetLoad = false;
-
-        if (!pendingGraphAssetPath.empty())
-        {
-            // 開幕Actionで選んだStateは、遅延Graph読み込みによるState再構築後にも引き継ぐ。
-            const auto presentationState_ = (presentationControlled || skillControlled) && currentState
-                ? std::make_unique<AnimState>(*currentState) : nullptr;
-            {
-                BS_PROFILE_SCOPE("Animation::LoadGraphAsset");
-                LoadGraphAsset(pendingGraphAssetPath);
-            }
-
-            {
-                BS_PROFILE_SCOPE("Animation::ApplyPendingStateAssets");
-                ApplyPendingStateAssets();
-            }
-
-            {
-                BS_PROFILE_SCOPE("Animation::TryEnterStartState");
-                if (presentationState_)
-                {
-                    AddState(presentationState_->name, presentationState_->animationIndex);
-                    *states.at(presentationState_->name) = *presentationState_;
-                    ChangeState(presentationState_->name, 0.0f);
-                }
-                else TryEnterStartState();
-            }
-        }
-    }
+    LoadPendingGraphAsset();
 
     ProcessBlackboardGraphRequests();
 
@@ -1131,6 +1141,7 @@ bool AnimationControllerComponent::EvaluateCondition(const AnimCondition& condit
         float animationDuration_ = animator.GetCurrentSampleDuration();
         if (animationDuration_ <= 0.0001f && state_->type == AnimStateType::Single)
         {
+            if (!modelComponent || !modelComponent->IsModelReady()) return false;
             animationDuration_ = modelComponent->GetAnimationDuration(state_->animationIndex);
         }
         return animator.GetCurrentFadeTime() >= animationDuration_;

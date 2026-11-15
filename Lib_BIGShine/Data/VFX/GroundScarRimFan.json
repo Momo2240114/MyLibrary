@@ -1,0 +1,409 @@
+{
+    "AssetType": "MeshVFX",
+    "AssetVersion": 1,
+    "MeshVFX": {
+        "IsPlaying": false,
+        "Parts": [
+            {
+                "ModelPath": "Data/Model/VFX/SM_Free_Magic_Stone1.glb",
+                "MeshIndex": 0,
+                "RenderEnabled": true,
+                "BaseTexturePath": "Data/Model/Stage/Rock/T_Rock_2_diffuseOriginal.png",
+                "Color": [
+                    0.45,
+                    0.34,
+                    0.26,
+                    1.0
+                ],
+                "Alpha": 1.0,
+                "AnimateAlpha": true,
+                "AlphaStart": 1.0,
+                "AlphaEnd": 0.0,
+                "Position": [
+                    -0.22,
+                    -0.45,
+                    -0.57
+                ],
+                "Rotation": [
+                    -12.0,
+                    0.0,
+                    -9.0
+                ],
+                "Scale": [
+                    0.24,
+                    0.7,
+                    0.29000000000000004
+                ],
+                "Duration": 8.0,
+                "Loop": false,
+                "BlendMode": 0,
+                "EmissiveStrength": 0.0,
+                "BaseUVSpeed": [
+                    0.0,
+                    0.0
+                ],
+                "UseMaterialBaseTexture": false
+            },
+            {
+                "ModelPath": "Data/Model/VFX/SM_Free_Magic_Stone1.glb",
+                "MeshIndex": 0,
+                "RenderEnabled": true,
+                "BaseTexturePath": "Data/Model/Stage/Rock/T_Rock_2_diffuseOriginal.png",
+                "Color": [
+                    0.45,
+                    0.34,
+                    0.26,
+                    1.0
+                ],
+                "Alpha": 1.0,
+                "AnimateAlpha": true,
+                "AlphaStart": 1.0,
+                "AlphaEnd": 0.0,
+                "Position": [
+                    0.22,
+                    -0.45,
+                    -0.57
+                ],
+                "Rotation": [
+                    -4.0,
+                    71.0,
+                    0.0
+                ],
+                "Scale": [
+                    0.3,
+                    0.8099999999999999,
+                    0.36
+                ],
+                "Duration": 8.0,
+                "Loop": false,
+                "BlendMode": 0,
+                "EmissiveStrength": 0.0,
+                "BaseUVSpeed": [
+                    0.0,
+                    0.0
+                ],
+                "UseMaterialBaseTexture": false
+            },
+            {
+                "ModelPath": "Data/Model/VFX/SM_Free_Magic_Stone1.glb",
+                "MeshIndex": 0,
+                "RenderEnabled": true,
+                "BaseTexturePath": "Data/Model/Stage/Rock/T_Rock_2_diffuseOriginal.png",
+                "Color": [
+                    0.45,
+                    0.34,
+                    0.26,
+                    1.0
+                ],
+                "Alpha": 1.0,
+                "AnimateAlpha": true,
+                "AlphaStart": 1.0,
+                "AlphaEnd": 0.0,
+                "Position": [
+                    -0.46,
+                    -0.45,
+                    -0.28
+                ],
+                "Rotation": [
+                    4.0,
+                    142.0,
+                    9.0
+                ],
+                "Scale": [
+                    0.36,
+                    0.9199999999999999,
+                    0.22
+                ],
+                "Duration": 8.0,
+                "Loop": false,
+                "BlendMode": 0,
+                "EmissiveStrength": 0.0,
+                "BaseUVSpeed": [
+                    0.0,
+                    0.0
+                ],
+                "UseMaterialBaseTexture": false
+            },
+            {
+                "ModelPath": "Data/Model/VFX/SM_Free_Magic_Stone1.glb",
+                "MeshIndex": 0,
+                "RenderEnabled": true,
+                "BaseTexturePath": "Data/Model/Stage/Rock/T_Rock_2_diffuseOriginal.png",
+                "Color": [
+                    0.45,
+                    0.34,
+                    0.26,
+                    1.0
+                ],
+                "Alpha": 1.0,
+                "AnimateAlpha": true,
+                "AlphaStart": 1.0,
+                "AlphaEnd": 0.0,
+                "Position": [
+                    0.46,
+                    -0.45,
+                    -0.28
+                ],
+                "Rotation": [
+                    12.0,
+                    213.0,
+                    -9.0
+                ],
+                "Scale": [
+                    0.24,
+                    1.03,
+                    0.29000000000000004
+                ],
+                "Duration": 8.0,
+                "Loop": false,
+                "BlendMode": 0,
+                "EmissiveStrength": 0.0,
+                "BaseUVSpeed": [
+                    0.0,
+                    0.0
+                ],
+                "UseMaterialBaseTexture": false
+            },
+            {
+                "ModelPath": "Data/Model/VFX/SM_Free_Magic_Stone1.glb",
+                "MeshIndex": 0,
+                "RenderEnabled": true,
+                "BaseTexturePath": "Data/Model/Stage/Rock/T_Rock_2_diffuseOriginal.png",
+                "Color": [
+                    0.45,
+                    0.34,
+                    0.26,
+                    1.0
+                ],
+                "Alpha": 1.0,
+                "AnimateAlpha": true,
+                "AlphaStart": 1.0,
+                "AlphaEnd": 0.0,
+                "Position": [
+                    -0.69,
+                    -0.45,
+                    0.05
+                ],
+                "Rotation": [
+                    -12.0,
+                    284.0,
+                    0.0
+                ],
+                "Scale": [
+                    0.3,
+                    0.7,
+                    0.36
+                ],
+                "Duration": 8.0,
+                "Loop": false,
+                "BlendMode": 0,
+                "EmissiveStrength": 0.0,
+                "BaseUVSpeed": [
+                    0.0,
+                    0.0
+                ],
+                "UseMaterialBaseTexture": false
+            },
+            {
+                "ModelPath": "Data/Model/VFX/SM_Free_Magic_Stone1.glb",
+                "MeshIndex": 0,
+                "RenderEnabled": true,
+                "BaseTexturePath": "Data/Model/Stage/Rock/T_Rock_2_diffuseOriginal.png",
+                "Color": [
+                    0.45,
+                    0.34,
+                    0.26,
+                    1.0
+                ],
+                "Alpha": 1.0,
+                "AnimateAlpha": true,
+                "AlphaStart": 1.0,
+                "AlphaEnd": 0.0,
+                "Position": [
+                    0.69,
+                    -0.45,
+                    0.05
+                ],
+                "Rotation": [
+                    -4.0,
+                    355.0,
+                    9.0
+                ],
+                "Scale": [
+                    0.36,
+                    0.8099999999999999,
+                    0.22
+                ],
+                "Duration": 8.0,
+                "Loop": false,
+                "BlendMode": 0,
+                "EmissiveStrength": 0.0,
+                "BaseUVSpeed": [
+                    0.0,
+                    0.0
+                ],
+                "UseMaterialBaseTexture": false
+            },
+            {
+                "ModelPath": "Data/Model/VFX/SM_Free_Magic_Stone1.glb",
+                "MeshIndex": 0,
+                "RenderEnabled": true,
+                "BaseTexturePath": "Data/Model/Stage/Rock/T_Rock_2_diffuseOriginal.png",
+                "Color": [
+                    0.45,
+                    0.34,
+                    0.26,
+                    1.0
+                ],
+                "Alpha": 1.0,
+                "AnimateAlpha": true,
+                "AlphaStart": 1.0,
+                "AlphaEnd": 0.0,
+                "Position": [
+                    -0.57,
+                    -0.45,
+                    0.48
+                ],
+                "Rotation": [
+                    4.0,
+                    66.0,
+                    -9.0
+                ],
+                "Scale": [
+                    0.24,
+                    0.9199999999999999,
+                    0.29000000000000004
+                ],
+                "Duration": 8.0,
+                "Loop": false,
+                "BlendMode": 0,
+                "EmissiveStrength": 0.0,
+                "BaseUVSpeed": [
+                    0.0,
+                    0.0
+                ],
+                "UseMaterialBaseTexture": false
+            },
+            {
+                "ModelPath": "Data/Model/VFX/SM_Free_Magic_Stone1.glb",
+                "MeshIndex": 0,
+                "RenderEnabled": true,
+                "BaseTexturePath": "Data/Model/Stage/Rock/T_Rock_2_diffuseOriginal.png",
+                "Color": [
+                    0.45,
+                    0.34,
+                    0.26,
+                    1.0
+                ],
+                "Alpha": 1.0,
+                "AnimateAlpha": true,
+                "AlphaStart": 1.0,
+                "AlphaEnd": 0.0,
+                "Position": [
+                    0.57,
+                    -0.45,
+                    0.48
+                ],
+                "Rotation": [
+                    12.0,
+                    137.0,
+                    0.0
+                ],
+                "Scale": [
+                    0.3,
+                    1.03,
+                    0.36
+                ],
+                "Duration": 8.0,
+                "Loop": false,
+                "BlendMode": 0,
+                "EmissiveStrength": 0.0,
+                "BaseUVSpeed": [
+                    0.0,
+                    0.0
+                ],
+                "UseMaterialBaseTexture": false
+            },
+            {
+                "ModelPath": "Data/Model/VFX/SM_Free_Magic_Stone1.glb",
+                "MeshIndex": 0,
+                "RenderEnabled": true,
+                "BaseTexturePath": "Data/Model/Stage/Rock/T_Rock_2_diffuseOriginal.png",
+                "Color": [
+                    0.45,
+                    0.34,
+                    0.26,
+                    1.0
+                ],
+                "Alpha": 1.0,
+                "AnimateAlpha": true,
+                "AlphaStart": 1.0,
+                "AlphaEnd": 0.0,
+                "Position": [
+                    -0.25,
+                    -0.45,
+                    0.67
+                ],
+                "Rotation": [
+                    -12.0,
+                    208.0,
+                    9.0
+                ],
+                "Scale": [
+                    0.36,
+                    0.7,
+                    0.22
+                ],
+                "Duration": 8.0,
+                "Loop": false,
+                "BlendMode": 0,
+                "EmissiveStrength": 0.0,
+                "BaseUVSpeed": [
+                    0.0,
+                    0.0
+                ],
+                "UseMaterialBaseTexture": false
+            },
+            {
+                "ModelPath": "Data/Model/VFX/SM_Free_Magic_Stone1.glb",
+                "MeshIndex": 0,
+                "RenderEnabled": true,
+                "BaseTexturePath": "Data/Model/Stage/Rock/T_Rock_2_diffuseOriginal.png",
+                "Color": [
+                    0.45,
+                    0.34,
+                    0.26,
+                    1.0
+                ],
+                "Alpha": 1.0,
+                "AnimateAlpha": true,
+                "AlphaStart": 1.0,
+                "AlphaEnd": 0.0,
+                "Position": [
+                    0.23,
+                    -0.45,
+                    0.68
+                ],
+                "Rotation": [
+                    -4.0,
+                    279.0,
+                    -9.0
+                ],
+                "Scale": [
+                    0.24,
+                    0.8099999999999999,
+                    0.29000000000000004
+                ],
+                "Duration": 8.0,
+                "Loop": false,
+                "BlendMode": 0,
+                "EmissiveStrength": 0.0,
+                "BaseUVSpeed": [
+                    0.0,
+                    0.0
+                ],
+                "UseMaterialBaseTexture": false
+            }
+        ]
+    }
+}

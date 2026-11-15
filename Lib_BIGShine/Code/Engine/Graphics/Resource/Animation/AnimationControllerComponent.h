@@ -31,6 +31,7 @@ public:
     void SetSequencerWindowVisible(bool visible_) { showSequencerWindow = visible_; }
     bool IsSequencerWindowVisible() const { return showSequencerWindow; }
     // エディタ用表示関数
+    void PrepareGraphEditor();
     void OnGuiNodeEditor();
     void DrawNodeEditorContent(ANIM_GRAPH_CONNECTION_MODE connectionMode_ = ANIM_GRAPH_CONNECTION_MODE::LEGACY_TWO_PIN);
     void DrawTransitionInspectorContent();
@@ -110,6 +111,7 @@ private:
     bool LoadStateAsset(const std::string& assetName_);
     std::string BuildDefaultStateAssetPath(const std::string& stateName_) const;
     void ApplyPendingStateAssets();
+    void LoadPendingGraphAsset();
     void RegisterStateAction(const std::string& stateName_);
     void EnsureGraphNodeForState(const std::string& stateName_);
     void EnsureNodeEditorContext();

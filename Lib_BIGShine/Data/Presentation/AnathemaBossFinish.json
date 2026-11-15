@@ -1,171 +1,294 @@
 {
-    "Version": 2,
     "Anchor": [
         0.0,
         -0.12,
         0.0
     ],
-    "Aspect": 1.7777778,
-    "HitStop": 0.0,
-    "ImpactHold": 0.0,
-    "BlackoutEnd": 0.0,
-    "CounterStart": 0.0,
-    "CaptureTime": 6.8,
-    "HoldTime": 1.3,
-    "PromptDelay": 2.8,
-    "ReturnFade": 0.65,
-    "Camera": {
-        "Position": [
-            5,
-            2.8,
-            -6
-        ],
-        "Focus": [
-            0,
-            0.85,
-            0.1
-        ],
-        "Fov": 43.0,
-        "Roll": 0,
-        "Shake": 0,
-        "ImpactShake": 0.12,
-        "ImpactShakeDuration": 0.18,
-        "ImpactRoll": 0.8,
-        "ImpactFovKick": 1.5
-    },
-    "Player": {
-        "Object": "PlayerModel",
-        "StateAsset": "Data/Animation/StateData/Player/States/Run_Attack_01_Seq.json",
-        "Position": [
-            0,
-            0,
-            -3.6
-        ],
-        "EndPosition": [
-            0,
-            0,
-            -0.9
-        ],
-        "Yaw": 0,
-        "PoseTime": 2.0666668,
-        "WindupTime": 0.35,
-        "WindupSpeed": 0.22,
-        "StrikeSpeed": 1.8,
-        "HitPoseTime": 0.35,
-        "WeaponObject": "Weapon",
-        "BladeStartNode": "TrailStart",
-        "BladeEndNode": "TrailEnd",
-        "Animation": "Run_Attack_01_Seq_0",
-        "ApproachTime": 0.55
-    },
-    "Boss": {
-        "Object": "HumanBoss",
-        "StateAsset": "Data/Animation/StateData/HumanBoss/States/HumanBossBerserkDownLoop.json",
-        "Position": [
-            0,
-            0,
-            0.9
-        ],
-        "Yaw": 180,
-        "PoseTime": 0.8,
-        "WindupPoseTime": 0.18,
-        "HitNode": "spine_02",
-        "HitRadius": 0.65,
-        "ReactionAnimation": "Knock_Down_Combat_Loop_Seq",
-        "ReactionSpeed": 1.0,
-        "ReactionPoseTime": 1.8,
-        "KeepPoseAnimation": true,
-        "Animation": "Knock_Down_Loop_Seq",
-        "Loop": true,
-        "ExecutionDistance": 1.8
-    },
-    "Equipment": [
-        "Weapon",
-        "Shield",
-        "HumanBossWeapon",
-        "HumanBossShield"
-    ],
+    "Aspect": 1.7777777910232544,
+    "AssetType": "BossFinishCinematic",
+    "AssetVersion": 1,
     "Background": [
         0.009,
         0.003,
         0.018,
         1.0
     ],
-    "ImageTint": [
-        1,
-        1,
-        1,
-        1
-    ],
-    "ZoomStart": 1.0,
-    "ZoomEnd": 1.0,
-    "ClearText": "討伐完了",
-    "PromptText": "ボタンを押してタイトルへ",
+    "BlackoutEnd": 0.6499999761581421,
+    "Boss": {
+        "HitNode": "spine_02",
+        "HitRadius": 0.65,
+        "KeepPoseAnimation": true,
+        "Object": "HumanBoss",
+        "PoseTime": 0.8,
+        "Position": [
+            0.3,
+            0.0,
+            1.6
+        ],
+        "ReactionAnimation": "Knock_Down_Combat_Loop_Seq",
+        "ReactionPoseTime": 1.8,
+        "ReactionSpeed": 1.0,
+        "StateAsset": "Data/Animation/StateData/HumanBoss/States/HumanBossBerserkDownLoop.json",
+        "WindupPoseTime": 0.18,
+        "Yaw": 180.0
+    },
+    "Camera": {
+        "Focus": [
+            0.0,
+            1.5,
+            0.6
+        ],
+        "Fov": 43.0,
+        "ImpactFovKick": 5.0,
+        "ImpactRoll": 3.5,
+        "ImpactShake": 0.44,
+        "ImpactShakeDuration": 0.18,
+        "Position": [
+            6.6,
+            3.2,
+            -8.5
+        ],
+        "Roll": -5.0,
+        "Shake": 0.12
+    },
+    "CaptureTime": 4.25,
     "ClearPosition": [
         0.5,
         0.76
     ],
+    "ClearText": "討伐完了",
+    "ConfirmAction": "UI.MenuConfirm",
+    "CounterStart": 2.799999952316284,
+    "Effects": [
+        {
+            "Anchor": "Impact",
+            "Asset": "Data/Particle/AnathemaFinishMudBurst.json",
+            "Color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "Emission": 1.0,
+            "Kind": "Particle",
+            "Offset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "PoseTime": 0.8,
+            "Position": [
+                0.3,
+                1.6,
+                1.6
+            ],
+            "RequiresImpact": true,
+            "Rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "Scale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "Start": 0.0,
+            "Stop": 0.85,
+            "TimeAnchor": "Impact"
+        },
+        {
+            "Anchor": "Boss",
+            "Asset": "Data/Particle/AnathemaFinishMudSlough.json",
+            "Color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "Emission": 1.0,
+            "Kind": "Particle",
+            "Node": "spine_02",
+            "Offset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "PoseTime": 1.1,
+            "Position": [
+                0.3,
+                1.1,
+                1.6
+            ],
+            "RequiresImpact": true,
+            "Rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "Scale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "Start": 0.08,
+            "Stop": 1.25,
+            "TimeAnchor": "Impact"
+        },
+        {
+            "Anchor": "Boss",
+            "Asset": "Data/VFX/TransitionMudPool.json",
+            "Color": [
+                0.08,
+                0.025,
+                0.11,
+                1.0
+            ],
+            "Emission": 1.0,
+            "Kind": "Mesh",
+            "Offset": [
+                0.0,
+                0.05,
+                0.0
+            ],
+            "PoseTime": 2.5,
+            "Position": [
+                0.3,
+                0.05,
+                1.6
+            ],
+            "Rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "Scale": [
+                1.4,
+                1.0,
+                1.4
+            ],
+            "Start": 0.7,
+            "Stop": 4.25
+        },
+        {
+            "Anchor": "Boss",
+            "Asset": "Data/VFX/TransitionMudVortex.json",
+            "Color": [
+                0.08,
+                0.02,
+                0.12,
+                1.0
+            ],
+            "Emission": 1.0,
+            "Kind": "Mesh",
+            "Offset": [
+                0.0,
+                0.4,
+                0.0
+            ],
+            "PoseTime": 2.4,
+            "Position": [
+                0.3,
+                0.4,
+                1.6
+            ],
+            "Rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "Scale": [
+                0.65,
+                1.3,
+                0.65
+            ],
+            "Start": 1.1,
+            "Stop": 4.25
+        },
+        {
+            "Anchor": "Impact",
+            "Asset": "Data/VFX/AnathemaFinishCross.json",
+            "Color": [
+                0.83,
+                1.0,
+                0.89,
+                1.0
+            ],
+            "Emission": 5.0,
+            "Kind": "Mesh",
+            "Offset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "PoseTime": 0.35,
+            "Position": [
+                0.0,
+                1.7,
+                1.0
+            ],
+            "RequiresImpact": true,
+            "Rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "Scale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "Start": 0.0,
+            "Stop": 0.4,
+            "TimeAnchor": "Impact"
+        }
+    ],
+    "Equipment": [
+        "Weapon",
+        "Shield",
+        "HumanBossWeapon",
+        "HumanBossShield"
+    ],
+    "HitStop": 0.1599999964237213,
+    "HoldTime": 1.2999999523162842,
+    "ImageTint": [
+        0.94,
+        1.0,
+        0.97,
+        1.0
+    ],
+    "ImpactHold": 0.1599999964237213,
+    "Player": {
+        "BladeEndNode": "TrailEnd",
+        "BladeStartNode": "TrailStart",
+        "EndPosition": [
+            -1.1,
+            0.0,
+            -0.9
+        ],
+        "HitPoseTime": 0.3499999940395355,
+        "Object": "PlayerModel",
+        "PoseTime": 0.8500000238418579,
+        "Position": [
+            -1.6,
+            0.0,
+            -3.5
+        ],
+        "StateAsset": "Data/Animation/StateData/Player/States/Run_Attack_01_Seq.json",
+        "StrikeSpeed": 1.7999999523162842,
+        "WeaponObject": "Weapon",
+        "WindupSpeed": 0.2199999988079071,
+        "WindupTime": 0.3499999940395355,
+        "Yaw": 10.0
+    },
+    "PromptDelay": 2.799999952316284,
     "PromptPosition": [
         0.5,
         0.9
     ],
-    "ConfirmAction": "UI.MenuConfirm",
-    "Effects": [
-        {
-            "Kind": "Particle",
-            "Asset": "Data/Particle/AnathemaFinishMudSlough.json",
-            "Position": [
-                0,
-                0,
-                0
-            ],
-            "Rotation": [
-                0,
-                0,
-                0
-            ],
-            "Scale": [
-                1,
-                1,
-                1
-            ],
-            "Start": 0,
-            "Stop": 3.15,
-            "PoseTime": 3.2,
-            "Color": [
-                1,
-                1,
-                1,
-                1
-            ],
-            "Emission": 1.0,
-            "Anchor": "Boss",
-            "Offset": [
-                0,
-                0,
-                0
-            ],
-            "MeshSourceObject": true,
-            "EmitDuration": 2.1,
-            "TimeAnchor": "Dissolve"
-        }
-    ],
-    "StageCenterObject": "Stage",
-    "ExecutionStart": 2.3,
-    "AlignDuration": 0.23,
-    "SlamTime": 0.8333333333333334,
-    "DissolveDelay": 0.4,
-    "DissolveDuration": 2.1,
-    "PlayerExecution": {
-        "Object": "PlayerModel",
-        "StateAsset": "Data/Animation/StateData/HumanBoss/States/Execution_03_Seq.json",
-        "Animation": "Execution_03_Seq"
-    },
-    "BossExecution": {
-        "Object": "HumanBoss",
-        "StateAsset": "Data/Animation/StateData/Player/States/Execution_Target_03_Seq.json",
-        "Animation": "Execution_Target_03_Seq"
-    },
-    "AssetType": "BossFinishCinematic",
-    "AssetVersion": 1
+    "PromptText": "ボタンを押してタイトルへ",
+    "ReturnFade": 0.6499999761581421,
+    "Version": 1,
+    "ZoomEnd": 1.0449999570846558,
+    "ZoomStart": 1.0
 }

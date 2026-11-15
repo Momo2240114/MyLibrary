@@ -4,13 +4,13 @@
             "blurPasses": 5,
             "enabled": true,
             "exposure": 1.0,
-            "intensity": 0.0,
-            "kawaseScale": 1.0,
-            "threshold": 2.0,
+            "intensity": 0.6000000238418579,
+            "kawaseScale": 3.0,
+            "threshold": 1.8899999856948853,
             "toneMappingEnabled": true
         },
         "IBL": {
-            "hdrIntensity": 0.003000000026077032,
+            "hdrIntensity": 0.0025,
             "specularHdrPath": "Data/Texture/IBL/qwantani_dusk_2_2k.hdr"
         },
         "ShadowMap": {

@@ -54,7 +54,7 @@
                   "customAnimIndex":  -1,
                   "events":  [
                                  {
-                                     "actionEnd":  "InputBufferOff",
+                                     "actionEnd":  "ComboTransition",
                                      "actionStart":  "InputBufferOn",
                                      "actionUpdate":  "",
                                      "attachNodeName":  "",
@@ -63,8 +63,8 @@
                                      "blackboardWrites":  [
 
                                                           ],
-                                     "callEndOnStateExit":  true,
-                                     "endTime":  0.6000000238418579,
+                                     "callEndOnStateExit":  false,
+                                     "endTime":  0.5166666666666667,
                                      "eventTemplateType":  "NONE",
                                      "label":  "InputBufferOn",
                                      "localPosition":  [
@@ -89,7 +89,7 @@
                                      "overridePlaybackSpeed":  false,
                                      "ownerTarget":  "Self",
                                      "playbackSpeed":  1.0,
-                                     "startTime":  0.05000000074505806
+                                     "startTime":  0.0
                                  },
                                  {
                                      "actionEnd":  "Trail_Stop",
@@ -245,44 +245,6 @@
                                  },
                                  {
                                      "actionEnd":  "",
-                                     "actionStart":  "ComboTransition",
-                                     "actionUpdate":  "",
-                                     "attachNodeName":  "",
-                                     "attachToOwner":  false,
-                                     "attackTemplateId":  "",
-                                     "blackboardWrites":  [
-
-                                                          ],
-                                     "callEndOnStateExit":  true,
-                                     "endTime":  0.6833333373069763,
-                                     "eventTemplateType":  "NONE",
-                                     "label":  "ComboTransition",
-                                     "localPosition":  [
-                                                           0.0,
-                                                           0.0,
-                                                           0.0
-                                                       ],
-                                     "localRotation":  [
-                                                           0.0,
-                                                           0.0,
-                                                           0.0
-                                                       ],
-                                     "localScale":  [
-                                                        1.0,
-                                                        1.0,
-                                                        1.0
-                                                    ],
-                                     "meshVFXAssetPath":  "",
-                                     "meshVFXLifeTime":  1.0,
-                                     "meshVFXPlaybackSpeed":  1.0,
-                                     "mirrorMeshVFX":  false,
-                                     "overridePlaybackSpeed":  false,
-                                     "ownerTarget":  "Self",
-                                     "playbackSpeed":  1.0,
-                                     "startTime":  0.44999998807907104
-                                 },
-                                 {
-                                     "actionEnd":  "",
                                      "actionStart":  "ActionEnd",
                                      "actionUpdate":  "",
                                      "attachNodeName":  "",
@@ -317,7 +279,7 @@
                                      "overridePlaybackSpeed":  false,
                                      "ownerTarget":  "Self",
                                      "playbackSpeed":  1.0,
-                                     "startTime":  0.7166666388511658
+                                     "startTime":  0.7333333333333333
                                  },
                                  {
                                      "actionEnd":  "DisableDodgeCancel",

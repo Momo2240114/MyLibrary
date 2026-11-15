@@ -1,0 +1,184 @@
+{
+    "ColliderComponents": [
+        {
+            "Data": {
+                "ActionPrefix": "",
+                "ActivateActionName": "EnableHitBox",
+                "AllowMultiHit": false,
+                "AttackInstanceId": 523,
+                "AttackSourceType": 0,
+                "AttackTag": "DamageBox",
+                "AttackerAirLiftPower": 0.0,
+                "BlackboardCategory": "Attack",
+                "CameraShakeAttackScale": 0.5,
+                "CameraShakeEnabled": true,
+                "CameraShakeFrequency": 24.0,
+                "CameraShakePriority": 5,
+                "CameraShakeReceiveDuration": 0.11999999731779099,
+                "CameraShakeReceivePositionStrength": 0.02500000037252903,
+                "CameraShakeReceiveRotationStrength": 0.18000000715255737,
+                "CanBeCharacterGround": true,
+                "CanBeGuarded": true,
+                "CanHitOwner": false,
+                "ColliderName": "",
+                "CollisionOwnerObjectName": "",
+                "CollisionRole": 2,
+                "ContainmentMode": 0,
+                "Damage": 5.0,
+                "DamageApplyType": 0,
+                "DamageHitInterval": 0.0,
+                "DamageKey": "Damage",
+                "DamageRate": 0.009999999776482582,
+                "DamageRateKey": "DamageRate",
+                "DeactivateActionName": "DisableHitBox",
+                "DebugPrimitiveColor": [
+                    1.0,
+                    0.20000000298023224,
+                    0.20000000298023224,
+                    1.0
+                ],
+                "EndNodeName": "",
+                "FixedDamage": 0.0,
+                "FixedDamageKey": "FixedDamage",
+                "GravityScale": 1.0,
+                "GuardBreak": false,
+                "HalfHeight": 1.0,
+                "HitGroupId": 0,
+                "HitImpactEffectAssetPath": "",
+                "HitMeshVFXAssetPath": "",
+                "HitMeshVFXLifeTime": 1.0,
+                "HitMeshVFXNormalOffset": 0.0,
+                "HitOncePerActivation": true,
+                "HitParticleAssetPath": "",
+                "HitParticleAxisToAttackerBlend": 0.0,
+                "HitParticleEmitterName": "",
+                "HitParticleLifeTime": 1.0,
+                "HitParticleNormalOffset": 0.0,
+                "HitParticleTargetAttractionFalloff": 1.0,
+                "HitParticleTargetAttractionRange": 0.0,
+                "HitParticleTargetAttractionStrength": 0.0,
+                "HitParticleUseImpactAxis": false,
+                "HitParticleUseTargetAttraction": false,
+                "HitSoundMuffled": false,
+                "HitSoundMuffledCutoff": 1200.0,
+                "HitSoundPath": "",
+                "HitSoundPathKey": "HitSoundPath",
+                "HitSoundVolume": 1.0,
+                "HitStopDuration": 0.05000000074505806,
+                "HitStopDurationKey": "HitStopDuration",
+                "HitStopLayerMask": 3,
+                "HitStopScale": 0.0,
+                "ImpactPower": 9.0,
+                "IsStatic": false,
+                "IsTrigger": true,
+                "JustGuardedActionName": "",
+                "KnockBackPower": 5.0,
+                "KnockBackPowerKey": "KnockBackPower",
+                "Mass": 0.0,
+                "MaxHitCount": 1,
+                "NodeModelObjectName": "",
+                "Offset": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "PhysicsControlsTransform": false,
+                "Radius": 0.5,
+                "RotateVelocityThreshold": 0.0010000000474974513,
+                "ShapeRenderFlg": true,
+                "SourceAction": "",
+                "StartNodeName": "",
+                "TargetAirLiftPower": 0.0,
+                "TeamId": 0,
+                "UseGravity": false,
+                "UsePhysicsResponse": false,
+                "VelocityRotationMode": 0,
+                "shapeSizeScale": 3.4800000190734863
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "HitBox",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        }
+    ],
+    "CollisionMask": 0,
+    "Components": [
+        {
+            "Data": {
+                "AutoActivate": true,
+                "Damage": 5.0,
+                "HitStopDuration": 0.05000000074505806,
+                "HitStopScale": 0.0,
+                "ImpactPower": 9.0,
+                "KnockBackPower": 5.0,
+                "RearmInterval": 0.800000011920929
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "DebugHitHistoryResetComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "Categories": {
+                    "GuardReaction": {
+                        "AttackGuarded": {
+                            "type": "bool",
+                            "value": true
+                        },
+                        "AttackGuardedTrigger": {
+                            "type": "bool",
+                            "value": true
+                        },
+                        "AttackJustGuarded": {
+                            "type": "bool",
+                            "value": false
+                        },
+                        "AttackJustGuardedTrigger": {
+                            "type": "bool",
+                            "value": true
+                        },
+                        "ShouldCancelAttack": {
+                            "type": "bool",
+                            "value": true
+                        }
+                    }
+                }
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "BlackboardComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        }
+    ],
+    "Layer": 0,
+    "Name": "TestDamge",
+    "ParentName": "",
+    "RequiredForSceneStart": false,
+    "Transform": {
+        "Pos": [
+            0.0,
+            100.0,
+            0.0
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

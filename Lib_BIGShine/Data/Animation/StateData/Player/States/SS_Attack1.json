@@ -64,8 +64,8 @@
                                      "blackboardWrites":  [
 
                                                           ],
-                                     "callEndOnStateExit":  true,
-                                     "endTime":  1.1666666269302368,
+                                     "callEndOnStateExit":  false,
+                                     "endTime":  0.8833333333333333,
                                      "eventTemplateType":  "NONE",
                                      "label":  "InputBufferOn",
                                      "localPosition":  [
@@ -90,7 +90,7 @@
                                      "overridePlaybackSpeed":  false,
                                      "ownerTarget":  "Self",
                                      "playbackSpeed":  1.0,
-                                     "startTime":  0.03333333507180214
+                                     "startTime":  0.0
                                  },
                                  {
                                      "actionEnd":  "DisableActionBranch",
@@ -245,44 +245,6 @@
                                      "startTime":  0.3333333432674408
                                  },
                                  {
-                                     "actionEnd":  "CanComboOff",
-                                     "actionStart":  "ComboTransition",
-                                     "actionUpdate":  "",
-                                     "attachNodeName":  "",
-                                     "attachToOwner":  false,
-                                     "attackTemplateId":  "",
-                                     "blackboardWrites":  [
-
-                                                          ],
-                                     "callEndOnStateExit":  false,
-                                     "endTime":  1.3166667222976685,
-                                     "eventTemplateType":  "NONE",
-                                     "label":  "ComboTransition",
-                                     "localPosition":  [
-                                                           0.0,
-                                                           0.0,
-                                                           0.0
-                                                       ],
-                                     "localRotation":  [
-                                                           0.0,
-                                                           0.0,
-                                                           0.0
-                                                       ],
-                                     "localScale":  [
-                                                        1.0,
-                                                        1.0,
-                                                        1.0
-                                                    ],
-                                     "meshVFXAssetPath":  "",
-                                     "meshVFXLifeTime":  1.0,
-                                     "meshVFXPlaybackSpeed":  1.0,
-                                     "mirrorMeshVFX":  false,
-                                     "overridePlaybackSpeed":  false,
-                                     "ownerTarget":  "Self",
-                                     "playbackSpeed":  1.0,
-                                     "startTime":  0.7166666388511658
-                                 },
-                                 {
                                      "actionEnd":  "",
                                      "actionStart":  "CanCancelOn",
                                      "actionUpdate":  "",
@@ -356,7 +318,7 @@
                                      "overridePlaybackSpeed":  false,
                                      "ownerTarget":  "Self",
                                      "playbackSpeed":  1.0,
-                                     "startTime":  1.3333333730697632
+                                     "startTime":  1.4
                                  },
                       {
                           "actionStart": "BeginWeakComboWarp",

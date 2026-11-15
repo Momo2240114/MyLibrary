@@ -6,8 +6,10 @@
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/GamePlay/Camera/CameraComponent.h"
 #include "Engine/GamePlay/Camera/CameraLockOnComponent.h"
+#include "Engine/GamePlay/Camera/LockOnTargetComponent.h"
 #include "Engine/GamePlay/Camera/CameraManager.h"
 #include "Engine/GamePlay/Core/Component/CharacterMovementComponent.h"
+#include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
 #include "Engine/GamePlay/Core/Component/MotionWarpComponent.h"
 #include "Engine/Graphics/Resource/Animation/AnimationControllerComponent.h"
 #include "Engine/Physics/CapsuleCollider.h"
@@ -28,6 +30,15 @@ namespace
 {
     constexpr float MINIMUM_HORIZONTAL_LENGTH_SQUARED = 0.000001f;
     constexpr float RADIANS_TO_DEGREES = 180.0f / DirectX::XM_PI;
+    constexpr float RUSH_OPENING_RANGE = 24.0f;
+    constexpr float RUSH_APPROACH_SPEED = 52.0f;
+    constexpr float RUSH_STRIKE_FOLLOW_SPEED = 18.0f;
+    constexpr float RUSH_STRIKE_FOLLOW_RANGE = 4.5f;
+    constexpr float RUSH_STRIKE_TURN_SPEED = 1440.0f;
+    constexpr float RUSH_APPROACH_TIMEOUT = 1.1f;
+    constexpr float RUSH_MINIMUM_SLIDE_DURATION = 0.08f;
+    constexpr float RUSH_UNTARGETED_SLIDE_DURATION = 0.16f;
+    constexpr float RUSH_UNTARGETED_SLIDE_SPEED = 22.0f;
     constexpr float DEGREES_TO_RADIANS = DirectX::XM_PI / 180.0f;
     constexpr float ATTACK_ASSIST_VERTICAL_DISTANCE_SCALE = 4.0f;
 
@@ -41,6 +52,26 @@ namespace
             for (const auto& child_ : object_->transform->children)
                 if (child_ && HasActiveAttackReceiver(child_->gameObject.lock())) return true;
         return false;
+    }
+
+    std::shared_ptr<GameObject> ResolveAttackCombatOwner(std::shared_ptr<GameObject> target_)
+    {
+        if (!target_) return nullptr;
+        if (const auto lockTarget_ = target_->GetComponent<LockOnTargetComponent>())
+            if (const auto owner_ = lockTarget_->GetCombatOwner()) target_ = owner_;
+
+        if (const auto collider_ = target_->GetComponent<ColliderComponent>())
+            if (const auto owner_ = collider_->ResolveCollisionOwnerObject(); owner_ && owner_ != target_ && owner_->GetLayer() == LayerType::Enemy)
+                return owner_;
+
+        // 親子構成だけの部位も、攻撃先としては敵本体にそろえる。
+        for (auto current_ = target_; current_ && current_->transform;)
+        {
+            const auto parent_ = current_->transform->parent.lock();
+            current_ = parent_ ? parent_->gameObject.lock() : nullptr;
+            if (current_ && current_->GetLayer() == LayerType::Enemy) target_ = current_;
+        }
+        return target_;
     }
 
     // ObjectのWorldスケールを考慮したCapsule半径を取得し、接近補正の停止距離に使う。
@@ -161,7 +192,6 @@ void PlayerAttackState::Enter()
     if (!player_) return;
 
     // 攻撃開始ごとに補正状態をリセットし、今回の攻撃だけで向き/位置補正を計算する。
-    weakMotionWarpStarted = false;
     weakMotionWarpPresetName.clear();
     weakPlannedRootMotion = {};
     weakWarpEndNormalizedTime = 0.0f;
@@ -208,11 +238,28 @@ void PlayerAttackState::Enter()
 
     if (action == PLAYER_ACTION::WEAK_ATTACK) PrepareWeakComboMotionWarp();
     ResolveAttackAssistTarget();
+    if (action == PLAYER_ACTION::JUST_DODGE_RUSH)
+    {
+        rushApproaching = player_->GetComboIndex() == 0;
+        rushApproachHasTarget = rushApproaching && !attackAssistTarget.expired();
+        if (const auto movement_ = GetComponent<CharacterMovementComponent>())
+        {
+            movement_->ClearRootMotionDelta();
+            movement_->StopHorizontalMovementImmediately();
+        }
+        // Animationの武器判定サンプルがMovementより先に走るため、段の開始時はここで向きを確定する。
+        if (const auto owner_ = GetOwner(); owner_ && owner_->transform)
+            owner_->transform->SetForwardYawOnly(lockedAssistDirection, 1.0f, 1.0f);
+        if (const auto board_ = GetComponent<BlackboardComponent>())
+            board_->SetBool(PlayerBlackboardCategory::ANIM, "RushApproaching", rushApproaching);
+    }
     if (action == PLAYER_ACTION::WEAK_ATTACK)
     {
         // 対象なしでも、明確な入力方向への空振りは維持する。
         const auto direction_ = player_->GetMoveInput();
-        if (!attackAssistTarget.lock() && direction_.x * direction_.x + direction_.z * direction_.z > 0.01f)
+        if (player_->GetComboIndex() > 0 && !attackAssistTarget.expired())
+            player_->SetFacingDirection(lockedAssistDirection);
+        else if (attackAssistTarget.expired() && direction_.x * direction_.x + direction_.z * direction_.z > 0.01f)
             player_->SetFacingDirection(direction_);
     }
     if (action == PLAYER_ACTION::COUNTER_ATTACK)
@@ -235,8 +282,16 @@ void PlayerAttackState::Execute(float elapsedTime_)
     if (!player_) return;
 
     // 攻撃中も入力をBlackboardへ流し、コンボ分岐やキャンセル判定に使える状態を保つ。
+    if (rushApproaching)
+    {
+        UpdateRushApproach(elapsedTime_);
+        return;
+    }
     attackElapsedTime += (std::max)(elapsedTime_, 0.0f);
-    ApplyAttackAssist(elapsedTime_);
+    if (action == PLAYER_ACTION::JUST_DODGE_RUSH)
+        UpdateRushStrike(elapsedTime_);
+    else
+        ApplyAttackAssist(elapsedTime_);
     player_->SendMoveInputToBlackboard(player_->GetMoveInput());
     player_->ProcessActionInput();
 }
@@ -246,13 +301,26 @@ void PlayerAttackState::Exit()
 {
     if (PlayerControllerComponent* player_ = GetPlayerController())
     {
+        if (rushApproaching)
+        {
+            rushApproaching = false;
+            player_->SetHorizontalVelocity({}, 0.0f, false);
+            if (const auto board_ = GetComponent<BlackboardComponent>())
+                board_->SetBool(PlayerBlackboardCategory::ANIM, "RushApproaching", false);
+        }
         player_->SetCanBufferInput(false);
         player_->SetCanCombo(false);
-        if (!player_->GetAttackAssistSettings().preserveTargetAcrossCombo)
+        if (action == PLAYER_ACTION::JUST_DODGE_RUSH)
+        {
+            player_->SetHorizontalVelocity({}, 0.0f, false);
+            if (const auto movement_ = GetComponent<CharacterMovementComponent>())
+                movement_->ClearRootMotionDelta();
+        }
+        else if (!player_->GetAttackAssistSettings().preserveTargetAcrossCombo)
         {
             player_->ClearAttackAssistTarget();
         }
-        if (action == PLAYER_ACTION::WEAK_ATTACK)
+        if (action == PLAYER_ACTION::WEAK_ATTACK || action == PLAYER_ACTION::JUST_DODGE_RUSH)
         {
             // Animation更新後のキャンセルでも、当フレームの武器判定を残さない。
             if (const auto animation_ = GetComponent<AnimationControllerComponent>())
@@ -263,8 +331,10 @@ void PlayerAttackState::Exit()
                         if (event_.isFired && event_.eventTemplateType == ANIMATION_EVENT_TEMPLATE_TYPE::ATTACK_TEMPLATE)
                             AttackTemplateRuntime::End(GetOwner(), event_);
             }
+        }
+        if (action == PLAYER_ACTION::WEAK_ATTACK)
+        {
             if (const auto warp_ = GetComponent<MotionWarpComponent>()) warp_->Stop(weakMotionWarpPresetName);
-            weakMotionWarpStarted = false;
             weakMotionWarpPresetName.clear();
             attackAssistTarget.reset();
         }
@@ -283,13 +353,44 @@ std::shared_ptr<GameObject> PlayerAttackState::FindAssistTarget()
     // ロックオン、入力方向、カメラ正面、距離をスコア化して攻撃補正先を選ぶ。
     const PlayerAttackAssistSettings& settings_ = player_->GetAttackAssistSettings();
     const DirectX::XMFLOAT3 ownerPosition_ = owner_->transform->GetWorldPosition();
-    const float maximumDistanceSquared_ = settings_.searchDistance * settings_.searchDistance;
+    const bool isRush_ = action == PLAYER_ACTION::JUST_DODGE_RUSH;
+    const auto lockOn_ = ResolveCameraLockOnComponent();
+    const bool isLockOn_ = lockOn_ && lockOn_->IsLockOnEnabled();
+    if (isRush_)
+    {
+        if (isLockOn_)
+        {
+            const auto target_ = ResolveAttackCombatOwner(lockOn_->GetLockOnTarget());
+            if (IsRushTargetValid(target_) && HasActiveAttackReceiver(target_)) return target_;
+        }
+
+        // ラッシュでは方向による絞り込みをせず、未ロック時は最寄りの敵本体を選ぶ。
+        std::shared_ptr<GameObject> nearest_;
+        float nearestDistanceSquared_ = RUSH_OPENING_RANGE * RUSH_OPENING_RANGE;
+        for (const auto& candidate_ : owner_->GetManager().GetObjects())
+        {
+            if (!candidate_ || candidate_->GetLayer() != LayerType::Enemy ||
+                ResolveAttackCombatOwner(candidate_) != candidate_ || !IsRushTargetValid(candidate_) ||
+                !HasActiveAttackReceiver(candidate_)) continue;
+            const auto position_ = candidate_->transform->GetWorldPosition();
+            const float dx_ = position_.x - ownerPosition_.x;
+            const float dz_ = position_.z - ownerPosition_.z;
+            const float distanceSquared_ = dx_ * dx_ + dz_ * dz_;
+            if (distanceSquared_ > nearestDistanceSquared_) continue;
+            nearestDistanceSquared_ = distanceSquared_;
+            nearest_ = candidate_;
+        }
+        return nearest_;
+    }
+
+    const float searchDistance_ = settings_.searchDistance;
+    const float maximumDistanceSquared_ = searchDistance_ * searchDistance_;
 
     const auto isValidTarget_ = [&](const std::shared_ptr<GameObject>& target_)
     {
         if (!target_ || target_.get() == owner_.get() || !target_->transform) return false;
         if (target_->layer != LayerType::Enemy) return false;
-        if (action == PLAYER_ACTION::WEAK_ATTACK && !IsWeakComboTargetValid(target_)) return false;
+        if (action == PLAYER_ACTION::WEAK_ATTACK && !IsWeakComboTargetValid(target_, true)) return false;
 
         const DirectX::XMFLOAT3 targetPosition_ = target_->transform->GetWorldPosition();
         const float differenceX_ = targetPosition_.x - ownerPosition_.x;
@@ -302,11 +403,10 @@ std::shared_ptr<GameObject> PlayerAttackState::FindAssistTarget()
             horizontalDistanceSquared_ > MINIMUM_HORIZONTAL_LENGTH_SQUARED;
     };
 
-    const std::shared_ptr<CameraLockOnComponent> lockOn_ = ResolveCameraLockOnComponent();
-    const bool isLockOn_ = lockOn_ && lockOn_->IsLockOnEnabled();
     if (isLockOn_)
     {
-        const std::shared_ptr<GameObject> lockOnTarget_ = lockOn_->GetLockOnTarget();
+        auto lockOnTarget_ = lockOn_->GetLockOnTarget();
+        if (action == PLAYER_ACTION::WEAK_ATTACK) lockOnTarget_ = ResolveAttackCombatOwner(lockOnTarget_);
         if (isValidTarget_(lockOnTarget_)) return lockOnTarget_;
     }
 
@@ -317,12 +417,11 @@ std::shared_ptr<GameObject> PlayerAttackState::FindAssistTarget()
     }
 
     DirectX::XMFLOAT3 moveInput_ = player_->GetMoveInput();
+    const float moveInputLength_ = std::sqrt(moveInput_.x * moveInput_.x + moveInput_.z * moveInput_.z);
     const bool hasMoveInput_ =
         settings_.preferMoveInputDirection &&
         NormalizeHorizontal(moveInput_) &&
-        std::sqrt(
-            player_->GetMoveInput().x * player_->GetMoveInput().x +
-            player_->GetMoveInput().z * player_->GetMoveInput().z) >=
+        moveInputLength_ >=
             (std::max)(settings_.minimumInputMagnitude, 0.0f);
 
     DirectX::XMFLOAT3 cameraForward_{ 0.0f, 0.0f, 1.0f };
@@ -345,15 +444,14 @@ std::shared_ptr<GameObject> PlayerAttackState::FindAssistTarget()
     }
 
     const float maximumAngleDegrees_ = isLockOn_
-        ? settings_.lockOnMaximumTargetAngleDegrees
-        : settings_.nonLockOnMaximumTargetAngleDegrees;
+        ? settings_.lockOnMaximumTargetAngleDegrees : settings_.nonLockOnMaximumTargetAngleDegrees;
     const float targetThreshold_ = std::cos(
         std::clamp(maximumAngleDegrees_, 0.0f, 180.0f) * DEGREES_TO_RADIANS);
     const float centerThreshold_ = std::cos(
         std::clamp(settings_.cameraCenterAngle, 0.0f, 180.0f) * DEGREES_TO_RADIANS);
-    const DirectX::XMFLOAT3 primaryDirection_ = hasMoveInput_
-        ? moveInput_
-        : (action == PLAYER_ACTION::WEAK_ATTACK ? ownerForward_
+    const bool isGroundWeak_ = action == PLAYER_ACTION::WEAK_ATTACK;
+    const DirectX::XMFLOAT3 primaryDirection_ = isGroundWeak_ ? ownerForward_
+        : (hasMoveInput_ ? moveInput_
             : (settings_.preferCameraForwardDirection && hasCameraForward_ ? cameraForward_ : ownerForward_));
 
     std::shared_ptr<GameObject> bestTarget_;
@@ -363,7 +461,8 @@ std::shared_ptr<GameObject> PlayerAttackState::FindAssistTarget()
 
     for (const std::shared_ptr<GameObject>& candidate_ : owner_->GetManager().GetObjects())
     {
-        if (!isValidTarget_(candidate_)) continue;
+        if (!isValidTarget_(candidate_) ||
+            (isGroundWeak_ && ResolveAttackCombatOwner(candidate_) != candidate_)) continue;
 
         const DirectX::XMFLOAT3 candidatePosition_ = candidate_->transform->GetWorldPosition();
         const float differenceX_ = candidatePosition_.x - ownerPosition_.x;
@@ -389,12 +488,13 @@ std::shared_ptr<GameObject> PlayerAttackState::FindAssistTarget()
             : primaryDot_;
         const float ownerDot_ = DotHorizontal(targetDirection_, ownerForward_);
         const float distance_ = std::sqrt(assistDistanceSquared_);
-        const float distanceScore_ = 1.0f - std::clamp(distance_ / (std::max)(settings_.searchDistance, 0.001f), 0.0f, 1.0f);
+        const float distanceScore_ = 1.0f - std::clamp(distance_ / (std::max)(searchDistance_, 0.001f), 0.0f, 1.0f);
         const float centerScore_ = hasCameraForward_ && cameraDot_ >= centerThreshold_
             ? 0.2f
             : 0.0f;
         const float score_ =
             primaryDot_ * 0.55f +
+            (isGroundWeak_ && hasMoveInput_ ? DotHorizontal(targetDirection_, moveInput_) * 0.12f : 0.0f) +
             cameraDot_ * 0.2f +
             ownerDot_ * 0.15f +
             distanceScore_ * 0.1f +
@@ -450,9 +550,19 @@ void PlayerAttackState::ResolveAttackAssistTarget()
     const bool isWeakComboContinuation_ = action == PLAYER_ACTION::WEAK_ATTACK && player_->GetComboIndex() > 0;
     const auto lockOn_ = ResolveCameraLockOnComponent();
     // 明示的なロックオン変更だけは次段の入口で優先し、実行途中には切り替えない。
-    if (action == PLAYER_ACTION::WEAK_ATTACK && lockOn_ && lockOn_->IsLockOnEnabled() &&
-        IsWeakComboTargetValid(lockOn_->GetLockOnTarget())) target_ = lockOn_->GetLockOnTarget();
-    if (!target_ && settings_.preserveTargetAcrossCombo &&
+    if (action == PLAYER_ACTION::WEAK_ATTACK && lockOn_ && lockOn_->IsLockOnEnabled())
+    {
+        const auto lockedTarget_ = ResolveAttackCombatOwner(lockOn_->GetLockOnTarget());
+        if (IsWeakComboTargetValid(lockedTarget_, !isWeakComboContinuation_)) target_ = lockedTarget_;
+    }
+    const bool isRush_ = action == PLAYER_ACTION::JUST_DODGE_RUSH;
+    const bool rushOpening_ = isRush_ && player_->GetComboIndex() == 0;
+    if (isRush_ && !rushOpening_)
+    {
+        const auto previousTarget_ = player_->GetAttackAssistTarget();
+        if (IsRushTargetValid(previousTarget_)) target_ = previousTarget_;
+    }
+    if (!target_ && !isRush_ && settings_.preserveTargetAcrossCombo &&
         (action != PLAYER_ACTION::WEAK_ATTACK || isWeakComboContinuation_))
     {
         const std::shared_ptr<GameObject> preservedTarget_ =
@@ -460,19 +570,17 @@ void PlayerAttackState::ResolveAttackAssistTarget()
         if (preservedTarget_ &&
             preservedTarget_->transform &&
             preservedTarget_->layer == LayerType::Enemy &&
-            (action != PLAYER_ACTION::WEAK_ATTACK || IsWeakComboTargetValid(preservedTarget_)))
+            (action != PLAYER_ACTION::WEAK_ATTACK || IsWeakComboTargetValid(preservedTarget_, false)))
         {
             target_ = preservedTarget_;
         }
     }
 
-    if (settings_.lockTargetOnAttackEnter)
+    if ((settings_.lockTargetOnAttackEnter || isRush_) && !target_)
     {
-        if (!target_ && (!isWeakComboContinuation_ || !settings_.preserveTargetAcrossCombo || moveInputLength_ >= 0.65f))
-        {
-            target_ = FindAssistTarget();
-        }
+        target_ = FindAssistTarget();
     }
+    if (isRush_ || action == PLAYER_ACTION::WEAK_ATTACK) target_ = ResolveAttackCombatOwner(target_);
 
     attackAssistTarget = target_;
     attackAssistTargetResolved = true;
@@ -530,7 +638,7 @@ void PlayerAttackState::ApplyAttackAssist(float elapsedTime_)
     if (action == PLAYER_ACTION::WEAK_ATTACK)
     {
         // 弱コンボは位置・向きをWarpへ一本化し、従来の速度加算を重ねない。
-        if (!IsWeakComboTargetValid(target_))
+        if (!IsWeakComboTargetValid(target_, false))
         {
             if (const auto warp_ = GetComponent<MotionWarpComponent>()) warp_->Stop(weakMotionWarpPresetName);
             player_->ClearAttackAssistTarget();
@@ -774,7 +882,7 @@ namespace
     bool IsAttackPathClear(const std::shared_ptr<GameObject>& owner_, const std::shared_ptr<GameObject>& target_,
         const DirectX::XMFLOAT3& start_, const DirectX::XMFLOAT3& end_)
     {
-        if (!owner_ || !owner_->transform || !target_ || !target_->transform) return false;
+        if (!owner_ || !owner_->transform) return false;
         const auto scene_ = PhysXSystem::GetScene();
         const auto capsule_ = owner_ ? owner_->GetComponent<CapsuleCollider>() : nullptr;
         if (!scene_ || !capsule_) return false;
@@ -793,6 +901,119 @@ namespace
         return !scene_->sweep(physx::PxSphereGeometry((std::max)(shape_.radius * 0.9f, 0.05f)),
             physx::PxTransform(origin_), direction_ / length_, length_, hit_, physx::PxHitFlag::eDEFAULT, data_, &filter_);
     }
+}
+
+float PlayerAttackState::GetRushStopDistance(const std::shared_ptr<GameObject>& target_) const
+{
+    return (std::max)(GetPlayerController()->GetAttackAssistSettings().targetStopDistance,
+        GetWorldCapsuleRadius(GetOwner()) + GetWorldCapsuleRadius(target_) + 0.10f);
+}
+
+bool PlayerAttackState::IsRushTargetValid(const std::shared_ptr<GameObject>& target_) const
+{
+    const auto owner_ = GetOwner();
+    if (!owner_ || !owner_->transform || !target_ || !target_->transform ||
+        target_->layer != LayerType::Enemy || target_->IsPendingDestroy() || !target_->IsCombatReady()) return false;
+    if (const auto health_ = target_->GetComponent<HealthComponent>(); health_ && health_->IsDead()) return false;
+    return std::abs(target_->transform->GetWorldPosition().y - owner_->transform->GetWorldPosition().y) <= 3.0f;
+}
+
+void PlayerAttackState::UpdateRushApproach(float elapsedTime_)
+{
+    const auto player_ = GetPlayerController();
+    const auto owner_ = GetOwner();
+    if (const auto movement_ = GetComponent<CharacterMovementComponent>())
+        movement_->ClearRootMotionDelta();
+    if (!player_->IsCurrentAnimationState("Charge_Air_Attack_Start_Seq") &&
+        !player_->IsCurrentAnimationState("Charge_Air_Attack_Loop_Seq")) return;
+    attackElapsedTime += (std::max)(elapsedTime_, 0.0f);
+
+    const auto target_ = attackAssistTarget.lock();
+    if (!owner_ || !owner_->transform || (rushApproachHasTarget && !IsRushTargetValid(target_)) ||
+        attackElapsedTime >= RUSH_APPROACH_TIMEOUT)
+    {
+        player_->NotifyActionEnd();
+        return;
+    }
+
+    const auto position_ = owner_->transform->GetWorldPosition();
+    DirectX::XMFLOAT3 direction_ = attackStartForward;
+    float remaining_ = (std::max)(0.0f, RUSH_UNTARGETED_SLIDE_DURATION - attackElapsedTime) * RUSH_UNTARGETED_SLIDE_SPEED;
+    if (target_)
+    {
+        const auto targetPosition_ = target_->transform->GetWorldPosition();
+        direction_ = { targetPosition_.x - position_.x, 0.0f, targetPosition_.z - position_.z };
+        const float distance_ = std::sqrt(direction_.x * direction_.x + direction_.z * direction_.z);
+        remaining_ = distance_ - GetRushStopDistance(target_);
+    }
+
+    if (remaining_ <= 0.08f)
+    {
+        player_->SetHorizontalVelocity({}, 0.0f, false);
+        player_->SetFacingDirection(direction_);
+        if (attackElapsedTime < RUSH_MINIMUM_SLIDE_DURATION) return;
+        rushApproaching = false;
+        if (const auto board_ = GetComponent<BlackboardComponent>())
+            board_->SetBool(PlayerBlackboardCategory::ANIM, "RushApproaching", false);
+        return;
+    }
+    if (elapsedTime_ <= 0.0f || !NormalizeHorizontal(direction_)) return;
+
+    const float speed_ = target_ ? RUSH_APPROACH_SPEED : RUSH_UNTARGETED_SLIDE_SPEED;
+    const float step_ = (std::min)(remaining_, speed_ * elapsedTime_);
+    const DirectX::XMFLOAT3 destination_{ position_.x + direction_.x * step_, position_.y, position_.z + direction_.z * step_ };
+    if (!IsAttackPathClear(owner_, target_, position_, destination_))
+    {
+        player_->NotifyActionEnd();
+        return;
+    }
+    player_->SetHorizontalVelocity(direction_, step_ / elapsedTime_, false);
+    player_->SetFacingDirection(direction_);
+}
+
+void PlayerAttackState::UpdateRushStrike(float elapsedTime_)
+{
+    const auto player_ = GetPlayerController();
+    const auto owner_ = GetOwner();
+    const auto movement_ = GetComponent<CharacterMovementComponent>();
+    if (!owner_ || !owner_->transform || !movement_) return;
+
+    // 斬撃クリップの踏み込みと追従速度を重ねず、停止距離を守る移動だけを物理へ渡す。
+    movement_->ClearRootMotionDelta();
+    player_->SetHorizontalVelocity({}, 0.0f, false);
+    const auto target_ = attackAssistTarget.lock();
+    if (elapsedTime_ <= 0.0f || !IsRushTargetValid(target_)) return;
+
+    const auto animation_ = GetComponent<AnimationControllerComponent>();
+    const auto* state_ = animation_ ? animation_->GetCurrentState() : nullptr;
+    if (!state_ || state_->name != "Combo_Attack_03_0" + std::to_string(player_->GetComboIndex() + 1) + "_Seq") return;
+
+    float lastHitEnd_ = 0.0f;
+    for (const auto& event_ : state_->events)
+        if (event_.eventTemplateType == ANIMATION_EVENT_TEMPLATE_TYPE::ATTACK_TEMPLATE)
+            lastHitEnd_ = (std::max)(lastHitEnd_, event_.endTime);
+    if (animation_->GetAnimatorTime() > lastHitEnd_) return;
+
+    const auto position_ = owner_->transform->GetWorldPosition();
+    const auto targetPosition_ = target_->transform->GetWorldPosition();
+    DirectX::XMFLOAT3 direction_{ targetPosition_.x - position_.x, 0.0f, targetPosition_.z - position_.z };
+    const float distance_ = std::hypot(direction_.x, direction_.z);
+    if (distance_ <= 0.15f || !NormalizeHorizontal(direction_)) return;
+
+    const float gap_ = distance_ - GetRushStopDistance(target_);
+    if (gap_ > RUSH_STRIKE_FOLLOW_RANGE) return;
+    const auto front_ = owner_->transform->GetFront();
+    const float currentYaw_ = GetYawDegrees(front_);
+    const float yawError_ = NormalizeAngleDegrees(GetYawDegrees(direction_) - currentYaw_);
+    const float turnLimit_ = RUSH_STRIKE_TURN_SPEED * elapsedTime_;
+    player_->SetFacingDirection(DirectionFromYawDegrees(currentYaw_ + std::clamp(yawError_, -turnLimit_, turnLimit_)));
+    if (gap_ <= 0.02f) return;
+
+    const float step_ = (std::min)(gap_, RUSH_STRIKE_FOLLOW_SPEED * elapsedTime_);
+    const DirectX::XMFLOAT3 destination_{ position_.x + direction_.x * step_, position_.y,
+        position_.z + direction_.z * step_ };
+    if (IsAttackPathClear(owner_, target_, position_, destination_))
+        player_->SetHorizontalVelocity(direction_, step_ / elapsedTime_, false);
 }
 
 // 判定開始から安全幅を引いた窓を使い、段ごとの保存済み設定を優先する。
@@ -832,8 +1053,8 @@ void PlayerAttackState::PrepareWeakComboMotionWarp()
     preset_.maximumPositionCorrectionPerSecond = stage_ == 0 ? 24.0f : 20.0f;
     preset_.maximumPositionCorrectionPerFrame = 2.5f;
     preset_.discardUnappliedCorrection = true;
-    preset_.maximumRotationDegrees = stage_ == 0 ? 55.0f : 45.0f;
-    preset_.maximumRotationDegreesPerSecond = 540.0f;
+    preset_.maximumRotationDegrees = stage_ == 0 ? 80.0f : 75.0f;
+    preset_.maximumRotationDegreesPerSecond = 900.0f;
     preset_.lockTargetOnStart = false;
     preset_.endNormalizedTime = weakWarpEndNormalizedTime;
     preset_.lockTargetNormalizedTime = (std::max)(0.0f, weakWarpEndNormalizedTime - 0.02f);
@@ -856,7 +1077,7 @@ void PlayerAttackState::PrepareWeakComboMotionWarp()
 }
 
 // 届く見込みのある生存中の敵だけを残し、背後への自動吸着や壁越しの選択を防ぐ。
-bool PlayerAttackState::IsWeakComboTargetValid(const std::shared_ptr<GameObject>& target_) const
+bool PlayerAttackState::IsWeakComboTargetValid(const std::shared_ptr<GameObject>& target_, bool checkFacing_) const
 {
     const auto owner_ = GetOwner();
     const auto player_ = GetPlayerController();
@@ -879,18 +1100,18 @@ bool PlayerAttackState::IsWeakComboTargetValid(const std::shared_ptr<GameObject>
     const float plannedApproach_ = (std::max)(0.0f, weakPlannedRootMotion.x * direction_.x + weakPlannedRootMotion.z * direction_.z);
     if (distance_ > stopDistance_ + plannedApproach_ + preset_->maximumTotalPositionCorrection) return false;
     // 新規選択時だけ向きの到達可能角度を調べ、同じ段の旋回による対象の振動を防ぐ。
-    if (!weakMotionWarpStarted)
+    if (checkFacing_)
     {
-        auto forward_ = player_->GetMoveInput();
-        if (!NormalizeHorizontal(forward_))
-        {
-            const auto front_ = owner_->transform->GetFront();
-            forward_ = { front_.x, 0.0f, front_.z };
-            NormalizeHorizontal(forward_);
-        }
+        const auto front_ = owner_->transform->GetFront();
+        DirectX::XMFLOAT3 forward_{ front_.x, 0.0f, front_.z };
+        if (!NormalizeHorizontal(forward_)) return false;
         if (DotHorizontal(direction_, forward_) < std::cos(preset_->maximumRotationDegrees * DEGREES_TO_RADIANS)) return false;
     }
-    return IsAttackPathClear(owner_, target_, position_, targetPosition_);
+    // 実際に踏み込む地点まで調べる。敵の中心までSweepすると、近接済みでも敵の胴体に阻まれる。
+    const float approach_ = (std::max)(0.0f, distance_ - stopDistance_);
+    const DirectX::XMFLOAT3 approachEnd_{
+        position_.x + direction_.x * approach_, position_.y, position_.z + direction_.z * approach_ };
+    return approach_ <= 0.0001f || IsAttackPathClear(owner_, target_, position_, approachEnd_);
 }
 
 // 元のRootMotionを予定量として渡し、不足分だけを同じ移動経路へ加える。
@@ -905,11 +1126,11 @@ void PlayerAttackState::StartWeakComboMotionWarp()
     const auto animation_ = owner_ ? owner_->GetComponent<AnimationControllerComponent>() : nullptr;
     const auto activeState_ = animation_ ? animation_->GetCurrentState() : nullptr;
     if (!player_ || !player_->GetAttackAssistSettings().enabled || !preset_ || !activeState_ ||
-        activeState_->name != "SS_Attack" + std::to_string(player_->GetComboIndex() + 1) || !IsWeakComboTargetValid(target_)) return;
+        activeState_->name != "SS_Attack" + std::to_string(player_->GetComboIndex() + 1) || !IsWeakComboTargetValid(target_, false)) return;
     weakStopDistance = (std::max)(preset_->targetDistance, GetWorldCapsuleRadius(owner_) + GetWorldCapsuleRadius(target_) + 0.10f);
     const std::weak_ptr<GameObject> weakOwner_ = owner_;
     const std::weak_ptr<GameObject> weakTarget_ = target_;
-    weakMotionWarpStarted = warp_->PlayForTarget(weakMotionWarpPresetName, target_, weakPlannedRootMotion, weakStopDistance,
+    warp_->PlayForTarget(weakMotionWarpPresetName, target_, weakPlannedRootMotion, weakStopDistance,
         preset_->startNormalizedTime, weakWarpEndNormalizedTime, nullptr,
         [weakOwner_, weakTarget_](const DirectX::XMFLOAT3& start_, const DirectX::XMFLOAT3& end_)
         {

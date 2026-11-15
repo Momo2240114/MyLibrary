@@ -1,0 +1,138 @@
+{
+    "AssetPath": "Data/Particle/HitFire.json",
+    "AssetType": "ParticleEffect",
+    "AssetVersion": 1,
+    "Emitters": [
+        {
+            "Acceleration": [
+                0.0,
+                9.800000190734863,
+                0.0
+            ],
+            "BlendMode": 0,
+            "BurstCount": 100,
+            "Color": [
+                1.0,
+                0.6274510025978088,
+                0.0235294122248888,
+                1.0
+            ],
+            "ColorEnd": [
+                1.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "ColorStart": [
+                1.0,
+                0.7843137383460999,
+                0.0235294122248888,
+                1.0
+            ],
+            "ConeAngle": [
+                0.0,
+                0.0
+            ],
+            "Delay": 0.0,
+            "Drag": 0.0,
+            "EmissionMode": 1,
+            "Fade": [
+                0.0,
+                0.6499999761581421
+            ],
+            "FresnelPower": 2.0,
+            "FresnelStrength": 1.0,
+            "GradientTexturePath": "",
+            "Gravity": -9.800000190734863,
+            "LegacyRadius": [
+                0.0,
+                0.0
+            ],
+            "Lifespan": [
+                0.30000001192092896,
+                0.75
+            ],
+            "MaskTexturePath": "Data/Texture/Particle/masks for  particles 2/masks for  particles 2/29.png",
+            "MaxCount": 100,
+            "MeshVertexSampleCount": 2048,
+            "Name": "HitFire",
+            "NoiseFrequency": 1.0,
+            "NoiseSpeed": 1.0,
+            "NoiseStrength": 60.0,
+            "OrbitVelocity": 0.0,
+            "PosOffset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "RadialVelocity": 0.0,
+            "RenderType": 0,
+            "RotationSpeed": [
+                0.0,
+                0.0
+            ],
+            "ShapeEnd": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "ShapeSize": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "ShapeStart": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "Size": [
+                0.5,
+                1.559999942779541
+            ],
+            "SizeRandomEnd": [
+                1.0,
+                1.0
+            ],
+            "SizeRandomStart": [
+                1.0,
+                1.0
+            ],
+            "SpawnShape": 0,
+            "SpawnSpace": 0,
+            "Speed": [
+                0.0,
+                0.0
+            ],
+            "SpriteAnimationFps": 12.0,
+            "SpriteAnimationLoop": 1,
+            "SpriteAnimationRange": [
+                0,
+                0
+            ],
+            "SpriteSheetIndex": [
+                0,
+                0
+            ],
+            "StretchMax": 100.0,
+            "StretchScale": 0.03999999910593033,
+            "TexturePath": "",
+            "TextureSplitCount": [
+                1,
+                1
+            ],
+            "UseColorOverLife": 1,
+            "UseFresnel": 0,
+            "UseGradient": 0,
+            "UseMask": 1,
+            "UseRandomSize": 0,
+            "UseSpriteAnimation": 0,
+            "Wind": [
+                0.0,
+                9.800000190734863,
+                0.0
+            ]
+        }
+    ],
+    "IsPlaying": true
+}

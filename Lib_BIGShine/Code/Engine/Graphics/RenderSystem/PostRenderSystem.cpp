@@ -44,12 +44,14 @@ void PostRenderSystem::Execute(const RenderContext& rc, ID3D11ShaderResourceView
     auto& radialBlurParams_ = graphics_.GetRadialBlurParams();
     auto& xeGtaoParams_ = graphics_.GetXeGtaoParams();
     auto& motionBlurParams_ = graphics_.GetMotionBlurParams();
-    auto& vignetteParams_ = graphics_.GetVignetteParams();
+    auto vignetteParams_ = graphics_.GetVignetteParams();
+    vignetteParams_.damageOpacity = graphics_.GetDamageVignetteOpacity();
 
     const bool radialBlurEnabled_ = radialBlurParams_.blurRadius > 0.0001f && radialBlurParams_.blurSamplingCount > 0;
     const bool xeGtaoEnabled_ = xeGtaoParams_.enabled && xeGtaoParams_.intensity > 0.0f;
     const bool motionBlurEnabled_ = motionBlurParams_.enabled && motionBlurParams_.strength > 0.0f;
-    const bool vignetteEnabled_ = vignetteParams_.enabled && vignetteParams_.opacity > 0.0f;
+    const bool vignetteEnabled_ = (vignetteParams_.enabled && vignetteParams_.opacity > 0.0f) ||
+        vignetteParams_.damageOpacity > 0.0f;
     const bool distortionEnabled_ = graphics_.IsSceneDistortionUsed() && graphics_.GetSceneDistortionSRV() != nullptr;
 
     if (!motionBlurEnabled_)

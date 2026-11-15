@@ -47,7 +47,7 @@
   "displayName": "HumanBoss Guard Break",
   "hitEffect": {
     "hitMeshVfxAssetPath": "",
-    "hitParticleAssetPath": "EnemyMudHeavyHit",
+    "hitParticleAssetPath": "LargeHitSparks_Strong",
     "hitParticleEmitterName": "",
     "hitParticleLifeTime": 0.5,
     "hitParticleNormalOffset": 0.06,

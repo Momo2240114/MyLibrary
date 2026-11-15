@@ -282,6 +282,7 @@ public:
 
 	void MarkPoseDirty();
 	void MarkTransformDirty();
+	void SetLocalRoll(float degrees_);
 	void UpdateTransformIfDirty();
 	const std::vector<DirectX::XMFLOAT4X4>& GetSkinningTransforms(int meshIndex_);
     // 現在のSkinning行列から少量のワールド頂点を採取し、構図と泥の発生位置へ共有する。
@@ -405,7 +406,7 @@ private:
 	void Deserialize(const char* filename);
 
 private:
-	DirectX::XMMATRIX MakeLocalScaleMatrix() const;
+	DirectX::XMMATRIX MakeModelLocalTransform() const;
 	ModelShaderID shaderId = ModelShaderID::PBR;
     bool runtimeSilhouette = false;
     DirectX::XMFLOAT4 runtimeSilhouetteColor{1.0f, 1.0f, 1.0f, 1.0f};
@@ -431,6 +432,7 @@ private:
 	bool hasCachedOwnerWorldTransform = false;
 	DirectX::XMFLOAT4X4 cachedOwnerWorldTransform{};
 
+	float localRoll = 0.0f;
 	float localScale = 1.0;
 	DirectX::XMFLOAT3 localScaleXYZ = { 1.0f, 1.0f, 1.0f };
 	DirectX::SimpleMath::Quaternion _RootRotationOffset;

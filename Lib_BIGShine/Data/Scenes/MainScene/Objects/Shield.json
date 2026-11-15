@@ -117,7 +117,7 @@
                 "HitMeshVFXLifeTime": 1.0,
                 "HitMeshVFXNormalOffset": 0.0,
                 "HitOncePerActivation": true,
-                "HitParticleAssetPath": "SwordHit_Aqua",
+                "HitParticleAssetPath": "LargeHitSparks_Strong",
                 "HitParticleAxisToAttackerBlend": 0.8500000238418579,
                 "HitParticleEmitterName": "",
                 "HitParticleLifeTime": 0.44999998807907104,

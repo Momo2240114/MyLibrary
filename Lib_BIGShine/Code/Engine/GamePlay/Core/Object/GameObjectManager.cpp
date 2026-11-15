@@ -1316,6 +1316,7 @@ void GameObjectManager::Clear(bool rebuildEffectPools_)
 
     GraphicsDeviceManager& graphics_ = GraphicsDeviceManager::Instance();
     graphics_.ResetFilter();
+    graphics_.ResetDamageVignette();
     graphics_.GetRadialBlurParams() = RadialBlurSystem::Parameters{};
     graphics_.GetVignetteParams() = VignetteSystem::Parameters{};
     if (timeManager)

@@ -255,6 +255,7 @@ void to_json(nlohmann::json& json_, const AttackEmitterTemplate& template_)
         { "FanVisualSampleCount", template_.fanVisualSampleCount },
         { "SpawnHit", template_.spawnHit },
         { "FitBeamVisualToHitShape", template_.fitBeamVisualToHitShape },
+        { "LeaveFireGroundMark", template_.leaveFireGroundMark },
         { "Entries", template_.entries },
         { "Hit", template_.hit },
     };
@@ -284,6 +285,7 @@ void from_json(const nlohmann::json& json_, AttackEmitterTemplate& template_)
     template_.fanVisualSampleCount = std::clamp(json_.value("FanVisualSampleCount", 1), 1, 31);
     template_.spawnHit = json_.value("SpawnHit", true);
     template_.fitBeamVisualToHitShape = json_.value("FitBeamVisualToHitShape", false);
+    template_.leaveFireGroundMark = json_.value("LeaveFireGroundMark", false);
     template_.entries = json_.value("Entries", std::vector<AttackEmitterEntryTemplate>{});
     template_.hit = json_.value("Hit", AttackEmitterHitTemplate{});
 }
@@ -365,6 +367,30 @@ void AttackEmitterComponent::EmitWithFrame(
     for (const AttackEmitterEntryTemplate& entry_ : template_.entries)
     {
         SpawnEntry(template_, entry_, frame_, hitObject_);
+    }
+
+    if (!hitObject_ || !template_.leaveFireGroundMark) return;
+
+    const float horizontal_ = std::hypot(frame_.direction.x, frame_.direction.z);
+    if (horizontal_ <= 0.001f) return;
+    const float yaw_ = std::atan2(frame_.direction.x, frame_.direction.z);
+    if (template_.shapeType == ATTACK_EMITTER_SHAPE_TYPE::BEAM ||
+        template_.shapeType == ATTACK_EMITTER_SHAPE_TYPE::FAN)
+    {
+        const bool fan_ = template_.shapeType == ATTACK_EMITTER_SHAPE_TYPE::FAN;
+        const float length_ = template_.range * std::abs(template_.localScale.z);
+        const float radius_ = template_.radius * (std::max)(std::abs(template_.localScale.x), std::abs(template_.localScale.y));
+        const float halfAngle_ = DirectX::XMConvertToRadians(template_.fanAngleDegrees * 0.5f);
+        const float width_ = fan_ ? template_.range * std::abs(template_.localScale.x) * std::sin(halfAngle_) +
+            radius_ * 1.1f : radius_;
+        const float halfLength_ = length_ * horizontal_ * 0.5f + radius_;
+        const DirectX::XMFLOAT3 center_{
+            frame_.position.x + frame_.direction.x * length_ * 0.5f,
+            frame_.position.y + frame_.direction.y * length_ * 0.5f,
+            frame_.position.z + frame_.direction.z * length_ * 0.5f
+        };
+        GetManager().GetEffectManager().SpawnGroundMark(fan_ ? GroundMarkShape::FIRE_FAN :
+            GroundMarkShape::FIRE_BEAM, center_, width_, halfLength_, yaw_);
     }
 }
 
@@ -802,6 +828,9 @@ std::shared_ptr<GameObject> AttackEmitterComponent::SpawnHitObject(
                 template_.projectileAcceleration,
                 template_.projectileGravity,
                 template_.projectileMaxSpeed);
+            if (template_.leaveFireGroundMark)
+                motion_->SetFireGroundMarkRadius(template_.radius *
+                    (std::max)(std::abs(template_.localScale.x), std::abs(template_.localScale.z)));
         }
     }
     if (!hit_.justGuardedActionName.empty())
@@ -1034,6 +1063,7 @@ void AttackEmitterComponent::Gui()
             ImGui::DragFloat3("Local Offset", &template_.localOffset.x, 0.01f);
             ImGui::DragFloat3("Local Rotation", &template_.localRotation.x, 0.1f);
             ImGui::DragFloat3("Local Scale", &template_.localScale.x, 0.01f, 0.001f, 100.0f);
+            ImGui::Checkbox("Leave Fire Ground Mark", &template_.leaveFireGroundMark);
             ImGui::DragFloat("Range", &template_.range, 0.1f, 0.01f, 1000.0f);
             ImGui::DragFloat("Radius", &template_.radius, 0.01f, 0.01f, 100.0f);
             ImGui::DragFloat("Speed", &template_.speed, 0.1f, 0.0f, 1000.0f);

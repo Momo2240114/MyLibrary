@@ -36,7 +36,8 @@ enum class PLAYER_ACTION
     SKILL_D,
     // 保存済みAction番号を変えず、死亡と復帰は末尾へ追加する。
     DEAD,
-    REVIVING
+    REVIVING,
+    JUST_DODGE_RUSH
 };
 
 // Actionを移動、攻撃、ガードなどの大きな分類で扱うための種別。
@@ -63,7 +64,8 @@ enum class PLAYER_ATTACK_TYPE
     SKILL_B,
     SKILL_C,
     // 既存の攻撃種別番号を維持し、4枠目のスキル種別を追加する。
-    SKILL_D
+    SKILL_D,
+    JUST_DODGE_RUSH
 };
 
 // 移動Action内でAnimation遷移に使用する詳細フェーズ。
@@ -189,6 +191,7 @@ inline const char* GetPlayerActionName(PLAYER_ACTION action_)
     case PLAYER_ACTION::AIR_STRONG_CHARGE_ATTACK: return "AirStrongChargeAttack";
     case PLAYER_ACTION::AIR_DODGE: return "AirDodge";
     case PLAYER_ACTION::COUNTER_ATTACK: return "CounterAttack";
+    case PLAYER_ACTION::JUST_DODGE_RUSH: return "JustDodgeRush";
     case PLAYER_ACTION::HIT: return "Hit";
     case PLAYER_ACTION::DEAD: return "Dead";
     case PLAYER_ACTION::REVIVING: return "Reviving";
@@ -210,6 +213,7 @@ inline PLAYER_ACTION_GROUP GetPlayerActionGroup(PLAYER_ACTION action_)
     case PLAYER_ACTION::AIR_STRONG_ATTACK:
     case PLAYER_ACTION::AIR_STRONG_CHARGE_ATTACK:
     case PLAYER_ACTION::COUNTER_ATTACK:
+    case PLAYER_ACTION::JUST_DODGE_RUSH:
     case PLAYER_ACTION::SKILL_A:
     case PLAYER_ACTION::SKILL_B:
     case PLAYER_ACTION::SKILL_C:
@@ -246,6 +250,8 @@ inline PLAYER_ATTACK_TYPE GetPlayerAttackType(PLAYER_ACTION action_)
         return PLAYER_ATTACK_TYPE::STRONG_CHARGE;
     case PLAYER_ACTION::COUNTER_ATTACK:
         return PLAYER_ATTACK_TYPE::COUNTER;
+    case PLAYER_ACTION::JUST_DODGE_RUSH:
+        return PLAYER_ATTACK_TYPE::JUST_DODGE_RUSH;
     case PLAYER_ACTION::SKILL_A:
         return PLAYER_ATTACK_TYPE::SKILL_A;
     case PLAYER_ACTION::SKILL_B:
@@ -278,6 +284,7 @@ inline bool IsPlayerActionTimelineDriven(PLAYER_ACTION action_)
     case PLAYER_ACTION::SKILL_C:
     case PLAYER_ACTION::SKILL_D:
     case PLAYER_ACTION::COUNTER_ATTACK:
+    case PLAYER_ACTION::JUST_DODGE_RUSH:
     case PLAYER_ACTION::HIT:
         return true;
     default:

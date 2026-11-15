@@ -27,6 +27,7 @@ public:
         float roundness = 1.0f;
         // 最終的な合成Alpha。
         float opacity = 1.0f;
+        float damageOpacity = 0.0f;
     };
 
     // FullScreen ShaderとVignette用ConstantBufferを作成する。
@@ -53,8 +54,10 @@ private:
         float rounded;
         float roundness;
         float opacity;
-        DirectX::XMFLOAT2 padding;
+        float damageOpacity;
+        float padding;
     };
+    static_assert(sizeof(CbVignette) == 64);
 
     // CPU側ParametersをShader用ConstantBufferへ詰める。
     void UpdateConstantBuffer(const RenderContext& rc_, const Parameters& parameters_);

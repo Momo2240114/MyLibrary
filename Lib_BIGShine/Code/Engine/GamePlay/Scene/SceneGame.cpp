@@ -5,7 +5,6 @@
 
 #include "Game/GameMode/GameModeManager.h"
 #include "Engine/Core/GameRuntimeSettings.h"
-#include "Engine/GamePlay/Input/MouseInput.h"
 #include "Engine/Debug/TracyProfiler.h"
 #include "Engine/GamePlay/Input/KeyInput.h"
 #include "Engine/GamePlay/Input/ControllerInput.h"
@@ -21,8 +20,6 @@ void SceneGame::Initialize()
 {
     BS_PROFILE_SCOPE("SceneGame::Initialize");
 	SceneBase::Initialize();
-    if (startImmediately) MouseInput::Instance().SetDebugFlag(false);
-    if (startImmediately && isEditorSuppressed) MouseInput::Instance().SetCursorLockEnabled(true);
 	if (!GameRuntimeSettings::IsGameOnly() && !startImmediately) _GameObjectManager->EnableEditorPlayMode();
 	if (SceneManager::IsRestoringEditorScene())
 	{

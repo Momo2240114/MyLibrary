@@ -10,6 +10,7 @@
 #include "Engine/Graphics/Resource/GlTFModel.h"
 #include "Engine/Graphics/VFX/MeshVFXRenderSystem.h"
 #include "Editor/EditorCameraData.h"
+#include "Engine/Physics/PhysXSystem.h"
 #include <vector>
 
 class AnimationControllerComponent;
@@ -25,6 +26,7 @@ class AnimationEditorWindow : public EditorWorkspaceWindow
 public:
     /// アニメーションエディタを生成し、編集元となるシーンのManagerを保持する。
     explicit AnimationEditorWindow(GameObjectManager* manager_);
+    ~AnimationEditorWindow() override;
 
     /// プレビュー、インスペクタ、階層、タイムラインを含むエディタ全体を描画する。
     void Draw() override;
@@ -46,6 +48,7 @@ private:
 
     /// 独立したプレビューシーンと描画リソースを初回のみ生成する。
     void EnsurePreviewScene();
+    void CreatePreviewFloor();
 
     /// モデル、エフェクト、デバッグ形状を表示するプレビュー領域を描画する。
     void DrawPreviewPanel();
@@ -223,6 +226,8 @@ private:
 
     // ポーズ編集で使用する全ノードの一時姿勢データ。
     std::vector<GltfModelCommponennt::NodePose> editPoseBuffer;
+
+    PhysXSystem::PreviewScene previewPhysics;
 
     // ゲーム本編から分離された編集専用GameObjectManager。
     std::unique_ptr<GameObjectManager> previewGameObjectManager;

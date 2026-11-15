@@ -112,7 +112,7 @@ private:
     float overlayTimer = 0.0f;
 
     // 保存する調整値と、保存しない実時間の発生時刻を分ける。
-    bool damageFlashEnabled = true;
+    bool damageFlashEnabled = false;
     float damageFlashDuration = 0.18f;
     uint64_t damageFlashStartTime = 0;
     bool damageFlashActive = false;

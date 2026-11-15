@@ -197,7 +197,7 @@
                 "HitMeshVFXLifeTime": 1.0,
                 "HitMeshVFXNormalOffset": 0.0,
                 "HitOncePerActivation": true,
-                "HitParticleAssetPath": "EnemyMudKickHit",
+                "HitParticleAssetPath": "LargeHitSparks_Weak",
                 "HitParticleAxisToAttackerBlend": 0.75,
                 "HitParticleEmitterName": "",
                 "HitParticleLifeTime": 0.6499999761581421,

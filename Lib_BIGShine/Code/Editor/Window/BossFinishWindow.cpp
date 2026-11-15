@@ -66,7 +66,8 @@ void BossFinishWindow::Draw()
             if (ImGui::Button("Stop + Restore")) director_->Stop();
             ImGui::SameLine();
             const bool badEnding_ = director_->IsBadEnding();
-            const float end_ = badEnding_ ? director_->GetPreviewEndTime(BossFinishDirector::Ending::BAD_END) : director_->GetCaptureTime() + 5.0f;
+            const float end_ = director_->GetPreviewEndTime(badEnding_ ?
+                BossFinishDirector::Ending::BAD_END : BossFinishDirector::Ending::TRUE_END);
             if (badEnding_ && director_->IsPreview() && director_->GetTime() >= end_) director_->SetPaused(true);
             if (ImGui::Button(director_->IsPaused() ? "Resume" : "Pause"))
             {
@@ -77,7 +78,7 @@ void BossFinishWindow::Draw()
             if (ImGui::Button("Before Capture"))
             {
                 if (!director_->IsActive()) director_->Begin(true);
-                director_->Seek(director_->GetEndingBranchTime() - 1.0f/60.0f);
+                director_->Seek(director_->GetClearTime() - 1.0f/60.0f);
             }
             ImGui::SameLine();
             if (ImGui::Button("Step 1/60")) director_->Seek(director_->GetTime() + 1.0f/60.0f);

@@ -24,6 +24,7 @@ struct DecalData {
     DirectX::XMFLOAT4 dissolveEdgeColor{ 1.0f, 1.0f, 1.0f, 1.0f };
     uint32_t blendMode = 0u;
     uint32_t useDissolve = 0u;
+    bool groundSurface = false;
 
     // DecalShaderへ渡す各Texture。
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture;

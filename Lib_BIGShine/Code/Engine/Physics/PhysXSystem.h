@@ -6,6 +6,36 @@
 class PhysXSystem
 {
 public:
+    class PreviewScene
+    {
+    public:
+        PreviewScene() = default;
+        ~PreviewScene();
+        PreviewScene(const PreviewScene&) = delete;
+        PreviewScene& operator=(const PreviewScene&) = delete;
+
+        bool Initialize();
+
+        // 既存のColliderやRaycastは、このスコープ内だけプレビュー側のSceneを参照する。
+        class Scope
+        {
+        public:
+            explicit Scope(PreviewScene& preview_);
+            ~Scope();
+            Scope(const Scope&) = delete;
+            Scope& operator=(const Scope&) = delete;
+
+        private:
+            PreviewScene* previous;
+        };
+
+    private:
+        friend class PhysXSystem;
+        physx::PxScene* scene = nullptr;
+        physx::PxControllerManager* controllers = nullptr;
+        float timeScale = 1.0f;
+    };
+
     // PhysXのFoundation/Physics/Scene/ControllerManagerを生成・破棄する。
     static void Initialize();
     static void Finalize();

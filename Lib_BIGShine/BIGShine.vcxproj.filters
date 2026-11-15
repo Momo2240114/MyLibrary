@@ -1039,6 +1039,9 @@
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\IKMapComponent.cpp">
       <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\Resource\Animation\FootContactComponent.cpp">
+      <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\FootIKComponent.cpp">
       <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
     </ClCompile>
@@ -1968,6 +1971,9 @@
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\IKMapComponent.h">
       <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\Resource\Animation\FootContactComponent.h">
+      <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\FootIKComponent.h">
       <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
     </ClInclude>
@@ -2115,6 +2121,24 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="CustomExternalDependencies.props" />
+    <None Include="Data\Animation\StateData\Player\States\Charge_Air_Attack_Start_Seq.json">
+      <Filter>Data\Animation\States</Filter>
+    </None>
+    <None Include="Data\Animation\StateData\Player\States\Charge_Air_Attack_Loop_Seq.json">
+      <Filter>Data\Animation\States</Filter>
+    </None>
+    <None Include="Data\Animation\StateData\Player\States\Combo_Attack_03_01_Seq.json">
+      <Filter>Data\Animation\States</Filter>
+    </None>
+    <None Include="Data\Animation\StateData\Player\States\Combo_Attack_03_02_Seq.json">
+      <Filter>Data\Animation\States</Filter>
+    </None>
+    <None Include="Data\Animation\StateData\Player\States\Combo_Attack_03_03_Seq.json">
+      <Filter>Data\Animation\States</Filter>
+    </None>
+    <None Include="Data\Animation\StateData\Player\States\Combo_Attack_03_04_Seq.json">
+      <Filter>Data\Animation\States</Filter>
+    </None>
     <None Include="Data\Animation\StateData\Player\States\Heal_Air_01.json">
       <Filter>Data\Animation\States</Filter>
     </None>
@@ -2138,6 +2162,15 @@
     </None>
     <None Include="Data\Animation\StateData\Player\States\Run_Fast_Combat_IP_Stop_Seq.json">
       <Filter>Data\Animation\States</Filter>
+    </None>
+    <None Include="Data\Particle\HumanoidFootDust.json">
+      <Filter>Data\Particle</Filter>
+    </None>
+    <None Include="Data\Particle\DragonFootDust.json">
+      <Filter>Data\Particle</Filter>
+    </None>
+    <None Include="Data\Particle\LargeHitSparks.json">
+      <Filter>Data\Particle</Filter>
     </None>
     <None Include="Data\Particle\PlayerHeal.json">
       <Filter>Data\Particle</Filter>
@@ -2709,6 +2742,12 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <Filter Include="Data\Texture\Decal">
+      <UniqueIdentifier>{777b3676-826c-588e-93a5-127e695e1a2c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Data\VFX">
+      <UniqueIdentifier>{4e7c50e2-1285-5435-a3d7-40ac2aaa3be8}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Data\Texture\TransitionMasks">
       <UniqueIdentifier>{E917D0DE-F0B3-4002-90B6-A6B7E4C8DE55}</UniqueIdentifier>
     </Filter>
@@ -2812,6 +2851,36 @@
     </None>
     <None Include="Data\Scenes\UIEffectsGallery\Objects\GallerySpriteExample.json">
       <Filter>Data\UI\Gallery</Filter>
+    </None>
+    <None Include="Data\Texture\Decal\GroundCrater.png">
+      <Filter>Data\Texture\Decal</Filter>
+    </None>
+    <None Include="Data\Texture\Decal\ScorchRound.png">
+      <Filter>Data\Texture\Decal</Filter>
+    </None>
+    <None Include="Data\Texture\Decal\ScorchBeam.png">
+      <Filter>Data\Texture\Decal</Filter>
+    </None>
+    <None Include="Data\Texture\Decal\ScorchFan.png">
+      <Filter>Data\Texture\Decal</Filter>
+    </None>
+    <None Include="Data\Texture\Decal\ScorchLightning.png">
+      <Filter>Data\Texture\Decal</Filter>
+    </None>
+    <None Include="Data\Texture\Decal\ScorchLava.png">
+      <Filter>Data\Texture\Decal</Filter>
+    </None>
+    <None Include="Data\Texture\Decal\ScorchViolet.png">
+      <Filter>Data\Texture\Decal</Filter>
+    </None>
+    <None Include="Data\VFX\GroundScarRim.json">
+      <Filter>Data\VFX</Filter>
+    </None>
+    <None Include="Data\VFX\GroundScarRimStrip.json">
+      <Filter>Data\VFX</Filter>
+    </None>
+    <None Include="Data\VFX\GroundScarRimFan.json">
+      <Filter>Data\VFX</Filter>
     </None>
     <None Include="Data\Texture\TransitionMasks\Checker.png">
       <Filter>Data\Texture\TransitionMasks</Filter>

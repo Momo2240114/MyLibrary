@@ -298,16 +298,17 @@ float KeyConfig::GetAxisUnitValue(const AxisUnit& unit_) const
 
     if (unit_.sourceType == AxisSourceType::MouseMove)
     {
-        // MouseInput側に GetDeltaX / GetDeltaY を用意して使う
+        const auto& mouse_ = MouseInput::Instance();
+        const auto delta_ = mouse_.IsCursorLocked() ? mouse_.GetSubMousePos() : Vector2{};
         float value_ = 0.0f;
 
         if (unit_.code == static_cast<int>(AxisCode::MouseX))
         {
-            value_ = MouseInput::Instance().GetSubMousePos().x;
+            value_ = delta_.x;
         }
         else if (unit_.code == static_cast<int>(AxisCode::MouseY))
         {
-            value_ = MouseInput::Instance().GetSubMousePos().y;
+            value_ = delta_.y;
         }
         else if (unit_.code == static_cast<int>(AxisCode::MouseWheel))
         {

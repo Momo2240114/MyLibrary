@@ -49,8 +49,10 @@ public:
     bool IsBadEndingImpactShot() const;
     bool IsBadEnding() const { return ending == Ending::BAD_END; }
     float GetEndingBranchTime() const;
+    float GetClearTime() const;
     float GetPreviewEndTime(Ending ending_) const;
     std::span<const EndingCue> GetBadEndingCues() const;
+    std::span<const EndingCue> GetTrueEndingCues() const;
     // PostEffect後、UI描画前の出力だけを複製し、同じ画像をSDRの2D経路で表示する。
     void RenderOutput(SpriteRenderSystem& sprites_, ID3D11RenderTargetView* target_);
     ID3D11ShaderResourceView* GetCapture() const { return capturedView.Get(); }
@@ -120,6 +122,10 @@ private:
     void Evaluate(float time_, float deltaTime_);
     void CreateEffects();
     void AdvanceEffects(float from_, float to_);
+    void BeginTrueEnding();
+    void ResetTrueEnding();
+    void AdvanceTrueEnding(float time_);
+    void UpdateTrueEnding(float previousTime_, float time_);
     void BeginBadEnding();
     void ResetBadEnding();
     void UpdateBadEnding(float previousTime_, float time_);
@@ -178,6 +184,21 @@ private:
     bool previousGameplayLock = false;
 
     Ending ending = Ending::TRUE_END;
+    float trueEndingTime = -1.0f;
+    DirectX::XMFLOAT3 trueEndingPosition{};
+    DirectX::XMFLOAT3 trueEndingBeamOrigin{};
+    ActorPose trueEndingIdle;
+    ActorPose trueEndingAwaken;
+    ActorPose trueEndingSweep;
+    ActorPose trueEndingStrike;
+    std::shared_ptr<GameObject> trueEndingMud;
+    std::shared_ptr<GameObject> trueEndingHandLight;
+    std::shared_ptr<GameObject> trueEndingAura;
+    std::shared_ptr<GameObject> trueEndingBladeLight;
+    std::shared_ptr<GameObject> trueEndingArc;
+    std::shared_ptr<GameObject> trueEndingBeam;
+    std::shared_ptr<GameObject> trueEndingPillar;
+
     float badEndingTime = -1.0f;
     DirectX::XMFLOAT3 badEndingPosition{};
     DirectX::XMFLOAT3 badEndingCameraEye{};

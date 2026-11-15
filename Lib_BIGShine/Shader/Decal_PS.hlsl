@@ -29,9 +29,10 @@ float4 main(VS_OUT pin) : SV_TARGET
     float2 decal_texcoord = base_texcoord * decalUvScaleOffset.xy + decalUvScaleOffset.zw;
     float2 decal_noise_texcoord = base_texcoord * decalNoiseUvScaleOffset.xy + decalNoiseUvScaleOffset.zw;
     float4 decal_tex = decal_texture.Sample(sampler_states[1], decal_texcoord);
-    float mask = decal_mask_texture.Sample(sampler_states[1], decal_texcoord).r;
+    float4 mask_sample = decal_mask_texture.Sample(sampler_states[1], decal_texcoord);
+    float mask = decalGroundSurface != 0u ? mask_sample.a : mask_sample.r;
 
-    float image_alpha = decal_tex.r;
+    float image_alpha = decalGroundSurface != 0u ? decal_tex.a : decal_tex.r;
     float3 albedo = decal_tex.rgb * decalBaseColor.rgb * pin.color.rgb;
     float alpha = image_alpha * mask * decalBaseColor.a * pin.color.a;
 
@@ -47,6 +48,11 @@ float4 main(VS_OUT pin) : SV_TARGET
     }
 
     float3 N = normalize(scene_normal_texture.Sample(sampler_states[0], screen_uv).xyz * 2.0f - 1.0f);
+    if (decalGroundSurface != 0u)
+    {
+        float3 groundNormal = -normalize(decal_world_matrix[2].xyz);
+        alpha *= smoothstep(0.65f, 0.9f, dot(N, groundNormal));
+    }
     float3 V = normalize(cameraPosition.xyz - world_pos);
 
     float metalness = 0.0f;
@@ -137,5 +143,7 @@ float4 main(VS_OUT pin) : SV_TARGET
         ? bg_color.rgb + final_decal_color * final_alpha
         : lerp(bg_color.rgb, final_decal_color, final_alpha);
 
+    // 接地跡は現在の描画先と合成し、上層の発光が下層の焦げを塗り戻さないようにする。
+    if (decalGroundSurface != 0u) return float4(final_decal_color, final_alpha);
     return float4(final_rgb, 1.0f);
 }

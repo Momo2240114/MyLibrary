@@ -1,6 +1,7 @@
 #include "PrecompiledHeader.h"
 
 #include "InputEditorWindow.h"
+#include "Engine/GamePlay/Input/ControllerInput.h"
 
 #include <Windows.h>
 #include <algorithm>
@@ -101,6 +102,40 @@ void InputEditorWindow::Draw()
 
     DrawToolbar();
     ImGui::Separator();
+
+    if (ImGui::CollapsingHeader("Gamepad Rumble"))
+    {
+        auto& controller_ = ControllerInput::Instance();
+        const auto activeId_ = controller_.GetGamepadId();
+        if (ImGui::BeginCombo("Input / Rumble Gamepad", controller_.IsConnected() ? controller_.GetName().c_str() : "Disconnected"))
+        {
+            int count_ = 0;
+            SDL_JoystickID* ids_ = SDL_GetGamepads(&count_);
+            for (int index_ = 0; ids_ && index_ < count_; ++index_)
+            {
+                const auto id_ = ids_[index_];
+                const char* name_ = SDL_GetGamepadNameForID(id_);
+                const std::string label_ = std::string(name_ ? name_ : "Unknown Gamepad") + " (#" + std::to_string(id_) + ")";
+                if (ImGui::Selectable(label_.c_str(), id_ == activeId_)) controller_.SelectGamepad(id_);
+            }
+            SDL_free(ids_);
+            ImGui::EndCombo();
+        }
+        ImGui::Text("SDL ID: %u | Rumble: %s", static_cast<unsigned>(controller_.GetGamepadId()),
+            controller_.SupportsRumble() ? "Supported" : "Unavailable");
+
+        static float lowStrength_ = 0.65f;
+        static float highStrength_ = 0.45f;
+        static float duration_ = 0.25f;
+        ImGui::SliderFloat("Low Frequency", &lowStrength_, 0.0f, 1.0f);
+        ImGui::SliderFloat("High Frequency", &highStrength_, 0.0f, 1.0f);
+        ImGui::SliderFloat("Duration (s)", &duration_, 0.05f, 2.0f);
+        constexpr int TEST_RUMBLE_PRIORITY = 100;
+        if (ImGui::Button("Test Rumble")) controller_.PlayRumble(lowStrength_, highStrength_, duration_, TEST_RUMBLE_PRIORITY);
+        ImGui::SameLine();
+        if (ImGui::Button("Stop Rumble")) controller_.StopRumble();
+        ImGui::TextUnformatted(controller_.GetRumbleStatus().c_str());
+    }
 
     DrawModeTabs();
     ImGui::Separator();

@@ -35,6 +35,7 @@ struct ParticleSpawnRequest
     float targetAttractionStrength = 0.0f;
     float targetAttractionRange = 0.0f;
     float targetAttractionFalloff = 1.0f;
+    float sizeScale = 1.0f;
 };
 
 struct TrailParticleEmissionRequest
@@ -73,6 +74,18 @@ struct DecalSpawnRequest
     float lifeTime = 5.0f;
     float fadeOutDuration = 1.0f;
     float normalOffset = 0.01f;
+    bool groundSurface = false;
+    float emissiveStrength = 0.0f;
+    std::string groundMaskPath;
+};
+
+enum class GroundMarkShape
+{
+    IMPACT,
+    FIRE_IMPACT,
+    FIRE_BEAM,
+    FIRE_FAN,
+    LIGHTNING_STRIP
 };
 
 // ヒット位置に発生させるParticle、MeshVFX、Decalの設定をまとめる
@@ -181,6 +194,9 @@ public:
         const MeshVFXSpawnRequest& request_);
     std::shared_ptr<GameObject> SpawnDecal(
         const DecalSpawnRequest& request_);
+    // 攻撃範囲の中心と半幅・半長を、地面上の残留演出へ反映する。
+    void SpawnGroundMark(GroundMarkShape shape_, const DirectX::XMFLOAT3& center_,
+        float halfWidth_, float halfLength_, float yaw_ = 0.0f);
     void SpawnImpactEffect(const ImpactEffectSpawnRequest& request_);
     void SpawnImpactEffectAsset(
         const std::string& assetNameOrPath_,

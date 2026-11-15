@@ -2464,6 +2464,12 @@ void DragonAIComponent::StopMovement()
     }
 }
 
+float DragonAIComponent::GetSpinTailSweepProgress() const
+{
+    if (runtime.currentAction != DRAGON_ACTION_TYPE::SPIN_TAIL_SWEEP || runtime.actionEnded) return -1.0f;
+    return std::abs(spinTailRotationAppliedYaw) / (std::max)(std::abs(spinTailRotationDegrees), 0.001f);
+}
+
 void DragonAIComponent::BeginSpinTailSweepRotation()
 {
     BS_PROFILE_SCOPE("DragonAIComponent::BeginSpinTailSweepRotation");
@@ -2569,6 +2575,9 @@ void DragonAIComponent::StartAction(DRAGON_ACTION_TYPE action_)
     {
         // RMなしのTurn90を使うため、一周分の回転は毎フレームのAI更新で補間する。
         BeginSpinTailSweepRotation();
+        if (const auto owner_ = GetGameObject())
+            if (const auto attacks_ = owner_->GetComponent<DragonAttackControllerComponent>())
+                attacks_->PlaySpinSweep(definition_->duration);
     }
 
     aiState = DRAGON_AI_STATE::ACTION;
@@ -2981,6 +2990,7 @@ void DragonAIComponent::EnableTailHitBoxes()
 {
     BS_PROFILE_SCOPE("DragonAIComponent::EnableTailHitBoxes");
 
+    if (runtime.currentAction == DRAGON_ACTION_TYPE::SPIN_TAIL_SWEEP) return;
     // 尻尾は複数部位に分かれているため、同じ攻撃タイミングでまとめて開く。
     ExecuteOwnerAction("TailAttack01HitBox_NewAttackInstance");
     ExecuteOwnerAction("TailAttack01HitBox_ClearAttackHits");
@@ -3003,6 +3013,10 @@ void DragonAIComponent::DisableSequencerHitBoxes()
         animation_->RequestCancelAttackTelegraphs();
     DisableBiteHitBox();
     DisableTailHitBoxes();
+    if (runtime.currentAction == DRAGON_ACTION_TYPE::SPIN_TAIL_SWEEP)
+        if (const auto owner_ = GetGameObject())
+            if (const auto attacks_ = owner_->GetComponent<DragonAttackControllerComponent>())
+                attacks_->StopSpinSweep();
 }
 
 void DragonAIComponent::StartSequencerSpinTailIK()
@@ -3436,7 +3450,6 @@ void DragonAIComponent::PlaySequencerAttackAction()
         break;
     case DRAGON_ACTION_TYPE::SPIN_TAIL_SWEEP:
         StartSequencerSpinTailIK();
-        EnableTailHitBoxes();
         break;
     case DRAGON_ACTION_TYPE::GROUND_STAMP:
         ExecuteOwnerAction("DragonAttack_PlayStamp");
@@ -3479,7 +3492,7 @@ void DragonAIComponent::ShowSequencerDangerAction()
         ExecuteOwnerAction("DragonAttack_ShowTailSweepDangerArea");
         break;
     case DRAGON_ACTION_TYPE::SPIN_TAIL_SWEEP:
-        ExecuteOwnerAction("DragonAttack_ShowSpinSweepDangerArea");
+        if (!runtime.actionEnded) ExecuteOwnerAction("DragonAttack_ShowSpinSweepDangerArea");
         break;
     case DRAGON_ACTION_TYPE::GROUND_STAMP:
     case DRAGON_ACTION_TYPE::LANDING_ATTACK:

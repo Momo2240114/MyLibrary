@@ -27,7 +27,7 @@
         "hitMeshVfxAssetPath": "",
         "hitMeshVfxLifeTime": 1.0,
         "hitMeshVfxNormalOffset": 0.0,
-        "hitParticleAssetPath": "SwordHit_Aqua",
+        "hitParticleAssetPath": "LargeHitSparks_Weak",
         "hitParticleEmitterName": "",
         "hitParticleLifeTime": 2.0,
         "hitParticleNormalOffset": 0.0,

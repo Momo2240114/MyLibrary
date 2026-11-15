@@ -32,6 +32,7 @@ public:
 
     // テクスチャだけで描画する旧形式のデカール設定。
     void SetTexture(const std::string& path_);
+    void SetGroundSurface(float emissiveStrength_, const std::string& maskPath_);
 
     // VFXMaterial を 1 つ割り当て、色・ブレンド・歪みなどをまとめて反映する。
     void SetMaterial(const std::string& path_);
@@ -68,6 +69,9 @@ private:
 private:
     // エディタ確認用に、デカールの投影ボックスを表示するかどうか。
     bool showDebugBounds = true;
+    bool groundSurface = false;
+    float groundEmissiveStrength = 0.0f;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> groundMask;
 
     // ライフタイム終了時に GameObject ごと破棄するか、描画だけ止めるかを切り替える。
     bool destroyOnLifeEnd = false;

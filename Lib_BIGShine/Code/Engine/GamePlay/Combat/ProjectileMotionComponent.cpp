@@ -10,6 +10,7 @@
 #include "Engine/GamePlay/Combat/HealthComponent.h"
 #include "Engine/Graphics/Particle/ParticleComponent.h"
 #include "Engine/Physics/PhysXSystem.h"
+#include "Engine/GamePlay/System/EffectManager.h"
 
 #include <algorithm>
 #include <cmath>
@@ -66,10 +67,30 @@ void ProjectileMotionComponent::Update(float deltaTime_)
     if (!owner_ || !owner_->transform) return;
 
     // 判定Object自体を動かすことで、子になっているHitBoxと見た目を同じ弾道へ追従させる。
-    owner_->transform->AddMoveOffset({
-        velocity.x * safeDeltaTime_,
-        velocity.y * safeDeltaTime_,
-        velocity.z * safeDeltaTime_ });
+    const physx::PxVec3 displacement_(velocity.x * safeDeltaTime_,
+        velocity.y * safeDeltaTime_, velocity.z * safeDeltaTime_);
+    if (fireGroundMarkRadius > 0.0f && owner_->manager && displacement_.magnitudeSquared() > 0.000001f)
+    {
+        if (auto* scene_ = PhysXSystem::GetScene())
+        {
+            const auto position_ = owner_->transform->GetWorldPosition();
+            physx::PxQueryFilterData filter_;
+            filter_.data.word0 = static_cast<physx::PxU32>(LayerType::Terrain) |
+                static_cast<physx::PxU32>(LayerType::Environment);
+            physx::PxSweepBuffer hit_;
+            if (scene_->sweep(physx::PxSphereGeometry(fireGroundMarkRadius),
+                physx::PxTransform(physx::PxVec3(position_.x, position_.y, position_.z)),
+                displacement_.getNormalized(), displacement_.magnitude(), hit_, physx::PxHitFlag::eDEFAULT, filter_) &&
+                hit_.hasBlock && hit_.block.normal.y >= 0.5f)
+            {
+                const auto& point_ = hit_.block.position;
+                owner_->GetManager().GetEffectManager().SpawnGroundMark(GroundMarkShape::FIRE_IMPACT,
+                    { point_.x, point_.y, point_.z }, fireGroundMarkRadius, fireGroundMarkRadius);
+                fireGroundMarkRadius = 0.0f;
+            }
+        }
+    }
+    owner_->transform->AddMoveOffset({ displacement_.x, displacement_.y, displacement_.z });
 }
 
 void ProjectileMotionComponent::Gui()

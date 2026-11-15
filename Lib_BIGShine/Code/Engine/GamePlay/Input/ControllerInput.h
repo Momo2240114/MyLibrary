@@ -59,6 +59,11 @@ public:
     // 演出終了やテスト停止時に、残っている振動を解除する。
     void StopRumble();
 
+    bool SelectGamepad(SDL_JoystickID id_);
+    SDL_JoystickID GetGamepadId() const { return gamepad ? SDL_GetGamepadID(gamepad) : 0; }
+    bool SupportsRumble() const;
+    const std::string& GetRumbleStatus() const { return rumbleStatus; }
+
     bool IsConnected() const { return connected; }
     const std::string& GetName() const { return gamepadName; }
     // SDLの機種情報は表示形式の選択にだけ使用する。
@@ -112,6 +117,7 @@ private:
     // 成功・被弾の振動を弱い攻撃開始通知で上書きしないため、実時間の終了時刻を保持する。
     Uint64 rumbleEndTime = 0;
     int rumblePriority = 0;
+    std::string rumbleStatus = "No request";
 
     // 現在フレームと前フレームの入力状態。
     ControllerState state{};

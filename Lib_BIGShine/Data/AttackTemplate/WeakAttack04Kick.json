@@ -26,7 +26,7 @@
     "displayName": "WeakAttack_04_Kick",
     "hitEffect": {
         "hitMeshVfxAssetPath": "",
-        "hitParticleAssetPath": "KickImpact_Aqua",
+        "hitParticleAssetPath": "LargeHitSparks_Weak",
         "hitParticleEmitterName": "",
         "hitParticleLifeTime": 0.65,
         "hitParticleNormalOffset": 0.08,

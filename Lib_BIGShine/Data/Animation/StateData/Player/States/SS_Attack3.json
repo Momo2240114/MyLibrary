@@ -64,7 +64,7 @@
 
                                                           ],
                                      "callEndOnStateExit":  false,
-                                     "endTime":  1.2000000476837158,
+                                     "endTime":  0.9,
                                      "eventTemplateType":  "NONE",
                                      "label":  "ComboInputWindow",
                                      "localPosition":  [
@@ -89,7 +89,7 @@
                                      "overridePlaybackSpeed":  false,
                                      "ownerTarget":  "Self",
                                      "playbackSpeed":  1.0,
-                                     "startTime":  0.06666667014360428
+                                     "startTime":  0.0
                                  },
                                  {
                                      "actionEnd":  "DisableDodgeCancel",
@@ -283,44 +283,6 @@
                                  },
                                  {
                                      "actionEnd":  "",
-                                     "actionStart":  "ComboTransition",
-                                     "actionUpdate":  "",
-                                     "attachNodeName":  "",
-                                     "attachToOwner":  false,
-                                     "attackTemplateId":  "",
-                                     "blackboardWrites":  [
-
-                                                          ],
-                                     "callEndOnStateExit":  false,
-                                     "endTime":  1.2000000476837158,
-                                     "eventTemplateType":  "NONE",
-                                     "label":  "ComboTransition",
-                                     "localPosition":  [
-                                                           0.0,
-                                                           0.0,
-                                                           0.0
-                                                       ],
-                                     "localRotation":  [
-                                                           0.0,
-                                                           0.0,
-                                                           0.0
-                                                       ],
-                                     "localScale":  [
-                                                        1.0,
-                                                        1.0,
-                                                        1.0
-                                                    ],
-                                     "meshVFXAssetPath":  "",
-                                     "meshVFXLifeTime":  1.0,
-                                     "meshVFXPlaybackSpeed":  1.0,
-                                     "mirrorMeshVFX":  false,
-                                     "overridePlaybackSpeed":  false,
-                                     "ownerTarget":  "Self",
-                                     "playbackSpeed":  1.0,
-                                     "startTime":  0.7333333492279053
-                                 },
-                                 {
-                                     "actionEnd":  "",
                                      "actionStart":  "ActionEnd",
                                      "actionUpdate":  "",
                                      "attachNodeName":  "",
@@ -355,7 +317,7 @@
                                      "overridePlaybackSpeed":  false,
                                      "ownerTarget":  "Self",
                                      "playbackSpeed":  1.0,
-                                     "startTime":  1.2166666984558105
+                                     "startTime":  1.2833333333333334
                                  },
                       {
                           "actionStart": "BeginWeakComboWarp",

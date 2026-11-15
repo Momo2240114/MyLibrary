@@ -1230,7 +1230,8 @@ void CameraLockOnComponent::UpdateLockOnSwitchInput(float deltaTime_)
         inputDirection_ = mouseInput_;
     }
 
-    const float wheelAxis_ = KeyConfig::Instance().GetRawAxis("LockOn_SwitchWheel");
+    const float wheelAxis_ = MouseInput::Instance().IsCursorLocked()
+        ? KeyConfig::Instance().GetRawAxis("LockOn_SwitchWheel") : 0.0f;
     const int wheelDirection_ = wheelAxis_ > 0.0f ? 1 : wheelAxis_ < 0.0f ? -1 : 0;
     if (wheelDirection_ != 0)
     {
@@ -1305,6 +1306,13 @@ DirectX::XMFLOAT2 CameraLockOnComponent::GetControllerSwitchInput() const
 
 DirectX::XMFLOAT2 CameraLockOnComponent::GetMouseSwitchInput(float deltaTime_)
 {
+    if (!MouseInput::Instance().IsCursorLocked())
+    {
+        accumulatedMouseDelta = {};
+        debugMouseAccumulatedDelta = {};
+        mouseAccumulationTimer = 0.0f;
+        return {};
+    }
     // マウス移動は一瞬のデルタだけではなく短時間蓄積し、しきい値を超えた軸方向をターゲット切替に使う。
     const KeyConfig& keyConfig_ = KeyConfig::Instance();
     const DirectX::XMFLOAT2 mouseDelta_

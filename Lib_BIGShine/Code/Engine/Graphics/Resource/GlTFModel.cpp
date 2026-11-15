@@ -820,7 +820,7 @@ void GltfModelCommponennt::UpdateNodeTransformOnly(int nodeIndex_)
 		? DirectX::XMMatrixIdentity()
 		: DirectX::XMLoadFloat4x4(&node_.parent->globalTransform);
 	const DirectX::XMMATRIX parentWorldTransform_ = owner_->transform->GetWorldMatrix();
-	const DirectX::XMMATRIX modelScaleMat_ = MakeLocalScaleMatrix();
+	const DirectX::XMMATRIX modelScaleMat_ = MakeModelLocalTransform();
 
 	UpdateNodeRecursive(
 		node_,
@@ -858,12 +858,18 @@ void GltfModelCommponennt::MarkSkinningTransformsDirty()
 	}
 }
 
-DirectX::XMMATRIX GltfModelCommponennt::MakeLocalScaleMatrix() const
+void GltfModelCommponennt::SetLocalRoll(float degrees_)
 {
-	return DirectX::XMMatrixScaling(
-		localScaleXYZ.x,
-		localScaleXYZ.y,
-		localScaleXYZ.z);
+	if (localRoll == degrees_) return;
+	localRoll = degrees_;
+	MarkTransformDirty();
+}
+
+DirectX::XMMATRIX GltfModelCommponennt::MakeModelLocalTransform() const
+{
+	const auto scale_ = DirectX::XMMatrixScaling(localScaleXYZ.x, localScaleXYZ.y, localScaleXYZ.z);
+	// 本体Transformより手前で傾け、移動やColliderの基準を保つ。
+	return localRoll == 0.0f ? scale_ : scale_ * DirectX::XMMatrixRotationZ(DirectX::XMConvertToRadians(localRoll));
 }
 
 void GltfModelCommponennt::UpdateTransformIfDirty()
@@ -991,7 +997,7 @@ void GltfModelCommponennt::UpdateTransform()
 	{
 		BS_PROFILE_SCOPE("GltfModel::PrepareRootTransform");
 		parentWorldTransform_ = owner_->transform->GetWorldMatrix();
-		modelScaleMat_ = MakeLocalScaleMatrix();
+		modelScaleMat_ = MakeModelLocalTransform();
 	}
 
 	{
@@ -1144,7 +1150,7 @@ void GltfModelCommponennt::UpdateNodeTransformFrom(int nodeIndex_)
 	DirectX::XMMATRIX parentWorldTransform_ =
 		owner_->transform->GetWorldMatrix();
 
-	DirectX::XMMATRIX modelScaleMat_ = MakeLocalScaleMatrix();
+	DirectX::XMMATRIX modelScaleMat_ = MakeModelLocalTransform();
 
 	UpdateNodeRecursive(nodes[nodeIndex_], parentWorldTransform_, modelScaleMat_);
 	MarkSkinningTransformsDirty();

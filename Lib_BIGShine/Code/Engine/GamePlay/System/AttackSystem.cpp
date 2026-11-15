@@ -6,6 +6,8 @@
 #include "Engine/Debug/TracyProfiler.h"
 #include "Engine/GamePlay/Combat/CombatStatsComponent.h"
 #include "Engine/GamePlay/Camera/CameraShakeComponent.h"
+#include "Engine/GamePlay/Camera/CameraComponent.h"
+#include "Engine/GamePlay/Camera/CameraManager.h"
 #include "Engine/GamePlay/Input/ControllerInput.h"
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
@@ -260,6 +262,9 @@ void AttackSystem::HandleHit(
     event_.attackTag = hitBox_.attackTag;
     event_.hurtTag = hurtBox_.hurtTag;
     event_.hitParticleAssetPath = hitBox_.hitParticleAssetPath;
+    if (event_.damage > 0.0f && event_.hitParticleAssetPath.empty() && hitBox_.hitParticleEmitterName.empty() &&
+        hitBox_.hitImpactEffectAssetPath.empty() && (IsPlayerObject(target_) || IsPlayerObject(attacker_)))
+        event_.hitParticleAssetPath = "Data/Particle/LargeHitSparks_Weak.json";
     event_.hitParticleEmitterName = hitBox_.hitParticleEmitterName;
     event_.hitParticleLifeTime = hitBox_.hitParticleLifeTime;
     event_.hitParticleNormalOffset = hitBox_.hitParticleNormalOffset;
@@ -299,11 +304,13 @@ void AttackSystem::HandleHit(
         const float strength_ = IsPlayerObject(target_)
             ? event_.feedback.receiveStrength : event_.feedback.attackStrength;
         // 既存の技ごとの強弱と無効設定を保ち、命中・被弾の両モーターを強める。
-        constexpr float HIT_RUMBLE_GAIN = 1.6f;
-        constexpr float HIT_RUMBLE_DURATION_SCALE = 1.25f;
-        ControllerInput::Instance().PlayRumble(strength_ * HIT_RUMBLE_GAIN, strength_ * 0.9f,
-            event_.feedback.duration * HIT_RUMBLE_DURATION_SCALE,
-            IsPlayerObject(target_) ? 3 : 2);
+        if (strength_ > 0.0f && event_.feedback.duration > 0.0f)
+        {
+            const bool receiving_ = IsPlayerObject(target_);
+            const float duration_ = (std::max)(event_.feedback.duration * 1.25f, receiving_ ? 0.18f : 0.12f);
+            ControllerInput::Instance().PlayRumble(strength_ * (receiving_ ? 2.1f : 1.9f), strength_ * 1.25f,
+                duration_, receiving_ ? 3 : 2);
+        }
     }
 
     if (event_.attackerAirLiftPower > 0.0f)
@@ -499,18 +506,27 @@ void AttackSystem::PlayCameraShake(const AttackHitEvent& event_) const
     if (!playerIsTarget_ && !playerIsAttacker_) return;
 
     // 技ごとの設定を基準に振幅を増やし、攻撃命中時も短すぎない衝撃を残す。
-    constexpr float HIT_SHAKE_GAIN = 2.0f;
+    const float hitShakeGain_ = playerIsTarget_ ? 2.6f : 2.0f;
     const float scale_ = (playerIsTarget_
         ? 1.0f
-        : event_.cameraShakeAttackScale) * HIT_SHAKE_GAIN;
+        : event_.cameraShakeAttackScale) * hitShakeGain_;
     const float durationScale_ = playerIsTarget_
         ? 1.15f
         : std::sqrt((std::max)(event_.cameraShakeAttackScale, 0.0f));
-    const std::vector<std::shared_ptr<CameraShakeComponent>> cameraShakes_ =
-        target_->GetManager().FindComponents<CameraShakeComponent>();
-    if (cameraShakes_.empty()) return;
+    std::shared_ptr<CameraShakeComponent> shake_;
+    auto& manager_ = target_->GetManager();
+    if (const auto cameras_ = manager_.GetCameraManager())
+        if (const auto camera_ = cameras_->GetSourceCamera())
+            if (const auto owner_ = camera_->GetGameObject())
+                shake_ = owner_->GetComponent<CameraShakeComponent>();
+    if (!shake_)
+    {
+        const auto cameraShakes_ = manager_.FindComponents<CameraShakeComponent>();
+        if (cameraShakes_.empty()) return;
+        shake_ = cameraShakes_.front();
+    }
 
-    cameraShakes_.front()->PlayShake(
+    shake_->PlayShake(
         event_.cameraShakeReceiveDuration * durationScale_,
         event_.cameraShakeReceivePositionStrength * scale_,
         event_.cameraShakeReceiveRotationStrength * scale_,

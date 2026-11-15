@@ -32,6 +32,10 @@ private:
     void ResolveAttackAssistTarget();
     // 攻撃中の向き補正と位置補正をまとめて適用する。
     void ApplyAttackAssist(float elapsedTime_);
+    void UpdateRushApproach(float elapsedTime_);
+    void UpdateRushStrike(float elapsedTime_);
+    bool IsRushTargetValid(const std::shared_ptr<GameObject>& target_) const;
+    float GetRushStopDistance(const std::shared_ptr<GameObject>& target_) const;
     // 攻撃中の向きをTarget方向へ補間する。
     void ApplyAttackFacingAssist(const std::shared_ptr<GameObject>& target_, float elapsedTime_);
     // 攻撃が届きやすい距離まで水平移動を補助する。
@@ -44,7 +48,7 @@ private:
     void PrepareWeakComboMotionWarp();
     void StartWeakComboMotionWarp();
     // 生存状態、到達可能距離、壁を確認して同じ段の対象を固定する。
-    bool IsWeakComboTargetValid(const std::shared_ptr<GameObject>& target_) const;
+    bool IsWeakComboTargetValid(const std::shared_ptr<GameObject>& target_, bool checkFacing_) const;
     // 反撃専用の広めなMotionWarpを開始する。
     void StartCounterMotionWarp();
     // 反撃終了時にMotionWarpを停止する。
@@ -70,10 +74,11 @@ private:
     bool attackAssistTargetResolved = false;
     // この攻撃Stateで反撃用MotionWarpを開始したか。
     bool counterMotionWarpActive = false;
+    bool rushApproaching = false;
+    bool rushApproachHasTarget = false;
     // 各段の実行情報は保存せず、次段・中断の境界で作り直す。
     std::string weakMotionWarpPresetName;
     DirectX::XMFLOAT3 weakPlannedRootMotion{ 0.0f, 0.0f, 0.0f };
     float weakWarpEndNormalizedTime = 0.0f;
     float weakStopDistance = 1.2f;
-    bool weakMotionWarpStarted = false;
 };

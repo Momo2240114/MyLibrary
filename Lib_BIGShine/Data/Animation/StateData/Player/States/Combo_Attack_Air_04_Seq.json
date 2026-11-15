@@ -165,7 +165,7 @@
                                      "overridePlaybackSpeed":  false,
                                      "ownerTarget":  "Self",
                                      "playbackSpeed":  1.0,
-                                     "startTime":  0.8333333134651184
+                                     "startTime":  0.85
                                  },
                                  {
                                      "actionEnd":  "InputBufferOff",
@@ -178,7 +178,7 @@
 
                                                           ],
                                      "callEndOnStateExit":  true,
-                                     "endTime":  0.8166666626930237,
+                                     "endTime":  0.8333333333333334,
                                      "eventTemplateType":  "NONE",
                                      "label":  "InputBufferOn",
                                      "localPosition":  [
@@ -203,7 +203,7 @@
                                      "overridePlaybackSpeed":  false,
                                      "ownerTarget":  "Self",
                                      "playbackSpeed":  1.0,
-                                     "startTime":  0.01666666753590107
+                                     "startTime":  0.0
                                  },
                                  {
                                      "actionEnd":  "DisableActionBranch",

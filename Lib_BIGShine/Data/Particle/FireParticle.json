@@ -1,0 +1,114 @@
+{
+    "AssetPath": "Data/Particle/FireParticle.json",
+    "AssetType": "ParticleEffect",
+    "AssetVersion": 1,
+    "Emitters": [
+        {
+            "BurstCount": 7000,
+            "Color": [
+                1.0,
+                0.8666666746139526,
+                1.0,
+                1.0
+            ],
+            "ColorEnd": [
+                1.0,
+                0.019607843831181526,
+                0.0,
+                0.9960784316062927
+            ],
+            "ColorStart": [
+                1.0,
+                0.5254902243614197,
+                0.10980392247438431,
+                1.0
+            ],
+            "ConeAngle": [
+                0.09000000357627869,
+                0.699999988079071
+            ],
+            "Delay": 0.0,
+            "EmissionMode": 0,
+            "Fade": [
+                0.07999999821186066,
+                3.940000057220459
+            ],
+            "GradientTexturePath": "",
+            "Gravity": 1.9199999570846558,
+            "LegacyRadius": [
+                0.0,
+                0.75
+            ],
+            "Lifespan": [
+                0.1599999964237213,
+                2.5
+            ],
+            "MaskTexturePath": "Data/Texture/Particle/Particle02.png",
+            "MaxCount": 20000,
+            "MeshVertexSampleCount": 2048,
+            "PosOffset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "RenderType": 0,
+            "RotationSpeed": [
+                0.0,
+                0.0
+            ],
+            "ShapeEnd": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "ShapeSize": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "ShapeStart": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "Size": [
+                0.10999999940395355,
+                0.7799999713897705
+            ],
+            "SizeRandomEnd": [
+                0.38999998569488525,
+                1.0
+            ],
+            "SizeRandomStart": [
+                0.699999988079071,
+                1.1799999475479126
+            ],
+            "SpawnShape": 3,
+            "Speed": [
+                0.15000000596046448,
+                2.25
+            ],
+            "SpriteAnimationFps": 12.0,
+            "SpriteAnimationLoop": 1,
+            "SpriteAnimationRange": [
+                0,
+                0
+            ],
+            "SpriteSheetIndex": [
+                0,
+                0
+            ],
+            "TexturePath": "",
+            "TextureSplitCount": [
+                1,
+                1
+            ],
+            "UseColorOverLife": 1,
+            "UseGradient": 0,
+            "UseMask": 1,
+            "UseRandomSize": 1,
+            "UseSpriteAnimation": 0
+        }
+    ],
+    "IsPlaying": true
+}

@@ -8,6 +8,7 @@
 #include "Engine/GamePlay/Transform/Transform.h"
 #include "Engine/Graphics/Resource/Animation/AnimationGraphBridgeComponent.h"
 #include "Engine/Physics/HitBox.h"
+#include "Engine/Physics/HurtBox.h"
 #include <algorithm>
 #include <cmath>
 #include <limits>
@@ -227,6 +228,11 @@ void PlayerControllerComponent::CancelEnemyExecution(bool returnToIdle_)
 
 void PlayerControllerComponent::OnDestroy()
 {
+    if (hurtBox && GetCurrentAction() == PLAYER_ACTION::JUST_DODGE_RUSH)
+    {
+        hurtBox->SetTemporaryInvincible(false);
+    }
+    ResetGroundMovement();
     // Scene終了時にも一時的な移動制限と耐性を解除する。
     CancelEnemyExecution(false);
 }

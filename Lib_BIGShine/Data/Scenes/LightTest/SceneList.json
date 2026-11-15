@@ -1,0 +1,21 @@
+{
+    "GraphicsSettings": {
+        "Bloom": {
+            "blurPasses": 5,
+            "intensity": 0.23999999463558197,
+            "kawaseScale": 0.46000000834465027,
+            "threshold": 0.9300000071525574
+        }
+    },
+    "ObjectList": [
+        "MainCamera",
+        "Stage",
+        "light",
+        "light2",
+        "Table",
+        "Enemy",
+        "HandLight",
+        "LightBeam"
+    ],
+    "SceneName": "LightTest"
+}

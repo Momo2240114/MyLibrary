@@ -1,0 +1,418 @@
+{
+    "AssetType": "AnimationState",
+    "AssetVersion": 2,
+    "State": {
+        "animIndexA": -1,
+        "animIndexB": -1,
+        "animationIndex": 70,
+        "blend2DBackwardAnimationIndex": -1,
+        "blend2DBackwardLeft90AnimationIndex": -1,
+        "blend2DBackwardLeft90PhaseOffset": 0.0,
+        "blend2DBackwardLeftAnimationIndex": -1,
+        "blend2DBackwardLeftPhaseOffset": 0.0,
+        "blend2DBackwardPhaseOffset": 0.0,
+        "blend2DBackwardRight90AnimationIndex": -1,
+        "blend2DBackwardRight90PhaseOffset": 0.0,
+        "blend2DBackwardRightAnimationIndex": -1,
+        "blend2DBackwardRightPhaseOffset": 0.0,
+        "blend2DDefaultInput": [
+            0.0,
+            1.0
+        ],
+        "blend2DForwardAnimationIndex": -1,
+        "blend2DForwardLeft90AnimationIndex": -1,
+        "blend2DForwardLeft90PhaseOffset": 0.0,
+        "blend2DForwardLeftAnimationIndex": -1,
+        "blend2DForwardLeftPhaseOffset": 0.0,
+        "blend2DForwardPhaseOffset": 0.0,
+        "blend2DForwardRight90AnimationIndex": -1,
+        "blend2DForwardRight90PhaseOffset": 0.0,
+        "blend2DForwardRightAnimationIndex": -1,
+        "blend2DForwardRightPhaseOffset": 0.0,
+        "blend2DIdleAnimationIndex": -1,
+        "blend2DIdlePhaseOffset": 0.0,
+        "blend2DIdleThreshold": 0.05000000074505806,
+        "blend2DLeftAnimationIndex": -1,
+        "blend2DLeftPhaseOffset": 0.0,
+        "blend2DParamName": "MoveInput",
+        "blend2DRightAnimationIndex": -1,
+        "blend2DRightPhaseOffset": 0.0,
+        "blend2DSyncNormalizedTime": true,
+        "blend2DUseEightDirections": false,
+        "blend2DUseForwardBackwardLateral": false,
+        "blend2DUseIdleStop": false,
+        "blendDefaultWeight": 0.5,
+        "blendMaskRootNodes": [],
+        "blendParamName": "BlendAlpha",
+        "blendParameterMax": 1.0,
+        "blendParameterMin": 0.0,
+        "blendPhaseOffsetA": 0.0,
+        "blendPhaseOffsetB": 0.0,
+        "blendSyncNormalizedTime": true,
+        "blendUseMask": false,
+        "customAnimIndex": -1,
+        "events": [
+            {
+                "actionEnd": "InputBufferOff",
+                "actionStart": "InputBufferOn",
+                "actionUpdate": "",
+                "attachNodeName": "",
+                "attachToOwner": false,
+                "attackTemplateId": "",
+                "blackboardWrites": [],
+                "callEndOnStateExit": false,
+                "endTime": 0.949999988079071,
+                "eventTemplateType": "NONE",
+                "label": "Rush Input Buffer",
+                "localPosition": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localRotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localScale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "meshVFXAssetPath": "",
+                "meshVFXLifeTime": 1.0,
+                "meshVFXPlaybackSpeed": 1.0,
+                "mirrorMeshVFX": false,
+                "overridePlaybackSpeed": false,
+                "ownerTarget": "Self",
+                "playbackSpeed": 1.0,
+                "startTime": 0.0,
+                "telegraph": {
+                    "attachNodeName": "",
+                    "berserkLeadFrames": 9.0,
+                    "enabled": true,
+                    "fallbackOffset": [
+                        0.0,
+                        2.0,
+                        0.0
+                    ],
+                    "leadFrames": 12.0,
+                    "lifeTime": 0.15000000596046448,
+                    "localOffset": [
+                        0.0,
+                        0.30000001192092896,
+                        0.0
+                    ],
+                    "particleName": "EnemyAttackWarning",
+                    "particleScale": 1.0
+                },
+                "telegraphHitStart": false
+            },
+            {
+                "actionEnd": "Trail_Stop",
+                "actionStart": "Trail_Start",
+                "actionUpdate": "",
+                "attachNodeName": "",
+                "attachToOwner": false,
+                "attackTemplateId": "",
+                "blackboardWrites": [],
+                "callEndOnStateExit": true,
+                "endTime": 0.949999988079071,
+                "eventTemplateType": "NONE",
+                "label": "Weapon_Trail_Start",
+                "localPosition": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localRotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localScale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "meshVFXAssetPath": "",
+                "meshVFXLifeTime": 1.0,
+                "meshVFXPlaybackSpeed": 1.0,
+                "mirrorMeshVFX": false,
+                "overridePlaybackSpeed": false,
+                "ownerTarget": "Self",
+                "playbackSpeed": 1.0,
+                "startTime": 0.0833333358168602,
+                "telegraph": {
+                    "attachNodeName": "",
+                    "berserkLeadFrames": 9.0,
+                    "enabled": true,
+                    "fallbackOffset": [
+                        0.0,
+                        2.0,
+                        0.0
+                    ],
+                    "leadFrames": 12.0,
+                    "lifeTime": 0.15000000596046448,
+                    "localOffset": [
+                        0.0,
+                        0.30000001192092896,
+                        0.0
+                    ],
+                    "particleName": "EnemyAttackWarning",
+                    "particleScale": 1.0
+                },
+                "telegraphHitStart": false
+            },
+            {
+                "actionEnd": "",
+                "actionStart": "",
+                "actionUpdate": "",
+                "attachNodeName": "",
+                "attachToOwner": false,
+                "attackTemplateId": "RashAttack_01",
+                "blackboardWrites": [],
+                "callEndOnStateExit": true,
+                "endTime": 0.28333333134651184,
+                "eventTemplateType": "ATTACK_TEMPLATE",
+                "label": "RashAttack_01",
+                "localPosition": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localRotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localScale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "meshVFXAssetPath": "",
+                "meshVFXLifeTime": 1.0,
+                "meshVFXPlaybackSpeed": 1.0,
+                "mirrorMeshVFX": false,
+                "overridePlaybackSpeed": false,
+                "ownerTarget": "Self",
+                "playbackSpeed": 1.0,
+                "startTime": 0.10000000149011612,
+                "telegraph": {
+                    "attachNodeName": "",
+                    "berserkLeadFrames": 9.0,
+                    "enabled": true,
+                    "fallbackOffset": [
+                        0.0,
+                        2.0,
+                        0.0
+                    ],
+                    "leadFrames": 12.0,
+                    "lifeTime": 0.15000000596046448,
+                    "localOffset": [
+                        0.0,
+                        0.30000001192092896,
+                        0.0
+                    ],
+                    "particleName": "EnemyAttackWarning",
+                    "particleScale": 1.0
+                },
+                "telegraphHitStart": false
+            },
+            {
+                "actionEnd": "",
+                "actionStart": "",
+                "actionUpdate": "",
+                "attachNodeName": "",
+                "attachToOwner": true,
+                "attackTemplateId": "",
+                "blackboardWrites": [],
+                "callEndOnStateExit": false,
+                "endTime": 0.3166666626930237,
+                "eventTemplateType": "VFX_TEMPLATE",
+                "label": "MeshVFX",
+                "localPosition": [
+                    0.0,
+                    1.5,
+                    0.5
+                ],
+                "localRotation": [
+                    0.0,
+                    0.0,
+                    26.0
+                ],
+                "localScale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "meshVFXAssetPath": "PlayerSwordArc_Aqua",
+                "meshVFXLifeTime": 0.6000000238418579,
+                "meshVFXPlaybackSpeed": 1.0,
+                "mirrorMeshVFX": false,
+                "overridePlaybackSpeed": false,
+                "ownerTarget": "Self",
+                "playbackSpeed": 1.0,
+                "startTime": 0.10000000149011612,
+                "telegraph": {
+                    "attachNodeName": "",
+                    "berserkLeadFrames": 9.0,
+                    "enabled": true,
+                    "fallbackOffset": [
+                        0.0,
+                        2.0,
+                        0.0
+                    ],
+                    "leadFrames": 12.0,
+                    "lifeTime": 0.15000000596046448,
+                    "localOffset": [
+                        0.0,
+                        0.30000001192092896,
+                        0.0
+                    ],
+                    "particleName": "EnemyAttackWarning",
+                    "particleScale": 1.0
+                },
+                "telegraphHitStart": false
+            },
+            {
+                "actionEnd": "CanComboOff",
+                "actionStart": "CanComboOn",
+                "actionUpdate": "",
+                "attachNodeName": "",
+                "attachToOwner": false,
+                "attackTemplateId": "",
+                "blackboardWrites": [],
+                "callEndOnStateExit": false,
+                "endTime": 1.0833333730697632,
+                "eventTemplateType": "NONE",
+                "label": "Rush Combo Window",
+                "localPosition": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localRotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localScale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "meshVFXAssetPath": "",
+                "meshVFXLifeTime": 1.0,
+                "meshVFXPlaybackSpeed": 1.0,
+                "mirrorMeshVFX": false,
+                "overridePlaybackSpeed": false,
+                "ownerTarget": "Self",
+                "playbackSpeed": 1.0,
+                "startTime": 0.44999998807907104,
+                "telegraph": {
+                    "attachNodeName": "",
+                    "berserkLeadFrames": 9.0,
+                    "enabled": true,
+                    "fallbackOffset": [
+                        0.0,
+                        2.0,
+                        0.0
+                    ],
+                    "leadFrames": 12.0,
+                    "lifeTime": 0.15000000596046448,
+                    "localOffset": [
+                        0.0,
+                        0.30000001192092896,
+                        0.0
+                    ],
+                    "particleName": "EnemyAttackWarning",
+                    "particleScale": 1.0
+                },
+                "telegraphHitStart": false
+            },
+            {
+                "actionEnd": "",
+                "actionStart": "ActionEnd",
+                "actionUpdate": "",
+                "attachNodeName": "",
+                "attachToOwner": false,
+                "attackTemplateId": "",
+                "blackboardWrites": [],
+                "callEndOnStateExit": false,
+                "endTime": 1.1666666269302368,
+                "eventTemplateType": "NONE",
+                "label": "ActionEnd",
+                "localPosition": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localRotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localScale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "meshVFXAssetPath": "",
+                "meshVFXLifeTime": 1.0,
+                "meshVFXPlaybackSpeed": 1.0,
+                "mirrorMeshVFX": false,
+                "overridePlaybackSpeed": false,
+                "ownerTarget": "Self",
+                "playbackSpeed": 1.0,
+                "startTime": 1.100000023841858,
+                "telegraph": {
+                    "attachNodeName": "",
+                    "berserkLeadFrames": 9.0,
+                    "enabled": true,
+                    "fallbackOffset": [
+                        0.0,
+                        2.0,
+                        0.0
+                    ],
+                    "leadFrames": 12.0,
+                    "lifeTime": 0.15000000596046448,
+                    "localOffset": [
+                        0.0,
+                        0.30000001192092896,
+                        0.0
+                    ],
+                    "particleName": "EnemyAttackWarning",
+                    "particleScale": 1.0
+                },
+                "telegraphHitStart": false
+            }
+        ],
+        "loop": false,
+        "name": "Combo_Attack_03_01_Seq",
+        "playbackSpeedParamName": "",
+        "rootMotion": {
+            "applyPositionX": true,
+            "applyPositionY": false,
+            "applyPositionZ": true,
+            "applyRotationX": false,
+            "applyRotationY": false,
+            "applyRotationZ": false,
+            "cutVisualPositionX": true,
+            "cutVisualPositionY": true,
+            "cutVisualPositionZ": true,
+            "cutVisualWhenDisabled": false,
+            "enable": true,
+            "sourceNodeName": "pelvis"
+        },
+        "rootMotionScale": 0.019999999552965164,
+        "rootMotionScaleCurveName": "",
+        "sampleWeaponHitBoxes": true,
+        "sequenceClips": [],
+        "sequencer": "",
+        "speed": 1.600000023841858,
+        "speedCurveName": "",
+        "type": 0
+    }
+}

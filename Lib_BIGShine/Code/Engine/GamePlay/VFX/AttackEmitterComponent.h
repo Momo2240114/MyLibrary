@@ -135,6 +135,7 @@ struct AttackEmitterTemplate
     bool spawnHit = true;
     // 直線Particleを判定カプセルの軸と幅に合わせる。既存Templateは従来の演出を維持する。
     bool fitBeamVisualToHitShape = false;
+    bool leaveFireGroundMark = false;
 
     // 同時に生成する見た目演出と、必要なら攻撃判定設定。
     std::vector<AttackEmitterEntryTemplate> entries;

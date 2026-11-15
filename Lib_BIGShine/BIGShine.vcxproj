@@ -536,6 +536,7 @@
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationControllerComponent.Gui.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationControllerComponent.NodeEditor.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\IKMapComponent.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\Resource\Animation\FootContactComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\FootIKComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\HumanLookAtIKComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\ShieldBlockIKComponent.cpp" />
@@ -934,6 +935,7 @@
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationGraphBridgeComponent.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationGraphBlackboardKeys.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\IKMapComponent.h" />
+    <ClInclude Include="Code\Engine\Graphics\Resource\Animation\FootContactComponent.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\FootIKComponent.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\HumanLookAtIKComponent.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\ShieldBlockIKComponent.h" />
@@ -1053,6 +1055,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="CustomExternalDependencies.props" />
+    <None Include="Data\Animation\StateData\Player\States\Charge_Air_Attack_Start_Seq.json" />
+    <None Include="Data\Animation\StateData\Player\States\Charge_Air_Attack_Loop_Seq.json" />
+    <None Include="Data\Animation\StateData\Player\States\Combo_Attack_03_01_Seq.json" />
+    <None Include="Data\Animation\StateData\Player\States\Combo_Attack_03_02_Seq.json" />
+    <None Include="Data\Animation\StateData\Player\States\Combo_Attack_03_03_Seq.json" />
+    <None Include="Data\Animation\StateData\Player\States\Combo_Attack_03_04_Seq.json" />
     <None Include="Data\Animation\StateData\Player\States\Heal_Air_01.json" />
     <None Include="Data\Animation\StateData\Player\States\Run_Fast_Combat_IP_Start_Seq.json" />
     <None Include="Data\Curve\Player.WeakCombo1.Speed.json" />
@@ -1061,6 +1069,9 @@
     <None Include="Data\Curve\Player.WeakCombo4.Speed.json" />
     <None Include="Data\Animation\StateData\Player\States\Run_Fast_Combat_IP_Loop_Seq.json" />
     <None Include="Data\Animation\StateData\Player\States\Run_Fast_Combat_IP_Stop_Seq.json" />
+    <None Include="Data\Particle\HumanoidFootDust.json" />
+    <None Include="Data\Particle\DragonFootDust.json" />
+    <None Include="Data\Particle\LargeHitSparks.json" />
     <None Include="Data\Particle\PlayerHeal.json" />
     <None Include="Data\Animation\StateData\DragonFirstForm_Test\States\DragonGroundStamp.json" />
     <None Include="Shader\Basic.hlsli" />
@@ -1504,6 +1515,16 @@
     <None Include="Data\Scenes\UIEffectsGallery\Objects\GalleryHeading.json" />
     <None Include="Data\Scenes\UIEffectsGallery\Objects\GalleryHint.json" />
     <None Include="Data\Scenes\UIEffectsGallery\Objects\GallerySpriteExample.json" />
+    <None Include="Data\Texture\Decal\GroundCrater.png" />
+    <None Include="Data\Texture\Decal\ScorchRound.png" />
+    <None Include="Data\Texture\Decal\ScorchBeam.png" />
+    <None Include="Data\Texture\Decal\ScorchFan.png" />
+    <None Include="Data\Texture\Decal\ScorchLightning.png" />
+    <None Include="Data\Texture\Decal\ScorchLava.png" />
+    <None Include="Data\Texture\Decal\ScorchViolet.png" />
+    <None Include="Data\VFX\GroundScarRim.json" />
+    <None Include="Data\VFX\GroundScarRimStrip.json" />
+    <None Include="Data\VFX\GroundScarRimFan.json" />
     <None Include="Data\Texture\TransitionMasks\Checker.png" />
     <None Include="Data\Texture\TransitionMasks\Diamond.png" />
     <None Include="Data\Texture\TransitionMasks\Ink.png" />

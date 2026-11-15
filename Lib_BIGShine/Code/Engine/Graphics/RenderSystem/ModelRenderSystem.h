@@ -161,7 +161,8 @@ private:
 		DirectX::XMFLOAT4   decalDissolveEdgeColor;
 		uint32_t decalBlendMode = 0u;          // 0: Alpha, 1: Additive
 		uint32_t decalUseDissolve = 0u;
-		DirectX::XMFLOAT2 decalPadding = { 0.0f, 0.0f };
+		uint32_t decalGroundSurface = 0u;
+		float decalPadding = 0.0f;
 	};
 
 	struct CbSkeleton

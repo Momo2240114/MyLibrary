@@ -3,7 +3,6 @@
 #include "AnimNodeEditorWindow.h"
 
 #include "Engine/GamePlay/Core/Object/GameObject.h"
-#include "Engine/Graphics/Resource/GlTFModel.h"
 #include "Engine/Graphics/Resource/Animation/AnimationControllerComponent.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include <algorithm>
@@ -66,33 +65,9 @@ namespace
     }
 }
 
-bool AnimNodeEditorWindow::ResolveTarget(GltfModelCommponennt*& modelComp, AnimationControllerComponent*& animController) const
-{
-    // 現在選択中のGameObjectから、プレビュー対象のモデルとノード編集対象のAnimationControllerを取り出す。
-    modelComp = nullptr;
-    animController = nullptr;
-
-    if (!gameObjectManager) return false;
-
-    auto selectedObject = gameObjectManager->GetSelectedObject();
-    if (!selectedObject) return false;
-
-    auto model = selectedObject->GetComponent<GltfModelCommponennt>();
-    auto animation = selectedObject->GetComponent<AnimationControllerComponent>();
-    if (!model || !animation) return false;
-
-    modelComp = model.get();
-    animController = animation.get();
-    return true;
-}
-
 void AnimNodeEditorWindow::Draw()
 {
     // 左にシーン確認、右にアニメーションノード編集を並べ、1画面で選択から遷移編集まで行える作業空間を作る。
-    GltfModelCommponennt* modelComp = nullptr;
-    AnimationControllerComponent* animController = nullptr;
-    ResolveTarget(modelComp, animController);
-
     if (!BeginWorkspaceWindow())
     {
         EndEditorWindow();
@@ -193,7 +168,9 @@ void AnimNodeEditorWindow::Draw()
     ImGui::SameLine(0.0f, 0.0f);
     ImGui::BeginGroup();
     ImGui::BeginChild("AnimNodeGraphPanel", ImVec2(rightPanelWidth, graphHeight_), true);
-    DrawGraphPanel(animController);
+    const auto selectedObject_ = gameObjectManager ? gameObjectManager->GetSelectedObject() : nullptr;
+    const auto animation_ = selectedObject_ ? selectedObject_->GetComponent<AnimationControllerComponent>() : nullptr;
+    DrawGraphPanel(animation_.get());
     ImGui::EndChild();
 
     DrawHorizontalSplitter(
@@ -281,8 +258,7 @@ void AnimNodeEditorWindow::DrawGraphPanel(AnimationControllerComponent* animCont
 
     if (!animController_)
     {
-        // モデルとAnimationControllerが揃っていない場合は、編集対象を選ぶための案内だけを出す。
-        ImGui::TextWrapped("Select a Scene GameObject that has GltfModel and AnimationControllerComponent.");
+        ImGui::TextWrapped("Select a Scene GameObject with an AnimationControllerComponent.");
         return;
     }
 

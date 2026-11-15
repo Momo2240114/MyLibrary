@@ -58,7 +58,7 @@
   "displayName": "HumanBoss Shadow Slash",
   "hitEffect": {
     "hitMeshVfxAssetPath": "",
-    "hitParticleAssetPath": "EnemyShadowMudBurst",
+    "hitParticleAssetPath": "LargeHitSparks_Weak",
     "hitParticleEmitterName": "",
     "hitParticleLifeTime": 0.5,
     "hitParticleNormalOffset": 0.06,

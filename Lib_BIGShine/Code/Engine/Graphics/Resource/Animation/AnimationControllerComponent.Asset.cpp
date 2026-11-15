@@ -192,6 +192,8 @@ void AnimationControllerComponent::Deserialize(const nlohmann::json& json_)
 
     assetFilePath = json_.value("AssetPath", "");
     graphAssetFilePath = json_.value("GraphAssetPath", "");
+    pendingGraphAssetPath = graphAssetFilePath;
+    pendingGraphAssetLoad = !pendingGraphAssetPath.empty();
     useTransitionGraph = true;
     stateAssetPaths.clear();
     pendingStateAssetPaths.clear();
@@ -245,12 +247,7 @@ void AnimationControllerComponent::Deserialize(const nlohmann::json& json_)
     graphNodes.clear();
     graphTransitions.clear();
 
-    if (!graphAssetFilePath.empty())
-    {
-        pendingGraphAssetPath = graphAssetFilePath;
-        pendingGraphAssetLoad = true;
-    }
-    else
+    if (!pendingGraphAssetLoad)
     {
         ApplyPendingStateAssets();
         EnsureSpecialGraphNodes();

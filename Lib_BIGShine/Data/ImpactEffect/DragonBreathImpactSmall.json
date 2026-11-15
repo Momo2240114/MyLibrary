@@ -5,7 +5,7 @@
         {
             "Type": 0,
             "Enabled": true,
-            "AssetPath": "DragonBreathProjectile_Impact",
+            "AssetPath": "LargeHitSparks_Strong",
             "EmitterName": "",
             "Scale": [1.0, 1.0, 1.0],
             "Color": [1.0, 0.76, 0.25, 1.0],
@@ -23,17 +23,6 @@
             "LifeTime": 0.28,
             "FadeOutDuration": 0.08,
             "NormalOffset": 0.05
-        },
-        {
-            "Type": 2,
-            "Enabled": true,
-            "AssetPath": "Data/Texture/Particle/kenney_particle-pack/PNG (Black background)/scorch_03.png",
-            "EmitterName": "",
-            "Scale": [1.6, 1.6, 1.0],
-            "Color": [0.65, 0.30, 0.12, 0.55],
-            "LifeTime": 2.0,
-            "FadeOutDuration": 0.45,
-            "NormalOffset": 0.015
         }
     ]
 }

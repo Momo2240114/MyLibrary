@@ -33,6 +33,20 @@ namespace
 {
     constexpr const char* PRESET_PATH = "Data/Presentation/AnathemaBossFinish.json";
     constexpr float FIXED_STEP = 1.0f / 60.0f;
+    constexpr float TRUE_END_HAND_LIGHT = 0.85f;
+    constexpr float TRUE_END_AWAKEN = 1.65f;
+    constexpr float TRUE_END_LUNGE = 3.05f;
+    constexpr float TRUE_END_SWEEP = 3.25f;
+    constexpr float TRUE_END_SWEEP_HIT = TRUE_END_SWEEP + 0.58f;
+    constexpr float TRUE_END_CHARGE = 4.5f;
+    constexpr float TRUE_END_BEAM = 6.3f;
+    constexpr float TRUE_END_PILLAR = TRUE_END_BEAM + 0.18f;
+    constexpr float TRUE_END_FINISH = 9.45f;
+    constexpr float TRUE_END_RAISED_POSE = 0.52f;
+    constexpr float TRUE_END_RELEASE_POSE = 0.78f;
+    constexpr float TRUE_END_IMPACT_DEPTH = -5.4f;
+    constexpr DirectX::XMFLOAT4 TRUE_END_GOLD{1.0f, 0.55f, 0.10f, 1.0f};
+    constexpr DirectX::XMFLOAT4 TRUE_END_CORE{1.0f, 0.91f, 0.61f, 1.0f};
     constexpr float BAD_END_COUNTER = 0.95f;
     constexpr float BAD_END_FLASHBACK = 1.25f;
     constexpr float BAD_END_FLASHBACK_DURATION = 1.0f;
@@ -700,6 +714,7 @@ void BossFinishDirector::Stop()
     BS_PROFILE_SCOPE("BossFinishDirector::Stop");
     if (!active) return;
     ResetBadEnding();
+    ResetTrueEnding();
     ending = Ending::TRUE_END;
     for (auto& saved_ : savedActors)
     {
@@ -904,10 +919,27 @@ float BossFinishDirector::GetEndingBranchTime() const
     return GetCaptureTime() + settings.value("HitStop", 0.16f);
 }
 
+float BossFinishDirector::GetClearTime() const
+{
+    return GetEndingBranchTime() + TRUE_END_FINISH;
+}
+
 float BossFinishDirector::GetPreviewEndTime(Ending ending_) const
 {
-    return GetEndingBranchTime() + (ending_ == Ending::BAD_END ?
-        BAD_END_FINISH : settings.value("PromptDelay", 2.8f) + 1.0f);
+    return ending_ == Ending::BAD_END ? GetEndingBranchTime() + BAD_END_FINISH :
+        GetClearTime() + settings.value("PromptDelay", 2.8f) + 1.0f;
+}
+
+std::span<const BossFinishDirector::EndingCue> BossFinishDirector::GetTrueEndingCues() const
+{
+    static constexpr EndingCue CUES[] = {
+        {"Mud approach / Hand light", 0.0f, TRUE_END_AWAKEN},
+        {"Awakening / Golden sword", TRUE_END_AWAKEN, TRUE_END_LUNGE},
+        {"Mud lunge / Wide slash", TRUE_END_LUNGE, TRUE_END_CHARGE},
+        {"Sword raised / Light gathers", TRUE_END_CHARGE, TRUE_END_BEAM},
+        {"Beam / Pillar of light", TRUE_END_BEAM, TRUE_END_FINISH}
+    };
+    return CUES;
 }
 
 std::span<const BossFinishDirector::EndingCue> BossFinishDirector::GetBadEndingCues() const
@@ -923,6 +955,393 @@ std::span<const BossFinishDirector::EndingCue> BossFinishDirector::GetBadEndingC
         {"Mud wipe / Blackout", BAD_END_WIPE, BAD_END_FINISH}
     };
     return CUES;
+}
+
+void BossFinishDirector::BeginTrueEnding()
+{
+    BS_PROFILE_SCOPE("BossFinishDirector::BeginTrueEnding");
+    trueEndingPosition = player.object ? player.object->transform->GetWorldPosition() : GetStageAnchor();
+    PrepareActor(trueEndingIdle, player.object, {}, "Idle_Combat_Seq", true);
+    PrepareActor(trueEndingAwaken, player.object, {}, "Buff_Seq", false);
+    PrepareActor(trueEndingSweep, player.object, {}, "Combo_Attack_01_01_Seq", false);
+    PrepareActor(trueEndingStrike, player.object, {}, "SS_Sp_Skill1", false);
+    for (auto* actor_ : {&trueEndingIdle, &trueEndingAwaken, &trueEndingSweep, &trueEndingStrike})
+    {
+        actor_->rootReferencePosition = playerExecution.rootReferencePosition;
+        actor_->hasRootReference = playerExecution.hasRootReference;
+    }
+
+    effects.clear();
+    trueEndingMud = MakeObject("TrueEndingMud");
+    trueEndingHandLight = MakeObject("TrueEndingHandLight");
+    trueEndingAura = MakeObject("TrueEndingAura");
+    trueEndingBladeLight = MakeObject("TrueEndingBladeLight");
+    trueEndingArc = MakeObject("TrueEndingArc");
+    trueEndingBeam = MakeObject("TrueEndingBeam");
+    trueEndingPillar = MakeObject("TrueEndingPillar");
+    effects = {trueEndingMud, trueEndingHandLight, trueEndingAura, trueEndingBladeLight,
+        trueEndingArc, trueEndingBeam, trueEndingPillar};
+    for (const auto& effect_ : effects) effect_->SetManager(&manager);
+
+    const auto mud_ = trueEndingMud->AddComponent<MeshVFXComponent>();
+    const auto mudParticles_ = trueEndingMud->AddComponent<ParticleComponent>();
+    const auto hand_ = trueEndingHandLight->AddComponent<ParticleComponent>();
+    const auto aura_ = trueEndingAura->AddComponent<ParticleComponent>();
+    const auto pillarParticles_ = trueEndingPillar->AddComponent<ParticleComponent>();
+    try
+    {
+        if (!mud_->LoadAsset("Data/VFX/TransitionMudVortex.json"))
+            throw std::runtime_error("Data/VFX/TransitionMudVortex.json");
+        for (auto& part_ : mud_->GetAsset().parts)
+        {
+            part_.renderEnabled = true;
+            part_.animateScale = false;
+            part_.scale = {1.45f, 1.05f, 1.45f};
+        }
+        mud_->Play();
+        if (!mudParticles_->LoadAsset("Data/Particle/TransitionMudVortex.json"))
+            throw std::runtime_error("Data/Particle/TransitionMudVortex.json");
+        for (auto& track_ : mudParticles_->GetTracks())
+        {
+            track_.spawnSpace = ParticleSpawnSpace::OWNER_RELATIVE;
+            track_.settings.shapeSize = {1.3f, 1.3f, 1.3f, 0.0f};
+            track_.settings.emissionSize = {0.36f, 0.12f};
+            track_.settings.burstCount = 95;
+        }
+        mudParticles_->Play();
+
+        for (const auto& light_ : {hand_, aura_, pillarParticles_})
+        {
+            if (!light_->LoadAsset("Data/Particle/IntroGateLight.json"))
+                throw std::runtime_error("Data/Particle/IntroGateLight.json");
+            const bool isHand_ = light_ == hand_;
+            const bool isPillar_ = light_ == pillarParticles_;
+            for (auto& track_ : light_->GetTracks())
+            {
+                track_.spawnSpace = ParticleSpawnSpace::OWNER_RELATIVE;
+                auto& config_ = track_.settings;
+                config_.emissionPosition = {0, isPillar_ ? 0.2f : 0.0f, 0, 1};
+                config_.emissionMode = 0;
+                config_.burstCount = isHand_ ? 170 : 520;
+                config_.shapeSize = isHand_ ? DirectX::XMFLOAT4{0.12f, 0.12f, 0.12f, 0} :
+                    DirectX::XMFLOAT4{1.25f, isPillar_ ? 0.15f : 1.75f, 1.25f, 0};
+                config_.emissionSize = {isPillar_ ? 0.11f : 0.075f, 0.015f};
+                config_.lifespan = {0.35f, isPillar_ ? 1.15f : 0.95f};
+                config_.emissionSpeed = isPillar_ ? DirectX::XMFLOAT2{4.5f, 10.0f} : DirectX::XMFLOAT2{0.6f, 2.4f};
+                config_.emissionConeAngle = {0.0f, isPillar_ ? 12.0f : 42.0f};
+                config_.orbitVelocity = isHand_ || isPillar_ ? 0.0f : 2.7f;
+                config_.colorStart = {4.0f, 2.3f, 0.65f, 0.95f};
+                config_.colorEnd = {1.4f, 0.55f, 0.08f, 0.0f};
+            }
+            light_->Play();
+        }
+    }
+    catch (const std::exception& error_)
+    {
+        status = std::string("True ending VFX: ") + error_.what();
+        BS_LOG_WARNING(LOG_CATEGORY::GAME, status);
+    }
+
+    const auto makeLight_ = [](const std::shared_ptr<GameObject>& object_, const char* shape_, float emission_,
+        const DirectX::XMFLOAT3& outerScale_ = {})
+    {
+        MeshVFXAsset asset_;
+        auto& part_ = asset_.parts.emplace_back();
+        part_.modelPath = shape_;
+        part_.meshIndex = 0;
+        part_.renderEnabled = true;
+        part_.useMaterialBaseTexture = false;
+        part_.useMaterialNormalTexture = false;
+        part_.blendMode = MeshVFXBlendMode::ADDITIVE;
+        part_.color = TRUE_END_CORE;
+        part_.edgeColor = TRUE_END_GOLD;
+        part_.emissiveStrength = emission_;
+        part_.emissivePulseAmount = 0.0f;
+        part_.internalMeshSettings.segments = 64;
+        if (outerScale_.x > 0.0f)
+        {
+            auto glow_ = part_;
+            glow_.scale = outerScale_;
+            glow_.alpha = 0.4f;
+            glow_.emissiveStrength = emission_ * 0.65f;
+            glow_.useMask = true;
+            glow_.maskTexturePath = "Data/Texture/VFX/T_Free_Magic_Noise2.PNG";
+            glow_.maskUVSpeed = {0.15f, -2.0f};
+            asset_.parts.push_back(std::move(glow_));
+        }
+        const auto mesh_ = object_->AddComponent<MeshVFXComponent>();
+        mesh_->SetAsset(asset_);
+        mesh_->Play();
+    };
+    makeLight_(trueEndingHandLight, "Data/Model/VFX/Sphere.glb", 7.0f);
+    makeLight_(trueEndingBladeLight, "__InternalMeshBreathBeam__", 5.0f);
+    makeLight_(trueEndingArc, "__InternalMeshSlashRaisedCrescent__", 8.0f);
+    makeLight_(trueEndingBeam, "__InternalMeshBreathBeam__", 14.0f, {1.65f, 1.65f, 1.0f});
+    makeLight_(trueEndingPillar, "__InternalMeshCylinder__", 10.0f, {1.65f, 1.0f, 1.65f});
+    UpdateTrueEnding(-1.0f, 0.0f);
+}
+
+void BossFinishDirector::ResetTrueEnding()
+{
+    if (trueEndingTime < 0.0f) return;
+    trueEndingTime = -1.0f;
+    for (auto* actor_ : {&trueEndingIdle, &trueEndingAwaken, &trueEndingSweep, &trueEndingStrike})
+    {
+        actor_->object.reset();
+        actor_->ready = false;
+    }
+    for (auto* effect_ : {&trueEndingMud, &trueEndingHandLight, &trueEndingAura, &trueEndingBladeLight,
+        &trueEndingArc, &trueEndingBeam, &trueEndingPillar})
+        effect_->reset();
+    effects.clear();
+}
+
+void BossFinishDirector::AdvanceTrueEnding(float time_)
+{
+    BS_PROFILE_SCOPE("BossFinishDirector::AdvanceTrueEnding");
+    // 手・剣・泥の位置を固定刻みで評価し、シーク先では端数フレームの姿勢も反映する。
+    while (trueEndingTime < time_)
+    {
+        const float next_ = trueEndingTime + FIXED_STEP;
+        if (next_ > time_ && !paused && time_ < TRUE_END_FINISH) break;
+        UpdateTrueEnding(trueEndingTime, (std::min)(next_, time_));
+    }
+}
+
+void BossFinishDirector::UpdateTrueEnding(float previousTime_, float time_)
+{
+    trueEndingTime = time_;
+    const float yaw_ = settings["Player"].value("Yaw", 0.0f);
+    const float radians_ = DirectX::XMConvertToRadians(yaw_);
+    const auto offset_ = [&](float x_, float y_, float z_)
+    {
+        return Vector3{x_ * std::cos(radians_) + z_ * std::sin(radians_), y_,
+            z_ * std::cos(radians_) - x_ * std::sin(radians_)};
+    };
+    const Vector3 playerPosition_{trueEndingPosition};
+    const float turn_ = ShotProgress(time_, TRUE_END_AWAKEN + 0.15f, TRUE_END_AWAKEN + 0.95f);
+    const float playerYaw_ = yaw_ + 180.0f * turn_;
+    PlaceActor(player.object, playerPosition_, playerYaw_);
+
+    const float openingPose_ = (std::max)(0.0f, GetCaptureTime() - settings["ExecutionStart"].get<float>());
+    if (time_ < 0.45f && playerExecution.ready && trueEndingIdle.ready)
+        BlendExecutionPose(playerExecution, trueEndingIdle, openingPose_, time_ / 0.45f);
+    else if (time_ < TRUE_END_AWAKEN)
+        SampleActor(trueEndingIdle, time_ - 0.45f);
+    else if (time_ < TRUE_END_SWEEP)
+        SampleActor(trueEndingAwaken, time_ - TRUE_END_AWAKEN);
+    else if (time_ < TRUE_END_CHARGE)
+        SampleActor(trueEndingSweep, (time_ - TRUE_END_SWEEP) * 1.12f);
+    else if (time_ < TRUE_END_CHARGE + 0.15f && trueEndingSweep.ready && trueEndingStrike.ready)
+        BlendExecutionPose(trueEndingSweep, trueEndingStrike, 1.16f, (time_ - TRUE_END_CHARGE) / 0.15f);
+    else if (time_ < TRUE_END_BEAM)
+    {
+        // 剣を掲げた区間を引き延ばし、振り下ろしの速度と光の溜めを分ける。
+        const float raised_ = ShotProgress(time_, TRUE_END_CHARGE + 0.15f, TRUE_END_CHARGE + 0.55f);
+        const float release_ = ShotProgress(time_, TRUE_END_BEAM - 0.28f, TRUE_END_BEAM);
+        SampleActor(trueEndingStrike, TRUE_END_RAISED_POSE * raised_ +
+            (TRUE_END_RELEASE_POSE - TRUE_END_RAISED_POSE) * release_);
+    }
+    else if (time_ < TRUE_END_BEAM + 1.35f)
+        SampleActor(trueEndingStrike, TRUE_END_RELEASE_POSE + (time_ - TRUE_END_BEAM) * 1.15f);
+    else if (time_ < TRUE_END_BEAM + 1.75f && trueEndingStrike.ready && trueEndingIdle.ready)
+        BlendExecutionPose(trueEndingStrike, trueEndingIdle, 2.3333335f, (time_ - TRUE_END_BEAM - 1.35f) / 0.4f);
+    else
+        SampleActor(trueEndingIdle, time_ - TRUE_END_BEAM - 1.75f);
+
+    const auto weapon_ = manager.Find(settings["Player"].value("WeaponObject", std::string("Weapon")));
+    for (const auto& object_ : {weapon_, manager.Find("Shield")})
+    {
+        if (!object_) continue;
+        if (const auto attachment_ = object_->GetComponent<ModelAttachmentComponent>()) attachment_->SyncAttachment();
+        object_->transform->UpdateWorldMatrix();
+        if (const auto model_ = object_->GetComponent<GltfModelCommponennt>()) model_->UpdateTransform();
+    }
+    auto handPosition_ = playerPosition_ + offset_(0.4f, 1.0f, 0.0f);
+    ReadNodePosition(player.object, "hand_r", handPosition_);
+    auto bladeStart_ = handPosition_;
+    auto bladeEnd_ = handPosition_ + offset_(0.0f, 0.5f, std::cos(DirectX::XM_PI * turn_));
+    ReadNodePosition(weapon_, settings["Player"].value("BladeStartNode", std::string("TrailStart")), bladeStart_);
+    ReadNodePosition(weapon_, settings["Player"].value("BladeEndNode", std::string("TrailEnd")), bladeEnd_);
+
+    const float approach_ = ShotProgress(time_, 0.0f, TRUE_END_HAND_LIGHT);
+    const float recoil_ = ShotProgress(time_, TRUE_END_HAND_LIGHT, TRUE_END_HAND_LIGHT + 0.32f);
+    const float lunge_ = ShotProgress(time_, TRUE_END_LUNGE, TRUE_END_SWEEP_HIT);
+    const float repel_ = ShotProgress(time_, TRUE_END_SWEEP_HIT, TRUE_END_CHARGE);
+    const float dissolve_ = ShotProgress(time_, TRUE_END_PILLAR, TRUE_END_PILLAR + 0.85f);
+    const float distress_ = repel_ * (1.0f - ShotProgress(time_, TRUE_END_CHARGE, TRUE_END_BEAM));
+    const float lungeDepth_ = TRUE_END_IMPACT_DEPTH + 2.9f * approach_ - 0.85f * recoil_ + 1.95f * lunge_;
+    const float mudDepth_ = std::lerp(lungeDepth_, TRUE_END_IMPACT_DEPTH, repel_);
+    const Vector3 mudPosition_ = playerPosition_ + offset_(
+        std::sin(time_ * 24.0f) * 0.14f * distress_, 0.0f, mudDepth_);
+    const Vector3 impact_ = playerPosition_ + offset_(0.0f, 0.0f, TRUE_END_IMPACT_DEPTH);
+
+    const float step_ = time_ - (std::max)(previousTime_, 0.0f);
+    const auto updateParticles_ = [&](const std::shared_ptr<GameObject>& object_, float start_, float stop_, float emission_)
+    {
+        const auto particles_ = object_->GetComponent<ParticleComponent>();
+        particles_->SetRuntimeSuppressed(time_ < start_ || time_ >= stop_ + 1.15f);
+        if (step_ <= 0.0f || time_ <= start_ || time_ >= stop_ + 1.15f) return;
+        // 連続発生のレート 0 は既定レートになるため、粒子を残して発生だけ止める。
+        if (previousTime_ < stop_ && time_ >= stop_) particles_->Stop();
+        particles_->SetEmissionScale(emission_);
+        particles_->Update((std::min)(step_, time_ - start_));
+    };
+
+    PlaceActor(trueEndingMud, mudPosition_ + offset_(0.0f, 0.42f * (1.0f - dissolve_), 0.0f), yaw_);
+    const auto mud_ = trueEndingMud->GetComponent<MeshVFXComponent>();
+    const float mudWidth_ = (0.65f + 0.22f * approach_ + 0.28f * lunge_) * (1.0f - 0.9f * dissolve_);
+    const float flinch_ = recoil_ * (1.0f - ShotProgress(time_, TRUE_END_HAND_LIGHT + 0.32f, TRUE_END_AWAKEN));
+    const float mudHeight_ = (0.4f + 0.42f * lunge_ - 0.22f * repel_ - 0.16f * flinch_ +
+        0.12f * std::sin(time_ * 27.0f) * distress_) * (1.0f - 0.93f * dissolve_);
+    const DirectX::XMFLOAT4 mudColor_{0.14f, 0.025f, 0.042f, 1.0f - dissolve_};
+    mud_->SetRuntimeAppearance({mudWidth_, mudHeight_, mudWidth_}, mudColor_, mudColor_);
+    mud_->SetRuntimeSuppressed(dissolve_ >= 1.0f);
+    mud_->Update(step_);
+    for (auto& track_ : trueEndingMud->GetComponent<ParticleComponent>()->GetTracks())
+        track_.settings.targetPosition = {mudPosition_.x, mudPosition_.y + 0.55f, mudPosition_.z, 1.0f};
+    updateParticles_(trueEndingMud, 0.0f, TRUE_END_PILLAR + 0.55f,
+        std::lerp(0.65f, 1.0f, distress_) * (1.0f - dissolve_));
+
+    PlaceActor(trueEndingHandLight, handPosition_, playerYaw_);
+    PlaceActor(trueEndingAura, playerPosition_ + offset_(0.0f, 0.92f, 0.0f), playerYaw_);
+    updateParticles_(trueEndingHandLight, TRUE_END_HAND_LIGHT, TRUE_END_BEAM + 0.45f, 1.0f);
+    const float handFade_ = ShotProgress(time_, TRUE_END_HAND_LIGHT, TRUE_END_HAND_LIGHT + 0.12f) *
+        (1.0f - ShotProgress(time_, TRUE_END_BEAM, TRUE_END_BEAM + 0.55f));
+    const auto handGlow_ = trueEndingHandLight->GetComponent<MeshVFXComponent>();
+    const float handSize_ = (0.14f + 0.03f * std::sin(time_ * 38.0f)) * handFade_;
+    handGlow_->SetRuntimeSuppressed(handFade_ <= 0.0f);
+    handGlow_->SetRuntimeAppearance({handSize_, handSize_, handSize_},
+        {1.0f, 0.68f, 0.2f, handFade_}, TRUE_END_GOLD);
+
+    const float charge_ = ShotProgress(time_, TRUE_END_CHARGE, TRUE_END_BEAM - 0.15f);
+    const bool gathering_ = time_ >= TRUE_END_CHARGE && time_ < TRUE_END_BEAM;
+    for (auto& track_ : trueEndingAura->GetComponent<ParticleComponent>()->GetTracks())
+    {
+        track_.settings.useTargetAttraction = gathering_ ? 1u : 0u;
+        track_.settings.targetPosition = {bladeEnd_.x, bladeEnd_.y, bladeEnd_.z, 1.0f};
+        track_.settings.targetAttractionRange = 5.0f;
+        track_.settings.targetAttractionStrength = 17.0f * charge_;
+    }
+    updateParticles_(trueEndingAura, TRUE_END_AWAKEN, TRUE_END_BEAM + 0.95f, gathering_ ? 1.0f : 0.74f);
+
+    // 内蔵ビームはローカル +Z へ伸びるため、剣先・着弾点から向きと長さを求める。
+    const auto aimLight_ = [](const std::shared_ptr<GameObject>& object_, const Vector3& start_, const Vector3& end_,
+        float width_, const DirectX::XMFLOAT4& color_, bool visible_)
+    {
+        const Vector3 direction_ = end_ - start_;
+        const float length_ = direction_.Length();
+        const auto mesh_ = object_->GetComponent<MeshVFXComponent>();
+        mesh_->SetRuntimeSuppressed(!visible_ || length_ < 0.001f);
+        if (!visible_ || length_ < 0.001f) return;
+        const float horizontal_ = std::hypot(direction_.x, direction_.z);
+        PlaceActor(object_, start_, DirectX::XMConvertToDegrees(std::atan2(direction_.x, direction_.z)));
+        object_->transform->localRotation.x = DirectX::XMConvertToDegrees(-std::atan2(direction_.y, horizontal_));
+        object_->transform->MarkDirty();
+        object_->transform->UpdateWorldMatrix();
+        mesh_->SetRuntimeAppearance({width_, width_, length_}, color_, TRUE_END_GOLD);
+    };
+    const float bladeFade_ = 1.0f - ShotProgress(time_, TRUE_END_BEAM + 0.25f, TRUE_END_BEAM + 1.8f);
+    aimLight_(trueEndingBladeLight, bladeStart_, bladeEnd_, (0.19f + charge_ * 0.42f) * bladeFade_,
+        {1.0f, 0.75f, 0.24f, bladeFade_}, time_ >= TRUE_END_AWAKEN && bladeFade_ > 0.0f);
+
+    const float arcTravel_ = ShotProgress(time_, TRUE_END_SWEEP_HIT, TRUE_END_SWEEP_HIT + 0.35f);
+    const float arcFade_ = 1.0f - ShotProgress(time_, TRUE_END_SWEEP_HIT + 0.12f, TRUE_END_CHARGE);
+    PlaceActor(trueEndingArc, playerPosition_ + offset_(0.0f, 0.88f, 0.0f), yaw_ + 180.0f);
+    const auto arc_ = trueEndingArc->GetComponent<MeshVFXComponent>();
+    arc_->SetRuntimeSuppressed(time_ < TRUE_END_SWEEP_HIT || arcFade_ <= 0.0f);
+    const float arcRadius_ = std::lerp(0.9f, 5.7f, arcTravel_);
+    arc_->SetRuntimeAppearance({arcRadius_, 0.44f, arcRadius_}, {1.0f, 0.7f, 0.22f, arcFade_}, TRUE_END_GOLD);
+
+    if (previousTime_ < TRUE_END_BEAM && time_ >= TRUE_END_BEAM)
+        trueEndingBeamOrigin = bladeStart_;
+    const Vector3 beamOrigin_{trueEndingBeamOrigin};
+    const Vector3 beamTarget_ = impact_ + offset_(0.0f, 0.48f, 0.0f);
+    const float beamTravel_ = ShotProgress(time_, TRUE_END_BEAM, TRUE_END_PILLAR);
+    const float beamFade_ = 1.0f - ShotProgress(time_, TRUE_END_PILLAR + 0.18f, TRUE_END_PILLAR + 0.72f);
+    aimLight_(trueEndingBeam, beamOrigin_, Vector3::Lerp(beamOrigin_, beamTarget_, beamTravel_),
+        std::lerp(2.6f, 0.5f, 1.0f - beamFade_), {1.0f, 0.92f, 0.66f, beamFade_},
+        time_ >= TRUE_END_BEAM && beamFade_ > 0.0f);
+
+    const float pillarRise_ = ShotProgress(time_, TRUE_END_PILLAR, TRUE_END_PILLAR + 0.36f);
+    const float pillarFade_ = 1.0f - ShotProgress(time_, TRUE_END_PILLAR + 0.65f, TRUE_END_FINISH - 0.55f);
+    const float pillarHeight_ = 0.05f + 5.9f * pillarRise_;
+    PlaceActor(trueEndingPillar, impact_, yaw_);
+    updateParticles_(trueEndingPillar, TRUE_END_PILLAR, TRUE_END_PILLAR + 0.95f, 1.0f);
+    PlaceActor(trueEndingPillar, impact_ + offset_(0.0f, pillarHeight_, 0.0f), yaw_);
+    const auto pillar_ = trueEndingPillar->GetComponent<MeshVFXComponent>();
+    const float pillarRadius_ = std::lerp(0.22f, 1.3f, pillarRise_) * pillarFade_;
+    pillar_->SetRuntimeSuppressed(time_ < TRUE_END_PILLAR || pillarFade_ <= 0.0f);
+    pillar_->SetRuntimeAppearance({pillarRadius_, pillarHeight_, pillarRadius_},
+        {1.0f, 0.83f, 0.38f, pillarFade_}, TRUE_END_GOLD);
+
+    if (!preview)
+    {
+        const auto crossed_ = [previousTime_, time_](float cue_) { return previousTime_ < cue_ && time_ >= cue_; };
+        auto& audio_ = AudioManager::Instance();
+        if (crossed_(0.1f)) audio_.PlaySEByPath("Data/Audio/SE/Sonniss/Shadow/TentacleMotion.wav");
+        if (crossed_(TRUE_END_SWEEP_HIT)) audio_.PlaySEByPath("Data/Audio/SE/Swordsmanship-2.wav");
+        if (crossed_(TRUE_END_BEAM)) audio_.PlaySEByPath("Data/Audio/SE/Sonniss/Dragon/FireWhoosh.wav");
+        if (crossed_(TRUE_END_PILLAR)) audio_.PlaySEByPath("Data/Audio/SE/Sonniss/Presentation/BassDropFast.wav");
+    }
+
+    if (preview && previewCameraOverride) return;
+    Vector3 eye_;
+    Vector3 focus_;
+    float fov_ = 43.0f;
+    if (time_ < TRUE_END_AWAKEN)
+    {
+        if (time_ >= TRUE_END_HAND_LIGHT - 0.18f && time_ < TRUE_END_HAND_LIGHT + 0.16f)
+        {
+            eye_ = handPosition_ + offset_(0.95f, 0.44f, -0.48f);
+            focus_ = handPosition_;
+            fov_ = 35.0f;
+        }
+        else
+        {
+            eye_ = playerPosition_ + offset_(std::lerp(5.4f, 3.6f, approach_), 1.6f, -1.1f);
+            focus_ = playerPosition_ + offset_(0.0f, 0.98f, std::lerp(-2.6f, -1.7f, approach_));
+            fov_ = std::lerp(48.0f, 43.0f, approach_);
+        }
+    }
+    else if (time_ < TRUE_END_LUNGE)
+    {
+        eye_ = playerPosition_ + offset_(3.0f - 0.8f * turn_, 1.14f - 0.45f * turn_, -2.8f);
+        focus_ = playerPosition_ + offset_(0.0f, 0.98f, -0.7f * (1.0f - turn_));
+    }
+    else if (time_ < TRUE_END_CHARGE)
+    {
+        eye_ = playerPosition_ + offset_(4.7f, 1.92f, -2.35f);
+        focus_ = playerPosition_ + offset_(0.0f, 0.85f, -2.6f);
+        fov_ = 49.0f;
+    }
+    else if (time_ < TRUE_END_BEAM)
+    {
+        eye_ = playerPosition_ + offset_(2.65f, 0.98f, -2.7f);
+        focus_ = Vector3::Lerp(playerPosition_ + offset_(0.0f, 1.05f, 0.0f), bladeEnd_, 0.36f * charge_);
+        fov_ = 45.0f;
+    }
+    else
+    {
+        const float widen_ = ShotProgress(time_, TRUE_END_BEAM, TRUE_END_PILLAR + 0.55f);
+        const float settle_ = ShotProgress(time_, TRUE_END_PILLAR + 1.6f, TRUE_END_FINISH);
+        eye_ = playerPosition_ + offset_(std::lerp(4.1f, 8.3f, widen_), std::lerp(1.6f, 4.2f, widen_),
+            std::lerp(0.8f, -2.2f, widen_));
+        focus_ = playerPosition_ + offset_(0.0f, std::lerp(1.0f, 3.8f, widen_), std::lerp(-2.2f, -3.5f, widen_));
+        eye_ = Vector3::Lerp(eye_, playerPosition_ + offset_(2.8f, 1.42f, -3.4f), settle_);
+        focus_ = Vector3::Lerp(focus_, playerPosition_ + offset_(0.0f, 0.95f, 0.0f), settle_);
+        const float shake_ = 0.13f * std::exp(-(time_ - TRUE_END_BEAM) / 0.22f);
+        const auto shakeOffset_ = offset_(std::sin(time_ * 80.0f) * shake_, std::cos(time_ * 94.0f) * shake_, 0.0f);
+        eye_ += shakeOffset_;
+        focus_ += shakeOffset_;
+        fov_ = std::lerp(57.0f, 43.0f, settle_);
+    }
+    const auto& graphics_ = GraphicsDeviceManager::Instance();
+    const float aspect_ = static_cast<float>((std::max)(graphics_.GetRenderWidth(), 1)) / (std::max)(graphics_.GetRenderHeight(), 1);
+    camera->SetLookAt(eye_, focus_, {0, 1, 0});
+    if (aspect_ < GetAspect())
+        fov_ = DirectX::XMConvertToDegrees(2.0f * std::atan(std::tan(DirectX::XMConvertToRadians(fov_) * 0.5f) * GetAspect() / aspect_));
+    camera->SetPerspectiveFov(fov_, aspect_, 0.05f, 300.0f);
 }
 
 bool BossFinishDirector::IsBadEndingImpactShot() const
@@ -1399,8 +1818,17 @@ bool BossFinishDirector::Update(float rawDeltaTime_)
         return true;
     }
     // 最初の短い停止は演出時計だけを進め、通常TimeScaleを変更せずに表現する。
-    Evaluate((std::max)(elapsed - settings["HitStop"].get<float>(), 0.0f), delta_);
-    const float captureAt_ = branchTime_;
+    if (!IsBadEnding() && elapsed >= branchTime_)
+    {
+        if (trueEndingTime < 0.0f)
+        {
+            Evaluate(GetCaptureTime(), 0.0f);
+            BeginTrueEnding();
+        }
+        AdvanceTrueEnding(elapsed >= GetClearTime() ? TRUE_END_FINISH : elapsed - branchTime_);
+    }
+    else Evaluate((std::max)(elapsed - settings["HitStop"].get<float>(), 0.0f), delta_);
+    const float captureAt_ = GetClearTime();
     if (elapsed >= captureAt_ && previous_ < captureAt_) RequestCapture();
     const float hold_ = elapsed - captureAt_;
     if (!preview && completionCommitted && hold_ >= settings["PromptDelay"].get<float>())
@@ -1444,6 +1872,7 @@ void BossFinishDirector::Seek(float time_)
     if (!active || !preview) return;
     Normalize();
     ResetBadEnding();
+    ResetTrueEnding();
     PrepareActor(player,"Player"); PrepareActor(boss,"Boss"); PrepareExecution(); PrepareSprites();
     effectsTime = 0.0f;
     CreateEffects();
@@ -1461,11 +1890,14 @@ void BossFinishDirector::Seek(float time_)
         while (badEndingTime < target_)
             UpdateBadEnding(badEndingTime, (std::min)(badEndingTime + FIXED_STEP, target_));
     }
-    else
+    else if (!IsBadEnding() && elapsed >= branchTime_)
     {
-        Evaluate((std::max)(elapsed - settings["HitStop"].get<float>(), 0.0f), 0.0f);
-        if (elapsed >= branchTime_) RequestCapture();
+        Evaluate(GetCaptureTime(), 0.0f);
+        BeginTrueEnding();
+        AdvanceTrueEnding(elapsed >= GetClearTime() ? TRUE_END_FINISH : elapsed - branchTime_);
+        if (elapsed >= GetClearTime()) RequestCapture();
     }
+    else Evaluate((std::max)(elapsed - settings["HitStop"].get<float>(), 0.0f), 0.0f);
 }
 
 void BossFinishDirector::RequestCapture()
@@ -1486,6 +1918,9 @@ bool BossFinishDirector::ShouldRenderActor(const std::shared_ptr<GameObject>& ob
             object_->GetName() == settings["Player"].value("WeaponObject", std::string("Weapon"));
     }
     if (object_->GetName() == settings.value("StageCenterObject", std::string("Stage"))) return true;
+    if (trueEndingTime >= 0.0f)
+        return object_ == player.object || object_->GetName() == "Shield" ||
+            object_->GetName() == settings["Player"].value("WeaponObject", std::string("Weapon"));
     if (object_ == player.object || object_ == boss.object) return true;
     for (const auto& name_ : settings.at("Equipment")) if (object_->GetName() == name_.get<std::string>()) return true;
     return false;
@@ -1564,7 +1999,7 @@ void BossFinishDirector::RenderOutput(SpriteRenderSystem& sprites_, ID3D11Render
     }
     // 撮影要求の有無・成功とは独立して、本番の既定時刻に一度だけ完了させる。
     // 接触診断NGや再撮影で要求を消費しても、クリア文字と決定入力まで必ず進める。
-    if (!IsBadEnding() && elapsed >= GetEndingBranchTime()) CompleteFinish();
+    if (!IsBadEnding() && elapsed >= GetClearTime()) CompleteFinish();
     context_->OMSetRenderTargets(1, &target_, nullptr);
     const auto* states_ = graphics_.GetRenderState();
     context_->OMSetBlendState(states_->GetBlendState(BlendState::Transparency), nullptr, 0xffffffff);
@@ -1579,7 +2014,7 @@ void BossFinishDirector::RenderOutput(SpriteRenderSystem& sprites_, ID3D11Render
         RenderBadEnding(sprites_, target_, width_, height_);
         return;
     }
-    const float held_ = elapsed - GetCaptureTime() - settings["HitStop"].get<float>();
+    const float held_ = elapsed - GetClearTime();
     if (showFixed && capturedView)
     {
         const float black_[4] = {0,0,0,1}; context_->ClearRenderTargetView(target_, black_);
@@ -1611,6 +2046,12 @@ void BossFinishDirector::RenderOutput(SpriteRenderSystem& sprites_, ID3D11Render
     const float impactAge_ = elapsed - settings["HitStop"].get<float>() - GetImpactTime();
     if (impactConfirmed && impactAge_ >= 0.0f && impactAge_ < 0.12f)
         DrawSprite(sprites_,solidSprite,0,0,width_,height_,{1,1,1,0.65f * std::exp(-impactAge_ / 0.035f)});
+    if (trueEndingTime >= 0.0f)
+    {
+        const float beamAge_ = trueEndingTime - TRUE_END_BEAM;
+        if (beamAge_ >= 0.0f && beamAge_ < 0.2f)
+            DrawSprite(sprites_, solidSprite, 0, 0, width_, height_, {1.0f, 0.95f, 0.80f, 0.68f * std::exp(-beamAge_ / 0.065f)});
+    }
     if (returning) DrawSprite(sprites_,solidSprite,0,0,width_,height_,{0,0,0,std::clamp(returnElapsed/settings["ReturnFade"].get<float>(),0.0f,1.0f)});
 }
 

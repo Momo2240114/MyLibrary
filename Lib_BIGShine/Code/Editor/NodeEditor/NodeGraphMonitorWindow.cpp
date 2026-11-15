@@ -549,6 +549,7 @@ void NodeGraphMonitorWindow::DrawAnimationGraph(const std::shared_ptr<GameObject
         return;
     }
 
+    animation_->PrepareGraphEditor();
     std::vector<AnimGraphNode>& nodes_ = animation_->GetGraphNodes();
     std::vector<AnimTransition>& transitions_ = animation_->GetTransitions();
     const AnimState* activeState_ = animation_->GetCurrentState();

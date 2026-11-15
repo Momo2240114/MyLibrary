@@ -112,6 +112,7 @@ void VignetteSystem::UpdateConstantBuffer(const RenderContext& rc_, const Parame
     cb_.rounded = parameters_.rounded;
     cb_.roundness = parameters_.roundness;
     cb_.opacity = parameters_.opacity;
+    cb_.damageOpacity = parameters_.damageOpacity;
 
     D3D11_MAPPED_SUBRESOURCE mapped_{};
     if (SUCCEEDED(rc_.deviceContext->Map(constantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped_)))

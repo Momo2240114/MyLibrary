@@ -238,18 +238,18 @@
                         "name": "Body.002",
                         "normalScale": 1.0,
                         "occlusionStrength": 0.4869999885559082,
-                        "outlineThicknessOffset": 0.014999999664723873,
-                        "rimStrength": 0.5320000052452087,
-                        "roughness": 0.9980000257492065,
+                        "outlineThicknessOffset": 0.029999999329447746,
+                        "rimStrength": 0.05999999865889549,
+                        "roughness": 1.0,
                         "shaderId": 3,
                         "shadowTint": [
-                            0.3843137323856354,
-                            0.4156862795352936,
-                            0.46666666865348816
+                            0.3824999928474426,
+                            0.414000004529953,
+                            0.44999998807907104
                         ],
-                        "specularStrength": 1.1710000038146973,
-                        "specularToonBlend": 0.2720000147819519,
-                        "toonPbrBlend": 0.8500000238418579,
+                        "specularStrength": 0.33,
+                        "specularToonBlend": 0.25,
+                        "toonPbrBlend": 1.0,
                         "uvAddressMode": 0,
                         "uvOffset": [
                             0.0,
@@ -262,7 +262,7 @@
                         ]
                     },
                     {
-                        "alphaCutoff": 1.0,
+                        "alphaCutoff": 0.5,
                         "alphaMode": 0,
                         "baseColor": [
                             1.0,
@@ -280,19 +280,19 @@
                         "metalness": 0.0,
                         "name": "Face.002",
                         "normalScale": 1.0,
-                        "occlusionStrength": 1.0,
+                        "occlusionStrength": 0.9950000047683716,
                         "outlineThicknessOffset": 0.0020000000949949026,
-                        "rimStrength": 0.35899999737739563,
-                        "roughness": 1.0,
+                        "rimStrength": 0.05999999865889549,
+                        "roughness": 0.8500000238418579,
                         "shaderId": 3,
                         "shadowTint": [
                             0.3824999928474426,
                             0.414000004529953,
                             0.44999998807907104
                         ],
-                        "specularStrength": 2.5290000438690186,
-                        "specularToonBlend": 0.6299999952316284,
-                        "toonPbrBlend": 0.7820000052452087,
+                        "specularStrength": 0.28,
+                        "specularToonBlend": 0.25,
+                        "toonPbrBlend": 0.9940000176429749,
                         "uvAddressMode": 0,
                         "uvOffset": [
                             0.0,
@@ -363,7 +363,7 @@
                             0.0
                         ],
                         "id": 3,
-                        "metalness": 1.0,
+                        "metalness": 0.18,
                         "name": "Squire_Cloth.002",
                         "normalScale": 1.0,
                         "occlusionStrength": 0.9330000281333923,
@@ -376,7 +376,7 @@
                             0.414000004529953,
                             0.44999998807907104
                         ],
-                        "specularStrength": 1.0,
+                        "specularStrength": 0.38,
                         "specularToonBlend": 0.25,
                         "toonPbrBlend": 0.8999999761581421,
                         "uvAddressMode": 0,
@@ -406,7 +406,7 @@
                             1.0
                         ],
                         "id": 4,
-                        "metalness": 1.0,
+                        "metalness": 0.2,
                         "name": "Shiled_Cloth.002",
                         "normalScale": 1.0,
                         "occlusionStrength": 1.0,
@@ -419,7 +419,7 @@
                             0.414000004529953,
                             0.44999998807907104
                         ],
-                        "specularStrength": 1.0,
+                        "specularStrength": 0.4,
                         "specularToonBlend": 0.25,
                         "toonPbrBlend": 0.8500000238418579,
                         "uvAddressMode": 0,
@@ -449,7 +449,7 @@
                             0.0
                         ],
                         "id": 5,
-                        "metalness": 0.03200000151991844,
+                        "metalness": 0.0,
                         "name": "Shiled_Hair.002",
                         "normalScale": 1.0,
                         "occlusionStrength": 1.0,
@@ -462,7 +462,7 @@
                             0.414000004529953,
                             0.44999998807907104
                         ],
-                        "specularStrength": 1.0,
+                        "specularStrength": 0.55,
                         "specularToonBlend": 0.25,
                         "toonPbrBlend": 1.0,
                         "uvAddressMode": 0,
@@ -2114,7 +2114,7 @@
                         },
                         "HitParticleAssetPath": {
                             "type": "string",
-                            "value": "Data/Particle/HitParticle.json"
+                            "value": "Data/Particle/LargeHitSparks_Weak.json"
                         },
                         "HitStopDir": {
                             "type": "float",
@@ -3792,7 +3792,7 @@
                                     "actionUpdate": "",
                                     "attachNodeName": "",
                                     "attachToOwner": false,
-                                    "attackTemplateId": "WeakAttack04Sword",
+                                    "attackTemplateId": "WeakAttack04Sheild",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": true,
                                     "endTime": 0.4000000059604645,
@@ -19903,6 +19903,14 @@
                     {
                         "From": 16,
                         "To": 9
+                    },
+                    {
+                        "From": 6,
+                        "To": 22
+                    },
+                    {
+                        "From": 16,
+                        "To": 22
                     }
                 ],
                 "AirControlAcceleration": 8.0,
@@ -19922,7 +19930,7 @@
                     "MaxPositionCorrection": 0.6000000238418579,
                     "MaximumTotalRotationDegrees": 35.0,
                     "MinimumInputMagnitude": 0.15000000596046448,
-                    "NonLockOnMaximumTargetAngleDegrees": 50.0,
+                    "NonLockOnMaximumTargetAngleDegrees": 75.0,
                     "NonLockOnUseNearestFallback": false,
                     "PositionSpeed": 4.0,
                     "PositionStrength": 0.3499999940395355,
@@ -19994,15 +20002,17 @@
                 "GroundAcceleration": 140.0,
                 "GroundAnimationReferenceSpeed": 16.0,
                 "GroundDeceleration": 160.0,
-                "GroundDirectionTurnSpeed": 1440.0,
+                "GroundDirectionTurnSpeed": 360.0,
                 "GroundDodgeCooldownDuration": 0.5,
+                "GroundFullSpeedTurnMultiplier": 0.949999988079071,
                 "GroundInputReleaseThreshold": 0.10000000149011612,
                 "GroundInputStartThreshold": 0.18000000715255737,
                 "GroundLoopBlendTime": 0.07999999821186066,
                 "GroundReversalDeceleration": 330.0,
                 "GroundStartBlendTime": 0.07999999821186066,
                 "GroundStopBlendTime": 0.05999999865889549,
-                "GroundStopSpeedThreshold": 0.05000000074505806,
+                "GroundStopSpeedThreshold": 0.15000000596046448,
+                "GroundTurnBankAngle": 10.0,
                 "GroundTurnSpeed": 1080.0,
                 "GuardMoveSpeed": 2.0,
                 "GuardSettings": {
@@ -20038,6 +20048,7 @@
                 "JumpImpulse": 13.0,
                 "JumpImpulseFallbackDuration": 0.18000000715255737,
                 "JustDodgeInvincibilityDuration": 0.5,
+                "JustGuardTimeScale": 0.6499999761581421,
                 "JustSuccessHoldDuration": 0.25,
                 "JustSuccessMuffleCutoff": 1200.0,
                 "JustSuccessPresentationEnabled": true,
@@ -21181,12 +21192,14 @@
                 "CommonReactionActionNames": [],
                 "CurrentHealth": 0.0,
                 "DamageActionName": "Health_Hit",
+                "DamageFlashDuration": 0.18000000715255737,
+                "DamageFlashEnabled": false,
                 "HeavyImpactThreshold": 50.0,
                 "HitStopLayerMask": 0,
                 "MaxHealth": 100.0,
                 "MediumImpactThreshold": 20.0,
                 "OverlayDuration": 0.11999999731779099,
-                "OverlayStartActionName": "MaterialOverlay_Start",
+                "OverlayStartActionName": "",
                 "OverlayStopActionName": "MaterialOverlay_Stop",
                 "ReactionActionName": "Player_Hit",
                 "ReactionActionNamesByKind": {
@@ -21596,8 +21609,8 @@
                         "MaximumPositionCorrectionPerFrame": 2.5,
                         "MaximumPositionCorrectionPerSecond": 24.0,
                         "MaximumPositionScale": 1.100000023841858,
-                        "MaximumRotationDegrees": 55.0,
-                        "MaximumRotationDegreesPerSecond": 540.0,
+                        "MaximumRotationDegrees": 80.0,
+                        "MaximumRotationDegreesPerSecond": 900.0,
                         "MaximumTargetTravelAngleDegrees": 15.0,
                         "MaximumTargetTravelDistance": 0.6000000238418579,
                         "MaximumTotalPositionCorrection": 2.5,
@@ -21632,8 +21645,8 @@
                         "MaximumPositionCorrectionPerFrame": 2.5,
                         "MaximumPositionCorrectionPerSecond": 20.0,
                         "MaximumPositionScale": 1.100000023841858,
-                        "MaximumRotationDegrees": 45.0,
-                        "MaximumRotationDegreesPerSecond": 540.0,
+                        "MaximumRotationDegrees": 75.0,
+                        "MaximumRotationDegreesPerSecond": 900.0,
                         "MaximumTargetTravelAngleDegrees": 15.0,
                         "MaximumTargetTravelDistance": 0.6000000238418579,
                         "MaximumTotalPositionCorrection": 1.25,
@@ -21668,8 +21681,8 @@
                         "MaximumPositionCorrectionPerFrame": 2.5,
                         "MaximumPositionCorrectionPerSecond": 20.0,
                         "MaximumPositionScale": 1.100000023841858,
-                        "MaximumRotationDegrees": 45.0,
-                        "MaximumRotationDegreesPerSecond": 540.0,
+                        "MaximumRotationDegrees": 75.0,
+                        "MaximumRotationDegreesPerSecond": 900.0,
                         "MaximumTargetTravelAngleDegrees": 15.0,
                         "MaximumTargetTravelDistance": 0.6000000238418579,
                         "MaximumTotalPositionCorrection": 1.25,
@@ -21704,8 +21717,8 @@
                         "MaximumPositionCorrectionPerFrame": 2.5,
                         "MaximumPositionCorrectionPerSecond": 20.0,
                         "MaximumPositionScale": 1.100000023841858,
-                        "MaximumRotationDegrees": 45.0,
-                        "MaximumRotationDegreesPerSecond": 540.0,
+                        "MaximumRotationDegrees": 75.0,
+                        "MaximumRotationDegreesPerSecond": 900.0,
                         "MaximumTargetTravelAngleDegrees": 15.0,
                         "MaximumTargetTravelDistance": 0.6000000238418579,
                         "MaximumTotalPositionCorrection": 1.25,
@@ -21945,6 +21958,36 @@
             "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
             "TypeName": "JustGuardReactionComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "ContactDistance": 0.1599999964237213,
+                "ContactEnabled": true,
+                "EffectCooldown": 0.11999999731779099,
+                "Feet": [
+                    {
+                        "BoneName": "foot_l",
+                        "EffectScale": 1.0,
+                        "Enabled": true,
+                        "ParticleEffect": "Data/Particle/HumanoidFootDust.json"
+                    },
+                    {
+                        "BoneName": "foot_r",
+                        "EffectScale": 1.0,
+                        "Enabled": true,
+                        "ParticleEffect": "Data/Particle/HumanoidFootDust.json"
+                    }
+                ],
+                "MinimumImpactSpeed": 0.800000011920929,
+                "ReleaseDistance": 0.2800000011920929
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 100,
+            "RequiredForSceneStart": false,
+            "TypeName": "FootContactComponent",
             "UpdateEnabled": true,
             "UpdatePriority": 0
         }

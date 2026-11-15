@@ -16,7 +16,8 @@ cbuffer GBUFFER_DECAL_CONSTANT_BUFFER : register(b10)
     float4 decalDissolveEdgeColor;
     uint decalBlendMode;
     uint decalUseDissolve;
-    float2 decalPadding;
+    uint decalGroundSurface;
+    float decalPadding;
 };
 
 Texture2D<float4> scene_color_texture : register(t0);

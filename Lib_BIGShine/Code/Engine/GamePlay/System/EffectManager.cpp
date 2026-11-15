@@ -14,6 +14,7 @@
 #include "Engine/Graphics/Resource/GLTFModel.h"
 #include "Engine/Graphics/VFX/MeshVFXComponent.h"
 #include "Engine/Physics/HitBox.h"
+#include "Engine/Physics/PhysXSystem.h"
 #include "Engine/Platform/WindowsDialogHelper.h"
 
 #include <DirectXMath.h>
@@ -583,6 +584,7 @@ std::shared_ptr<GameObject> EffectManager::SpawnParticle(
     particle_->ResetUpdateTiming();
     particle_->SetEnabled(true);
     particle_->ResetRuntime();
+    particle_->SetRuntimeSizeScale(request_.sizeScale);
     for (ParticleComponent::EmitterTrack& track_ : particle_->GetTracks())
     {
         // EffectManager経由のParticleは生成Objectの位置を基準にし、Asset内のWorld原点固定を避ける。
@@ -1143,22 +1145,21 @@ void EffectManager::SpawnForHit(const AttackHitEvent& event_)
         request_.normal = event_.hitNormal;
         request_.lifeTime = event_.hitParticleLifeTime;
         request_.normalOffset = event_.hitParticleNormalOffset;
+        const auto attacker_ = event_.attacker.lock();
+        if (attacker_ && attacker_->GetLayer() == LayerType::Player)
+            request_.sizeScale = 2.0f;
         if (event_.hitParticleUseImpactAxis)
         {
             DirectX::XMFLOAT3 attackerDirection_ = event_.hitNormal;
-            if (const std::shared_ptr<GameObject> attacker_ = event_.attacker.lock())
+            if (attacker_ && attacker_->transform)
             {
-                if (attacker_->transform)
+                const DirectX::XMFLOAT3 attackerPosition_ = attacker_->transform->GetWorldPosition();
+                attackerDirection_ =
                 {
-                    const DirectX::XMFLOAT3 attackerPosition_ =
-                        attacker_->transform->GetWorldPosition();
-                    attackerDirection_ =
-                    {
-                        attackerPosition_.x - event_.hitPosition.x,
-                        attackerPosition_.y - event_.hitPosition.y,
-                        attackerPosition_.z - event_.hitPosition.z,
-                    };
-                }
+                    attackerPosition_.x - event_.hitPosition.x,
+                    attackerPosition_.y - event_.hitPosition.y,
+                    attackerPosition_.z - event_.hitPosition.z,
+                };
             }
             request_.overrideAxis = true;
             request_.axis = LerpDirection(
@@ -1181,7 +1182,7 @@ void EffectManager::SpawnForHit(const AttackHitEvent& event_)
             request_.targetAttractionRange = event_.hitParticleTargetAttractionRange;
             request_.targetAttractionFalloff = event_.hitParticleTargetAttractionFalloff;
         }
-        RegisterAttackEffectOwner(SpawnParticle(request_), event_.attacker.lock());
+        RegisterAttackEffectOwner(SpawnParticle(request_), attacker_);
     }
 
     if (!event_.hitMeshVFXAssetPath.empty())
@@ -1244,9 +1245,122 @@ std::shared_ptr<GameObject> EffectManager::SpawnDecal(
     }
     decal_->color = request_.color;
     decal_->SetTexture(request_.texturePath);
+    if (request_.groundSurface) decal_->SetGroundSurface(request_.emissiveStrength, request_.groundMaskPath);
     decal_->SetLifeTime(request_.lifeTime, request_.fadeOutDuration);
     decal_->SetDestroyOnLifeEnd(true);
     return object_;
+}
+
+void EffectManager::SpawnGroundMark(GroundMarkShape shape_, const DirectX::XMFLOAT3& center_,
+    float halfWidth_, float halfLength_, float yaw_)
+{
+    BS_PROFILE_SCOPE("EffectManager::SpawnGroundMark");
+    auto* scene_ = PhysXSystem::GetScene();
+    if (!scene_ || halfWidth_ <= 0.0f || halfLength_ <= 0.0f) return;
+
+    physx::PxRaycastBuffer ground_;
+    physx::PxQueryFilterData filter_;
+    filter_.data.word0 = static_cast<physx::PxU32>(LayerType::Terrain) |
+        static_cast<physx::PxU32>(LayerType::Environment);
+    filter_.flags = physx::PxQueryFlag::eSTATIC | physx::PxQueryFlag::eDYNAMIC;
+    if (!scene_->raycast({ center_.x, center_.y + 2.0f, center_.z }, { 0.0f, -1.0f, 0.0f },
+        32.0f, ground_, physx::PxHitFlag::eDEFAULT, filter_) ||
+        !ground_.hasBlock || ground_.block.normal.y < 0.5f) return;
+
+    using namespace DirectX;
+    const XMFLOAT3 position_{ ground_.block.position.x, ground_.block.position.y, ground_.block.position.z };
+    const XMFLOAT3 normal_{ ground_.block.normal.x, ground_.block.normal.y, ground_.block.normal.z };
+    const auto up_ = XMLoadFloat3(&normal_);
+    const auto heading_ = XMVectorSet(std::sin(yaw_), 0.0f, std::cos(yaw_), 0.0f);
+    const auto right_ = XMVector3Normalize(XMVector3Cross(up_, heading_));
+    const auto forward_ = XMVector3Cross(right_, up_);
+    const XMMATRIX surface_(right_, up_, forward_, XMVectorSet(position_.x, position_.y, position_.z, 1.0f));
+    // デカールはローカルXYで投影するため、画像の上を攻撃の前方へ向ける。
+    const XMMATRIX projection_(right_, forward_, -up_, surface_.r[3]);
+
+    constexpr float GROUND_MARK_LIFETIME = 8.0f;
+    DecalSpawnRequest decal_;
+    decal_.position = position_;
+    decal_.normal = normal_;
+    decal_.scale = { halfWidth_, halfLength_, 0.9f };
+    decal_.normalOffset = 0.0f;
+    decal_.groundSurface = true;
+    decal_.lifeTime = GROUND_MARK_LIFETIME;
+    decal_.fadeOutDuration = 1.25f;
+    const auto placeDecal_ = [&]()
+    {
+        if (const auto object_ = SpawnDecal(decal_))
+        {
+            object_->transform->SetRotation(Vector3(0.0f, 0.0f, 0.0f));
+            object_->transform->localPosition = {};
+            object_->transform->SetParentOverride(true, projection_);
+            object_->UpdateTransform();
+        }
+    };
+
+    const char* scorch_ = "Data/Texture/Decal/ScorchRound.png";
+    if (shape_ == GroundMarkShape::FIRE_BEAM) scorch_ = "Data/Texture/Decal/ScorchBeam.png";
+    if (shape_ == GroundMarkShape::FIRE_FAN) scorch_ = "Data/Texture/Decal/ScorchFan.png";
+    if (shape_ == GroundMarkShape::LIGHTNING_STRIP) scorch_ = "Data/Texture/Decal/ScorchLightning.png";
+
+    decal_.texturePath = "Data/Texture/Decal/GroundCrater.png";
+    decal_.groundMaskPath = scorch_;
+    decal_.color.w = 0.72f;
+    placeDecal_();
+
+    decal_.texturePath = scorch_;
+    decal_.groundMaskPath.clear();
+    decal_.color.w = shape_ == GroundMarkShape::IMPACT ? 0.42f : 0.88f;
+    placeDecal_();
+
+    if (shape_ != GroundMarkShape::IMPACT)
+    {
+        const bool lightning_ = shape_ == GroundMarkShape::LIGHTNING_STRIP;
+        decal_.texturePath = lightning_ ? "Data/Texture/Decal/ScorchViolet.png" : "Data/Texture/Decal/ScorchLava.png";
+        decal_.groundMaskPath = scorch_;
+        decal_.color.w = 0.8f;
+        decal_.emissiveStrength = lightning_ ? 1.35f : 1.75f;
+        decal_.lifeTime = lightning_ ? 4.0f : 2.8f;
+        decal_.fadeOutDuration = 1.3f;
+        placeDecal_();
+
+        if (!lightning_)
+        {
+            ParticleSpawnRequest embers_;
+            embers_.assetPath = "DragonBreathProjectile_TrailResidue";
+            embers_.normal = normal_;
+            embers_.normalOffset = 0.18f;
+            embers_.lifeTime = 1.0f;
+            const int emberCount_ = shape_ == GroundMarkShape::FIRE_IMPACT ? 1 : 3;
+            for (int index_ = 0; index_ < emberCount_; ++index_)
+            {
+                const float across_ = shape_ == GroundMarkShape::FIRE_FAN
+                    ? (index_ - 1) * halfWidth_ * 0.46f : 0.0f;
+                const float along_ = shape_ == GroundMarkShape::FIRE_BEAM
+                    ? (index_ - 1) * halfLength_ * 0.55f
+                    : shape_ == GroundMarkShape::FIRE_FAN ? halfLength_ * 0.28f : 0.0f;
+                const auto sample_ = XMVectorMultiplyAdd(forward_, XMVectorReplicate(along_),
+                    XMVectorMultiplyAdd(right_, XMVectorReplicate(across_), surface_.r[3]));
+                XMStoreFloat3(&embers_.position, sample_);
+                SpawnParticle(embers_);
+            }
+        }
+    }
+
+    MeshVFXSpawnRequest rim_;
+    rim_.assetPath = shape_ == GroundMarkShape::FIRE_FAN ? "GroundScarRimFan" :
+        (shape_ == GroundMarkShape::FIRE_BEAM || shape_ == GroundMarkShape::LIGHTNING_STRIP) ?
+        "GroundScarRimStrip" : "GroundScarRim";
+    rim_.position = position_;
+    rim_.lifeTime = GROUND_MARK_LIFETIME;
+    if (const auto object_ = SpawnMeshVFX(rim_))
+    {
+        const float rise_ = std::clamp(halfWidth_ * 0.065f, 0.12f, 0.4f);
+        object_->transform->localPosition = {};
+        object_->transform->localScale = { halfWidth_, rise_, halfLength_ };
+        object_->transform->SetParentOverride(true, surface_);
+        object_->UpdateTransform();
+    }
 }
 
 // 指定された有効フラグに従ってParticle、MeshVFX、Decalをまとめて生成する
@@ -1899,6 +2013,7 @@ void EffectManager::ReleasePooledEffect(ManagedEffect& effect_)
     if (object_->transform)
     {
         object_->transform->SetParent(nullptr);
+        object_->transform->SetParentOverride(false, DirectX::XMMatrixIdentity());
         object_->transform->localPosition = { 0.0f, 0.0f, 0.0f };
         object_->transform->localRotation = { 0.0f, 0.0f, 0.0f };
         object_->transform->localScale = { 1.0f, 1.0f, 1.0f };

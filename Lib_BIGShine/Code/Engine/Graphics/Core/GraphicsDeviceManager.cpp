@@ -6,6 +6,7 @@
 #include "IMGUI.h"
 
 #include <d3d11.h>
+#include <SDL3/SDL_timer.h>
 #include <d3d11sdklayers.h>
 #include <dxgidebug.h>
 
@@ -790,6 +791,24 @@ void GraphicsDeviceManager::RenderSkyBox(const RenderContext& rc)
     deviceContext_->RSSetState(renderState->GetRasterizerState(RasterizerState::SolidCullBack));
 }
 
+
+namespace
+{
+    constexpr uint64_t DAMAGE_VIGNETTE_DURATION_MS = 240;
+}
+
+void GraphicsDeviceManager::PlayDamageVignette()
+{
+    damageVignetteEndTime = SDL_GetTicks() + DAMAGE_VIGNETTE_DURATION_MS;
+}
+
+float GraphicsDeviceManager::GetDamageVignetteOpacity() const
+{
+    const auto now_ = SDL_GetTicks();
+    if (now_ >= damageVignetteEndTime) return 0.0f;
+    const float remaining_ = static_cast<float>(damageVignetteEndTime - now_) / DAMAGE_VIGNETTE_DURATION_MS;
+    return 0.28f * remaining_ * remaining_;
+}
 
 void GraphicsDeviceManager::ResetFilter()
 {
