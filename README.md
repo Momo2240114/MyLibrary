@@ -19,22 +19,22 @@ BigShine には、シーン編集、描画、物理、アニメーション制�
 
 ## 技術ドキュメント
 
-- [エンジン全体の構成](Docs/Architecture.md)
-- [GameObject / Component](Docs/GameObject_Component.md)
-- [描画システム](Docs/Rendering.md)
-- [Animation Sequence と ActionRegistry](Docs/AnimationSequence.md)
-- [AI / Behavior Graph](Docs/AI_BehaviorTree.md)
-- [Effect System](Docs/EffectSystem.md)
-- [ANATHEMA のゲームシステム](Docs/GameSystems.md)
-- [注目してほしいソースコード](Docs/CodeHighlights.md)
+- [エンジン全体の構成](Lib_BIGShine/Docs/Architecture.md)
+- [GameObject / Component](Lib_BIGShine/Docs/GameObject_Component.md)
+- [描画システム](Lib_BIGShine/Docs/Rendering.md)
+- [Animation Sequence と ActionRegistry](Lib_BIGShine/Docs/AnimationSequence.md)
+- [AI / Behavior Graph](Lib_BIGShine/Docs/AI_BehaviorTree.md)
+- [Effect System](Lib_BIGShine/Docs/EffectSystem.md)
+- [ANATHEMA のゲームシステム](Lib_BIGShine/Docs/GameSystems.md)
+- [注目してほしいソースコード](Lib_BIGShine/Docs/CodeHighlights.md)
 
 ## まず見てほしいコード
 
-1. [GameObject](Code/Engine/GamePlay/Core/Object/GameObject.h) と [GameObjectManager](Code/Engine/GamePlay/Core/Object/GameObjectManager.cpp)
-2. [ActionSequence](Code/Engine/GamePlay/EventSystem/ActionSequence.cpp) と [ActionRegistry](Code/Engine/GamePlay/Serialize/ActionRegistry.cpp)
-3. [AIBehaviorGraph](Code/Engine/GamePlay/AI/AIBehaviorGraph.cpp) と [AIControllerComponent](Code/Engine/GamePlay/AI/AIControllerComponent.cpp)
-4. [ModelRenderSystem](Code/Engine/Graphics/RenderSystem/ModelRenderSystem.cpp)
-5. [PlayerControllerComponent](Code/Game/Charcter/Player/PlayerControllerComponent.cpp)
+1. [GameObject](Lib_BIGShine/Code/Engine/GamePlay/Core/Object/GameObject.h) と [GameObjectManager](Lib_BIGShine/Code/Engine/GamePlay/Core/Object/GameObjectManager.cpp)
+2. [ActionSequence](Lib_BIGShine/Code/Engine/GamePlay/EventSystem/ActionSequence.cpp) と [ActionRegistry](Lib_BIGShine/Code/Engine/GamePlay/Serialize/ActionRegistry.cpp)
+3. [AIBehaviorGraph](Lib_BIGShine/Code/Engine/GamePlay/AI/AIBehaviorGraph.cpp) と [AIControllerComponent](Lib_BIGShine/Code/Engine/GamePlay/AI/AIControllerComponent.cpp)
+4. [ModelRenderSystem](Lib_BIGShine/Code/Engine/Graphics/RenderSystem/ModelRenderSystem.cpp)
+5. [PlayerControllerComponent](Lib_BIGShine/Code/Game/Charcter/Player/PlayerControllerComponent.cpp)
 
 ## 動画・ポートフォリオ
 
@@ -51,4 +51,4 @@ Visual Studio 2022 用の `BIGShine.sln`（C++20）が含まれています。�
 
 ---
 
-各システムの説明とコード上の根拠は [CodeHighlights](Docs/CodeHighlights.md) および各技術資料を参照してください。
+各システムの説明とコード上の根拠は [CodeHighlights](Lib_BIGShine/Docs/CodeHighlights.md) および各技術資料を参照してください。
