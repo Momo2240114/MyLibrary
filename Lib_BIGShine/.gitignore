@@ -1,0 +1,16 @@
+# 親の.gitignoreで無視されるMarkdownのうち、公開用ドキュメントだけを含める。
+*.md
+!AGENTS.md
+!**/AGENTS.md
+!External/**/*.md
+
+!/README.md
+Docs/*.md
+!Docs/Architecture.md
+!Docs/GameObject_Component.md
+!Docs/Rendering.md
+!Docs/AnimationSequence.md
+!Docs/AI_BehaviorTree.md
+!Docs/EffectSystem.md
+!Docs/GameSystems.md
+!Docs/CodeHighlights.md
