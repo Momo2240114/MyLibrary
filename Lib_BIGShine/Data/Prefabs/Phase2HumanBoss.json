@@ -14525,6 +14525,36 @@
                     "TypeName": "ParticleComponent",
                     "UpdateEnabled": true,
                     "UpdatePriority": 20
+                },
+                {
+                    "Data": {
+                        "ContactDistance": 0.16,
+                        "ContactEnabled": true,
+                        "EffectCooldown": 0.1,
+                        "Feet": [
+                            {
+                                "BoneName": "foot_l",
+                                "EffectScale": 1.25,
+                                "Enabled": true,
+                                "ParticleEffect": "Data/Particle/HumanoidFootDust.json"
+                            },
+                            {
+                                "BoneName": "foot_r",
+                                "EffectScale": 1.25,
+                                "Enabled": true,
+                                "ParticleEffect": "Data/Particle/HumanoidFootDust.json"
+                            }
+                        ],
+                        "MinimumImpactSpeed": 0.65,
+                        "ReleaseDistance": 0.3
+                    },
+                    "Enabled": true,
+                    "LateUpdateEnabled": true,
+                    "LateUpdatePriority": 100,
+                    "RequiredForSceneStart": false,
+                    "TypeName": "FootContactComponent",
+                    "UpdateEnabled": true,
+                    "UpdatePriority": 0
                 }
             ],
             "Layer": 2,

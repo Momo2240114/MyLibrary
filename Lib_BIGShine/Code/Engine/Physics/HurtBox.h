@@ -26,6 +26,7 @@ public:
     void SetInvincible(bool invincible_);
     // 行動中の無敵を、通常の回避フラグや報酬Timerと独立して切り替える。
     void SetTemporaryInvincible(bool invincible_) { temporaryInvincible = invincible_; }
+    bool IsTemporaryInvincible() const { return temporaryInvincible; }
     // 回避などの明示無敵を変更せず、指定時間の被弾拒否を追加する。
     void AddInvincibilityTime(float duration_);
     bool IsInvincible() const { return invincible || temporaryInvincible || grantedInvincibilityTimer > 0.0f; }

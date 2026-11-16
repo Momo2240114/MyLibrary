@@ -7395,7 +7395,7 @@
                 "PlayerObjectName": "PlayerModel",
                 "RepeatActionPenaltyRate": 0.3499999940395355,
                 "RunSpeed": 25.0,
-                "SecondUltimateHpRate": 0.10000000149011612,
+                "SecondUltimateHpRate": 0.15000000596046448,
                 "SecondUltimateTriggered": true,
                 "SideAngleDegrees": 100.0,
                 "SidePunishMultiplier": 1.350000023841858,

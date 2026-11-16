@@ -223,6 +223,7 @@ public:
     const std::vector<DragonActionDefinition>& GetActionDefinitions() const { return actionDefinitions; }
     const SkillExecution& GetSkillExecution() const { return skillExecution; }
     void RequestDamageReaction();
+    bool RequestSpecialAction(bool dive_);
     bool IsUltimateDamageReductionActive() const { return ultimateDamageReductionActive; }
     void ForceAction(DRAGON_ACTION_TYPE action_);
     void SetCanCancel(bool enabled_);
@@ -476,7 +477,7 @@ private:
     float airHoverHeightTolerance = 0.25f;
     int maxAirAttackCount = 1;
     float firstUltimateHpRate = 0.5f;
-    float secondUltimateHpRate = 0.1f;
+    float secondUltimateHpRate = 0.15f;
     float ultimateDamageRate = 0.1f;
     float turnSpeed = 6.0f;
     float walkSpeed = 5.0f;
@@ -523,6 +524,8 @@ private:
     bool firstUltimateTriggered = false;
     bool secondUltimateTriggered = false;
     bool pendingUltimateAction = false;
+    bool pendingMeteorAction = false;
+    bool pendingDiveAction = false;
     bool ultimateDamageReductionActive = false;
     bool hasPreviousHpRateForUltimate = false;
     float previousHpRateForUltimate = 1.0f;

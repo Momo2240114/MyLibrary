@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Engine/GamePlay/Core/Component/ComponentBase.h"
+#include "Engine/Graphics/RenderSystem/RadialBlurSystem.h"
 
 #include <DirectXMath.h>
 #include <cstdint>
@@ -14,6 +15,9 @@ class DragonTailCommandIKComponent;
 class AttackEmitterComponent;
 class GameObject;
 class MeshVFXComponent;
+class ColliderComponent;
+class HurtBox;
+class CameraActionDirectorComponent;
 
 // Dragonのブレスや尻尾攻撃の判定・VFX発生を、首/尻尾IKの位置に合わせて制御するComponent。
 class DragonAttackControllerComponent : public Component
@@ -44,6 +48,13 @@ public:
     void StopSpinSweep();
     // 着地や踏みつけの瞬間に、足元周辺へ範囲攻撃と岩VFXを発生させる。
     void PlayStamp();
+    void PlaySpecialImpact(const DirectX::XMFLOAT3& position_, float radius_, float damage_, const std::string& effectPath_);
+    bool BeginSpecialAction(bool dive_);
+    bool IsSpecialActionActive() const { return specialPhase >= 0; }
+    bool IsSpecialDive() const { return specialDive; }
+    int GetSpecialPhase() const { return specialPhase; }
+    void StopSpecialAction();
+    void BeginSpecialCameraReturn();
     // 現在このComponentが生成した攻撃判定を停止する。
     void StopAttack();
     // ブレス攻撃の危険範囲だけを事前表示する。
@@ -64,6 +75,64 @@ public:
     void ShowStampDangerArea();
 
 private:
+    void UpdateSpecialAction(float deltaTime_);
+    bool LoadSpecialSettings();
+    bool ResolveSpecialGround(const DirectX::XMFLOAT3& position_, DirectX::XMFLOAT3& ground_) const;
+    void ReleaseSpecialIntro();
+    void PlaceSpecialDragon(const DirectX::XMFLOAT3& position_);
+    void SpawnSpecialImpact(const DirectX::XMFLOAT3& position_, float radius_, bool final_, bool applyDamage_ = true);
+    bool IsSpecialTargetSheltered() const;
+    void DrawSpecialGui();
+
+    struct SpecialMeteor
+    {
+        DirectX::XMFLOAT3 ground{};
+        std::shared_ptr<GameObject> body;
+        std::shared_ptr<GameObject> trail;
+        std::shared_ptr<GameObject> warning;
+        std::shared_ptr<GameObject> obstacle;
+        float radius = 1.0f;
+        float coverRadius = 1.0f;
+        float height = 1.0f;
+        float warningRemaining = 0.0f;
+        bool landed = false;
+        bool final = false;
+    };
+    int specialPhase = -1;
+    bool specialDive = false;
+    float specialTimer = 0.0f;
+    int specialWave = 0;
+    DirectX::XMFLOAT3 specialStart{};
+    DirectX::XMFLOAT3 specialCenter{};
+    DirectX::XMFLOAT3 specialTarget{};
+    std::shared_ptr<GameObject> specialDanger;
+    std::vector<SpecialMeteor> specialMeteors;
+    std::vector<std::shared_ptr<GameObject>> specialAura;
+    std::vector<std::weak_ptr<GameObject>> specialDecals;
+    std::vector<std::pair<std::weak_ptr<Component>, bool>> specialPlayerSuppression;
+    std::vector<std::pair<std::weak_ptr<HurtBox>, bool>> specialPlayerInvincibility;
+    std::weak_ptr<CameraActionDirectorComponent> specialCamera;
+    std::weak_ptr<ColliderComponent> specialCollider;
+    DirectX::XMFLOAT3 specialRotation{};
+    DirectX::XMFLOAT3 specialWorldScale{1.0f,1.0f,1.0f};
+    DirectX::XMFLOAT3 specialAirPosition{};
+    float specialGroundOffset = 0.0f;
+    float specialAngle = 0.0f;
+    float specialElapsed = 0.0f;
+    float specialAppliedBlurRadius = 0.0f;
+    bool specialMovementSuppressed = false;
+    bool specialAnimationControlled = false;
+    bool specialGravity = false;
+    bool specialPhysicsControlsTransform = false;
+    bool specialIntroLocked = false;
+    bool specialPreviousPlayerLock = false;
+    bool specialCameraReturning = false;
+    bool specialCompleted = false;
+    unsigned int specialSequenceGeneration = 0;
+    int specialGameState = -1;
+    RadialBlurSystem::Parameters specialPreviousBlur;
+    nlohmann::json specialSettings;
+    std::string specialStatus;
     // 無効化・撃破・破棄済みのドラゴンから予告や攻撃を再生成しない。
     bool CanSpawnAttack() const;
 

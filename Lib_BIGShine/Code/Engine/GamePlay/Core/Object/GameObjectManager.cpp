@@ -2546,10 +2546,12 @@ void GameObjectManager::LoadSceneData(const std::string& sceneName_, const nlohm
 }
 
 // 独立したWorkspaceのManagerには適用せず、Sceneのテスト実行だけを制御する。
-void GameObjectManager::EnableEditorPlayMode()
+void GameObjectManager::EnableEditorPlayMode(bool followActiveSession_)
 {
     editorPlayModeEnabled = true;
-    editorPlayMode = SceneManager::IsEditorPlaySessionActive() ? EditorPlayMode::PLAY : EditorPlayMode::EDITOR;
+    editorPlayMode = followActiveSession_ && SceneManager::IsEditorPlaySessionActive()
+        ? EditorPlayMode::PLAY
+        : EditorPlayMode::EDITOR;
 }
 
 // 戦闘中のHPや生成Objectを初期状態へ混ぜず、Play開始時と同じSceneを配布する。

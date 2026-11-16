@@ -2,6 +2,9 @@
 
 #include "DragonAttackControllerComponent.h"
 #include "DragonAIComponent.h"
+#include "Engine/GamePlay/VFX/DangerAreaComponent.h"
+#include "Engine/GamePlay/Core/Component/CharacterMovementComponent.h"
+#include "Engine/Graphics/Resource/Animation/AnimationControllerComponent.h"
 #include "Engine/Audio/AudioManager.h"
 
 #include "Engine/GamePlay/Combat/AttackEffectHitComponent.h"
@@ -197,6 +200,7 @@ const std::string& DragonAttackControllerComponent::GetName() const
 void DragonAttackControllerComponent::Start()
 {
     EnsureDependencies();
+    LoadSpecialSettings();
     RegisterActions();
 }
 
@@ -206,6 +210,7 @@ void DragonAttackControllerComponent::Update(float deltaTime_)
 
     EnsureDependencies();
     UpdateRuntimeAttacks(deltaTime_);
+    UpdateSpecialAction(deltaTime_);
     UpdateBreathVFX(deltaTime_);
     UpdatePendingStampRocks(deltaTime_);
 }
@@ -522,6 +527,7 @@ void DragonAttackControllerComponent::OnDestroy()
 void DragonAttackControllerComponent::StopAttack()
 {
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::StopAttack");
+    StopSpecialAction();
     pendingBeamFrameValid = false;
     pendingBeamFrameTimer = 0.0f;
     pendingBeamEmitter.reset();
@@ -582,6 +588,8 @@ void DragonAttackControllerComponent::RegisterActions()
     registerAction_(ACTION_SHOW_SPIN_SWEEP_DANGER_AREA, [this]() { ShowSpinSweepDangerArea(); });
     registerAction_(ACTION_SHOW_STAMP_DANGER_AREA, [this]() { ShowStampDangerArea(); });
     registerAction_(ACTION_STOP, [this]() { StopAttack(); });
+    registerAction_("DragonSpecial_ReturnCamera", [this]() { BeginSpecialCameraReturn(); });
+    registerAction_("DragonSpecial_Abort", [this]() { StopSpecialAction(); });
 }
 
 void DragonAttackControllerComponent::UnregisterActions()
@@ -1687,6 +1695,60 @@ float DragonAttackControllerComponent::ResolveSpinSweepRadius() const
     return rootDistance_ + tailLength_ + padding_;
 }
 
+void DragonAttackControllerComponent::PlaySpecialImpact(
+    const DirectX::XMFLOAT3& position_, float radius_, float damage_, const std::string& effectPath_)
+{
+    BS_PROFILE_SCOPE("DragonAttackControllerComponent::PlaySpecialImpact");
+    if (!CanSpawnAttack()) return;
+    const auto owner_ = GetGameObject();
+    if (!owner_) return;
+    const auto attack_ = owner_->GetManager().Create("RuntimeDragonSpecialImpact");
+    if (!attack_) return;
+    if (!attack_->transform)
+    {
+        owner_->GetManager().Destroy(attack_);
+        return;
+    }
+    attack_->SetNoSaveObject();
+    attack_->SetLayer(LayerType::EnemyBullet);
+    attack_->transform->localPosition = position_;
+    attack_->transform->MarkDirty();
+    const auto hit_ = attack_->AddComponent<AttackEffectHitComponent>();
+    if (!hit_)
+    {
+        owner_->GetManager().Destroy(attack_);
+        return;
+    }
+    const uint32_t id_ = CreateAttackInstanceId();
+    AttackEffectHitShapeTemplate shape_;
+    shape_.shape = ATTACK_HIT_SHAPE::SPHERE;
+    shape_.radius = (std::max)(0.01f, radius_);
+    shape_.activeEndTime = 0.15f;
+    shape_.allowMultiHit = false;
+    hit_->SetOwner(owner_.get());
+    hit_->SetAttackInstanceId(id_);
+    hit_->SetHitGroupId(id_);
+    hit_->SetDamage((std::max)(0.0f, damage_));
+    hit_->SetDamageRate(0.0f);
+    hit_->SetFixedDamage(0.0f);
+    hit_->SetDamageApplyType(DAMAGE_APPLY_TYPE::SINGLE_HIT);
+    hit_->SetMaxHitCount(1);
+    hit_->SetAllowMultiHit(false);
+    // ガードだけを禁止し、無敵時間とジャスト回避は既存のHitBox経路で判定する。
+    hit_->SetGuardProperties(false, false);
+    hit_->SetEffectType(ATTACK_EFFECT_TYPE::INSTANT_AREA);
+    hit_->SetLifeTime(0.2f);
+    hit_->SetDestroyOnLifeEnd(false);
+    hit_->SetHitShapes({ shape_ });
+    hit_->Play();
+    RuntimeAttack runtime_;
+    runtime_.object = attack_;
+    runtime_.hitComponent = hit_;
+    runtime_.lifeTimer = 0.2f;
+    runtimeAttacks.push_back(runtime_);
+    owner_->GetManager().GetEffectManager().SpawnImpactEffectAsset(effectPath_, position_, { 0.0f, 1.0f, 0.0f }, owner_);
+}
+
 void DragonAttackControllerComponent::SpawnStampHit()
 {
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::SpawnStampHit");
@@ -1937,6 +1999,7 @@ uint32_t DragonAttackControllerComponent::CreateAttackInstanceId()
 
 void DragonAttackControllerComponent::Gui()
 {
+    DrawSpecialGui();
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::Gui");
 
     ImGui::InputText("Action Category", &actionCategory);

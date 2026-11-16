@@ -25,6 +25,8 @@ PrefabWorkspaceWindow::PrefabWorkspaceWindow(GameObjectManager* manager_)
 {
     isVisible = false;
     previewGameObjectManager->Initialize();
+    // Preview側で通常のRuntime更新やStartを実行しない。
+    previewGameObjectManager->EnableEditorPlayMode(false);
     gameObjectManager = previewGameObjectManager.get();
     assetBrowser.SetPrefabOpenHandler(
         [this](const std::filesystem::path& prefabPath_)

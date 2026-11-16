@@ -1,0 +1,106 @@
+{
+  "Entries": [
+    {
+      "NormalOffset": 0.2,
+      "Color": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "Type": 0,
+      "FadeOutDuration": 0.0,
+      "Enabled": true,
+      "AssetPath": "Data/Particle/DragonBreathProjectile_Impact.json",
+      "Scale": [
+        20.0,
+        20.0,
+        20.0
+      ],
+      "LifeTime": 3.5,
+      "EmitterName": ""
+    },
+    {
+      "NormalOffset": 0.2,
+      "Color": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "Type": 0,
+      "FadeOutDuration": 0.0,
+      "Enabled": true,
+      "AssetPath": "Data/Particle/TransitionGroundImpact.json",
+      "Scale": [
+        20.0,
+        20.0,
+        20.0
+      ],
+      "LifeTime": 4.5,
+      "EmitterName": ""
+    },
+    {
+      "NormalOffset": 0.2,
+      "Color": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "Type": 0,
+      "FadeOutDuration": 0.0,
+      "Enabled": true,
+      "AssetPath": "Data/Particle/DragonFootDust.json",
+      "Scale": [
+        20.0,
+        20.0,
+        20.0
+      ],
+      "LifeTime": 5.0,
+      "EmitterName": ""
+    },
+    {
+      "NormalOffset": 0.03,
+      "Color": [
+        1.0,
+        0.5,
+        0.2,
+        0.95
+      ],
+      "Type": 2,
+      "FadeOutDuration": 6.0,
+      "Enabled": true,
+      "AssetPath": "Data/Texture/Decal/ScorchRound.png",
+      "Scale": [
+        65.0,
+        4.0,
+        65.0
+      ],
+      "LifeTime": 24.0,
+      "EmitterName": ""
+    },
+    {
+      "NormalOffset": 0.03,
+      "Color": [
+        1.0,
+        0.5,
+        0.2,
+        0.8
+      ],
+      "Type": 2,
+      "FadeOutDuration": 6.0,
+      "Enabled": true,
+      "AssetPath": "Data/Texture/Decal/ScorchLava.png",
+      "Scale": [
+        65.0,
+        4.0,
+        65.0
+      ],
+      "LifeTime": 24.0,
+      "EmitterName": ""
+    }
+  ],
+  "AssetType": "ImpactEffect",
+  "AssetVersion": 1
+}

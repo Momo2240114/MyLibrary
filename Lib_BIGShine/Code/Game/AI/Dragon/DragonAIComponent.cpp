@@ -160,6 +160,9 @@ const std::string& DragonAIComponent::GetName() const
 
 void DragonAIComponent::Start()
 {
+    firstUltimateTriggered = false;
+    secondUltimateTriggered = false;
+    pendingMeteorAction = pendingDiveAction = false;
     ReloadSkillDefinitions(skillDefinitionsPath);
     // 依存コンポーネント、アクション定義、BehaviorGraph、ActionRegistryを初期化してAIを起動可能にする。
     randomEngine.seed(std::random_device{}());
@@ -204,12 +207,34 @@ void DragonAIComponent::Update(float deltaTime_)
     UpdateContext();
     if (IsEnemyAILockedByGameMode())
     {
+        if (const auto owner_ = GetGameObject())
+            if (const auto attacks_ = owner_->GetComponent<DragonAttackControllerComponent>()) attacks_->StopSpecialAction();
         // GameMode演出中はAI判断と攻撃遷移を進めず、演出Animationを上書きしない。
         StopMovement();
         SendRuntimeToBlackboard();
         return;
     }
     UpdateUltimateTrigger();
+    if (runtime.currentAction == DRAGON_ACTION_TYPE::ULTIMATE_ATTACK)
+    {
+        const auto owner_ = GetGameObject();
+        const auto attacks_ = owner_ ? owner_->GetComponent<DragonAttackControllerComponent>() : nullptr;
+        if (health && health->IsDead())
+        {
+            if (attacks_) attacks_->StopSpecialAction();
+            SetAirbornePhysicsEnabled(false);
+            StartAction(DRAGON_ACTION_TYPE::AIR_DEATH_FALL_START);
+        }
+        else if (!attacks_ || !attacks_->IsSpecialActionActive())
+        {
+            SetAirbornePhysicsEnabled(false);
+            ultimateDamageReductionActive = false;
+            FinishRecovery();
+        }
+        SendRuntimeToBlackboard();
+        return;
+    }
+    if (runtime.currentAction == DRAGON_ACTION_TYPE::ULTIMATE_ATTACK) return;
     UpdateCooldowns(deltaTime_);
     if (skillActionRunning)
     {
@@ -312,6 +337,9 @@ void DragonAIComponent::Update(float deltaTime_)
             FinishRecovery();
         }
     }
+
+    UpdateUltimateTrigger();
+    if (runtime.currentAction == DRAGON_ACTION_TYPE::ULTIMATE_ATTACK) return;
 
     if (behaviorGraphEnabled && HasBehaviorGraph())
     {
@@ -627,8 +655,8 @@ void DragonAIComponent::Serialize(nlohmann::json& json_) const
     json_["FirstUltimateHpRate"] = firstUltimateHpRate;
     json_["SecondUltimateHpRate"] = secondUltimateHpRate;
     json_["UltimateDamageRate"] = ultimateDamageRate;
-    json_["FirstUltimateTriggered"] = firstUltimateTriggered;
-    json_["SecondUltimateTriggered"] = secondUltimateTriggered;
+    // 発動履歴は戦闘ごとの状態なのでSceneには保存しない。
+
     json_["TurnSpeed"] = turnSpeed;
     json_["WalkSpeed"] = walkSpeed;
     json_["RunSpeed"] = runSpeed;
@@ -714,10 +742,10 @@ void DragonAIComponent::Deserialize(const nlohmann::json& json_)
     airHoverHeightTolerance = json_.value("AirHoverHeightTolerance", 0.25f);
     maxAirAttackCount = json_.value("MaxAirAttackCount", 1);
     firstUltimateHpRate = json_.value("FirstUltimateHpRate", 0.5f);
-    secondUltimateHpRate = json_.value("SecondUltimateHpRate", 0.1f);
+    secondUltimateHpRate = json_.value("SecondUltimateHpRate", 0.15f);
     ultimateDamageRate = json_.value("UltimateDamageRate", 0.1f);
-    firstUltimateTriggered = json_.value("FirstUltimateTriggered", false);
-    secondUltimateTriggered = json_.value("SecondUltimateTriggered", false);
+    firstUltimateTriggered = false;
+    secondUltimateTriggered = false;
     turnSpeed = json_.value("TurnSpeed", 6.0f);
     walkSpeed = json_.value("WalkSpeed", 5.0f);
     runSpeed = json_.value("RunSpeed", 12.0f);
@@ -788,6 +816,7 @@ void DragonAIComponent::Deserialize(const nlohmann::json& json_)
 
 bool DragonAIComponent::RequestAction(DRAGON_ACTION_TYPE action_)
 {
+    if (runtime.currentAction == DRAGON_ACTION_TYPE::ULTIMATE_ATTACK) return false;
     BS_PROFILE_SCOPE("DragonAIComponent::RequestAction");
 
     if (action_ == DRAGON_ACTION_TYPE::TURN_TO_PLAYER)
@@ -927,6 +956,7 @@ bool DragonAIComponent::RequestWeightedAction()
 void DragonAIComponent::RequestDamageReaction()
 {
     BS_PROFILE_SCOPE("DragonAIComponent::RequestDamageReaction");
+    if (runtime.currentAction == DRAGON_ACTION_TYPE::ULTIMATE_ATTACK) return;
 
     // ダメージ反応は現在の空中/地上状態で使うリアクションを切り替える。
     if (runtime.currentAction == DRAGON_ACTION_TYPE::DEATH ||
@@ -944,6 +974,11 @@ void DragonAIComponent::RequestDamageReaction()
 void DragonAIComponent::ForceAction(DRAGON_ACTION_TYPE action_)
 {
     BS_PROFILE_SCOPE("DragonAIComponent::ForceAction");
+    if (action_ == DRAGON_ACTION_TYPE::ULTIMATE_ATTACK) { RequestSpecialAction(firstUltimateTriggered); return; }
+    if (runtime.currentAction == DRAGON_ACTION_TYPE::ULTIMATE_ATTACK &&
+        (action_ == DRAGON_ACTION_TYPE::GET_HIT || action_ == DRAGON_ACTION_TYPE::AIR_GET_HIT)) return;
+    if (const auto owner_ = GetGameObject())
+        if (const auto attacks_ = owner_->GetComponent<DragonAttackControllerComponent>()) attacks_->StopSpecialAction();
 
     // Forceはデバッグやイベント用の即時遷移で、通常のキャンセル可否やクールダウンを無視する。
     if (action_ == DRAGON_ACTION_TYPE::IDLE)
@@ -1034,6 +1069,12 @@ void DragonAIComponent::NotifyAIActionEnd()
 
 void DragonAIComponent::CompleteActionEnd()
 {
+    if (runtime.currentAction == DRAGON_ACTION_TYPE::ULTIMATE_ATTACK)
+    {
+        const auto owner_ = GetGameObject();
+        const auto attacks_ = owner_ ? owner_->GetComponent<DragonAttackControllerComponent>() : nullptr;
+        if (attacks_ && attacks_->IsSpecialActionActive()) return;
+    }
     if (skillActionRunning)
     {
         skillExecution.Stop();
@@ -1078,7 +1119,8 @@ void DragonAIComponent::CompleteActionEnd()
     const DRAGON_ACTION_TYPE completedAction_ = runtime.currentAction;
     if (completedAction_ == DRAGON_ACTION_TYPE::TAKE_OFF)
     {
-        pendingAirAttackDecision = true;
+        pendingAirAttackDecision = false;
+        pendingAirLandingDecision = true;
         airAttackCount = 0;
         StartAction(DRAGON_ACTION_TYPE::AIR_HOLD);
         return;
@@ -1279,12 +1321,7 @@ void DragonAIComponent::AddActionCandidates(
     {
         AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::GROUND_STAMP, 6.5f);
     }
-    if ((context_.isPlayerUnderBody || context_.playerHorizontalDistance <= biteDistance + 1.5f) &&
-        context_.canUseTakeOff)
-    {
-        const float takeOffWeight_ = context_.isPlayerInFront ? 0.7f : 2.0f;
-        AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::TAKE_OFF, takeOffWeight_);
-    }
+    // 通常AIからの離陸は特殊行動へ置き換える。
     const bool canUseTurnTailSweep_ =
         context_.canUseTailSweep &&
         CanUseTurnTailSweep(context_);
@@ -1806,7 +1843,8 @@ void DragonAIComponent::UpdateContext()
     context.canUseTailSweep =
         IsActionAvailable(DRAGON_ACTION_TYPE::TURN_TAIL_SWEEP) &&
         CanUseTurnTailSweep(context);
-    context.canUseTakeOff = IsActionAvailable(DRAGON_ACTION_TYPE::TAKE_OFF);
+    // 離陸は通常AIの候補から外し、特殊行動からだけ開始する。
+    context.canUseTakeOff = false;
     context.canUseRunCharge = IsActionAvailable(DRAGON_ACTION_TYPE::RUN_CHARGE);
     context.canUseSpinSweep =
         IsActionAvailable(DRAGON_ACTION_TYPE::SPIN_TAIL_SWEEP) &&
@@ -1816,64 +1854,44 @@ void DragonAIComponent::UpdateContext()
 
 void DragonAIComponent::UpdateUltimateTrigger()
 {
-    BS_PROFILE_SCOPE("DragonAIComponent::UpdateUltimateTrigger");
-
-    if (aiState == DRAGON_AI_STATE::DEAD ||
-        !health ||
-        health->IsDead())
-    {
-        ultimateDamageReductionActive = false;
-        return;
-    }
-
-    const float currentHpRate_ = context.hpRate;
-    if (!hasPreviousHpRateForUltimate)
-    {
-        hasPreviousHpRateForUltimate = true;
-        previousHpRateForUltimate = currentHpRate_;
-        return;
-    }
-
-    const float firstThreshold_ = std::clamp(firstUltimateHpRate, 0.0f, 1.0f);
-    const float secondThreshold_ = std::clamp(secondUltimateHpRate, 0.0f, 1.0f);
-    const bool crossedFirstThreshold_ =
-        !firstUltimateTriggered &&
-        previousHpRateForUltimate > firstThreshold_ &&
-        currentHpRate_ <= firstThreshold_;
-    const bool crossedSecondThreshold_ =
-        !secondUltimateTriggered &&
-        previousHpRateForUltimate > secondThreshold_ &&
-        currentHpRate_ <= secondThreshold_;
-
-    previousHpRateForUltimate = currentHpRate_;
-
-    if (crossedFirstThreshold_)
-    {
-        firstUltimateTriggered = true;
-        pendingUltimateAction = true;
-    }
-    if (crossedSecondThreshold_)
-    {
-        secondUltimateTriggered = true;
-        pendingUltimateAction = true;
-    }
-
-    ultimateDamageReductionActive =
-        pendingUltimateAction ||
-        runtime.currentAction == DRAGON_ACTION_TYPE::ULTIMATE_ATTACK;
-
-    if (!pendingUltimateAction ||
-        runtime.currentAction == DRAGON_ACTION_TYPE::ULTIMATE_ATTACK ||
-        IsDeathAction(runtime.currentAction))
-    {
-        return;
-    }
-
-    pendingUltimateAction = false;
-    ultimateDamageReductionActive = true;
-    ForceAction(DRAGON_ACTION_TYPE::ULTIMATE_ATTACK);
+    if (!health || health->IsDead() || aiState == DRAGON_AI_STATE::DEAD) return;
+    // 一度跨いだ条件は回復しても予約を保持し、同時成立では隕石から消費する。
+    if (!firstUltimateTriggered && context.hpRate <= firstUltimateHpRate) pendingMeteorAction = true;
+    if (!secondUltimateTriggered && context.hpRate <= secondUltimateHpRate) pendingDiveAction = true;
+    pendingUltimateAction = pendingMeteorAction || pendingDiveAction;
+    if (aiState != DRAGON_AI_STATE::IDLE || !autoDecisionEnabled || IsEnemyAILockedByGameMode()) return;
+    if (pendingMeteorAction) RequestSpecialAction(false);
+    else if (pendingDiveAction) RequestSpecialAction(true);
 }
 
+bool DragonAIComponent::RequestSpecialAction(bool dive_)
+{
+    const auto owner_ = GetGameObject();
+    const auto attacks_ = owner_ ? owner_->GetComponent<DragonAttackControllerComponent>() : nullptr;
+    if (!attacks_ || !health || health->IsDead() || IsEnemyAILockedByGameMode() || attacks_->IsSpecialActionActive()) return false;
+    skillExecution.Stop();
+    skillActionRunning = false;
+    StopMovement();
+    DisableSequencerHitBoxes();
+    ClearTurnRootMotionLimit();
+    ClearTailIK();
+    if (!attacks_->BeginSpecialAction(dive_)) return false;
+    if (dive_) { secondUltimateTriggered = true; pendingDiveAction = false; }
+    else { firstUltimateTriggered = true; pendingMeteorAction = false; }
+    runtime.currentAction = DRAGON_ACTION_TYPE::ULTIMATE_ATTACK;
+    runtime.bufferedAction = DRAGON_ACTION_TYPE::IDLE;
+    runtime.actionTimer = 0.0f;
+    runtime.actionStarted = true;
+    runtime.actionEnded = false;
+    runtime.canCancel = false;
+    runtime.canBufferAction = false;
+    pendingSequencerActionEnd = false;
+    aiState = DRAGON_AI_STATE::ACTION;
+    behaviorGraph.ResetRuntime();
+    ultimateDamageReductionActive = true;
+    SendRuntimeToBlackboard();
+    return true;
+}
 void DragonAIComponent::UpdateCooldowns(float deltaTime_)
 {
     if (actionCooldowns.size() != DRAGON_ACTION_COUNT)
@@ -1893,12 +1911,8 @@ void DragonAIComponent::UpdateDecision(float deltaTime_)
     const bool canDecideGroundAction_ =
         autoDecisionEnabled &&
         aiState == DRAGON_AI_STATE::IDLE;
-    const bool canDecideAirAction_ =
-        autoDecisionEnabled &&
-        aiState == DRAGON_AI_STATE::AIR &&
-        runtime.currentAction == DRAGON_ACTION_TYPE::AIR_HOLD &&
-        runtime.actionEnded &&
-        (pendingAirAttackDecision || pendingAirLandingDecision);
+    const bool canDecideAirAction_ = autoDecisionEnabled && aiState == DRAGON_AI_STATE::AIR &&
+        runtime.currentAction == DRAGON_ACTION_TYPE::AIR_HOLD && runtime.actionEnded && pendingAirLandingDecision;
 
     if ((!canDecideGroundAction_ && !canDecideAirAction_) ||
         ShouldWaitForIdleAnimation())
@@ -2526,6 +2540,9 @@ void DragonAIComponent::UpdateSpinTailSweepRotation(float deltaTime_)
 
 void DragonAIComponent::StartAction(DRAGON_ACTION_TYPE action_)
 {
+    if (action_ != DRAGON_ACTION_TYPE::ULTIMATE_ATTACK)
+        if (const auto owner_ = GetGameObject())
+            if (const auto attacks_ = owner_->GetComponent<DragonAttackControllerComponent>()) attacks_->StopSpecialAction();
     // 被弾・死亡・キャンセルでも古い共通Phaseの予約を残さない。
     skillExecution.Stop();
     skillActionRunning = false;
@@ -3671,8 +3688,6 @@ DRAGON_ACTION_TYPE DragonAIComponent::ResolveAntiFlankAction()
         AddWeightedActionCandidate(context, candidates_, DRAGON_ACTION_TYPE::TURN_TAIL_SWEEP, context.isPlayerBehind ? 4.0f : 1.4f);
     if (CanUseSpinTailSweep(context))
         AddWeightedActionCandidate(context, candidates_, DRAGON_ACTION_TYPE::SPIN_TAIL_SWEEP, context.isPlayerBehind ? 1.2f : 0.6f);
-    if (context.playerHorizontalDistance <= biteDistance + 1.5f)
-        AddWeightedActionCandidate(context, candidates_, DRAGON_ACTION_TYPE::TAKE_OFF, 2.0f);
 
     return SelectHistoryWeightedAction(candidates_);
 }
@@ -3694,6 +3709,9 @@ void DragonAIComponent::SetCooldown(DRAGON_ACTION_TYPE action_, float cooldownTi
 
 bool DragonAIComponent::IsActionAvailable(DRAGON_ACTION_TYPE action_) const
 {
+    // 通常Graphと重み付き選択の両方から旧空中攻撃への入口を閉じる。
+    if (action_ == DRAGON_ACTION_TYPE::TAKE_OFF || action_ == DRAGON_ACTION_TYPE::AIR_FIRE_BALL ||
+        action_ == DRAGON_ACTION_TYPE::AIR_SPREAD_BREATH || action_ == DRAGON_ACTION_TYPE::ULTIMATE_ATTACK) return false;
     // 有効フラグとクールダウンをまとめた、AI/Graph共通の使用可否判定。
     if (action_ == DRAGON_ACTION_TYPE::IDLE)
     {

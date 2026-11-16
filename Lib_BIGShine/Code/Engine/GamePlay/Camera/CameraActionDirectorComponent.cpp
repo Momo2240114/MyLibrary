@@ -471,6 +471,13 @@ void CameraActionDirectorComponent::PlayActionForTarget(
         target_);
 }
 
+bool CameraActionDirectorComponent::PlayPresetForTarget(const CameraActionPreset& preset_, const std::shared_ptr<GameObject>& target_)
+{
+    if (!target_ || !target_->transform) return false;
+    BeginAction(preset_, target_->transform->GetWorldPosition(), { 0.0f, 0.0f, 1.0f }, target_);
+    return IsPlayingAction(preset_.actionName);
+}
+
 void CameraActionDirectorComponent::StopAction(bool immediate_)
 {
     if (immediate_)

@@ -1095,6 +1095,9 @@ std::shared_ptr<GameObject> EffectManager::SpawnMeshVFX(
         object_->GetComponent<MeshVFXComponent>();
     if (!meshVFX_) return object_;
 
+    object_->transform->localScale = request_.scale;
+    object_->transform->MarkDirty();
+
     std::printf(
         "[EffectManager::SpawnMeshVFX] request='%s' resolved='%s'\n",
         request_.assetPath.c_str(),
@@ -1422,12 +1425,14 @@ void EffectManager::SpawnImpactEffectAsset(
             request_.particle.assetPath = entry_.assetPath;
             request_.particle.emitterName = entry_.emitterName;
             request_.particle.lifeTime = entry_.lifeTime;
+            request_.particle.sizeScale = (std::max)(0.01f, entry_.scale.x);
             request_.particle.normalOffset = entry_.normalOffset;
         }
         else if (entry_.type == IMPACT_EFFECT_ENTRY_TYPE::MESH_VFX)
         {
             request_.spawnMeshVFX = true;
             request_.meshVFX.assetPath = entry_.assetPath;
+            request_.meshVFX.scale = entry_.scale;
             request_.meshVFX.lifeTime = entry_.lifeTime;
             request_.meshVFX.normalOffset = entry_.normalOffset;
         }

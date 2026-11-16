@@ -42,6 +42,7 @@ public:
     void ChangeState(const std::string& stateName_, float duration_ = 0.2f, bool restart_ = false, float startTime_ = 0.0f);
     // 演出再生中は通常グラフの自動遷移だけを抑制し、Animationとイベントは更新する。
     void SetPresentationControlled(bool controlled_) { presentationControlled = controlled_; }
+    bool IsPresentationControlled() const { return presentationControlled; }
     // SkillStateがPhaseを選択中も、Animation EventとRootMotionは通常どおり更新する。
     void SetSkillControlled(bool controlled_) { skillControlled = controlled_; }
     bool IsSkillControlled() const { return skillControlled; }

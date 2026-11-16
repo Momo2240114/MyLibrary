@@ -149,8 +149,8 @@ public:
     void UnregisterMotionVelocityComponent(MotionVelocityComponent* component_);
 
     void Update(float elapsedTime_);
-    // Scene編集用Managerだけで有効化し、Workspaceの独立プレビューを維持する。
-    void EnableEditorPlayMode();
+    // followActiveSession_がfalseなら、独立WorkspaceをEditorモードに固定する。
+    void EnableEditorPlayMode(bool followActiveSession_ = true);
     bool SupportsEditorPlayMode() const { return editorPlayModeEnabled; }
     EditorPlayMode GetEditorPlayMode() const { return editorPlayModeEnabled ? editorPlayMode : EditorPlayMode::PLAY; }
     bool CanStartEditorPlay() const { return editorPlayModeEnabled && editorPlayMode == EditorPlayMode::EDITOR && sceneRuntimeState == SCENE_RUNTIME_STATE::RUNNING; }
