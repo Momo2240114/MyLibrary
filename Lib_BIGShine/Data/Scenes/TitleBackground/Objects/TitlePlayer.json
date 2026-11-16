@@ -247,7 +247,7 @@
                             0.414000004529953,
                             0.44999998807907104
                         ],
-                        "specularStrength": 0.33,
+                        "specularStrength": 0.33000001311302185,
                         "specularToonBlend": 0.25,
                         "toonPbrBlend": 1.0,
                         "uvAddressMode": 0,
@@ -290,7 +290,7 @@
                             0.414000004529953,
                             0.44999998807907104
                         ],
-                        "specularStrength": 0.28,
+                        "specularStrength": 0.2800000011920929,
                         "specularToonBlend": 0.25,
                         "toonPbrBlend": 0.9940000176429749,
                         "uvAddressMode": 0,
@@ -363,7 +363,7 @@
                             0.0
                         ],
                         "id": 3,
-                        "metalness": 0.18,
+                        "metalness": 0.18000000715255737,
                         "name": "Squire_Cloth.002",
                         "normalScale": 1.0,
                         "occlusionStrength": 0.9330000281333923,
@@ -376,7 +376,7 @@
                             0.414000004529953,
                             0.44999998807907104
                         ],
-                        "specularStrength": 0.38,
+                        "specularStrength": 0.3799999952316284,
                         "specularToonBlend": 0.25,
                         "toonPbrBlend": 0.8999999761581421,
                         "uvAddressMode": 0,
@@ -406,7 +406,7 @@
                             1.0
                         ],
                         "id": 4,
-                        "metalness": 0.2,
+                        "metalness": 0.20000000298023224,
                         "name": "Shiled_Cloth.002",
                         "normalScale": 1.0,
                         "occlusionStrength": 1.0,
@@ -419,7 +419,7 @@
                             0.414000004529953,
                             0.44999998807907104
                         ],
-                        "specularStrength": 0.4,
+                        "specularStrength": 0.4000000059604645,
                         "specularToonBlend": 0.25,
                         "toonPbrBlend": 0.8500000238418579,
                         "uvAddressMode": 0,
@@ -462,7 +462,7 @@
                             0.414000004529953,
                             0.44999998807907104
                         ],
-                        "specularStrength": 0.55,
+                        "specularStrength": 0.550000011920929,
                         "specularToonBlend": 0.25,
                         "toonPbrBlend": 1.0,
                         "uvAddressMode": 0,
@@ -499,10 +499,6 @@
         },
         {
             "Data": {
-                "AssetPath": "",
-                "GraphAssetPath": "",
-                "StateAssets": {},
-                "UseTransitionGraph": false,
                 "AnimationData": {
                     "DefaultState": "SS_Idle",
                     "States": [
@@ -559,8 +555,8 @@
                             "events": [],
                             "loop": true,
                             "name": "SS_Idle",
+                            "playbackSpeedParamName": "",
                             "rootMotion": {
-                                "enable": false,
                                 "applyPositionX": false,
                                 "applyPositionY": false,
                                 "applyPositionZ": false,
@@ -571,10 +567,12 @@
                                 "cutVisualPositionY": true,
                                 "cutVisualPositionZ": true,
                                 "cutVisualWhenDisabled": true,
+                                "enable": false,
                                 "sourceNodeName": ""
                             },
                             "rootMotionScale": 1.0,
                             "rootMotionScaleCurveName": "SS_Idle.RootScale",
+                            "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
@@ -582,13 +580,41 @@
                             "type": 0
                         }
                     ]
-                }
+                },
+                "AssetPath": "",
+                "GraphAssetPath": "",
+                "StateAssets": {},
+                "UseTransitionGraph": true
             },
             "Enabled": true,
             "LateUpdateEnabled": true,
             "LateUpdatePriority": 0,
             "RequiredForSceneStart": true,
             "TypeName": "AnimationControllerComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "FacingTurnSpeed": 10.0,
+                "ImpulseDamping": 6.0,
+                "UsePhysicsVelocity": true
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "CharacterMovementComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {},
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "BlackboardComponent",
             "UpdateEnabled": true,
             "UpdatePriority": 0
         }

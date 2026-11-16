@@ -1,0 +1,470 @@
+{
+  "AssetType": "MeshVFX",
+  "AssetVersion": 1,
+  "MeshVFX": {
+    "IsPlaying": false,
+    "PlaybackSpeed": 1,
+    "Parts": [
+      {
+        "RenderEnabled": true,
+        "ModelPath": "__InternalMeshDangerArea__",
+        "MeshIndex": 0,
+        "Loop": false,
+        "Duration": 0.65,
+        "Color": [
+          1.8,
+          0.5,
+          0.08,
+          1.0
+        ],
+        "Alpha": 0.95,
+        "AnimateAlpha": true,
+        "AlphaStart": 1,
+        "AlphaEnd": 0,
+        "BlendMode": 1,
+        "EmissiveStrength": 5.0,
+        "Position": [
+          0,
+          0.04,
+          0
+        ],
+        "Rotation": [
+          0,
+          0,
+          0
+        ],
+        "Scale": [
+          1,
+          1,
+          1
+        ],
+        "BaseTexturePath": "",
+        "UseMaterialBaseTexture": false,
+        "UseMaterialNormalTexture": false,
+        "UseGradientTexture": false,
+        "UseMask": true,
+        "MaskLayers": [
+          {
+            "Path": "Data/Texture/Trail/T_TrailMask_22.PNG",
+            "BlendMode": 0,
+            "Invert": false
+          }
+        ],
+        "MaskUVScale": [
+          1,
+          1
+        ],
+        "MaskUVSpeed": [
+          2.0,
+          0
+        ],
+        "UseNoise": true,
+        "NoiseTexturePaths": [
+          "Data/Texture/VFX/T_Free_Magic_Noise1_normal.PNG"
+        ],
+        "NoiseUVScale": [
+          1,
+          2
+        ],
+        "NoiseUVSpeed": [
+          3,
+          0
+        ],
+        "NoiseStrength": 0.12,
+        "UseFresnel": false,
+        "UseNormal": false,
+        "UseEdgeHighlight": false,
+        "UseDissolveEdge": false,
+        "UseBackFaceBoost": false,
+        "InternalMeshCylinderRadius": 1,
+        "InternalMeshSettings": {
+          "CapsuleLength": 0
+        },
+        "AnimateScale": true,
+        "ScaleStart": [
+          0.1,
+          1,
+          0.1
+        ],
+        "ScaleEnd": [
+          1.0,
+          1,
+          1.0
+        ],
+        "MeshRotationSpeed": [
+          0,
+          60,
+          0
+        ]
+      },
+      {
+        "RenderEnabled": true,
+        "ModelPath": "__InternalMeshDangerArea__",
+        "MeshIndex": 0,
+        "Loop": false,
+        "Duration": 0.75,
+        "Color": [
+          1.8,
+          0.5,
+          0.08,
+          1.0
+        ],
+        "Alpha": 0.7,
+        "AnimateAlpha": true,
+        "AlphaStart": 1,
+        "AlphaEnd": 0,
+        "BlendMode": 1,
+        "EmissiveStrength": 5.0,
+        "Position": [
+          0,
+          0.07500000000000001,
+          0
+        ],
+        "Rotation": [
+          0,
+          0,
+          0
+        ],
+        "Scale": [
+          1,
+          1,
+          1
+        ],
+        "BaseTexturePath": "",
+        "UseMaterialBaseTexture": false,
+        "UseMaterialNormalTexture": false,
+        "UseGradientTexture": false,
+        "UseMask": true,
+        "MaskLayers": [
+          {
+            "Path": "Data/Texture/Trail/T_TrailMask_22.PNG",
+            "BlendMode": 0,
+            "Invert": false
+          }
+        ],
+        "MaskUVScale": [
+          1,
+          1
+        ],
+        "MaskUVSpeed": [
+          3.0,
+          0
+        ],
+        "UseNoise": true,
+        "NoiseTexturePaths": [
+          "Data/Texture/VFX/T_Free_Magic_Noise1_normal.PNG"
+        ],
+        "NoiseUVScale": [
+          1,
+          2
+        ],
+        "NoiseUVSpeed": [
+          3,
+          0
+        ],
+        "NoiseStrength": 0.12,
+        "UseFresnel": false,
+        "UseNormal": false,
+        "UseEdgeHighlight": false,
+        "UseDissolveEdge": false,
+        "UseBackFaceBoost": false,
+        "InternalMeshCylinderRadius": 1,
+        "InternalMeshSettings": {
+          "CapsuleLength": 0
+        },
+        "AnimateScale": true,
+        "ScaleStart": [
+          0.2,
+          1,
+          0.2
+        ],
+        "ScaleEnd": [
+          0.9,
+          1,
+          0.9
+        ],
+        "MeshRotationSpeed": [
+          0,
+          100,
+          0
+        ]
+      },
+      {
+        "RenderEnabled": true,
+        "ModelPath": "__InternalMeshDangerArea__",
+        "MeshIndex": 0,
+        "Loop": false,
+        "Duration": 0.8500000000000001,
+        "Color": [
+          1.8,
+          0.5,
+          0.08,
+          1.0
+        ],
+        "Alpha": 0.7,
+        "AnimateAlpha": true,
+        "AlphaStart": 1,
+        "AlphaEnd": 0,
+        "BlendMode": 1,
+        "EmissiveStrength": 5.0,
+        "Position": [
+          0,
+          0.11000000000000001,
+          0
+        ],
+        "Rotation": [
+          0,
+          0,
+          0
+        ],
+        "Scale": [
+          1,
+          1,
+          1
+        ],
+        "BaseTexturePath": "",
+        "UseMaterialBaseTexture": false,
+        "UseMaterialNormalTexture": false,
+        "UseGradientTexture": false,
+        "UseMask": true,
+        "MaskLayers": [
+          {
+            "Path": "Data/Texture/Trail/T_TrailMask_22.PNG",
+            "BlendMode": 0,
+            "Invert": false
+          }
+        ],
+        "MaskUVScale": [
+          1,
+          1
+        ],
+        "MaskUVSpeed": [
+          4.0,
+          0
+        ],
+        "UseNoise": true,
+        "NoiseTexturePaths": [
+          "Data/Texture/VFX/T_Free_Magic_Noise1_normal.PNG"
+        ],
+        "NoiseUVScale": [
+          1,
+          2
+        ],
+        "NoiseUVSpeed": [
+          3,
+          0
+        ],
+        "NoiseStrength": 0.12,
+        "UseFresnel": false,
+        "UseNormal": false,
+        "UseEdgeHighlight": false,
+        "UseDissolveEdge": false,
+        "UseBackFaceBoost": false,
+        "InternalMeshCylinderRadius": 1,
+        "InternalMeshSettings": {
+          "CapsuleLength": 0
+        },
+        "AnimateScale": true,
+        "ScaleStart": [
+          0.30000000000000004,
+          1,
+          0.30000000000000004
+        ],
+        "ScaleEnd": [
+          0.8,
+          1,
+          0.8
+        ],
+        "MeshRotationSpeed": [
+          0,
+          140,
+          0
+        ]
+      },
+      {
+        "RenderEnabled": true,
+        "ModelPath": "__InternalMeshCylinder__",
+        "MeshIndex": 0,
+        "Loop": false,
+        "Duration": 0.8,
+        "Color": [
+          1.8,
+          0.5,
+          0.08,
+          1.0
+        ],
+        "Alpha": 0.9,
+        "AnimateAlpha": true,
+        "AlphaStart": 1,
+        "AlphaEnd": 0,
+        "BlendMode": 0,
+        "EmissiveStrength": 5.0,
+        "Position": [
+          0,
+          1.65,
+          0
+        ],
+        "Rotation": [
+          0,
+          0,
+          0
+        ],
+        "Scale": [
+          1,
+          1,
+          1
+        ],
+        "BaseTexturePath": "",
+        "UseMaterialBaseTexture": false,
+        "UseMaterialNormalTexture": false,
+        "UseGradientTexture": false,
+        "UseMask": true,
+        "MaskLayers": [
+          {
+            "Path": "Data/Texture/Trail/T_TrailMask_22.PNG",
+            "BlendMode": 0,
+            "Invert": false
+          }
+        ],
+        "MaskUVScale": [
+          1,
+          1
+        ],
+        "MaskUVSpeed": [
+          3,
+          -2
+        ],
+        "UseNoise": true,
+        "NoiseTexturePaths": [
+          "Data/Texture/VFX/T_Free_Magic_Noise1_normal.PNG"
+        ],
+        "NoiseUVScale": [
+          1,
+          2
+        ],
+        "NoiseUVSpeed": [
+          3,
+          0
+        ],
+        "NoiseStrength": 0.32,
+        "UseFresnel": false,
+        "UseNormal": false,
+        "UseEdgeHighlight": false,
+        "UseDissolveEdge": false,
+        "UseBackFaceBoost": false,
+        "InternalMeshCylinderRadius": 1,
+        "InternalMeshSettings": {
+          "CapsuleLength": 0
+        },
+        "AnimateScale": true,
+        "ScaleStart": [
+          0.15,
+          0.08,
+          0.15
+        ],
+        "ScaleEnd": [
+          0.65,
+          1.65,
+          0.65
+        ],
+        "MeshRotationSpeed": [
+          0,
+          -160,
+          0
+        ]
+      },
+      {
+        "RenderEnabled": true,
+        "ModelPath": "__InternalMeshCylinder__",
+        "MeshIndex": 0,
+        "Loop": false,
+        "Duration": 0.8,
+        "Color": [
+          1.8,
+          0.5,
+          0.08,
+          1.0
+        ],
+        "Alpha": 0.65,
+        "AnimateAlpha": true,
+        "AlphaStart": 1,
+        "AlphaEnd": 0,
+        "BlendMode": 1,
+        "EmissiveStrength": 5.0,
+        "Position": [
+          0,
+          1.65,
+          0
+        ],
+        "Rotation": [
+          0,
+          0,
+          0
+        ],
+        "Scale": [
+          1,
+          1,
+          1
+        ],
+        "BaseTexturePath": "",
+        "UseMaterialBaseTexture": false,
+        "UseMaterialNormalTexture": false,
+        "UseGradientTexture": false,
+        "UseMask": true,
+        "MaskLayers": [
+          {
+            "Path": "Data/Texture/Trail/T_TrailMask_22.PNG",
+            "BlendMode": 0,
+            "Invert": false
+          }
+        ],
+        "MaskUVScale": [
+          1,
+          1
+        ],
+        "MaskUVSpeed": [
+          3,
+          -2
+        ],
+        "UseNoise": true,
+        "NoiseTexturePaths": [
+          "Data/Texture/VFX/T_Free_Magic_Noise1_normal.PNG"
+        ],
+        "NoiseUVScale": [
+          1,
+          2
+        ],
+        "NoiseUVSpeed": [
+          3,
+          0
+        ],
+        "NoiseStrength": 0.32,
+        "UseFresnel": false,
+        "UseNormal": false,
+        "UseEdgeHighlight": false,
+        "UseDissolveEdge": false,
+        "UseBackFaceBoost": false,
+        "InternalMeshCylinderRadius": 1,
+        "InternalMeshSettings": {
+          "CapsuleLength": 0
+        },
+        "AnimateScale": true,
+        "ScaleStart": [
+          0.15,
+          0.08,
+          0.15
+        ],
+        "ScaleEnd": [
+          0.45,
+          2.2,
+          0.45
+        ],
+        "MeshRotationSpeed": [
+          0,
+          220,
+          0
+        ]
+      }
+    ]
+  }
+}

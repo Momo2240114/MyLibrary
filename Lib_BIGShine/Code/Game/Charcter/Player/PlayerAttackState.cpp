@@ -21,16 +21,13 @@
 #include "Engine/GamePlay/Combat/AttackTemplateRuntime.h"
 #include "PlayerControllerComponent.h"
 
-#include <algorithm>
-#include <cstdint>
-#include <cmath>
-#include <limits>
+
 
 namespace
 {
     constexpr float MINIMUM_HORIZONTAL_LENGTH_SQUARED = 0.000001f;
     constexpr float RADIANS_TO_DEGREES = 180.0f / DirectX::XM_PI;
-    constexpr float RUSH_OPENING_RANGE = 24.0f;
+    constexpr float RUSH_OPENING_RANGE = 32.0f;
     constexpr float RUSH_APPROACH_SPEED = 52.0f;
     constexpr float RUSH_STRIKE_FOLLOW_SPEED = 18.0f;
     constexpr float RUSH_STRIKE_FOLLOW_RANGE = 4.5f;
@@ -922,13 +919,17 @@ void PlayerAttackState::UpdateRushApproach(float elapsedTime_)
 {
     const auto player_ = GetPlayerController();
     const auto owner_ = GetOwner();
+
     if (const auto movement_ = GetComponent<CharacterMovementComponent>())
         movement_->ClearRootMotionDelta();
+
     if (!player_->IsCurrentAnimationState("Charge_Air_Attack_Start_Seq") &&
         !player_->IsCurrentAnimationState("Charge_Air_Attack_Loop_Seq")) return;
+
     attackElapsedTime += (std::max)(elapsedTime_, 0.0f);
 
     const auto target_ = attackAssistTarget.lock();
+
     if (!owner_ || !owner_->transform || (rushApproachHasTarget && !IsRushTargetValid(target_)) ||
         attackElapsedTime >= RUSH_APPROACH_TIMEOUT)
     {
@@ -939,6 +940,7 @@ void PlayerAttackState::UpdateRushApproach(float elapsedTime_)
     const auto position_ = owner_->transform->GetWorldPosition();
     DirectX::XMFLOAT3 direction_ = attackStartForward;
     float remaining_ = (std::max)(0.0f, RUSH_UNTARGETED_SLIDE_DURATION - attackElapsedTime) * RUSH_UNTARGETED_SLIDE_SPEED;
+
     if (target_)
     {
         const auto targetPosition_ = target_->transform->GetWorldPosition();
@@ -962,6 +964,7 @@ void PlayerAttackState::UpdateRushApproach(float elapsedTime_)
     const float speed_ = target_ ? RUSH_APPROACH_SPEED : RUSH_UNTARGETED_SLIDE_SPEED;
     const float step_ = (std::min)(remaining_, speed_ * elapsedTime_);
     const DirectX::XMFLOAT3 destination_{ position_.x + direction_.x * step_, position_.y, position_.z + direction_.z * step_ };
+
     if (!IsAttackPathClear(owner_, target_, position_, destination_))
     {
         player_->NotifyActionEnd();

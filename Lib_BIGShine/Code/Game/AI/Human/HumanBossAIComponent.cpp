@@ -1275,6 +1275,8 @@ void HumanBossAIComponent::Deserialize(const nlohmann::json& json_)
     }
     EnsureDefaultBehaviorGraph();
     playerObjectName = json_.value("PlayerObjectName", playerObjectName);
+    if (!behaviorGraphAssetPath.empty() && json_.contains("BehaviorGraph"))
+        behaviorGraph.RestoreEditorLayout(json_["BehaviorGraph"]);
     idleState = json_.value("IdleState", idleState);
     walkState = json_.value("WalkState", walkState);
     hitState = json_.value("HitState", hitState);

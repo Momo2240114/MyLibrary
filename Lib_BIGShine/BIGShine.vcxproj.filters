@@ -1126,6 +1126,9 @@
     <ClCompile Include="Code\Game\AI\Dragon\DragonAttackControllerComponent.cpp">
       <Filter>Code\Game\Logics\AI\Dragon</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Game\AI\Dragon\DragonAttackControllerComponent.Special.cpp">
+      <Filter>Code\Game\Logics\AI\Dragon</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\Core\PrecompiledHeader\PrecompiledHeader.cpp">
       <Filter>Code\Engine\Core</Filter>
     </ClCompile>

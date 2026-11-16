@@ -1,147 +1,177 @@
 {
-    "Name": "TitleMenu_game_startLabel",
-    "Layer": 16,
     "CollisionMask": 0,
+    "Components": [
+        {
+            "Data": {
+                "InputEnabled": false,
+                "ParentWidgetId": "",
+                "RaycastTarget": false,
+                "RectTransform": {
+                    "AnchorMax": [
+                        0.11999999731779099,
+                        0.6399999856948853
+                    ],
+                    "AnchorMin": [
+                        0.11999999731779099,
+                        0.6399999856948853
+                    ],
+                    "AnchoredPosition": [
+                        0.0,
+                        0.0
+                    ],
+                    "LocalRotation": 0.0,
+                    "LocalScale": [
+                        1.0,
+                        1.0
+                    ],
+                    "Pivot": [
+                        0.0,
+                        0.0
+                    ],
+                    "SizeDelta": [
+                        430.0,
+                        48.0
+                    ]
+                },
+                "Version": 1,
+                "Visible": true,
+                "WidgetId": "TitleMenu_game_startLabel",
+                "ZOrder": 20
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": true,
+            "TypeName": "UIWidgetComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "CatPos": [
+                    0.0,
+                    0.0
+                ],
+                "CatSize": [
+                    430.0,
+                    47.0
+                ],
+                "Color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "LinearSampling": true,
+                "LocalSize": [
+                    430.0,
+                    47.0
+                ],
+                "SdrTexture": true,
+                "ShaderID": 0,
+                "TexturePath": "",
+                "Visible": true,
+                "pivotType": 0
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": true,
+            "TypeName": "SpriteRenderer",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "AutoSizeWidget": false,
+                "Color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "FontPath": "Data/Font/NotoSansJP-Regular.otf",
+                "FontSize": 29.0,
+                "FontStrokeWidth": 0.0,
+                "HorizontalAlign": "LEFT",
+                "MaxWidth": 430.0,
+                "Padding": 0.0,
+                "Text": "GAME START",
+                "Version": 1,
+                "VerticalAlign": "CENTER"
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": true,
+            "TypeName": "UITextComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "PlayOnStart": true,
+                "Preset": "MenuButton",
+                "Settings": {
+                    "GlowColor": [
+                        0.72,
+                        1,
+                        0.87,
+                        1
+                    ],
+                    "GlowIntensity": 0.24,
+                    "GlowRadius": 3,
+                    "ShadowColor": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "ShadowOffset": [
+                        1,
+                        2
+                    ],
+                    "ShadowOpacity": 0.7,
+                    "ShadowSoftness": 1,
+                    "SweepColor": [
+                        0.8,
+                        1,
+                        0.92,
+                        1
+                    ],
+                    "SweepIntensity": 0.28,
+                    "SweepSpeed": 0.2,
+                    "SweepWidth": 0.1
+                }
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "UIVisualEffectComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        }
+    ],
+    "Layer": 16,
+    "Name": "TitleMenu_game_startLabel",
     "ParentName": "TitleUI",
     "RequiredForSceneStart": true,
     "Transform": {
         "Pos": [
-            0,
-            0,
-            0
+            0.0,
+            0.0,
+            0.0
         ],
         "Rot": [
-            0,
-            0,
-            0
+            0.0,
+            0.0,
+            0.0
         ],
         "Scale": [
-            1,
-            1,
-            1
+            1.0,
+            1.0,
+            1.0
         ]
-    },
-    "Components": [
-        {
-            "TypeName": "UIWidgetComponent",
-            "Enabled": true,
-            "RequiredForSceneStart": true,
-            "UpdateEnabled": true,
-            "LateUpdateEnabled": true,
-            "UpdatePriority": 0,
-            "LateUpdatePriority": 0,
-            "Data": {
-                "Version": 1,
-                "WidgetId": "TitleMenu_game_startLabel",
-                "ParentWidgetId": "",
-                "Visible": true,
-                "InputEnabled": false,
-                "RaycastTarget": false,
-                "ZOrder": 20,
-                "RectTransform": {
-                    "AnchorMin": [
-                        0.12,
-                        0.64
-                    ],
-                    "AnchorMax": [
-                        0.12,
-                        0.64
-                    ],
-                    "Pivot": [
-                        0,
-                        0
-                    ],
-                    "AnchoredPosition": [
-                        0,
-                        0
-                    ],
-                    "SizeDelta": [
-                        430,
-                        48
-                    ],
-                    "LocalScale": [
-                        1,
-                        1
-                    ],
-                    "LocalRotation": 0
-                }
-            }
-        },
-        {
-            "TypeName": "SpriteRenderer",
-            "Enabled": true,
-            "RequiredForSceneStart": true,
-            "UpdateEnabled": true,
-            "LateUpdateEnabled": true,
-            "UpdatePriority": 0,
-            "LateUpdatePriority": 0,
-            "Data": {
-                "TexturePath": "",
-                "LocalSize": [
-                    1,
-                    1
-                ],
-                "CatPos": [
-                    0,
-                    0
-                ],
-                "CatSize": [
-                    1,
-                    1
-                ],
-                "Color": [
-                    0.84,
-                    0.81,
-                    0.73,
-                    1
-                ],
-                "Visible": true,
-                "LinearSampling": true,
-                "SdrTexture": true,
-                "ShaderID": 0,
-                "pivotType": 0
-            }
-        },
-        {
-            "TypeName": "UITextComponent",
-            "Enabled": true,
-            "RequiredForSceneStart": true,
-            "UpdateEnabled": true,
-            "LateUpdateEnabled": true,
-            "UpdatePriority": 0,
-            "LateUpdatePriority": 0,
-            "Data": {
-                "Version": 1,
-                "Text": "GAME START",
-                "FontPath": "Data/Font/NotoSansJP-Regular.otf",
-                "FontSize": 29,
-                "FontStrokeWidth": 0,
-                "Color": [
-                    1,
-                    1,
-                    1,
-                    1
-                ],
-                "MaxWidth": 430,
-                "Padding": 0,
-                "AutoSizeWidget": false,
-                "HorizontalAlign": "LEFT",
-                "VerticalAlign": "CENTER"
-            }
-        },
-        {
-            "TypeName": "UIVisualEffectComponent",
-            "Enabled": true,
-            "RequiredForSceneStart": false,
-            "UpdateEnabled": true,
-            "LateUpdateEnabled": true,
-            "UpdatePriority": 0,
-            "LateUpdatePriority": 0,
-            "Data": {
-                "Preset": "MenuButton",
-                "PlayOnStart": true,
-                "Settings": {}
-            }
-        }
-    ]
+    }
 }

@@ -482,6 +482,13 @@ void CameraActionDirectorComponent::StopAction(bool immediate_)
 {
     if (immediate_)
     {
+        if (phase != CAMERA_ACTION_PHASE::IDLE)
+        {
+            // 中断時も撮影前の画角・姿勢を戻してから通常制御へ引き渡す。
+            returnStartCameraPosition = startCameraPosition;
+            returnStartFocusPosition = startFocusPosition;
+            ApplyCameraPose(startCameraPosition, startFocusPosition, startFov, startCameraUp);
+        }
         phase = CAMERA_ACTION_PHASE::IDLE;
         phaseTimer = 0.0f;
         activePriority = -1;

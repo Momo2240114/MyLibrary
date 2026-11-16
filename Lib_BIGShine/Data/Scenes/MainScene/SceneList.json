@@ -10,7 +10,7 @@
             "toneMappingEnabled": true
         },
         "IBL": {
-            "hdrIntensity": 0.0025,
+            "hdrIntensity": 0.0024999999441206455,
             "specularHdrPath": "Data/Texture/IBL/qwantani_dusk_2_2k.hdr"
         },
         "ShadowMap": {

@@ -63,7 +63,7 @@ void AIControllerComponent::Start()
         spawnPosition = owner_->transform->GetWorldPosition();
     }
 
-    if (!graphAssetPath.empty())
+    if (!graphAssetPath.empty() && graph.GetNodes().empty())
     {
         LoadGraphAsset(graphAssetPath);
     }
@@ -167,6 +167,7 @@ void AIControllerComponent::Serialize(nlohmann::json& json_) const
 
     json_["IsRunning"] = isRunning;
     json_["GraphAssetPath"] = graphAssetPath;
+    graph.Serialize(json_["Graph"]);
     json_["TargetName"] = targetName;
     json_["DetectRange"] = detectRange;
     json_["AttackRange"] = attackRange;
@@ -210,6 +211,7 @@ void AIControllerComponent::Deserialize(const nlohmann::json& json_)
     {
         BS_PROFILE_SCOPE("AIController::LoadGraphAssetOnDeserialize");
         graph.LoadFromFile(graphAssetPath);
+        if (json_.contains("Graph")) graph.RestoreEditorLayout(json_["Graph"]);
     }
     else if (json_.contains("Graph"))
     {

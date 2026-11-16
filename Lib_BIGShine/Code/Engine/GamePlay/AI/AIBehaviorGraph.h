@@ -220,6 +220,7 @@ public:
 
     // 既存のPriorityを維持して行動の枝を領域ごとに配置する。
     void OrganizeActionAreas();
+    void RestoreEditorLayout(const nlohmann::json& json_);
     // 登録済みノードが収まる大きさへ領域を合わせる。
     void FitArea(AIBehaviorArea& area_);
     std::vector<AIBehaviorArea>& GetAreas() { return areas; }

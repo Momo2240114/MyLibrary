@@ -505,6 +505,31 @@ void AIBehaviorGraph::Deserialize(const nlohmann::json& json_)
     EnsureDefaultGraph();
 }
 
+void AIBehaviorGraph::RestoreEditorLayout(const nlohmann::json& json_)
+{
+    if (!json_.contains("Areas") || !json_["Areas"].is_array()) return;
+    // 外部Assetの行動・接続を優先し、シーンで編集した分類と座標だけを復元する。
+    nlohmann::json merged_;
+    Serialize(merged_);
+    merged_["Areas"] = json_["Areas"];
+    for (auto& area_ : merged_["Areas"])
+    {
+        if (!area_.contains("NodeIds") || !area_["NodeIds"].is_array()) continue;
+        auto& ids_ = area_["NodeIds"];
+        ids_.erase(std::remove_if(ids_.begin(), ids_.end(), [this](const nlohmann::json& id_)
+            { return !id_.is_number_integer() || !FindNode(id_.get<uintptr_t>()); }), ids_.end());
+        area_["Id"] = GenerateId();
+    }
+    if (json_.contains("Nodes") && json_["Nodes"].is_array())
+        for (auto& node_ : merged_["Nodes"])
+            for (const auto& saved_ : json_["Nodes"])
+                if (saved_.value("Id", uintptr_t{0}) == node_["Id"].get<uintptr_t>() &&
+                    saved_.value("Name", std::string{}) == node_.value("Name", std::string{}) &&
+                    saved_.contains("Position") && saved_["Position"].is_array() && saved_["Position"].size() == 2)
+                { node_["Position"] = saved_["Position"]; break; }
+    Deserialize(merged_);
+}
+
 // BehaviorGraphをJSONへ変換し、必要な親フォルダーを作成してファイル保存する。
 bool AIBehaviorGraph::SaveToFile(const std::string& path_) const
 {

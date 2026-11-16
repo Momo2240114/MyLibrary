@@ -59,46 +59,6 @@
       ],
       "LifeTime": 5.0,
       "EmitterName": ""
-    },
-    {
-      "NormalOffset": 0.03,
-      "Color": [
-        1.0,
-        0.5,
-        0.2,
-        0.95
-      ],
-      "Type": 2,
-      "FadeOutDuration": 6.0,
-      "Enabled": true,
-      "AssetPath": "Data/Texture/Decal/ScorchRound.png",
-      "Scale": [
-        40.0,
-        4.0,
-        40.0
-      ],
-      "LifeTime": 30.0,
-      "EmitterName": ""
-    },
-    {
-      "NormalOffset": 0.03,
-      "Color": [
-        1.0,
-        0.5,
-        0.2,
-        0.8
-      ],
-      "Type": 2,
-      "FadeOutDuration": 6.0,
-      "Enabled": true,
-      "AssetPath": "Data/Texture/Decal/ScorchLava.png",
-      "Scale": [
-        40.0,
-        4.0,
-        40.0
-      ],
-      "LifeTime": 30.0,
-      "EmitterName": ""
     }
   ],
   "AssetType": "ImpactEffect",

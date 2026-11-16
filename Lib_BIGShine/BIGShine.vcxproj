@@ -637,6 +637,7 @@
     <ClCompile Include="Code\Game\AI\Human\HumanBossActionComponent.Ranged.cpp" />
     <ClCompile Include="Code\Game\AI\Dragon\DragonAIComponent.cpp" />
     <ClCompile Include="Code\Game\AI\Dragon\DragonAttackControllerComponent.cpp" />
+    <ClCompile Include="Code\Game\AI\Dragon\DragonAttackControllerComponent.Special.cpp" />
     <ClCompile Include="Code\Game\AI\Dragon\DragonBodyPartHurtBoxComponent.cpp" />
     <ClCompile Include="Code\Game\AI\Dragon\DragonBodyPartManagerComponent.cpp" />
     <ClCompile Include="Code\Game\AI\Director\AIDirectorComponent.cpp" />

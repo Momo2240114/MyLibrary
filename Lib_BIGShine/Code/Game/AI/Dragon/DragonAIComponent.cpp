@@ -223,7 +223,7 @@ void DragonAIComponent::Update(float deltaTime_)
         {
             if (attacks_) attacks_->StopSpecialAction();
             SetAirbornePhysicsEnabled(false);
-            StartAction(DRAGON_ACTION_TYPE::AIR_DEATH_FALL_START);
+            StartAction(IsGrounded() ? DRAGON_ACTION_TYPE::DEATH : DRAGON_ACTION_TYPE::AIR_DEATH_FALL_START);
         }
         else if (!attacks_ || !attacks_->IsSpecialActionActive())
         {
@@ -234,7 +234,6 @@ void DragonAIComponent::Update(float deltaTime_)
         SendRuntimeToBlackboard();
         return;
     }
-    if (runtime.currentAction == DRAGON_ACTION_TYPE::ULTIMATE_ATTACK) return;
     UpdateCooldowns(deltaTime_);
     if (skillActionRunning)
     {
@@ -495,6 +494,11 @@ void DragonAIComponent::Gui()
         if (ImGui::Button("Test AirHit")) RequestAction(DRAGON_ACTION_TYPE::AIR_GET_HIT);
         ImGui::SameLine();
         if (ImGui::Button("Force Death")) StartAction(DRAGON_ACTION_TYPE::DEATH);
+        if (ImGui::Button("Test Meteor Special")) RequestSpecialAction(false);
+        ImGui::SameLine();
+        if (ImGui::Button("Test Dive Special")) RequestSpecialAction(true);
+        ImGui::Text("Meteor used: %s / queued: %s", firstUltimateTriggered ? "Yes" : "No", pendingMeteorAction ? "Yes" : "No");
+        ImGui::Text("Dive used: %s / queued: %s", secondUltimateTriggered ? "Yes" : "No", pendingDiveAction ? "Yes" : "No");
     }
 
     if (ImGui::CollapsingHeader("Tuning", ImGuiTreeNodeFlags_None))
@@ -630,6 +634,7 @@ void DragonAIComponent::Serialize(nlohmann::json& json_) const
     json_["AutoDecisionEnabled"] = autoDecisionEnabled;
     json_["BehaviorGraphEnabled"] = behaviorGraphEnabled;
     json_["BehaviorGraphAssetPath"] = behaviorGraphAssetPath;
+    behaviorGraph.Serialize(json_["BehaviorGraph"]);
     json_["UseDebugHpRate"] = useDebugHpRate;
     json_["DebugHpRate"] = debugHpRate;
     json_["DecisionInterval"] = decisionInterval;
@@ -806,6 +811,7 @@ void DragonAIComponent::Deserialize(const nlohmann::json& json_)
     {
         BS_PROFILE_SCOPE("DragonAI::LoadBehaviorGraphOnDeserialize");
         behaviorGraph.LoadFromFile(behaviorGraphAssetPath);
+        if (json_.contains("BehaviorGraph")) behaviorGraph.RestoreEditorLayout(json_["BehaviorGraph"]);
     }
     if (behaviorGraphEnabled)
     {
@@ -1859,13 +1865,15 @@ void DragonAIComponent::UpdateUltimateTrigger()
     if (!firstUltimateTriggered && context.hpRate <= firstUltimateHpRate) pendingMeteorAction = true;
     if (!secondUltimateTriggered && context.hpRate <= secondUltimateHpRate) pendingDiveAction = true;
     pendingUltimateAction = pendingMeteorAction || pendingDiveAction;
-    if (aiState != DRAGON_AI_STATE::IDLE || !autoDecisionEnabled || IsEnemyAILockedByGameMode()) return;
+    // HP特殊行動は外部AIControllerで通常攻撃を選ぶ構成でも必ず予約を消費する。
+    if (aiState != DRAGON_AI_STATE::IDLE || IsEnemyAILockedByGameMode()) return;
     if (pendingMeteorAction) RequestSpecialAction(false);
     else if (pendingDiveAction) RequestSpecialAction(true);
 }
 
 bool DragonAIComponent::RequestSpecialAction(bool dive_)
 {
+    EnsureDependencies();
     const auto owner_ = GetGameObject();
     const auto attacks_ = owner_ ? owner_->GetComponent<DragonAttackControllerComponent>() : nullptr;
     if (!attacks_ || !health || health->IsDead() || IsEnemyAILockedByGameMode() || attacks_->IsSpecialActionActive()) return false;
@@ -3430,6 +3438,8 @@ void DragonAIComponent::RegisterRuntimeActions()
     registerAction_("DragonAI_TestGroundStamp", [this]() { RequestAction(DRAGON_ACTION_TYPE::GROUND_STAMP); });
     registerAction_("DragonAI_TestTakeOff", [this]() { RequestAction(DRAGON_ACTION_TYPE::TAKE_OFF); });
     registerAction_("DragonAI_TestUltimate", [this]() { ForceAction(DRAGON_ACTION_TYPE::ULTIMATE_ATTACK); });
+    registerAction_("DragonAI_TestMeteorSpecial", [this]() { RequestSpecialAction(false); });
+    registerAction_("DragonAI_TestDiveSpecial", [this]() { RequestSpecialAction(true); });
     registerAction_("DragonAI_UltimateEnd", [this]() { NotifySequencerActionEnd(); });
     registerAction_("DragonAI_ForceIdle", [this]() { ForceAction(DRAGON_ACTION_TYPE::IDLE); });
     registerAction_("DragonAI_ForceTurn", [this]() { ForceAction(DRAGON_ACTION_TYPE::TURN_TO_PLAYER); });

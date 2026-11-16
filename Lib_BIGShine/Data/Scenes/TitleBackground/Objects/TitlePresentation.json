@@ -1,158 +1,158 @@
 {
-    "Name": "TitlePresentation",
-    "Layer": 0,
     "CollisionMask": 0,
-    "ParentName": "",
-    "RequiredForSceneStart": true,
-    "Transform": {
-        "Pos": [
-            0,
-            0,
-            0
-        ],
-        "Rot": [
-            0,
-            0,
-            0
-        ],
-        "Scale": [
-            1,
-            1,
-            1
-        ]
-    },
     "Components": [
         {
-            "TypeName": "ScenePresentationComponent",
-            "Enabled": true,
-            "RequiredForSceneStart": true,
-            "UpdateEnabled": true,
-            "LateUpdateEnabled": true,
-            "UpdatePriority": 1000,
-            "LateUpdatePriority": 1000,
             "Data": {
-                "SceneName": "TitleBackground",
-                "SettingsObjectPath": "Data/Scenes/TitleBackground/Objects/TitlePresentation.json",
-                "CameraObject": "TitleCamera",
-                "LogoObject": "TitleLogo",
-                "FadeObject": "TitleScreenFade",
                 "AttachmentObjects": [
                     "TitleSword",
                     "TitleShield"
-                ],
-                "MusicPath": "Data/Audio/BGM/PerituneMaterial_Investigation2.mp3",
-                "ReleaseCursor": true,
-                "StopPreviousMusic": true,
-                "ResetPhysicsTimeScale": true,
-                "ClearColor": [
-                    0.012,
-                    0.008,
-                    0.014,
-                    1
                 ],
                 "Bloom": {
                     "Enabled": true,
                     "Intensity": 0.12,
                     "Threshold": 1
                 },
+                "CameraObject": "TitleCamera",
+                "ClearColor": [
+                    0.012,
+                    0.008,
+                    0.014,
+                    1
+                ],
+                "FadeObject": "TitleScreenFade",
+                "LogoObject": "TitleLogo",
+                "MusicPath": "Data/Audio/BGM/PerituneMaterial_Investigation2.mp3",
+                "Presentation": {
+                    "CameraMotionAmplitude": 0.0,
+                    "CameraMotionSpeed": 0.10999999940395355,
+                    "CameraPosition": [
+                        6.800000190734863,
+                        2.450000047683716,
+                        -8.350000381469727
+                    ],
+                    "FieldOfView": 42,
+                    "LogoCenterX": 0.33000001311302185,
+                    "LogoMaxHeight": 0.55,
+                    "LogoTop": 0.03999999910593033,
+                    "LogoWidth": 0.56,
+                    "LookAtPosition": [
+                        0.0,
+                        1.5,
+                        1.2000000476837158
+                    ],
+                    "MenuTop": 0.64,
+                    "ReferenceAspect": 1.7777777777777777
+                },
+                "ReleaseCursor": true,
+                "ResetPhysicsTimeScale": true,
+                "SceneName": "TitleBackground",
+                "SettingsInputAction": "UI.PresentationSettings",
+                "SettingsObjectPath": "Data/Scenes/TitleBackground/Objects/TitlePresentation.json",
+                "ShowDebugShapes": false,
+                "StopPreviousMusic": true,
                 "Vignette": {
-                    "Enabled": true,
                     "Color": [
                         0,
                         0,
                         0,
                         1
                     ],
+                    "Enabled": true,
                     "Intensity": 0.65
-                },
-                "Presentation": {
-                    "CameraPosition": [
-                        0,
-                        2.7,
-                        -9.5
-                    ],
-                    "LookAtPosition": [
-                        0,
-                        1.8,
-                        0
-                    ],
-                    "FieldOfView": 42,
-                    "CameraMotionAmplitude": 0.16,
-                    "CameraMotionSpeed": 0.12,
-                    "LogoCenterX": 0.46,
-                    "LogoTop": 0.02,
-                    "LogoWidth": 0.56,
-                    "LogoMaxHeight": 0.55,
-                    "MenuTop": 0.64,
-                    "ReferenceAspect": 1.7777777777777777
-                },
-                "SettingsInputAction": "UI.PresentationSettings",
-                "ShowDebugShapes": false
-            }
+                }
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 1000,
+            "RequiredForSceneStart": true,
+            "TypeName": "ScenePresentationComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 1000
         },
         {
-            "TypeName": "MenuNavigationComponent",
-            "Enabled": true,
-            "RequiredForSceneStart": true,
-            "UpdateEnabled": true,
-            "LateUpdateEnabled": true,
-            "UpdatePriority": 2000,
-            "LateUpdatePriority": 2000,
             "Data": {
-                "FadeObject": "TitleScreenFade",
-                "PanelObject": "TitleMenuPanel",
-                "KeyboardGuideObject": "TitleGuideKeyboard",
-                "PlayStationGuideObject": "TitleGuidePlayStation",
-                "DeveloperGuideObject": "TitleGuideDeveloper",
-                "DeveloperAction": "GoSceneEditor",
-                "MoveSound": "Data/Audio/SE/Sword-Practice-2.wav",
+                "ConfirmInputAction": "UI.MenuConfirm",
                 "ConfirmSound": "Data/Audio/SE/Sword-Fight-1.wav",
+                "DeveloperAction": "GoSceneEditor",
+                "DeveloperGuideObject": "TitleGuideDeveloper",
+                "DeveloperInputAction": "UI.OpenEditor",
+                "FadeObject": "TitleScreenFade",
                 "InputDelay": 1.5,
-                "RepeatDelay": 0.35,
-                "RepeatInterval": 0.14,
                 "Items": [
                     {
                         "Action": "GoSceneGame",
-                        "LabelObject": "TitleMenu_game_startLabel",
-                        "HighlightObject": "TitleMenu_game_startHighlight",
-                        "MarkerObject": "TitleMenu_game_startMarker",
+                        "Enabled": true,
                         "GlowObject": "TitleMenu_game_startGlow",
-                        "Visible": true,
-                        "Enabled": true
+                        "HighlightObject": "TitleMenu_game_startHighlight",
+                        "LabelObject": "TitleMenu_game_startLabel",
+                        "MarkerObject": "TitleMenu_game_startMarker",
+                        "Visible": true
                     },
                     {
                         "Action": "GoSceneTutorial",
-                        "LabelObject": "TitleMenu_tutorialLabel",
-                        "HighlightObject": "TitleMenu_tutorialHighlight",
-                        "MarkerObject": "TitleMenu_tutorialMarker",
+                        "Enabled": false,
                         "GlowObject": "TitleMenu_tutorialGlow",
-                        "Visible": true,
-                        "Enabled": false
+                        "HighlightObject": "TitleMenu_tutorialHighlight",
+                        "LabelObject": "TitleMenu_tutorialLabel",
+                        "MarkerObject": "TitleMenu_tutorialMarker",
+                        "Visible": true
                     },
                     {
                         "Action": "",
-                        "LabelObject": "TitleMenu_settingsLabel",
-                        "HighlightObject": "TitleMenu_settingsHighlight",
-                        "MarkerObject": "TitleMenu_settingsMarker",
+                        "Enabled": false,
                         "GlowObject": "TitleMenu_settingsGlow",
-                        "Visible": true,
-                        "Enabled": false
+                        "HighlightObject": "TitleMenu_settingsHighlight",
+                        "LabelObject": "TitleMenu_settingsLabel",
+                        "MarkerObject": "TitleMenu_settingsMarker",
+                        "Visible": true
                     },
                     {
                         "Action": "Application.Exit",
-                        "LabelObject": "TitleMenu_exitLabel",
-                        "HighlightObject": "TitleMenu_exitHighlight",
-                        "MarkerObject": "TitleMenu_exitMarker",
+                        "Enabled": true,
                         "GlowObject": "TitleMenu_exitGlow",
-                        "Visible": true,
-                        "Enabled": true
+                        "HighlightObject": "TitleMenu_exitHighlight",
+                        "LabelObject": "TitleMenu_exitLabel",
+                        "MarkerObject": "TitleMenu_exitMarker",
+                        "Visible": true
                     }
                 ],
-                "PreviousInputAction": "UI.MenuPrevious",
+                "KeyboardGuideObject": "TitleGuideKeyboard",
+                "MoveSound": "Data/Audio/SE/Sword-Practice-2.wav",
                 "NextInputAction": "UI.MenuNext",
-                "ConfirmInputAction": "UI.MenuConfirm",
-                "DeveloperInputAction": "UI.OpenEditor"
-            }
+                "PanelObject": "TitleMenuPanel",
+                "PlayStationGuideObject": "TitleGuidePlayStation",
+                "PreviousInputAction": "UI.MenuPrevious",
+                "RepeatDelay": 0.3499999940395355,
+                "RepeatInterval": 0.14000000059604645
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 2000,
+            "RequiredForSceneStart": true,
+            "TypeName": "MenuNavigationComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 2000
         }
-    ]
+    ],
+    "Layer": 0,
+    "Name": "TitlePresentation",
+    "ParentName": "",
+    "RequiredForSceneStart": true,
+    "Transform": {
+        "Pos": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
 }

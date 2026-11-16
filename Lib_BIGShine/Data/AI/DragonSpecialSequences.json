@@ -1,0 +1,14 @@
+{
+    "RegisterGlobal": false,
+    "Sequences": [
+        {
+            "name": "DragonSpecialChargeSequence",
+            "duration": 2.0,
+            "cinematicEditing": true,
+            "cleanupObjectsOnCompletion": false,
+            "completionAction": "DragonSpecial_ReturnCamera",
+            "interruptionAction": "DragonSpecial_Abort",
+            "actions": []
+        }
+    ]
+}

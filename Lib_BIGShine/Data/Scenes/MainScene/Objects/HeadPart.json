@@ -468,6 +468,7 @@
                             "KnockBackPower": 3.0,
                             "TargetAirLiftPower": 0.0
                         },
+                        "LeaveFireGroundMark": false,
                         "LifeTime": 1.350000023841858,
                         "LocalOffset": [
                             0.0,
@@ -599,6 +600,7 @@
                             "KnockBackPower": 5.0,
                             "TargetAirLiftPower": 0.0
                         },
+                        "LeaveFireGroundMark": true,
                         "LifeTime": 1.5499999523162842,
                         "LocalOffset": [
                             0.0,
@@ -615,7 +617,6 @@
                             1.0,
                             1.0
                         ],
-                        "LeaveFireGroundMark": true,
                         "Name": "DragonBreathLightSingle",
                         "ProjectileAcceleration": 10.0,
                         "ProjectileGravity": 0.0,
@@ -702,6 +703,7 @@
                             "KnockBackPower": 3.0,
                             "TargetAirLiftPower": 0.0
                         },
+                        "LeaveFireGroundMark": true,
                         "LifeTime": 1.5499999523162842,
                         "LocalOffset": [
                             0.0,
@@ -718,7 +720,6 @@
                             1.0,
                             1.0
                         ],
-                        "LeaveFireGroundMark": true,
                         "Name": "DragonBreathLightBeam",
                         "ProjectileAcceleration": 0.0,
                         "ProjectileGravity": 0.0,
@@ -805,6 +806,7 @@
                             "KnockBackPower": 4.0,
                             "TargetAirLiftPower": 0.0
                         },
+                        "LeaveFireGroundMark": true,
                         "LifeTime": 2.0,
                         "LocalOffset": [
                             0.0,
@@ -821,7 +823,6 @@
                             1.0,
                             1.0
                         ],
-                        "LeaveFireGroundMark": true,
                         "Name": "DragonBreathLightFan",
                         "ProjectileAcceleration": 0.0,
                         "ProjectileGravity": 0.0,

@@ -6,6 +6,7 @@
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/GamePlay/Core/Component/CharacterMovementComponent.h"
+#include "Engine/GamePlay/Core/Component/MotionWarpComponent.h"
 #include "Engine/GamePlay/Combat/HealthComponent.h"
 #include "Engine/GamePlay/EventSystem/ActionSequence.h"
 #include "Engine/GamePlay/System/EffectManager.h"
@@ -20,9 +21,11 @@
 #include "Engine/Physics/PhysXSystem.h"
 #include "Engine/Physics/SphereCollider.h"
 #include "Engine/Physics/HurtBox.h"
+#include "Engine/Physics/HitBox.h"
 #include <algorithm>
 #include <cmath>
 #include <fstream>
+#include <stdexcept>
 
 namespace
 {
@@ -167,6 +170,8 @@ bool DragonAttackControllerComponent::BeginSpecialAction(bool dive_)
     }
     sequence_->StopPlayback(sequence_->GetPlaybackGeneration());
     StopAttack();
+    specialSequenceGeneration = sequence_->GetPlaybackGeneration();
+    if (const auto warp_ = owner_->GetComponent<MotionWarpComponent>()) warp_->Stop();
     specialDive = dive_;
     specialPhase = 0;
     specialTimer = specialElapsed = 0.0f;
@@ -211,6 +216,10 @@ bool DragonAttackControllerComponent::BeginSpecialAction(bool dive_)
         { specialPlayerInvincibility.push_back({hurt_,hurt_->IsTemporaryInvincible()}); hurt_->SetTemporaryInvincible(true); }
         for (const auto& component_ : object_->GetComponents<CharacterMovementComponent>())
         { specialPlayerSuppression.push_back({component_,component_->IsRuntimeSuppressed()}); component_->ResetMovementRequests(); component_->SetRuntimeSuppressed(true); }
+        for (const auto& component_ : object_->GetComponents<AnimationControllerComponent>())
+        { specialPlayerSuppression.push_back({component_,component_->IsRuntimeSuppressed()}); component_->SetRuntimeSuppressed(true); }
+        for (const auto& component_ : object_->GetComponents<HitBox>())
+        { specialPlayerSuppression.push_back({component_,component_->IsRuntimeSuppressed()}); component_->SetRuntimeSuppressed(true); }
         for (const auto& child_ : object_->transform->children) if (child_) if (const auto objectChild_ = child_->gameObject.lock()) self_(self_,objectChild_);
     };
     if (const auto controller_ = player_->GetComponent<PlayerControllerComponent>()) controller_->StopSkill();
@@ -263,7 +272,11 @@ void DragonAttackControllerComponent::ReleaseSpecialIntro()
         if (const auto mode_ = owner_->GetManager().GetGameModeManager(); mode_ && static_cast<int>(mode_->GetCurrentGameState()) == specialGameState)
             mode_->SetPlayerControlLocked(specialPreviousPlayerLock);
     for (const auto& [weak_, previous_] : specialPlayerSuppression)
-        if (const auto component_ = weak_.lock()) component_->SetRuntimeSuppressed(previous_);
+        if (const auto component_ = weak_.lock())
+        {
+            if (const auto movement_ = std::dynamic_pointer_cast<CharacterMovementComponent>(component_)) movement_->ResetMovementRequests();
+            component_->SetRuntimeSuppressed(previous_);
+        }
     specialPlayerSuppression.clear();
     for (const auto& [weak_, previous_] : specialPlayerInvincibility)
         if (const auto hurt_ = weak_.lock()) hurt_->SetTemporaryInvincible(previous_);
@@ -310,14 +323,17 @@ void DragonAttackControllerComponent::StopSpecialAction()
         const auto position_ = owner_->transform->GetWorldPosition();
         if (ResolveSpecialGround(position_,ground_)) { ground_.y += specialGroundOffset; specialRotation.x = specialRotation.z = 0.0f; PlaceSpecialDragon(ground_); }
     }
-    specialDecals.clear();
+    if (!specialCompleted) specialDecals.clear();
     if (const auto collider_ = specialCollider.lock())
     { collider_->useGravity = specialGravity; collider_->physicsControlsTransform = specialPhysicsControlsTransform; collider_->velocity = {}; }
     specialCollider.reset();
     if (const auto movement_ = owner_->GetComponent<CharacterMovementComponent>())
     { movement_->ResetMovementRequests(); movement_->SetRuntimeSuppressed(specialMovementSuppressed); }
     if (const auto animation_ = owner_->GetComponent<AnimationControllerComponent>())
+    {
+        if (specialCompleted) animation_->ChangeState("PlainsDragon_IdleBreathe",0.2f,true);
         animation_->SetPresentationControlled(specialAnimationControlled);
+    }
 }
 
 bool DragonAttackControllerComponent::IsSpecialTargetSheltered() const
@@ -376,6 +392,13 @@ void DragonAttackControllerComponent::SpawnSpecialImpact(const DirectX::XMFLOAT3
     dust_.sizeScale = radius_ * specialSettings["ExplosionScale"].get<float>();
     const auto explosion_ = effects_.SpawnParticle(dust_);
     effects_.RegisterAttackEffectOwner(explosion_,owner_);
+    MeshVFXSpawnRequest shockwave_;
+    shockwave_.assetPath = "Data/VFX/DragonSpecialShockwave.json";
+    shockwave_.position = position_;
+    shockwave_.position.y += 0.12f;
+    shockwave_.scale = {radius_,1.0f,radius_};
+    shockwave_.lifeTime = 2.0f;
+    effects_.RegisterAttackEffectOwner(effects_.SpawnMeshVFX(shockwave_),owner_);
     const auto cameras_ = owner_->GetManager().GetCameraManager();
     const auto camera_ = cameras_ ? cameras_->GetSourceCamera() : nullptr;
     if (const auto cameraObject_ = camera_ ? camera_->GetGameObject() : nullptr)
@@ -385,25 +408,36 @@ void DragonAttackControllerComponent::SpawnSpecialImpact(const DirectX::XMFLOAT3
 void DragonAttackControllerComponent::UpdateSpecialAction(float deltaTime_)
 {
     if (!IsSpecialActionActive()) return;
+
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::UpdateSpecialAction");
+
     const auto owner_ = GetGameObject();
     const auto mode_ = owner_ && owner_->manager ? owner_->GetManager().GetGameModeManager() : nullptr;
     const auto player_ = owner_ && owner_->manager ? owner_->GetManager().Find(targetObjectName) : nullptr;
+
     const auto playerHealth_ = player_ ? player_->GetComponent<HealthComponent>() : nullptr;
+
     if (!CanSpawnAttack() || !mode_ || !player_ || (playerHealth_ && playerHealth_->IsDead()) ||
         static_cast<int>(mode_->GetCurrentGameState()) != specialGameState || mode_->IsEnemyAILocked())
-    { specialStatus = "Interrupted"; StopSpecialAction(); return; }
+    { 
+        specialStatus = "Interrupted"; StopSpecialAction(); 
+        return; 
+    }
+
     const float dt_ = (std::max)(0.0f,deltaTime_);
     specialTimer += dt_;
+
     const auto animation_ = owner_->GetComponent<AnimationControllerComponent>();
     const auto sequence_ = owner_->GetComponent<ActionSequence>();
     const float arena_ = specialSettings["ArenaRadius"].get<float>();
     auto position_ = owner_->transform->GetWorldPosition();
+
     if (specialIntroLocked)
     {
         const float charge_ = specialSettings["ChargeTime"].get<float>();
         const float pulse_ = specialPhase == 1 ? std::sin(std::clamp(specialTimer/charge_,0.0f,1.0f)*DirectX::XM_PI) : 0.0f;
         auto& blur_ = GraphicsDeviceManager::Instance().GetRadialBlurParams();
+
         if (std::abs(blur_.blurRadius-specialAppliedBlurRadius) < 0.00001f)
         {
             blur_ = specialPreviousBlur;
@@ -412,6 +446,7 @@ void DragonAttackControllerComponent::UpdateSpecialAction(float deltaTime_)
             specialAppliedBlurRadius = blur_.blurRadius;
         }
     }
+
     for (size_t index_ = 0; index_ < specialAura.size(); ++index_)
     {
         const auto& effect_ = specialAura[index_];
@@ -423,25 +458,41 @@ void DragonAttackControllerComponent::UpdateSpecialAction(float deltaTime_)
         effect_->transform->localPosition = world_;
         effect_->transform->MarkDirty();
     }
+
     if (specialPhase == 0)
     {
         float rate_ = std::clamp(specialTimer/specialSettings["AscentTime"].get<float>(),0.0f,1.0f);
         rate_ = rate_*rate_*(3.0f-2.0f*rate_);
-        position_ = {specialStart.x+(specialAirPosition.x-specialStart.x)*rate_, specialStart.y+(specialAirPosition.y-specialStart.y)*rate_, specialStart.z+(specialAirPosition.z-specialStart.z)*rate_};
+        position_ = 
+        {
+            specialStart.x+(specialAirPosition.x-specialStart.x)*rate_,
+            specialStart.y+(specialAirPosition.y-specialStart.y)*rate_,
+            specialStart.z+(specialAirPosition.z-specialStart.z)*rate_
+        };
+
         if (rate_ >= 1.0f)
         {
             specialPhase = 1; specialTimer = 0.0f;
             animation_->ChangeState(specialDive ? "DragonSpecialHover" : "DragonSpecialCharge",0.2f,true);
             owner_->ExecuteAction("DragonSpecialChargeSequence");
             specialSequenceGeneration = sequence_->GetPlaybackGeneration();
+
             if (sequence_->GetPlayingSequenceName() != "DragonSpecialChargeSequence")
-            { specialStatus = "Charge sequence failed to start"; StopSpecialAction(); return; }
+            { 
+                specialStatus = "Charge sequence failed to start"; 
+                StopSpecialAction(); 
+                return;
+            }
         }
     }
     else if (specialPhase == 1)
     {
         if (sequence_->GetPlaybackGeneration() != specialSequenceGeneration || specialTimer > 30.0f)
-        { specialStatus = "Charge sequence interrupted or timed out"; StopSpecialAction(); return; }
+        { 
+            specialStatus = "Charge sequence interrupted or timed out"; 
+            StopSpecialAction();
+            return; 
+        }
     }
     else if (specialPhase == 2)
     {
@@ -451,7 +502,19 @@ void DragonAttackControllerComponent::UpdateSpecialAction(float deltaTime_)
             ReleaseSpecialIntro();
             specialPhase = specialDive ? 4 : 3; specialTimer = specialElapsed = 0.0f;
             animation_->ChangeState(specialDive ? "DragonSpecialGlide" : "DragonSpecialHover",0.2f,true);
-            if (specialDive) specialRotation.y = DirectX::XMConvertToDegrees(specialAngle+DirectX::XM_PIDIV2);
+            if (specialDive)
+            {
+                for (auto& effect_ : specialAura)
+                {
+                    if (effect_) owner_->GetManager().GetEffectManager().StopEffect(effect_);
+                    ParticleSpawnRequest trail_;
+                    trail_.assetPath = "Data/Particle/DragonSpecialMeteorTrail.json";
+                    trail_.position = position_;
+                    trail_.sizeScale = 4.0f;
+                    trail_.lifeTime = 3600.0f;
+                    effect_ = owner_->GetManager().GetEffectManager().SpawnParticle(trail_);
+                }
+            }
         }
         else if (specialTimer > specialSettings["CameraReturnTime"].get<float>()+5.0f)
         { specialStatus = "Camera return timed out"; StopSpecialAction(); return; }
@@ -515,23 +578,48 @@ void DragonAttackControllerComponent::UpdateSpecialAction(float deltaTime_)
                 fallingTime_ = (std::max)(0.0f, dt_-meteor_.warningRemaining);
                 meteor_.warningRemaining = (std::max)(0.0f,meteor_.warningRemaining-dt_);
             }
+
             meteor_.height = (std::max)(0.0f,meteor_.height-specialSettings["MeteorSpeed"].get<float>()*fallingTime_);
             auto bodyPosition_ = meteor_.ground;
             bodyPosition_.y += meteor_.height + (meteor_.final ? 0.0f : meteor_.coverRadius*0.65f);
+
             for (const auto& object_ : {meteor_.body,meteor_.trail}) if (object_)
-            { object_->transform->localPosition = bodyPosition_; object_->transform->MarkDirty(); }
-            if (meteor_.height > 0.0f) continue;
+            {
+                object_->transform->localPosition = bodyPosition_; 
+                object_->transform->MarkDirty(); 
+            }
+
+            if (meteor_.height > 0.0f)
+            {
+                continue;
+            }
+
             meteor_.landed = true;
-            if (meteor_.warning) owner_->GetManager().Destroy(meteor_.warning);
+
+            if (meteor_.warning) 
+            {
+                owner_->GetManager().Destroy(meteor_.warning);
+            }
+
             meteor_.warning.reset();
-            if (meteor_.trail) owner_->GetManager().GetEffectManager().StopEffect(meteor_.trail);
+            if (meteor_.trail)
+            {
+                owner_->GetManager().GetEffectManager().StopEffect(meteor_.trail);
+            }
+
             meteor_.trail.reset();
             const bool sheltered_ = meteor_.final && IsSpecialTargetSheltered();
             SpawnSpecialImpact(meteor_.ground,meteor_.radius,meteor_.final,!sheltered_);
             if (!meteor_.final)
             {
                 meteor_.obstacle = owner_->GetManager().Create("DragonMeteorCover");
-                if (!meteor_.obstacle) { specialStatus = "Meteor cover creation failed"; StopSpecialAction(); return; }
+                if (!meteor_.obstacle)
+                { 
+                    specialStatus = "Meteor cover creation failed";
+                     StopSpecialAction(); 
+                    return; 
+                }
+
                 meteor_.obstacle->SetNoSaveObject();
                 meteor_.obstacle->SetLayer(LayerType::Environment);
                 meteor_.obstacle->transform->localPosition = bodyPosition_;
@@ -558,20 +646,31 @@ void DragonAttackControllerComponent::UpdateSpecialAction(float deltaTime_)
         specialAngle += specialSettings["OrbitSpeed"].get<float>()*dt_;
         const float radius_ = arena_*specialSettings["OrbitRadiusRatio"].get<float>();
         position_ = {specialCenter.x+std::sin(specialAngle)*radius_,specialAirPosition.y,specialCenter.z+std::cos(specialAngle)*radius_};
-        specialRotation.y = DirectX::XMConvertToDegrees(specialAngle+DirectX::XM_PIDIV2);
+        const float orbitYaw_ = DirectX::XMConvertToDegrees(specialAngle+DirectX::XM_PIDIV2);
+        specialRotation.y += std::remainder(orbitYaw_-specialRotation.y,360.0f)*(1.0f-std::exp(-6.0f*dt_));
         specialRotation.z = -12.0f*std::clamp(specialTimer,0.0f,1.0f);
         if (specialTimer >= specialSettings["OrbitTime"].get<float>())
         {
             specialPhase = 5; specialTimer = 0.0f;
             animation_->ChangeState("DragonSpecialHover",0.3f,true);
             if (!ResolveSpecialGround(player_->transform->GetWorldPosition(),specialTarget))
-            { specialStatus = "Dive target ground missing"; StopSpecialAction(); return; }
+            {
+                specialStatus = "Dive target ground missing";
+                StopSpecialAction(); 
+                return;
+            }
+
             DangerAreaTemplate danger_;
             danger_.shapeType = DangerAreaShapeType::CIRCLE;
             danger_.radius = arena_*specialSettings["DiveRadiusRatio"].get<float>();
             danger_.lifeTime = specialSettings["TrackingTime"].get<float>()+specialSettings["EvadeTime"].get<float>()+30.0f;
             specialDanger = owner_->GetOrAddComponent<DangerAreaComponent>()->ShowAt(danger_,specialTarget);
-            if (!specialDanger) { specialStatus = "Dive warning unavailable"; StopSpecialAction(); return; }
+            if (!specialDanger) 
+            { 
+                specialStatus = "Dive warning unavailable";
+                StopSpecialAction();
+                return; 
+            }
         }
     }
     else if (specialPhase == 5 || specialPhase == 6)
@@ -593,7 +692,11 @@ void DragonAttackControllerComponent::UpdateSpecialAction(float deltaTime_)
                 if (!ResolveSpecialGround(specialTarget,specialTarget)) { specialStatus = "Tracking ground missing"; StopSpecialAction(); return; }
                 owner_->GetOrAddComponent<DangerAreaComponent>()->UpdateAt(specialDanger,specialTarget,0.0f);
             }
-            if (specialTimer >= specialSettings["TrackingTime"].get<float>()) { specialPhase = 6; specialTimer = 0.0f; }
+            if (specialTimer >= specialSettings["TrackingTime"].get<float>())
+            {
+                specialPhase = 6; 
+                specialTimer = 0.0f; 
+            }
         }
         const float targetYaw_ = DirectX::XMConvertToDegrees(std::atan2(specialTarget.x-position_.x,specialTarget.z-position_.z));
         specialRotation.y += std::remainder(targetYaw_-specialRotation.y,360.0f)*(1.0f-std::exp(-6.0f*dt_));
@@ -619,7 +722,10 @@ void DragonAttackControllerComponent::UpdateSpecialAction(float deltaTime_)
             specialPhase = 9; specialTimer = 0.0f;
             specialRotation.x = specialRotation.z = 0.0f;
             animation_->ChangeState("DragonSpecialIdle",0.25f,true);
-            if (specialDanger) owner_->GetManager().Destroy(specialDanger);
+            if (specialDanger) 
+            {
+                owner_->GetManager().Destroy(specialDanger);
+            }
             specialDanger.reset();
         }
     }
@@ -656,7 +762,12 @@ void DragonAttackControllerComponent::UpdateSpecialAction(float deltaTime_)
         if (!remaining_)
         {
             specialPhase = 8; specialTimer = 0.0f;
-            if (!ResolveSpecialGround(specialCenter,specialTarget)) { specialStatus = "Landing ground missing"; StopSpecialAction(); return; }
+            if (!ResolveSpecialGround(specialCenter,specialTarget)) 
+            {
+                specialStatus = "Landing ground missing";
+                StopSpecialAction();
+                return;
+            }
             animation_->ChangeState("DragonSpecialHover",0.2f,true);
         }
     }
@@ -666,14 +777,23 @@ void DragonAttackControllerComponent::UpdateSpecialAction(float deltaTime_)
 void DragonAttackControllerComponent::DrawSpecialGui()
 {
     if (!ImGui::CollapsingHeader("Dragon Special Actions")) return;
+
     ImGui::Text("Action: %s / Phase: %s / Time: %.2f",IsSpecialActionActive() ? (specialDive ? "Dive" : "Meteors") : "None",
         specialPhase >= 0 && specialPhase < 11 ? PHASE_NAMES[specialPhase] : "Idle",specialTimer);
+
     ImGui::Text("Input locked: %s / Meteors: %d / Aura: %d",specialIntroLocked ? "Yes" : "No",static_cast<int>(specialMeteors.size()),static_cast<int>(specialAura.size()));
     ImGui::Text("Fixed target: %.2f, %.2f, %.2f",specialTarget.x,specialTarget.y,specialTarget.z);
     ImGui::TextWrapped("%s",specialStatus.c_str());
+
     for (const auto& meteor_ : specialMeteors)
-        ImGui::Text("Meteor (%.1f, %.1f, %.1f) r=%.1f height=%.1f %s",meteor_.ground.x,meteor_.ground.y,meteor_.ground.z,meteor_.radius,meteor_.height,meteor_.landed ? "Landed" : "Pending");
+    {
+        ImGui::Text("Meteor (%.1f, %.1f, %.1f) r=%.1f height=%.1f %s", meteor_.ground.x, meteor_.ground.y, meteor_.ground.z, meteor_.radius, meteor_.height, meteor_.landed ? "Landed" : "Pending");
+    }
+
     ImGui::BeginDisabled(IsSpecialActionActive());
-    if (ImGui::Button("Reload Special Settings")) LoadSpecialSettings();
+    if (ImGui::Button("Reload Special Settings")) 
+    {
+        LoadSpecialSettings();
+    }
     ImGui::EndDisabled();
 }

@@ -1,35 +1,12 @@
 {
-    "Name": "TitleAtmosphere",
-    "Layer": 1,
     "CollisionMask": 0,
-    "ParentName": "",
-    "RequiredForSceneStart": true,
-    "Transform": {
-        "Pos": [
-            0,
-            0.15,
-            1.5
-        ],
-        "Rot": [
-            0.0,
-            0.0,
-            0.0
-        ],
-        "Scale": [
-            1.0,
-            1.0,
-            1.0
-        ]
-    },
     "Components": [
         {
-            "TypeName": "ParticleComponent",
-            "Enabled": true,
-            "RequiredForSceneStart": true,
             "Data": {
-                "AssetType": "ParticleEffect",
-                "AssetVersion": 1,
                 "AssetPath": "Data/Particle/TitleAtmosphere.json",
+                "AttractionTargetName": "",
+                "DissolveBoundaryBand": 0.15000000596046448,
+                "EmitDissolveBoundary": false,
                 "Emitters": [
                     {
                         "Acceleration": [
@@ -40,21 +17,21 @@
                         "BlendMode": 0,
                         "BurstCount": 0,
                         "Color": [
-                            0.025,
-                            0.008,
-                            0.015,
+                            0.02500000037252903,
+                            0.00800000037997961,
+                            0.014999999664723873,
                             0.5
                         ],
                         "ColorEnd": [
-                            0.01,
-                            0.003,
-                            0.006,
+                            0.009999999776482582,
+                            0.003000000026077032,
+                            0.006000000052154064,
                             0.0
                         ],
                         "ColorStart": [
-                            0.025,
-                            0.008,
-                            0.015,
+                            0.02500000037252903,
+                            0.00800000037997961,
+                            0.014999999664723873,
                             0.0
                         ],
                         "ConeAngle": [
@@ -115,7 +92,7 @@
                         ],
                         "ShapeSize": [
                             9.0,
-                            0.3,
+                            0.30000001192092896,
                             5.0
                         ],
                         "ShapeStart": [
@@ -124,8 +101,8 @@
                             0.0
                         ],
                         "Size": [
-                            1.1,
-                            1.8
+                            1.100000023841858,
+                            1.7999999523162842
                         ],
                         "SizeRandomEnd": [
                             1.0,
@@ -139,8 +116,8 @@
                         "SpawnShape": 2,
                         "SpawnSpace": 0,
                         "Speed": [
-                            0.025,
-                            0.07
+                            0.02500000037252903,
+                            0.07000000029802322
                         ],
                         "SpriteAnimationFps": 12.0,
                         "SpriteAnimationLoop": 1,
@@ -200,28 +177,28 @@
                     {
                         "Acceleration": [
                             0.0,
-                            0.015,
+                            0.014999999664723873,
                             0.0
                         ],
                         "BlendMode": 1,
                         "BurstCount": 0,
                         "Color": [
-                            0.65,
-                            0.018,
-                            0.009,
-                            0.7
+                            0.6499999761581421,
+                            0.017999999225139618,
+                            0.008999999612569809,
+                            0.699999988079071
                         ],
                         "ColorEnd": [
-                            0.12,
+                            0.11999999731779099,
                             0.0,
                             0.0,
                             0.0
                         ],
                         "ColorStart": [
-                            0.65,
-                            0.018,
-                            0.009,
-                            0.7
+                            0.6499999761581421,
+                            0.017999999225139618,
+                            0.008999999612569809,
+                            0.699999988079071
                         ],
                         "ConeAngle": [
                             0.0,
@@ -260,9 +237,9 @@
                         "MeshVertexSampleCount": 2048,
                         "Name": "TitleEmbers",
                         "NoiseFrequency": 1.0,
-                        "NoiseSpeed": 0.12,
-                        "NoiseStrength": 0.08,
-                        "OrbitVelocity": 0.05,
+                        "NoiseSpeed": 0.11999999731779099,
+                        "NoiseStrength": 0.07999999821186066,
+                        "OrbitVelocity": 0.05000000074505806,
                         "PosOffset": [
                             0.0,
                             0.0,
@@ -290,8 +267,8 @@
                             0.0
                         ],
                         "Size": [
-                            0.025,
-                            0.012
+                            0.02500000037252903,
+                            0.012000000104308128
                         ],
                         "SizeRandomEnd": [
                             1.0,
@@ -305,8 +282,8 @@
                         "SpawnShape": 2,
                         "SpawnSpace": 0,
                         "Speed": [
-                            0.06,
-                            0.18
+                            0.05999999865889549,
+                            0.18000000715255737
                         ],
                         "SpriteAnimationFps": 12.0,
                         "SpriteAnimationLoop": 1,
@@ -343,7 +320,7 @@
                         "VerticalSpawnRange": 0.0,
                         "Wind": [
                             0.0,
-                            0.0,
+                            0.014999999664723873,
                             0.0
                         ],
                         "gradientDirection": 0,
@@ -364,8 +341,41 @@
                         "useShadeGradientTexture": 0
                     }
                 ],
-                "IsPlaying": true
-            }
+                "HealthOwnerName": "",
+                "HealthyEmissionMultiplier": 1.0,
+                "IsPlaying": true,
+                "LowHealthEmissionMultiplier": 3.0,
+                "MeshSourceObjectName": "",
+                "ScaleEmissionByHealth": false
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": true,
+            "TypeName": "ParticleComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         }
-    ]
+    ],
+    "Layer": 1,
+    "Name": "TitleAtmosphere",
+    "ParentName": "",
+    "RequiredForSceneStart": true,
+    "Transform": {
+        "Pos": [
+            0.0,
+            0.15000000596046448,
+            1.5
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
 }

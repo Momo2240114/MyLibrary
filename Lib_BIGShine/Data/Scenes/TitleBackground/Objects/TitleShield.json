@@ -94,6 +94,18 @@
                     1.0
                 ],
                 "EndNodeName": "ShiledMiddle",
+                "Feedback": {
+                    "attackStrength": 0.30000001192092896,
+                    "duration": 0.11999999731779099,
+                    "hitSoundPath": "",
+                    "maxDistance": 40.0,
+                    "minDistance": 3.0,
+                    "receiveStrength": 0.6499999761581421,
+                    "rumbleEnabled": true,
+                    "startSoundPath": "",
+                    "startStrength": 0.15000000596046448,
+                    "volume": 1.0
+                },
                 "FixedDamage": 0.0,
                 "FixedDamageKey": "FixedDamage",
                 "GravityScale": 1.0,

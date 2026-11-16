@@ -1,49 +1,49 @@
 {
-    "Name": "TitleUI",
-    "Layer": 16,
     "CollisionMask": 0,
+    "Components": [
+        {
+            "Data": {
+                "BoardId": "TitleUI",
+                "BoardLayer": 10,
+                "BoardName": "TitleUI",
+                "InputEnabled": false,
+                "ReferenceResolution": [
+                    1920.0,
+                    1080.0
+                ],
+                "ScaleMode": "EXPAND",
+                "Version": 1,
+                "Visible": true,
+                "ZOrder": 100
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": true,
+            "TypeName": "WidgetBoardComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        }
+    ],
+    "Layer": 16,
+    "Name": "TitleUI",
     "ParentName": "",
     "RequiredForSceneStart": true,
     "Transform": {
         "Pos": [
-            0,
-            0,
-            0
+            0.0,
+            0.0,
+            0.0
         ],
         "Rot": [
-            0,
-            0,
-            0
+            0.0,
+            0.0,
+            0.0
         ],
         "Scale": [
-            1,
-            1,
-            1
+            1.0,
+            1.0,
+            1.0
         ]
-    },
-    "Components": [
-        {
-            "TypeName": "WidgetBoardComponent",
-            "Enabled": true,
-            "RequiredForSceneStart": true,
-            "UpdateEnabled": true,
-            "LateUpdateEnabled": true,
-            "UpdatePriority": 0,
-            "LateUpdatePriority": 0,
-            "Data": {
-                "Version": 1,
-                "BoardName": "TitleUI",
-                "BoardId": "TitleUI",
-                "ReferenceResolution": [
-                    1920,
-                    1080
-                ],
-                "ScaleMode": "EXPAND",
-                "BoardLayer": 10,
-                "ZOrder": 100,
-                "Visible": true,
-                "InputEnabled": false
-            }
-        }
-    ]
+    }
 }

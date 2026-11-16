@@ -1,4 +1,1022 @@
 {
+    "Areas": [
+  {
+    "Id": 250,
+    "Name": "ジャストガード後の反撃",
+    "Comment": "条件判定と行動をまとめた分類。実行優先順位は既存設定を維持。",
+    "Position": [
+      -1775.0,
+      -100.0
+    ],
+    "Size": [
+      3599.0,
+      692.0
+    ],
+    "Color": [
+      0.22,
+      0.3,
+      0.46,
+      0.18
+    ],
+    "NodeIds": [
+      8,
+      12,
+      120,
+      16,
+      125
+    ]
+  },
+  {
+    "Id": 251,
+    "Name": "COUNTER_ATTACK",
+    "Comment": "実行Action: HumanBoss_COUNTER_ATTACK",
+    "Position": [
+      -1535.0,
+      304.0
+    ],
+    "Size": [
+      274.0,
+      244.0
+    ],
+    "Color": [
+      0.2,
+      0.42,
+      0.48,
+      0.24
+    ],
+    "NodeIds": [
+      16
+    ]
+  },
+  {
+    "Id": 252,
+    "Name": "プレイヤー攻撃への反応",
+    "Comment": "条件判定と行動をまとめた分類。実行優先順位は既存設定を維持。",
+    "Position": [
+      -1375.0,
+      112.0
+    ],
+    "Size": [
+      1314.0,
+      804.0
+    ],
+    "Color": [
+      0.22,
+      0.3,
+      0.46,
+      0.18
+    ],
+    "NodeIds": [
+      20,
+      24,
+      28,
+      32,
+      36,
+      40,
+      44,
+      48
+    ]
+  },
+  {
+    "Id": 253,
+    "Name": "BACK_DODGE",
+    "Comment": "実行Action: HumanBoss_BACK_DODGE",
+    "Position": [
+      -815.0,
+      636.0
+    ],
+    "Size": [
+      274.0,
+      244.0
+    ],
+    "Color": [
+      0.2,
+      0.42,
+      0.48,
+      0.24
+    ],
+    "NodeIds": [
+      32
+    ]
+  },
+  {
+    "Id": 254,
+    "Name": "SIDE_DODGE",
+    "Comment": "実行Action: HumanBoss_SIDE_DODGE",
+    "Position": [
+      -1071.0,
+      640.0
+    ],
+    "Size": [
+      274.0,
+      244.0
+    ],
+    "Color": [
+      0.2,
+      0.42,
+      0.48,
+      0.24
+    ],
+    "NodeIds": [
+      36
+    ]
+  },
+  {
+    "Id": 255,
+    "Name": "GUARD",
+    "Comment": "実行Action: HumanBoss_GUARD",
+    "Position": [
+      -1343.0,
+      624.0
+    ],
+    "Size": [
+      274.0,
+      244.0
+    ],
+    "Color": [
+      0.2,
+      0.42,
+      0.48,
+      0.24
+    ],
+    "NodeIds": [
+      40
+    ]
+  },
+  {
+    "Id": 256,
+    "Name": "JUST_GUARD",
+    "Comment": "実行Action: HumanBoss_JUST_GUARD",
+    "Position": [
+      -367.0,
+      636.0
+    ],
+    "Size": [
+      274.0,
+      244.0
+    ],
+    "Color": [
+      0.2,
+      0.42,
+      0.48,
+      0.24
+    ],
+    "NodeIds": [
+      44
+    ]
+  },
+  {
+    "Id": 257,
+    "Name": "NoReaction",
+    "Comment": "実行Action: HumanBoss_NoReaction",
+    "Position": [
+      -591.0,
+      636.0
+    ],
+    "Size": [
+      274.0,
+      244.0
+    ],
+    "Color": [
+      0.2,
+      0.42,
+      0.48,
+      0.24
+    ],
+    "NodeIds": [
+      48
+    ]
+  },
+  {
+    "Id": 258,
+    "Name": "間合いの調整",
+    "Comment": "条件判定と行動をまとめた分類。実行優先順位は既存設定を維持。",
+    "Position": [
+      -207.0,
+      272.0
+    ],
+    "Size": [
+      738.0,
+      356.0
+    ],
+    "Color": [
+      0.22,
+      0.3,
+      0.46,
+      0.18
+    ],
+    "NodeIds": [
+      52,
+      56,
+      60
+    ]
+  },
+  {
+    "Id": 259,
+    "Name": "Reposition",
+    "Comment": "実行Action: HumanBoss_Reposition",
+    "Position": [
+      225.0,
+      288.0
+    ],
+    "Size": [
+      274.0,
+      244.0
+    ],
+    "Color": [
+      0.2,
+      0.42,
+      0.48,
+      0.24
+    ],
+    "NodeIds": [
+      60
+    ]
+  },
+  {
+    "Id": 260,
+    "Name": "攻撃距離への接近",
+    "Comment": "条件判定と行動をまとめた分類。実行優先順位は既存設定を維持。",
+    "Position": [
+      641.0,
+      320.0
+    ],
+    "Size": [
+      690.0,
+      344.0
+    ],
+    "Color": [
+      0.22,
+      0.3,
+      0.46,
+      0.18
+    ],
+    "NodeIds": [
+      64,
+      68,
+      72
+    ]
+  },
+  {
+    "Id": 261,
+    "Name": "Approach",
+    "Comment": "実行Action: HumanBoss_Approach",
+    "Position": [
+      1025.0,
+      320.0
+    ],
+    "Size": [
+      274.0,
+      244.0
+    ],
+    "Color": [
+      0.2,
+      0.42,
+      0.48,
+      0.24
+    ],
+    "NodeIds": [
+      72
+    ]
+  },
+  {
+    "Id": 262,
+    "Name": "プレイヤーの観察",
+    "Comment": "条件判定と行動をまとめた分類。実行優先順位は既存設定を維持。",
+    "Position": [
+      1297.0,
+      188.0
+    ],
+    "Size": [
+      770.0,
+      364.0
+    ],
+    "Color": [
+      0.22,
+      0.3,
+      0.46,
+      0.18
+    ],
+    "NodeIds": [
+      76,
+      80,
+      84
+    ]
+  },
+  {
+    "Id": 263,
+    "Name": "Observe",
+    "Comment": "実行Action: HumanBoss_Observe",
+    "Position": [
+      1761.0,
+      220.0
+    ],
+    "Size": [
+      274.0,
+      244.0
+    ],
+    "Color": [
+      0.2,
+      0.42,
+      0.48,
+      0.24
+    ],
+    "NodeIds": [
+      84
+    ]
+  },
+  {
+    "Id": 264,
+    "Name": "攻撃の選択",
+    "Comment": "条件判定と行動をまとめた分類。実行優先順位は既存設定を維持。",
+    "Position": [
+      1386.0,
+      224.0
+    ],
+    "Size": [
+      1849.0,
+      1952.0
+    ],
+    "Color": [
+      0.22,
+      0.3,
+      0.46,
+      0.18
+    ],
+    "NodeIds": [
+      88,
+      92,
+      96,
+      100,
+      104,
+      108,
+      112,
+      129,
+      133,
+      166
+    ]
+  },
+  {
+    "Id": 265,
+    "Name": "ComboPattern01 (4 stages)",
+    "Comment": "実行Action: HumanBoss_NORMAL_ATTACK_A",
+    "Position": [
+      2225.0,
+      444.0
+    ],
+    "Size": [
+      274.0,
+      244.0
+    ],
+    "Color": [
+      0.2,
+      0.42,
+      0.48,
+      0.24
+    ],
+    "NodeIds": [
+      100
+    ]
+  },
+  {
+    "Id": 266,
+    "Name": "ComboPattern02 (4 stages)",
+    "Comment": "実行Action: HumanBoss_NORMAL_ATTACK_B",
+    "Position": [
+      2481.0,
+      448.0
+    ],
+    "Size": [
+      274.0,
+      244.0
+    ],
+    "Color": [
+      0.2,
+      0.42,
+      0.48,
+      0.24
+    ],
+    "NodeIds": [
+      104
+    ]
+  },
+  {
+    "Id": 267,
+    "Name": "DELAY_ATTACK",
+    "Comment": "実行Action: HumanBoss_DELAY_ATTACK",
+    "Position": [
+      2705.0,
+      448.0
+    ],
+    "Size": [
+      274.0,
+      244.0
+    ],
+    "Color": [
+      0.2,
+      0.42,
+      0.48,
+      0.24
+    ],
+    "NodeIds": [
+      108
+    ]
+  },
+  {
+    "Id": 268,
+    "Name": "GUARD_BREAK",
+    "Comment": "実行Action: HumanBoss_GUARD_BREAK",
+    "Position": [
+      2929.0,
+      448.0
+    ],
+    "Size": [
+      274.0,
+      244.0
+    ],
+    "Color": [
+      0.2,
+      0.42,
+      0.48,
+      0.24
+    ],
+    "NodeIds": [
+      112
+    ]
+  },
+  {
+    "Id": 269,
+    "Name": "待機と観察",
+    "Comment": "実行Action: HumanBoss_Observe",
+    "Position": [
+      4017.0,
+      356.0
+    ],
+    "Size": [
+      274.0,
+      244.0
+    ],
+    "Color": [
+      0.2,
+      0.42,
+      0.48,
+      0.24
+    ],
+    "NodeIds": [
+      116
+    ]
+  },
+  {
+    "Id": 270,
+    "Name": "通常Guard／Dodge後の軽反撃",
+    "Comment": "実行Action: HumanBoss_LIGHT_COUNTER",
+    "Position": [
+      1518.0,
+      0.0
+    ],
+    "Size": [
+      274.0,
+      244.0
+    ],
+    "Color": [
+      0.2,
+      0.42,
+      0.48,
+      0.24
+    ],
+    "NodeIds": [
+      125
+    ]
+  },
+  {
+    "Id": 271,
+    "Name": "空振り後の反撃",
+    "Comment": "実行Action: HumanBoss_WHIFF_PUNISH",
+    "Position": [
+      1518.0,
+      1800.0
+    ],
+    "Size": [
+      274.0,
+      244.0
+    ],
+    "Color": [
+      0.2,
+      0.42,
+      0.48,
+      0.24
+    ],
+    "NodeIds": [
+      129
+    ]
+  },
+  {
+    "Id": 272,
+    "Name": "予兆を見せて攻撃を誘う",
+    "Comment": "実行Action: HumanBoss_ATTACK_FEINT",
+    "Position": [
+      1518.0,
+      1900.0
+    ],
+    "Size": [
+      274.0,
+      244.0
+    ],
+    "Color": [
+      0.2,
+      0.42,
+      0.48,
+      0.24
+    ],
+    "NodeIds": [
+      133
+    ]
+  },
+  {
+    "Id": 273,
+    "Name": "Intentに応じたShadow接続",
+    "Comment": "条件判定と行動をまとめた分類。実行優先順位は既存設定を維持。",
+    "Position": [
+      506.0,
+      420.0
+    ],
+    "Size": [
+      1808.0,
+      676.0
+    ],
+    "Color": [
+      0.22,
+      0.3,
+      0.46,
+      0.18
+    ],
+    "NodeIds": [
+      137,
+      141,
+      145,
+      149,
+      153,
+      157,
+      161,
+      170,
+      174,
+      178,
+      182
+    ]
+  },
+  {
+    "Id": 274,
+    "Name": "SHADOW_SHIFT_APPROACH",
+    "Comment": "実行Action: HumanBoss_SHADOW_SHIFT_APPROACH",
+    "Position": [
+      1518.0,
+      420.0
+    ],
+    "Size": [
+      274.0,
+      244.0
+    ],
+    "Color": [
+      0.2,
+      0.42,
+      0.48,
+      0.24
+    ],
+    "NodeIds": [
+      149
+    ]
+  },
+  {
+    "Id": 275,
+    "Name": "SHADOW_SHIFT_BACK",
+    "Comment": "実行Action: HumanBoss_SHADOW_SHIFT_BACK",
+    "Position": [
+      1518.0,
+      520.0
+    ],
+    "Size": [
+      274.0,
+      244.0
+    ],
+    "Color": [
+      0.2,
+      0.42,
+      0.48,
+      0.24
+    ],
+    "NodeIds": [
+      153
+    ]
+  },
+  {
+    "Id": 276,
+    "Name": "SHADOW_SHIFT_SIDE",
+    "Comment": "実行Action: HumanBoss_SHADOW_SHIFT_SIDE",
+    "Position": [
+      1518.0,
+      620.0
+    ],
+    "Size": [
+      274.0,
+      244.0
+    ],
+    "Color": [
+      0.2,
+      0.42,
+      0.48,
+      0.24
+    ],
+    "NodeIds": [
+      157
+    ]
+  },
+  {
+    "Id": 277,
+    "Name": "SHADOW_SHIFT_BEHIND",
+    "Comment": "実行Action: HumanBoss_SHADOW_SHIFT_BEHIND",
+    "Position": [
+      1518.0,
+      720.0
+    ],
+    "Size": [
+      274.0,
+      244.0
+    ],
+    "Color": [
+      0.2,
+      0.42,
+      0.48,
+      0.24
+    ],
+    "NodeIds": [
+      161
+    ]
+  },
+  {
+    "Id": 278,
+    "Name": "HEAVY_SINGLE_ATTACK",
+    "Comment": "実行Action: HumanBoss_HEAVY_SINGLE_ATTACK",
+    "Position": [
+      1418.0,
+      400.0
+    ],
+    "Size": [
+      274.0,
+      244.0
+    ],
+    "Color": [
+      0.2,
+      0.42,
+      0.48,
+      0.24
+    ],
+    "NodeIds": [
+      166
+    ]
+  },
+  {
+    "Id": 279,
+    "Name": "SHADOW_SLASH",
+    "Comment": "実行Action: HumanBoss_SHADOW_SLASH",
+    "Position": [
+      1468.0,
+      820.0
+    ],
+    "Size": [
+      274.0,
+      244.0
+    ],
+    "Color": [
+      0.2,
+      0.42,
+      0.48,
+      0.24
+    ],
+    "NodeIds": [
+      170
+    ]
+  },
+  {
+    "Id": 280,
+    "Name": "SHADOW_DIVE_01",
+    "Comment": "実行Action: HumanBoss_SHADOW_DIVE_01",
+    "Position": [
+      1648.0,
+      820.0
+    ],
+    "Size": [
+      274.0,
+      244.0
+    ],
+    "Color": [
+      0.2,
+      0.42,
+      0.48,
+      0.24
+    ],
+    "NodeIds": [
+      174
+    ]
+  },
+  {
+    "Id": 281,
+    "Name": "SHADOW_DIVE_02",
+    "Comment": "実行Action: HumanBoss_SHADOW_DIVE_02",
+    "Position": [
+      1828.0,
+      820.0
+    ],
+    "Size": [
+      274.0,
+      244.0
+    ],
+    "Color": [
+      0.2,
+      0.42,
+      0.48,
+      0.24
+    ],
+    "NodeIds": [
+      178
+    ]
+  },
+  {
+    "Id": 282,
+    "Name": "SHADOW_DOMAIN",
+    "Comment": "実行Action: HumanBoss_SHADOW_DOMAIN",
+    "Position": [
+      2008.0,
+      820.0
+    ],
+    "Size": [
+      274.0,
+      244.0
+    ],
+    "Color": [
+      0.2,
+      0.42,
+      0.48,
+      0.24
+    ],
+    "NodeIds": [
+      182
+    ]
+  },
+  {
+    "Id": 283,
+    "Name": "HP50%以下の特殊攻撃",
+    "Comment": "条件判定と行動をまとめた分類。実行優先順位は既存設定を維持。",
+    "Position": [
+      636.0,
+      300.0
+    ],
+    "Size": [
+      698.0,
+      276.0
+    ],
+    "Color": [
+      0.22,
+      0.3,
+      0.46,
+      0.18
+    ],
+    "NodeIds": [
+      186,
+      190,
+      194
+    ]
+  },
+  {
+    "Id": 284,
+    "Name": "SHADOW_RAGNAROK",
+    "Comment": "実行Action: HumanBoss_SHADOW_RAGNAROK",
+    "Position": [
+      848.0,
+      300.0
+    ],
+    "Size": [
+      274.0,
+      244.0
+    ],
+    "Color": [
+      0.2,
+      0.42,
+      0.48,
+      0.24
+    ],
+    "NodeIds": [
+      194
+    ]
+  },
+  {
+    "Id": 285,
+    "Name": "遠距離の攻撃選択",
+    "Comment": "条件判定と行動をまとめた分類。実行優先順位は既存設定を維持。",
+    "Position": [
+      636.0,
+      300.0
+    ],
+    "Size": [
+      878.0,
+      276.0
+    ],
+    "Color": [
+      0.22,
+      0.3,
+      0.46,
+      0.18
+    ],
+    "NodeIds": [
+      198,
+      202,
+      206,
+      210,
+      214,
+      218,
+      222
+    ]
+  },
+  {
+    "Id": 286,
+    "Name": "SHADOW_CHARGE",
+    "Comment": "実行Action: HumanBoss_SHADOW_CHARGE",
+    "Position": [
+      668.0,
+      300.0
+    ],
+    "Size": [
+      274.0,
+      244.0
+    ],
+    "Color": [
+      0.2,
+      0.42,
+      0.48,
+      0.24
+    ],
+    "NodeIds": [
+      210
+    ]
+  },
+  {
+    "Id": 287,
+    "Name": "SHADOW_ORB",
+    "Comment": "実行Action: HumanBoss_SHADOW_ORB",
+    "Position": [
+      848.0,
+      300.0
+    ],
+    "Size": [
+      274.0,
+      244.0
+    ],
+    "Color": [
+      0.2,
+      0.42,
+      0.48,
+      0.24
+    ],
+    "NodeIds": [
+      214
+    ]
+  },
+  {
+    "Id": 288,
+    "Name": "SHADOW_SHIFT_APPROACH",
+    "Comment": "実行Action: HumanBoss_SHADOW_SHIFT_APPROACH",
+    "Position": [
+      1028.0,
+      300.0
+    ],
+    "Size": [
+      274.0,
+      244.0
+    ],
+    "Color": [
+      0.2,
+      0.42,
+      0.48,
+      0.24
+    ],
+    "NodeIds": [
+      218
+    ]
+  },
+  {
+    "Id": 289,
+    "Name": "Approach",
+    "Comment": "実行Action: HumanBoss_Approach",
+    "Position": [
+      1208.0,
+      300.0
+    ],
+    "Size": [
+      274.0,
+      244.0
+    ],
+    "Color": [
+      0.2,
+      0.42,
+      0.48,
+      0.24
+    ],
+    "NodeIds": [
+      222
+    ]
+  },
+  {
+    "Id": 290,
+    "Name": "初回特殊攻撃の優先選択",
+    "Comment": "条件判定と行動をまとめた分類。実行優先順位は既存設定を維持。",
+    "Position": [
+      -764.0,
+      150.0
+    ],
+    "Size": [
+      338.0,
+      276.0
+    ],
+    "Color": [
+      0.22,
+      0.3,
+      0.46,
+      0.18
+    ],
+    "NodeIds": [
+      226,
+      230,
+      234
+    ]
+  },
+  {
+    "Id": 291,
+    "Name": "Initial Shadow Ragnarok",
+    "Comment": "実行Action: HumanBoss_SHADOW_RAGNAROK",
+    "Position": [
+      -732.0,
+      150.0
+    ],
+    "Size": [
+      274.0,
+      244.0
+    ],
+    "Color": [
+      0.2,
+      0.42,
+      0.48,
+      0.24
+    ],
+    "NodeIds": [
+      234
+    ]
+  },
+  {
+    "Id": 292,
+    "Name": "ガード継続への拘束攻撃",
+    "Comment": "条件判定と行動をまとめた分類。実行優先順位は既存設定を維持。",
+    "Position": [
+      1136.0,
+      550.0
+    ],
+    "Size": [
+      338.0,
+      426.0
+    ],
+    "Color": [
+      0.22,
+      0.3,
+      0.46,
+      0.18
+    ],
+    "NodeIds": [
+      238,
+      242,
+      246
+    ]
+  },
+  {
+    "Id": 293,
+    "Name": "GUARD_EXECUTION",
+    "Comment": "実行Action: HumanBoss_GUARD_EXECUTION",
+    "Position": [
+      1168.0,
+      700.0
+    ],
+    "Size": [
+      274.0,
+      244.0
+    ],
+    "Color": [
+      0.2,
+      0.42,
+      0.48,
+      0.24
+    ],
+    "NodeIds": [
+      246
+    ]
+  }
+],
     "Links": [
         {
             "FromNodeId": 1,
@@ -428,7 +1446,7 @@
             "ToPinId": 247
         }
     ],
-    "NextId": 250,
+    "NextId": 294,
     "Nodes": [
         {
             "ActionEndCategory": "HumanBossAI",

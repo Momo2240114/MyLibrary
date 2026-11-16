@@ -3,26 +3,28 @@
     "Components": [
         {
             "Data": {
-                "aspect": 1.7777777910232544,
+                "aspect": 1.809613585472107,
+                "eventPriority": 8,
                 "eye": [
-                    0,
-                    2.7,
-                    -9.5
+                    6.800000190734863,
+                    2.450000047683716,
+                    -8.350000381469727
                 ],
-                "farZ": 400,
+                "farZ": 400.0,
                 "focus": [
-                    0,
-                    1.8,
-                    0
+                    0.0,
+                    1.5,
+                    1.2000000476837158
                 ],
-                "fovY": 42,
-                "nearZ": 0.1,
+                "fovY": 42.0,
+                "nearZ": 0.10000000149011612,
                 "priority": 10,
                 "up": [
                     0.0,
                     1.0,
                     0.0
-                ]
+                ],
+                "useEventPriority": false
             },
             "Enabled": true,
             "LateUpdateEnabled": true,
@@ -39,8 +41,8 @@
     "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [
-            0,
-            2.7,
+            0.0,
+            2.700000047683716,
             -9.5
         ],
         "Rot": [
