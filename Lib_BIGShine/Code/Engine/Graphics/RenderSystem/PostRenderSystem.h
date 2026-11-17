@@ -9,6 +9,8 @@
 #include "XeGtaoSystem.h"
 #include "MotionBlurSystem.h"
 #include "VignetteSystem.h"
+#include "FogSystem.h"
+#include "FxaaSystem.h"
 #include "PostDistortionSystem.h"
 
 class PostRenderSystem {
@@ -25,6 +27,13 @@ public:
     MotionBlurSystem& GetMotionBlurSystem() { return motionBlur; }
     VignetteSystem& GetVignetteSystem() { return vignette; }
     PostDistortionSystem& GetPostDistortionSystem() { return postDistortion; }
+    bool IsFogAvailable() const { return fogAvailable; }
+    bool IsFxaaAvailable() const { return fxaaAvailable; }
+    void SetDebugCaptureEnabled(bool enabled_) { debugCaptureEnabled = enabled_; }
+    ID3D11ShaderResourceView* GetBloomCompositeDebugSRV() const { return debugBloom.valid ? debugBloom.srv.Get() : nullptr; }
+    ID3D11ShaderResourceView* GetFogDebugSRV() const { return debugFog.valid ? debugFog.srv.Get() : nullptr; }
+    ID3D11ShaderResourceView* GetVignetteDebugSRV() const { return debugVignette.valid ? debugVignette.srv.Get() : nullptr; }
+    ID3D11ShaderResourceView* GetFxaaDebugSRV() const { return debugFxaa.valid ? debugFxaa.srv.Get() : nullptr; }
     ID3D11ShaderResourceView* GetWorkBufferSRV(int index_) const
     {
         // Debug表示などで内部Ping-Pongバッファを参照できるよう、範囲外はnullptrで返す。
@@ -39,7 +48,14 @@ private:
         Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv;
     };
 
+    struct DebugBuffer {
+        Microsoft::WRL::ComPtr<ID3D11Texture2D> texture;
+        Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv;
+        bool valid = false;
+    };
+
     bool CreatePostBuffer(ID3D11Device* device, int width, int height, PostBuffer& outBuffer);
+    void CaptureDebugOutput(const RenderContext& rc_, ID3D11RenderTargetView* outputRTV_, DebugBuffer& buffer_);
 
     // 個別Effectの設定値は各Systemが保持し、このクラスは実行順と中間バッファ管理を担当する。
     BloomSystem bloom;
@@ -48,6 +64,16 @@ private:
     MotionBlurSystem motionBlur;
     VignetteSystem vignette;
     PostDistortionSystem postDistortion;
+    FogSystem fog;
+    FxaaSystem fxaa;
+    bool fogAvailable = false;
+    bool fxaaAvailable = false;
+    bool initialized = false;
     // 2枚の作業バッファをPing-Pongして、複数PostEffectを余計なコピーなしで連結する。
     PostBuffer workBuffers[2];
+    DebugBuffer debugBloom;
+    DebugBuffer debugFog;
+    DebugBuffer debugVignette;
+    DebugBuffer debugFxaa;
+    bool debugCaptureEnabled = false;
 };

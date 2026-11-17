@@ -62,10 +62,12 @@
                     1.0,
                     1.0
                 ],
+                "LinearSampling": false,
                 "LocalSize": [
                     760.0,
                     20.0
                 ],
+                "SdrTexture": false,
                 "ShaderID": 0,
                 "TexturePath": "./Data/Sprite/UI/BossHealthBackground_Dragon.png",
                 "Visible": true,

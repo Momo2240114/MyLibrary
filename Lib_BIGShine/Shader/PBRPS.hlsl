@@ -126,6 +126,7 @@ PS_OUT main(VS_OUT pin)
     float3 diffuse_reflectance = base.rgb * (1.0f - metalness);
 
     // --- 3. 直接ライティング ---
+    float shadowVisibility = CalcCascadeShadowVisibility(pin.position);
     float3 totalDirectLighting = 0;
 
     // A. 平行光源
@@ -141,7 +142,7 @@ PS_OUT main(VS_OUT pin)
         float3 diff = brdf_lambertian(f0, f90, base.rgb, VoH) * (1.0f - metalness);
 
         float directionalIntensity = lightDirection.w;
-        float shadow = CalcCascadeShadow(pin.position);
+        float shadow = lerp(cascadeShadowAttenuation, 1.0f, shadowVisibility);
         totalDirectLighting += (diff + spec) * (lightColor.rgb * directionalIntensity) * NdotL * shadow;
     }
 
@@ -214,7 +215,8 @@ PS_OUT main(VS_OUT pin)
     float3 emissive = EmissiveMap.Sample(LinearSampler, pin.texcoord).rgb * emissiveColor.rgb;
 
     // --- AOを拡散反射IBLへ適用 ---
-    float3 finalColor = (totalDirectLighting + (iblDiffuse * ao) + iblSpecular) + emissive;
+    float indirectShadow = lerp(cascadeIndirectShadowAttenuation, 1.0f, shadowVisibility);
+    float3 finalColor = (totalDirectLighting + (iblDiffuse * ao) * indirectShadow + iblSpecular) + emissive;
 
     // Bloomと半透明合成へ線形HDRを渡し、表示変換は最終合成で行う。
     finalColor = max(finalColor, 0.0f);

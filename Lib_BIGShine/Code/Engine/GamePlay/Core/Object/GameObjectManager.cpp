@@ -2325,6 +2325,7 @@ void GameObjectManager::SaveScene(const std::string& sceneName_)
         {"toneMappingEnabled", params.toneMappingEnabled},
         {"exposure", params.exposure}
     };
+    GraphicsDeviceManager::Instance().SerializePostEffectSettings(listJson["GraphicsSettings"]);
     SaveCurrentIBLSettings(listJson["GraphicsSettings"]);
 
     if (modelRenderSystem)
@@ -2458,6 +2459,7 @@ void GameObjectManager::LoadSceneData(const std::string& sceneName_, const nlohm
             params.toneMappingEnabled = bloomJson.value("toneMappingEnabled", true);
             params.exposure = bloomJson.value("exposure", 1.0f);
         }
+        GraphicsDeviceManager::Instance().DeserializePostEffectSettings(graphicsJson);
 
         LoadSceneIBLSettings(graphicsJson);
 
@@ -2578,6 +2580,7 @@ nlohmann::json GameObjectManager::CaptureEditorSnapshot()
     snapshot_["GraphicsSettings"]["Bloom"] = {{"enabled", bloom_.enabled}, {"threshold", bloom_.threshold},
         {"intensity", bloom_.intensity}, {"kawaseScale", bloom_.kawaseScale}, {"blurPasses", bloom_.blurPasses},
         {"toneMappingEnabled", bloom_.toneMappingEnabled}, {"exposure", bloom_.exposure}};
+    GraphicsDeviceManager::Instance().SerializePostEffectSettings(snapshot_["GraphicsSettings"]);
     SaveCurrentIBLSettings(snapshot_["GraphicsSettings"]);
     if (modelRenderSystem) modelRenderSystem->SerializeGraphicsSettings(snapshot_["GraphicsSettings"]);
     if (cameraManager)

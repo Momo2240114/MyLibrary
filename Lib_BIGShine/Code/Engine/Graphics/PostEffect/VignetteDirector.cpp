@@ -54,7 +54,7 @@ VignetteSystem::Parameters VignetteDirector::Lerp(
     // Scalar/Color/Centerは線形補間し、enabledは補間中に片方でもtrueなら有効として扱う。
     const auto value_ = [ratio_](float fromValue_, float toValue_)
     { return fromValue_ + (toValue_ - fromValue_) * ratio_; };
-    VignetteSystem::Parameters result_;
+    VignetteSystem::Parameters result_ = to_;
     result_.enabled = ratio_ < 1.0f ? from_.enabled || to_.enabled : to_.enabled;
     result_.color = { value_(from_.color.x, to_.color.x), value_(from_.color.y, to_.color.y),
         value_(from_.color.z, to_.color.z), value_(from_.color.w, to_.color.w) };

@@ -44,7 +44,10 @@ framework::framework(HWND hwnd) : hwnd(hwnd){}
 
 bool framework::initialize()
 {
-	GraphicsDeviceManager::Instance().Initialize(hwnd, SCREEN_WIDTH, SCREEN_HEIGHT, FULLSCREEN);
+	if (!GraphicsDeviceManager::Instance().Initialize(hwnd, SCREEN_WIDTH, SCREEN_HEIGHT, FULLSCREEN))
+	{
+		return false;
+	}
     MouseInput::Instance().RegisterRawMouse(hwnd);
 
 	ImGuiRenderer::Initialize(hwnd,

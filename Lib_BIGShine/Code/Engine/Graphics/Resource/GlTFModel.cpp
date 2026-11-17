@@ -1475,6 +1475,8 @@ void GltfModelCommponennt::Serialize(nlohmann::json& j) const
 
 	j["ModelName"] = pathForSave;
 	j["ShaderID"] = static_cast<int>(shaderId);
+	j["OverrideOutlineColor"] = overrideOutlineColor;
+	j["OutlineColor"] = { outlineColor.x, outlineColor.y, outlineColor.z, outlineColor.w };
 	j["LocalScale"] = localScale;
 	j["LocalScaleXYZ"] = { localScaleXYZ.x, localScaleXYZ.y, localScaleXYZ.z };
 	j["StaticModel"] = isStaticModel;
@@ -1494,6 +1496,12 @@ void GltfModelCommponennt::Deserialize(const nlohmann::json& j)
 {
 	BS_PROFILE_SCOPE("GltfModelCommponennt::DeserializeJson");
 	isStaticModel = j.value("StaticModel", false);
+	overrideOutlineColor = j.value("OverrideOutlineColor", false);
+	if (j.contains("OutlineColor") && j["OutlineColor"].is_array() && j["OutlineColor"].size() == 4)
+	{
+		const auto& color_ = j["OutlineColor"];
+		outlineColor = { color_[0].get<float>(), color_[1].get<float>(), color_[2].get<float>(), color_[3].get<float>() };
+	}
 	hasCachedOwnerWorldTransform = false;
 	pendingMaterialOverrides.clear();
 	MarkTransformDirty();
@@ -1676,6 +1684,12 @@ void GltfModelCommponennt::ShowMeshDetailsUI()
 		ImGui::End();
 		return;
 	}
+	ImGui::Checkbox("Override Outline Color", &overrideOutlineColor);
+	if (overrideOutlineColor)
+	{
+		ImGui::ColorEdit4("Outline Color", &outlineColor.x);
+	}
+	ImGui::Separator();
 
 	for (auto& material : materials)
 	{

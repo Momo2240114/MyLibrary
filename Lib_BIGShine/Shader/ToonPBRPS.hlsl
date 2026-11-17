@@ -174,11 +174,12 @@ PS_OUT main(VS_OUT pin)
     float3 f0 = lerp(float3(0.04f, 0.04f, 0.04f), base.rgb, metalness);
     float3 diffuseReflectance = base.rgb * (1.0f - metalness);
 
+    float shadowVisibility = CalcCascadeShadowVisibility(pin.position);
     float3 totalDirectLighting = 0.0f;
     {
         float3 L = normalize(-lightDirection.xyz);
         float directionalIntensity = lightDirection.w;
-        float shadow = CalcCascadeShadow(pin.position);
+        float shadow = lerp(cascadeShadowAttenuation, 1.0f, shadowVisibility);
         totalDirectLighting += DirectToonPBR(
             base.rgb, N, V, L,
             lightColor.rgb * directionalIntensity * shadow,
@@ -249,9 +250,10 @@ PS_OUT main(VS_OUT pin)
     float iblDiffuseStrength = lerp(1.0f, 0.4f, toonPbrBlend);
     float iblSpecularStrength = lerp(1.0f, 0.35f, saturate(styleParams.w)) * max(specularStrength, 0.0f);
 
+    float indirectShadow = lerp(cascadeIndirectShadowAttenuation, 1.0f, shadowVisibility);
     float3 finalColor =
     totalDirectLighting +
-    iblDiffuse * ao * iblDiffuseStrength +
+    iblDiffuse * ao * iblDiffuseStrength * indirectShadow +
     iblSpecular * iblSpecularStrength +
     emissive;
     

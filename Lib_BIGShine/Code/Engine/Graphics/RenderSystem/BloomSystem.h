@@ -72,11 +72,12 @@ private:
     {
         Microsoft::WRL::ComPtr<ID3D11RenderTargetView> rtv;
         Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv;
-        float width, height;
+        float width = 0.0f;
+        float height = 0.0f;
     };
 
     // 指定サイズの RTV/SRV ペアを作成し、抽出・ぼかしパスの中間結果として使う。
-    void CreateRenderTarget(ID3D11Device* device, int w, int h, RenderTarget& outRT);
+    bool CreateRenderTarget(ID3D11Device* device, int w, int h, RenderTarget& outRT);
 
     // 閾値、強度、パスごとの Kawase オフセットを GPU へ渡す。
     void UpdateConstantBuffer(ID3D11DeviceContext* dc, const Parameters& params, float offset, float w, float h);

@@ -3,6 +3,7 @@
 #include <d3d11.h>
 #include <wrl/client.h>
 #include <DirectXMath.h>
+#include <string>
 
 #include "Engine/Graphics/Core/RenderContext.h"
 
@@ -28,6 +29,11 @@ public:
         // 最終的な合成Alpha。
         float opacity = 1.0f;
         float damageOpacity = 0.0f;
+        std::string texturePath;
+        DirectX::XMFLOAT2 textureTiling{ 1.0f, 1.0f };
+        float textureStrength = 0.0f;
+        float hatchStrength = 0.0f;
+        float hatchScale = 1.0f;
     };
 
     // FullScreen ShaderとVignette用ConstantBufferを作成する。
@@ -56,8 +62,10 @@ private:
         float opacity;
         float damageOpacity;
         float padding;
+        DirectX::XMFLOAT4 textureParams;
+        DirectX::XMFLOAT4 hatchParams;
     };
-    static_assert(sizeof(CbVignette) == 64);
+    static_assert(sizeof(CbVignette) == 96);
 
     // CPU側ParametersをShader用ConstantBufferへ詰める。
     void UpdateConstantBuffer(const RenderContext& rc_, const Parameters& parameters_);
@@ -70,4 +78,6 @@ private:
     Microsoft::WRL::ComPtr<ID3D11Buffer> constantBuffer;
     Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
     Microsoft::WRL::ComPtr<ID3D11VertexShader> fullScreenVs;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> vignetteTexture;
+    std::string loadedTexturePath;
 };

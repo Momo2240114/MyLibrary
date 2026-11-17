@@ -237,21 +237,24 @@ HRESULT CPUResourceLoader::LoadVertexShader(ID3D11Device* device, const char* fi
     // ファイルを開く
     FILE* fp = nullptr;
     fopen_s(&fp, filename, "rb");
-    _ASSERT_EXPR_A(fp, "Vertex Shader File not found");
+    if (!fp) return HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND);
 
     // ファイルのサイズを求める
     fseek(fp, 0, SEEK_END);
     long size = ftell(fp);
+    if (size <= 0) { fclose(fp); return E_FAIL; }
     fseek(fp, 0, SEEK_SET);
 
     // メモリ上に頂点シェーダーデータを格納する領域を用意する
     std::unique_ptr<std::uint8_t[]> data = std::make_unique<std::uint8_t[]>(size);
-    fread(data.get(), size, 1, fp);
+    const size_t readCount_ = fread(data.get(), size, 1, fp);
     fclose(fp);
+    if (readCount_ != 1) return E_FAIL;
 
     // 頂点シェーダー生成
     HRESULT hr = device->CreateVertexShader(data.get(), size, nullptr, vertexShader);
     _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+    if (FAILED(hr)) return hr;
 
     // 入力レイアウト
     if (inputLayout != nullptr)
@@ -268,17 +271,19 @@ HRESULT CPUResourceLoader::LoadPixelShader(ID3D11Device* device, const char* fil
     // ファイルを開く
     FILE* fp = nullptr;
     fopen_s(&fp, filename, "rb");
-    _ASSERT_EXPR_A(fp, "Pixel Shader File not found");
+    if (!fp) return HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND);
 
     // ファイルのサイズを求める
     fseek(fp, 0, SEEK_END);
     long size = ftell(fp);
+    if (size <= 0) { fclose(fp); return E_FAIL; }
     fseek(fp, 0, SEEK_SET);
 
     // メモリ上に頂点シェーダーデータを格納する領域を用意する
     std::unique_ptr<std::uint8_t[]> data = std::make_unique<std::uint8_t[]>(size);
-    fread(data.get(), size, 1, fp);
+    const size_t readCount_ = fread(data.get(), size, 1, fp);
     fclose(fp);
+    if (readCount_ != 1) return E_FAIL;
 
     // ピクセルシェーダー生成
     HRESULT hr = device->CreatePixelShader(data.get(), size, nullptr, pixelShader);

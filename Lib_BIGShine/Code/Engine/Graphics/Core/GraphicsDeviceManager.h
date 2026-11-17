@@ -7,6 +7,7 @@
 #include <string>
 #include <d3d11.h>
 #include <wrl.h>
+#include <nlohmann/json.hpp>
 
 #include "Engine/Common/misc.h"
 #include "Engine/Graphics/RenderSystem/ShapeRenderer.h"
@@ -101,6 +102,8 @@ public:
     XeGtaoSystem::Parameters& GetXeGtaoParams() { return xeGtaoParams; }
     MotionBlurSystem::Parameters& GetMotionBlurParams() { return motionBlurParams; }
     VignetteSystem::Parameters& GetVignetteParams() { return vignetteParams; }
+    FogSystem::Parameters& GetFogParams() { return fogParams; }
+    FxaaSystem::Parameters& GetFxaaParams() { return fxaaParams; }
     BloomSystem::CbColorFilter& GetFilterParams() { return filterParams; }
 
     // パーティクルはカラーバッファにだけ影響を与えたい
@@ -124,6 +127,8 @@ public:
     float GetDamageVignetteOpacity() const;
     void DrawPostEffectGuiContent();
     void ShowPostEffectGui();
+    void SerializePostEffectSettings(nlohmann::json& json_) const;
+    void DeserializePostEffectSettings(const nlohmann::json& json_);
 private:
     ShapeRenderSystem shapeRendererSystem;
     PostRenderSystem postRenderSystem;
@@ -201,6 +206,8 @@ private:
     XeGtaoSystem::Parameters xeGtaoParams;
     MotionBlurSystem::Parameters motionBlurParams;
     VignetteSystem::Parameters vignetteParams;
+    FogSystem::Parameters fogParams;
+    FxaaSystem::Parameters fxaaParams;
     uint64_t damageVignetteEndTime = 0;
 
     CascadeShadowMap cascadeShadowMap;

@@ -478,6 +478,8 @@
                     }
                 ],
                 "ModelName": "./Data/Model/SwordPlayer/CombatGirls_Sword_Shield.gltf",
+                "OutlineColor": [0.012, 0.065, 0.16, 1.0],
+                "OverrideOutlineColor": true,
                 "RootMotionName": "root",
                 "ShaderID": 1,
                 "StaticModel": false,
@@ -2276,7 +2278,7 @@
                     "Health": {
                         "Current": {
                             "type": "float",
-                            "value": 500.0
+                            "value": 1000.0
                         },
                         "Dead": {
                             "type": "bool",
@@ -2284,7 +2286,7 @@
                         },
                         "Max": {
                             "type": "float",
-                            "value": 500.0
+                            "value": 1000.0
                         }
                     },
                     "Hit": {
@@ -23673,8 +23675,8 @@
         },
         {
             "Data": {
-                "CurrentHealth": 500.0,
-                "MaxHealth": 500.0
+                "CurrentHealth": 1000.0,
+                "MaxHealth": 1000.0
             },
             "Enabled": true,
             "LateUpdateEnabled": true,

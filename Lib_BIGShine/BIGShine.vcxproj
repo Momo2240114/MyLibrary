@@ -522,6 +522,8 @@
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\MotionVelocityRenderSystem.cpp" />
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\PostDistortionSystem.cpp" />
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\VignetteSystem.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\RenderSystem\FogSystem.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\RenderSystem\FxaaSystem.cpp" />
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\OutlineSystem.cpp" />
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\ParticleRenderSystem.cpp" />
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\PostRenderSystem.cpp" />
@@ -845,6 +847,8 @@
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\MotionVelocityRenderSystem.h" />
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\PostDistortionSystem.h" />
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\VignetteSystem.h" />
+    <ClInclude Include="Code\Engine\Graphics\RenderSystem\FogSystem.h" />
+    <ClInclude Include="Code\Engine\Graphics\RenderSystem\FxaaSystem.h" />
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\OutlineSystem.h" />
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\PostRenderSystem.h" />
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\RadialBlurSystem.h" />
@@ -1242,6 +1246,14 @@
       <ShaderModel>5.0</ShaderModel>
     </FxCompile>
     <FxCompile Include="Shader\VignettePS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\FogPS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\FxaaPS.hlsl">
       <ShaderType>Pixel</ShaderType>
       <ShaderModel>5.0</ShaderModel>
     </FxCompile>

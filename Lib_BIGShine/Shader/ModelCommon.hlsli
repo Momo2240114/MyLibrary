@@ -55,7 +55,8 @@ cbuffer CbCascadeShadow : register(b8)
     float4 cascadeSplits;
     float4 cascadeShadowBias;
     float cascadeShadowAttenuation;
-    float3 cascadeShadowPadding;
+    float cascadeIndirectShadowAttenuation;
+    float2 cascadeShadowPadding;
     float4 cascadeShadowSoftness;
 };
 
@@ -116,7 +117,7 @@ float CalcCascadeShadowSample(int index_, float3 shadowTexcoord_, float2 uvOffse
     return (shadowTexcoord_.z - cascadeShadowBias[index_] <= shadowDepth_) ? 1.0f : 0.0f;
 }
 
-float CalcCascadeShadow(float3 worldPosition)
+float CalcCascadeShadowVisibility(float3 worldPosition)
 {
     float shadow = 1.0f;
 
@@ -138,7 +139,7 @@ float CalcCascadeShadow(float3 worldPosition)
             if (softnessEnabled_ < 0.5f || poissonRadius_ <= 0.0001f || poissonSampleCount_ <= 1)
             {
                 const float lit_ = CalcCascadeShadowSample(index, lightPosition.xyz, float2(0.0f, 0.0f));
-                shadow = lerp(cascadeShadowAttenuation, 1.0f, lit_);
+                shadow = lit_;
                 break;
             }
 
@@ -160,10 +161,15 @@ float CalcCascadeShadow(float3 worldPosition)
                 }
             }
 
-            shadow = lerp(cascadeShadowAttenuation, 1.0f, litSum_ / (float)poissonSampleCount_);
+            shadow = litSum_ / (float)poissonSampleCount_;
             break;
         }
     }
 
     return shadow;
+}
+
+float CalcCascadeShadow(float3 worldPosition)
+{
+    return lerp(cascadeShadowAttenuation, 1.0f, CalcCascadeShadowVisibility(worldPosition));
 }

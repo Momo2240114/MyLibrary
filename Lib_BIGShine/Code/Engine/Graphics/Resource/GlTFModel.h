@@ -353,6 +353,8 @@ public:
     void SetRuntimeSilhouette(bool enabled_, const DirectX::XMFLOAT4& color_) { runtimeSilhouette = enabled_; runtimeSilhouetteColor = color_; }
     bool HasRuntimeSilhouette() const { return runtimeSilhouette; }
     const DirectX::XMFLOAT4& GetRuntimeSilhouetteColor() const { return runtimeSilhouetteColor; }
+	bool HasOutlineColorOverride() const { return overrideOutlineColor; }
+	const DirectX::XMFLOAT4& GetOutlineColor() const { return outlineColor; }
 	ModelShaderID  GetShaderID() { return shaderId; };
 	void SetShaderID(ModelShaderID id_) { shaderId = id_; }
 
@@ -410,6 +412,8 @@ private:
 	ModelShaderID shaderId = ModelShaderID::PBR;
     bool runtimeSilhouette = false;
     DirectX::XMFLOAT4 runtimeSilhouetteColor{1.0f, 1.0f, 1.0f, 1.0f};
+	bool overrideOutlineColor = false;
+	DirectX::XMFLOAT4 outlineColor{ 0.02f, 0.02f, 0.025f, 1.0f };
 	std::string modelName = "";
 	std::string modelFullPass = "";
 	ModelLoadHandle modelLoadHandle;

@@ -2,6 +2,7 @@
 
 
 #include "GraphicsDeviceManager.h"
+#include "Editor/AssetSlotGui.h"
 #include "Engine/Core/BuildConfig.h"
 #include "IMGUI.h"
 
@@ -510,7 +511,11 @@ void GraphicsDeviceManager::OnResize(int newWidth_, int newHeight_)
     CreateSceneRenderTarget(width, height); // シーンバッファを新しいサイズで作る
     CreateSceneViewRenderTarget(width, height);
     CreateGBufferTargets(width, height);
-    postRenderSystem.Initialize(device.Get(), width, height); // ポストプロセスも再初期化
+    postRenderSystem.Shutdown();
+    if (!postRenderSystem.Initialize(device.Get(), width, height))
+    {
+        OutputDebugStringA("PostRenderSystem failed to initialize after resize.\n");
+    }
 
     // ビューポートの設定
     viewport.Width = static_cast<float>(width);
@@ -910,6 +915,34 @@ void GraphicsDeviceManager::DrawPostEffectGuiContent()
         ImGui::SliderFloat("Vignette Rounded", &vignetteParams.rounded, 0.0f, 1.0f, "%.2f");
         ImGui::DragFloat("Vignette Roundness", &vignetteParams.roundness, 0.01f, 0.1f, 8.0f, "%.2f");
         ImGui::SliderFloat("Vignette Opacity", &vignetteParams.opacity, 0.0f, 1.0f, "%.2f");
+        AssetSlotGui::Draw("Vignette Texture", AssetSlotType::TEXTURE, vignetteParams.texturePath);
+        ImGui::DragFloat2("Vignette Texture Tiling", &vignetteParams.textureTiling.x, 0.01f, 0.01f, 100.0f);
+        ImGui::SliderFloat("Vignette Texture Strength", &vignetteParams.textureStrength, 0.0f, 1.0f);
+        ImGui::SliderFloat("Vignette Hatch Strength", &vignetteParams.hatchStrength, 0.0f, 1.0f);
+        ImGui::DragFloat("Vignette Hatch Scale", &vignetteParams.hatchScale, 0.01f, 0.1f, 10.0f);
+    }
+
+    if (ImGui::CollapsingHeader("Fog", ImGuiTreeNodeFlags_DefaultOpen))
+    {
+        if (!postRenderSystem.IsFogAvailable()) ImGui::TextDisabled("Fog shader unavailable. Build FogPS.hlsl.");
+        ImGui::Checkbox("Fog Enabled", &fogParams.enabled);
+        ImGui::ColorEdit3("Fog Color", &fogParams.color.x);
+        ImGui::DragFloat("Fog Start", &fogParams.startDistance, 0.5f, 0.0f, 10000.0f);
+        ImGui::DragFloat("Fog End", &fogParams.endDistance, 0.5f, fogParams.startDistance + 0.01f, 10000.0f);
+        ImGui::SliderFloat("Fog Density", &fogParams.density, 0.0f, 1.0f);
+        AssetSlotGui::Draw("Fog Texture", AssetSlotType::TEXTURE, fogParams.texturePath);
+        ImGui::DragFloat2("Fog Texture Tiling", &fogParams.textureTiling.x, 0.01f, 0.01f, 100.0f);
+        ImGui::SliderFloat("Fog Texture Strength", &fogParams.textureStrength, 0.0f, 1.0f);
+        ImGui::SliderFloat("Fog Hatch Strength", &fogParams.hatchStrength, 0.0f, 1.0f);
+        ImGui::DragFloat("Fog Hatch Scale", &fogParams.hatchScale, 0.01f, 0.1f, 10.0f);
+    }
+
+    if (ImGui::CollapsingHeader("FXAA", ImGuiTreeNodeFlags_DefaultOpen))
+    {
+        if (!postRenderSystem.IsFxaaAvailable()) ImGui::TextDisabled("FXAA shader unavailable. Build FxaaPS.hlsl.");
+        ImGui::Checkbox("FXAA Enabled", &fxaaParams.enabled);
+        ImGui::SliderFloat("FXAA Edge Threshold", &fxaaParams.edgeThreshold, 0.0312f, 0.333f);
+        ImGui::SliderFloat("FXAA Minimum Threshold", &fxaaParams.edgeThresholdMin, 0.0f, 0.0833f);
     }
     if (ImGui::CollapsingHeader("XeGTAO", ImGuiTreeNodeFlags_DefaultOpen))
     {
@@ -959,6 +992,99 @@ void GraphicsDeviceManager::ShowPostEffectGui()
     ImGui::Begin("GraphicsSettings");
     DrawPostEffectGuiContent();
     ImGui::End();
+}
+
+void GraphicsDeviceManager::SerializePostEffectSettings(nlohmann::json& json_) const
+{
+    json_["Fog"] = {
+        {"enabled", fogParams.enabled},
+        {"color", {fogParams.color.x, fogParams.color.y, fogParams.color.z}},
+        {"startDistance", fogParams.startDistance}, {"endDistance", fogParams.endDistance},
+        {"density", fogParams.density}, {"texturePath", fogParams.texturePath},
+        {"textureTiling", {fogParams.textureTiling.x, fogParams.textureTiling.y}},
+        {"textureStrength", fogParams.textureStrength},
+        {"hatchStrength", fogParams.hatchStrength}, {"hatchScale", fogParams.hatchScale}
+    };
+    json_["FXAA"] = {
+        {"enabled", fxaaParams.enabled}, {"edgeThreshold", fxaaParams.edgeThreshold},
+        {"edgeThresholdMin", fxaaParams.edgeThresholdMin}
+    };
+    json_["Vignette"] = {
+        {"enabled", vignetteParams.enabled},
+        {"color", {vignetteParams.color.x, vignetteParams.color.y, vignetteParams.color.z, vignetteParams.color.w}},
+        {"center", {vignetteParams.center.x, vignetteParams.center.y}},
+        {"intensity", vignetteParams.intensity}, {"smoothness", vignetteParams.smoothness},
+        {"rounded", vignetteParams.rounded}, {"roundness", vignetteParams.roundness},
+        {"opacity", vignetteParams.opacity}, {"texturePath", vignetteParams.texturePath},
+        {"textureTiling", {vignetteParams.textureTiling.x, vignetteParams.textureTiling.y}},
+        {"textureStrength", vignetteParams.textureStrength},
+        {"hatchStrength", vignetteParams.hatchStrength}, {"hatchScale", vignetteParams.hatchScale}
+    };
+}
+
+void GraphicsDeviceManager::DeserializePostEffectSettings(const nlohmann::json& json_)
+{
+    fogParams = FogSystem::Parameters{};
+    fxaaParams = FxaaSystem::Parameters{};
+    if (json_.contains("Fog") && json_["Fog"].is_object())
+    {
+        const auto& fog_ = json_["Fog"];
+        fogParams.enabled = fog_.value("enabled", fogParams.enabled);
+        fogParams.startDistance = fog_.value("startDistance", fogParams.startDistance);
+        fogParams.endDistance = fog_.value("endDistance", fogParams.endDistance);
+        fogParams.density = fog_.value("density", fogParams.density);
+        fogParams.texturePath = fog_.value("texturePath", fogParams.texturePath);
+        fogParams.textureStrength = fog_.value("textureStrength", fogParams.textureStrength);
+        fogParams.hatchStrength = fog_.value("hatchStrength", fogParams.hatchStrength);
+        fogParams.hatchScale = fog_.value("hatchScale", fogParams.hatchScale);
+        if (fog_.contains("color") && fog_["color"].is_array() && fog_["color"].size() == 3)
+        {
+            const auto& color_ = fog_["color"];
+            fogParams.color = {color_[0].get<float>(), color_[1].get<float>(), color_[2].get<float>()};
+        }
+        if (fog_.contains("textureTiling") && fog_["textureTiling"].is_array() && fog_["textureTiling"].size() == 2)
+        {
+            const auto& tiling_ = fog_["textureTiling"];
+            fogParams.textureTiling = {tiling_[0].get<float>(), tiling_[1].get<float>()};
+        }
+    }
+    if (json_.contains("FXAA") && json_["FXAA"].is_object())
+    {
+        const auto& fxaa_ = json_["FXAA"];
+        fxaaParams.enabled = fxaa_.value("enabled", fxaaParams.enabled);
+        fxaaParams.edgeThreshold = fxaa_.value("edgeThreshold", fxaaParams.edgeThreshold);
+        fxaaParams.edgeThresholdMin = fxaa_.value("edgeThresholdMin", fxaaParams.edgeThresholdMin);
+    }
+    if (json_.contains("Vignette") && json_["Vignette"].is_object())
+    {
+        vignetteParams = VignetteSystem::Parameters{};
+        const auto& vignette_ = json_["Vignette"];
+        vignetteParams.enabled = vignette_.value("enabled", vignetteParams.enabled);
+        vignetteParams.intensity = vignette_.value("intensity", vignetteParams.intensity);
+        vignetteParams.smoothness = vignette_.value("smoothness", vignetteParams.smoothness);
+        vignetteParams.rounded = vignette_.value("rounded", vignetteParams.rounded);
+        vignetteParams.roundness = vignette_.value("roundness", vignetteParams.roundness);
+        vignetteParams.opacity = vignette_.value("opacity", vignetteParams.opacity);
+        vignetteParams.texturePath = vignette_.value("texturePath", vignetteParams.texturePath);
+        vignetteParams.textureStrength = vignette_.value("textureStrength", vignetteParams.textureStrength);
+        vignetteParams.hatchStrength = vignette_.value("hatchStrength", vignetteParams.hatchStrength);
+        vignetteParams.hatchScale = vignette_.value("hatchScale", vignetteParams.hatchScale);
+        if (vignette_.contains("color") && vignette_["color"].is_array() && vignette_["color"].size() == 4)
+        {
+            const auto& color_ = vignette_["color"];
+            vignetteParams.color = {color_[0].get<float>(), color_[1].get<float>(), color_[2].get<float>(), color_[3].get<float>()};
+        }
+        if (vignette_.contains("center") && vignette_["center"].is_array() && vignette_["center"].size() == 2)
+        {
+            const auto& center_ = vignette_["center"];
+            vignetteParams.center = {center_[0].get<float>(), center_[1].get<float>()};
+        }
+        if (vignette_.contains("textureTiling") && vignette_["textureTiling"].is_array() && vignette_["textureTiling"].size() == 2)
+        {
+            const auto& tiling_ = vignette_["textureTiling"];
+            vignetteParams.textureTiling = {tiling_[0].get<float>(), tiling_[1].get<float>()};
+        }
+    }
 }
 
 /**

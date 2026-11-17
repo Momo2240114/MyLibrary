@@ -1,5 +1,7 @@
 Texture2D SceneTexture : register(t0);
+Texture2D VignetteTexture : register(t1);
 SamplerState LinearClampSampler : register(s0);
+SamplerState LinearWrapSampler : register(s1);
 
 cbuffer CbVignette : register(b0)
 {
@@ -14,6 +16,8 @@ cbuffer CbVignette : register(b0)
     float opacity;
     float damageOpacity;
     float padding;
+    float4 textureParams;
+    float4 hatchParams;
 }
 
 struct VS_OUT
@@ -33,8 +37,20 @@ float4 main(VS_OUT input_) : SV_TARGET
         distance_ = pow(saturate(distance_), max(roundness, 0.001f));
 
         float vignetteFactor_ = pow(saturate(1.0f - dot(distance_, distance_)), max(smoothness, 0.001f));
-        float3 vignetteColor_ = lerp(color.rgb, 1.0f.xxx, vignetteFactor_);
-        sceneColor_.rgb = lerp(sceneColor_.rgb, sceneColor_.rgb * vignetteColor_, saturate(opacity));
+        float edgeMask_ = 1.0f - vignetteFactor_;
+        if (textureParams.w > 0.5f)
+        {
+            float pattern_ = VignetteTexture.Sample(LinearWrapSampler, input_.texcoord * textureParams.xy).r;
+            edgeMask_ *= lerp(1.0f, pattern_, saturate(textureParams.z));
+        }
+        float vignetteAmount_ = saturate(opacity) * edgeMask_;
+        sceneColor_.rgb = lerp(sceneColor_.rgb, sceneColor_.rgb * color.rgb, vignetteAmount_);
+        if (hatchParams.x > 0.0f)
+        {
+            float line_ = abs(frac((input_.position.x + input_.position.y) * 0.08f * max(hatchParams.y, 0.01f)) - 0.5f);
+            float hatch_ = 1.0f - smoothstep(0.04f, 0.10f, line_);
+            sceneColor_.rgb *= 1.0f - hatch_ * saturate(hatchParams.x) * vignetteAmount_ * 0.55f;
+        }
     }
     if (damageOpacity > 0.0f)
     {

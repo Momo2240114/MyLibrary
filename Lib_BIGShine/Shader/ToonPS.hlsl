@@ -113,6 +113,7 @@ PS_OUT main(VS_OUT pin)
     roughnessParm = max(roughnessParm, 0.04f);
 
     // 蓄積されるダイレクトライトの器
+    float shadowVisibility = CalcCascadeShadowVisibility(pin.position);
     float3 totalDirectLighting = 0.0f;
 
     // =============================================================
@@ -121,7 +122,7 @@ PS_OUT main(VS_OUT pin)
     {
         float3 L = normalize(-lightDirection.xyz);
         float directionalIntensity = lightDirection.w;
-        float shadow = CalcCascadeShadow(pin.position);
+        float shadow = lerp(cascadeShadowAttenuation, 1.0f, shadowVisibility);
 
         totalDirectLighting += DirectToonLighting(
             base.rgb, N, V, L,
@@ -212,9 +213,10 @@ PS_OUT main(VS_OUT pin)
     // =============================================================
     // 5. 最終色の結合とポスト処理
     // =============================================================
+    float indirectShadow = lerp(cascadeIndirectShadowAttenuation, 1.0f, shadowVisibility);
     float3 finalColor =
         totalDirectLighting +
-        (iblDiffuse * ao) +
+        (iblDiffuse * ao) * indirectShadow +
         iblSpecular +
         emissive;
 

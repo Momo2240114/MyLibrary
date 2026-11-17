@@ -115,9 +115,11 @@ float4 main(VS_OUT_FULLSCREEN pin_) : SV_TARGET
     float toonPbrBlend_ = material_.a;
     float3 worldPosition_ = ReconstructWorldPos(pin_.uv, depth_, invViewProjection);
     float3 view_ = normalize(cameraPosition.xyz - worldPosition_);
+    float shadowVisibility_ = CalcCascadeShadowVisibility(worldPosition_);
+    float indirectShadow_ = lerp(cascadeIndirectShadowAttenuation, 1.0f, shadowVisibility_);
 
     float3 directLighting_ = CalculateDirectLight(baseColor_, normal_, view_, normalize(-lightDirection.xyz),
-        lightColor.rgb * lightDirection.w * CalcCascadeShadow(worldPosition_),
+        lightColor.rgb * lightDirection.w * lerp(cascadeShadowAttenuation, 1.0f, shadowVisibility_),
         metalness_, roughness_, shadingModel_, toonPbrBlend_, style_.rgb, style_.a, specularStrength_);
 
     [loop]
@@ -173,7 +175,7 @@ float4 main(VS_OUT_FULLSCREEN pin_) : SV_TARGET
     float3 specularIbl_ = specularLight_ * (f0_ * environmentBrdf_.x + environmentBrdf_.y);
 
     float toonBlend_ = shadingModel_ == SHADING_MODEL_TOON ? 1.0f : (shadingModel_ == SHADING_MODEL_TOON_PBR ? toonPbrBlend_ : 0.0f);
-    float3 finalColor_ = directLighting_ + diffuseIbl_ * ao_ * lerp(1.0f, 0.4f, toonBlend_)
+    float3 finalColor_ = directLighting_ + diffuseIbl_ * ao_ * lerp(1.0f, 0.4f, toonBlend_) * indirectShadow_
         + specularIbl_ * (shadingModel_ == SHADING_MODEL_TOON_PBR
             ? lerp(1.0f, 0.35f, style_.a) * specularStrength_
             : lerp(1.0f, 0.03f, toonBlend_)) + emissive_;

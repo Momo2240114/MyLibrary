@@ -901,6 +901,12 @@
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\VignetteSystem.cpp">
       <Filter>Code\Engine\Graphics\RenderSystem\PostEffect</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\RenderSystem\FogSystem.cpp">
+      <Filter>Code\Engine\Graphics\RenderSystem\PostEffect</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\RenderSystem\FxaaSystem.cpp">
+      <Filter>Code\Engine\Graphics\RenderSystem\PostEffect</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\ShapeRenderer.cpp">
       <Filter>Code\Engine\Graphics\RenderSystem\Shape</Filter>
     </ClCompile>
@@ -1863,6 +1869,12 @@
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\VignetteSystem.h">
       <Filter>Code\Engine\Graphics\RenderSystem\PostEffect</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\RenderSystem\FogSystem.h">
+      <Filter>Code\Engine\Graphics\RenderSystem\PostEffect</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\RenderSystem\FxaaSystem.h">
+      <Filter>Code\Engine\Graphics\RenderSystem\PostEffect</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\ShapeRenderer.h">
       <Filter>Code\Engine\Graphics\RenderSystem\Shape</Filter>
     </ClInclude>
@@ -2394,6 +2406,12 @@
       <Filter>Shaders\PostEffect</Filter>
     </FxCompile>
     <FxCompile Include="Shader\VignettePS.hlsl">
+      <Filter>Shaders\PostEffect</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\FogPS.hlsl">
+      <Filter>Shaders\PostEffect</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\FxaaPS.hlsl">
       <Filter>Shaders\PostEffect</Filter>
     </FxCompile>
     <FxCompile Include="Shader\MeshVFXPS.hlsl">

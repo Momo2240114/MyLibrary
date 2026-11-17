@@ -335,6 +335,7 @@ void ModelRenderSystem::SerializeGraphicsSettings(nlohmann::json& j_) const
 		{"cascadeDepthPadding", cascadeShadowMap_.GetCascadeDepthPadding()},
 		{"cascadeSplitDistances", {splits_[0], splits_[1], splits_[2], splits_[3]}},
 		{"shadowAttenuation", shadowAttenuation},
+		{"indirectShadowAttenuation", indirectShadowAttenuation},
 		{"useCascadeShadowSoftness", useCascadeShadowSoftness},
 		{"useCascadeShadowRandomRotation", useCascadeShadowRandomRotation},
 		{"cascadeShadowSoftnessRadius", cascadeShadowSoftnessRadius},
@@ -447,6 +448,7 @@ void ModelRenderSystem::DeserializeGraphicsSettings(const nlohmann::json& j_)
 		}
 
 		shadowAttenuation = shadowJson_.value("shadowAttenuation", shadowAttenuation);
+		indirectShadowAttenuation = shadowJson_.value("indirectShadowAttenuation", indirectShadowAttenuation);
 		useCascadeShadowSoftness = shadowJson_.value("useCascadeShadowSoftness", useCascadeShadowSoftness);
 		useCascadeShadowRandomRotation = shadowJson_.value("useCascadeShadowRandomRotation", useCascadeShadowRandomRotation);
 		cascadeShadowSoftnessRadius = shadowJson_.value("cascadeShadowSoftnessRadius", cascadeShadowSoftnessRadius);
@@ -630,6 +632,7 @@ void ModelRenderSystem::ShadowSettingGui()
 
 		ImGui::Text("Shadow Strength");
 		ImGui::SliderFloat("Shadow Attenuation", &shadowAttenuation, 0.0f, 1.0f);
+		ImGui::SliderFloat("Indirect Shadow Attenuation", &indirectShadowAttenuation, 0.0f, 1.0f);
 
 		ImGui::Separator();
 
@@ -802,6 +805,7 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 		shadowData.cascadeSplits = rc.cascadeShadowMap->GetCascadeSplits();
 		shadowData.cascadeShadowBias = cascadeShadowBias;
 		shadowData.shadowAttenuation = shadowAttenuation;
+		shadowData.indirectShadowAttenuation = indirectShadowAttenuation;
 		shadowData.cascadeShadowSoftness =
 		{
 			cascadeShadowSoftnessRadius,
@@ -812,6 +816,7 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 		if (investigationEnabled_ && !renderInvestigationSettings.enableShadowPass)
 		{
 			shadowData.shadowAttenuation = 1.0f;
+			shadowData.indirectShadowAttenuation = 1.0f;
 		}
 
 		dc->UpdateSubresource(cascadeShadowConstantBuffer.Get(), 0, nullptr, &shadowData, 0, 0);
@@ -1379,7 +1384,7 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 			}
 
 			CbOutline cbOutline{};
-			cbOutline.outlineColor = outlineColor;
+			cbOutline.outlineColor = model_.HasOutlineColorOverride() ? model_.GetOutlineColor() : outlineColor;
 			cbOutline.outlineThickness = mesh.material->outlineThicknessOffset;
 			dc->UpdateSubresource(outlineConstantBuffer.Get(), 0, nullptr, &cbOutline, 0, 0);
 

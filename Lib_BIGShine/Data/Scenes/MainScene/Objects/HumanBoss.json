@@ -481,6 +481,8 @@
                     }
                 ],
                 "ModelName": "./Data/Model/SwordPlayer/CombatGirls_Sword_Shield.gltf",
+                "OutlineColor": [0.12, 0.018, 0.025, 1.0],
+                "OverrideOutlineColor": true,
                 "RootMotionName": "root",
                 "ShaderID": 1,
                 "StaticModel": false,

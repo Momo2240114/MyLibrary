@@ -49,8 +49,10 @@
         {
             "Data": {
                 "BackgroundWidgetId": "PlayerHpBackground",
+                "CropFillUV": false,
                 "CurrentRate": 1.0,
                 "CurrentWidgetId": "PlayerHpCurrent",
+                "DamageDelayDuration": 0.0,
                 "DamageDelayRate": 1.0,
                 "DamageDelayWidgetId": "PlayerHpDamageDelay",
                 "DamageFlashColor": [

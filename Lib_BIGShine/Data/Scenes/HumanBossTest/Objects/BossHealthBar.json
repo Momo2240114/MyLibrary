@@ -49,8 +49,10 @@
         {
             "Data": {
                 "BackgroundWidgetId": "BossHealthBackground",
+                "CropFillUV": false,
                 "CurrentRate": 0.2408333271741867,
                 "CurrentWidgetId": "BossHealthCurrent",
+                "DamageDelayDuration": 0.0,
                 "DamageDelayRate": 0.2408333271741867,
                 "DamageDelayWidgetId": "BossHealthDamageDelay",
                 "DamageFlashColor": [

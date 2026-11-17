@@ -5,13 +5,15 @@
 #include "Engine/Graphics/Core/RenderContext.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include "Engine/Debug/TracyProfiler.h"
+#include <algorithm>
 
 bool BloomSystem::Initialize(ID3D11Device* device, int width, int height)
 {
+    if (!device || width <= 0 || height <= 0) return false;
     blurTargets.clear();
 
     // 1. 高輝度抽出用テクスチャ (1/2サイズ)
-    CreateRenderTarget(device, width / 2, height / 2, brightTarget);
+    if (!CreateRenderTarget(device, (std::max)(width / 2, 1), (std::max)(height / 2, 1), brightTarget)) return false;
     
     ScreenSize = {
         static_cast<float>(width),static_cast<float>(height)
@@ -20,21 +22,21 @@ bool BloomSystem::Initialize(ID3D11Device* device, int width, int height)
     // 2. 川瀬式用ピンポンバッファ (さらに解像度を落とすと効果的)
     for (int i = 0; i < 2; ++i) {
         RenderTarget rt;
-        CreateRenderTarget(device, width / 2, height / 2, rt);
+        if (!CreateRenderTarget(device, (std::max)(width / 2, 1), (std::max)(height / 2, 1), rt)) return false;
         blurTargets.push_back(rt);
     }
 
-    CPUResourceLoader::LoadVertexShader(
+    if (FAILED(CPUResourceLoader::LoadVertexShader(
         device,
         "Data/Shader/FullScreenVS.cso",
         nullptr, 0,
         nullptr, // InputLayoutも不要
-        fullScreenVS.GetAddressOf());
+        fullScreenVS.GetAddressOf()))) return false;
 
     // 各ピクセルシェーダー
-    CPUResourceLoader::LoadPixelShader(device, "Data/Shader/BrightPassPS.cso", brightPS.GetAddressOf());
-    CPUResourceLoader::LoadPixelShader(device, "Data/Shader/KawaseBlurPS.cso", kawasePS.GetAddressOf());
-    CPUResourceLoader::LoadPixelShader(device, "Data/Shader/CompositePS.cso", compositePS.GetAddressOf());
+    if (FAILED(CPUResourceLoader::LoadPixelShader(device, "Data/Shader/BrightPassPS.cso", brightPS.GetAddressOf()))) return false;
+    if (FAILED(CPUResourceLoader::LoadPixelShader(device, "Data/Shader/KawaseBlurPS.cso", kawasePS.GetAddressOf()))) return false;
+    if (FAILED(CPUResourceLoader::LoadPixelShader(device, "Data/Shader/CompositePS.cso", compositePS.GetAddressOf()))) return false;
     
     // 3. 定数バッファの作成
     D3D11_BUFFER_DESC cbDesc = {};
@@ -42,14 +44,14 @@ bool BloomSystem::Initialize(ID3D11Device* device, int width, int height)
     cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
     cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
     cbDesc.ByteWidth = sizeof(CbBloom);
-    device->CreateBuffer(&cbDesc, nullptr, constantBuffer.GetAddressOf());
+    if (FAILED(device->CreateBuffer(&cbDesc, nullptr, constantBuffer.GetAddressOf()))) return false;
 
     cbDesc = {};
     cbDesc.Usage = D3D11_USAGE_DYNAMIC;
     cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
     cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
     cbDesc.ByteWidth = sizeof(CbColorFilter);
-    device->CreateBuffer(&cbDesc, nullptr, filterBuffer.GetAddressOf());
+    if (FAILED(device->CreateBuffer(&cbDesc, nullptr, filterBuffer.GetAddressOf()))) return false;
     
     return true;
 }
@@ -60,6 +62,8 @@ void BloomSystem::Shutdown()
 
     brightTarget.rtv.Reset();
     brightTarget.srv.Reset();
+    brightTarget.width = 0.0f;
+    brightTarget.height = 0.0f;
     blurTargets.clear();
     constantBuffer.Reset();
     filterBuffer.Reset();
@@ -75,12 +79,16 @@ void BloomSystem::Execute(
     ID3D11RenderTargetView* finalRTV, 
     const Parameters& params)
 {
+    if (!rc.deviceContext || !rc.renderState || !sceneSRV || !finalRTV ||
+        !brightTarget.rtv || !brightTarget.srv || blurTargets.size() != 2 ||
+        !constantBuffer || !filterBuffer || !brightPS || !kawasePS || !compositePS || !fullScreenVS) return;
     auto dc = rc.deviceContext;
     auto rs = rc.renderState;
 
     // 共通ステート設定
     dc->RSSetState(rs->GetRasterizerState(RasterizerState::SolidCullNone));
     dc->OMSetDepthStencilState(rs->GetDepthStencilState(DepthState::NoTestNoWrite), 0);
+    dc->OMSetBlendState(rs->GetBlendState(BlendState::Opaque), nullptr, 0xFFFFFFFF);
 
     // サンプラーを Clamp に固定！
     ID3D11SamplerState* sampler = rs->GetSamplerState(SamplerState::LinearClamp);
@@ -181,12 +189,18 @@ void BloomSystem::Execute(
     const Parameters& params,
 const CbColorFilter& colorFilterParams) // 引数名を修正
 {
+    if (!rc.deviceContext || !rc.renderState || !sceneSRV || !finalRTV ||
+        !brightTarget.rtv || !brightTarget.srv || blurTargets.size() != 2 ||
+        !constantBuffer || !filterBuffer || !brightPS || !kawasePS || !compositePS || !fullScreenVS) return;
     auto dc = rc.deviceContext;
     auto rs = rc.renderState;
+    Microsoft::WRL::ComPtr<ID3D11DepthStencilView> previousDSV_;
+    dc->OMGetRenderTargets(0, nullptr, previousDSV_.GetAddressOf());
 
     // --- 0. 共通ステート設定 ---
     dc->RSSetState(rs->GetRasterizerState(RasterizerState::SolidCullNone));
     dc->OMSetDepthStencilState(rs->GetDepthStencilState(DepthState::NoTestNoWrite), 0);
+    dc->OMSetBlendState(rs->GetBlendState(BlendState::Opaque), nullptr, 0xFFFFFFFF);
     ID3D11SamplerState* sampler = rs->GetSamplerState(SamplerState::LinearClamp);
     dc->PSSetSamplers(0, 1, &sampler);
 
@@ -246,9 +260,7 @@ const CbColorFilter& colorFilterParams) // 引数名を修正
     SetVP(ScreenSize.x, ScreenSize.y);
 
     // デプスバッファを戻して、後の描画（UIやデバッグ形状）が正しく遮蔽されるようにする
-    ID3D11DepthStencilView* dsv = nullptr;
-    rc.deviceContext->OMGetRenderTargets(0, nullptr, &dsv);
-    dc->OMSetRenderTargets(1, &finalRTV, dsv);
+    dc->OMSetRenderTargets(1, &finalRTV, previousDSV_.Get());
 
     // ColorFilter 用定数バッファの更新
     D3D11_MAPPED_SUBRESOURCE mapped;
@@ -277,7 +289,7 @@ const CbColorFilter& colorFilterParams) // 引数名を修正
 }
 
 
-void BloomSystem::CreateRenderTarget(ID3D11Device* device, int w, int h, RenderTarget& outRT) {
+bool BloomSystem::CreateRenderTarget(ID3D11Device* device, int w, int h, RenderTarget& outRT) {
     D3D11_TEXTURE2D_DESC desc = {};
     desc.Width = w;
     desc.Height = h;
@@ -289,11 +301,14 @@ void BloomSystem::CreateRenderTarget(ID3D11Device* device, int w, int h, RenderT
     desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 
     Microsoft::WRL::ComPtr<ID3D11Texture2D> tex;
-    device->CreateTexture2D(&desc, nullptr, tex.GetAddressOf());
-    device->CreateRenderTargetView(tex.Get(), nullptr, outRT.rtv.GetAddressOf());
-    device->CreateShaderResourceView(tex.Get(), nullptr, outRT.srv.GetAddressOf());
+    if (FAILED(device->CreateTexture2D(&desc, nullptr, tex.GetAddressOf()))) return false;
+    outRT.rtv.Reset();
+    outRT.srv.Reset();
+    if (FAILED(device->CreateRenderTargetView(tex.Get(), nullptr, outRT.rtv.GetAddressOf()))) return false;
+    if (FAILED(device->CreateShaderResourceView(tex.Get(), nullptr, outRT.srv.GetAddressOf()))) return false;
     outRT.width = (float)w;
     outRT.height = (float)h;
+    return true;
 }
 
 void BloomSystem::UpdateConstantBuffer(ID3D11DeviceContext* dc, const Parameters& params, float offset, float w, float h) 
@@ -315,8 +330,10 @@ void BloomSystem::UpdateConstantBuffer(ID3D11DeviceContext* dc, const Parameters
 void BloomSystem::DrawFullScreenQuad(ID3D11DeviceContext* dc)
 {
     // 頂点バッファなしで3頂点描画（シェーダー側で座標計算）
+    ID3D11Buffer* emptyVertexBuffer_ = nullptr;
+    UINT zero_ = 0;
     dc->IASetInputLayout(nullptr);
-    dc->IASetVertexBuffers(0, 0, nullptr, nullptr, nullptr);
+    dc->IASetVertexBuffers(0, 1, &emptyVertexBuffer_, &zero_, &zero_);
     dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     dc->VSSetShader(fullScreenVS.Get(), nullptr, 0);
     dc->Draw(3, 0);

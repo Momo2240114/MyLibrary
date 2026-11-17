@@ -270,7 +270,8 @@ private:
 		DirectX::XMFLOAT4   cascadeSplits;
 		DirectX::XMFLOAT4   cascadeShadowBias{ 0.001f, 0.002f, 0.003f, 0.004f };
 		float shadowAttenuation = 0.35f;
-		DirectX::XMFLOAT3 padding{};
+		float indirectShadowAttenuation = 1.0f;
+		DirectX::XMFLOAT2 padding{};
 		DirectX::XMFLOAT4 cascadeShadowSoftness{ 2.0f, 8.0f, 1.0f, 1.0f };
 	};
 
@@ -346,6 +347,7 @@ private:
 
 	bool useCascadeShadow;
 	float shadowAttenuation = 0.35f;
+	float indirectShadowAttenuation = 1.0f;
 	float cascadeShadowSoftnessRadius = 2.0f;
 	int cascadeShadowSoftnessSampleCount = 8;
 	bool useCascadeShadowSoftness = true;

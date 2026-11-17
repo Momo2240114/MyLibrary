@@ -14,6 +14,7 @@
 
 void DebugTextureViewerWindow::Draw()
 {
+    GraphicsDeviceManager::Instance().GetPostRenderSystem().SetDebugCaptureEnabled(false);
     if (!isVisible) return;
 
     BS_PROFILE_SCOPE("DebugTextureViewerWindow::Draw");
@@ -166,12 +167,17 @@ void DebugTextureViewerWindow::AddPostEffectTextures(std::vector<TextureEntry>& 
     // ポストエフェクトの作業バッファと各サブシステムの中間結果を一覧化する。
     GraphicsDeviceManager& graphicsDeviceManager_ = GraphicsDeviceManager::Instance();
     PostRenderSystem& postRenderSystem_ = graphicsDeviceManager_.GetPostRenderSystem();
+    postRenderSystem_.SetDebugCaptureEnabled(true);
     BloomSystem& bloomSystem_ = postRenderSystem_.GetBloomSystem();
     XeGtaoSystem& xeGtaoSystem_ = postRenderSystem_.GetXeGtaoSystem();
     MotionBlurSystem& motionBlurSystem_ = postRenderSystem_.GetMotionBlurSystem();
 
     textures_.push_back({ "Post Work 0", postRenderSystem_.GetWorkBufferSRV(0) });
     textures_.push_back({ "Post Work 1", postRenderSystem_.GetWorkBufferSRV(1) });
+    textures_.push_back({ "Bloom Composite", postRenderSystem_.GetBloomCompositeDebugSRV() });
+    textures_.push_back({ "Fog Result", postRenderSystem_.GetFogDebugSRV() });
+    textures_.push_back({ "Vignette Result", postRenderSystem_.GetVignetteDebugSRV() });
+    textures_.push_back({ "FXAA Result", postRenderSystem_.GetFxaaDebugSRV() });
     textures_.push_back({ "Bloom Bright", bloomSystem_.GetBrightSRV() });
 
     static const char* bloomBlurNames_[] =

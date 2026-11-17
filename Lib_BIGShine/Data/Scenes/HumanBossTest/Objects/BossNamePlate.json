@@ -62,10 +62,12 @@
                     1.0,
                     1.0
                 ],
+                "LinearSampling": false,
                 "LocalSize": [
                     328.0,
                     44.0
                 ],
+                "SdrTexture": false,
                 "ShaderID": 0,
                 "TexturePath": "",
                 "Visible": true,
@@ -90,6 +92,7 @@
                 ],
                 "FontPath": "Data/Font/NotoSansJP-Regular.otf",
                 "FontSize": 22.0,
+                "FontStrokeWidth": 0.0,
                 "HorizontalAlign": "CENTER",
                 "MaxWidth": 320.0,
                 "Padding": 4.0,
@@ -106,18 +109,48 @@
             "UpdatePriority": 0
         },
         {
-            "TypeName": "UIVisualEffectComponent",
-            "Enabled": true,
-            "RequiredForSceneStart": false,
-            "UpdateEnabled": true,
-            "LateUpdateEnabled": true,
-            "UpdatePriority": 0,
-            "LateUpdatePriority": 0,
             "Data": {
-                "Preset": "HudBossName",
                 "PlayOnStart": true,
-                "Settings": {}
-            }
+                "Preset": "HudBossName",
+                "Settings": {
+                    "GlowColor": [
+                        1,
+                        0.7,
+                        0.42,
+                        1
+                    ],
+                    "GlowIntensity": 0.18,
+                    "GlowRadius": 3,
+                    "ShadowColor": [
+                        0.01,
+                        0.005,
+                        0.015,
+                        1
+                    ],
+                    "ShadowOffset": [
+                        1,
+                        2
+                    ],
+                    "ShadowOpacity": 0.85,
+                    "ShadowSoftness": 1,
+                    "SweepColor": [
+                        1,
+                        0.9,
+                        0.72,
+                        1
+                    ],
+                    "SweepIntensity": 0.12,
+                    "SweepSpeed": 0.11,
+                    "SweepWidth": 0.1
+                }
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "UIVisualEffectComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         }
     ],
     "Layer": 16,
