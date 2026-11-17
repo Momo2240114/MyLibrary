@@ -137,7 +137,12 @@ void framework::update(float elapsedTime_/*Elapsed seconds from last frame*/)
             const bool toggle_ = KeyInput::KeyPressedIn(VK_F2) && !ImGui::GetIO().WantTextInput;
             if (editorPlay_)
             {
-                if (mouseRecaptureRequired) manager_->SetPlayInputCaptured(false);
+                // Scene画像のクリックが前フレームで捕捉を要求した場合は、解除待ちを終える。
+                if (mouseRecaptureRequired)
+                {
+                    if (manager_->IsPlayInputCaptured()) mouseRecaptureRequired = false;
+                    else manager_->SetPlayInputCaptured(false);
+                }
                 if (toggle_ && !releaseKey_)
                 {
                     manager_->SetPlayInputCaptured(!manager_->IsPlayInputCaptured());

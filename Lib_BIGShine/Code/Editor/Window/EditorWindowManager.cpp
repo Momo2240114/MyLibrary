@@ -141,6 +141,10 @@ void EditorWindowManager::DrawSceneView()
                 cursorPos_.x + (available_.x - imageSize_.x) * 0.5f,
                 cursorPos_.y + (available_.y - imageSize_.y) * 0.5f));
             ImGui::Image(reinterpret_cast<void*>(sceneSRV_), imageSize_);
+            if (gameObjectManager && gameObjectManager->SupportsEditorPlayMode() &&
+                gameObjectManager->GetEditorPlayMode() == EditorPlayMode::PLAY &&
+                ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+                gameObjectManager->SetPlayInputCaptured(true);
             if (gameObjectManager && gameObjectManager->SupportsEditorPlayMode())
             {
                 if (gameObjectManager->GetEditorPlayMode() == EditorPlayMode::EDITOR)
@@ -187,7 +191,7 @@ void EditorWindowManager::DrawPlayModeToolbar()
     const char* status_ = !supported_ ? "Runtime" : mode_ == EditorPlayMode::EDITOR ? "Editor" :
         mode_ == EditorPlayMode::PAUSED ? "Paused - mouse released" :
         gameObjectManager->IsPlayInputCaptured() ? "Play - mouse captured / F2 or Esc to release" :
-        "Play - F2 to capture mouse";
+        "Play - click Scene or press F2 to capture mouse";
     ImGui::TextDisabled("%s", status_);
     ImGui::Separator();
 }

@@ -151,6 +151,7 @@ public:
     void SetJustGuardedActionName(const std::string& actionName_);
     void SetRuntimeHitOwner(GameObject* owner_);
     void SetRuntimeHitTeamId(int teamId_);
+    void SetRuntimeSourceAction(const std::string& sourceAction_);
 
     // 攻撃タイプによって移動や寿命の扱いを変える。
     void SetEffectType(ATTACK_EFFECT_TYPE effectType_);
@@ -173,6 +174,9 @@ public:
     // Editor/Debug描画用に、現在のHitShape情報を提出する。
     void SubmitDebugShapes();
 
+
+    // 継続攻撃や再生し直し時に、HitBox側の重複Hit履歴を消す。
+    void ClearHitHistory();
 private:
     struct RuntimeHitShape
     {
@@ -193,8 +197,6 @@ private:
             const AttackEffectHitShapeTemplate& shape_,
             const std::string& name_);
 
-    // 継続攻撃や再生し直し時に、HitBox側の重複Hit履歴を消す。
-    void ClearHitHistory();
 
     // 実行中の攻撃タイプと攻撃者情報。
     ATTACK_EFFECT_TYPE effectType = ATTACK_EFFECT_TYPE::INSTANT_AREA;

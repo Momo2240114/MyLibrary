@@ -31,6 +31,8 @@ public:
         float waitTime_, float turnDegreesPerSecond_, float collisionRadius_);
     // 待機中だけ攻撃者の周囲を傾いた円軌道で周回し、発射地点まで見た目と判定を運ぶ。
     void ConfigureOrbit(float radius_, float height_, float tiltDegrees_, float angularSpeed_, float phaseDegrees_, float yawDegrees_);
+    // 周回弾の所有者が切り替わった直後、待機を終了して新しい対象へ向ける。
+    void Reflect(const std::shared_ptr<GameObject>& target_, const std::shared_ptr<GameObject>& attacker_, float speedMultiplier_);
 private:
     // 発射時刻で周回位置を確定し、その位置から既存の追尾移動へ引き継ぐ。
     void UpdateOrbitPosition(float elapsedTime_);

@@ -635,6 +635,7 @@ std::shared_ptr<GameObject> EffectManager::SpawnParticle(
     particle_->SetEnabled(true);
     particle_->ResetRuntime();
     particle_->SetRuntimeSizeScale(request_.sizeScale);
+
     for (ParticleComponent::EmitterTrack& track_ : particle_->GetTracks())
     {
         // EffectManager経由のParticleは生成Objectの位置を基準にし、Asset内のWorld原点固定を避ける。
@@ -643,6 +644,7 @@ std::shared_ptr<GameObject> EffectManager::SpawnParticle(
             track_.spawnSpace = ParticleSpawnSpace::OWNER_RELATIVE;
         }
     }
+
     if (request_.overrideAxis || request_.overrideTargetAttraction)
     {
         for (ParticleComponent::EmitterTrack& track_ : particle_->GetTracks())
@@ -1200,7 +1202,15 @@ void EffectManager::SpawnForHit(const AttackHitEvent& event_)
         request_.normalOffset = event_.hitParticleNormalOffset;
         const auto attacker_ = event_.attacker.lock();
         if (attacker_ && attacker_->GetLayer() == LayerType::Player)
+        {
             request_.sizeScale = 2.0f;
+            if (request_.assetPath == "LargeHitSparks_Weak" ||
+                request_.assetPath == "Data/Particle/LargeHitSparks_Weak.json")
+                request_.assetPath = "PlayerHitSparks_Weak";
+            else if (request_.assetPath == "LargeHitSparks_Strong" ||
+                request_.assetPath == "Data/Particle/LargeHitSparks_Strong.json")
+                request_.assetPath = "PlayerHitSparks_Strong";
+        }
         if (event_.hitParticleUseImpactAxis)
         {
             DirectX::XMFLOAT3 attackerDirection_ = event_.hitNormal;

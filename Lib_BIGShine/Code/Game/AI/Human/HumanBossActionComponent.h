@@ -196,6 +196,7 @@ private:
     float orbOrbitSpeed = 180.0f;
     float orbOrbitDuration = 2.4f;
     float orbLaunchSpeedMultiplier = 4.0f;
+    float orbReflectSpeedMultiplier = 1.5f;
     bool ragnarokEnabled = true;
     mutable std::string ragnarokBlockReason; // 他行動の検証に上書きされない特殊攻撃の開始不可理由。
     bool ragnarokUsed = false; // HP Phaseとは独立した初回使用履歴。

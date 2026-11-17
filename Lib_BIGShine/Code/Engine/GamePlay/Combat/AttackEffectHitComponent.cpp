@@ -253,6 +253,15 @@ void AttackEffectHitComponent::SetRuntimeHitTeamId(int teamId_)
     }
 }
 
+void AttackEffectHitComponent::SetRuntimeSourceAction(const std::string& sourceAction_)
+{
+    sourceAction = sourceAction_;
+    for (RuntimeHitShape& runtime_ : runtimeHitShapes)
+    {
+        if (runtime_.hitBox) runtime_.hitBox->sourceAction = sourceAction_;
+    }
+}
+
 void AttackEffectHitComponent::SetHitShapes(
     const std::vector<AttackEffectHitShapeTemplate>& hitShapes_)
 {

@@ -225,62 +225,6 @@
                 "actionStart": "",
                 "actionUpdate": "",
                 "attachNodeName": "",
-                "attachToOwner": true,
-                "attackTemplateId": "",
-                "blackboardWrites": [],
-                "callEndOnStateExit": false,
-                "endTime": 0.38333332538604736,
-                "eventTemplateType": "VFX_TEMPLATE",
-                "label": "Shield_PowerEffect",
-                "localPosition": [
-                    -0.17000000178813934,
-                    4.159999847412109,
-                    2.2799999713897705
-                ],
-                "localRotation": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "localScale": [
-                    3.0,
-                    3.0,
-                    2.0
-                ],
-                "meshVFXAssetPath": "DragonBreath_Charge",
-                "meshVFXLifeTime": 0.19999998807907104,
-                "meshVFXPlaybackSpeed": 1.0,
-                "mirrorMeshVFX": false,
-                "overridePlaybackSpeed": false,
-                "ownerTarget": "Self",
-                "playbackSpeed": 1.0,
-                "startTime": 0.28333333134651184,
-                "telegraph": {
-                    "attachNodeName": "",
-                    "berserkLeadFrames": 9.0,
-                    "enabled": true,
-                    "fallbackOffset": [
-                        0.0,
-                        2.0,
-                        0.0
-                    ],
-                    "leadFrames": 12.0,
-                    "lifeTime": 0.15000000596046448,
-                    "localOffset": [
-                        0.0,
-                        0.30000001192092896,
-                        0.0
-                    ],
-                    "particleName": "EnemyAttackWarning",
-                    "particleScale": 1.0
-                },
-                "telegraphHitStart": false
-            },
-            {
-                "actionEnd": "",
-                "actionStart": "",
-                "actionUpdate": "",
-                "attachNodeName": "",
                 "attachToOwner": false,
                 "attackTemplateId": "RashAttack_04_Sheild",
                 "blackboardWrites": [],

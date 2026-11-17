@@ -89,7 +89,6 @@ private:
     {
         DirectX::XMFLOAT3 ground{};
         std::shared_ptr<GameObject> body;
-        std::shared_ptr<GameObject> trail;
         std::shared_ptr<GameObject> warning;
         std::shared_ptr<GameObject> obstacle;
         float radius = 1.0f;
@@ -129,7 +128,6 @@ private:
     bool specialPreviousPlayerLock = false;
     bool specialCameraReturning = false;
     bool specialCompleted = false;
-    unsigned int specialSequenceGeneration = 0;
     int specialGameState = -1;
     RadialBlurSystem::Parameters specialPreviousBlur;
     nlohmann::json specialSettings;

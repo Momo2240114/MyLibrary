@@ -1074,6 +1074,7 @@
     <None Include="Data\Particle\DragonFootDust.json" />
     <None Include="Data\Particle\LargeHitSparks.json" />
     <None Include="Data\Particle\PlayerHeal.json" />
+    <None Include="Data\Particle\HumanBossBloodEye.json" />
     <None Include="Data\Animation\StateData\DragonFirstForm_Test\States\DragonGroundStamp.json" />
     <None Include="Shader\Basic.hlsli" />
     <None Include="Shader\bidirectional_reflectance_distribution_function.hlsli" />

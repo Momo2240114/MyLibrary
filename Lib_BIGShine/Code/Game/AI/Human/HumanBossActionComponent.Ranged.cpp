@@ -868,6 +868,7 @@ void HumanBossActionComponent::DrawRangedGui()
     ImGui::DragFloat("OrbOrbitSpeed", &orbOrbitSpeed, 1.0f, -360.0f, 360.0f);
     ImGui::DragFloat("OrbOrbitDuration", &orbOrbitDuration, 0.05f, 0.5f, 5.0f);
     ImGui::DragFloat("OrbLaunchSpeedMultiplier", &orbLaunchSpeedMultiplier, 0.1f, 3.0f, 5.0f);
+    ImGui::DragFloat("OrbReflectSpeedMultiplier", &orbReflectSpeedMultiplier, 0.05f, 1.0f, 3.0f);
     ImGui::DragFloat("RagnarokHpThreshold", &ragnarokHpThreshold, 0.05f, 0.01f, 1.0f);
     ImGui::DragInt("RagnarokAttackCount", &ragnarokAttackCount, 1.0f, 1, 8);
     ImGui::DragFloat("RagnarokAdvanceSpeed", &ragnarokAdvanceSpeed, 0.1f, 1.0f, 16.0f);
@@ -932,6 +933,7 @@ void HumanBossActionComponent::SerializeRanged(nlohmann::json& json_) const
     json_["OrbOrbitSpeed"] = orbOrbitSpeed;
     json_["OrbOrbitDuration"] = orbOrbitDuration;
     json_["OrbLaunchSpeedMultiplier"] = orbLaunchSpeedMultiplier;
+    json_["OrbReflectSpeedMultiplier"] = orbReflectSpeedMultiplier;
     json_["RagnarokHpThreshold"] = ragnarokHpThreshold;
     json_["RagnarokAttackCount"] = ragnarokAttackCount;
     json_["RagnarokAdvanceSpeed"] = ragnarokAdvanceSpeed;
@@ -981,6 +983,7 @@ void HumanBossActionComponent::DeserializeRanged(const nlohmann::json& json_)
     orbOrbitSpeed = std::clamp(json_.value("OrbOrbitSpeed", orbOrbitSpeed), -360.0f, 360.0f);
     orbOrbitDuration = std::clamp(json_.value("OrbOrbitDuration", orbOrbitDuration), 0.5f, 5.0f);
     orbLaunchSpeedMultiplier = std::clamp(json_.value("OrbLaunchSpeedMultiplier", orbLaunchSpeedMultiplier), 3.0f, 5.0f);
+    orbReflectSpeedMultiplier = std::clamp(json_.value("OrbReflectSpeedMultiplier", orbReflectSpeedMultiplier), 1.0f, 3.0f);
     ragnarokHpThreshold = std::clamp(json_.value("RagnarokHpThreshold", ragnarokHpThreshold), 0.01f, 1.0f);
     ragnarokAttackCount = std::clamp(json_.value("RagnarokAttackCount", ragnarokAttackCount), 1, 8);
     ragnarokAdvanceSpeed = std::clamp(json_.value("RagnarokAdvanceSpeed", ragnarokAdvanceSpeed), 1.0f, 16.0f);

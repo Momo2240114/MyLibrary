@@ -19,6 +19,10 @@
 #include <utility>
 #include "Engine/GamePlay/Combat/AttackTemplateManager.h"
 #include "Engine/GamePlay/EventSystem/ActionSequence.h"
+#include "Engine/GamePlay/System/AttackSystem.h"
+#include "Engine/GamePlay/System/JustDodgeSystem.h"
+#include "Engine/GamePlay/System/JustGuardSystem.h"
+#include "Game/Charcter/Player/PlayerControllerComponent.h"
 #include "Engine/Math/Curve/CurveComponent.h"
 
 namespace
@@ -269,11 +273,9 @@ HumanBossAIComponent::HumanBossAIComponent()
         definition_.skill.phases = { CreateComboPhase("HumanBossCombatWalk", SkillPhaseEnd::DURATION, 1.5f) };
         if (index_ == 24)
         {
-            definition_.skill.phases.push_back(CreateComboPhase("HumanBossAttackTell", SkillPhaseEnd::DURATION, 0.18f));
             auto slash_ = CreateComboPhase("SS_Sp_Skill1", SkillPhaseEnd::ANIMATION_END, 0.0f, "HumanBoss_SHADOW_SLASH_Sequence");
-            slash_.motionWarpPreset = "HumanBoss.Counter";
             slash_.preventFlinch = true;
-            definition_.skill.phases.push_back(slash_);
+            definition_.skill.phases = { slash_ };
         }
         else if (index_ == 27)
         {
@@ -313,6 +315,7 @@ HumanBossAIComponent::HumanBossAIComponent()
         for (auto& phase_ : definition_.skill.phases)
             phase_.motionWarpPreset = GetDefaultAttackWarpPreset(phase_.animationState, definition_.type);
     }
+    actions[static_cast<std::size_t>(HumanBossActionType::SHADOW_SLASH)].skill.phases.front().motionWarpPreset.clear();
     // 遠距離行動も既存Skillを使用し、通常の影渡りSkillとは分けて接続する。
     auto& charge_ = actions[static_cast<std::size_t>(HumanBossActionType::SHADOW_CHARGE)];
     charge_.category = HumanBossState::OFFENSE;
@@ -411,6 +414,66 @@ void HumanBossAIComponent::Start()
     rangedPressureTime = 0.0f;
     runtimeStarted = true;
     RegisterActions();
+    const std::weak_ptr<HumanBossAIComponent> weak_ = owner_->GetComponent<HumanBossAIComponent>();
+    owner_->GetManager().GetAttackSystem().AddHitCallback([weak_](const AttackHitEvent& event_)
+    {
+        const auto self_ = weak_.lock();
+        if (!self_) return;
+        auto receiver_ = event_.target.lock();
+        while (receiver_ && receiver_ != self_->GetGameObject() && receiver_->transform)
+        {
+            const auto parent_ = receiver_->transform->parent.lock();
+            receiver_ = parent_ ? parent_->gameObject.lock() : nullptr;
+        }
+        if (receiver_ != self_->GetGameObject() || self_->IsBerserkActive()) return;
+        auto attacker_ = event_.attacker.lock();
+        while (attacker_ && !attacker_->GetComponent<PlayerControllerComponent>() && attacker_->transform)
+        {
+            const auto parent_ = attacker_->transform->parent.lock();
+            attacker_ = parent_ ? parent_->gameObject.lock() : nullptr;
+        }
+        const auto player_ = attacker_ ? attacker_->GetComponent<PlayerControllerComponent>() : nullptr;
+        if (!player_) return;
+        const auto skill_ = player_->GetSkillDefinition(player_->GetCurrentAction());
+        if (skill_ && skill_->name == "PhantomRush") self_->comboBindTimer = self_->comboBindDuration;
+        if (event_.sourceAction == "HumanBossShadowOrbReflected")
+        {
+            self_->reflectedOrbTimer = 0.0f;
+            self_->hitTimer = (std::max)(self_->hitTimer, 0.8f);
+        }
+    });
+    owner_->GetManager().GetJustDodgeSystem().AddJustDodgeCallback([weak_](const JustDodgeEvent& event_)
+    {
+        const auto self_ = weak_.lock();
+        auto attacker_ = event_.attacker.lock();
+        const auto dodger_ = event_.dodger.lock();
+        if (!self_ || !dodger_ || !dodger_->GetComponent<PlayerControllerComponent>()) return;
+        while (attacker_ && attacker_ != self_->GetGameObject() && attacker_->transform)
+        {
+            const auto parent_ = attacker_->transform->parent.lock();
+            attacker_ = parent_ ? parent_->gameObject.lock() : nullptr;
+        }
+        if (attacker_ != self_->GetGameObject() || self_->IsBerserkActive()) return;
+        self_->playerCounterProtectionTimer = 3.0f;
+        self_->playerCounterStarted = false;
+        self_->playerCounterFromGuard = false;
+    });
+    owner_->GetManager().GetJustGuardSystem().AddJustGuardCallback([weak_](const JustGuardEvent& event_)
+    {
+        const auto self_ = weak_.lock();
+        auto attacker_ = event_.attacker.lock();
+        const auto defender_ = event_.defender.lock();
+        if (!self_ || !defender_ || !defender_->GetComponent<PlayerControllerComponent>()) return;
+        while (attacker_ && attacker_ != self_->GetGameObject() && attacker_->transform)
+        {
+            const auto parent_ = attacker_->transform->parent.lock();
+            attacker_ = parent_ ? parent_->gameObject.lock() : nullptr;
+        }
+        if (attacker_ != self_->GetGameObject() || self_->IsBerserkActive()) return;
+        self_->playerCounterProtectionTimer = 3.0f;
+        self_->playerCounterStarted = false;
+        self_->playerCounterFromGuard = true;
+    });
     EnterNeutral();
 }
 
@@ -668,6 +731,10 @@ bool HumanBossAIComponent::IsAvailable(std::size_t index_, std::string* reason_)
     if (normalOffense_ && static_cast<int>(index_) == lastOffense) return reject_("Same offense repetition blocked");
     if (category_ == HumanBossState::REACTION && reactionBudget < GetReactionCost(type_)) return reject_("Insufficient reaction budget");
     if (IsDodge(type_) && dodgeTimer > 0.0f) return reject_("Shared dodge cooldown remaining");
+    if ((IsDodge(type_) || type_ == HumanBossActionType::GUARD || type_ == HumanBossActionType::JUST_GUARD ||
+        category_ == HumanBossState::SHADOW) &&
+        (comboBindTimer > 0.0f || playerCounterProtectionTimer > 0.0f || reflectedOrbTimer > 0.0f))
+        return reject_("Player combo or counter has priority");
     if (normalOffense_ && attackTimer > 0.0f) return reject_("Shared attack cooldown remaining");
 
     // 影渡りの派生は、対応済みの行動範囲だけを実行担当へ渡す。
@@ -688,7 +755,7 @@ bool HumanBossAIComponent::IsAvailable(std::size_t index_, std::string* reason_)
     if (!executor_) return reject_("Action executor missing");
     if (!executor_->CanStart(definition_.skill, defense_, target.lock()))
     { if (reason_) *reason_ = "Executor rejected: " + executor_->GetValidationError(); return false; }
-    if (category_ == HumanBossState::SHADOW &&
+    if (category_ == HumanBossState::SHADOW && type_ != HumanBossActionType::SHADOW_SLASH &&
         !executor_->CanShadowShift(definition_.skill, GetShadowShiftMode(definition_), target.lock(), strafeDirection))
         return reject_("Shadow destination / route unavailable");
     return true;
@@ -716,7 +783,7 @@ bool HumanBossAIComponent::BeginAction(std::size_t index_)
     const bool usesAttackWarp_ = std::any_of(definition_.skill.phases.begin(), definition_.skill.phases.end(),
         [](const SkillPhase& phase_) { return !phase_.motionWarpPreset.empty(); });
     if (!usesAttackWarp_) executor_->FaceTarget(toPlayer, definition_.skill.category != SkillCategory::ATTACK && definition_.skill.category != SkillCategory::COUNTER);
-    const bool started_ = definition_.category == HumanBossState::SHADOW
+    const bool started_ = definition_.category == HumanBossState::SHADOW && definition_.type != HumanBossActionType::SHADOW_SLASH
         ? executor_->BeginShadowShift(definition_.skill,
             GetShadowShiftMode(definition_), target.lock(), strafeDirection)
         : executor_->Begin(executionSkill_, defense_, velocity_, target.lock());
@@ -797,6 +864,34 @@ void HumanBossAIComponent::Update(float deltaTime_)
     }
     const float delta_ = (std::max)(deltaTime_, 0.0f);
     const auto health_ = owner_->GetComponent<HealthComponent>();
+    const auto playerObject_ = target.lock() ? target.lock() : owner_->GetManager().Find(playerObjectName);
+    const auto player_ = playerObject_ ? playerObject_->GetComponent<PlayerControllerComponent>() : nullptr;
+    const auto playerHealth_ = playerObject_ ? playerObject_->GetComponent<HealthComponent>() : nullptr;
+    if (comboBindTimer > 0.0f)
+    {
+        const auto skill_ = player_ ? player_->GetSkillDefinition(player_->GetCurrentAction()) : nullptr;
+        comboBindTimer = skill_ && skill_->name == "PhantomRush"
+            ? comboBindDuration : (std::max)(0.0f, comboBindTimer - delta_);
+    }
+    reflectedOrbTimer = (std::max)(0.0f, reflectedOrbTimer - delta_);
+    if (playerCounterProtectionTimer > 0.0f)
+    {
+        playerCounterProtectionTimer = (std::max)(0.0f, playerCounterProtectionTimer - delta_);
+        const PLAYER_ACTION expected_ = playerCounterFromGuard ? PLAYER_ACTION::COUNTER_ATTACK : PLAYER_ACTION::JUST_DODGE_RUSH;
+        if (player_ && player_->GetCurrentAction() == expected_)
+        {
+            playerCounterStarted = true;
+            playerCounterProtectionTimer = (std::max)(playerCounterProtectionTimer, 0.5f);
+        }
+        else if (playerCounterStarted) playerCounterProtectionTimer = 0.0f;
+    }
+    if ((health_ && health_->IsDead()) || !player_)
+    {
+        comboBindTimer = 0.0f;
+        playerCounterProtectionTimer = 0.0f;
+        reflectedOrbTimer = 0.0f;
+    }
+    if (playerCounterProtectionTimer > 0.0f && currentAction >= 0 && !IsBerserkActive()) Stop();
     bool locked_ = false;
     if (owner_->manager)
     {
@@ -859,6 +954,17 @@ void HumanBossAIComponent::Update(float deltaTime_)
         phase = rate_ <= phase3Hp ? 2 : rate_ <= phase2Hp ? 1 : 0;
     }
     if (debugForcePhase) phase = std::clamp(debugPhase, 0, 2);
+    if (health_ && health_->IsDead()) StopBloodEye();
+    else if (bloodEyeRemaining > 0.0f)
+    {
+        bloodEyeRemaining = (std::max)(0.0f, bloodEyeRemaining - delta_);
+        if (bloodEyeRemaining <= 0.0f) StopBloodEye(false);
+    }
+    else if (!bloodEyeUsed && berserkStage < 0 && player_ && (!playerHealth_ || !playerHealth_->IsDead()) &&
+        comboBindTimer <= 0.0f && playerCounterProtectionTimer <= 0.0f && reflectedOrbTimer <= 0.0f &&
+        health_ && health_->GetMaxHealth() > 0.0f &&
+        health_->GetCurrentHealth() / health_->GetMaxHealth() <= bloodEyeHpThreshold) StartBloodEye();
+    if (specialIntroLocked) { PublishDebug(); return; }
     for (auto& cooldown_ : cooldowns) cooldown_ = (std::max)(0.0f, cooldown_ - delta_);
     reactionTimer = (std::max)(0.0f, reactionTimer - delta_);
     dodgeTimer = (std::max)(0.0f, dodgeTimer - delta_);
@@ -902,7 +1008,8 @@ void HumanBossAIComponent::Update(float deltaTime_)
         const bool followUpRejected_ = executor_->GetResult() == SkillExecutionResult::FOLLOW_UP_REJECTED;
         const bool counter_ = completed_ && counterPending;
         const bool light_ = completed_ && (executor_->ConsumeGuardSuccess() || (IsDodge(actions[currentAction].type) && whiffTimer > 0.0f)) &&
-            std::uniform_real_distribution<float>(0.0f, 1.0f)(random) < mindSettings.lightCounterChance;
+            std::uniform_real_distribution<float>(0.0f, 1.0f)(random) <
+                std::clamp(mindSettings.lightCounterChance * (bloodEyeRemaining > 0.0f ? 1.4f : 1.0f), 0.0f, 0.85f);
         const bool reposition_ = completed_ && state == HumanBossState::OFFENSE;
         const bool approachCompleted_ = completed_ && actions[currentAction].type == HumanBossActionType::SHADOW_SHIFT_APPROACH;
         const bool feintDodged_ = completed_ && actions[currentAction].type == HumanBossActionType::ATTACK_FEINT && (playerObservation.dodging || comboDelayPending || dodgePunishRequests > 0);
@@ -946,6 +1053,8 @@ void HumanBossAIComponent::PublishDebug()
     if (!blackboard_) return;
     blackboard_->SetBool("HumanBossAI", "JustGuardStunned", justGuardStunned);
     blackboard_->SetInt("HumanBossAI", "BerserkStage", berserkStage);
+    blackboard_->SetBool("HumanBossAI", "BloodEyeMode", bloodEyeRemaining > 0.0f);
+    blackboard_->SetFloat("HumanBossAI", "BloodEyeRemaining", bloodEyeRemaining);
     blackboard_->SetString("HumanBossAI", "SuspensionReason", suspensionReason);
     blackboard_->SetString("HumanBossAI", "Intent", GetHumanBossIntentName(intent));
     blackboard_->SetFloat("HumanBossAI", "ReactionBudget", reactionBudget);
@@ -1078,6 +1187,7 @@ void HumanBossAIComponent::Gui()
     ImGui::InputText("Combat Walk State", &walkState);
     ImGui::InputText("Hit State", &hitState);
     ImGui::DragFloat("Hit Recovery Duration", &hitRecoveryDuration, 0.05f, 0.05f, 5.0f);
+    ImGui::DragFloat("Phantom Rush Bind Duration", &comboBindDuration, 0.01f, 0.1f, 2.0f);
     ImGui::DragFloat("Min Combat Distance", &minCombatDistance, 0.05f, 0.0f, 100.0f);
     ImGui::DragFloat("Preferred Combat Distance", &preferredCombatDistance, 0.05f, 0.0f, 100.0f);
     ImGui::DragFloat("Max Combat Distance", &maxCombatDistance, 0.05f, 0.0f, 100.0f);
@@ -1204,6 +1314,7 @@ void HumanBossAIComponent::Serialize(nlohmann::json& json_) const
     json_["WalkState"] = walkState;
     json_["HitState"] = hitState;
     json_["HitRecoveryDuration"] = hitRecoveryDuration;
+    json_["ComboBindDuration"] = comboBindDuration;
     json_["MinCombatDistance"] = minCombatDistance;
     json_["PreferredCombatDistance"] = preferredCombatDistance;
     json_["MaxCombatDistance"] = maxCombatDistance;
@@ -1281,6 +1392,7 @@ void HumanBossAIComponent::Deserialize(const nlohmann::json& json_)
     walkState = json_.value("WalkState", walkState);
     hitState = json_.value("HitState", hitState);
     hitRecoveryDuration = json_.value("HitRecoveryDuration", hitRecoveryDuration);
+    comboBindDuration = std::clamp(json_.value("ComboBindDuration", comboBindDuration), 0.1f, 2.0f);
     minCombatDistance = json_.value("MinCombatDistance", minCombatDistance);
     preferredCombatDistance = json_.value("PreferredCombatDistance", preferredCombatDistance);
     maxCombatDistance = json_.value("MaxCombatDistance", maxCombatDistance);
@@ -1421,7 +1533,11 @@ float HumanBossAIComponent::GetGraphActionWeight(const std::string& actionName_,
     if (currentAction >= 0) return matchesAction_(GetCurrentGraphActionName()) ? 1.0f : reject_("Another action is running");
     if (matchesAction_("HumanBoss_NoReaction"))
         return intent == HumanBossIntent::DEFEND && IsReactionReady() && !IsHeavyJustGuardReady() ? noneReactionWeight : 0.0f;
-    if (matchesAction_("HumanBoss_Approach") || matchesAction_("HumanBoss_Reposition") || matchesAction_("HumanBoss_Observe")) return 1.0f;
+    if (matchesAction_("HumanBoss_Approach") || matchesAction_("HumanBoss_Reposition") || matchesAction_("HumanBoss_Observe"))
+        return (comboBindTimer > 0.0f || playerCounterProtectionTimer > 0.0f || reflectedOrbTimer > 0.0f) &&
+            !matchesAction_("HumanBoss_Observe") ? 0.0f : 1.0f;
+    if (comboBindTimer > 0.0f || playerCounterProtectionTimer > 0.0f || reflectedOrbTimer > 0.0f)
+        return reject_("Player counter, combo or reflected orb has priority");
     for (std::size_t index_ = 0; index_ < actions.size(); ++index_)
     {
         const auto& definition_ = actions[index_];
@@ -1433,7 +1549,9 @@ float HumanBossAIComponent::GetGraphActionWeight(const std::string& actionName_,
         const float intentModifier_ = GetIntentActionModifier(index_);
         if (intentModifier_ <= 0.0f) return reject_("Current intent excludes this action");
         if (definition_.type == HumanBossActionType::COUNTER_ATTACK) return counterPending ? intentModifier_ : reject_("Confirmed counter not pending");
-        if (definition_.type == HumanBossActionType::LIGHT_COUNTER) return lightCounterPending ? intentModifier_ : reject_("Light counter not pending");
+        if (definition_.type == HumanBossActionType::LIGHT_COUNTER)
+            return lightCounterPending ? intentModifier_ * (bloodEyeRemaining > 0.0f ? 1.3f : 1.0f)
+                : reject_("Light counter not pending");
         if (definition_.category == HumanBossState::REACTION)
         {
             if (!playerAttackDetected || reactionTimer > 0.0f || attackSerial == reactedSerial) return reject_("No new threat / reaction cooldown");
@@ -1443,7 +1561,12 @@ float HumanBossAIComponent::GetGraphActionWeight(const std::string& actionName_,
         {
             if ((waitTimer > 0.0f || repositionTimer > 0.0f) && definition_.type != HumanBossActionType::WHIFF_PUNISH) return reject_("Observation / reposition wait remaining");
         }
-        return definition_.weight[phase] * intentModifier_;
+        float weight_ = definition_.weight[phase] * intentModifier_;
+        if (bloodEyeRemaining > 0.0f)
+        {
+            if (IsDodge(definition_.type) || definition_.type == HumanBossActionType::JUST_GUARD) weight_ *= 1.55f;
+        }
+        return weight_;
     }
     // 未登録Actionで終了待ちへ入らず、追加済みEmitterなどの独立Actionだけを許可する。
     return owner_ && (owner_->GetLocalRegistry().HasAction(owner_->BuildActionName(actionName_)) ||
@@ -1579,6 +1702,12 @@ void HumanBossAIComponent::UpdateLocomotion(const std::string& actionName_)
     }
     const auto executor_ = executor.lock();
     if (!executor_) return;
+    if (comboBindTimer > 0.0f || playerCounterProtectionTimer > 0.0f || reflectedOrbTimer > 0.0f)
+    {
+        state = HumanBossState::NEUTRAL;
+        executor_->SetLocomotion(idleState, { 0.0f, 0.0f, 0.0f }, toPlayer, { 0.0f, 0.0f });
+        return;
+    }
     // 受け流しの受付を待つ間は横移動や接近を止め、攻撃との間合いを保つ。
     if (intent == HumanBossIntent::DEFEND && playerAttackDetected)
     {

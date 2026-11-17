@@ -335,6 +335,13 @@ void CameraActionDirectorComponent::LateUpdate(float deltaTime_)
         StopAction(false);
         return;
     }
+    if (phase != CAMERA_ACTION_PHASE::RETURN && !activePreset.autoFrameTargets &&
+        (activePreset.targetMode == CAMERA_ACTION_TARGET_MODE::GAME_OBJECT ||
+         activePreset.targetMode == CAMERA_ACTION_TARGET_MODE::GAME_OBJECT_OFFSET))
+    {
+        if (const auto target_ = activeTarget.lock(); target_ && target_->transform)
+            actionFocusPosition = AddFloat3(target_->transform->GetWorldPosition(), activePreset.focusOffset);
+    }
     if (activePreset.autoFrameTargets && phase != CAMERA_ACTION_PHASE::RETURN) UpdateFraming(activePreset);
     float phaseDelta_ = deltaTime_;
     if (activePreset.useUnscaledTime)
@@ -482,9 +489,9 @@ void CameraActionDirectorComponent::StopAction(bool immediate_)
 {
     if (immediate_)
     {
-        if (phase != CAMERA_ACTION_PHASE::IDLE)
+        if (phase != CAMERA_ACTION_PHASE::IDLE && phase != CAMERA_ACTION_PHASE::RETURN)
         {
-            // 中断時も撮影前の画角・姿勢を戻してから通常制御へ引き渡す。
+            // 中断時だけ開始姿勢へ戻す。RETURN完了時はTPSが更新した現在姿勢を保持する。
             returnStartCameraPosition = startCameraPosition;
             returnStartFocusPosition = startFocusPosition;
             ApplyCameraPose(startCameraPosition, startFocusPosition, startFov, startCameraUp);

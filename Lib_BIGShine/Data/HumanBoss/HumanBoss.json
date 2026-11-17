@@ -2326,6 +2326,13 @@
                                 "time": 0.23,
                                 "animationState": "SS_Sp_Skill1",
                                 "useNormalizedTime": true
+                            },
+                            {
+                                "cat": "HumanBoss",
+                                "name": "HumanBoss_ShadowSlashStep",
+                                "time": 0.23,
+                                "animationState": "SS_Sp_Skill1",
+                                "useNormalizedTime": true
                             }
                         ]
                     },
@@ -2839,24 +2846,6 @@
                             "CleanupAction": "HumanBoss_ShadowClear",
                             "Phases": [
                                 {
-                                    "Animation": "HumanBossCombatWalk",
-                                    "End": "DURATION",
-                                    "Duration": 1.5,
-                                    "MaximumDuration": 5,
-                                    "BlendDuration": 0.04,
-                                    "Sequence": "",
-                                    "EnterAction": ""
-                                },
-                                {
-                                    "Animation": "HumanBossAttackTell",
-                                    "End": "DURATION",
-                                    "Duration": 0.18,
-                                    "MaximumDuration": 5,
-                                    "BlendDuration": 0.04,
-                                    "Sequence": "",
-                                    "EnterAction": ""
-                                },
-                                {
                                     "Animation": "SS_Sp_Skill1",
                                     "End": "ANIMATION_END",
                                     "Duration": 0,
@@ -2864,7 +2853,7 @@
                                     "BlendDuration": 0.04,
                                     "Sequence": "HumanBoss_SHADOW_SLASH_Sequence",
                                     "EnterAction": "",
-                                    "MotionWarpPreset": "HumanBoss.Counter",
+                                    "MotionWarpPreset": "",
                                     "PreventFlinch": true
                                 },
                                 {

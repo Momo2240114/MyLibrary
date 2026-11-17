@@ -19,6 +19,13 @@
           "time": 0.23,
           "animationState": "SS_Sp_Skill1",
           "useNormalizedTime": true
+        },
+        {
+          "cat": "HumanBoss",
+          "name": "HumanBoss_ShadowSlashStep",
+          "time": 0.23,
+          "animationState": "SS_Sp_Skill1",
+          "useNormalizedTime": true
         }
       ]
     },

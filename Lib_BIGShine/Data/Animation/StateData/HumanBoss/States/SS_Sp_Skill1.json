@@ -128,9 +128,9 @@
     "loop": false,
     "name": "SS_Sp_Skill1",
     "rootMotion": {
-      "applyPositionX": true,
+      "applyPositionX": false,
       "applyPositionY": false,
-      "applyPositionZ": true,
+      "applyPositionZ": false,
       "applyRotationX": false,
       "applyRotationY": false,
       "applyRotationZ": false,

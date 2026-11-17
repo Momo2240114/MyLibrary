@@ -1,5 +1,6 @@
 #include "PrecompiledHeader.h"
 #include "HumanBossActionComponent.h"
+#include "HumanBossAIComponent.h"
 #include "Engine/Audio/AudioManager.h"
 #include "Engine/Debug/TracyProfiler.h"
 #include "Game/Charcter/Player/PlayerControllerComponent.h"
@@ -13,6 +14,8 @@
 #include "Engine/Physics/HurtBox.h"
 #include "Engine/GamePlay/Combat/HitReactionComponent.h"
 #include "Engine/GamePlay/Combat/HealthComponent.h"
+#include "Engine/GamePlay/Combat/AttackEffectHitComponent.h"
+#include "Engine/GamePlay/Combat/ProjectileMotionComponent.h"
 #include "Engine/GamePlay/Transform/Transform.h"
 #include "Engine/Physics/HitBox.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
@@ -524,7 +527,32 @@ void HumanBossActionComponent::Start()
     const std::weak_ptr<HumanBossActionComponent> weak_ = owner_->GetComponent<HumanBossActionComponent>();
     owner_->GetManager().GetJustGuardSystem().AddJustGuardCallback([weak_](const JustGuardEvent& event_)
     {
-        if (const auto self_ = weak_.lock()) self_->NotifyCounterOpportunity(event_.attacker.lock());
+        const auto self_ = weak_.lock();
+        if (!self_) return;
+        self_->NotifyCounterOpportunity(event_.attacker.lock());
+        const auto boss_ = self_->GetGameObject();
+        const auto player_ = event_.defender.lock();
+        auto hitObject_ = event_.hitBox ? event_.hitBox->GetGameObject() : nullptr;
+        if (!boss_ || !player_ || !player_->GetComponent<PlayerControllerComponent>()) return;
+        while (hitObject_ && !hitObject_->GetComponent<ProjectileMotionComponent>())
+        {
+            const auto parent_ = hitObject_->transform ? hitObject_->transform->parent.lock() : nullptr;
+            hitObject_ = parent_ ? parent_->gameObject.lock() : nullptr;
+        }
+        if (!hitObject_ || std::none_of(self_->shadowOrbs.begin(), self_->shadowOrbs.end(),
+            [&hitObject_](const std::weak_ptr<GameObject>& orb_) { return orb_.lock() == hitObject_; })) return;
+        const auto hit_ = hitObject_->GetComponent<AttackEffectHitComponent>();
+        const auto motion_ = hitObject_->GetComponent<ProjectileMotionComponent>();
+        if (!hit_ || !motion_ || !hit_->IsOwnedBy(boss_.get())) return;
+        hit_->SetRuntimeHitOwner(player_.get());
+        hit_->SetRuntimeHitTeamId(0);
+        hit_->SetRuntimeSourceAction("HumanBossShadowOrbReflected");
+        hit_->ClearHitHistory();
+        motion_->Reflect(boss_, player_, self_->orbReflectSpeedMultiplier);
+        if (const auto mesh_ = hitObject_->GetComponent<MeshVFXComponent>())
+            mesh_->SetRuntimeAppearance({ 1.0f, 1.0f, 1.0f }, { 0.65f, 0.9f, 1.0f, 1.0f },
+                { 1.0f, 0.82f, 0.3f, 1.0f });
+        if (const auto ai_ = boss_->GetComponent<HumanBossAIComponent>()) ai_->NotifyReflectedOrb();
     });
     owner_->GetManager().GetJustDodgeSystem().AddJustDodgeCallback([weak_](const JustDodgeEvent& event_)
     {
@@ -600,6 +628,36 @@ void HumanBossActionComponent::RegisterActions()
     { if (const auto self_ = weak_.lock()) self_->ShowShadowArea(); });
     owner_->RegisterAction("HumanBoss", "HumanBoss_ShadowStrike", [weak_]()
     { if (const auto self_ = weak_.lock()) self_->StrikeShadowArea(); });
+    owner_->RegisterAction("HumanBoss", "HumanBoss_ShadowSlashStep", [weak_]()
+    {
+        const auto self_ = weak_.lock();
+        const auto actor_ = self_ ? self_->GetGameObject() : nullptr;
+        const auto phase_ = self_ ? self_->execution.GetCurrentPhase() : nullptr;
+        const auto target_ = self_ ? self_->attackTarget.lock() : nullptr;
+        if (!actor_ || !actor_->transform || !target_ || !target_->transform || !phase_ ||
+            self_->rangedSkill != "SHADOW_SLASH" || phase_->animationState != "SS_Sp_Skill1") return;
+        DirectX::XMFLOAT3 ground_{};
+        DirectX::XMFLOAT3 currentGround_{};
+        const auto start_ = actor_->transform->GetWorldPosition();
+        if (!self_->ResolveShadowDiveGround(ground_) || !self_->ResolveShadowGround(start_, currentGround_))
+        { self_->Stop(); return; }
+        const DirectX::XMFLOAT3 destination_{ ground_.x, start_.y + ground_.y - currentGround_.y, ground_.z };
+        // 瞬間移動では途中の経路を通らない。出現地点だけをカプセルで検証する。
+        if (!self_->CanRaiseShadowDive(0.1f)) { self_->Stop(); return; }
+        self_->SpawnShadowEffect();
+        if (const auto warp_ = actor_->GetComponent<MotionWarpComponent>()) warp_->Stop();
+        if (const auto movement_ = actor_->GetComponent<CharacterMovementComponent>()) movement_->StopHorizontalMovementImmediately();
+        actor_->transform->ApplyWorldMatrix(actor_->transform->GetWorldMatrix() * DirectX::XMMatrixTranslation(
+            destination_.x - start_.x, destination_.y - start_.y, destination_.z - start_.z));
+        actor_->UpdateTransform();
+        if (const auto movement_ = actor_->GetComponent<CharacterMovementComponent>())
+        {
+            const auto targetPosition_ = target_->transform->GetWorldPosition();
+            movement_->SetFacingDirection({ targetPosition_.x - destination_.x, 0.0f,
+                targetPosition_.z - destination_.z }, true);
+        }
+        self_->SpawnShadowEffect();
+    });
     owner_->RegisterAction("HumanBoss", "HumanBoss_ShadowClear", [weak_]()
     { if (const auto self_ = weak_.lock()) self_->ClearShadowArea(); });
     owner_->RegisterAction("HumanBoss", "HumanBoss_ShadowDiveStart", [weak_]()
@@ -1250,7 +1308,8 @@ void HumanBossActionComponent::SpawnShadowEffect()
     const auto owner_ = GetGameObject();
     if (!owner_ || !owner_->transform) return;
     MeshVFXSpawnRequest request_;
-    const bool usesPurpleShadow_ = shadowChain || rangedSkill == "SHADOW_CHARGE" || rangedSkill == "SHADOW_RAGNAROK";
+    const bool usesPurpleShadow_ = shadowChain || rangedSkill == "SHADOW_SLASH" ||
+        rangedSkill == "SHADOW_CHARGE" || rangedSkill == "SHADOW_RAGNAROK";
     request_.assetPath = usesPurpleShadow_ ? "Data/VFX/EnemyShadowShift.json" : "Data/VFX/EnemyMudShadowShift.json";
     request_.position = owner_->transform->GetWorldPosition();
     request_.lifeTime = 0.55f;

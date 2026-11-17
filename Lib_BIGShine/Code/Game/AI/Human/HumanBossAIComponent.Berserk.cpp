@@ -15,7 +15,12 @@
 #include "Engine/GamePlay/Camera/CameraManager.h"
 #include "Engine/GamePlay/Camera/CameraComponent.h"
 #include "Engine/GamePlay/Camera/CameraShakeComponent.h"
+#include "Engine/GamePlay/Camera/CameraActionDirectorComponent.h"
+#include "Game/GameMode/GameModeManager.h"
+#include "Engine/GamePlay/Transform/ModelAttachmentComponent.h"
+#include "Engine/Graphics/Resource/GlTFModel.h"
 #include <limits>
+#include <cmath>
 
 namespace
 {
@@ -29,11 +34,130 @@ namespace
     }
 }
 
+void HumanBossAIComponent::BeginSpecialIntro()
+{
+    RestoreSpecialIntro();
+    const auto owner_ = GetGameObject();
+    if (!owner_ || !owner_->manager || !owner_->transform) return;
+    const auto mode_ = owner_->GetManager().GetGameModeManager();
+    const auto cameras_ = owner_->GetManager().GetCameraManager();
+    const auto source_ = cameras_ ? cameras_->GetSourceCamera() : nullptr;
+    const auto cameraObject_ = source_ ? source_->GetGameObject() : nullptr;
+    const auto director_ = cameraObject_ ? cameraObject_->GetComponent<CameraActionDirectorComponent>() : nullptr;
+    if (!mode_ || !director_) return;
+    const auto player_ = target.lock();
+    const auto position_ = owner_->transform->GetWorldPosition();
+    const auto playerPosition_ = player_ && player_->transform ? player_->transform->GetWorldPosition() : position_;
+    const float dx_ = playerPosition_.x - position_.x;
+    const float dz_ = playerPosition_.z - position_.z;
+    const float length_ = std::hypot(dx_, dz_);
+    CameraActionPreset preset_;
+    preset_.actionName = "HumanBossSpecialIntro";
+    preset_.targetMode = CAMERA_ACTION_TARGET_MODE::GAME_OBJECT_OFFSET;
+    preset_.positionMode = CAMERA_ACTION_POSITION_MODE::WORLD_POSITION;
+    preset_.targetObjectName = owner_->GetName();
+    preset_.useModelBounds = false;
+    preset_.autoFrameTargets = true;
+    preset_.framingRadius = 1.4f;
+    preset_.minimumFramingDistance = 4.0f;
+    preset_.cameraOffset = length_ > 0.001f ? DirectX::XMFLOAT3{ dx_ / length_, 0.1f, dz_ / length_ }
+        : DirectX::XMFLOAT3{ 0.0f, 0.1f, 1.0f };
+    preset_.focusOffset = { 0.0f, 1.5f, 0.0f };
+    preset_.targetFov = 42.0f;
+    preset_.enterDuration = 0.5f;
+    preset_.holdDuration = 0.6f;
+    preset_.returnDuration = 0.35f;
+    preset_.priority = 24;
+    preset_.suppressCameraCollision = true;
+    if (!director_->PlayPresetForTarget(preset_, owner_)) return;
+    specialIntroCamera = director_;
+    specialIntroRemaining = 1.45f;
+    specialIntroCameraReturning = false;
+    specialIntroPreviousPlayerLock = mode_->IsPlayerControlLocked();
+    mode_->SetPlayerControlLocked(true);
+    specialIntroLocked = true;
+}
+
+void HumanBossAIComponent::UpdateSpecialIntro()
+{
+    if (!specialIntroLocked) return;
+    const auto owner_ = GetGameObject();
+    const auto health_ = owner_ ? owner_->GetComponent<HealthComponent>() : nullptr;
+    const auto time_ = owner_ && owner_->manager ? owner_->GetManager().GetTimeManager() : nullptr;
+    if (!owner_ || !owner_->manager || owner_->IsPendingDestroy() || (health_ && health_->IsDead()))
+    { RestoreSpecialIntro(); return; }
+    specialIntroRemaining -= time_ ? time_->GetLastRawDeltaTime() : 1.0f / 60.0f;
+    if (!specialIntroCameraReturning && specialIntroRemaining <= 0.35f)
+    {
+        if (const auto camera_ = specialIntroCamera.lock()) camera_->StopActionByName("HumanBossSpecialIntro", false);
+        specialIntroCameraReturning = true;
+    }
+    if (specialIntroRemaining <= 0.0f) RestoreSpecialIntro();
+}
+
+void HumanBossAIComponent::RestoreSpecialIntro()
+{
+    if (!specialIntroLocked) return;
+    if (const auto camera_ = specialIntroCamera.lock())
+        camera_->StopActionByName("HumanBossSpecialIntro", !specialIntroCameraReturning);
+    const auto owner_ = GetGameObject();
+    if (owner_ && owner_->manager)
+        if (const auto mode_ = owner_->GetManager().GetGameModeManager(); mode_ && !mode_->IsPresentationPlaying())
+            mode_->SetPlayerControlLocked(specialIntroPreviousPlayerLock);
+    specialIntroCamera.reset();
+    specialIntroLocked = false;
+    specialIntroRemaining = 0.0f;
+}
+
+void HumanBossAIComponent::StartBloodEye()
+{
+    const auto owner_ = GetGameObject();
+    if (!owner_ || !owner_->manager || !owner_->transform) return;
+    Stop();
+    bloodEyeUsed = true;
+    bloodEyeRemaining = bloodEyeDuration;
+    BeginSpecialIntro();
+    if (const auto animation_ = owner_->GetComponent<AnimationControllerComponent>())
+        animation_->ChangeState("SS_Guard", 0.06f, true, 0.0f);
+    const auto model_ = owner_->GetComponent<GltfModelCommponennt>();
+    if (!model_) return;
+    for (int index_ = 0; index_ < 2; ++index_)
+    {
+        ParticleSpawnRequest request_;
+        request_.assetPath = "Data/Particle/HumanBossBloodEye.json";
+        request_.position = owner_->transform->GetWorldPosition();
+        request_.lifeTime = bloodEyeDuration + 1.0f;
+        const auto effect_ = owner_->GetManager().GetEffectManager().SpawnParticle(request_);
+        bloodEyeEffects[index_] = effect_;
+        if (!effect_ || !effect_->transform) continue;
+        effect_->transform->localPosition = { index_ == 0 ? -0.12f : 0.12f, 0.08f, 0.18f };
+        effect_->transform->MarkDirty();
+        const auto attachment_ = effect_->GetOrAddComponent<ModelAttachmentComponent>();
+        attachment_->SetTargetNode(model_, "head");
+        attachment_->SyncAttachment();
+    }
+}
+
+void HumanBossAIComponent::StopBloodEye(bool immediate_)
+{
+    bloodEyeRemaining = 0.0f;
+    const auto owner_ = GetGameObject();
+    if (owner_ && owner_->manager)
+        for (auto& weak_ : bloodEyeEffects)
+            if (const auto effect_ = weak_.lock())
+            {
+                if (immediate_) owner_->GetManager().GetEffectManager().StopEffect(effect_);
+                else if (const auto particle_ = effect_->GetComponent<ParticleComponent>()) particle_->SetEmissionScale(0.0f);
+            }
+    bloodEyeEffects = {};
+}
+
 void HumanBossAIComponent::BeginBerserkEntrance()
 {
     BS_PROFILE_SCOPE("HumanBossAIComponent::BeginBerserkEntrance");
     const auto owner_ = GetGameObject();
     if (!owner_ || !owner_->manager) return;
+    BeginSpecialIntro();
     // 暴走の開始通知だけで唸りと低音を重ね、毎フレームのオーラ更新では再生しない。
     if (owner_->transform)
     {
@@ -175,6 +299,7 @@ void HumanBossAIComponent::LateUpdate(float deltaTime_)
 {
     BS_PROFILE_SCOPE("HumanBossAIComponent::LateUpdate");
     (void)deltaTime_;
+    UpdateSpecialIntro();
     // 観察対象を一時的に見失ってAIのUpdateが早期終了しても、ブラーの復元時計は止めない。
     UpdateBerserkEntrance();
     const auto owner_ = GetGameObject();
@@ -198,9 +323,15 @@ void HumanBossAIComponent::OnDestroy()
 void HumanBossAIComponent::ResetBerserk()
 {
     BS_PROFILE_SCOPE("HumanBossAIComponent::ResetBerserk");
+    StopBloodEye();
+    RestoreSpecialIntro();
     StopBerserkAura();
     RestoreBerserkEntrance();
     const auto owner_ = GetGameObject();
+    if (const auto health_ = owner_ ? owner_->GetComponent<HealthComponent>() : nullptr;
+        health_ && health_->GetMaxHealth() > 0.0f &&
+        health_->GetCurrentHealth() / health_->GetMaxHealth() > bloodEyeHpThreshold)
+        bloodEyeUsed = false;
     if (const auto effect_ = berserkStunEffect.lock(); effect_ && owner_ && owner_->manager)
         owner_->GetManager().GetEffectManager().StopEffect(effect_);
     berserkStunEffect.reset();
@@ -280,6 +411,7 @@ bool HumanBossAIComponent::TryStartBerserk()
 {
     BS_PROFILE_SCOPE("HumanBossAIComponent::TryStartBerserk");
     if (berserkStage >= 0 || finishRequested) return false;
+    if (comboBindTimer > 0.0f || playerCounterProtectionTimer > 0.0f || reflectedOrbTimer > 0.0f || specialIntroLocked) return false;
     const auto owner_ = GetGameObject();
     const auto executor_ = executor.lock();
     if (!owner_ || !executor_) { berserkStartReason = "Owner or action executor missing"; return false; }
@@ -295,6 +427,7 @@ bool HumanBossAIComponent::TryStartBerserk()
     // IsActiveの終了待ちは行わない。通常Skillが長いコンボや通知待ちでも確実に開始できるよう、
     // 既存Stop経路で予約・判定・JG硬直を閉じてから暴走状態を確定する。
     Stop();
+    StopBloodEye();
     hitTimer = 0.0f;
     berserkStage = next_; berserkUsed[next_] = true; berserkPending[next_] = false;
     berserkStartedCount = 0; berserkTimer = 0.0f; berserkFailureTime = 0.0f;
@@ -341,7 +474,7 @@ bool HumanBossAIComponent::UpdateBerserk(float deltaTime_)
         Stop();
         return true;
     }
-    if (berserkBlurOwned) return true;
+    if (berserkBlurOwned || specialIntroLocked) return true;
     executor_->UpdateHitProtection(deltaTime_);
     if (berserkAttackInFlight)
     {
@@ -467,6 +600,9 @@ void HumanBossAIComponent::EnterBerserkStun()
 void HumanBossAIComponent::DrawBerserkGui()
 {
     if (!ImGui::TreeNode("HP Berserk / Final Stun")) return;
+    ImGui::DragFloat("Blood eye HP threshold", &bloodEyeHpThreshold, 0.01f, 0.26f, 1.0f);
+    ImGui::DragFloat("Blood eye duration", &bloodEyeDuration, 0.5f, 1.0f, 60.0f);
+    ImGui::Text("Blood eye: %s / %.1f s", bloodEyeRemaining > 0.0f ? "ACTIVE" : bloodEyeUsed ? "USED" : "READY", bloodEyeRemaining);
     ImGui::Text("Stage %d / actions %d / stun %s / final reserved %s",berserkStage,berserkStartedCount,berserkStunned?"YES":"NO",finalPhaseReserved?"YES":"NO");
     for (int index_ = 0; index_ < 3; ++index_)
     {
@@ -502,7 +638,8 @@ void HumanBossAIComponent::SerializeBerserk(nlohmann::json& json_) const
     json_["Berserk"] = {{"ActionCounts",berserkAttackCounts},{"Speeds",berserkSpeeds},{"StunDurations",berserkStunDurations},
         {"ParryDelay",berserkParryDelay},{"ActionGap",berserkActionGap},{"MinimumTell",berserkMinimumTell},
         {"EntranceDuration",berserkEntranceDuration},{"EntranceBlur",berserkEntranceBlur},
-        {"EntranceBlurMultipliers",berserkEntranceBlurMultipliers},{"EntranceMonochrome",berserkEntranceMonochrome}};
+        {"EntranceBlurMultipliers",berserkEntranceBlurMultipliers},{"EntranceMonochrome",berserkEntranceMonochrome},
+        {"BloodEyeHpThreshold",bloodEyeHpThreshold},{"BloodEyeDuration",bloodEyeDuration}};
 }
 
 void HumanBossAIComponent::DeserializeBerserk(const nlohmann::json& json_)
@@ -527,4 +664,6 @@ void HumanBossAIComponent::DeserializeBerserk(const nlohmann::json& json_)
     berserkMinimumTell = std::clamp(config_.value("MinimumTell",berserkMinimumTell),0.12f,0.5f);
     berserkEntranceDuration = std::clamp(config_.value("EntranceDuration",berserkEntranceDuration),0.2f,1.5f);
     berserkEntranceBlur = std::clamp(config_.value("EntranceBlur",berserkEntranceBlur),0.0f,0.08f);
+    bloodEyeHpThreshold = std::clamp(config_.value("BloodEyeHpThreshold",bloodEyeHpThreshold),0.26f,1.0f);
+    bloodEyeDuration = std::clamp(config_.value("BloodEyeDuration",bloodEyeDuration),1.0f,60.0f);
 }

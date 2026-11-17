@@ -256,6 +256,25 @@ void ProjectileMotionComponent::ConfigureOrbit(float radius_, float height_, flo
     UpdateOrbitPosition(0.0f);
 }
 
+void ProjectileMotionComponent::Reflect(const std::shared_ptr<GameObject>& target_,
+    const std::shared_ptr<GameObject>& attacker_, float speedMultiplier_)
+{
+    const auto projectile_ = GetGameObject();
+    if (!projectile_ || !projectile_->transform || !target_ || !target_->transform || !attacker_) return;
+    const auto position_ = projectile_->transform->GetWorldPosition();
+    const auto aim_ = target_->transform->GetWorldPosition();
+    direction = NormalizeDirection({ aim_.x - position_.x, aim_.y + 1.0f - position_.y, aim_.z - position_.z });
+    homingTarget = target_;
+    homingAttacker = attacker_;
+    homingWaitTime = 0.0f;
+    homingElapsed = 0.0f;
+    orbitEnabled = false;
+    speed *= (std::max)(1.0f, speedMultiplier_);
+    acceleration *= (std::max)(1.0f, speedMultiplier_);
+    maxSpeed *= (std::max)(1.0f, speedMultiplier_);
+    homingTurnSpeed = 180.0f;
+}
+
 void ProjectileMotionComponent::UpdateOrbitPosition(float elapsedTime_)
 {
     BS_PROFILE_SCOPE("ProjectileMotionComponent::UpdateOrbitPosition");

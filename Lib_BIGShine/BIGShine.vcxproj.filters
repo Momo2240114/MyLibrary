@@ -2178,6 +2178,9 @@
     <None Include="Data\Particle\PlayerHeal.json">
       <Filter>Data\Particle</Filter>
     </None>
+    <None Include="Data\Particle\HumanBossBloodEye.json">
+      <Filter>Data\Particle</Filter>
+    </None>
     <None Include="Data\Animation\StateData\DragonFirstForm_Test\States\DragonGroundStamp.json">
       <Filter>Data\Animation\States</Filter>
     </None>

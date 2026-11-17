@@ -8,15 +8,16 @@
 #include "Engine/GamePlay/Core/Component/CharacterMovementComponent.h"
 #include "Engine/GamePlay/Core/Component/MotionWarpComponent.h"
 #include "Engine/GamePlay/Combat/HealthComponent.h"
-#include "Engine/GamePlay/EventSystem/ActionSequence.h"
 #include "Engine/GamePlay/System/EffectManager.h"
 #include "Engine/GamePlay/Transform/Transform.h"
 #include "Engine/GamePlay/VFX/DangerAreaComponent.h"
 #include "Engine/GamePlay/Camera/CameraManager.h"
 #include "Engine/GamePlay/Camera/CameraComponent.h"
 #include "Engine/GamePlay/Camera/CameraActionDirectorComponent.h"
+#include "Engine/GamePlay/Camera/CameraLockOnComponent.h"
 #include "Engine/GamePlay/Camera/CameraShakeComponent.h"
 #include "Engine/Graphics/Resource/Animation/AnimationControllerComponent.h"
+#include "Engine/Graphics/Particle/ParticleComponent.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include "Engine/Physics/PhysXSystem.h"
 #include "Engine/Physics/SphereCollider.h"
@@ -70,6 +71,7 @@ bool DragonAttackControllerComponent::LoadSpecialSettings()
         if (!stream_) { specialStatus = "DragonSpecialActions.json missing"; return false; }
         auto settings_ = nlohmann::json::parse(stream_);
         for (const char* key_ : { "ArenaRadius", "MeteorHoverHeight", "DiveHeight", "AscentTime", "ChargeTime", "CameraReturnTime",
+            "IntroCameraDistance", "IntroCameraHeight", "IntroFocusHeight", "IntroFov",
             "MeteorHeight", "MeteorSpeed", "CoverRadiusRatio", "OrbitRadiusRatio", "OrbitSpeed", "OrbitTime", "TrackingTime",
             "TrackingSpeed", "EvadeTime", "DiveSpeed", "DiveRadiusRatio", "RecoveryTime", "RockCleanupInterval", "DecalLifetime",
             "ExplosionScale", "MeteorDamage", "FinalDamage", "DiveDamage", "BlurStrength", "DescentSpeed" })
@@ -153,8 +155,6 @@ bool DragonAttackControllerComponent::BeginSpecialAction(bool dive_)
     const auto cameraObject_ = camera_ ? camera_->GetGameObject() : nullptr;
     if (!cameraObject_) { specialStatus = "Battle camera unavailable"; return false; }
     auto director_ = cameraObject_->GetOrAddComponent<CameraActionDirectorComponent>();
-    auto sequence_ = owner_->GetOrAddComponent<ActionSequence>();
-    if (!sequence_->LoadMissingSequences("Data/AI/DragonSpecialSequences.json")) { specialStatus = "Special sequences missing"; return false; }
     // 独立したStateにし、通常攻撃のHitBox開閉・終了イベントを特殊行動へ持ち込まない。
     const char* NAMES[] = { "DragonSpecialTakeOff", "DragonSpecialHover", "DragonSpecialCharge", "DragonSpecialGlide", "DragonSpecialFalling", "DragonSpecialIdle" };
     const int INDICES[] = { 23, 6, 10, 14, 4, 18 };
@@ -168,9 +168,7 @@ bool DragonAttackControllerComponent::BeginSpecialAction(bool dive_)
         state_.sequencerDataName.clear();
         state_.isLoop = index_ != 0 && index_ != 2;
     }
-    sequence_->StopPlayback(sequence_->GetPlaybackGeneration());
     StopAttack();
-    specialSequenceGeneration = sequence_->GetPlaybackGeneration();
     if (const auto warp_ = owner_->GetComponent<MotionWarpComponent>()) warp_->Stop();
     specialDive = dive_;
     specialPhase = 0;
@@ -227,12 +225,40 @@ bool DragonAttackControllerComponent::BeginSpecialAction(bool dive_)
     specialPreviousBlur = GraphicsDeviceManager::Instance().GetRadialBlurParams();
     specialAppliedBlurRadius = specialPreviousBlur.blurRadius;
     specialCamera = director_;
+    // ロックオンを残すと空中のドラゴンへ通常カメラが追従し、復帰後に構図が跳ねる。
+    if (const auto lockOn_ = cameraObject_->GetComponent<CameraLockOnComponent>())
+        if (lockOn_->IsLockOnEnabled()) lockOn_->SetLockOnEnabled(false);
+    const auto playerPosition_ = player_->transform->GetWorldPosition();
+    const float frontX_ = playerPosition_.x-specialStart.x;
+    const float frontZ_ = playerPosition_.z-specialStart.z;
+    const float frontLength_ = std::hypot(frontX_,frontZ_);
+    DirectX::XMFLOAT3 front_;
+    if (frontLength_ > 0.001f) front_ = {frontX_/frontLength_,0.0f,frontZ_/frontLength_};
+    else
+    {
+        DirectX::XMStoreFloat3(&front_,DirectX::XMVector3TransformNormal(
+            DirectX::XMVectorSet(0.0f,0.0f,1.0f,0.0f),owner_->transform->GetWorldMatrix()));
+        front_.y = 0.0f;
+        const float length_ = std::hypot(front_.x,front_.z);
+        if (length_ > 0.001f) { front_.x /= length_; front_.z /= length_; }
+        else front_ = {0.0f,0.0f,1.0f};
+    }
+    const float cameraDistance_ = specialSettings["IntroCameraDistance"].get<float>();
     CameraActionPreset preset_;
     preset_.actionName = SPECIAL_CAMERA;
     preset_.targetMode = CAMERA_ACTION_TARGET_MODE::GAME_OBJECT_OFFSET;
-    preset_.positionMode = CAMERA_ACTION_POSITION_MODE::TARGET_LOCAL_RELATIVE;
-    preset_.cameraOffset = {0.0f, dive_ ? -8.0f : 4.0f, 25.0f};
-    preset_.focusOffset = {0.0f,4.0f,0.0f};
+    preset_.positionMode = CAMERA_ACTION_POSITION_MODE::WORLD_POSITION;
+    // ドラゴンの上昇に合わせて視点も追従させ、正面から胴体を捉える。
+    preset_.autoFrameTargets = true;
+    preset_.targetObjectName = owner_->GetName();
+    preset_.useModelBounds = false;
+    preset_.framingRadius = cameraDistance_ * 0.25f;
+    preset_.minimumFramingDistance = cameraDistance_;
+    preset_.cameraOffset = {front_.x,
+        (specialSettings["IntroCameraHeight"].get<float>() - specialSettings["IntroFocusHeight"].get<float>()) / cameraDistance_,
+        front_.z};
+    preset_.focusOffset = {0.0f,specialSettings["IntroFocusHeight"].get<float>(),0.0f};
+    preset_.targetFov = specialSettings["IntroFov"].get<float>();
     preset_.enterDuration = 0.7f;
     preset_.holdDuration = 300.0f;
     preset_.returnDuration = specialSettings["CameraReturnTime"].get<float>();
@@ -295,7 +321,6 @@ void DragonAttackControllerComponent::StopSpecialAction()
     const auto owner_ = GetGameObject();
     if (!owner_ || !owner_->manager) return;
     auto& manager_ = owner_->GetManager();
-    if (const auto sequence_ = owner_->GetComponent<ActionSequence>()) sequence_->StopPlayback(specialSequenceGeneration);
     if (specialDanger) manager_.Destroy(specialDanger);
     specialDanger.reset();
     for (auto& meteor_ : specialMeteors)
@@ -305,8 +330,7 @@ void DragonAttackControllerComponent::StopSpecialAction()
             if (const auto collider_ = meteor_.obstacle->GetComponent<SphereCollider>()) collider_->ReleasePhysXActor();
             manager_.Destroy(meteor_.obstacle);
         }
-        if (meteor_.body) manager_.GetEffectManager().StopEffect(meteor_.body, this);
-        if (meteor_.trail) manager_.GetEffectManager().StopEffect(meteor_.trail);
+        if (meteor_.body) manager_.Destroy(meteor_.body);
         if (meteor_.warning) manager_.Destroy(meteor_.warning);
     }
     specialMeteors.clear();
@@ -428,7 +452,6 @@ void DragonAttackControllerComponent::UpdateSpecialAction(float deltaTime_)
     specialTimer += dt_;
 
     const auto animation_ = owner_->GetComponent<AnimationControllerComponent>();
-    const auto sequence_ = owner_->GetComponent<ActionSequence>();
     const float arena_ = specialSettings["ArenaRadius"].get<float>();
     auto position_ = owner_->transform->GetWorldPosition();
 
@@ -474,25 +497,11 @@ void DragonAttackControllerComponent::UpdateSpecialAction(float deltaTime_)
         {
             specialPhase = 1; specialTimer = 0.0f;
             animation_->ChangeState(specialDive ? "DragonSpecialHover" : "DragonSpecialCharge",0.2f,true);
-            owner_->ExecuteAction("DragonSpecialChargeSequence");
-            specialSequenceGeneration = sequence_->GetPlaybackGeneration();
-
-            if (sequence_->GetPlayingSequenceName() != "DragonSpecialChargeSequence")
-            { 
-                specialStatus = "Charge sequence failed to start"; 
-                StopSpecialAction(); 
-                return;
-            }
         }
     }
     else if (specialPhase == 1)
     {
-        if (sequence_->GetPlaybackGeneration() != specialSequenceGeneration || specialTimer > 30.0f)
-        { 
-            specialStatus = "Charge sequence interrupted or timed out"; 
-            StopSpecialAction();
-            return; 
-        }
+        if (specialTimer >= specialSettings["ChargeTime"].get<float>()) BeginSpecialCameraReturn();
     }
     else if (specialPhase == 2)
     {
@@ -543,27 +552,28 @@ void DragonAttackControllerComponent::UpdateSpecialAction(float deltaTime_)
                     meteor_.warningRemaining = waves_[specialWave]["Warning"].get<float>();
                     meteor_.final = final_;
                     auto bodyPosition_ = meteor_.ground; bodyPosition_.y += meteor_.height;
-                    MeshVFXSpawnRequest body_;
-                    body_.assetPath = "Data/VFX/DragonSpecialMeteor.json";
-                    body_.position = bodyPosition_;
                     const float scale_ = final_ ? meteor_.radius*0.65f : meteor_.coverRadius;
-                    body_.scale = {scale_,scale_,scale_};
-                    body_.lifeTime = 3600.0f;
-                    body_.lifetimeOwner = owner_->GetComponent<DragonAttackControllerComponent>();
-                    meteor_.body = owner_->GetManager().GetEffectManager().SpawnMeshVFX(body_);
-                    ParticleSpawnRequest trail_;
-                    trail_.assetPath = "Data/Particle/DragonSpecialMeteorTrail.json";
-                    trail_.position = bodyPosition_;
-                    trail_.sizeScale = scale_;
-                    trail_.lifeTime = 3600.0f;
-                    meteor_.trail = owner_->GetManager().GetEffectManager().SpawnParticle(trail_);
+                    meteor_.body = owner_->GetManager().Instantiate("DragonSpecialMeteor");
+                    if (!meteor_.body)
+                    { specialStatus = "Meteor prefab unavailable"; StopSpecialAction(); return; }
+                    meteor_.body->SetNoSaveObject();
+                    meteor_.body->transform->localPosition = bodyPosition_;
+                    meteor_.body->transform->localScale = {scale_,scale_,scale_};
+                    meteor_.body->transform->MarkDirty();
+                    if (const auto particles_ = meteor_.body->GetComponent<ParticleComponent>())
+                        particles_->SetRuntimeVisualScale((std::min)(6.0f,1.8f*scale_/meteor_.coverRadius));
+                    for (const auto& child_ : meteor_.body->transform->children)
+                        if (child_)
+                            if (const auto object_ = child_->gameObject.lock())
+                                if (object_->GetComponent<SphereCollider>())
+                                { meteor_.obstacle = object_; object_->SetNoSaveObject(); break; }
                     DangerAreaTemplate danger_;
                     danger_.shapeType = DangerAreaShapeType::CIRCLE;
                     danger_.radius = meteor_.radius;
                     danger_.lifeTime = meteor_.warningRemaining + meteor_.height/specialSettings["MeteorSpeed"].get<float>()+0.5f;
                     meteor_.warning = owner_->GetOrAddComponent<DangerAreaComponent>()->ShowAt(danger_,meteor_.ground);
                     specialMeteors.push_back(std::move(meteor_));
-                    if (!specialMeteors.back().body || !specialMeteors.back().trail || !specialMeteors.back().warning)
+                    if (!specialMeteors.back().obstacle || !specialMeteors.back().warning)
                     { specialStatus = "Meteor visual or warning unavailable"; StopSpecialAction(); return; }
                 }
                 ++specialWave;
@@ -581,13 +591,10 @@ void DragonAttackControllerComponent::UpdateSpecialAction(float deltaTime_)
 
             meteor_.height = (std::max)(0.0f,meteor_.height-specialSettings["MeteorSpeed"].get<float>()*fallingTime_);
             auto bodyPosition_ = meteor_.ground;
-            bodyPosition_.y += meteor_.height + (meteor_.final ? 0.0f : meteor_.coverRadius*0.65f);
+            bodyPosition_.y += meteor_.height;
 
-            for (const auto& object_ : {meteor_.body,meteor_.trail}) if (object_)
-            {
-                object_->transform->localPosition = bodyPosition_; 
-                object_->transform->MarkDirty(); 
-            }
+            if (meteor_.body)
+            { meteor_.body->transform->localPosition = bodyPosition_; meteor_.body->transform->MarkDirty(); }
 
             if (meteor_.height > 0.0f)
             {
@@ -602,40 +609,20 @@ void DragonAttackControllerComponent::UpdateSpecialAction(float deltaTime_)
             }
 
             meteor_.warning.reset();
-            if (meteor_.trail)
-            {
-                owner_->GetManager().GetEffectManager().StopEffect(meteor_.trail);
-            }
-
-            meteor_.trail.reset();
+            if (const auto particles_ = meteor_.body->GetComponent<ParticleComponent>()) particles_->Stop();
             const bool sheltered_ = meteor_.final && IsSpecialTargetSheltered();
             SpawnSpecialImpact(meteor_.ground,meteor_.radius,meteor_.final,!sheltered_);
             if (!meteor_.final)
             {
-                meteor_.obstacle = owner_->GetManager().Create("DragonMeteorCover");
-                if (!meteor_.obstacle)
-                { 
-                    specialStatus = "Meteor cover creation failed";
-                     StopSpecialAction(); 
-                    return; 
-                }
-
-                meteor_.obstacle->SetNoSaveObject();
-                meteor_.obstacle->SetLayer(LayerType::Environment);
-                meteor_.obstacle->transform->localPosition = bodyPosition_;
-                meteor_.obstacle->transform->MarkDirty();
-                const auto collider_ = meteor_.obstacle->AddComponent<SphereCollider>();
-                collider_->radius = meteor_.coverRadius;
-                collider_->isStatic = true;
-                collider_->useGravity = false;
-                collider_->canBeCharacterGround = false;
-                collider_->shapeRenderEnabled = false;
+                const auto collider_ = meteor_.obstacle->GetComponent<SphereCollider>();
+                collider_->SetEnabled(true);
                 collider_->RecreatePhysXActor();
             }
             else
             {
-                owner_->GetManager().GetEffectManager().StopEffect(meteor_.body,this);
+                owner_->GetManager().Destroy(meteor_.body);
                 meteor_.body.reset();
+                meteor_.obstacle.reset();
                 specialStatus = sheltered_ ? "Final impact blocked by meteor cover" : "Final impact";
                 specialPhase = 10; specialTimer = 0.0f;
             }
@@ -750,7 +737,7 @@ void DragonAttackControllerComponent::UpdateSpecialAction(float deltaTime_)
             meteor_.body->transform->localScale = {scale_,scale_,scale_}; meteor_.body->transform->MarkDirty();
             if (shrink_ >= 1.0f)
             {
-                owner_->GetManager().GetEffectManager().StopEffect(meteor_.body,this); meteor_.body.reset();
+                owner_->GetManager().Destroy(meteor_.body); meteor_.body.reset();
                 if (meteor_.obstacle)
                 {
                     meteor_.obstacle->GetComponent<SphereCollider>()->ReleasePhysXActor();

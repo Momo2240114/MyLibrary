@@ -1,0 +1,191 @@
+{
+  "AssetType": "Prefab",
+  "Version": 2,
+  "RootName": "DragonSpecialMeteor",
+  "ObjectList": [
+    "DragonSpecialMeteor",
+    "DragonSpecialMeteorCover",
+    "DragonSpecialMeteorScorch"
+  ],
+  "Objects": {
+    "DragonSpecialMeteor": {
+      "Name": "DragonSpecialMeteor",
+      "ParentName": "",
+      "Layer": 32,
+      "CollisionMask": 0,
+      "RequiredForSceneStart": false,
+      "Transform": {
+        "Pos": [
+          0,
+          0,
+          0
+        ],
+        "Rot": [
+          0,
+          0,
+          0
+        ],
+        "Scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "Components": [
+        {
+          "Data": {
+            "LocalScale": 1.0,
+            "MaterialOverrides": [
+              {
+                "baseColor": [
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "disableOutline": false,
+                "id": 0,
+                "outlineThicknessOffset": 1.0,
+                "shaderId": 3,
+                "toonPbrBlend": 0.5
+              }
+            ],
+            "ModelName": "./Data/Model/Stage/Rock/Rock01.gltf",
+            "RootMotionName": "",
+            "ShaderID": 1,
+            "UsedNaviMeshSystemFlg": false,
+            "_RootRotationOffset": {
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "LocalScaleXYZ": [
+              0.00146,
+              0.00208,
+              0.00105
+            ]
+          },
+          "Enabled": true,
+          "TypeName": "GltfModel"
+        },
+        {
+          "TypeName": "ParticleComponent",
+          "Enabled": true,
+          "Data": {
+            "AssetPath": "Data/Particle/DragonSpecialMeteorTrail.json",
+            "IsPlaying": true
+          }
+        }
+      ],
+      "ColliderComponents": []
+    },
+    "DragonSpecialMeteorCover": {
+      "Name": "DragonSpecialMeteorCover",
+      "ParentName": "DragonSpecialMeteor",
+      "Layer": 32,
+      "CollisionMask": 0,
+      "RequiredForSceneStart": false,
+      "Transform": {
+        "Pos": [
+          0,
+          1,
+          0
+        ],
+        "Rot": [
+          0,
+          0,
+          0
+        ],
+        "Scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "Components": [],
+      "ColliderComponents": [
+        {
+          "Data": {
+            "CanBeCharacterGround": false,
+            "ColliderName": "",
+            "CollisionOwnerObjectName": "",
+            "CollisionRole": 0,
+            "ContainmentMode": 0,
+            "DebugPrimitiveColor": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "GravityScale": 1.0,
+            "IsStatic": true,
+            "IsTrigger": false,
+            "Mass": 0.0,
+            "Offset": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "PhysicsControlsTransform": false,
+            "Radius": 0.9,
+            "RotateVelocityThreshold": 0.0010000000474974513,
+            "ShapeRenderFlg": false,
+            "UseGravity": false,
+            "UsePhysicsResponse": true,
+            "VelocityRotationMode": 0,
+            "shapeSizeScale": 1.0
+          },
+          "Enabled": false,
+          "LateUpdateEnabled": true,
+          "LateUpdatePriority": 0,
+          "RequiredForSceneStart": false,
+          "TypeName": "SphereCollider",
+          "UpdateEnabled": true,
+          "UpdatePriority": 0
+        }
+      ]
+    },
+    "DragonSpecialMeteorScorch": {
+      "Name": "DragonSpecialMeteorScorch",
+      "ParentName": "DragonSpecialMeteor",
+      "Layer": 32,
+      "CollisionMask": 0,
+      "RequiredForSceneStart": false,
+      "Transform": {
+        "Pos": [
+          0,
+          1,
+          0
+        ],
+        "Rot": [
+          0,
+          0,
+          0
+        ],
+        "Scale": [
+          1.8,
+          1.8,
+          1.8
+        ]
+      },
+      "Components": [
+        {
+          "TypeName": "DecalComponent",
+          "Enabled": true,
+          "Data": {
+            "TexturePath": "Data/Texture/Decal/ScorchLava.png",
+            "Color": [
+              1,
+              0.34,
+              0.08,
+              0.72
+            ],
+            "ShowDebugBounds": false
+          }
+        }
+      ],
+      "ColliderComponents": []
+    }
+  }
+}

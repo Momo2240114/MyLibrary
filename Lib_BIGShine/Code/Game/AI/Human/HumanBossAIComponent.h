@@ -16,6 +16,7 @@
 
 class HumanBossActionComponent;
 class HumanBossAITraceComponent;
+class CameraActionDirectorComponent;
 
 // 観察から選択する行動の大分類。特殊演出も同じ実行経路へ接続する。
 enum class HumanBossState { NEUTRAL, REACTION, OFFENSE, REPOSITION, SHADOW, DRAGON_SHADOW, SPECIAL };
@@ -88,6 +89,7 @@ public:
     bool IsBerserkInvulnerable() const { return berserkStage >= 0 && !berserkStunned && !finishRequested; }
     // Owner階層を持たない独立範囲攻撃のジャストガードも同じ受付へ接続する。
     void NotifyBerserkJustGuard() { OnBerserkJustGuarded(); }
+    void NotifyReflectedOrb() { reflectedOrbTimer = 5.0f; }
     // 既存BehaviorTree Editorへ、実行中の判断グラフと保存先を公開する。
     AIBehaviorGraph& GetBehaviorGraph() { return behaviorGraph; }
     std::string& GetBehaviorGraphAssetPath() { return behaviorGraphAssetPath; }
@@ -124,6 +126,11 @@ private:
     void DrawBerserkGui();
     void SerializeBerserk(nlohmann::json& json_) const;
     void DeserializeBerserk(const nlohmann::json& json_);
+    void StartBloodEye();
+    void StopBloodEye(bool immediate_ = true);
+    void BeginSpecialIntro();
+    void UpdateSpecialIntro();
+    void RestoreSpecialIntro();
     std::array<int, 3> berserkAttackCounts{3,5,12};
     std::array<float, 3> berserkSpeeds{1.25f,1.5f,1.8f};
     std::array<float, 3> berserkStunDurations{3.0f,4.0f,5.0f};
@@ -155,6 +162,16 @@ private:
     bool berserkBlurOwned = false;
     bool berserkDownLoop = false;
     std::string berserkStartReason = "Waiting for HP threshold";
+    float bloodEyeHpThreshold = 0.55f;
+    float bloodEyeDuration = 25.0f;
+    float bloodEyeRemaining = 0.0f;
+    bool bloodEyeUsed = false;
+    std::array<std::weak_ptr<GameObject>, 2> bloodEyeEffects;
+    std::weak_ptr<CameraActionDirectorComponent> specialIntroCamera;
+    float specialIntroRemaining = 0.0f;
+    bool specialIntroCameraReturning = false;
+    bool specialIntroLocked = false;
+    bool specialIntroPreviousPlayerLock = false;
     // 優先判断はBehaviorGraphへ渡し、行動の実行条件と終了だけをComponentで管理する。
     void EnsureDefaultBehaviorGraph();
     // 攻撃設定が広い場合はIntentの追跡距離にも反映し、古い共通距離で攻撃を遮断しない。
@@ -252,6 +269,12 @@ private:
     std::string hitState = "SS_HitGround_Medium";
     float hitRecoveryDuration = 0.6f;
     float hitTimer = 0.0f;
+    float comboBindTimer = 0.0f;
+    float comboBindDuration = 0.5f;
+    float playerCounterProtectionTimer = 0.0f;
+    float reflectedOrbTimer = 0.0f;
+    bool playerCounterStarted = false;
+    bool playerCounterFromGuard = false;
     // 死亡や演出ロックによる停止を、行動中の待機とは区別して表示する。
     std::string suspensionReason;
     float minCombatDistance = 2.0f;

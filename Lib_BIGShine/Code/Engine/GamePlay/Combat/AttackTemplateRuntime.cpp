@@ -16,6 +16,7 @@
 #include <cstdio>
 #include <algorithm>
 #include <cmath>
+#include <random>
 #include "Engine/Graphics/Resource/GlTFModel.h"
 
 namespace
@@ -162,7 +163,16 @@ void AttackTemplateRuntime::Start(
     if (actor_ && actor_->GetLayer() == LayerType::Player && attackTemplate_->feedback.rumbleEnabled)
         ControllerInput::Instance().PlayRumble(attackTemplate_->feedback.startStrength,
             attackTemplate_->feedback.startStrength * 0.5f, attackTemplate_->feedback.duration);
-    if (owner_->transform)
+    if (actor_ && actor_->GetLayer() == LayerType::Player && !attackTemplate_->feedback.startSoundPath.empty())
+    {
+        static std::mt19937 randomEngine_{ std::random_device{}() };
+        static std::uniform_real_distribution<float> pitchDistribution_{ 0.92f, 1.08f };
+        AudioPlaybackSettings settings_;
+        settings_.volume = std::clamp(attackTemplate_->feedback.volume, 0.0f, 1.0f);
+        settings_.pitch = pitchDistribution_(randomEngine_);
+        AudioManager::Instance().PlayOneShotByPath(attackTemplate_->feedback.startSoundPath, settings_);
+    }
+    else if (owner_->transform)
         AudioManager::Instance().PlaySpatialAttackSound(attackTemplate_->feedback.startSoundPath,
             owner_->transform->GetWorldPosition(), attackTemplate_->feedback.volume,
             attackTemplate_->feedback.minDistance, attackTemplate_->feedback.maxDistance);
