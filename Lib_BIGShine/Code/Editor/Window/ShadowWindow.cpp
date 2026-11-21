@@ -4,7 +4,10 @@
 
 void ShadowWindow::Draw()
 {
-    if (!isVisible) return;
+    if (!isVisible)
+    {
+        return;
+    }
 
     if (BeginEditorWindow("Shadow Settings"))
     {

@@ -28,7 +28,10 @@ namespace
 
     AI_ACTION_EXECUTE_TARGET ExecuteTargetFromString(const std::string& value_)
     {
-        if (value_ == "Global") return AI_ACTION_EXECUTE_TARGET::GLOBAL;
+        if (value_ == "Global")
+        {
+            return AI_ACTION_EXECUTE_TARGET::GLOBAL;
+        }
         return AI_ACTION_EXECUTE_TARGET::OWNER;
     }
 }
@@ -49,8 +52,14 @@ void AIActionComponent::Gui()
 {
     EnsureBlackboard();
     ImGui::InputText("Skill Library", &skillDefinitionsPath);
-    if (ImGui::Button("Reload Skills")) ReloadSkillDefinitions(skillDefinitionsPath);
-    if (skillActionRunning && ImGui::Button("Stop Skill")) StopSkill();
+    if (ImGui::Button("Reload Skills"))
+    {
+        ReloadSkillDefinitions(skillDefinitionsPath);
+    }
+    if (skillActionRunning && ImGui::Button("Stop Skill"))
+    {
+        StopSkill();
+    }
 
     if (ImGui::Button(IM_U8("AIアクション追加##AIActionComponent_AddAiActionButton")))
     {
@@ -68,7 +77,10 @@ void AIActionComponent::Gui()
         statusText = "Registered";
     }
 
-    if (!statusText.empty()) ImGui::Text("%s", statusText.c_str());
+    if (!statusText.empty())
+    {
+        ImGui::Text("%s", statusText.c_str());
+    }
 
     int removeIndex_ = -1;
     for (int index_ = 0; index_ < static_cast<int>(actions.size()); ++index_)
@@ -97,7 +109,10 @@ void AIActionComponent::Gui()
         RegisterActions();
     }
 
-    if (selectedActionIndex < 0 || selectedActionIndex >= static_cast<int>(actions.size())) return;
+    if (selectedActionIndex < 0 || selectedActionIndex >= static_cast<int>(actions.size()))
+    {
+        return;
+    }
 
     AIActionDefinition& definition_ = actions[selectedActionIndex];
     ImGui::SeparatorText(IM_U8("AIアクション##AIActionComponent_AiActionHeader"));
@@ -219,7 +234,10 @@ bool AIActionComponent::ExecuteAIAction(const std::string& aiActionName_)
     BS_PROFILE_SCOPE("AIActionComponent::ExecuteAIAction");
     // Graphから渡された名前に対応する設定を探し、未登録名なら実行しない。
     AIActionDefinition* definition_ = FindDefinition(aiActionName_);
-    if (!definition_) return false;
+    if (!definition_)
+    {
+        return false;
+    }
     if (definition_->skillName.empty() && !definition_->executeActionName.empty() &&
         definition_->executeActionName == definition_->aiActionName)
     {
@@ -230,14 +248,30 @@ bool AIActionComponent::ExecuteAIAction(const std::string& aiActionName_)
     if (!definition_->skillName.empty())
     {
         for (const auto& candidate_ : skillDefinitions)
-            if (candidate_.name == definition_->skillName) { skill_ = &candidate_; break; }
-        if (!skill_) { statusText = "Skill not found: " + definition_->skillName; return false; }
-        if (!SkillExecution::CanExecute(GetGameObject(), *skill_, statusText)) return false;
+        {
+            if (candidate_.name == definition_->skillName)
+            {
+                skill_ = &candidate_;
+                break;
+            }
+        }
+        if (!skill_)
+        {
+            statusText = "Skill not found: " + definition_->skillName;
+            return false;
+        }
+        if (!SkillExecution::CanExecute(GetGameObject(), *skill_, statusText))
+        {
+            return false;
+        }
     }
     if (skillExecution.IsActive())
     {
         const auto* phase_ = skillExecution.GetCurrentPhase();
-        if (!phase_ || !phase_->canActionBranch) return false;
+        if (!phase_ || !phase_->canActionBranch)
+        {
+            return false;
+        }
         skillExecution.Stop();
         skillActionRunning = false;
     }
@@ -276,10 +310,16 @@ bool AIActionComponent::ExecuteAIAction(const std::string& aiActionName_)
         animationDefinition_.animationTriggerName.clear();
         ApplyAnimationActionStart(animationDefinition_);
     }
-    else ApplyAnimationActionStart(*definition_);
+    else
+    {
+        ApplyAnimationActionStart(*definition_);
+    }
 
     std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return false;
+    if (!owner_)
+    {
+        return false;
+    }
 
     if (skill_)
     {
@@ -327,17 +367,29 @@ void AIActionComponent::NotifyActionEnd(const std::string& category_)
         return;
     }
     EnsureBlackboard();
-    if (!blackboardComponent) return;
+    if (!blackboardComponent)
+    {
+        return;
+    }
 
     // CurrentActionと一致する定義を探し、対応するAnimation終了処理を特定する。
     AIActionDefinition* currentDefinition_ = nullptr;
     for (AIActionDefinition& definition_ : actions)
     {
-        if (definition_.blackboardCategory != category_) continue;
+        if (definition_.blackboardCategory != category_)
+        {
+            continue;
+        }
 
         std::string currentAction_;
-        if (!blackboardComponent->GetString(category_, definition_.currentActionKey, currentAction_)) continue;
-        if (currentAction_ != definition_.aiActionName) continue;
+        if (!blackboardComponent->GetString(category_, definition_.currentActionKey, currentAction_))
+        {
+            continue;
+        }
+        if (currentAction_ != definition_.aiActionName)
+        {
+            continue;
+        }
 
         currentDefinition_ = &definition_;
         break;
@@ -352,7 +404,10 @@ void AIActionComponent::NotifyActionEnd(const std::string& category_)
 
     for (const AIActionDefinition& definition_ : actions)
     {
-        if (definition_.blackboardCategory != category_) continue;
+        if (definition_.blackboardCategory != category_)
+        {
+            continue;
+        }
         blackboardComponent->SetBool(definition_.blackboardCategory, definition_.actionEndedKey, true);
         blackboardComponent->SetBool(definition_.blackboardCategory, definition_.isActingKey, false);
     }
@@ -361,7 +416,10 @@ void AIActionComponent::NotifyActionEnd(const std::string& category_)
 // Blackboard上の共通ActionEndedキーを読み、対象カテゴリの行動が終了したかを返す。
 bool AIActionComponent::IsActionEnded(const std::string& category_) const
 {
-    if (!blackboardComponent) return false;
+    if (!blackboardComponent)
+    {
+        return false;
+    }
 
     bool ended_ = false;
     return blackboardComponent->GetBool(category_, AIBlackboardKeys::ACTION_ENDED, ended_) && ended_;
@@ -371,7 +429,10 @@ bool AIActionComponent::IsActionEnded(const std::string& category_) const
 void AIActionComponent::EnsureBlackboard()
 {
     std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     auto blackboard_ = owner_->GetComponent<BlackboardComponent>();
     if (!blackboard_)
@@ -385,7 +446,10 @@ void AIActionComponent::EnsureBlackboard()
 void AIActionComponent::RegisterActions()
 {
     std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     // 再登録による同名Actionの重複を防ぐため、前回登録分を先に解除する。
     for (const std::string& actionName_ : registeredActionNames)
@@ -420,7 +484,10 @@ void AIActionComponent::RegisterActions()
 void AIActionComponent::RegisterBridgeAction(const AIActionDefinition& definition_)
 {
     std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_ || definition_.aiActionName.empty()) return;
+    if (!owner_ || definition_.aiActionName.empty())
+    {
+        return;
+    }
 
     const std::string actionName_ = definition_.aiActionName;
     owner_->RegisterAction(AIBlackboardKeys::CATEGORY_AI, actionName_, [this, actionName_]()
@@ -434,11 +501,17 @@ void AIActionComponent::RegisterBridgeAction(const AIActionDefinition& definitio
 void AIActionComponent::ApplyAnimationActionStart(const AIActionDefinition& definition_)
 {
     std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     const auto animation_ = AnimationGraphBridgeComponent::Acquire(owner_);
     const auto board_ = owner_->GetOrAddComponent<BlackboardComponent>();
-    if (!animation_ || !board_) return;
+    if (!animation_ || !board_)
+    {
+        return;
+    }
     // 設定されたカテゴリへ条件を書き、ControllerのカテゴリをAI側で切り替えない。
     if (definition_.writeAnimationBlackboard)
     {
@@ -447,29 +520,39 @@ void AIActionComponent::ApplyAnimationActionStart(const AIActionDefinition& defi
         board_->SetBool(definition_.animationBlackboardCategory, definition_.animationIsActingKey, true);
     }
     if (!definition_.animationTriggerName.empty())
+    {
         animation_->RequestTrigger(definition_.animationTriggerName, definition_.animationBlackboardCategory);
+    }
     if (!definition_.animationStateName.empty())
+    {
         animation_->RequestStateTransition(definition_.animationStateName, 0.2f, false, 0.0f, false, definition_.animationBlackboardCategory);
-
+    }
 }
 
 // AIアクション終了時にAnimation Blackboardと終了Triggerを更新する。
 void AIActionComponent::ApplyAnimationActionEnd(const AIActionDefinition& definition_)
 {
     std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     const auto animation_ = AnimationGraphBridgeComponent::Acquire(owner_);
     const auto board_ = owner_->GetOrAddComponent<BlackboardComponent>();
-    if (!animation_ || !board_) return;
+    if (!animation_ || !board_)
+    {
+        return;
+    }
     if (definition_.writeAnimationBlackboard)
     {
         board_->SetBool(definition_.animationBlackboardCategory, definition_.animationActionEndedKey, true);
         board_->SetBool(definition_.animationBlackboardCategory, definition_.animationIsActingKey, false);
     }
     if (!definition_.animationActionEndTriggerName.empty())
+    {
         animation_->RequestTrigger(definition_.animationActionEndTriggerName, definition_.animationBlackboardCategory);
-
+    }
 }
 
 // AIアクション名が一致する編集可能な定義を線形検索する。
@@ -477,7 +560,10 @@ AIActionDefinition* AIActionComponent::FindDefinition(const std::string& aiActio
 {
     for (AIActionDefinition& definition_ : actions)
     {
-        if (definition_.aiActionName == aiActionName_) return &definition_;
+        if (definition_.aiActionName == aiActionName_)
+        {
+            return &definition_;
+        }
     }
     return nullptr;
 }
@@ -487,7 +573,10 @@ const AIActionDefinition* AIActionComponent::FindDefinition(const std::string& a
 {
     for (const AIActionDefinition& definition_ : actions)
     {
-        if (definition_.aiActionName == aiActionName_) return &definition_;
+        if (definition_.aiActionName == aiActionName_)
+        {
+            return &definition_;
+        }
     }
     return nullptr;
 }
@@ -498,7 +587,10 @@ REGISTER_COMPONENT(AIActionComponent, "AIActionComponent")
 void AIActionComponent::Update(float deltaTime_)
 {
     BS_PROFILE_SCOPE("AIActionComponent::UpdateSkill");
-    if (!skillActionRunning) return;
+    if (!skillActionRunning)
+    {
+        return;
+    }
     skillExecution.Update(deltaTime_);
     if (skillActionRunning && !skillExecution.IsActive())
     {
@@ -511,9 +603,15 @@ void AIActionComponent::Update(float deltaTime_)
 bool AIActionComponent::ReloadSkillDefinitions(const std::string& path_)
 {
     BS_PROFILE_SCOPE("AIActionComponent::ReloadSkillDefinitions");
-    if (skillActionRunning) return false;
+    if (skillActionRunning)
+    {
+        return false;
+    }
     nlohmann::json document_;
-    if (!LoadSkillDefinitions(path_, skillDefinitions, document_, statusText)) return false;
+    if (!LoadSkillDefinitions(path_, skillDefinitions, document_, statusText))
+    {
+        return false;
+    }
     skillDefinitionsPath = path_;
     return true;
 }
@@ -521,7 +619,10 @@ bool AIActionComponent::ReloadSkillDefinitions(const std::string& path_)
 // BehaviorGraphから指定できるAI Action名とSkill名の対応を設定する。
 bool AIActionComponent::SetSkillForAction(const std::string& actionName_, const std::string& skillName_, const std::string& path_)
 {
-    if (actionName_.empty() || !ReloadSkillDefinitions(path_)) return false;
+    if (actionName_.empty() || !ReloadSkillDefinitions(path_))
+    {
+        return false;
+    }
     auto* definition_ = FindDefinition(actionName_);
     if (!definition_)
     {
@@ -539,7 +640,10 @@ bool AIActionComponent::SetSkillForAction(const std::string& actionName_, const 
 // 明示的な中断でも予約Actionを閉じ、AIの待機を解除する。
 void AIActionComponent::StopSkill()
 {
-    if (!skillActionRunning) return;
+    if (!skillActionRunning)
+    {
+        return;
+    }
     skillExecution.Stop();
     skillActionRunning = false;
     NotifyActionEnd(runningSkillCategory);

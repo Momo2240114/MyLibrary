@@ -84,8 +84,14 @@ namespace
         // 基本アニメーションと外部カーブを掛け合わせ、Editor上のCurve設定も最終描画へ反映する。
         state_.rotation.y += part_.meshRotationSpeed.y * state_.time;
         state_.rotation.z += part_.meshRotationSpeed.z * state_.time;
-        if (part_.animateScale) state_.scale = Lerp(part_.scaleStart, part_.scaleEnd, normalizedTime_);
-        if (part_.animateAlpha) state_.alpha *= Lerp(part_.alphaStart, part_.alphaEnd, normalizedTime_);
+        if (part_.animateScale)
+        {
+            state_.scale = Lerp(part_.scaleStart, part_.scaleEnd, normalizedTime_);
+        }
+        if (part_.animateAlpha)
+        {
+            state_.alpha *= Lerp(part_.alphaStart, part_.alphaEnd, normalizedTime_);
+        }
         const float scaleCurveValue_ = component_.EvaluateCurveValue(part_.scaleCurveName, normalizedTime_, 1.0f);
         state_.scale.x *= scaleCurveValue_;
         state_.scale.y *= scaleCurveValue_;
@@ -150,7 +156,10 @@ namespace
         float materialTime_)
     {
         BS_PROFILE_SCOPE("MeshVFXRenderSystem::ApplyMaterialToPart");
-        if (!materialResource_) return;
+        if (!materialResource_)
+        {
+            return;
+        }
 
         // VFXMaterialの色・UV・ディゾルブ・歪み設定を、パーツ側の値へ乗算/加算して最終値を作る。
         const VFXMaterialData& materialData_ =
@@ -287,22 +296,34 @@ namespace
 bool MeshVFXTextureMixer::Initialize(ID3D11Device* device_)
 {
     // GPU上で複数マスク/ノイズを合成するため、全画面シェーダと一時RTを準備する。
-    if (!device_) return false;
+    if (!device_)
+    {
+        return false;
+    }
     if (FAILED(CPUResourceLoader::LoadVertexShader(
         device_,
         "Data/Shader/FullScreenVS.cso",
         nullptr,
         0,
         nullptr,
-        fullScreenVertexShader.ReleaseAndGetAddressOf()))) return false;
+        fullScreenVertexShader.ReleaseAndGetAddressOf())))
+    {
+        return false;
+    }
     if (FAILED(CPUResourceLoader::LoadPixelShader(
         device_,
         "Data/Shader/MeshVFXTextureMixPS.cso",
-        mixPixelShader.ReleaseAndGetAddressOf()))) return false;
+        mixPixelShader.ReleaseAndGetAddressOf())))
+    {
+        return false;
+    }
     if (FAILED(CPUResourceLoader::CreateConstantBuffer(
         device_,
         sizeof(MixConstants),
-        constantBuffer.ReleaseAndGetAddressOf()))) return false;
+        constantBuffer.ReleaseAndGetAddressOf())))
+    {
+        return false;
+    }
     return CreateTarget(device_, targets[0]) && CreateTarget(device_, targets[1]);
 }
 
@@ -318,11 +339,17 @@ bool MeshVFXTextureMixer::CreateTarget(ID3D11Device* device_, Target& target_)
     description_.SampleDesc.Count = 1;
     description_.Usage = D3D11_USAGE_DEFAULT;
     description_.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
-    if (FAILED(device_->CreateTexture2D(&description_, nullptr, target_.texture.ReleaseAndGetAddressOf()))) return false;
+    if (FAILED(device_->CreateTexture2D(&description_, nullptr, target_.texture.ReleaseAndGetAddressOf())))
+    {
+        return false;
+    }
     if (FAILED(device_->CreateRenderTargetView(
         target_.texture.Get(),
         nullptr,
-        target_.renderTargetView.ReleaseAndGetAddressOf()))) return false;
+        target_.renderTargetView.ReleaseAndGetAddressOf())))
+    {
+        return false;
+    }
     return SUCCEEDED(device_->CreateShaderResourceView(
         target_.texture.Get(),
         nullptr,
@@ -337,7 +364,10 @@ ID3D11ShaderResourceView* MeshVFXTextureMixer::Mix(
     bool average_)
 {
     // 入力が1枚だけならそのまま返し、複数枚なら2枚の一時RTを交互に使って合成する。
-    if (textures_.empty() || !renderContext_.deviceContext || !renderContext_.renderState) return nullptr;
+    if (textures_.empty() || !renderContext_.deviceContext || !renderContext_.renderState)
+    {
+        return nullptr;
+    }
     if (textures_.size() == 1 && (!invertLayers_ || invertLayers_->empty() || !(*invertLayers_)[0]))
     {
         return textures_[0];
@@ -422,7 +452,10 @@ bool MeshVFXRenderSystem::EnsureAfterimageBuffers(
     UINT instanceCapacity_)
 {
     // Afterimage用のStructuredBufferは必要インスタンス数が増えた時だけ拡張する。
-    if (!device_ || instanceCapacity_ == 0) return false;
+    if (!device_ || instanceCapacity_ == 0)
+    {
+        return false;
+    }
     if (afterimageInstanceCapacity >= instanceCapacity_ &&
         afterimageBoneBuffer && afterimageInstanceBuffer)
     {
@@ -430,7 +463,10 @@ bool MeshVFXRenderSystem::EnsureAfterimageBuffers(
     }
 
     UINT newCapacity_ = 1;
-    while (newCapacity_ < instanceCapacity_) newCapacity_ *= 2;
+    while (newCapacity_ < instanceCapacity_)
+    {
+        newCapacity_ *= 2;
+    }
 
     auto createStructuredBuffer_ = [device_](
         UINT elementCount_, UINT stride_,
@@ -515,7 +551,10 @@ UINT MeshVFXRenderSystem::UpdateAfterimageBuffers(
     {
         const MeshVFXModelPoseView* pose_ = poses_[poseIndex_];
         if (!pose_ || !pose_->meshTransforms ||
-            meshIndex_ >= pose_->meshTransforms->size()) continue;
+            meshIndex_ >= pose_->meshTransforms->size())
+        {
+            continue;
+        }
         const auto& transforms_ = (*pose_->meshTransforms)[meshIndex_];
         const size_t transformCount_ = (std::min)(transforms_.size(), static_cast<size_t>(256));
         std::memcpy(
@@ -552,7 +591,10 @@ UINT MeshVFXRenderSystem::UpdateAfterimageBuffers(
 void MeshVFXRenderSystem::PushSubmit(MeshVFXComponent* component_)
 {
     // このフレームで描画可能なComponentだけをキューに積み、RenderAllでまとめて描画する。
-    if (!isInitialized || !component_ || !component_->IsEnabled()) return;
+    if (!isInitialized || !component_ || !component_->IsEnabled())
+    {
+        return;
+    }
 
     if (component_->UsesOwnerModel())
     {
@@ -560,7 +602,10 @@ void MeshVFXRenderSystem::PushSubmit(MeshVFXComponent* component_)
         const std::shared_ptr<GameObject> owner_ = component_->GetGameObject();
         if (component_->UsesModelPoses())
         {
-            if (component_->HasModelPoses()) components.push_back(component_);
+            if (component_->HasModelPoses())
+            {
+                components.push_back(component_);
+            }
             return;
         }
         if (owner_ && owner_->GetComponent<GltfModelCommponennt>())
@@ -585,7 +630,10 @@ void MeshVFXRenderSystem::PushSubmit(MeshVFXComponent* component_)
         {
             return runtimePart_.modelResource != nullptr;
         });
-    if (!hasRenderablePart_) return;
+    if (!hasRenderablePart_)
+    {
+        return;
+    }
 
     components.push_back(component_);
 }
@@ -597,12 +645,18 @@ bool MeshVFXRenderSystem::EnsureCopyTexture(
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& shaderResourceView_)
 {
     // Ensure copy textures with matching size/format so shaders can sample scene color/depth.
-    if (!device_ || !source_) return false;
+    if (!device_ || !source_)
+    {
+        return false;
+    }
 
     Microsoft::WRL::ComPtr<ID3D11Resource> sourceResource_;
     source_->GetResource(sourceResource_.GetAddressOf());
     Microsoft::WRL::ComPtr<ID3D11Texture2D> sourceTexture_;
-    if (FAILED(sourceResource_.As(&sourceTexture_))) return false;
+    if (FAILED(sourceResource_.As(&sourceTexture_)))
+    {
+        return false;
+    }
 
     D3D11_TEXTURE2D_DESC sourceDescription_{};
     sourceTexture_->GetDesc(&sourceDescription_);
@@ -717,13 +771,17 @@ void MeshVFXRenderSystem::RenderAll(
     };
     deviceContext_->PSSetSamplers(0, _countof(samplers_), samplers_);
 
-    const bool needsSceneSampling_ = std::any_of(
+    const bool layerMaskPass_ = renderContext_.layerDepthTarget != nullptr;
+    const bool needsSceneSampling_ = !layerMaskPass_ && std::any_of(
         components.begin(),
         components.end(),
         [](const MeshVFXComponent* component_)
         {
-            if (!component_) return false;
-            const auto& parts_ = component_->GetAsset().parts;
+            if (!component_)
+        {
+            return false;
+        }
+        const auto& parts_ = component_->GetAsset().parts;
             return std::any_of(
                 parts_.begin(),
                 parts_.end(),
@@ -743,6 +801,13 @@ void MeshVFXRenderSystem::RenderAll(
     const auto restoreMeshTarget_ = [&](bool useDistortion_)
         {
             // 通常描画と歪み描画で出力先が変わるため、各Draw前に正しいRTへ戻す。
+            if (layerMaskPass_)
+            {
+                auto* colorTarget_ = renderContext_.layerColorTarget;
+                deviceContext_->OMSetRenderTargets(colorTarget_ ? 1 : 0,
+                    colorTarget_ ? &colorTarget_ : nullptr, renderContext_.layerDepthTarget);
+                return;
+            }
             if (isEditorWindow_ && activeRenderTarget_)
             {
                 deviceContext_->OMSetRenderTargets(1, &activeRenderTarget_, activeDepthStencil_);
@@ -761,7 +826,10 @@ void MeshVFXRenderSystem::RenderAll(
     {
         // Component単位でOwner Transform、Asset定義、Runtimeリソースを取り出し、各Partを順に描画する。
         const std::shared_ptr<GameObject> owner_ = component_->GetGameObject();
-        if (!owner_ || !owner_->transform) continue;
+        if (!owner_ || !owner_->transform)
+        {
+            continue;
+        }
 
         const MeshVFXAsset& asset_ = component_->GetAsset();
         const std::vector<MeshVFXRuntimePart>& runtimeParts_ = component_->GetRuntimeParts();
@@ -785,11 +853,20 @@ void MeshVFXRenderSystem::RenderAll(
             const bool useDynamicMesh_ = component_->GetDynamicMesh(dynamicMesh_);
             if (!part_.renderEnabled ||
                 (useOwnerModel_ ? (!ownerModel_ && !hasModelPoses_) :
-                    (!useDynamicMesh_ && !runtimePart_.modelResource))) continue;
+                    (!useDynamicMesh_ && !runtimePart_.modelResource)))
+            {
+                continue;
+            }
 
             const PartAnimationState animation_ =
                 CalculatePartAnimation(part_, *component_, component_->GetTime());
-            if (!animation_.active) continue;
+            if (!animation_.active)
+            {
+                continue;
+            }
+            const DirectX::XMMATRIX partWorld_ =
+                CreatePartTransform(part_, animation_) * owner_->transform->GetWorldMatrix();
+
             // Part定義に時間カーブとMaterial設定を重ね、シェーダへ送る最終パラメータを作る。
             MeshVFXPart evaluatedPart_ = ApplyPartTimeCurves(
                 part_,
@@ -802,7 +879,7 @@ void MeshVFXRenderSystem::RenderAll(
                 component_->GetTime());
 
             const bool partUsesDistortion_ =
-                !isEditorWindow_ &&
+                !layerMaskPass_ && !isEditorWindow_ &&
                 evaluatedPart_.useMaskDistortion &&
                 runtimePart_.distortionNoiseTexture;
             // 通常色描画を先に行い、必要なPartだけ後段で歪みRTにも同じ形状を書き込む。
@@ -814,6 +891,20 @@ void MeshVFXRenderSystem::RenderAll(
             deviceContext_->OMSetBlendState(
                 renderContext_.renderState->GetBlendState(blendState_), nullptr, 0xFFFFFFFF);
 
+            RasterizerState rasterizerState_ = RasterizerState::SolidCullNone;
+            switch (evaluatedPart_.cullMode)
+            {
+            case VFX_MATERIAL_CULL_MODE::BACK:
+                rasterizerState_ = RasterizerState::SolidCullBack;
+                break;
+            case VFX_MATERIAL_CULL_MODE::FRONT:
+                rasterizerState_ = RasterizerState::SolidCullFront;
+                break;
+            default:
+                break;
+            }
+            auto* const rasterizer_ = renderContext_.renderState->GetRasterizerState(rasterizerState_);
+
             const auto renderMesh_ = [&](ID3D11Buffer* vertexBuffer_, ID3D11Buffer* indexBuffer_,
                 UINT indexCount_, UINT stride_, const DirectX::XMMATRIX& world_,
                 const GltfModelCommponennt::Mesh* sourceMesh_,
@@ -822,7 +913,10 @@ void MeshVFXRenderSystem::RenderAll(
                 UINT instanceCount_, bool useInstancedPose_)
             {
                 // メッシュ種別に関係なく、テクスチャ解決、シェーダ更新、DrawCall発行をここへ集約する。
-                if (!vertexBuffer_ || !indexBuffer_ || indexCount_ == 0) return;
+                if (!vertexBuffer_ || !indexBuffer_ || indexCount_ == 0)
+                {
+                    return;
+                }
 
                 ID3D11ShaderResourceView* baseTexture_ = runtimePart_.baseTexture.Get();
                 if (runtimePart_.materialResource &&
@@ -911,9 +1005,10 @@ void MeshVFXRenderSystem::RenderAll(
                 deviceContext_->OMSetBlendState(
                     renderContext_.renderState->GetBlendState(blendState_), nullptr, 0xFFFFFFFF);
                 deviceContext_->OMSetDepthStencilState(
-                    renderContext_.renderState->GetDepthStencilState(DepthState::TestOnly), 0);
-                deviceContext_->RSSetState(
-                    renderContext_.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
+                    renderContext_.renderState->GetDepthStencilState(
+                        layerMaskPass_ && renderContext_.layerCaptureMode != LayerCaptureMode::BLOOM_COLOR
+                        ? DepthState::TestAndWrite : DepthState::TestOnly), 0);
+                deviceContext_->RSSetState(rasterizer_);
                 deviceContext_->PSSetSamplers(0, _countof(samplers_), samplers_);
                 shader->Begin(
                     renderContext_,
@@ -955,8 +1050,7 @@ void MeshVFXRenderSystem::RenderAll(
                         renderContext_.renderState->GetBlendState(BlendState::Transparency), nullptr, 0xFFFFFFFF);
                     deviceContext_->OMSetDepthStencilState(
                         renderContext_.renderState->GetDepthStencilState(DepthState::TestOnly), 0);
-                    deviceContext_->RSSetState(
-                        renderContext_.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
+                    deviceContext_->RSSetState(rasterizer_);
                     deviceContext_->PSSetSamplers(0, _countof(samplers_), samplers_);
                     shader->BeginDistortion(
                         renderContext_,
@@ -1007,21 +1101,33 @@ void MeshVFXRenderSystem::RenderAll(
                     std::vector<const MeshVFXModelPoseView*>> poseGroups_;
                 for (const MeshVFXModelPoseView& pose_ : modelPoses_)
                 {
-                    if (!pose_.model) continue;
+                    if (!pose_.model)
+                    {
+                        continue;
+                    }
                     poseGroups_[pose_.model.get()].push_back(&pose_);
                 }
 
                 for (const auto& [model_, poses_] : poseGroups_)
                 {
-                    if (!model_ || poses_.empty()) continue;
+                    if (!model_ || poses_.empty())
+                    {
+                        continue;
+                    }
                     const auto& meshes_ = model_->GetMeshes();
                     for (size_t meshIndex_ = 0; meshIndex_ < meshes_.size(); ++meshIndex_)
                     {
-                        if (part_.meshIndex >= 0 && part_.meshIndex != static_cast<int>(meshIndex_)) continue;
+                        if (part_.meshIndex >= 0 && part_.meshIndex != static_cast<int>(meshIndex_))
+                        {
+                            continue;
+                        }
                         const GltfModelCommponennt::Mesh& mesh_ = meshes_[meshIndex_];
                         const UINT instanceCount_ = UpdateAfterimageBuffers(
                             renderContext_, poses_, meshIndex_);
-                        if (instanceCount_ == 0) continue;
+                        if (instanceCount_ == 0)
+                        {
+                            continue;
+                        }
                         renderMesh_(mesh_.vertexBuffer.Get(), mesh_.indexBuffer.Get(),
                             static_cast<UINT>(mesh_.indices.size()),
                             sizeof(GltfModelCommponennt::Vertex),
@@ -1036,14 +1142,15 @@ void MeshVFXRenderSystem::RenderAll(
             for (size_t meshIndex_ = 0; meshIndex_ < meshes_.size(); ++meshIndex_)
             {
                 // 通常MeshVFXはNode階層、PartローカルTransform、Owner Transformを合成して描画する。
-                if (part_.meshIndex >= 0 && part_.meshIndex != static_cast<int>(meshIndex_)) continue;
+                if (part_.meshIndex >= 0 && part_.meshIndex != static_cast<int>(meshIndex_))
+                {
+                    continue;
+                }
 
                 const GltfModelCommponennt::Mesh& mesh_ = meshes_[meshIndex_];
                 const DirectX::XMMATRIX world_ = useOwnerModel_
                     ? DirectX::XMMatrixIdentity()
-                    : CreateNodeTransform(mesh_.node) *
-                        CreatePartTransform(part_, animation_) *
-                        owner_->transform->GetWorldMatrix();
+                    : CreateNodeTransform(mesh_.node) * partWorld_;
                 renderMesh_(mesh_.vertexBuffer.Get(), mesh_.indexBuffer.Get(),
                     static_cast<UINT>(mesh_.indices.size()),
                     sizeof(GltfModelCommponennt::Vertex), world_, &mesh_, nullptr,

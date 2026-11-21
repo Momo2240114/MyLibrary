@@ -38,25 +38,56 @@ class LightManager
 {
 public:
     // ディレクショナルライト設定
-    void SetDirectionalLight(DirectionalLight& light) { directionalLight = light; }
+    void SetDirectionalLight(DirectionalLight& light)
+    {
+        directionalLight = light;
+    }
+
     // ディレクショナルライト取得
-    const DirectionalLight& GetDirectionalLight() const { return directionalLight; }
+    const DirectionalLight& GetDirectionalLight() const
+    {
+        return directionalLight;
+    }
+
     // 点光源の管理（とりあえず1つ、あるいは固定数で実装する場合）
-    void AddPointLight(const PointLight& light) { pointLights.push_back(light); }
-    const std::vector<PointLight>& GetPointLights() const { return pointLights; }
+    void AddPointLight(const PointLight& light)
+    {
+        pointLights.push_back(light);
+    }
+
+    const std::vector<PointLight>& GetPointLights() const
+    {
+        return pointLights;
+    }
 
     // スポットライト用の管理を追加
-    void AddSpotLight(const SpotLight& light) { spotLights.push_back(light); }
-    const std::vector<SpotLight>& GetSpotLights() const { return spotLights; }
+    void AddSpotLight(const SpotLight& light)
+    {
+        spotLights.push_back(light);
+    }
+
+    const std::vector<SpotLight>& GetSpotLights() const
+    {
+        return spotLights;
+    }
 
     // 平行光源を追加・クリアするメソッドを追加
-    void AddDirectionalLight(const DirectionalLight& light) { directionalLights.push_back(light); }
+    void AddDirectionalLight(const DirectionalLight& light)
+    {
+        directionalLights.push_back(light);
+    }
 
-    std::vector<DirectionalLight> GetAllDirectionalLights() const { return directionalLights; }
+    std::vector<DirectionalLight> GetAllDirectionalLights() const
+    {
+        return directionalLights;
+    }
 
     // 最強のライトを返す
     DirectionalLight GetStrongestDirectionalLight() const {
-        if (directionalLights.empty()) return DirectionalLight(); // なければデフォルトを返す
+        if (directionalLights.empty())
+        {
+            return DirectionalLight(); // なければデフォルトを返す
+        }
 
         const DirectionalLight* strongest = &directionalLights[0];
         for (const auto& light : directionalLights) {

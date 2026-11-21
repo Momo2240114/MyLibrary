@@ -26,7 +26,10 @@ float4 main(VS_OUT input_) : SV_TARGET
     DepthTexture.GetDimensions(width_, height_);
     int2 pixel_ = clamp(int2(input_.position.xy), int2(0, 0), int2(width_ - 1, height_ - 1));
     float depth_ = DepthTexture.Load(int3(pixel_, 0));
-    if (depth_ >= 0.99999f) return sceneColor_;
+    if (depth_ >= 0.99999f)
+    {
+        return sceneColor_;
+    }
 
     // 深度バッファの非線形値を視点からの距離へ戻す。
     float viewDistance_ = distances.x * distances.y /

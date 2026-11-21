@@ -18,8 +18,16 @@ public:
     GuardCollider();
 
     const std::string& GetName() const override;
-    bool HasFixedCollisionRole() const override { return true; }
-    bool HasFixedPhysicsBehavior() const override { return true; }
+
+    bool HasFixedCollisionRole() const override
+    {
+        return true;
+    }
+
+    bool HasFixedPhysicsBehavior() const override
+    {
+        return true;
+    }
 
     void Start() override;
     void Gui() override;
@@ -33,13 +41,25 @@ public:
     bool HasGuardedAttackRecord(const HitBox& hitBox_) const;
     void RecordGuardedAttack(const HitBox& hitBox_);
     void ClearGuardedAttackHistory();
-    bool GuardsBodyContact() const { return guardBodyContact; }
-    float GetGuardBreakDamageRate() const { return guardBreakDamageRate; }
+
+    bool GuardsBodyContact() const
+    {
+        return guardBodyContact;
+    }
+
+    float GetGuardBreakDamageRate() const
+    {
+        return guardBreakDamageRate;
+    }
 
     void SetGuardOwner(GameObject* guardOwner_);
     std::shared_ptr<GameObject> GetGuardOwner() const;
 
-    bool IsJustGuardEnabled() const { return justGuardEnabled; }
+    bool IsJustGuardEnabled() const
+    {
+        return justGuardEnabled;
+    }
+
     void SetJustGuardEnabled(bool enabled_);
 
     std::string GetActivateActionName() const;

@@ -43,15 +43,18 @@ public:
     float GetDamageFlashWeight() const;
     // HPとHit記録を初期値へ戻す。
     void ResetHealth();
+
     void SetReactionActionName(const std::string& actionName_)
     {
         reactionActionName = actionName_;
         SetDefaultReactionActionName(actionName_);
     }
+
     void SetDamageActionName(const std::string& actionName_)
     {
         damageActionName = actionName_;
     }
+
     void SetDefaultReactionActionName(const std::string& actionName_);
     // ImpactPowerからReaction種別を選ぶしきい値を設定する。
     void SetReactionImpactThresholds(
@@ -62,11 +65,16 @@ public:
     void AddCommonReactionAction(const std::string& actionName_);
     // 指定Reaction種別だけで呼ぶActionを追加する。
     void AddReactionAction(HIT_REACTION_KIND kind_, const std::string& actionName_);
+
     void SetArmor(float armor_)
     {
         armor = (std::max)(armor_, 0.0f);
     }
-    float GetArmor() const { return armor; }
+
+    float GetArmor() const
+    {
+        return armor;
+    }
 
 private:
     // OwnerへCombat/OnHit Actionを登録する。

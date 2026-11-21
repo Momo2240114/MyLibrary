@@ -3,6 +3,7 @@
 #include "UIWidgetComponent.h"
 #include "UIProgressBarComponent.h"
 #include "UITextComponent.h"
+#include "UIMotionComponent.h"
 #include "UISpriteSheetComponent.h"
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
 #include "WidgetBoardComponent.h"
@@ -14,6 +15,7 @@
 #include "Engine/Graphics/Resource/Sprite.h"
 #include "Engine/Physics/HurtBox.h"
 #include "Game/Charcter/Player/PlayerControllerComponent.h"
+#include "Game/Charcter/Player/PlayerInputResolver.h"
 #include "Game/GameMode/GameModeManager.h"
 #include "Game/AI/Human/HumanBossAIComponent.h"
 #include <algorithm>
@@ -26,7 +28,10 @@ namespace
     // 装備の分類に対応した素材を選び、登録されていないスキルは空欄へ戻す。
     const char* SkillIcon(const PlayerSkillDefinition* definition_)
     {
-        if (!definition_) return "Skills/Skill_Empty";
+        if (!definition_)
+        {
+            return "Skills/Skill_Empty";
+        }
         switch (definition_->category)
         {
         case SkillCategory::RUSH: return "Skills/Skill_ChargeRound";
@@ -49,7 +54,10 @@ namespace
     float HealthRate(const std::shared_ptr<HealthComponent>& health_)
     {
         if (!health_ || !std::isfinite(health_->GetMaxHealth()) || health_->GetMaxHealth() <= 0.0f ||
-            !std::isfinite(health_->GetCurrentHealth())) return 0.0f;
+            !std::isfinite(health_->GetCurrentHealth()))
+        {
+            return 0.0f;
+        }
         return std::clamp(health_->GetCurrentHealth() / health_->GetMaxHealth(), 0.0f, 1.0f);
     }
 }
@@ -62,20 +70,32 @@ void BattleHudComponent::Start()
     hudAlpha = 0.0f;
     paletteAlpha = 0.0f;
     const auto owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
     // Object側のAction寿命管理へ登録し、Scene破棄後にthisを参照する通知を残さない。
     const std::weak_ptr<GameObject> weakOwner_ = owner_;
     owner_->RegisterGlobalAction("UI", "Hud_Show", [weakOwner_]()
     {
         const auto owner_ = weakOwner_.lock();
-        if (const auto hud_ = owner_ ? owner_->GetComponent<BattleHudComponent>() : nullptr) hud_->requestedVisible = true;
+        if (const auto hud_ = owner_ ? owner_->GetComponent<BattleHudComponent>() : nullptr)
+        {
+            hud_->requestedVisible = true;
+        }
     });
     owner_->RegisterGlobalAction("UI", "Hud_Hide", [weakOwner_]()
     {
         const auto owner_ = weakOwner_.lock();
-        if (const auto hud_ = owner_ ? owner_->GetComponent<BattleHudComponent>() : nullptr) hud_->requestedVisible = false;
+        if (const auto hud_ = owner_ ? owner_->GetComponent<BattleHudComponent>() : nullptr)
+        {
+            hud_->requestedVisible = false;
+        }
     });
-    for (auto& element_ : elements) ApplyElement(element_, 0.0f);
+    for (auto& element_ : elements)
+    {
+        ApplyElement(element_, 0.0f);
+    }
 }
 
 void BattleHudComponent::ResolveElements()
@@ -95,20 +115,32 @@ void BattleHudComponent::ResolveElements()
     elementIndices.reserve(80);
     for (const auto& object_ : GetManager().GetObjects())
     {
-        if (!object_ || object_->IsPendingDestroy()) continue;
+        if (!object_ || object_->IsPendingDestroy())
+        {
+            continue;
+        }
         const auto widget_ = object_->GetComponent<UIWidgetComponent>();
-        if (!widget_) continue;
+        if (!widget_)
+        {
+            continue;
+        }
         const auto& name_ = object_->GetName();
         const int group_ = name_.find("BossHealth") == 0 || name_ == "BossNamePlate" ? 1 :
             name_.find("PlayerHp") == 0 || name_.find("PlayerFace") == 0 || name_ == "PlayerStatusRoot" || name_.find("HudStatus") == 0 ? 2 :
             name_.find("HudGuide") == 0 ? 3 : 0;
-        if (!group_) continue;
+        if (!group_)
+        {
+            continue;
+        }
         HudElement element_;
         element_.object = object_;
         element_.widget = widget_;
         element_.sprite = object_->GetComponent<SpriteRenderer>();
         element_.text = object_->GetComponent<UITextComponent>();
-        if (const auto sprite_ = element_.sprite.lock()) element_.color = sprite_->GetConfiguredColor();
+        if (const auto sprite_ = element_.sprite.lock())
+        {
+            element_.color = sprite_->GetConfiguredColor();
+        }
         element_.position = widget_->GetRectTransform().anchoredPosition;
         element_.size = widget_->GetRectTransform().sizeDelta;
         // Scene保存済みの描画用Rectへ倍率を再適用しないよう、保存時の基準配置を優先する。
@@ -128,16 +160,29 @@ void BattleHudComponent::ResolveElements()
     // HPゲージのComponentは表示要素の解決時に保持し、毎フレームの型検索を避ける。
     const std::array<const char*, 2> barNames_ = { "BossHealthBar","PlayerHpBar" };
     for (std::size_t index_ = 0; index_ < barNames_.size(); ++index_)
+    {
         if (const auto element_ = FindElement(barNames_[index_]))
-            if (const auto object_ = element_->object.lock()) healthBars[index_] = object_->GetComponent<UIProgressBarComponent>();
+        {
+            if (const auto object_ = element_->object.lock())
+            {
+                healthBars[index_] = object_->GetComponent<UIProgressBarComponent>();
+            }
+        }
+    }
 }
 
 BattleHudComponent::HudElement* BattleHudComponent::FindElement(const std::string& name_)
 {
     const auto iterator_ = elementIndices.find(name_);
-    if (iterator_ == elementIndices.end()) return nullptr;
+    if (iterator_ == elementIndices.end())
+    {
+        return nullptr;
+    }
     auto& element_ = elements[iterator_->second];
-    if (const auto object_ = element_.object.lock(); object_ && !object_->IsPendingDestroy() && object_->GetName() == name_) return &element_;
+    if (const auto object_ = element_.object.lock(); object_ && !object_->IsPendingDestroy() && object_->GetName() == name_)
+    {
+        return &element_;
+    }
     return nullptr;
 }
 
@@ -145,7 +190,10 @@ void BattleHudComponent::ApplyElement(HudElement& element_, float alpha_, float 
 {
     const auto object_ = element_.object.lock();
     const auto widget_ = element_.widget.lock();
-    if (!object_ || object_->IsPendingDestroy() || !widget_) return;
+    if (!object_ || object_->IsPendingDestroy() || !widget_)
+    {
+        return;
+    }
     const auto& name_ = object_->GetName();
     const float scale_ = element_.group == 1 ? bossScale : element_.group == 2 ? playerScale : guideScale;
     auto& rect_ = widget_->GetRectTransform();
@@ -161,24 +209,46 @@ void BattleHudComponent::ApplyElement(HudElement& element_, float alpha_, float 
         rect_.anchoredPosition = bossPosition;
         rect_.sizeDelta = { bossWidth * scale_, bossHeight * scale_ };
     }
-    else if (name_ == "PlayerStatusRoot") rect_.anchoredPosition = playerPosition;
-    else if (name_ == "HudGuideRoot") rect_.anchoredPosition = guideDevice == InputDisplayDevice::KEYBOARD_MOUSE ?
+    else if (name_ == "PlayerStatusRoot")
+    {
+        rect_.anchoredPosition = playerPosition;
+    }
+    else if (name_ == "HudGuideRoot")
+    {
+        rect_.anchoredPosition = guideDevice == InputDisplayDevice::KEYBOARD_MOUSE ?
         DirectX::XMFLOAT2{guidePosition.x + 80.0f,guidePosition.y - 60.0f} : guidePosition;
+    }
     else if (name_ == "BossHealthFrame" || name_ == "BossHealthAwakened")
+    {
         rect_.sizeDelta = { (bossWidth + 40.0f) * scale_, (bossHeight + 16.0f) * scale_ };
+    }
     if (name_.find("SkillIcon") != std::string::npos || name_.find("CooldownMask") != std::string::npos || name_.find("ReadyFrame") != std::string::npos)
+    {
         rect_.localScale = { iconScale,iconScale };
-    else if (name_.find("CooldownText") != std::string::npos) rect_.localScale = { cooldownTextScale,cooldownTextScale };
-    else if (element_.group == 3 && !element_.text.expired()) rect_.localScale = { labelScale,labelScale };
+    }
+    else if (name_.find("CooldownText") != std::string::npos)
+    {
+        rect_.localScale = { cooldownTextScale,cooldownTextScale };
+    }
+    else if (element_.group == 3 && !element_.text.expired())
+    {
+        rect_.localScale = { labelScale,labelScale };
+    }
     // 色のフェードだけで配置を無効化せず、座標や倍率が変わった場合だけ更新を通知する。
     if (previousPosition_.x != rect_.anchoredPosition.x || previousPosition_.y != rect_.anchoredPosition.y ||
         previousSize_.x != rect_.sizeDelta.x || previousSize_.y != rect_.sizeDelta.y ||
-        previousScale_.x != rect_.localScale.x || previousScale_.y != rect_.localScale.y) widget_->MarkLayoutDirty();
+        previousScale_.x != rect_.localScale.x || previousScale_.y != rect_.localScale.y)
+    {
+        widget_->MarkLayoutDirty();
+    }
     if (const auto sprite_ = element_.sprite.lock())
     {
         auto color_ = element_.color;
         // Flashと端部Highlightは既存ProgressBarの演出色を保ち、透明度だけを後段で掛ける。
-        if (name_.find("Flash") != std::string::npos || name_.find("EdgeHighlight") != std::string::npos) color_ = sprite_->GetColor();
+        if (name_.find("Flash") != std::string::npos || name_.find("EdgeHighlight") != std::string::npos)
+        {
+            color_ = sprite_->GetColor();
+        }
         color_.x *= brightness_;
         color_.y *= brightness_;
         color_.z *= brightness_;
@@ -195,12 +265,20 @@ void BattleHudComponent::ApplyElement(HudElement& element_, float alpha_, float 
 void BattleHudComponent::SetText(const std::string& name_, const std::string& text_)
 {
     if (const auto element_ = FindElement(name_))
-        if (const auto textComponent_ = element_->text.lock()) textComponent_->SetText(text_);
+    {
+        if (const auto textComponent_ = element_->text.lock())
+        {
+            textComponent_->SetText(text_);
+        }
+    }
 }
 
 void BattleHudComponent::SetAlpha(const std::string& name_, float alpha_, float brightness_)
 {
-    if (auto element_ = FindElement(name_)) ApplyElement(*element_, alpha_, brightness_);
+    if (auto element_ = FindElement(name_))
+    {
+        ApplyElement(*element_, alpha_, brightness_);
+    }
 }
 
 void BattleHudComponent::UpdateHealth(float deltaTime_)
@@ -211,7 +289,10 @@ void BattleHudComponent::UpdateHealth(float deltaTime_)
     const bool human_ = mode_ && mode_->GetCurrentBattlePhase() >= static_cast<int>(BossBattlePhase::PHASE_2);
     // ボスの所有権はSceneに置く。名前を解決し直すことで形態移行時の古い参照を使用しない。
     auto boss_ = manager_.Find(human_ ? "HumanBoss" : "TestTarget");
-    if (boss_ && (boss_->IsPendingDestroy() || !boss_->IsCombatReady())) boss_.reset();
+    if (boss_ && (boss_->IsPendingDestroy() || !boss_->IsCombatReady()))
+    {
+        boss_.reset();
+    }
     const auto bossAI_ = boss_ ? boss_->GetComponent<HumanBossAIComponent>() : nullptr;
     const bool invulnerable_ = bossAI_ && bossAI_->IsBerserkInvulnerable();
     const bool invulnerabilityChanged_ = bossInvulnerable != invulnerable_;
@@ -224,15 +305,26 @@ void BattleHudComponent::UpdateHealth(float deltaTime_)
         const bool actorChanged_ = previous_.lock() != actors_[index_];
         // Objectの切替やComponentの差替え時だけ再取得し、Scene側の所有権は保持しない。
         if (actorChanged_ || healthSources[index_].expired())
+        {
             healthSources[index_] = actors_[index_] ? actors_[index_]->GetComponent<HealthComponent>() : nullptr;
+        }
         const auto health_ = actors_[index_] ? healthSources[index_].lock() : nullptr;
         const float rate_ = HealthRate(health_);
         if (const auto bar_ = healthBars[index_].lock())
         {
-            if (actorChanged_) bar_->ResetDisplayedRate(rate_);
-            else bar_->SetTargetRate(rate_);
+            if (actorChanged_)
+            {
+                bar_->ResetDisplayedRate(rate_);
+            }
+            else
+            {
+                bar_->SetTargetRate(rate_);
+            }
             // HPの読取と同じフレームに既存の補間処理を進め、時間経過は間引かない。
-            if (bar_->IsEnabled() && !bar_->ShouldUpdate()) bar_->Update(deltaTime_);
+            if (bar_->IsEnabled() && !bar_->ShouldUpdate())
+            {
+                bar_->Update(deltaTime_);
+            }
         }
         previous_ = actors_[index_];
         const float healthValue_ = health_ && std::isfinite(health_->GetCurrentHealth()) ? std::round((std::max)(0.0f,health_->GetCurrentHealth())) : -1.0f;
@@ -241,7 +333,10 @@ void BattleHudComponent::UpdateHealth(float deltaTime_)
         if (!healthTextInitialized[index_] || displayedHealth[index_] != healthValue_ || displayedMaxHealth[index_] != maxValue_ || (index_ == 0 && invulnerabilityChanged_))
         {
             char buffer_[96]{};
-            if (healthValue_ >= 0.0f && maxValue_ >= 0.0f) std::snprintf(buffer_,sizeof(buffer_),"%.0f / %.0f",healthValue_,maxValue_);
+            if (healthValue_ >= 0.0f && maxValue_ >= 0.0f)
+            {
+                std::snprintf(buffer_,sizeof(buffer_),"%.0f / %.0f",healthValue_,maxValue_);
+            }
             // 無敵をHP量から推定せず、攻撃受付と同じ実行時状態で明示する。
             SetText(index_ == 0 ? "BossHealthValue" : "PlayerHpValue",
                 index_ == 0 && invulnerable_ ? std::string("無敵 | ") + buffer_ : std::string(buffer_));
@@ -250,7 +345,12 @@ void BattleHudComponent::UpdateHealth(float deltaTime_)
             healthTextInitialized[index_] = true;
         }
         for (auto& element_ : elements)
-            if (element_.group == static_cast<int>(index_) + 1) ApplyElement(element_, health_ ? hudAlpha : 0.0f);
+        {
+            if (element_.group == static_cast<int>(index_) + 1)
+            {
+                ApplyElement(element_, health_ ? hudAlpha : 0.0f);
+            }
+        }
     }
     const int style_ = human_ ? 1 : 0;
     if (bossStyle != style_)
@@ -260,19 +360,26 @@ void BattleHudComponent::UpdateHealth(float deltaTime_)
             { "BossHealthFrame", human_ ? "Boss/BossBar_HumanFrame" : "Boss/BossBar_Frame" }
         } };
         for (const auto& path_ : paths_)
+        {
             if (auto element_ = FindElement(path_.first))
+            {
                 if (const auto sprite_ = element_->sprite.lock())
                 {
                     sprite_->LoadTexture(GraphicsDeviceManager::Instance().GetDevice(), std::string("Data/Sprite/UI/Hud/") + path_.second + ".png");
                     const auto size_ = sprite_->GetTextureSize();
                     sprite_->SetUVRect(0,0,size_.x,size_.y);
                 }
+            }
+        }
         SetText("BossNamePlate", human_ ? "黒泥の鏡像" : "断崖の龍");
         bossStyle = style_;
     }
     // 人型AIがBlackboardへ公開したPhaseだけを参照し、HPから暴走条件を推定しない。
     int phase_ = 0;
-    if (const auto blackboard_ = boss_ ? boss_->GetComponent<BlackboardComponent>() : nullptr) blackboard_->GetInt("HumanBossAI", "Phase", phase_);
+    if (const auto blackboard_ = boss_ ? boss_->GetComponent<BlackboardComponent>() : nullptr)
+    {
+        blackboard_->GetInt("HumanBossAI", "Phase", phase_);
+    }
     // 名前欄へ状態説明を連結すると既定幅で折り返すため、無敵はHP値と色で表示する。
     SetText("BossNamePlate", human_ ? "黒泥の鏡像" : "断崖の龍");
     // 両形態の顔素材はモデルと一致しないため表示しない。バー本体とフレームは維持する。
@@ -283,9 +390,15 @@ void BattleHudComponent::UpdateHealth(float deltaTime_)
     {
         // Frameも着色するため、HP5％の短い残量でも無敵状態を読み取れる。
         for (const auto name_ : {"BossHealthCurrent","BossHealthFrame","BossHealthValue"})
+        {
             if (const auto element_ = FindElement(name_))
+            {
                 if (const auto sprite_ = element_->sprite.lock())
+                {
                     sprite_->SetRuntimeColor({0.72f,0.55f,1.0f,hudAlpha});
+                }
+            }
+        }
     }
 }
 
@@ -303,7 +416,10 @@ void BattleHudComponent::SetGuideLayout(const std::string& name_, DirectX::XMFLO
 const InputCombo& BattleHudComponent::GetGuideBinding(const std::string& action_)
 {
     const auto iterator_ = actionBindings.find(action_);
-    if (iterator_ != actionBindings.end()) return iterator_->second;
+    if (iterator_ != actionBindings.end())
+    {
+        return iterator_->second;
+    }
     return actionBindings.emplace(action_,InputIconAtlas::FindBinding(action_,guideDevice)).first->second;
 }
 
@@ -312,7 +428,9 @@ const std::string& BattleHudComponent::PresentBinding(const std::string& prefix_
     auto& visual_ = bindingVisuals[prefix_];
     const bool changed_ = !visual_.initialized || visual_.combo.size() != combo_.size() ||
         !std::equal(combo_.begin(),combo_.end(),visual_.combo.begin(),[](const InputUnit& left_, const InputUnit& right_)
-        { return left_.device == right_.device && left_.code == right_.code; });
+        {
+        return left_.device == right_.device && left_.code == right_.code;
+    });
     if (changed_)
     {
         visual_.combo = combo_;
@@ -323,7 +441,12 @@ const std::string& BattleHudComponent::PresentBinding(const std::string& prefix_
         {
             const std::string name_ = prefix_ + (index_ == 0 ? "" : std::to_string(index_));
             if (const auto element_ = FindElement(name_))
-                if (const auto sprite_ = element_->sprite.lock()) visual_.icons[index_] = inputAtlas.Apply(*sprite_,guideDevice,combo_[index_].code);
+            {
+                if (const auto sprite_ = element_->sprite.lock())
+                {
+                    visual_.icons[index_] = inputAtlas.Apply(*sprite_,guideDevice,combo_[index_].code);
+                }
+            }
             missing_ |= !visual_.icons[index_];
         }
         // 複合入力は画像に加えてAND関係を文字でも示す。未収録キーだけの場合も操作名を失わない。
@@ -331,10 +454,16 @@ const std::string& BattleHudComponent::PresentBinding(const std::string& prefix_
         {
             for (const auto& unit_ : combo_)
             {
-                if (!visual_.fallback.empty()) visual_.fallback += " + ";
+                if (!visual_.fallback.empty())
+                {
+                    visual_.fallback += " + ";
+                }
                 visual_.fallback += InputIconAtlas::GetKeyLabel(guideDevice,unit_.code);
             }
-            if (combo_.empty()) visual_.fallback = "未割当";
+            if (combo_.empty())
+            {
+                visual_.fallback = "未割当";
+            }
             visual_.fallback = "[" + visual_.fallback + "] ";
         }
         visual_.initialized = true;
@@ -354,13 +483,25 @@ void BattleHudComponent::UpdateGuide(const std::shared_ptr<PlayerControllerCompo
     const auto& keys_ = KeyConfig::Instance();
     auto desiredDevice_ = keys_.GetActiveDevice();
     if (desiredDevice_ != InputDisplayDevice::KEYBOARD_MOUSE && controllerIconType != 0)
+    {
         desiredDevice_ = controllerIconType == 1 ? InputDisplayDevice::XBOX_PAD : InputDisplayDevice::PLAYSTATION_PAD;
-    if (previewDevice > 0) desiredDevice_ = static_cast<InputDisplayDevice>(previewDevice - 1);
-    if (!guideDeviceInitialized) { guideDevice = desiredDevice_; guideDeviceInitialized = true; }
+    }
+    if (previewDevice > 0)
+    {
+        desiredDevice_ = static_cast<InputDisplayDevice>(previewDevice - 1);
+    }
+    if (!guideDeviceInitialized)
+    {
+        guideDevice = desiredDevice_;
+        guideDeviceInitialized = true;
+    }
     // 切替先が変わっても進行中のフェードを巻き戻さず、完全に消えた時点で配置とUVを交換する。
     guideDeviceAlpha = Approach(guideDeviceAlpha,desiredDevice_ == guideDevice ? 1.0f : 0.0f,deltaTime_,0.075f);
     const bool deviceChanged_ = desiredDevice_ != guideDevice && guideDeviceAlpha <= 0.0f;
-    if (deviceChanged_) guideDevice = desiredDevice_;
+    if (deviceChanged_)
+    {
+        guideDevice = desiredDevice_;
+    }
     if (deviceChanged_ || observedBindingsRevision != keys_.GetBindingsRevision())
     {
         actionBindings.clear();
@@ -377,12 +518,17 @@ void BattleHudComponent::UpdateGuide(const std::shared_ptr<PlayerControllerCompo
     bool skillHeld_ = previewDevice > 0 && previewSkillPalette;
     bool hasKeyboardModifier_ = false;
     if (player_)
+    {
         for (const auto& binding_ : player_->GetSkillInputBindings())
         {
             const auto& modifier_ = GetGuideBinding(binding_.modifierAction);
             hasKeyboardModifier_ |= !modifier_.empty();
-            if (!modifier_.empty()) skillHeld_ |= keys_.ActionPressed(binding_.modifierAction);
+            if (!modifier_.empty())
+            {
+                skillHeld_ |= keys_.ActionPressed(binding_.modifierAction);
+            }
         }
+    }
     // キーボード修飾キーが未設定なら既存の直接スキル入力を併記し、ゲームの設定を補完しない。
     const bool directSkills_ = keyboard_ && !hasKeyboardModifier_;
     paletteAlpha = Approach(paletteAlpha,skillHeld_ ? 1.0f : 0.0f,deltaTime_,paletteFadeDuration);
@@ -399,17 +545,24 @@ void BattleHudComponent::UpdateGuide(const std::shared_ptr<PlayerControllerCompo
     const bool dead_ = !health_ || health_->IsDead();
     const auto blackboard_ = owner_ ? owner_->GetComponent<BlackboardComponent>() : nullptr;
     bool comboOpen_ = false;
-    if (blackboard_) blackboard_->GetBool(PlayerBlackboardCategory::PLAYER,PlayerBlackboardKey::CAN_COMBO,comboOpen_);
+    if (blackboard_)
+    {
+        blackboard_->GetBool(PlayerBlackboardCategory::PLAYER,PlayerBlackboardKey::CAN_COMBO,comboOpen_);
+    }
     // 操作名ではなく、現在の割り当てに含まれる物理フェイスボタンから十字位置を決める。
     const auto facePosition_ = [](const InputCombo& combo_, std::size_t index_) -> DirectX::XMFLOAT2
     {
         for (const auto& unit_ : combo_)
+        {
             switch (static_cast<PadCode>(unit_.code))
             {
-            case PadCode::Y: return {-100,-85}; case PadCode::X: return {-185,0};
-            case PadCode::B: return {-15,0}; case PadCode::A: return {-100,85};
+            case PadCode::Y: return {-100,-85};
+            case PadCode::X: return {-185,0};
+            case PadCode::B: return {-15,0};
+            case PadCode::A: return {-100,85};
             default: break;
             }
+        }
         // フェイス以外への再割当は十字へ偽装せず、左側の独立した行へ表示する。
         return {-390,-100 + static_cast<float>(index_) * 70.0f};
     };
@@ -421,6 +574,7 @@ void BattleHudComponent::UpdateGuide(const std::shared_ptr<PlayerControllerCompo
         auto position_ = keyboard_ ? DirectX::XMFLOAT2{-160,-220 + static_cast<float>(index_) * 40.0f} : facePosition_(normalBinding_,index_);
         // 同じフェイスへの重複割当は独立行へ逃がし、複数の操作名を重ねて描かない。
         if (!keyboard_)
+        {
             for (std::size_t previousIndex_ = 0; previousIndex_ < index_; ++previousIndex_)
             {
                 const auto previousPosition_ = facePosition_(GetGuideBinding(actions_[previousIndex_]),previousIndex_);
@@ -430,6 +584,7 @@ void BattleHudComponent::UpdateGuide(const std::shared_ptr<PlayerControllerCompo
                     break;
                 }
             }
+        }
         const float normalAlpha_ = alpha_ * (directSkills_ ? 1.0f : 1.0f - paletteAlpha);
         const bool ready_ = !controlLocked_ && !dead_ && player_->CanDisplayActionReady(states_[index_]);
         const bool active_ = !controlLocked_ && !dead_ && (currentAction_ == states_[index_] ||
@@ -439,7 +594,8 @@ void BattleHudComponent::UpdateGuide(const std::shared_ptr<PlayerControllerCompo
         if (!cache_.normalInitialized || cache_.comboOpen != comboOpen_)
         {
             SetText(prefix_ + "Label",fallback_ + (index_ == 1 && comboOpen_ ? "連撃受付" : labels_[index_]));
-            cache_.normalInitialized = true; cache_.comboOpen = comboOpen_;
+            cache_.normalInitialized = true;
+            cache_.comboOpen = comboOpen_;
         }
         SetGuideLayout(prefix_ + "Label",keyboard_ ? DirectX::XMFLOAT2{80,position_.y} : DirectX::XMFLOAT2{position_.x,position_.y + 43},keyboard_ ? DirectX::XMFLOAT2{200,36} : DirectX::XMFLOAT2{160,38});
         SetGuideLayout(prefix_ + "Highlight",position_,{52,52});
@@ -450,21 +606,35 @@ void BattleHudComponent::UpdateGuide(const std::shared_ptr<PlayerControllerCompo
         const float skillAlpha_ = alpha_ * (directSkills_ ? 1.0f : paletteAlpha);
         if (skillAlpha_ <= 0.0f)
         {
-            for (const char* suffix_ : {"SkillIcon","SkillLabel","CooldownMask","CooldownText","ReadyFrame","SkillButton","SkillButton1","SkillButton2","SkillButton3"}) SetAlpha(prefix_ + suffix_,0.0f);
+            for (const char* suffix_ : {"SkillIcon","SkillLabel","CooldownMask","CooldownText","ReadyFrame","SkillButton","SkillButton1","SkillButton2","SkillButton3"})
+            {
+                SetAlpha(prefix_ + suffix_,0.0f);
+            }
             continue;
         }
         const PlayerSkillInputBinding* selectedBinding_ = nullptr;
         if (player_ && !directSkills_)
+        {
             for (const auto& binding_ : player_->GetSkillInputBindings())
             {
-                if (binding_.triggerAction != actions_[index_] || binding_.slotIndex < 0 || binding_.slotIndex >= static_cast<int>(PlayerSkillLoadout::SLOT_COUNT) || GetGuideBinding(binding_.modifierAction).empty()) continue;
+                if (binding_.triggerAction != actions_[index_] || binding_.slotIndex < 0 || binding_.slotIndex >= static_cast<int>(PlayerSkillLoadout::SLOT_COUNT) || GetGuideBinding(binding_.modifierAction).empty())
+                {
+                    continue;
+                }
                 const bool held_ = keys_.ActionPressed(binding_.modifierAction);
                 const bool previousHeld_ = selectedBinding_ && keys_.ActionPressed(selectedBinding_->modifierAction);
-                if (!selectedBinding_ || (held_ && !previousHeld_) || (held_ == previousHeld_ && binding_.priority > selectedBinding_->priority)) selectedBinding_ = &binding_;
+                if (!selectedBinding_ || (held_ && !previousHeld_) || (held_ == previousHeld_ && binding_.priority > selectedBinding_->priority))
+                {
+                    selectedBinding_ = &binding_;
+                }
             }
+        }
         if (!directSkills_ && !selectedBinding_)
         {
-            for (const char* suffix_ : {"SkillIcon","SkillLabel","CooldownMask","CooldownText","ReadyFrame","SkillButton","SkillButton1","SkillButton2","SkillButton3"}) SetAlpha(prefix_ + suffix_,0.0f);
+            for (const char* suffix_ : {"SkillIcon","SkillLabel","CooldownMask","CooldownText","ReadyFrame","SkillButton","SkillButton1","SkillButton2","SkillButton3"})
+            {
+                SetAlpha(prefix_ + suffix_,0.0f);
+            }
             continue;
         }
         const int slot_ = directSkills_ ? static_cast<int>(index_) : selectedBinding_ ? selectedBinding_->slotIndex : -1;
@@ -475,13 +645,22 @@ void BattleHudComponent::UpdateGuide(const std::shared_ptr<PlayerControllerCompo
         if (!cache_.skillInitialized || cache_.skillBinding != bindingKey_)
         {
             InputCombo skillCombo_;
-            if (directSkills_) skillCombo_ = GetGuideBinding(bindingKey_);
+            if (directSkills_)
+            {
+                skillCombo_ = GetGuideBinding(bindingKey_);
+            }
             else if (selectedBinding_)
             {
                 skillCombo_ = GetGuideBinding(selectedBinding_->modifierAction);
                 const auto& trigger_ = GetGuideBinding(selectedBinding_->triggerAction);
-                if (trigger_.empty()) skillCombo_.clear();
-                else skillCombo_.insert(skillCombo_.end(),trigger_.begin(),trigger_.end());
+                if (trigger_.empty())
+                {
+                    skillCombo_.clear();
+                }
+                else
+                {
+                    skillCombo_.insert(skillCombo_.end(),trigger_.begin(),trigger_.end());
+                }
             }
             actionBindings[prefix_ + "SkillCombo"] = std::move(skillCombo_);
             cache_.skillBinding = bindingKey_;
@@ -494,7 +673,8 @@ void BattleHudComponent::UpdateGuide(const std::shared_ptr<PlayerControllerCompo
         if (!cache_.skillInitialized || cache_.skillName != skillName_)
         {
             SetText(prefix_ + "SkillLabel",skillFallback_ + skillName_);
-            cache_.skillName = skillName_; cache_.skillInitialized = true;
+            cache_.skillName = skillName_;
+            cache_.skillInitialized = true;
         }
         const float remaining_ = definition_ ? (std::max)(0.0f,player_->GetRemainingSkillCooldown(definition_->name)) : 0.0f;
         const float duration_ = definition_ ? definition_->cooldown : 0.0f;
@@ -506,27 +686,41 @@ void BattleHudComponent::UpdateGuide(const std::shared_ptr<PlayerControllerCompo
         if (cache_.cooldownTenths != tenths_ || cache_.skillState != state_)
         {
             char time_[24]{};
-            if (tenths_ > 0.0f) std::snprintf(time_,sizeof(time_),"%.1f",tenths_ / 10.0f);
+            if (tenths_ > 0.0f)
+            {
+                std::snprintf(time_,sizeof(time_),"%.1f",tenths_ / 10.0f);
+            }
             SetText(prefix_ + "CooldownText",tenths_ > 0.0f ? time_ : state_ == 2 ? "READY" : state_ == 3 ? "UNAVAILABLE" : "");
-            cache_.cooldownTenths = tenths_; cache_.skillState = state_;
+            cache_.cooldownTenths = tenths_;
+            cache_.skillState = state_;
         }
         const int iconCategory_ = definition_ ? static_cast<int>(definition_->category) : -1;
         if (cache_.iconCategory != iconCategory_)
         {
             if (const auto element_ = FindElement(prefix_ + "SkillIcon"))
+            {
                 if (const auto sprite_ = element_->sprite.lock())
                 {
                     sprite_->LoadTexture(GraphicsDeviceManager::Instance().GetDevice(),std::string("Data/Sprite/UI/Hud/") + SkillIcon(definition_) + ".png");
-                    const auto size_ = sprite_->GetTextureSize(); sprite_->SetUVRect(0,0,size_.x,size_.y);
+                    const auto size_ = sprite_->GetTextureSize();
+                    sprite_->SetUVRect(0,0,size_.x,size_.y);
                 }
+            }
             cache_.iconCategory = iconCategory_;
         }
         for (const char* suffix_ : {"SkillIcon","CooldownMask","ReadyFrame"})
+        {
             SetGuideLayout(prefix_ + suffix_,skillPosition_,keyboard_ ? DirectX::XMFLOAT2{38,38} : DirectX::XMFLOAT2{64,64});
+        }
         SetGuideLayout(prefix_ + "SkillLabel",keyboard_ ? DirectX::XMFLOAT2{100,skillPosition_.y} : DirectX::XMFLOAT2{skillPosition_.x,skillPosition_.y < -40 ? skillPosition_.y - 66 : skillPosition_.y + 72},keyboard_ ? DirectX::XMFLOAT2{180,42} : DirectX::XMFLOAT2{180,42});
         SetGuideLayout(prefix_ + "CooldownText",skillPosition_,keyboard_ ? DirectX::XMFLOAT2{60,26} : DirectX::XMFLOAT2{80,28});
         if (const auto element_ = FindElement(prefix_ + "CooldownMask"))
-            if (const auto sprite_ = element_->sprite.lock()) sprite_->SetUVGridIndex(std::clamp(static_cast<int>(std::ceil(rate_ * 64.0f)),0,64),9,{128,128});
+        {
+            if (const auto sprite_ = element_->sprite.lock())
+            {
+                sprite_->SetUVGridIndex(std::clamp(static_cast<int>(std::ceil(rate_ * 64.0f)),0,64),9,{128,128});
+            }
+        }
         SetAlpha(prefix_ + "SkillIcon",skillAlpha_,remaining_ > 0.0f ? 0.45f : usable_ || activeSkill_ ? 1.0f : 0.55f);
         SetAlpha(prefix_ + "SkillLabel",skillAlpha_);
         SetAlpha(prefix_ + "CooldownMask",remaining_ > 0.0f ? skillAlpha_ : 0.0f);
@@ -543,12 +737,16 @@ void BattleHudComponent::UpdateGuide(const std::shared_ptr<PlayerControllerCompo
         // 現在のデバイスに割り当てがない案内は行全体を隠し、表示する行だけを詰めて配置する。
         const float hintAlpha_ = combo_.empty() ? 0.0f : alpha_;
         const auto position_ = keyboard_ ? DirectX::XMFLOAT2{-160,-60 + static_cast<float>(visibleHintIndex_) * 40.0f} : DirectX::XMFLOAT2{50,-90 + static_cast<float>(visibleHintIndex_) * 60.0f};
-        if (!combo_.empty()) ++visibleHintIndex_;
+        if (!combo_.empty())
+        {
+            ++visibleHintIndex_;
+        }
         const auto& fallback_ = PresentBinding(prefix_ + "Button",combo_,hintAlpha_,keyboard_ ? position_ : DirectX::XMFLOAT2{position_.x,position_.y - 10},keyboard_ ? 32.0f : 24.0f);
         auto& cache_ = guideDisplayCache[index_];
         if (!cache_.hintInitialized)
         {
-            SetText(prefix_ + "Text",combo_.empty() ? std::string{} : fallback_ + hintLabels_[index_]); cache_.hintInitialized = true;
+            SetText(prefix_ + "Text",combo_.empty() ? std::string{} : fallback_ + hintLabels_[index_]);
+            cache_.hintInitialized = true;
         }
         SetGuideLayout(prefix_ + "Text",{keyboard_ ? 80.0f : 150.0f,position_.y + (keyboard_ ? 0.0f : 15.0f)},{200,keyboard_ ? 42.0f : 28.0f});
         SetGuideLayout(prefix_ + "Background",{keyboard_ ? 0.0f : 150.0f,position_.y},{keyboard_ ? 380.0f : 240.0f,44});
@@ -557,11 +755,101 @@ void BattleHudComponent::UpdateGuide(const std::shared_ptr<PlayerControllerCompo
     }
     bool guard_ = false;
     bool justGuard_ = false;
+    bool justDodge_ = false;
     if (blackboard_)
     {
         blackboard_->GetBool(PlayerBlackboardCategory::PLAYER,PlayerBlackboardKey::IS_GUARD,guard_);
         blackboard_->GetBool(PlayerBlackboardCategory::PLAYER,PlayerBlackboardKey::JUST_GUARD_COUNTER_TAG,justGuard_);
+        blackboard_->GetBool(PlayerBlackboardCategory::PLAYER,PlayerBlackboardKey::DODGED_COUNTER_TAG,justDodge_);
     }
+
+    const bool showFollowUps_ = !controlLocked_ && !dead_ && alpha_ > 0.0f;
+    const auto bufferedAction_ = showFollowUps_ ? player_->GetBufferedAction() : PLAYER_ACTION::NONE;
+    constexpr float FIRST_ROW_Y = 108.0f;
+    constexpr float ROW_SPACING = 64.0f;
+    constexpr float BUTTON_X = 128.0f;
+    constexpr float BUTTON_SIZE = 42.0f;
+    float starAlpha_ = 0.0f;
+    std::size_t visibleFollowUpIndex_ = 0;
+    for (const bool rush_ : { true, false })
+    {
+        const std::string prefix_ = rush_ ? "HudGuideFollowUpRush" : "HudGuideFollowUpCounter";
+        const char* inputAction_ = rush_ ? actions_[1] : actions_[0];
+        const auto followUp_ = rush_ ? PLAYER_ACTION::JUST_DODGE_RUSH : PLAYER_ACTION::COUNTER_ATTACK;
+        const auto& combo_ = GetGuideBinding(inputAction_);
+        const bool active_ = currentAction_ == followUp_;
+        const bool queued_ = bufferedAction_ == followUp_;
+        const bool inputConsumed_ = showFollowUps_ &&
+            PlayerInputResolver::IsActionConsumed(keys_, player_->GetSkillInputBindings(), inputAction_);
+        const bool hasSuccessTag_ = rush_ ? justDodge_ && !justGuard_ : justDodge_ || justGuard_;
+        // 派生を先行入力した時点で成功Tagが消えるため、予約中と攻撃中も対応する案内を表示する。
+        const bool available_ = showFollowUps_ && !combo_.empty() &&
+            (active_ || queued_ || (hasSuccessTag_ && !inputConsumed_ && player_->CanDisplayActionReady(followUp_)));
+        if (!available_)
+        {
+            SetAlpha(prefix_ + "Background", 0.0f);
+            SetAlpha(prefix_ + "Button", 0.0f);
+            SetAlpha(prefix_ + "Text", 0.0f);
+            continue;
+        }
+
+        const float y_ = FIRST_ROW_Y + static_cast<float>(visibleFollowUpIndex_++) * ROW_SPACING;
+        SetGuideLayout(prefix_ + "Background", { 266.0f, y_ }, { 348.0f, 54.0f });
+        SetGuideLayout(prefix_ + "Text", { 299.0f, y_ }, { 260.0f, 32.0f });
+        const auto& fallback_ = PresentBinding(prefix_ + "Button", combo_,
+            combo_.size() == 1 ? alpha_ : 0.0f, { BUTTON_X, y_ }, BUTTON_SIZE);
+        const bool repeatRush_ = rush_ && active_ && player_->HasNextRushCombo();
+        const char* label_ = repeatRush_ ? "連打で追撃" : rush_ ? "ラッシュ" : "カウンター";
+        if (keyboard_ && combo_.size() == 1 && combo_.front().code == (rush_ ? VK_LBUTTON : VK_RBUTTON))
+        {
+            if (repeatRush_)
+            {
+                label_ = "左クリック連打で追撃";
+            }
+            else if (!active_ && !queued_)
+            {
+                label_ = rush_ ? "左クリックでラッシュ" : "右クリックでカウンター";
+            }
+            SetText(prefix_ + "Text", label_);
+        }
+        else
+        {
+            SetText(prefix_ + "Text", fallback_ + label_);
+        }
+        SetAlpha(prefix_ + "Background", alpha_);
+        SetAlpha(prefix_ + "Text", alpha_);
+
+        if (repeatRush_ && !inputConsumed_ && fallback_.empty())
+        {
+            SetGuideLayout("HudGuideFollowUpRushStar", { BUTTON_X, y_ }, { BUTTON_SIZE, BUTTON_SIZE });
+            starAlpha_ = alpha_;
+        }
+    }
+
+    if (auto* star_ = FindElement("HudGuideFollowUpRushStar"))
+    {
+        const auto sprite_ = star_->sprite.lock();
+        const bool showStar_ = starAlpha_ > 0.001f;
+        if (sprite_ && sprite_->IsVisible() != showStar_)
+        {
+            if (const auto object_ = star_->object.lock())
+            {
+                if (const auto motion_ = object_->GetComponent<UIMotionComponent>())
+                {
+                    if (showStar_)
+                    {
+                        motion_->Play();
+                    }
+                    else
+                    {
+                        motion_->Stop();
+                    }
+                }
+            }
+        }
+        ApplyElement(*star_, starAlpha_);
+    }
+
     const auto hurtbox_ = owner_ ? owner_->GetComponent<HurtBox>() : nullptr;
     SetAlpha("HudStatusGuard",hudAlpha * (guard_ ? 1.0f : 0.0f));
     SetAlpha("HudStatusJustGuard",hudAlpha * (justGuard_ ? 1.0f : 0.0f));
@@ -575,13 +863,17 @@ void BattleHudComponent::UpdatePortrait(const std::shared_ptr<PlayerControllerCo
     const auto element_ = FindElement("PlayerFaceIcon");
     const auto face_ = element_ ? element_->object.lock() : nullptr;
     const auto sheet_ = face_ ? face_->GetComponent<UISpriteSheetComponent>() : nullptr;
-    if (!sheet_) return;
+    if (!sheet_)
+    {
+        return;
+    }
     const auto owner_ = player_ ? player_->GetGameObject() : nullptr;
     const auto health_ = owner_ ? owner_->GetComponent<HealthComponent>() : nullptr;
     if (!owner_ || !health_ || !std::isfinite(health_->GetCurrentHealth()))
     {
         sheet_->ClearRuntimeCell();
-        portraitPlayer.reset(); portraitHealth.reset();
+        portraitPlayer.reset();
+        portraitHealth.reset();
         portraitPreviousHealth = -1.0f;
         portraitHoldTime = 0.0f;
         return;
@@ -590,7 +882,8 @@ void BattleHudComponent::UpdatePortrait(const std::shared_ptr<PlayerControllerCo
     const float healthValue_ = health_->GetCurrentHealth();
     if (changed_)
     {
-        portraitPlayer = owner_; portraitHealth = health_;
+        portraitPlayer = owner_;
+        portraitHealth = health_;
         portraitPreviousHealth = healthValue_;
         portraitHoldTime = 0.0f;
         portraitJustGuard = portraitParried = false;
@@ -613,25 +906,53 @@ void BattleHudComponent::UpdatePortrait(const std::shared_ptr<PlayerControllerCo
     }
     const bool guardEvent_ = guardSucceeded_ && (guardInstance_ != portraitGuardInstance || guardHitGroup_ != portraitGuardHitGroup);
     // ダメージを最優先の一時表情とし、同じ成功フラグを毎フレーム延長しない。
-    if (healthValue_ < portraitPreviousHealth) { portraitTransient = 1; portraitHoldTime = portraitHoldDuration; }
+    if (healthValue_ < portraitPreviousHealth)
+    {
+        portraitTransient = 1;
+        portraitHoldTime = portraitHoldDuration;
+    }
     else if (parried_ && (!portraitParried || attackInstance_ != portraitAttackInstance))
-        { portraitTransient = 2; portraitHoldTime = portraitHoldDuration; }
+        {
+        portraitTransient = 2;
+        portraitHoldTime = portraitHoldDuration;
+    }
     else if (healthValue_ > portraitPreviousHealth || guardEvent_ || (justGuard_ && !portraitJustGuard))
-        { portraitTransient = 3; portraitHoldTime = portraitHoldDuration; }
+        {
+        portraitTransient = 3;
+        portraitHoldTime = portraitHoldDuration;
+    }
     portraitPreviousHealth = healthValue_;
-    portraitJustGuard = justGuard_; portraitParried = parried_; portraitAttackInstance = attackInstance_;
-    portraitGuardInstance = guardInstance_; portraitGuardHitGroup = guardHitGroup_;
+    portraitJustGuard = justGuard_;
+    portraitParried = parried_;
+    portraitAttackInstance = attackInstance_;
+    portraitGuardInstance = guardInstance_;
+    portraitGuardHitGroup = guardHitGroup_;
     const auto action_ = player_->GetCurrentAction();
     const bool skill_ = action_ == PLAYER_ACTION::SKILL_A || action_ == PLAYER_ACTION::SKILL_B ||
         action_ == PLAYER_ACTION::SKILL_C || action_ == PLAYER_ACTION::SKILL_D;
     const auto definition_ = skill_ ? player_->GetSkillDefinition(action_) : nullptr;
     // 死亡・瀕死を基準に、一時反応、回復スキル、攻撃スキルと反撃待機の順で選ぶ。
     int expression_ = 0;
-    if (health_->IsDead()) expression_ = 2;
-    else if (portraitHoldTime > 0.0f) expression_ = portraitTransient;
-    else if (HealthRate(health_) <= portraitLowHealthRate) expression_ = 2;
-    else if (definition_ && definition_->category == SkillCategory::HEAL) expression_ = 3;
-    else if (skill_ || counter_ || action_ == PLAYER_ACTION::COUNTER_ATTACK) expression_ = 4;
+    if (health_->IsDead())
+    {
+        expression_ = 2;
+    }
+    else if (portraitHoldTime > 0.0f)
+    {
+        expression_ = portraitTransient;
+    }
+    else if (HealthRate(health_) <= portraitLowHealthRate)
+    {
+        expression_ = 2;
+    }
+    else if (definition_ && definition_->category == SkillCategory::HEAL)
+    {
+        expression_ = 3;
+    }
+    else if (skill_ || counter_ || action_ == PLAYER_ACTION::COUNTER_ATTACK)
+    {
+        expression_ = 4;
+    }
     sheet_->SetRuntimeCell(portraitColumns[expression_]);
 }
 
@@ -647,7 +968,10 @@ void BattleHudComponent::LateUpdate(float deltaTime_)
     BS_PROFILE_SCOPE("BattleHudComponent::LateUpdate");
     BS_PROFILE_PLOT("HUD.InformationUpdatesEnabled",freezeHudInformation ? 0 : 1);
     // 情報転送の負荷を切り分けるため、既存のSpriteとTextを残して更新だけ停止する。
-    if (freezeHudInformation) return;
+    if (freezeHudInformation)
+    {
+        return;
+    }
     pulseTime += (std::max)(0.0f, deltaTime_);
     const auto mode_ = GetManager().GetGameModeManager();
     const auto sourceObject_ = GetManager().Find("UI");
@@ -681,7 +1005,12 @@ void BattleHudComponent::Gui()
     ImGui::SliderFloat("Portrait Reaction Hold", &portraitHoldDuration, 0.1f, 2.0f);
     const char* PORTRAIT_LABELS[] = { "Normal Cell", "Damage Cell", "Critical / Parried Cell", "Heal / Just Guard Cell", "Skill / Counter Cell" };
     for (std::size_t index_ = 0; index_ < portraitColumns.size(); ++index_)
-        if (ImGui::InputInt(PORTRAIT_LABELS[index_], &portraitColumns[index_])) portraitColumns[index_] = std::clamp(portraitColumns[index_], 0, 255);
+    {
+        if (ImGui::InputInt(PORTRAIT_LABELS[index_], &portraitColumns[index_]))
+        {
+            portraitColumns[index_] = std::clamp(portraitColumns[index_], 0, 255);
+        }
+    }
     ImGui::Checkbox("Freeze HUD Information (keep drawing)",&freezeHudInformation);
     ImGui::Checkbox("Hide During Presentation",&hideDuringPresentation);
     ImGui::DragFloat2("Boss Position",&bossPosition.x,1.0f);
@@ -713,8 +1042,12 @@ void BattleHudComponent::Serialize(nlohmann::json& json_) const
     json_["PortraitHoldDuration"] = portraitHoldDuration;
     json_["ElementLayouts"] = nlohmann::json::object();
     for (const auto& element_ : elements)
+    {
         if (const auto object_ = element_.object.lock(); object_ && !object_->IsPendingDestroy())
+        {
             json_["ElementLayouts"][object_->GetName()] = { element_.position.x,element_.position.y,element_.size.x,element_.size.y };
+        }
+    }
 }
 
 void BattleHudComponent::Deserialize(const nlohmann::json& json_)
@@ -724,7 +1057,9 @@ void BattleHudComponent::Deserialize(const nlohmann::json& json_)
     const auto readPosition_ = [&json_](const char* key_, DirectX::XMFLOAT2& position_)
     {
         if (json_.contains(key_) && json_[key_].is_array() && json_[key_].size() == 2)
+        {
             position_ = { json_[key_][0].get<float>(),json_[key_][1].get<float>() };
+        }
     };
     readPosition_("BossPosition",bossPosition);
     readPosition_("PlayerPosition",playerPosition);
@@ -745,8 +1080,18 @@ void BattleHudComponent::Deserialize(const nlohmann::json& json_)
     portraitLowHealthRate = std::clamp(json_.value("PortraitLowHealthRate", 0.25f), 0.01f, 0.9f);
     portraitHoldDuration = std::clamp(json_.value("PortraitHoldDuration", 0.8f), 0.1f, 2.0f);
     if (json_.contains("PortraitColumns") && json_["PortraitColumns"].is_array() && json_["PortraitColumns"].size() == portraitColumns.size())
+    {
         for (std::size_t index_ = 0; index_ < portraitColumns.size(); ++index_)
-            if (json_["PortraitColumns"][index_].is_number_integer()) portraitColumns[index_] = std::clamp(json_["PortraitColumns"][index_].get<int>(), 0, 255);
+        {
+            if (json_["PortraitColumns"][index_].is_number_integer())
+            {
+                portraitColumns[index_] = std::clamp(json_["PortraitColumns"][index_].get<int>(), 0, 255);
+            }
+        }
+    }
     savedLayouts = json_.value("ElementLayouts",nlohmann::json::object());
-    if (!savedLayouts.is_object()) savedLayouts = nlohmann::json::object();
+    if (!savedLayouts.is_object())
+    {
+        savedLayouts = nlohmann::json::object();
+    }
 }

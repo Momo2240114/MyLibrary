@@ -35,6 +35,7 @@ cbuffer CbModelDissolve : register(b4)
     float4 dissolveDirection;
     float4 dissolveOrigin;
 };
+
 Texture2D DissolveNoiseMap : register(t18);
 
 TextureCube diffuse_iem : register(t10);
@@ -148,8 +149,10 @@ PS_OUT main(VS_OUT pin)
     }
     float4 base = BaseMap.Sample(LinearSampler, pin.texcoord) * baseColor;
     if (base.a < 0.1f)
+    {
         discard;
-  
+    }
+
     float3 N = normalize(pin.normal);
     float3 T = normalize(pin.tangent.xyz);
 
@@ -194,7 +197,9 @@ PS_OUT main(VS_OUT pin)
         float distanceSquared = dot(Lvec, Lvec);
         float rangeSquared = pl.range * pl.range;
         if (distanceSquared > rangeSquared)
+        {
             continue;
+        }
 
         float inverseDistance = rsqrt(max(distanceSquared, 0.000001f));
         float d = distanceSquared * inverseDistance;
@@ -215,7 +220,9 @@ PS_OUT main(VS_OUT pin)
         float distanceSquared = dot(Lvec, Lvec);
         float rangeSquared = sl.range * sl.range;
         if (distanceSquared > rangeSquared)
+        {
             continue;
+        }
 
         float inverseDistance = rsqrt(max(distanceSquared, 0.000001f));
         float d = distanceSquared * inverseDistance;
@@ -226,7 +233,9 @@ PS_OUT main(VS_OUT pin)
         float spotAtt = saturate((cosAngle - cosOuter) / max(cosInner - cosOuter, 1e-4f));
         spotAtt *= spotAtt;
         if (spotAtt <= 0.0f)
+        {
             continue;
+        }
 
         float att = saturate(1.0f - (d / sl.range));
         att = att * att * spotAtt;

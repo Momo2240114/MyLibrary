@@ -47,16 +47,28 @@ void SpriteRenderer::Gui()
     BS_PROFILE_SCOPE("SpriteRenderer::Gui");
 
     auto t_ = transform.lock();
-    if (!t_) return;
+    if (!t_)
+    {
+        return;
+    }
 
     DirectX::XMFLOAT2 h = localSize;
-    if (ImGui::DragFloat2("size", &h.x, 0.01f)) localSize = h;
+    if (ImGui::DragFloat2("size", &h.x, 0.01f))
+    {
+        localSize = h;
+    }
 
     h = catSize;
-    if (ImGui::DragFloat2("catSize", &h.x, 0.01f)) catSize = h;
+    if (ImGui::DragFloat2("catSize", &h.x, 0.01f))
+    {
+        catSize = h;
+    }
 
     h = catPos;
-    if (ImGui::DragFloat2("catPosLeftTop", &h.x, 0.01f)) catPos = h;
+    if (ImGui::DragFloat2("catPosLeftTop", &h.x, 0.01f))
+    {
+        catPos = h;
+    }
     ImGuiColorEditor::DrawColorEdit4("Color", &color.x);
 
     // --- Pivot設定の追加 ---
@@ -170,8 +182,14 @@ bool SpriteRenderer::EnsureFallbackTexture(ID3D11Device* device_)
 {
     BS_PROFILE_SCOPE("SpriteRenderer::EnsureFallbackTexture");
 
-    if (texture) return true;
-    if (!device_) return false;
+    if (texture)
+    {
+        return true;
+    }
+    if (!device_)
+    {
+        return false;
+    }
 
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> fallbackTexture_;
     if (FAILED(CPUResourceLoader::CreateDummyTexture(
@@ -229,7 +247,10 @@ DirectX::XMFLOAT2 SpriteRenderer::GetScale() const
 DirectX::XMFLOAT2 SpriteRenderer::GetSize()
 {
     auto t_ = transform.lock();
-    if (!t_) return{1,1};
+    if (!t_)
+    {
+        return{1,1};
+    }
 
     DirectX::XMFLOAT2 size;
 
@@ -248,16 +269,21 @@ float SpriteRenderer::GetRotationZ() const
     }
     return localRotation;
 }
+
 bool SpriteRenderer::GetRenderData(RenderData& outData_) const
 {
     // 非表示ならスキップ
     if (!IsVisible())
+    {
         return false;
+    }
 
     // Transformが存在しない場合もスキップ
     auto t_ = transform.lock();
     if (!t_)
+    {
         return false;
+    }
 
     // 描画データを設定
     outData_.texture = texture;
@@ -273,7 +299,10 @@ void SpriteRenderer::RefreshSpriteFileList()
     spriteFiles.clear();
     std::string path = "Data/Sprite/";
 
-    if (!std::filesystem::exists(path)) return;
+    if (!std::filesystem::exists(path))
+    {
+        return;
+    }
 
     for (const auto& entry : std::filesystem::directory_iterator(path)) {
         if (entry.is_regular_file()) {
@@ -324,7 +353,10 @@ void SpriteRenderer::Deserialize(const nlohmann::json& j)
     if (j.contains("TexturePath")) {
         std::string name = j["TexturePath"];
         if (!name.empty()) {
-            if (name.substr(0, 2) == "./") name = name.substr(2);
+            if (name.substr(0, 2) == "./")
+            {
+                name = name.substr(2);
+            }
             std::replace(name.begin(), name.end(), '/', '\\');
 
             auto device = GraphicsDeviceManager::Instance().GetDevice();

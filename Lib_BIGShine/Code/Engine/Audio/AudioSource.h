@@ -65,14 +65,27 @@ public:
     // 再生が終わったOneShot ChannelとDSPを解放する。
     void Update();
     void SetVolume(float volume_);
-    float GetVolume() const { return volume; }
+
+    float GetVolume() const
+    {
+        return volume;
+    }
+
     void SetPitch(float pitch_);
     void SetPan(float pan_);
     void SetMuffled(bool muffled_);
     void SetLowPassCutoff(float cutoff_);
+
     // BGM専用の演出Busへ接続し、個別音量やDSPを変更せず減衰できるようにする。
-    void SetChannelGroup(FMOD::ChannelGroup* group_) { channelGroup = group_; }
-    bool IsValid() const { return sound != nullptr; }
+    void SetChannelGroup(FMOD::ChannelGroup* group_)
+    {
+        channelGroup = group_;
+    }
+
+    bool IsValid() const
+    {
+        return sound != nullptr;
+    }
 
 private:
     // OneShot再生へ接続したDSPを、対応するChannelの終了に合わせて解放する。

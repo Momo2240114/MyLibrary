@@ -20,7 +20,9 @@ struct Particle
 {
     float4 parameter; // x:スプライト番号 y:残り寿命 z:総寿命 w:描画タイプ。
     float4 position; // ワールド座標。
-    float4 rotation; // z:角度 w:角速度。
+    float2 colorRandomRates; // 生成時に決めた開始色・終了色の補間率。
+    float rotation;
+    float angularSpeed;
     float4 scale; // x/y:開始サイズ z:終了サイズ。
     float4 velocity; // 現在速度。
     float4 acceleration; // 基本加速度。
@@ -33,7 +35,9 @@ struct EmitParticleData
 {
     float4 parameter; // x:スプライト番号 y:初期寿命 z:未使用 w:描画タイプ。
     float4 position; // 生成位置。
-    float4 rotation; // 生成角度と角速度。
+    float2 colorRandomRates;
+    float rotation;
+    float angularSpeed;
     float4 scale; // 開始サイズと終了サイズ。
     float4 velocity; // 初速。
     float4 acceleration; // 基本加速度。
@@ -96,7 +100,7 @@ cbuffer ParticleSystemConstants : register(b9)
     float4 shapeSize; // Box/Circle/Sphereのサイズ。
     uint useColorOverLife; // 寿命色補間を使うか。
     uint useRandomSize; // サイズランダムを使うか。
-    uint padding0; // 16byteアライン用。
+    uint useRandomColor;
     uint padding1; // 16byteアライン用。
     uint2 textureSplitCountSetting; // スプライトシート列/行。
     uint2 spriteSheetIndex; // 固定セル座標。
@@ -134,6 +138,8 @@ cbuffer ParticleSystemConstants : register(b9)
     float shadeGradientEndUv;
     uint shadeGradientSampleMode;
     uint shadeGradientDirection;
+    float4 randomColorStart;
+    float4 randomColorEnd;
 };
 
 cbuffer ParticleCommonConstants : register(b10)

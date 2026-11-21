@@ -67,7 +67,10 @@ void CameraDirector::Gui()
 
 void CameraDirector::PlayCombined(int index, EasingType transEase, EasingType fovEase)
 {
-    if (index < 0 || index >= (int)combinedWaypoints.size()) return;
+    if (index < 0 || index >= (int)combinedWaypoints.size())
+    {
+        return;
+    }
 
     auto& cp = combinedWaypoints[index];
 
@@ -82,7 +85,10 @@ void CameraDirector::PlayCombined(int index, EasingType transEase, EasingType fo
 
 // --- Capture: 今の見た目をそれぞれのリストに追加してペアリング ---
 void CameraDirector::CaptureCombinedWaypoint() {
-    if (!transformDirector || !fovDirector) return;
+    if (!transformDirector || !fovDirector)
+    {
+        return;
+    }
 
     // 1. 子に「今の状態を自分のリストに保存しろ」と命令
     transformDirector->CaptureCurrentState();
@@ -98,7 +104,10 @@ void CameraDirector::CaptureCombinedWaypoint() {
 void CameraDirector::RegisterActions()
 {
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     for (int i = 0; i < (int)combinedWaypoints.size(); ++i) {
         // 名前を "ObjName_WP_0" にする

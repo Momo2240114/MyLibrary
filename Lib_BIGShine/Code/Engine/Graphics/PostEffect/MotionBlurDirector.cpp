@@ -13,7 +13,10 @@
 void MotionBlurDirector::Update(float elapsedTime_)
 {
     // 演出中でない場合はGraphicsDeviceManagerの設定を触らない。
-    if (phase == PHASE::IDLE) return;
+    if (phase == PHASE::IDLE)
+    {
+        return;
+    }
 
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     const std::shared_ptr<TimeManager> timeManager_ = owner_
@@ -23,7 +26,10 @@ void MotionBlurDirector::Update(float elapsedTime_)
 
     if (phase == PHASE::HOLD)
     {
-        if (elapsed < holdDuration) return;
+        if (elapsed < holdDuration)
+        {
+            return;
+        }
         // Holdが終わったら現在値を始点にしてDefaultへ戻る補間へ切り替える。
         startParams = GraphicsDeviceManager::Instance().GetMotionBlurParams();
         targetParams = defaultParams;
@@ -35,7 +41,10 @@ void MotionBlurDirector::Update(float elapsedTime_)
     const float ratio_ = duration > 0.0f ? std::clamp(elapsed / duration, 0.0f, 1.0f) : 1.0f;
     // 補間結果をGraphicsDeviceManagerへ反映し、RenderSystem側が次の描画で使う。
     GraphicsDeviceManager::Instance().GetMotionBlurParams() = Lerp(startParams, targetParams, ratio_);
-    if (ratio_ < 1.0f) return;
+    if (ratio_ < 1.0f)
+    {
+        return;
+    }
 
     if (phase == PHASE::TO_TARGET)
     {
@@ -109,7 +118,10 @@ void MotionBlurDirector::Gui()
         RegisterActions();
     }
     ImGui::SameLine();
-    if (ImGui::Button("Reset Motion Blur")) ResetToDefault();
+    if (ImGui::Button("Reset Motion Blur"))
+    {
+        ResetToDefault();
+    }
 
     for (int index_ = 0; index_ < static_cast<int>(editorWaypoints.size()); ++index_)
     {
@@ -126,7 +138,10 @@ void MotionBlurDirector::Gui()
             ImGui::DragFloat("Time To Target", &wayPoint_.timeToTarget, 0.01f, 0.0f, 60.0f);
             ImGui::DragFloat("Hold", &wayPoint_.holdDuration, 0.01f, 0.0f, 60.0f);
             ImGui::DragFloat("Time To Default", &wayPoint_.timeToDefault, 0.01f, 0.0f, 60.0f);
-            if (ImGui::Button("Play")) Play(wayPoint_);
+            if (ImGui::Button("Play"))
+            {
+                Play(wayPoint_);
+            }
             ImGui::SameLine();
             if (ImGui::Button("Remove"))
             {
@@ -142,13 +157,19 @@ void MotionBlurDirector::RegisterActions()
 {
     // PostProcessカテゴリにMotionBlur_0, MotionBlur_1...として登録する。
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     for (size_t index_ = 0; index_ < editorWaypoints.size(); ++index_)
     {
         owner_->RegisterGlobalAction("PostProcess", "MotionBlur_" + std::to_string(index_), [this, index_]()
         {
-            if (index_ < editorWaypoints.size()) Play(editorWaypoints[index_]);
+            if (index_ < editorWaypoints.size())
+            {
+                Play(editorWaypoints[index_]);
+            }
         });
     }
 }
@@ -188,7 +209,10 @@ void MotionBlurDirector::Deserialize(const nlohmann::json& json_)
         value_.maxVelocity = input_.value("maxVelocity", value_.maxVelocity);
     };
 
-    if (json_.contains("Default")) read_(json_["Default"], defaultParams);
+    if (json_.contains("Default"))
+    {
+        read_(json_["Default"], defaultParams);
+    }
 
     editorWaypoints.clear();
     if (json_.contains("Waypoints"))
@@ -197,7 +221,10 @@ void MotionBlurDirector::Deserialize(const nlohmann::json& json_)
         {
             // Waypointが欠けている古いデータでも既定値で補完する。
             MotionBlurWayPoint wayPoint_;
-            if (item_.contains("target")) read_(item_["target"], wayPoint_.target);
+            if (item_.contains("target"))
+            {
+                read_(item_["target"], wayPoint_.target);
+            }
             wayPoint_.timeToTarget = item_.value("toTarget", 0.1f);
             wayPoint_.holdDuration = item_.value("hold", 0.0f);
             wayPoint_.timeToDefault = item_.value("toDefault", 0.1f);

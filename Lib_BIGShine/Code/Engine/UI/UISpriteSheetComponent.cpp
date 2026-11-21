@@ -104,10 +104,16 @@ void UISpriteSheetComponent::SetRuntimeCell(int columnIndex_, int rowIndex_)
 {
     const int column_ = std::clamp(columnIndex_, 0, (std::max)(1, columnCount) - 1);
     const int row_ = std::clamp(rowIndex_, 0, (std::max)(1, rowCount) - 1);
-    if (runtimeColumnIndex == column_ && runtimeRowIndex == row_) return;
+    if (runtimeColumnIndex == column_ && runtimeRowIndex == row_)
+    {
+        return;
+    }
     runtimeColumnIndex = column_;
     runtimeRowIndex = row_;
-    if (spriteRenderer.expired()) ResolveSpriteRenderer();
+    if (spriteRenderer.expired())
+    {
+        ResolveSpriteRenderer();
+    }
     ApplySlice();
 }
 
@@ -123,7 +129,10 @@ void UISpriteSheetComponent::ApplySlice()
     BS_PROFILE_SCOPE("UISpriteSheetComponent::ApplySlice");
 
     const std::shared_ptr<SpriteRenderer> spriteRenderer_ = spriteRenderer.lock();
-    if (!spriteRenderer_) return;
+    if (!spriteRenderer_)
+    {
+        return;
+    }
 
     const DirectX::XMFLOAT2 textureSize_ = spriteRenderer_->GetTextureSize();
     // Paddingを除いた有効領域を分割し、指定CellのPixel Rectを計算する。

@@ -32,7 +32,9 @@ public:
         float alpha = 1.0f;            // 残像ごとの透明度。
         DirectX::XMFLOAT2 padding{};   // 16byteアライン用。
     };
+
     static_assert(sizeof(AfterimageInstanceData) == 16);
+
 private:
 
     // TextureMixPSへ渡す1Layer分の合成設定。
@@ -43,6 +45,7 @@ private:
         float blendWeight = 1.0f;  // 合成重み。現在は基本1。
         float padding = 0.0f;      // 16byteアライン用。
     };
+
     // Ping-Pong合成に使う一時RenderTarget。
     struct Target
     {

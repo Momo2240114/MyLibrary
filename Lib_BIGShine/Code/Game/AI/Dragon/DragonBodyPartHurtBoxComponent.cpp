@@ -36,7 +36,10 @@ void DragonBodyPartHurtBoxComponent::ResolveReferences()
     if (!owner_)
     {
         const std::shared_ptr<GameObject> self_ = GetGameObject();
-        if (!self_) return;
+        if (!self_)
+        {
+            return;
+        }
 
         if (!combatOwnerObjectName.empty() && self_->manager)
         {
@@ -83,7 +86,10 @@ std::shared_ptr<GameObject> DragonBodyPartHurtBoxComponent::FindOwnerFromHierarc
 
         const std::shared_ptr<Transform> parentTransform_ =
             current_->transform->parent.lock();
-        if (!parentTransform_) break;
+        if (!parentTransform_)
+        {
+            break;
+        }
         current_ = parentTransform_->gameObject.lock();
     }
     return nullptr;

@@ -307,7 +307,7 @@
                         "name": "Body.002",
                         "normalScale": 1.0,
                         "occlusionStrength": 0.4869999885559082,
-                        "outlineThicknessOffset": 0.029999999329447746,
+                        "outlineThicknessOffset": 0.02,
                         "rimStrength": 0.05999999865889549,
                         "roughness": 1.0,
                         "shaderId": 3,
@@ -350,7 +350,7 @@
                         "name": "Face.002",
                         "normalScale": 1.0,
                         "occlusionStrength": 0.9950000047683716,
-                        "outlineThicknessOffset": 0.0020000000949949026,
+                        "outlineThicknessOffset": 0.01,
                         "rimStrength": 0.05999999865889549,
                         "roughness": 0.8500000238418579,
                         "shaderId": 3,
@@ -436,7 +436,7 @@
                         "name": "Squire_Cloth.002",
                         "normalScale": 1.0,
                         "occlusionStrength": 0.9330000281333923,
-                        "outlineThicknessOffset": 0.02800000086426735,
+                        "outlineThicknessOffset": 0.02,
                         "rimStrength": 0.05999999865889549,
                         "roughness": 0.9980000257492065,
                         "shaderId": 3,
@@ -479,7 +479,7 @@
                         "name": "Shiled_Cloth.002",
                         "normalScale": 1.0,
                         "occlusionStrength": 1.0,
-                        "outlineThicknessOffset": 0.019999999552965164,
+                        "outlineThicknessOffset": 0.018,
                         "rimStrength": 0.05999999865889549,
                         "roughness": 0.9819999933242798,
                         "shaderId": 3,
@@ -522,7 +522,7 @@
                         "name": "Shiled_Hair.002",
                         "normalScale": 1.0,
                         "occlusionStrength": 1.0,
-                        "outlineThicknessOffset": 0.012500000186264515,
+                        "outlineThicknessOffset": 0.015,
                         "rimStrength": 0.05999999865889549,
                         "roughness": 1.0,
                         "shaderId": 3,
@@ -547,6 +547,13 @@
                     }
                 ],
                 "ModelName": "./Data/Model/SwordPlayer/CombatGirls_Sword_Shield.gltf",
+                "OutlineColor": [
+                    0.019999999552965164,
+                    0.019999999552965164,
+                    0.02500000037252903,
+                    1.0
+                ],
+                "OverrideOutlineColor": false,
                 "RootMotionName": "root",
                 "ShaderID": 1,
                 "StaticModel": false,
@@ -2566,83 +2573,6 @@
                         {
                             "animIndexA": -1,
                             "animIndexB": -1,
-                            "animationIndex": 23,
-                            "blend2DBackwardAnimationIndex": -1,
-                            "blend2DBackwardLeft90AnimationIndex": -1,
-                            "blend2DBackwardLeft90PhaseOffset": 0.0,
-                            "blend2DBackwardLeftAnimationIndex": -1,
-                            "blend2DBackwardLeftPhaseOffset": 0.0,
-                            "blend2DBackwardPhaseOffset": 0.0,
-                            "blend2DBackwardRight90AnimationIndex": -1,
-                            "blend2DBackwardRight90PhaseOffset": 0.0,
-                            "blend2DBackwardRightAnimationIndex": -1,
-                            "blend2DBackwardRightPhaseOffset": 0.0,
-                            "blend2DDefaultInput": [
-                                0.0,
-                                1.0
-                            ],
-                            "blend2DForwardAnimationIndex": -1,
-                            "blend2DForwardLeft90AnimationIndex": -1,
-                            "blend2DForwardLeft90PhaseOffset": 0.0,
-                            "blend2DForwardLeftAnimationIndex": -1,
-                            "blend2DForwardLeftPhaseOffset": 0.0,
-                            "blend2DForwardPhaseOffset": 0.0,
-                            "blend2DForwardRight90AnimationIndex": -1,
-                            "blend2DForwardRight90PhaseOffset": 0.0,
-                            "blend2DForwardRightAnimationIndex": -1,
-                            "blend2DForwardRightPhaseOffset": 0.0,
-                            "blend2DIdleAnimationIndex": -1,
-                            "blend2DIdlePhaseOffset": 0.0,
-                            "blend2DIdleThreshold": 0.05000000074505806,
-                            "blend2DLeftAnimationIndex": -1,
-                            "blend2DLeftPhaseOffset": 0.0,
-                            "blend2DParamName": "MoveInput",
-                            "blend2DRightAnimationIndex": -1,
-                            "blend2DRightPhaseOffset": 0.0,
-                            "blend2DSyncNormalizedTime": true,
-                            "blend2DUseEightDirections": false,
-                            "blend2DUseForwardBackwardLateral": false,
-                            "blend2DUseIdleStop": false,
-                            "blendDefaultWeight": 0.5,
-                            "blendMaskRootNodes": [],
-                            "blendParamName": "BlendAlpha",
-                            "blendParameterMax": 1.0,
-                            "blendParameterMin": 0.0,
-                            "blendPhaseOffsetA": 0.0,
-                            "blendPhaseOffsetB": 0.0,
-                            "blendSyncNormalizedTime": true,
-                            "blendUseMask": false,
-                            "customAnimIndex": -1,
-                            "events": [],
-                            "loop": true,
-                            "name": "SS_Idle",
-                            "playbackSpeedParamName": "",
-                            "rootMotion": {
-                                "applyPositionX": false,
-                                "applyPositionY": false,
-                                "applyPositionZ": false,
-                                "applyRotationX": false,
-                                "applyRotationY": false,
-                                "applyRotationZ": false,
-                                "cutVisualPositionX": true,
-                                "cutVisualPositionY": true,
-                                "cutVisualPositionZ": true,
-                                "cutVisualWhenDisabled": false,
-                                "enable": true,
-                                "sourceNodeName": ""
-                            },
-                            "rootMotionScale": 0.0,
-                            "rootMotionScaleCurveName": "",
-                            "sampleWeaponHitBoxes": false,
-                            "sequenceClips": [],
-                            "sequencer": "",
-                            "speed": 1.0,
-                            "speedCurveName": "Track 0",
-                            "type": 0
-                        },
-                        {
-                            "animIndexA": -1,
-                            "animIndexB": -1,
                             "animationIndex": 355,
                             "blend2DBackwardAnimationIndex": 350,
                             "blend2DBackwardLeft90AnimationIndex": 352,
@@ -2716,6 +2646,83 @@
                             "speed": 1.0,
                             "speedCurveName": "",
                             "type": 3
+                        },
+                        {
+                            "animIndexA": -1,
+                            "animIndexB": -1,
+                            "animationIndex": 23,
+                            "blend2DBackwardAnimationIndex": -1,
+                            "blend2DBackwardLeft90AnimationIndex": -1,
+                            "blend2DBackwardLeft90PhaseOffset": 0.0,
+                            "blend2DBackwardLeftAnimationIndex": -1,
+                            "blend2DBackwardLeftPhaseOffset": 0.0,
+                            "blend2DBackwardPhaseOffset": 0.0,
+                            "blend2DBackwardRight90AnimationIndex": -1,
+                            "blend2DBackwardRight90PhaseOffset": 0.0,
+                            "blend2DBackwardRightAnimationIndex": -1,
+                            "blend2DBackwardRightPhaseOffset": 0.0,
+                            "blend2DDefaultInput": [
+                                0.0,
+                                1.0
+                            ],
+                            "blend2DForwardAnimationIndex": -1,
+                            "blend2DForwardLeft90AnimationIndex": -1,
+                            "blend2DForwardLeft90PhaseOffset": 0.0,
+                            "blend2DForwardLeftAnimationIndex": -1,
+                            "blend2DForwardLeftPhaseOffset": 0.0,
+                            "blend2DForwardPhaseOffset": 0.0,
+                            "blend2DForwardRight90AnimationIndex": -1,
+                            "blend2DForwardRight90PhaseOffset": 0.0,
+                            "blend2DForwardRightAnimationIndex": -1,
+                            "blend2DForwardRightPhaseOffset": 0.0,
+                            "blend2DIdleAnimationIndex": -1,
+                            "blend2DIdlePhaseOffset": 0.0,
+                            "blend2DIdleThreshold": 0.05000000074505806,
+                            "blend2DLeftAnimationIndex": -1,
+                            "blend2DLeftPhaseOffset": 0.0,
+                            "blend2DParamName": "MoveInput",
+                            "blend2DRightAnimationIndex": -1,
+                            "blend2DRightPhaseOffset": 0.0,
+                            "blend2DSyncNormalizedTime": true,
+                            "blend2DUseEightDirections": false,
+                            "blend2DUseForwardBackwardLateral": false,
+                            "blend2DUseIdleStop": false,
+                            "blendDefaultWeight": 0.5,
+                            "blendMaskRootNodes": [],
+                            "blendParamName": "BlendAlpha",
+                            "blendParameterMax": 1.0,
+                            "blendParameterMin": 0.0,
+                            "blendPhaseOffsetA": 0.0,
+                            "blendPhaseOffsetB": 0.0,
+                            "blendSyncNormalizedTime": true,
+                            "blendUseMask": false,
+                            "customAnimIndex": -1,
+                            "events": [],
+                            "loop": true,
+                            "name": "SS_Idle",
+                            "playbackSpeedParamName": "",
+                            "rootMotion": {
+                                "applyPositionX": false,
+                                "applyPositionY": false,
+                                "applyPositionZ": false,
+                                "applyRotationX": false,
+                                "applyRotationY": false,
+                                "applyRotationZ": false,
+                                "cutVisualPositionX": true,
+                                "cutVisualPositionY": true,
+                                "cutVisualPositionZ": true,
+                                "cutVisualWhenDisabled": false,
+                                "enable": true,
+                                "sourceNodeName": ""
+                            },
+                            "rootMotionScale": 0.0,
+                            "rootMotionScaleCurveName": "",
+                            "sampleWeaponHitBoxes": false,
+                            "sequenceClips": [],
+                            "sequencer": "",
+                            "speed": 1.0,
+                            "speedCurveName": "Track 0",
+                            "type": 0
                         },
                         {
                             "animIndexA": -1,
@@ -3880,7 +3887,7 @@
                         {
                             "animIndexA": -1,
                             "animIndexB": -1,
-                            "animationIndex": 60,
+                            "animationIndex": 37,
                             "blend2DBackwardAnimationIndex": -1,
                             "blend2DBackwardLeft90AnimationIndex": -1,
                             "blend2DBackwardLeft90PhaseOffset": 0.0,
@@ -3928,8 +3935,8 @@
                             "blendUseMask": false,
                             "customAnimIndex": -1,
                             "events": [],
-                            "loop": true,
-                            "name": "HumanBossAttackTell",
+                            "loop": false,
+                            "name": "Attack_Air_to_Floor_01_Start_Seq",
                             "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": false,
@@ -3943,15 +3950,92 @@
                                 "cutVisualPositionZ": true,
                                 "cutVisualWhenDisabled": false,
                                 "enable": true,
-                                "sourceNodeName": "pelvis"
+                                "sourceNodeName": "root"
                             },
                             "rootMotionScale": 0.0,
-                            "rootMotionScaleCurveName": "",
+                            "rootMotionScaleCurveName": "HumanBoss.AttackRootWeight",
                             "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
-                            "speedCurveName": "HumanBoss.WindupPoseSpeed",
+                            "speedCurveName": "",
+                            "type": 0
+                        },
+                        {
+                            "animIndexA": -1,
+                            "animIndexB": -1,
+                            "animationIndex": 53,
+                            "blend2DBackwardAnimationIndex": -1,
+                            "blend2DBackwardLeft90AnimationIndex": -1,
+                            "blend2DBackwardLeft90PhaseOffset": 0.0,
+                            "blend2DBackwardLeftAnimationIndex": -1,
+                            "blend2DBackwardLeftPhaseOffset": 0.0,
+                            "blend2DBackwardPhaseOffset": 0.0,
+                            "blend2DBackwardRight90AnimationIndex": -1,
+                            "blend2DBackwardRight90PhaseOffset": 0.0,
+                            "blend2DBackwardRightAnimationIndex": -1,
+                            "blend2DBackwardRightPhaseOffset": 0.0,
+                            "blend2DDefaultInput": [
+                                0.0,
+                                1.0
+                            ],
+                            "blend2DForwardAnimationIndex": -1,
+                            "blend2DForwardLeft90AnimationIndex": -1,
+                            "blend2DForwardLeft90PhaseOffset": 0.0,
+                            "blend2DForwardLeftAnimationIndex": -1,
+                            "blend2DForwardLeftPhaseOffset": 0.0,
+                            "blend2DForwardPhaseOffset": 0.0,
+                            "blend2DForwardRight90AnimationIndex": -1,
+                            "blend2DForwardRight90PhaseOffset": 0.0,
+                            "blend2DForwardRightAnimationIndex": -1,
+                            "blend2DForwardRightPhaseOffset": 0.0,
+                            "blend2DIdleAnimationIndex": -1,
+                            "blend2DIdlePhaseOffset": 0.0,
+                            "blend2DIdleThreshold": 0.05000000074505806,
+                            "blend2DLeftAnimationIndex": -1,
+                            "blend2DLeftPhaseOffset": 0.0,
+                            "blend2DParamName": "MoveInput",
+                            "blend2DRightAnimationIndex": -1,
+                            "blend2DRightPhaseOffset": 0.0,
+                            "blend2DSyncNormalizedTime": true,
+                            "blend2DUseEightDirections": false,
+                            "blend2DUseForwardBackwardLateral": false,
+                            "blend2DUseIdleStop": false,
+                            "blendDefaultWeight": 0.5,
+                            "blendMaskRootNodes": [],
+                            "blendParamName": "BlendAlpha",
+                            "blendParameterMax": 1.0,
+                            "blendParameterMin": 0.0,
+                            "blendPhaseOffsetA": 0.0,
+                            "blendPhaseOffsetB": 0.0,
+                            "blendSyncNormalizedTime": true,
+                            "blendUseMask": false,
+                            "customAnimIndex": -1,
+                            "events": [],
+                            "loop": false,
+                            "name": "Buff_Seq",
+                            "playbackSpeedParamName": "",
+                            "rootMotion": {
+                                "applyPositionX": false,
+                                "applyPositionY": false,
+                                "applyPositionZ": false,
+                                "applyRotationX": false,
+                                "applyRotationY": false,
+                                "applyRotationZ": false,
+                                "cutVisualPositionX": true,
+                                "cutVisualPositionY": true,
+                                "cutVisualPositionZ": true,
+                                "cutVisualWhenDisabled": false,
+                                "enable": true,
+                                "sourceNodeName": "root"
+                            },
+                            "rootMotionScale": 0.0,
+                            "rootMotionScaleCurveName": "HumanBoss.AttackRootWeight",
+                            "sampleWeaponHitBoxes": false,
+                            "sequenceClips": [],
+                            "sequencer": "",
+                            "speed": 1.0,
+                            "speedCurveName": "",
                             "type": 0
                         },
                         {
@@ -4259,7 +4343,7 @@
                         {
                             "animIndexA": -1,
                             "animIndexB": -1,
-                            "animationIndex": 53,
+                            "animationIndex": 60,
                             "blend2DBackwardAnimationIndex": -1,
                             "blend2DBackwardLeft90AnimationIndex": -1,
                             "blend2DBackwardLeft90PhaseOffset": 0.0,
@@ -4307,8 +4391,8 @@
                             "blendUseMask": false,
                             "customAnimIndex": -1,
                             "events": [],
-                            "loop": false,
-                            "name": "Buff_Seq",
+                            "loop": true,
+                            "name": "HumanBossAttackTell",
                             "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": false,
@@ -4322,92 +4406,15 @@
                                 "cutVisualPositionZ": true,
                                 "cutVisualWhenDisabled": false,
                                 "enable": true,
-                                "sourceNodeName": "root"
+                                "sourceNodeName": "pelvis"
                             },
                             "rootMotionScale": 0.0,
-                            "rootMotionScaleCurveName": "HumanBoss.AttackRootWeight",
+                            "rootMotionScaleCurveName": "",
                             "sampleWeaponHitBoxes": false,
                             "sequenceClips": [],
                             "sequencer": "",
                             "speed": 1.0,
-                            "speedCurveName": "",
-                            "type": 0
-                        },
-                        {
-                            "animIndexA": -1,
-                            "animIndexB": -1,
-                            "animationIndex": 37,
-                            "blend2DBackwardAnimationIndex": -1,
-                            "blend2DBackwardLeft90AnimationIndex": -1,
-                            "blend2DBackwardLeft90PhaseOffset": 0.0,
-                            "blend2DBackwardLeftAnimationIndex": -1,
-                            "blend2DBackwardLeftPhaseOffset": 0.0,
-                            "blend2DBackwardPhaseOffset": 0.0,
-                            "blend2DBackwardRight90AnimationIndex": -1,
-                            "blend2DBackwardRight90PhaseOffset": 0.0,
-                            "blend2DBackwardRightAnimationIndex": -1,
-                            "blend2DBackwardRightPhaseOffset": 0.0,
-                            "blend2DDefaultInput": [
-                                0.0,
-                                1.0
-                            ],
-                            "blend2DForwardAnimationIndex": -1,
-                            "blend2DForwardLeft90AnimationIndex": -1,
-                            "blend2DForwardLeft90PhaseOffset": 0.0,
-                            "blend2DForwardLeftAnimationIndex": -1,
-                            "blend2DForwardLeftPhaseOffset": 0.0,
-                            "blend2DForwardPhaseOffset": 0.0,
-                            "blend2DForwardRight90AnimationIndex": -1,
-                            "blend2DForwardRight90PhaseOffset": 0.0,
-                            "blend2DForwardRightAnimationIndex": -1,
-                            "blend2DForwardRightPhaseOffset": 0.0,
-                            "blend2DIdleAnimationIndex": -1,
-                            "blend2DIdlePhaseOffset": 0.0,
-                            "blend2DIdleThreshold": 0.05000000074505806,
-                            "blend2DLeftAnimationIndex": -1,
-                            "blend2DLeftPhaseOffset": 0.0,
-                            "blend2DParamName": "MoveInput",
-                            "blend2DRightAnimationIndex": -1,
-                            "blend2DRightPhaseOffset": 0.0,
-                            "blend2DSyncNormalizedTime": true,
-                            "blend2DUseEightDirections": false,
-                            "blend2DUseForwardBackwardLateral": false,
-                            "blend2DUseIdleStop": false,
-                            "blendDefaultWeight": 0.5,
-                            "blendMaskRootNodes": [],
-                            "blendParamName": "BlendAlpha",
-                            "blendParameterMax": 1.0,
-                            "blendParameterMin": 0.0,
-                            "blendPhaseOffsetA": 0.0,
-                            "blendPhaseOffsetB": 0.0,
-                            "blendSyncNormalizedTime": true,
-                            "blendUseMask": false,
-                            "customAnimIndex": -1,
-                            "events": [],
-                            "loop": false,
-                            "name": "Attack_Air_to_Floor_01_Start_Seq",
-                            "playbackSpeedParamName": "",
-                            "rootMotion": {
-                                "applyPositionX": false,
-                                "applyPositionY": false,
-                                "applyPositionZ": false,
-                                "applyRotationX": false,
-                                "applyRotationY": false,
-                                "applyRotationZ": false,
-                                "cutVisualPositionX": true,
-                                "cutVisualPositionY": true,
-                                "cutVisualPositionZ": true,
-                                "cutVisualWhenDisabled": false,
-                                "enable": true,
-                                "sourceNodeName": "root"
-                            },
-                            "rootMotionScale": 0.0,
-                            "rootMotionScaleCurveName": "HumanBoss.AttackRootWeight",
-                            "sampleWeaponHitBoxes": false,
-                            "sequenceClips": [],
-                            "sequencer": "",
-                            "speed": 1.0,
-                            "speedCurveName": "",
+                            "speedCurveName": "HumanBoss.WindupPoseSpeed",
                             "type": 0
                         },
                         {
@@ -4598,6 +4605,196 @@
                             "sequencer": "",
                             "speed": 1.5,
                             "speedCurveName": "HumanBoss.FinisherSpeed",
+                            "type": 0
+                        },
+                        {
+                            "animIndexA": -1,
+                            "animIndexB": -1,
+                            "animationIndex": 67,
+                            "blend2DBackwardAnimationIndex": -1,
+                            "blend2DBackwardLeft90AnimationIndex": -1,
+                            "blend2DBackwardLeft90PhaseOffset": 0.0,
+                            "blend2DBackwardLeftAnimationIndex": -1,
+                            "blend2DBackwardLeftPhaseOffset": 0.0,
+                            "blend2DBackwardPhaseOffset": 0.0,
+                            "blend2DBackwardRight90AnimationIndex": -1,
+                            "blend2DBackwardRight90PhaseOffset": 0.0,
+                            "blend2DBackwardRightAnimationIndex": -1,
+                            "blend2DBackwardRightPhaseOffset": 0.0,
+                            "blend2DDefaultInput": [
+                                0.0,
+                                1.0
+                            ],
+                            "blend2DForwardAnimationIndex": -1,
+                            "blend2DForwardLeft90AnimationIndex": -1,
+                            "blend2DForwardLeft90PhaseOffset": 0.0,
+                            "blend2DForwardLeftAnimationIndex": -1,
+                            "blend2DForwardLeftPhaseOffset": 0.0,
+                            "blend2DForwardPhaseOffset": 0.0,
+                            "blend2DForwardRight90AnimationIndex": -1,
+                            "blend2DForwardRight90PhaseOffset": 0.0,
+                            "blend2DForwardRightAnimationIndex": -1,
+                            "blend2DForwardRightPhaseOffset": 0.0,
+                            "blend2DIdleAnimationIndex": -1,
+                            "blend2DIdlePhaseOffset": 0.0,
+                            "blend2DIdleThreshold": 0.05000000074505806,
+                            "blend2DLeftAnimationIndex": -1,
+                            "blend2DLeftPhaseOffset": 0.0,
+                            "blend2DParamName": "MoveInput",
+                            "blend2DRightAnimationIndex": -1,
+                            "blend2DRightPhaseOffset": 0.0,
+                            "blend2DSyncNormalizedTime": true,
+                            "blend2DUseEightDirections": false,
+                            "blend2DUseForwardBackwardLateral": false,
+                            "blend2DUseIdleStop": false,
+                            "blendDefaultWeight": 0.5,
+                            "blendMaskRootNodes": [],
+                            "blendParamName": "BlendAlpha",
+                            "blendParameterMax": 1.0,
+                            "blendParameterMin": 0.0,
+                            "blendPhaseOffsetA": 0.0,
+                            "blendPhaseOffsetB": 0.0,
+                            "blendSyncNormalizedTime": true,
+                            "blendUseMask": false,
+                            "customAnimIndex": -1,
+                            "events": [
+                                {
+                                    "actionEnd": "",
+                                    "actionStart": "",
+                                    "actionUpdate": "",
+                                    "attachNodeName": "",
+                                    "attachToOwner": false,
+                                    "attackTemplateId": "HumanBossSword02",
+                                    "blackboardWrites": [],
+                                    "callEndOnStateExit": true,
+                                    "endTime": 0.33000001311302185,
+                                    "eventTemplateType": "ATTACK_TEMPLATE",
+                                    "label": "Combo_Attack_02_03_Seq.Hit",
+                                    "localPosition": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localRotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localScale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "meshVFXAssetPath": "",
+                                    "meshVFXLifeTime": 1.0,
+                                    "meshVFXPlaybackSpeed": 1.0,
+                                    "mirrorMeshVFX": false,
+                                    "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
+                                    "playbackSpeed": 1.0,
+                                    "startTime": 0.12999999523162842,
+                                    "telegraph": {
+                                        "attachNodeName": "",
+                                        "berserkLeadFrames": 9.0,
+                                        "enabled": true,
+                                        "fallbackOffset": [
+                                            0.0,
+                                            2.0,
+                                            0.0
+                                        ],
+                                        "leadFrames": 12.0,
+                                        "lifeTime": 0.15000000596046448,
+                                        "localOffset": [
+                                            0.0,
+                                            0.30000001192092896,
+                                            0.0
+                                        ],
+                                        "particleName": "EnemyAttackWarning",
+                                        "particleScale": 1.0
+                                    },
+                                    "telegraphHitStart": false
+                                },
+                                {
+                                    "actionEnd": "HumanBoss_TrailEnd",
+                                    "actionStart": "HumanBoss_TrailBegin",
+                                    "actionUpdate": "",
+                                    "attachNodeName": "",
+                                    "attachToOwner": false,
+                                    "attackTemplateId": "",
+                                    "blackboardWrites": [],
+                                    "callEndOnStateExit": true,
+                                    "endTime": 0.36500000953674316,
+                                    "eventTemplateType": "NONE",
+                                    "label": "HumanBoss.WeaponTrail.1",
+                                    "localPosition": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localRotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localScale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "meshVFXAssetPath": "",
+                                    "meshVFXLifeTime": 1.0,
+                                    "meshVFXPlaybackSpeed": 1.0,
+                                    "mirrorMeshVFX": false,
+                                    "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
+                                    "playbackSpeed": 1.0,
+                                    "startTime": 0.10499999672174454,
+                                    "telegraph": {
+                                        "attachNodeName": "",
+                                        "berserkLeadFrames": 9.0,
+                                        "enabled": true,
+                                        "fallbackOffset": [
+                                            0.0,
+                                            2.0,
+                                            0.0
+                                        ],
+                                        "leadFrames": 12.0,
+                                        "lifeTime": 0.15000000596046448,
+                                        "localOffset": [
+                                            0.0,
+                                            0.30000001192092896,
+                                            0.0
+                                        ],
+                                        "particleName": "EnemyAttackWarning",
+                                        "particleScale": 1.0
+                                    },
+                                    "telegraphHitStart": false
+                                }
+                            ],
+                            "loop": false,
+                            "name": "Combo_Attack_02_03_Seq",
+                            "playbackSpeedParamName": "",
+                            "rootMotion": {
+                                "applyPositionX": true,
+                                "applyPositionY": false,
+                                "applyPositionZ": true,
+                                "applyRotationX": false,
+                                "applyRotationY": false,
+                                "applyRotationZ": false,
+                                "cutVisualPositionX": true,
+                                "cutVisualPositionY": false,
+                                "cutVisualPositionZ": true,
+                                "cutVisualWhenDisabled": false,
+                                "enable": true,
+                                "sourceNodeName": "pelvis"
+                            },
+                            "rootMotionScale": 0.004999999888241291,
+                            "rootMotionScaleCurveName": "HumanBoss.AttackRootWeight",
+                            "sampleWeaponHitBoxes": false,
+                            "sequenceClips": [],
+                            "sequencer": "",
+                            "speed": 1.0,
+                            "speedCurveName": "",
                             "type": 0
                         },
                         {
@@ -4844,196 +5041,6 @@
                             "sequencer": "",
                             "speed": 1.5,
                             "speedCurveName": "HumanBoss.FinisherSpeed",
-                            "type": 0
-                        },
-                        {
-                            "animIndexA": -1,
-                            "animIndexB": -1,
-                            "animationIndex": 67,
-                            "blend2DBackwardAnimationIndex": -1,
-                            "blend2DBackwardLeft90AnimationIndex": -1,
-                            "blend2DBackwardLeft90PhaseOffset": 0.0,
-                            "blend2DBackwardLeftAnimationIndex": -1,
-                            "blend2DBackwardLeftPhaseOffset": 0.0,
-                            "blend2DBackwardPhaseOffset": 0.0,
-                            "blend2DBackwardRight90AnimationIndex": -1,
-                            "blend2DBackwardRight90PhaseOffset": 0.0,
-                            "blend2DBackwardRightAnimationIndex": -1,
-                            "blend2DBackwardRightPhaseOffset": 0.0,
-                            "blend2DDefaultInput": [
-                                0.0,
-                                1.0
-                            ],
-                            "blend2DForwardAnimationIndex": -1,
-                            "blend2DForwardLeft90AnimationIndex": -1,
-                            "blend2DForwardLeft90PhaseOffset": 0.0,
-                            "blend2DForwardLeftAnimationIndex": -1,
-                            "blend2DForwardLeftPhaseOffset": 0.0,
-                            "blend2DForwardPhaseOffset": 0.0,
-                            "blend2DForwardRight90AnimationIndex": -1,
-                            "blend2DForwardRight90PhaseOffset": 0.0,
-                            "blend2DForwardRightAnimationIndex": -1,
-                            "blend2DForwardRightPhaseOffset": 0.0,
-                            "blend2DIdleAnimationIndex": -1,
-                            "blend2DIdlePhaseOffset": 0.0,
-                            "blend2DIdleThreshold": 0.05000000074505806,
-                            "blend2DLeftAnimationIndex": -1,
-                            "blend2DLeftPhaseOffset": 0.0,
-                            "blend2DParamName": "MoveInput",
-                            "blend2DRightAnimationIndex": -1,
-                            "blend2DRightPhaseOffset": 0.0,
-                            "blend2DSyncNormalizedTime": true,
-                            "blend2DUseEightDirections": false,
-                            "blend2DUseForwardBackwardLateral": false,
-                            "blend2DUseIdleStop": false,
-                            "blendDefaultWeight": 0.5,
-                            "blendMaskRootNodes": [],
-                            "blendParamName": "BlendAlpha",
-                            "blendParameterMax": 1.0,
-                            "blendParameterMin": 0.0,
-                            "blendPhaseOffsetA": 0.0,
-                            "blendPhaseOffsetB": 0.0,
-                            "blendSyncNormalizedTime": true,
-                            "blendUseMask": false,
-                            "customAnimIndex": -1,
-                            "events": [
-                                {
-                                    "actionEnd": "",
-                                    "actionStart": "",
-                                    "actionUpdate": "",
-                                    "attachNodeName": "",
-                                    "attachToOwner": false,
-                                    "attackTemplateId": "HumanBossSword02",
-                                    "blackboardWrites": [],
-                                    "callEndOnStateExit": true,
-                                    "endTime": 0.33000001311302185,
-                                    "eventTemplateType": "ATTACK_TEMPLATE",
-                                    "label": "Combo_Attack_02_03_Seq.Hit",
-                                    "localPosition": [
-                                        0.0,
-                                        0.0,
-                                        0.0
-                                    ],
-                                    "localRotation": [
-                                        0.0,
-                                        0.0,
-                                        0.0
-                                    ],
-                                    "localScale": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "meshVFXAssetPath": "",
-                                    "meshVFXLifeTime": 1.0,
-                                    "meshVFXPlaybackSpeed": 1.0,
-                                    "mirrorMeshVFX": false,
-                                    "overridePlaybackSpeed": false,
-                                    "ownerTarget": "Self",
-                                    "playbackSpeed": 1.0,
-                                    "startTime": 0.12999999523162842,
-                                    "telegraph": {
-                                        "attachNodeName": "",
-                                        "berserkLeadFrames": 9.0,
-                                        "enabled": true,
-                                        "fallbackOffset": [
-                                            0.0,
-                                            2.0,
-                                            0.0
-                                        ],
-                                        "leadFrames": 12.0,
-                                        "lifeTime": 0.15000000596046448,
-                                        "localOffset": [
-                                            0.0,
-                                            0.30000001192092896,
-                                            0.0
-                                        ],
-                                        "particleName": "EnemyAttackWarning",
-                                        "particleScale": 1.0
-                                    },
-                                    "telegraphHitStart": false
-                                },
-                                {
-                                    "actionEnd": "HumanBoss_TrailEnd",
-                                    "actionStart": "HumanBoss_TrailBegin",
-                                    "actionUpdate": "",
-                                    "attachNodeName": "",
-                                    "attachToOwner": false,
-                                    "attackTemplateId": "",
-                                    "blackboardWrites": [],
-                                    "callEndOnStateExit": true,
-                                    "endTime": 0.36500000953674316,
-                                    "eventTemplateType": "NONE",
-                                    "label": "HumanBoss.WeaponTrail.1",
-                                    "localPosition": [
-                                        0.0,
-                                        0.0,
-                                        0.0
-                                    ],
-                                    "localRotation": [
-                                        0.0,
-                                        0.0,
-                                        0.0
-                                    ],
-                                    "localScale": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "meshVFXAssetPath": "",
-                                    "meshVFXLifeTime": 1.0,
-                                    "meshVFXPlaybackSpeed": 1.0,
-                                    "mirrorMeshVFX": false,
-                                    "overridePlaybackSpeed": false,
-                                    "ownerTarget": "Self",
-                                    "playbackSpeed": 1.0,
-                                    "startTime": 0.10499999672174454,
-                                    "telegraph": {
-                                        "attachNodeName": "",
-                                        "berserkLeadFrames": 9.0,
-                                        "enabled": true,
-                                        "fallbackOffset": [
-                                            0.0,
-                                            2.0,
-                                            0.0
-                                        ],
-                                        "leadFrames": 12.0,
-                                        "lifeTime": 0.15000000596046448,
-                                        "localOffset": [
-                                            0.0,
-                                            0.30000001192092896,
-                                            0.0
-                                        ],
-                                        "particleName": "EnemyAttackWarning",
-                                        "particleScale": 1.0
-                                    },
-                                    "telegraphHitStart": false
-                                }
-                            ],
-                            "loop": false,
-                            "name": "Combo_Attack_02_03_Seq",
-                            "playbackSpeedParamName": "",
-                            "rootMotion": {
-                                "applyPositionX": true,
-                                "applyPositionY": false,
-                                "applyPositionZ": true,
-                                "applyRotationX": false,
-                                "applyRotationY": false,
-                                "applyRotationZ": false,
-                                "cutVisualPositionX": true,
-                                "cutVisualPositionY": false,
-                                "cutVisualPositionZ": true,
-                                "cutVisualWhenDisabled": false,
-                                "enable": true,
-                                "sourceNodeName": "pelvis"
-                            },
-                            "rootMotionScale": 0.004999999888241291,
-                            "rootMotionScaleCurveName": "HumanBoss.AttackRootWeight",
-                            "sampleWeaponHitBoxes": false,
-                            "sequenceClips": [],
-                            "sequencer": "",
-                            "speed": 1.0,
-                            "speedCurveName": "",
                             "type": 0
                         },
                         {
@@ -6123,6 +6130,83 @@
                         {
                             "animIndexA": -1,
                             "animIndexB": -1,
+                            "animationIndex": 36,
+                            "blend2DBackwardAnimationIndex": -1,
+                            "blend2DBackwardLeft90AnimationIndex": -1,
+                            "blend2DBackwardLeft90PhaseOffset": 0.0,
+                            "blend2DBackwardLeftAnimationIndex": -1,
+                            "blend2DBackwardLeftPhaseOffset": 0.0,
+                            "blend2DBackwardPhaseOffset": 0.0,
+                            "blend2DBackwardRight90AnimationIndex": -1,
+                            "blend2DBackwardRight90PhaseOffset": 0.0,
+                            "blend2DBackwardRightAnimationIndex": -1,
+                            "blend2DBackwardRightPhaseOffset": 0.0,
+                            "blend2DDefaultInput": [
+                                0.0,
+                                1.0
+                            ],
+                            "blend2DForwardAnimationIndex": -1,
+                            "blend2DForwardLeft90AnimationIndex": -1,
+                            "blend2DForwardLeft90PhaseOffset": 0.0,
+                            "blend2DForwardLeftAnimationIndex": -1,
+                            "blend2DForwardLeftPhaseOffset": 0.0,
+                            "blend2DForwardPhaseOffset": 0.0,
+                            "blend2DForwardRight90AnimationIndex": -1,
+                            "blend2DForwardRight90PhaseOffset": 0.0,
+                            "blend2DForwardRightAnimationIndex": -1,
+                            "blend2DForwardRightPhaseOffset": 0.0,
+                            "blend2DIdleAnimationIndex": -1,
+                            "blend2DIdlePhaseOffset": 0.0,
+                            "blend2DIdleThreshold": 0.05000000074505806,
+                            "blend2DLeftAnimationIndex": -1,
+                            "blend2DLeftPhaseOffset": 0.0,
+                            "blend2DParamName": "MoveInput",
+                            "blend2DRightAnimationIndex": -1,
+                            "blend2DRightPhaseOffset": 0.0,
+                            "blend2DSyncNormalizedTime": true,
+                            "blend2DUseEightDirections": false,
+                            "blend2DUseForwardBackwardLateral": false,
+                            "blend2DUseIdleStop": false,
+                            "blendDefaultWeight": 0.5,
+                            "blendMaskRootNodes": [],
+                            "blendParamName": "BlendAlpha",
+                            "blendParameterMax": 1.0,
+                            "blendParameterMin": 0.0,
+                            "blendPhaseOffsetA": 0.0,
+                            "blendPhaseOffsetB": 0.0,
+                            "blendSyncNormalizedTime": true,
+                            "blendUseMask": false,
+                            "customAnimIndex": -1,
+                            "events": [],
+                            "loop": true,
+                            "name": "Attack_Air_to_Floor_01_Loop_Seq",
+                            "playbackSpeedParamName": "",
+                            "rootMotion": {
+                                "applyPositionX": false,
+                                "applyPositionY": false,
+                                "applyPositionZ": false,
+                                "applyRotationX": false,
+                                "applyRotationY": false,
+                                "applyRotationZ": false,
+                                "cutVisualPositionX": true,
+                                "cutVisualPositionY": true,
+                                "cutVisualPositionZ": true,
+                                "cutVisualWhenDisabled": false,
+                                "enable": true,
+                                "sourceNodeName": "root"
+                            },
+                            "rootMotionScale": 0.0,
+                            "rootMotionScaleCurveName": "HumanBoss.AttackRootWeight",
+                            "sampleWeaponHitBoxes": false,
+                            "sequenceClips": [],
+                            "sequencer": "",
+                            "speed": 1.0,
+                            "speedCurveName": "",
+                            "type": 0
+                        },
+                        {
+                            "animIndexA": -1,
+                            "animIndexB": -1,
                             "animationIndex": 8,
                             "blend2DBackwardAnimationIndex": -1,
                             "blend2DBackwardLeft90AnimationIndex": -1,
@@ -6364,83 +6448,6 @@
                             "sequencer": "",
                             "speed": 1.0,
                             "speedCurveName": "HumanBoss.HeavySingleSpeed",
-                            "type": 0
-                        },
-                        {
-                            "animIndexA": -1,
-                            "animIndexB": -1,
-                            "animationIndex": 36,
-                            "blend2DBackwardAnimationIndex": -1,
-                            "blend2DBackwardLeft90AnimationIndex": -1,
-                            "blend2DBackwardLeft90PhaseOffset": 0.0,
-                            "blend2DBackwardLeftAnimationIndex": -1,
-                            "blend2DBackwardLeftPhaseOffset": 0.0,
-                            "blend2DBackwardPhaseOffset": 0.0,
-                            "blend2DBackwardRight90AnimationIndex": -1,
-                            "blend2DBackwardRight90PhaseOffset": 0.0,
-                            "blend2DBackwardRightAnimationIndex": -1,
-                            "blend2DBackwardRightPhaseOffset": 0.0,
-                            "blend2DDefaultInput": [
-                                0.0,
-                                1.0
-                            ],
-                            "blend2DForwardAnimationIndex": -1,
-                            "blend2DForwardLeft90AnimationIndex": -1,
-                            "blend2DForwardLeft90PhaseOffset": 0.0,
-                            "blend2DForwardLeftAnimationIndex": -1,
-                            "blend2DForwardLeftPhaseOffset": 0.0,
-                            "blend2DForwardPhaseOffset": 0.0,
-                            "blend2DForwardRight90AnimationIndex": -1,
-                            "blend2DForwardRight90PhaseOffset": 0.0,
-                            "blend2DForwardRightAnimationIndex": -1,
-                            "blend2DForwardRightPhaseOffset": 0.0,
-                            "blend2DIdleAnimationIndex": -1,
-                            "blend2DIdlePhaseOffset": 0.0,
-                            "blend2DIdleThreshold": 0.05000000074505806,
-                            "blend2DLeftAnimationIndex": -1,
-                            "blend2DLeftPhaseOffset": 0.0,
-                            "blend2DParamName": "MoveInput",
-                            "blend2DRightAnimationIndex": -1,
-                            "blend2DRightPhaseOffset": 0.0,
-                            "blend2DSyncNormalizedTime": true,
-                            "blend2DUseEightDirections": false,
-                            "blend2DUseForwardBackwardLateral": false,
-                            "blend2DUseIdleStop": false,
-                            "blendDefaultWeight": 0.5,
-                            "blendMaskRootNodes": [],
-                            "blendParamName": "BlendAlpha",
-                            "blendParameterMax": 1.0,
-                            "blendParameterMin": 0.0,
-                            "blendPhaseOffsetA": 0.0,
-                            "blendPhaseOffsetB": 0.0,
-                            "blendSyncNormalizedTime": true,
-                            "blendUseMask": false,
-                            "customAnimIndex": -1,
-                            "events": [],
-                            "loop": true,
-                            "name": "Attack_Air_to_Floor_01_Loop_Seq",
-                            "playbackSpeedParamName": "",
-                            "rootMotion": {
-                                "applyPositionX": false,
-                                "applyPositionY": false,
-                                "applyPositionZ": false,
-                                "applyRotationX": false,
-                                "applyRotationY": false,
-                                "applyRotationZ": false,
-                                "cutVisualPositionX": true,
-                                "cutVisualPositionY": true,
-                                "cutVisualPositionZ": true,
-                                "cutVisualWhenDisabled": false,
-                                "enable": true,
-                                "sourceNodeName": "root"
-                            },
-                            "rootMotionScale": 0.0,
-                            "rootMotionScaleCurveName": "HumanBoss.AttackRootWeight",
-                            "sampleWeaponHitBoxes": false,
-                            "sequenceClips": [],
-                            "sequencer": "",
-                            "speed": 1.0,
-                            "speedCurveName": "",
                             "type": 0
                         },
                         {
@@ -6790,83 +6797,6 @@
                         {
                             "animIndexA": -1,
                             "animIndexB": -1,
-                            "animationIndex": 40,
-                            "blend2DBackwardAnimationIndex": -1,
-                            "blend2DBackwardLeft90AnimationIndex": -1,
-                            "blend2DBackwardLeft90PhaseOffset": 0.0,
-                            "blend2DBackwardLeftAnimationIndex": -1,
-                            "blend2DBackwardLeftPhaseOffset": 0.0,
-                            "blend2DBackwardPhaseOffset": 0.0,
-                            "blend2DBackwardRight90AnimationIndex": -1,
-                            "blend2DBackwardRight90PhaseOffset": 0.0,
-                            "blend2DBackwardRightAnimationIndex": -1,
-                            "blend2DBackwardRightPhaseOffset": 0.0,
-                            "blend2DDefaultInput": [
-                                0.0,
-                                1.0
-                            ],
-                            "blend2DForwardAnimationIndex": -1,
-                            "blend2DForwardLeft90AnimationIndex": -1,
-                            "blend2DForwardLeft90PhaseOffset": 0.0,
-                            "blend2DForwardLeftAnimationIndex": -1,
-                            "blend2DForwardLeftPhaseOffset": 0.0,
-                            "blend2DForwardPhaseOffset": 0.0,
-                            "blend2DForwardRight90AnimationIndex": -1,
-                            "blend2DForwardRight90PhaseOffset": 0.0,
-                            "blend2DForwardRightAnimationIndex": -1,
-                            "blend2DForwardRightPhaseOffset": 0.0,
-                            "blend2DIdleAnimationIndex": -1,
-                            "blend2DIdlePhaseOffset": 0.0,
-                            "blend2DIdleThreshold": 0.05000000074505806,
-                            "blend2DLeftAnimationIndex": -1,
-                            "blend2DLeftPhaseOffset": 0.0,
-                            "blend2DParamName": "MoveInput",
-                            "blend2DRightAnimationIndex": -1,
-                            "blend2DRightPhaseOffset": 0.0,
-                            "blend2DSyncNormalizedTime": true,
-                            "blend2DUseEightDirections": false,
-                            "blend2DUseForwardBackwardLateral": false,
-                            "blend2DUseIdleStop": false,
-                            "blendDefaultWeight": 0.5,
-                            "blendMaskRootNodes": [],
-                            "blendParamName": "BlendAlpha",
-                            "blendParameterMax": 1.0,
-                            "blendParameterMin": 0.0,
-                            "blendPhaseOffsetA": 0.0,
-                            "blendPhaseOffsetB": 0.0,
-                            "blendSyncNormalizedTime": true,
-                            "blendUseMask": false,
-                            "customAnimIndex": -1,
-                            "events": [],
-                            "loop": false,
-                            "name": "Attack_Air_to_Floor_02_Start_Seq",
-                            "playbackSpeedParamName": "",
-                            "rootMotion": {
-                                "applyPositionX": false,
-                                "applyPositionY": false,
-                                "applyPositionZ": false,
-                                "applyRotationX": false,
-                                "applyRotationY": false,
-                                "applyRotationZ": false,
-                                "cutVisualPositionX": true,
-                                "cutVisualPositionY": true,
-                                "cutVisualPositionZ": true,
-                                "cutVisualWhenDisabled": false,
-                                "enable": true,
-                                "sourceNodeName": "root"
-                            },
-                            "rootMotionScale": 0.0,
-                            "rootMotionScaleCurveName": "HumanBoss.AttackRootWeight",
-                            "sampleWeaponHitBoxes": false,
-                            "sequenceClips": [],
-                            "sequencer": "",
-                            "speed": 1.0,
-                            "speedCurveName": "",
-                            "type": 0
-                        },
-                        {
-                            "animIndexA": -1,
-                            "animIndexB": -1,
                             "animationIndex": 39,
                             "blend2DBackwardAnimationIndex": -1,
                             "blend2DBackwardLeft90AnimationIndex": -1,
@@ -6917,6 +6847,83 @@
                             "events": [],
                             "loop": true,
                             "name": "Attack_Air_to_Floor_02_Loop_Seq",
+                            "playbackSpeedParamName": "",
+                            "rootMotion": {
+                                "applyPositionX": false,
+                                "applyPositionY": false,
+                                "applyPositionZ": false,
+                                "applyRotationX": false,
+                                "applyRotationY": false,
+                                "applyRotationZ": false,
+                                "cutVisualPositionX": true,
+                                "cutVisualPositionY": true,
+                                "cutVisualPositionZ": true,
+                                "cutVisualWhenDisabled": false,
+                                "enable": true,
+                                "sourceNodeName": "root"
+                            },
+                            "rootMotionScale": 0.0,
+                            "rootMotionScaleCurveName": "HumanBoss.AttackRootWeight",
+                            "sampleWeaponHitBoxes": false,
+                            "sequenceClips": [],
+                            "sequencer": "",
+                            "speed": 1.0,
+                            "speedCurveName": "",
+                            "type": 0
+                        },
+                        {
+                            "animIndexA": -1,
+                            "animIndexB": -1,
+                            "animationIndex": 40,
+                            "blend2DBackwardAnimationIndex": -1,
+                            "blend2DBackwardLeft90AnimationIndex": -1,
+                            "blend2DBackwardLeft90PhaseOffset": 0.0,
+                            "blend2DBackwardLeftAnimationIndex": -1,
+                            "blend2DBackwardLeftPhaseOffset": 0.0,
+                            "blend2DBackwardPhaseOffset": 0.0,
+                            "blend2DBackwardRight90AnimationIndex": -1,
+                            "blend2DBackwardRight90PhaseOffset": 0.0,
+                            "blend2DBackwardRightAnimationIndex": -1,
+                            "blend2DBackwardRightPhaseOffset": 0.0,
+                            "blend2DDefaultInput": [
+                                0.0,
+                                1.0
+                            ],
+                            "blend2DForwardAnimationIndex": -1,
+                            "blend2DForwardLeft90AnimationIndex": -1,
+                            "blend2DForwardLeft90PhaseOffset": 0.0,
+                            "blend2DForwardLeftAnimationIndex": -1,
+                            "blend2DForwardLeftPhaseOffset": 0.0,
+                            "blend2DForwardPhaseOffset": 0.0,
+                            "blend2DForwardRight90AnimationIndex": -1,
+                            "blend2DForwardRight90PhaseOffset": 0.0,
+                            "blend2DForwardRightAnimationIndex": -1,
+                            "blend2DForwardRightPhaseOffset": 0.0,
+                            "blend2DIdleAnimationIndex": -1,
+                            "blend2DIdlePhaseOffset": 0.0,
+                            "blend2DIdleThreshold": 0.05000000074505806,
+                            "blend2DLeftAnimationIndex": -1,
+                            "blend2DLeftPhaseOffset": 0.0,
+                            "blend2DParamName": "MoveInput",
+                            "blend2DRightAnimationIndex": -1,
+                            "blend2DRightPhaseOffset": 0.0,
+                            "blend2DSyncNormalizedTime": true,
+                            "blend2DUseEightDirections": false,
+                            "blend2DUseForwardBackwardLateral": false,
+                            "blend2DUseIdleStop": false,
+                            "blendDefaultWeight": 0.5,
+                            "blendMaskRootNodes": [],
+                            "blendParamName": "BlendAlpha",
+                            "blendParameterMax": 1.0,
+                            "blendParameterMin": 0.0,
+                            "blendPhaseOffsetA": 0.0,
+                            "blendPhaseOffsetB": 0.0,
+                            "blendSyncNormalizedTime": true,
+                            "blendUseMask": false,
+                            "customAnimIndex": -1,
+                            "events": [],
+                            "loop": false,
+                            "name": "Attack_Air_to_Floor_02_Start_Seq",
                             "playbackSpeedParamName": "",
                             "rootMotion": {
                                 "applyPositionX": false,
@@ -7880,6 +7887,90 @@
                             "Phases": [
                                 {
                                     "AirAnimation": "",
+                                    "Animation": "SS_Take",
+                                    "AnimationStartTime": 0.0,
+                                    "BlendDuration": 0.03999999910593033,
+                                    "CanActionBranch": false,
+                                    "CanBufferInput": false,
+                                    "CanDodgeCancel": false,
+                                    "ContinueSequence": false,
+                                    "Duration": 0.0,
+                                    "EnableGuard": false,
+                                    "End": "ACTION_END",
+                                    "EnterAction": "",
+                                    "ExitAction": "",
+                                    "ForwardSpeed": 0.0,
+                                    "ForwardSpeedCurve": "",
+                                    "MaximumDuration": 5.0,
+                                    "MotionWarpPreset": "",
+                                    "PlayAnimationFromSequence": false,
+                                    "PreventFlinch": false,
+                                    "Sequence": "HumanBoss_ComboTell",
+                                    "SuspendGravity": false,
+                                    "VerticalImpulse": 0.0,
+                                    "VerticalSpeed": 0.0,
+                                    "VerticalSpeedCurve": "",
+                                    "WaitForAnimationEnd": false,
+                                    "WarpHeight": 0.0
+                                },
+                                {
+                                    "AirAnimation": "",
+                                    "Animation": "Charge_Air_Attack_Start_Seq",
+                                    "AnimationStartTime": 0.0,
+                                    "BlendDuration": 0.03999999910593033,
+                                    "CanActionBranch": false,
+                                    "CanBufferInput": false,
+                                    "CanDodgeCancel": false,
+                                    "ContinueSequence": false,
+                                    "Duration": 0.0,
+                                    "EnableGuard": false,
+                                    "End": "ANIMATION_END",
+                                    "EnterAction": "",
+                                    "ExitAction": "",
+                                    "ForwardSpeed": 4.0,
+                                    "ForwardSpeedCurve": "",
+                                    "MaximumDuration": 5.0,
+                                    "MotionWarpPreset": "",
+                                    "PlayAnimationFromSequence": false,
+                                    "PreventFlinch": false,
+                                    "Sequence": "",
+                                    "SuspendGravity": false,
+                                    "VerticalImpulse": 0.0,
+                                    "VerticalSpeed": 0.0,
+                                    "VerticalSpeedCurve": "",
+                                    "WaitForAnimationEnd": false,
+                                    "WarpHeight": 0.0
+                                },
+                                {
+                                    "AirAnimation": "",
+                                    "Animation": "Charge_Air_Attack_Loop_Seq",
+                                    "AnimationStartTime": 0.0,
+                                    "BlendDuration": 0.03999999910593033,
+                                    "CanActionBranch": false,
+                                    "CanBufferInput": false,
+                                    "CanDodgeCancel": false,
+                                    "ContinueSequence": false,
+                                    "Duration": 0.0,
+                                    "EnableGuard": false,
+                                    "End": "ACTION_END",
+                                    "EnterAction": "",
+                                    "ExitAction": "",
+                                    "ForwardSpeed": 4.0,
+                                    "ForwardSpeedCurve": "",
+                                    "MaximumDuration": 6.0,
+                                    "MotionWarpPreset": "",
+                                    "PlayAnimationFromSequence": false,
+                                    "PreventFlinch": false,
+                                    "Sequence": "",
+                                    "SuspendGravity": false,
+                                    "VerticalImpulse": 0.0,
+                                    "VerticalSpeed": 0.0,
+                                    "VerticalSpeedCurve": "",
+                                    "WaitForAnimationEnd": false,
+                                    "WarpHeight": 0.0
+                                },
+                                {
+                                    "AirAnimation": "",
                                     "Animation": "Combo_Attack_01_01_Seq",
                                     "AnimationStartTime": 0.0,
                                     "BlendDuration": 0.03999999910593033,
@@ -8023,6 +8114,90 @@
                             "Enabled": true,
                             "Name": "HumanBoss_COMBO_PATTERN_02",
                             "Phases": [
+                                {
+                                    "AirAnimation": "",
+                                    "Animation": "SS_Take",
+                                    "AnimationStartTime": 0.0,
+                                    "BlendDuration": 0.03999999910593033,
+                                    "CanActionBranch": false,
+                                    "CanBufferInput": false,
+                                    "CanDodgeCancel": false,
+                                    "ContinueSequence": false,
+                                    "Duration": 0.0,
+                                    "EnableGuard": false,
+                                    "End": "ACTION_END",
+                                    "EnterAction": "",
+                                    "ExitAction": "",
+                                    "ForwardSpeed": 0.0,
+                                    "ForwardSpeedCurve": "",
+                                    "MaximumDuration": 5.0,
+                                    "MotionWarpPreset": "",
+                                    "PlayAnimationFromSequence": false,
+                                    "PreventFlinch": false,
+                                    "Sequence": "HumanBoss_ComboTell",
+                                    "SuspendGravity": false,
+                                    "VerticalImpulse": 0.0,
+                                    "VerticalSpeed": 0.0,
+                                    "VerticalSpeedCurve": "",
+                                    "WaitForAnimationEnd": false,
+                                    "WarpHeight": 0.0
+                                },
+                                {
+                                    "AirAnimation": "",
+                                    "Animation": "Charge_Air_Attack_Start_Seq",
+                                    "AnimationStartTime": 0.0,
+                                    "BlendDuration": 0.03999999910593033,
+                                    "CanActionBranch": false,
+                                    "CanBufferInput": false,
+                                    "CanDodgeCancel": false,
+                                    "ContinueSequence": false,
+                                    "Duration": 0.0,
+                                    "EnableGuard": false,
+                                    "End": "ANIMATION_END",
+                                    "EnterAction": "",
+                                    "ExitAction": "",
+                                    "ForwardSpeed": 4.0,
+                                    "ForwardSpeedCurve": "",
+                                    "MaximumDuration": 5.0,
+                                    "MotionWarpPreset": "",
+                                    "PlayAnimationFromSequence": false,
+                                    "PreventFlinch": false,
+                                    "Sequence": "",
+                                    "SuspendGravity": false,
+                                    "VerticalImpulse": 0.0,
+                                    "VerticalSpeed": 0.0,
+                                    "VerticalSpeedCurve": "",
+                                    "WaitForAnimationEnd": false,
+                                    "WarpHeight": 0.0
+                                },
+                                {
+                                    "AirAnimation": "",
+                                    "Animation": "Charge_Air_Attack_Loop_Seq",
+                                    "AnimationStartTime": 0.0,
+                                    "BlendDuration": 0.03999999910593033,
+                                    "CanActionBranch": false,
+                                    "CanBufferInput": false,
+                                    "CanDodgeCancel": false,
+                                    "ContinueSequence": false,
+                                    "Duration": 0.0,
+                                    "EnableGuard": false,
+                                    "End": "ACTION_END",
+                                    "EnterAction": "",
+                                    "ExitAction": "",
+                                    "ForwardSpeed": 4.0,
+                                    "ForwardSpeedCurve": "",
+                                    "MaximumDuration": 6.0,
+                                    "MotionWarpPreset": "",
+                                    "PlayAnimationFromSequence": false,
+                                    "PreventFlinch": false,
+                                    "Sequence": "",
+                                    "SuspendGravity": false,
+                                    "VerticalImpulse": 0.0,
+                                    "VerticalSpeed": 0.0,
+                                    "VerticalSpeedCurve": "",
+                                    "WaitForAnimationEnd": false,
+                                    "WarpHeight": 0.0
+                                },
                                 {
                                     "AirAnimation": "",
                                     "Animation": "Combo_Attack_02_01_Seq",
@@ -10483,7 +10658,7 @@
                                 0.18000000715255737
                             ],
                             "Comment": "条件判定と行動をまとめた分類。実行優先順位は既存設定を維持。",
-                            "Id": 294,
+                            "Id": 302,
                             "Name": "ジャストガード後の反撃",
                             "NodeIds": [
                                 8,
@@ -10509,7 +10684,7 @@
                                 0.23999999463558197
                             ],
                             "Comment": "実行Action: HumanBoss_COUNTER_ATTACK",
-                            "Id": 295,
+                            "Id": 303,
                             "Name": "COUNTER_ATTACK",
                             "NodeIds": [
                                 16
@@ -10531,7 +10706,7 @@
                                 0.18000000715255737
                             ],
                             "Comment": "条件判定と行動をまとめた分類。実行優先順位は既存設定を維持。",
-                            "Id": 296,
+                            "Id": 304,
                             "Name": "プレイヤー攻撃への反応",
                             "NodeIds": [
                                 20,
@@ -10560,7 +10735,7 @@
                                 0.23999999463558197
                             ],
                             "Comment": "実行Action: HumanBoss_BACK_DODGE",
-                            "Id": 297,
+                            "Id": 305,
                             "Name": "BACK_DODGE",
                             "NodeIds": [
                                 32
@@ -10582,7 +10757,7 @@
                                 0.23999999463558197
                             ],
                             "Comment": "実行Action: HumanBoss_SIDE_DODGE",
-                            "Id": 298,
+                            "Id": 306,
                             "Name": "SIDE_DODGE",
                             "NodeIds": [
                                 36
@@ -10604,7 +10779,7 @@
                                 0.23999999463558197
                             ],
                             "Comment": "実行Action: HumanBoss_GUARD",
-                            "Id": 299,
+                            "Id": 307,
                             "Name": "GUARD",
                             "NodeIds": [
                                 40
@@ -10626,7 +10801,7 @@
                                 0.23999999463558197
                             ],
                             "Comment": "実行Action: HumanBoss_JUST_GUARD",
-                            "Id": 300,
+                            "Id": 308,
                             "Name": "JUST_GUARD",
                             "NodeIds": [
                                 44
@@ -10648,7 +10823,7 @@
                                 0.23999999463558197
                             ],
                             "Comment": "実行Action: HumanBoss_NoReaction",
-                            "Id": 301,
+                            "Id": 309,
                             "Name": "NoReaction",
                             "NodeIds": [
                                 48
@@ -10670,7 +10845,7 @@
                                 0.18000000715255737
                             ],
                             "Comment": "条件判定と行動をまとめた分類。実行優先順位は既存設定を維持。",
-                            "Id": 302,
+                            "Id": 310,
                             "Name": "間合いの調整",
                             "NodeIds": [
                                 52,
@@ -10694,7 +10869,7 @@
                                 0.23999999463558197
                             ],
                             "Comment": "実行Action: HumanBoss_Reposition",
-                            "Id": 303,
+                            "Id": 311,
                             "Name": "Reposition",
                             "NodeIds": [
                                 60
@@ -10716,7 +10891,7 @@
                                 0.18000000715255737
                             ],
                             "Comment": "条件判定と行動をまとめた分類。実行優先順位は既存設定を維持。",
-                            "Id": 304,
+                            "Id": 312,
                             "Name": "攻撃距離への接近",
                             "NodeIds": [
                                 64,
@@ -10740,7 +10915,7 @@
                                 0.23999999463558197
                             ],
                             "Comment": "実行Action: HumanBoss_Approach",
-                            "Id": 305,
+                            "Id": 313,
                             "Name": "Approach",
                             "NodeIds": [
                                 72
@@ -10762,7 +10937,7 @@
                                 0.18000000715255737
                             ],
                             "Comment": "条件判定と行動をまとめた分類。実行優先順位は既存設定を維持。",
-                            "Id": 306,
+                            "Id": 314,
                             "Name": "プレイヤーの観察",
                             "NodeIds": [
                                 76,
@@ -10786,7 +10961,7 @@
                                 0.23999999463558197
                             ],
                             "Comment": "実行Action: HumanBoss_Observe",
-                            "Id": 307,
+                            "Id": 315,
                             "Name": "Observe",
                             "NodeIds": [
                                 84
@@ -10808,7 +10983,7 @@
                                 0.18000000715255737
                             ],
                             "Comment": "条件判定と行動をまとめた分類。実行優先順位は既存設定を維持。",
-                            "Id": 308,
+                            "Id": 316,
                             "Name": "攻撃の選択",
                             "NodeIds": [
                                 88,
@@ -10839,7 +11014,7 @@
                                 0.23999999463558197
                             ],
                             "Comment": "実行Action: HumanBoss_NORMAL_ATTACK_A",
-                            "Id": 309,
+                            "Id": 317,
                             "Name": "ComboPattern01 (4 stages)",
                             "NodeIds": [
                                 100
@@ -10861,7 +11036,7 @@
                                 0.23999999463558197
                             ],
                             "Comment": "実行Action: HumanBoss_NORMAL_ATTACK_B",
-                            "Id": 310,
+                            "Id": 318,
                             "Name": "ComboPattern02 (4 stages)",
                             "NodeIds": [
                                 104
@@ -10883,7 +11058,7 @@
                                 0.23999999463558197
                             ],
                             "Comment": "実行Action: HumanBoss_DELAY_ATTACK",
-                            "Id": 311,
+                            "Id": 319,
                             "Name": "DELAY_ATTACK",
                             "NodeIds": [
                                 108
@@ -10905,7 +11080,7 @@
                                 0.23999999463558197
                             ],
                             "Comment": "実行Action: HumanBoss_GUARD_BREAK",
-                            "Id": 312,
+                            "Id": 320,
                             "Name": "GUARD_BREAK",
                             "NodeIds": [
                                 112
@@ -10927,7 +11102,7 @@
                                 0.23999999463558197
                             ],
                             "Comment": "実行Action: HumanBoss_Observe",
-                            "Id": 313,
+                            "Id": 321,
                             "Name": "待機と観察",
                             "NodeIds": [
                                 116
@@ -10949,7 +11124,7 @@
                                 0.23999999463558197
                             ],
                             "Comment": "実行Action: HumanBoss_LIGHT_COUNTER",
-                            "Id": 314,
+                            "Id": 322,
                             "Name": "通常Guard／Dodge後の軽反撃",
                             "NodeIds": [
                                 125
@@ -10971,7 +11146,7 @@
                                 0.23999999463558197
                             ],
                             "Comment": "実行Action: HumanBoss_WHIFF_PUNISH",
-                            "Id": 315,
+                            "Id": 323,
                             "Name": "空振り後の反撃",
                             "NodeIds": [
                                 129
@@ -10993,7 +11168,7 @@
                                 0.23999999463558197
                             ],
                             "Comment": "実行Action: HumanBoss_ATTACK_FEINT",
-                            "Id": 316,
+                            "Id": 324,
                             "Name": "予兆を見せて攻撃を誘う",
                             "NodeIds": [
                                 133
@@ -11015,7 +11190,7 @@
                                 0.18000000715255737
                             ],
                             "Comment": "条件判定と行動をまとめた分類。実行優先順位は既存設定を維持。",
-                            "Id": 317,
+                            "Id": 325,
                             "Name": "Intentに応じたShadow接続",
                             "NodeIds": [
                                 137,
@@ -11047,7 +11222,7 @@
                                 0.23999999463558197
                             ],
                             "Comment": "実行Action: HumanBoss_SHADOW_SHIFT_APPROACH",
-                            "Id": 318,
+                            "Id": 326,
                             "Name": "SHADOW_SHIFT_APPROACH",
                             "NodeIds": [
                                 149
@@ -11069,7 +11244,7 @@
                                 0.23999999463558197
                             ],
                             "Comment": "実行Action: HumanBoss_SHADOW_SHIFT_BACK",
-                            "Id": 319,
+                            "Id": 327,
                             "Name": "SHADOW_SHIFT_BACK",
                             "NodeIds": [
                                 153
@@ -11091,7 +11266,7 @@
                                 0.23999999463558197
                             ],
                             "Comment": "実行Action: HumanBoss_SHADOW_SHIFT_SIDE",
-                            "Id": 320,
+                            "Id": 328,
                             "Name": "SHADOW_SHIFT_SIDE",
                             "NodeIds": [
                                 157
@@ -11113,7 +11288,7 @@
                                 0.23999999463558197
                             ],
                             "Comment": "実行Action: HumanBoss_SHADOW_SHIFT_BEHIND",
-                            "Id": 321,
+                            "Id": 329,
                             "Name": "SHADOW_SHIFT_BEHIND",
                             "NodeIds": [
                                 161
@@ -11135,7 +11310,7 @@
                                 0.23999999463558197
                             ],
                             "Comment": "実行Action: HumanBoss_HEAVY_SINGLE_ATTACK",
-                            "Id": 322,
+                            "Id": 330,
                             "Name": "HEAVY_SINGLE_ATTACK",
                             "NodeIds": [
                                 166
@@ -11157,7 +11332,7 @@
                                 0.23999999463558197
                             ],
                             "Comment": "実行Action: HumanBoss_SHADOW_SLASH",
-                            "Id": 323,
+                            "Id": 331,
                             "Name": "SHADOW_SLASH",
                             "NodeIds": [
                                 170
@@ -11179,7 +11354,7 @@
                                 0.23999999463558197
                             ],
                             "Comment": "実行Action: HumanBoss_SHADOW_DIVE_01",
-                            "Id": 324,
+                            "Id": 332,
                             "Name": "SHADOW_DIVE_01",
                             "NodeIds": [
                                 174
@@ -11201,7 +11376,7 @@
                                 0.23999999463558197
                             ],
                             "Comment": "実行Action: HumanBoss_SHADOW_DIVE_02",
-                            "Id": 325,
+                            "Id": 333,
                             "Name": "SHADOW_DIVE_02",
                             "NodeIds": [
                                 178
@@ -11223,7 +11398,7 @@
                                 0.23999999463558197
                             ],
                             "Comment": "実行Action: HumanBoss_SHADOW_DOMAIN",
-                            "Id": 326,
+                            "Id": 334,
                             "Name": "SHADOW_DOMAIN",
                             "NodeIds": [
                                 182
@@ -11245,7 +11420,7 @@
                                 0.18000000715255737
                             ],
                             "Comment": "条件判定と行動をまとめた分類。実行優先順位は既存設定を維持。",
-                            "Id": 327,
+                            "Id": 335,
                             "Name": "HP50%以下の特殊攻撃",
                             "NodeIds": [
                                 186,
@@ -11269,7 +11444,7 @@
                                 0.23999999463558197
                             ],
                             "Comment": "実行Action: HumanBoss_SHADOW_RAGNAROK",
-                            "Id": 328,
+                            "Id": 336,
                             "Name": "SHADOW_RAGNAROK",
                             "NodeIds": [
                                 194
@@ -11291,7 +11466,7 @@
                                 0.18000000715255737
                             ],
                             "Comment": "条件判定と行動をまとめた分類。実行優先順位は既存設定を維持。",
-                            "Id": 329,
+                            "Id": 337,
                             "Name": "遠距離の攻撃選択",
                             "NodeIds": [
                                 198,
@@ -11319,7 +11494,7 @@
                                 0.23999999463558197
                             ],
                             "Comment": "実行Action: HumanBoss_SHADOW_CHARGE",
-                            "Id": 330,
+                            "Id": 338,
                             "Name": "SHADOW_CHARGE",
                             "NodeIds": [
                                 210
@@ -11341,7 +11516,7 @@
                                 0.23999999463558197
                             ],
                             "Comment": "実行Action: HumanBoss_SHADOW_ORB",
-                            "Id": 331,
+                            "Id": 339,
                             "Name": "SHADOW_ORB",
                             "NodeIds": [
                                 214
@@ -11363,7 +11538,7 @@
                                 0.23999999463558197
                             ],
                             "Comment": "実行Action: HumanBoss_SHADOW_SHIFT_APPROACH",
-                            "Id": 332,
+                            "Id": 340,
                             "Name": "SHADOW_SHIFT_APPROACH",
                             "NodeIds": [
                                 218
@@ -11385,7 +11560,7 @@
                                 0.23999999463558197
                             ],
                             "Comment": "実行Action: HumanBoss_Approach",
-                            "Id": 333,
+                            "Id": 341,
                             "Name": "Approach",
                             "NodeIds": [
                                 222
@@ -11407,7 +11582,7 @@
                                 0.18000000715255737
                             ],
                             "Comment": "条件判定と行動をまとめた分類。実行優先順位は既存設定を維持。",
-                            "Id": 334,
+                            "Id": 342,
                             "Name": "初回特殊攻撃の優先選択",
                             "NodeIds": [
                                 226,
@@ -11431,7 +11606,7 @@
                                 0.23999999463558197
                             ],
                             "Comment": "実行Action: HumanBoss_SHADOW_RAGNAROK",
-                            "Id": 335,
+                            "Id": 343,
                             "Name": "Initial Shadow Ragnarok",
                             "NodeIds": [
                                 234
@@ -11453,7 +11628,7 @@
                                 0.18000000715255737
                             ],
                             "Comment": "条件判定と行動をまとめた分類。実行優先順位は既存設定を維持。",
-                            "Id": 336,
+                            "Id": 344,
                             "Name": "ガード継続への拘束攻撃",
                             "NodeIds": [
                                 238,
@@ -11477,7 +11652,7 @@
                                 0.23999999463558197
                             ],
                             "Comment": "実行Action: HumanBoss_GUARD_EXECUTION",
-                            "Id": 337,
+                            "Id": 345,
                             "Name": "GUARD_EXECUTION",
                             "NodeIds": [
                                 246
@@ -11919,9 +12094,23 @@
                             "Id": 249,
                             "ToNodeId": 246,
                             "ToPinId": 247
+                        },
+                        {
+                            "FromNodeId": 206,
+                            "FromPinId": 208,
+                            "Id": 297,
+                            "ToNodeId": 294,
+                            "ToPinId": 295
+                        },
+                        {
+                            "FromNodeId": 206,
+                            "FromPinId": 208,
+                            "Id": 301,
+                            "ToNodeId": 298,
+                            "ToPinId": 299
                         }
                     ],
-                    "NextId": 338,
+                    "NextId": 346,
                     "Nodes": [
                         {
                             "ActionEndCategory": "HumanBossAI",
@@ -14323,6 +14512,84 @@
                                 800.0
                             ],
                             "Priority": 1,
+                            "ScopeId": "Root",
+                            "StringValue": "",
+                            "SubGraphName": "",
+                            "Type": "PlayAction",
+                            "ValueType": "Bool",
+                            "Vector2Value": [
+                                0.0,
+                                0.0
+                            ],
+                            "Vector3Value": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "WaitForActionEnd": true,
+                            "WaitSeconds": 0.0,
+                            "Weight": 1.0
+                        },
+                        {
+                            "ActionEndCategory": "HumanBossAI",
+                            "ActionEndKey": "ActionEnded",
+                            "ActionName": "HumanBoss_NORMAL_ATTACK_A",
+                            "BlackboardCategory": "HumanBossAI",
+                            "BlackboardKey": "",
+                            "BlackboardScope": "Local",
+                            "BoolValue": true,
+                            "Comment": "",
+                            "CompareType": "Equal",
+                            "FloatValue": 0.0,
+                            "Id": 294,
+                            "InputPinId": 295,
+                            "IntValue": 0,
+                            "Name": "Combo approach A",
+                            "OutputPinId": 296,
+                            "Position": [
+                                1480.0,
+                                600.0
+                            ],
+                            "Priority": 4,
+                            "ScopeId": "Root",
+                            "StringValue": "",
+                            "SubGraphName": "",
+                            "Type": "PlayAction",
+                            "ValueType": "Bool",
+                            "Vector2Value": [
+                                0.0,
+                                0.0
+                            ],
+                            "Vector3Value": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "WaitForActionEnd": true,
+                            "WaitSeconds": 0.0,
+                            "Weight": 1.0
+                        },
+                        {
+                            "ActionEndCategory": "HumanBossAI",
+                            "ActionEndKey": "ActionEnded",
+                            "ActionName": "HumanBoss_NORMAL_ATTACK_B",
+                            "BlackboardCategory": "HumanBossAI",
+                            "BlackboardKey": "",
+                            "BlackboardScope": "Local",
+                            "BoolValue": true,
+                            "Comment": "",
+                            "CompareType": "Equal",
+                            "FloatValue": 0.0,
+                            "Id": 298,
+                            "InputPinId": 299,
+                            "IntValue": 0,
+                            "Name": "Combo approach B",
+                            "OutputPinId": 300,
+                            "Position": [
+                                1780.0,
+                                600.0
+                            ],
+                            "Priority": 5,
                             "ScopeId": "Root",
                             "StringValue": "",
                             "SubGraphName": "",

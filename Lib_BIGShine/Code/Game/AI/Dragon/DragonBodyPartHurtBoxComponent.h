@@ -23,7 +23,11 @@ public:
     void Deserialize(const nlohmann::json& json_) override;
 
     // このHurtBoxが表すDragon部位を返す
-    DRAGON_BODY_PART GetBodyPart() const { return bodyPart; }
+    DRAGON_BODY_PART GetBodyPart() const
+    {
+        return bodyPart;
+    }
+
     // ダメージを集約するDragon本体Objectを返す
     std::shared_ptr<GameObject> GetCombatOwner();
     // Dragon本体に付いている部位管理Componentを返す

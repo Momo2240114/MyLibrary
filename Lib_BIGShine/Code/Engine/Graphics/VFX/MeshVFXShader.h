@@ -189,7 +189,7 @@ private:
         uint32_t useDissolveEdge;      // Dissolve境界発光を使うか
         uint32_t useFresnelNoise;      // Fresnel Noiseを使うか
         uint32_t useBackFaceBoost;     // 背面Boostを使うか
-        uint32_t meshVFXPadding;       // 16byteアライン調整
+        uint32_t layerMaskPass;
 
         uint32_t baseSamplerMode;
         uint32_t maskSamplerMode;

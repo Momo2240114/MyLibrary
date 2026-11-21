@@ -95,14 +95,20 @@ namespace
 
     void DeserializeFloat2(const nlohmann::json& json_, const char* key_, DirectX::XMFLOAT2& value_)
     {
-        if (!json_.contains(key_) || !json_[key_].is_array() || json_[key_].size() < 2) return;
+        if (!json_.contains(key_) || !json_[key_].is_array() || json_[key_].size() < 2)
+        {
+            return;
+        }
         value_.x = json_[key_][0].get<float>();
         value_.y = json_[key_][1].get<float>();
     }
 
     void DeserializeFloat3(const nlohmann::json& json_, const char* key_, DirectX::XMFLOAT3& value_)
     {
-        if (!json_.contains(key_) || !json_[key_].is_array() || json_[key_].size() < 3) return;
+        if (!json_.contains(key_) || !json_[key_].is_array() || json_[key_].size() < 3)
+        {
+            return;
+        }
         value_.x = json_[key_][0].get<float>();
         value_.y = json_[key_][1].get<float>();
         value_.z = json_[key_][2].get<float>();
@@ -127,7 +133,10 @@ void UIWorldAnchorComponent::LateUpdate(float deltaTime_)
         ResolveReferences();
         widget_ = widget.lock();
     }
-    if (!widget_) return;
+    if (!widget_)
+    {
+        return;
+    }
 
     const std::shared_ptr<GameObject> targetObject_ = ResolveTargetObject();
     const std::shared_ptr<CameraComponent> camera_ = ResolveCamera();
@@ -323,7 +332,10 @@ std::shared_ptr<GameObject> UIWorldAnchorComponent::ResolveTargetObject()
 
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     GameObjectManager* manager_ = owner_ ? owner_->manager : nullptr;
-    if (!manager_) return nullptr;
+    if (!manager_)
+    {
+        return nullptr;
+    }
 
     if (targetMode == UiWorldAnchorTargetMode::LOCK_ON_TARGET)
     {
@@ -336,7 +348,10 @@ std::shared_ptr<GameObject> UIWorldAnchorComponent::ResolveTargetObject()
                 manager_->FindComponents<CameraLockOnComponent>();
             for (const std::shared_ptr<CameraLockOnComponent>& lockOn_ : lockOnComponents_)
             {
-                if (!lockOn_ || !lockOn_->IsLockOnEnabled()) continue;
+                if (!lockOn_ || !lockOn_->IsLockOnEnabled())
+                {
+                    continue;
+                }
                 targetObject = lockOn_->GetLockOnTarget();
                 if (const std::shared_ptr<GameObject> currentTarget_ = targetObject.lock())
                 {
@@ -377,7 +392,10 @@ std::shared_ptr<CameraComponent> UIWorldAnchorComponent::ResolveCamera() const
 
     const std::shared_ptr<GameObject> owner_ = gameObject.lock();
     GameObjectManager* manager_ = owner_ ? owner_->manager : nullptr;
-    if (!manager_) return nullptr;
+    if (!manager_)
+    {
+        return nullptr;
+    }
 
     if (!cameraObjectName.empty())
     {
@@ -395,7 +413,10 @@ DirectX::XMFLOAT3 UIWorldAnchorComponent::CalculateAnchorWorldPosition(
     BS_PROFILE_SCOPE("UIWorldAnchorComponent::CalculateAnchorWorldPosition");
 
     DirectX::XMFLOAT3 position_ = worldOffset;
-    if (!targetObject_) return position_;
+    if (!targetObject_)
+    {
+        return position_;
+    }
 
     if (useLockOnFocusPosition)
     {
@@ -410,7 +431,10 @@ DirectX::XMFLOAT3 UIWorldAnchorComponent::CalculateAnchorWorldPosition(
         }
     }
 
-    if (!targetObject_->transform) return position_;
+    if (!targetObject_->transform)
+    {
+        return position_;
+    }
 
     const DirectX::XMFLOAT3 targetPosition_ = targetObject_->transform->GetWorldPosition();
     position_.x += targetPosition_.x;

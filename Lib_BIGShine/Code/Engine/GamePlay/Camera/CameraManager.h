@@ -16,7 +16,12 @@ public:
     // レンダリングで呼び出す「今使うべきカメラ」
     std::shared_ptr<CameraComponent> GetActiveCamera() const;
     std::shared_ptr<CameraComponent> GetSourceCamera() const;
-    std::shared_ptr<CameraComponent> GetEditorCamera() const { return editorCameraComponent; }
+
+    std::shared_ptr<CameraComponent> GetEditorCamera() const
+    {
+        return editorCameraComponent;
+    }
+
     void CopyActiveCameraToEditorCamera();
 
 private:

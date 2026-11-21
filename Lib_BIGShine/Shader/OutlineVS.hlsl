@@ -5,7 +5,9 @@ cbuffer CbOutline : register(b0)
 {
     float4 outlineColor;
     float outlineThickness;
-    float3 padding;
+    float depthScale;
+    float maxDistanceScale;
+    float padding;
 };
 
 struct OUTLINE_VS_OUT
@@ -29,7 +31,17 @@ OUTLINE_VS_OUT main(
     float4 worldPos = SkinningPosition(position, boneWeights, boneIndices);
     float3 worldNormal = normalize(SkinningVector(normal, boneWeights, boneIndices));
 
-    worldPos.xyz += worldNormal * outlineThickness;
+    float thickness_ = outlineThickness;
+    if (depthScale > 0.0f)
+    {
+        // 透視投影では押し出し前のclip.wが視点空間の深度になる。
+        const float4 clipWColumn_ = float4(
+            viewProjection._14, viewProjection._24, viewProjection._34, viewProjection._44);
+        const float viewDepth_ = dot(worldPos, clipWColumn_);
+        thickness_ *= clamp(viewDepth_ * depthScale, 0.0f, maxDistanceScale);
+    }
+
+    worldPos.xyz += worldNormal * thickness_;
 
     vout.vertex = mul(worldPos, viewProjection);
     vout.normal = worldNormal;

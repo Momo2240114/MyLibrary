@@ -13,14 +13,24 @@ public:
     void Update(float deltaTime_) override;
     // 暗転完了後に実行するActionを予約する。
     bool BeginFadeOut(const std::string& action_);
-    bool IsFadingOut() const { return fadingOut; }
-    float GetFadeOutTime() const { return fadingOut ? elapsedTime : 0.0f; }
+
+    bool IsFadingOut() const
+    {
+        return fadingOut;
+    }
+
+    float GetFadeOutTime() const
+    {
+        return fadingOut ? elapsedTime : 0.0f;
+    }
+
     // フェード設定を既存Inspectorから編集する。
     void Gui() override;
     // フェードの初期設定を保存する。
     void Serialize(nlohmann::json& json_) const override;
     // 旧JSONで欠けた設定には標準値を使って復元する。
     void Deserialize(const nlohmann::json& json_) override;
+
 private:
     // Spriteの保存色は維持し、実行中の透明度だけを変更する。
     void ApplyAlpha(float alpha_);

@@ -23,7 +23,10 @@ namespace
     {
         // JSON配列が壊れている場合はfallbackを使い、読み込み失敗で値を壊さない。
         const nlohmann::json value_ = json_.value(key_, nlohmann::json::array());
-        if (!value_.is_array() || value_.size() < 3u) return fallback_;
+        if (!value_.is_array() || value_.size() < 3u)
+        {
+            return fallback_;
+        }
         return { value_[0].get<float>(), value_[1].get<float>(), value_[2].get<float>() };
     }
 
@@ -33,7 +36,10 @@ namespace
         const DirectX::XMFLOAT4& fallback_)
     {
         const nlohmann::json value_ = json_.value(key_, nlohmann::json::array());
-        if (!value_.is_array() || value_.size() < 4u) return fallback_;
+        if (!value_.is_array() || value_.size() < 4u)
+        {
+            return fallback_;
+        }
         return {
             value_[0].get<float>(), value_[1].get<float>(),
             value_[2].get<float>(), value_[3].get<float>() };
@@ -91,14 +97,23 @@ void ImpactEffectComponent::Start()
 bool ImpactEffectComponent::LoadAsset(const std::string& path_)
 {
     // AssetTypeでImpactEffect JSONか確認してからComponentへ反映する。
-    if (path_.empty()) return false;
+    if (path_.empty())
+    {
+        return false;
+    }
     std::ifstream file_(path_);
-    if (!file_.is_open()) return false;
+    if (!file_.is_open())
+    {
+        return false;
+    }
     nlohmann::json json_;
     try
     {
         file_ >> json_;
-        if (json_.value("AssetType", std::string{}) != "ImpactEffect") return false;
+        if (json_.value("AssetType", std::string{}) != "ImpactEffect")
+        {
+            return false;
+        }
         asset = json_.get<ImpactEffectAsset>();
         assetPath = path_;
         return true;
@@ -112,11 +127,17 @@ bool ImpactEffectComponent::LoadAsset(const std::string& path_)
 bool ImpactEffectComponent::SaveAsset(const std::string& path_) const
 {
     // 保存先Folderを作成してから、現在のasset内容をJSONとして書き出す。
-    if (path_.empty()) return false;
+    if (path_.empty())
+    {
+        return false;
+    }
     const std::filesystem::path outputPath_(path_);
     std::filesystem::create_directories(outputPath_.parent_path());
     std::ofstream file_(outputPath_, std::ios::out | std::ios::trunc);
-    if (!file_.is_open()) return false;
+    if (!file_.is_open())
+    {
+        return false;
+    }
     const nlohmann::json json_ = asset;
     file_ << json_.dump(4);
     return file_.good();
@@ -132,13 +153,19 @@ void ImpactEffectComponent::Update(float deltaTime_)
 void ImpactEffectComponent::BindColliders()
 {
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     for (const std::shared_ptr<ColliderComponent>& collider_ :
         owner_->GetComponents<ColliderComponent>())
     {
         // 同じColliderへCallbackを二重登録しないようSetで管理する。
-        if (!collider_ || !boundColliders.insert(collider_.get()).second) continue;
+        if (!collider_ || !boundColliders.insert(collider_.get()).second)
+        {
+            continue;
+        }
         collider_->onCollisionContactCallbacks.push_back(
             [this](std::shared_ptr<GameObject> other_, const CollisionContact& contact_)
             {
@@ -156,8 +183,14 @@ bool ImpactEffectComponent::CanSpawnFor(
     const std::shared_ptr<GameObject>& other_) const
 {
     // Component無効、相手なし、CoolDown中、Once済みならSpawnしない。
-    if (!IsEnabled() || !other_ || coolDownTimer > 0.0f) return false;
-    if (spawnOnlyOnce && hasSpawned) return false;
+    if (!IsEnabled() || !other_ || coolDownTimer > 0.0f)
+    {
+        return false;
+    }
+    if (spawnOnlyOnce && hasSpawned)
+    {
+        return false;
+    }
     return (targetLayerMask & other_->GetLayerBit()) != 0u;
 }
 
@@ -165,10 +198,16 @@ void ImpactEffectComponent::OnCollision(
     const std::shared_ptr<GameObject>& other_,
     const CollisionContact& contact_)
 {
-    if (!CanSpawnFor(other_)) return;
+    if (!CanSpawnFor(other_))
+    {
+        return;
+    }
 
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_ || !owner_->transform) return;
+    if (!owner_ || !owner_->transform)
+    {
+        return;
+    }
     const DirectX::XMFLOAT3 position_ = contact_.isValid
         // Contactが有効なら衝突点、不明な場合はOwner位置を使う。
         ? contact_.position
@@ -183,9 +222,15 @@ void ImpactEffectComponent::OnCollision(
 void ImpactEffectComponent::OnTrigger(
     const std::shared_ptr<GameObject>& other_)
 {
-    if (!listenToTriggers || !CanSpawnFor(other_)) return;
+    if (!listenToTriggers || !CanSpawnFor(other_))
+    {
+        return;
+    }
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_ || !owner_->transform || !other_->transform) return;
+    if (!owner_ || !owner_->transform || !other_->transform)
+    {
+        return;
+    }
 
     const DirectX::XMFLOAT3 position_ = owner_->transform->GetWorldPosition();
     const DirectX::XMFLOAT3 otherPosition_ = other_->transform->GetWorldPosition();
@@ -222,7 +267,10 @@ void ImpactEffectComponent::SpawnAt(
     for (const ImpactEffectEntry& entry_ : asset.entries)
     {
         // Component内Assetを使う場合はEntryごとにParticle/MeshVFX/Decalへ変換する。
-        if (!entry_.enabled || entry_.assetPath.empty()) continue;
+        if (!entry_.enabled || entry_.assetPath.empty())
+        {
+            continue;
+        }
 
         ImpactEffectSpawnRequest request_{};
         request_.position = position_;
@@ -272,14 +320,26 @@ void ImpactEffectComponent::Gui()
         nullptr,
         "Data/ImpactEffect"))
     {
-        if (selectedAssetPath_.empty()) assetPath.clear();
-        else LoadAsset(selectedAssetPath_);
+        if (selectedAssetPath_.empty())
+        {
+            assetPath.clear();
+        }
+        else
+        {
+            LoadAsset(selectedAssetPath_);
+        }
     }
     if (!assetPath.empty())
     {
-        if (ImGui::Button("Reload Impact Asset")) LoadAsset(assetPath);
+        if (ImGui::Button("Reload Impact Asset"))
+        {
+            LoadAsset(assetPath);
+        }
         ImGui::SameLine();
-        if (ImGui::Button("Save Impact Asset")) SaveAsset(assetPath);
+        if (ImGui::Button("Save Impact Asset"))
+        {
+            SaveAsset(assetPath);
+        }
     }
     ImGui::Separator();
     ImGui::Checkbox("Spawn Only Once", &spawnOnlyOnce);
@@ -320,13 +380,22 @@ void ImpactEffectComponent::Gui()
             }
             ImGui::DragFloat("Life Time", &entry_.lifeTime, 0.05f, 0.01f, 120.0f);
             ImGui::DragFloat("Normal Offset", &entry_.normalOffset, 0.001f, -10.0f, 10.0f);
-            if (ImGui::Button("Remove")) removeIndex_ = index_;
+            if (ImGui::Button("Remove"))
+            {
+                removeIndex_ = index_;
+            }
             ImGui::TreePop();
         }
         ImGui::PopID();
     }
-    if (removeIndex_ >= 0) asset.entries.erase(asset.entries.begin() + removeIndex_);
-    if (ImGui::Button("Add Particle")) asset.entries.push_back({});
+    if (removeIndex_ >= 0)
+    {
+        asset.entries.erase(asset.entries.begin() + removeIndex_);
+    }
+    if (ImGui::Button("Add Particle"))
+    {
+        asset.entries.push_back({});
+    }
     ImGui::SameLine();
     if (ImGui::Button("Add Mesh VFX"))
     {

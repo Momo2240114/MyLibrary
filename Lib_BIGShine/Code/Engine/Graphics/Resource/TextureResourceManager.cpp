@@ -17,14 +17,23 @@ TextureResourceManager& TextureResourceManager::Instance()
 ID3D11ShaderResourceView* TextureResourceManager::LoadTexture(ID3D11Device* device_, const std::string& path_)
 {
     // Device未生成時や空PathではGPU Resourceを作れないため失敗扱いにする。
-    if (!device_ || path_.empty()) return nullptr;
+    if (!device_ || path_.empty())
+    {
+        return nullptr;
+    }
     // 既に読み込んだTextureはSRVを再利用し、同じ画像の二重ロードを避ける。
     const auto iterator_ = textures.find(path_);
-    if (iterator_ != textures.end()) return iterator_->second.Get();
+    if (iterator_ != textures.end())
+    {
+        return iterator_->second.Get();
+    }
 
     const std::filesystem::path texturePath_ = WindowsDialogHelper::Utf8ToPath(path_);
     // UTF-8文字列PathをWindows Pathへ変換したうえで、実在しない場合は読み込みを中止する。
-    if (!std::filesystem::exists(texturePath_)) return nullptr;
+    if (!std::filesystem::exists(texturePath_))
+    {
+        return nullptr;
+    }
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture_;
     if (FAILED(CPUResourceLoader::LoadTextureFromFile(
         device_, texturePath_.wstring().c_str(), texture_.GetAddressOf())))

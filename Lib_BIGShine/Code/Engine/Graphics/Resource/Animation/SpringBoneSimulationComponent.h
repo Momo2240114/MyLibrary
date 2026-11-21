@@ -76,6 +76,7 @@ private:
 
     // 髪・布の点が体の前側へ回り込まないように制限する
     void ConstrainHairBehindBody(IKMapComponent::IKChain& chain_);
+
 private:
     // 髪・布チェーン設定を持つComponent
     IKMapComponent* ikMap = nullptr;

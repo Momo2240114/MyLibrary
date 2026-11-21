@@ -103,7 +103,10 @@ void AfterimageTrailComponent::Deserialize(const nlohmann::json& json_)
 {
     BS_PROFILE_SCOPE("AfterimageTrailComponent::Deserialize");
     TrailMeshComponent::Deserialize(json_);
-    if (!json_.contains("TrailEmitting")) SetEmitting(false);
+    if (!json_.contains("TrailEmitting"))
+    {
+        SetEmitting(false);
+    }
     trailWidth = (std::max)(json_.value("AfterimageTrailWidth", 1.8f), 0.001f);
     verticalOffset = json_.value("AfterimageTrailVerticalOffset", 0.8f);
     wobbleAmplitude = (std::max)(json_.value("AfterimageTrailWobbleAmplitude", 0.35f), 0.0f);
@@ -113,13 +116,25 @@ void AfterimageTrailComponent::Deserialize(const nlohmann::json& json_)
 void AfterimageTrailComponent::RegisterActions()
 {
     const std::shared_ptr<GameObject> owner_ = gameObject.lock();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     // 攻撃アニメーション側からタイミング指定できるよう、ローカルアクションへ公開する。
     auto& registry_ = owner_->GetLocalRegistry();
-    registry_.RegisterAction("VFX", "AfterimageTrailStart", [this]() { StartTrail(); });
-    registry_.RegisterAction("VFX", "AfterimageTrailStop", [this]() { StopTrail(); });
-    registry_.RegisterAction("VFX", "AfterimageTrailClear", [this]() { ClearTrail(); });
+    registry_.RegisterAction("VFX", "AfterimageTrailStart", [this]()
+    {
+        StartTrail();
+    });
+    registry_.RegisterAction("VFX", "AfterimageTrailStop", [this]()
+    {
+        StopTrail();
+    });
+    registry_.RegisterAction("VFX", "AfterimageTrailClear", [this]()
+    {
+        ClearTrail();
+    });
 }
 
 bool AfterimageTrailComponent::GetTrailSegment(
@@ -127,7 +142,10 @@ bool AfterimageTrailComponent::GetTrailSegment(
     DirectX::XMFLOAT3& rightPosition_) const
 {
     const std::shared_ptr<GameObject> owner_ = gameObject.lock();
-    if (!owner_ || !owner_->transform) return false;
+    if (!owner_ || !owner_->transform)
+    {
+        return false;
+    }
 
     const DirectX::XMMATRIX world_ = owner_->transform->GetWorldMatrix();
 

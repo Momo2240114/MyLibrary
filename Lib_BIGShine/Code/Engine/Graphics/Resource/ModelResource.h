@@ -19,7 +19,10 @@ public:
     // アタッチメントなどが「特定の部位（ソケット）」の位置を探るための、便利な探索
     int FindNodeIndex(const std::string& name) const {
         for (size_t i = 0; i < nodes.size(); ++i) {
-            if (nodes[i].name == name) return static_cast<int>(i);
+            if (nodes[i].name == name)
+            {
+                return static_cast<int>(i);
+            }
         }
         return -1;
     }

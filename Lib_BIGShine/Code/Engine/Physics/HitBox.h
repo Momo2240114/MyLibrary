@@ -96,8 +96,17 @@ public:
     HitBox();
 
     const std::string& GetName() const override;
-    bool HasFixedCollisionRole() const override { return true; }
-    bool HasFixedPhysicsBehavior() const override { return true; }
+
+    bool HasFixedCollisionRole() const override
+    {
+        return true;
+    }
+
+    bool HasFixedPhysicsBehavior() const override
+    {
+        return true;
+    }
+
     void Start() override;
     void Activate();
     void Deactivate();
@@ -106,7 +115,12 @@ public:
     CollisionManifold CheckFrameSweep(const Capsule& other_, Capsule& contactCapsule_) const;
     // 一時的に有効化した判定は、ガード・回避・命中の全判定が終わってから閉じる。
     void FinishFrameSweep();
-    uint64_t GetActivationId() const { return activationId; }
+
+    uint64_t GetActivationId() const
+    {
+        return activationId;
+    }
+
     void SetOwner(GameObject* owner_);
     void SetAttackInstanceId(uint32_t attackInstanceId_);
     void SetHitGroupId(uint32_t hitGroupId_);
@@ -121,27 +135,37 @@ public:
     bool ShouldNotifyAttackerOnGuard() const;
     void SetAirLiftPower(float targetAirLiftPower_, float attackerAirLiftPower_);
     void SetHitEffectPath(const std::string& path_);
+
     void SetHitEffectBlackboardOverrideEnabled(bool enabled_)
     {
         hitEffectBlackboardOverrideEnabled = enabled_;
     }
+
     void SetAttackDataBlackboardOverrideEnabled(bool enabled_)
     {
         attackDataBlackboardOverrideEnabled = enabled_;
     }
+
     void ClearHitTargets();
     // 広域Sphereに入った対象を、実際の扇形の角度・高さで絞る。
     bool IsWithinAttackSector(GameObject* target_) const;
     void SetAttackSector(float range_, float angle_, float halfHeight_);
     // 球の広域判定から、エフェクト姿勢に沿った長方形の帯だけを通す。
     void SetAttackBox(float halfWidth_, float halfHeight_, float halfLength_);
-    bool HasRegisteredHit() const { return !alreadyHitTargets.empty(); }
+
+    bool HasRegisteredHit() const
+    {
+        return !alreadyHitTargets.empty();
+    }
+
     bool CanHit(GameObject* target_) const;
+
 private:
     DirectX::XMFLOAT3 attackBoxHalfExtents{}; // 攻撃エフェクトの形状設定から復元する実行時の寸法。
     float sectorRange = 0.0f; // 0なら既存のCapsule判定のみ。
     float sectorAngle = 360.0f;
     float sectorHalfHeight = 1.0f;
+
 public:
     void RegisterHit(GameObject* target_);
     std::shared_ptr<GameObject> GetAttackOwner();
@@ -151,6 +175,7 @@ public:
     std::string GetActivateActionName() const;
     std::string GetDeactivateActionName() const;
     std::string GetActionPrefix()const;
+
 private:
     // HitBox用に固定したCollisionRoleとPhysics挙動を再適用する。
     void EnforceHitBoxSettings();

@@ -25,7 +25,10 @@ void ModelMaterial::SetChannel(MaterialValue value_, TextureChannel channel_)
 {
     const std::size_t index_ = static_cast<std::size_t>(value_);
     const int channelIndex_ = static_cast<int>(channel_);
-    if (index_ >= MATERIAL_VALUE_COUNT || channelIndex_ < 0 || channelIndex_ > 3) return;
+    if (index_ >= MATERIAL_VALUE_COUNT || channelIndex_ < 0 || channelIndex_ > 3)
+    {
+        return;
+    }
     channels[index_] = channel_;
 }
 
@@ -37,24 +40,41 @@ ModelMaterial::TextureChannel ModelMaterial::GetChannel(MaterialValue value_) co
 
 ModelMaterial::TextureChannel ModelMaterial::GetDefaultChannel(MaterialValue value_)
 {
-    if (value_ == MaterialValue::PACKED_METALLIC) return TextureChannel::B;
-    if (value_ == MaterialValue::PACKED_ROUGHNESS) return TextureChannel::G;
+    if (value_ == MaterialValue::PACKED_METALLIC)
+    {
+        return TextureChannel::B;
+    }
+    if (value_ == MaterialValue::PACKED_ROUGHNESS)
+    {
+        return TextureChannel::G;
+    }
     return TextureChannel::R;
 }
 
 ModelMaterial::TextureSlot ModelMaterial::GetValueTextureSlot(MaterialValue value_)
 {
     if (value_ == MaterialValue::PACKED_METALLIC || value_ == MaterialValue::PACKED_ROUGHNESS)
+    {
         return TextureSlot::METALNESS_ROUGHNESS;
-    if (value_ == MaterialValue::METALLIC) return TextureSlot::METALLIC;
-    if (value_ == MaterialValue::ROUGHNESS) return TextureSlot::ROUGHNESS;
+    }
+    if (value_ == MaterialValue::METALLIC)
+    {
+        return TextureSlot::METALLIC;
+    }
+    if (value_ == MaterialValue::ROUGHNESS)
+    {
+        return TextureSlot::ROUGHNESS;
+    }
     return TextureSlot::COUNT;
 }
 
 void ModelMaterial::SetTexture(TextureSlot slot_, const std::string& path_)
 {
     const std::size_t index_ = static_cast<std::size_t>(slot_);
-    if (index_ >= TEXTURE_SLOT_COUNT) return;
+    if (index_ >= TEXTURE_SLOT_COUNT)
+    {
+        return;
+    }
     texturePaths[index_] = path_;
     textures[index_].Reset();
     pendingLoads[index_] = !path_.empty();
@@ -82,10 +102,16 @@ bool ModelMaterial::HasTextureFailure(TextureSlot slot_) const
 
 void ModelMaterial::LoadPendingTextures(ID3D11Device* device_)
 {
-    if (!device_) return;
+    if (!device_)
+    {
+        return;
+    }
     for (std::size_t index_ = 0; index_ < TEXTURE_SLOT_COUNT; ++index_)
     {
-        if (!pendingLoads[index_]) continue;
+        if (!pendingLoads[index_])
+        {
+            continue;
+        }
         BS_PROFILE_SCOPE("ModelMaterial::LoadTexture");
         pendingLoads[index_] = false;
 
@@ -122,7 +148,10 @@ void ModelMaterial::LoadPendingTextures(ID3D11Device* device_)
             result_ = E_FAIL;
         }
         textureFailures[index_] = FAILED(result_) || !textures[index_];
-        if (textureFailures[index_]) textures[index_].Reset();
+        if (textureFailures[index_])
+        {
+            textures[index_].Reset();
+        }
     }
 }
 
@@ -160,12 +189,20 @@ void ModelMaterial::Deserialize(const nlohmann::json& json_)
     {
         const auto value_ = static_cast<MaterialValue>(index_);
         channels[index_] = GetDefaultChannel(value_);
-        if (!json_.contains("Channels") || !json_["Channels"].is_object()) continue;
+        if (!json_.contains("Channels") || !json_["Channels"].is_object())
+        {
+            continue;
+        }
         const auto& channelJson_ = json_["Channels"];
         const auto channel_ = channelJson_.find(CHANNEL_KEYS[index_]);
-        if (channel_ == channelJson_.end() || !channel_->is_number_integer()) continue;
+        if (channel_ == channelJson_.end() || !channel_->is_number_integer())
+        {
+            continue;
+        }
         // 数値を列挙型へ変換する前に範囲を確認し、不正な添字をGPUへ渡さない。
         if (*channel_ >= 0 && *channel_ <= 3)
+        {
             SetChannel(value_, static_cast<TextureChannel>(channel_->get<int>()));
+        }
     }
 }

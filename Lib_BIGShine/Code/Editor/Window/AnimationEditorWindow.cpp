@@ -40,7 +40,10 @@ namespace
 {
     static bool ContainsCaseInsensitive(const std::string& text_, const std::string& query_)
     {
-        if (query_.empty()) return true;
+        if (query_.empty())
+        {
+            return true;
+        }
 
         return std::search(
             text_.begin(), text_.end(),
@@ -73,8 +76,15 @@ namespace
         float fps = 60.0f;
         std::vector<FrameRange> frameRanges;
 
-        int ToFrame(float time) const { return static_cast<int>(time * fps); }
-        float ToTime(int frame) const { return static_cast<float>(frame) / fps; }
+        int ToFrame(float time) const
+        {
+            return static_cast<int>(time * fps);
+        }
+
+        float ToTime(int frame) const
+        {
+            return static_cast<float>(frame) / fps;
+        }
 
         void SyncFrames()
         {
@@ -88,17 +98,41 @@ namespace
             }
         }
 
-        int GetFrameMin() const override { return 0; }
-        int GetFrameMax() const override { return anim ? ToFrame(anim->duration) : 0; }
-        int GetItemCount() const override { return anim ? (int)anim->keyframes.size() : 0; }
-        int GetItemTypeCount() const override { return 1; }
-        const char* GetItemTypeName(int typeIndex) const override { return "Pose Keyframe"; }
+        int GetFrameMin() const override
+        {
+            return 0;
+        }
 
-        void BeginEdit(int index) override {}
+        int GetFrameMax() const override
+        {
+            return anim ? ToFrame(anim->duration) : 0;
+        }
+
+        int GetItemCount() const override
+        {
+            return anim ? (int)anim->keyframes.size() : 0;
+        }
+
+        int GetItemTypeCount() const override
+        {
+            return 1;
+        }
+
+        const char* GetItemTypeName(int typeIndex) const override
+        {
+            return "Pose Keyframe";
+        }
+
+        void BeginEdit(int index) override
+        {
+        }
 
         void EndEdit() override
         {
-            if (!anim) return;
+            if (!anim)
+            {
+                return;
+            }
             for (int i = 0; i < (int)anim->keyframes.size() && i < (int)frameRanges.size(); ++i)
             {
                 anim->keyframes[i].time = (std::max)(0.0f, (std::min)(anim->duration, ToTime(frameRanges[i].start)));
@@ -107,18 +141,39 @@ namespace
 
         void Get(int index, int** start, int** end, int* type, unsigned int* color) override
         {
-            if (!anim || index < 0 || index >= (int)anim->keyframes.size()) return;
-            if (frameRanges.size() != anim->keyframes.size()) SyncFrames();
+            if (!anim || index < 0 || index >= (int)anim->keyframes.size())
+            {
+                return;
+            }
+            if (frameRanges.size() != anim->keyframes.size())
+            {
+                SyncFrames();
+            }
 
-            if (start) *start = &frameRanges[index].start;
-            if (end) *end = &frameRanges[index].end;
-            if (type) *type = 0;
-            if (color) *color = 0xFF4FA3FF;
+            if (start)
+            {
+                *start = &frameRanges[index].start;
+            }
+            if (end)
+            {
+                *end = &frameRanges[index].end;
+            }
+            if (type)
+            {
+                *type = 0;
+            }
+            if (color)
+            {
+                *color = 0xFF4FA3FF;
+            }
         }
 
         const char* GetItemLabel(int index) const override
         {
-            if (!anim || !poseLibrary || index < 0 || index >= (int)anim->keyframes.size()) return "";
+            if (!anim || !poseLibrary || index < 0 || index >= (int)anim->keyframes.size())
+            {
+                return "";
+            }
 
             const int poseIndex = anim->keyframes[index].poseIndex;
             if (poseIndex >= 0 && poseIndex < (int)poseLibrary->poseLibrary.size())
@@ -143,7 +198,10 @@ namespace
 
         void Add(int type) override
         {
-            if (!anim || !poseLibrary) return;
+            if (!anim || !poseLibrary)
+            {
+                return;
+            }
 
             PoseKeyframe key_;
             if (selectedPose >= 0 && selectedPose < static_cast<int>(poseLibrary->poseLibrary.size()))
@@ -170,7 +228,10 @@ namespace
 
         void Del(int index) override
         {
-            if (!anim || index < 0 || index >= (int)anim->keyframes.size()) return;
+            if (!anim || index < 0 || index >= (int)anim->keyframes.size())
+            {
+                return;
+            }
             anim->keyframes.erase(anim->keyframes.begin() + index);
             SyncFrames();
         }
@@ -181,19 +242,61 @@ namespace
         float duration = 0.0f;
         float fps = 60.0f;
 
-        int ToFrame(float time) const { return static_cast<int>(time * fps); }
-        float ToTime(int frame) const { return static_cast<float>(frame) / fps; }
+        int ToFrame(float time) const
+        {
+            return static_cast<int>(time * fps);
+        }
 
-        int GetFrameMin() const override { return 0; }
-        int GetFrameMax() const override { return ToFrame(duration); }
-        int GetItemCount() const override { return 0; }
-        int GetItemTypeCount() const override { return 1; }
-        const char* GetItemTypeName(int typeIndex) const override { return "Animation Time"; }
-        const char* GetItemLabel(int index) const override { return ""; }
-        void Get(int index, int** start, int** end, int* type, unsigned int* color) override {}
-        void Add(int type) override {}
-        void Del(int index) override {}
-        void Duplicate(int index) override {}
+        float ToTime(int frame) const
+        {
+            return static_cast<float>(frame) / fps;
+        }
+
+        int GetFrameMin() const override
+        {
+            return 0;
+        }
+
+        int GetFrameMax() const override
+        {
+            return ToFrame(duration);
+        }
+
+        int GetItemCount() const override
+        {
+            return 0;
+        }
+
+        int GetItemTypeCount() const override
+        {
+            return 1;
+        }
+
+        const char* GetItemTypeName(int typeIndex) const override
+        {
+            return "Animation Time";
+        }
+
+        const char* GetItemLabel(int index) const override
+        {
+            return "";
+        }
+
+        void Get(int index, int** start, int** end, int* type, unsigned int* color) override
+        {
+        }
+
+        void Add(int type) override
+        {
+        }
+
+        void Del(int index) override
+        {
+        }
+
+        void Duplicate(int index) override
+        {
+        }
     };
 
     static ImGuizmo::OPERATION ToGizmoOperation(int operation)
@@ -213,7 +316,10 @@ namespace
         int nodeIndex,
         int& selectedNode)
     {
-        if (nodeIndex < 0 || nodeIndex >= (int)nodes.size()) return;
+        if (nodeIndex < 0 || nodeIndex >= (int)nodes.size())
+        {
+            return;
+        }
 
         const bool hasChildren = !children[nodeIndex].empty();
         ImGuiTreeNodeFlags flags =
@@ -260,16 +366,25 @@ AnimationEditorWindow::AnimationEditorWindow(GameObjectManager* manager_)
 
 AnimationEditorWindow::~AnimationEditorWindow()
 {
-    if (!previewGameObjectManager) return;
+    if (!previewGameObjectManager)
+    {
+        return;
+    }
     const PhysXSystem::PreviewScene::Scope physicsScope_(previewPhysics);
     const auto previewObjects_ = previewGameObjectManager->GetObjects();
     for (const auto& object_ : previewObjects_)
     {
-        if (object_) object_->PrepareForDestroy();
+        if (object_)
+        {
+            object_->PrepareForDestroy();
+        }
     }
     for (const auto& object_ : previewObjects_)
     {
-        if (object_) object_->SetManager(nullptr);
+        if (object_)
+        {
+            object_->SetManager(nullptr);
+        }
     }
     previewGameObjectManager.reset();
 }
@@ -280,11 +395,17 @@ bool AnimationEditorWindow::ResolveTarget(GltfModelCommponennt*& modelComp, Anim
     animController = nullptr;
 
     auto selectedObject = GetPreviewManager() ? GetPreviewManager()->GetSelectedObject() : nullptr;
-    if (!selectedObject) return false;
+    if (!selectedObject)
+    {
+        return false;
+    }
 
     auto model = selectedObject->GetComponent<GltfModelCommponennt>();
     auto animation = selectedObject->GetComponent<AnimationControllerComponent>();
-    if (!model || !animation) return false;
+    if (!model || !animation)
+    {
+        return false;
+    }
 
     modelComp = model.get();
     animController = animation.get();
@@ -295,14 +416,21 @@ GameObjectManager* AnimationEditorWindow::GetPreviewManager() const
 {
     return previewGameObjectManager.get();
 }
+
 void AnimationEditorWindow::PlaySelectedEffectPreview(const AnimEvent& event_)
 {
     StopSelectedEffectPreview();
-    if (!previewGameObjectManager || event_.meshVFXAssetPath.empty()) return;
+    if (!previewGameObjectManager || event_.meshVFXAssetPath.empty())
+    {
+        return;
+    }
 
     const std::shared_ptr<GameObject> owner_ =
         previewGameObjectManager->GetSelectedObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     AttackEffectSpawnRequest request_{};
     request_.ownerObject = owner_.get();
@@ -335,14 +463,21 @@ void AnimationEditorWindow::StopSelectedEffectPreview()
     selectedEffectPreviewObject.reset();
     selectedEffectPreviewTimer = 0.0f;
 }
+
 void AnimationEditorWindow::PlayAttackTemplateEffectPreview(
     const std::string& templateId_)
 {
     StopAttackTemplateEffectPreview();
-    if (!previewGameObjectManager || templateId_.empty()) return;
+    if (!previewGameObjectManager || templateId_.empty())
+    {
+        return;
+    }
     const AttackTemplate* attackTemplate_ =
         AttackTemplateManager::Instance().FindTemplate(templateId_);
-    if (!attackTemplate_ || !attackTemplate_->hitEffect.spawnOnHit) return;
+    if (!attackTemplate_ || !attackTemplate_->hitEffect.spawnOnHit)
+    {
+        return;
+    }
 
     const std::shared_ptr<GameObject> owner_ =
         previewGameObjectManager->GetSelectedObject();
@@ -405,6 +540,7 @@ void AnimationEditorWindow::StopAttackTemplateEffectPreview()
     attackTemplateEffectPreviewObjects.clear();
     attackTemplateEffectPreviewTimer = 0.0f;
 }
+
 bool AnimationEditorWindow::CopySceneObjectToPreview(
     const std::shared_ptr<GameObject>& sourceObject_)
 {
@@ -489,7 +625,10 @@ void AnimationEditorWindow::CreatePreviewFloor()
 
 void AnimationEditorWindow::EnsurePreviewScene()
 {
-    if (isPreviewSceneInitialized) return;
+    if (isPreviewSceneInitialized)
+    {
+        return;
+    }
 
     auto& graphics_ = GraphicsDeviceManager::Instance();
     if (!previewGameObjectManager)
@@ -520,7 +659,10 @@ void AnimationEditorWindow::EnsurePreviewScene()
 
 void AnimationEditorWindow::Update(float deltaTime_)
 {
-    if (!previewPhysics.Initialize()) return;
+    if (!previewPhysics.Initialize())
+    {
+        return;
+    }
     const PhysXSystem::PreviewScene::Scope physicsScope_(previewPhysics);
     EnsurePreviewScene();
     if (autoUpdatePreview && previewGameObjectManager)
@@ -538,10 +680,16 @@ void AnimationEditorWindow::Update(float deltaTime_)
 
     GltfModelCommponennt* modelComp_ = nullptr;
     AnimationControllerComponent* animController_ = nullptr;
-    if (!customPreviewEnabled || !ResolveTarget(modelComp_, animController_)) return;
+    if (!customPreviewEnabled || !ResolveTarget(modelComp_, animController_))
+    {
+        return;
+    }
 
     auto poseLibrary_ = animController_->GetPoseLibrary();
-    if (!poseLibrary_ || selectedCustom < 0 || selectedCustom >= static_cast<int>(poseLibrary_->customAnims.size())) return;
+    if (!poseLibrary_ || selectedCustom < 0 || selectedCustom >= static_cast<int>(poseLibrary_->customAnims.size()))
+    {
+        return;
+    }
 
     const float duration_ = (std::max)(0.05f, poseLibrary_->customAnims[selectedCustom].duration);
     if (editorPlaybackEnabled)
@@ -779,13 +927,19 @@ void AnimationEditorWindow::DrawEditorTimelinePanel()
     {
         customPreviewEnabled = false;
         editorPlaybackEnabled = false;
-        if (!poseEditEnabled) animController->SetEditorPoseOverride(false);
+        if (!poseEditEnabled)
+        {
+            animController->SetEditorPoseOverride(false);
+        }
     }
 
     if (!poseEditTabActive && poseEditEnabled)
     {
         poseEditEnabled = false;
-        if (!customPreviewEnabled) animController->SetEditorPoseOverride(false);
+        if (!customPreviewEnabled)
+        {
+            animController->SetEditorPoseOverride(false);
+        }
     }
 }
 
@@ -850,7 +1004,10 @@ void AnimationEditorWindow::DrawCurveEditor(AnimationControllerComponent* animCo
 
         for (const std::string& stateName_ : stateNames_)
         {
-            if (!ContainsCaseInsensitive(stateName_, curveStateSearchText)) continue;
+            if (!ContainsCaseInsensitive(stateName_, curveStateSearchText))
+            {
+                continue;
+            }
 
             const bool selected_ = selectedCurveStateName == stateName_;
             if (ImGui::Selectable(stateName_.c_str(), selected_))
@@ -928,18 +1085,28 @@ void AnimationEditorWindow::DrawCurveEditor(AnimationControllerComponent* animCo
     curveComponent_->DrawEditorContent();
     ImGui::EndChild();
 }
+
 void AnimationEditorWindow::RenderPreview(const ImVec2& previewSize_)
 {
-    if (!previewGameObjectManager) return;
+    if (!previewGameObjectManager)
+    {
+        return;
+    }
 
     auto& graphics_ = GraphicsDeviceManager::Instance();
     ID3D11Device* device_ = graphics_.GetDevice();
     ID3D11DeviceContext* context_ = graphics_.GetContext();
-    if (!device_ || !context_) return;
+    if (!device_ || !context_)
+    {
+        return;
+    }
 
     const int width_ = (std::max)(1, static_cast<int>(previewSize_.x));
     const int height_ = (std::max)(1, static_cast<int>(previewSize_.y));
-    if (!previewTarget.Resize(device_, width_, height_)) return;
+    if (!previewTarget.Resize(device_, width_, height_))
+    {
+        return;
+    }
 
     previewCamera.SetPerspectiveFov(45.0f, static_cast<float>(width_) / static_cast<float>(height_), 0.01f, 1000.0f);
 
@@ -977,7 +1144,10 @@ void AnimationEditorWindow::RenderPreview(const ImVec2& previewSize_)
 
     for (auto& object_ : previewGameObjectManager->GetObjects())
     {
-        if (!object_) continue;
+        if (!object_)
+        {
+            continue;
+        }
 
         if (auto model_ = object_->GetComponent<GltfModelCommponennt>())
         {
@@ -1031,7 +1201,10 @@ void AnimationEditorWindow::OnVisibilityChanged(bool visible)
         loopAttackTemplateEffectPreview = false;
         StopAttackTemplateEffectPreview();
     }
-    if (visible || (!poseEditEnabled && !customPreviewEnabled)) return;
+    if (visible || (!poseEditEnabled && !customPreviewEnabled))
+    {
+        return;
+    }
 
     GltfModelCommponennt* modelComp = nullptr;
     AnimationControllerComponent* animController = nullptr;
@@ -1046,7 +1219,10 @@ void AnimationEditorWindow::OnVisibilityChanged(bool visible)
 
 void AnimationEditorWindow::Draw()
 {
-    if (!previewPhysics.Initialize()) return;
+    if (!previewPhysics.Initialize())
+    {
+        return;
+    }
     const PhysXSystem::PreviewScene::Scope physicsScope_(previewPhysics);
     EnsurePreviewScene();
 
@@ -1251,7 +1427,10 @@ void AnimationEditorWindow::DrawPoseAnimationCreator(GltfModelCommponennt* model
             std::string outputName_ = bakedAnimationName.empty() ? modelAnimations_[bakeSourceAnimationIndex].name + "_Original" : bakedAnimationName;
 
             auto duplicateIt_ = std::find_if(poseLibrary->customAnims.begin(), poseLibrary->customAnims.end(),
-                [&](const CustomAnimation& existingAnimation_) { return existingAnimation_.name == outputName_; });
+                [&](const CustomAnimation& existingAnimation_)
+            {
+                return existingAnimation_.name == outputName_;
+            });
             if (duplicateIt_ != poseLibrary->customAnims.end())
             {
                 outputName_ += "_" + std::to_string(poseLibrary->customAnims.size());
@@ -1338,7 +1517,10 @@ void AnimationEditorWindow::DrawPoseAnimationCreator(GltfModelCommponennt* model
                 selectedPose = i;
             }
             ImGui::SameLine(ImGui::GetContentRegionAvail().x - 28.0f);
-            if (ImGui::SmallButton("X")) poseToDelete = i;
+            if (ImGui::SmallButton("X"))
+            {
+                poseToDelete = i;
+            }
             ImGui::PopID();
         }
 
@@ -1349,12 +1531,18 @@ void AnimationEditorWindow::DrawPoseAnimationCreator(GltfModelCommponennt* model
             {
                 anim.keyframes.erase(
                     std::remove_if(anim.keyframes.begin(), anim.keyframes.end(),
-                        [poseToDelete](const PoseKeyframe& key) { return key.poseIndex == poseToDelete; }),
+                        [poseToDelete](const PoseKeyframe& key)
+                {
+                    return key.poseIndex == poseToDelete;
+                }),
                     anim.keyframes.end());
 
                 for (auto& key : anim.keyframes)
                 {
-                    if (key.poseIndex > poseToDelete) --key.poseIndex;
+                    if (key.poseIndex > poseToDelete)
+                    {
+                        --key.poseIndex;
+                    }
                 }
             }
             selectedPose = -1;
@@ -1402,10 +1590,16 @@ void AnimationEditorWindow::DrawPoseAnimationCreator(GltfModelCommponennt* model
         return;
     }
 
-    if (selectedCustom < 0 || selectedCustom >= (int)poseLibrary->customAnims.size()) selectedCustom = 0;
+    if (selectedCustom < 0 || selectedCustom >= (int)poseLibrary->customAnims.size())
+    {
+        selectedCustom = 0;
+    }
 
     std::vector<const char*> animNames;
-    for (auto& anim : poseLibrary->customAnims) animNames.push_back(anim.name.c_str());
+    for (auto& anim : poseLibrary->customAnims)
+    {
+        animNames.push_back(anim.name.c_str());
+    }
     ImGui::SetNextItemWidth(240.0f);
     if (ImGui::Combo("Editing Custom", &selectedCustom, animNames.data(), (int)animNames.size()))
     {
@@ -1507,8 +1701,14 @@ void AnimationEditorWindow::DrawPoseAnimationCreator(GltfModelCommponennt* model
 
         for (auto& [stateName_, state_] : animController->GetStates())
         {
-            if (!state_) continue;
-            if (!ContainsCaseInsensitive(stateName_, registeredStateSearchText)) continue;
+            if (!state_)
+            {
+                continue;
+            }
+            if (!ContainsCaseInsensitive(stateName_, registeredStateSearchText))
+            {
+                continue;
+            }
 
             const bool selected_ = stateName_ == selectedStateName_;
             if (ImGui::Selectable(stateName_.c_str(), selected_))
@@ -1575,7 +1775,10 @@ void AnimationEditorWindow::DrawPoseKeyframeSequencer(CustomAnimation& anim, Pos
 
     if (ImGui::Button("Sort Keyframes"))
     {
-        std::sort(anim.keyframes.begin(), anim.keyframes.end(), [](const PoseKeyframe& a_, const PoseKeyframe& b_) { return a_.time < b_.time; });
+        std::sort(anim.keyframes.begin(), anim.keyframes.end(), [](const PoseKeyframe& a_, const PoseKeyframe& b_)
+        {
+            return a_.time < b_.time;
+        });
     }
     if (modelComp && anim.baseAnimationIndex >= 0 && anim.baseAnimationIndex < static_cast<int>(modelComp->GetAnimations().size()))
     {
@@ -1588,7 +1791,10 @@ void AnimationEditorWindow::DrawPoseKeyframeSequencer(CustomAnimation& anim, Pos
             key_.sourceAnimIdx = anim.baseAnimationIndex;
             key_.sourceTime = anim.baseAnimationStartTime + editorPlaybackTime * anim.baseAnimationSpeed;
             const auto insertIt_ = std::upper_bound(anim.keyframes.begin(), anim.keyframes.end(), key_.time,
-                [](float time_, const PoseKeyframe& existingKey_) { return time_ < existingKey_.time; });
+                [](float time_, const PoseKeyframe& existingKey_)
+            {
+                return time_ < existingKey_.time;
+            });
             selectedKeyframe = static_cast<int>(insertIt_ - anim.keyframes.begin());
             anim.keyframes.insert(insertIt_, key_);
         }
@@ -1608,7 +1814,10 @@ void AnimationEditorWindow::DrawPoseKeyframeSequencer(CustomAnimation& anim, Pos
     if (ImGui::RadioButton("Recorded Pose", sourceMode_ == 0))
     {
         sourceMode_ = 0;
-        if (key.poseIndex < 0 && !poseLibrary.poseLibrary.empty()) key.poseIndex = 0;
+        if (key.poseIndex < 0 && !poseLibrary.poseLibrary.empty())
+        {
+            key.poseIndex = 0;
+        }
     }
     ImGui::SameLine();
     if (ImGui::RadioButton("Source Animation", sourceMode_ == 1))
@@ -1686,7 +1895,10 @@ void AnimationEditorWindow::DrawPoseKeyframeSequencer(CustomAnimation& anim, Pos
 void AnimationEditorWindow::SampleEditPoseFromAnimation(GltfModelCommponennt* modelComp)
 {
     const auto& animations = modelComp->GetAnimations();
-    if (animations.empty()) return;
+    if (animations.empty())
+    {
+        return;
+    }
 
     poseEditAnimIndex = (std::max)(0, (std::min)(poseEditAnimIndex, (int)animations.size() - 1));
     const float duration = (std::max)(0.0f, modelComp->GetAnimationDuration(poseEditAnimIndex));
@@ -1738,7 +1950,10 @@ void AnimationEditorWindow::DrawSelectedNodeGizmo(GltfModelCommponennt* modelCom
         return;
     }
 
-    if (!ImGuizmo::IsUsing()) return;
+    if (!ImGuizmo::IsUsing())
+    {
+        return;
+    }
 
     DirectX::XMMATRIX newWorld = DirectX::XMLoadFloat4x4(&gizmoMatrix);
     DirectX::XMMATRIX parentWorld = DirectX::XMMatrixIdentity();
@@ -1796,7 +2011,10 @@ void AnimationEditorWindow::DrawPoseEditMode(GltfModelCommponennt* modelComp, An
             }
         }
         SampleEditPoseFromAnimation(modelComp);
-        if (selectedEditNode < 0 && !modelComp->GetNodes().empty()) selectedEditNode = 0;
+        if (selectedEditNode < 0 && !modelComp->GetNodes().empty())
+        {
+            selectedEditNode = 0;
+        }
     }
     else
     {
@@ -2085,6 +2303,7 @@ void AnimationEditorWindow::DrawPoseEditMode(GltfModelCommponennt* modelComp, An
         ImGui::TextDisabled("Unsaved edits");
     }
 }
+
 void AnimationEditorWindow::DrawEventSequencer(
     GltfModelCommponennt* modelComp,
     AnimationControllerComponent* animController)
@@ -2456,10 +2675,15 @@ void AnimationEditorWindow::DrawEventSequencer(
         ANIMATION_EVENT_TEMPLATE_TYPE::VFX_TEMPLATE;
 
     // 従来の有効化Actionにも予兆設定を保存でき、Templateイベントの設定とは分けて編集する。
-    if (!isAttackTemplateEvent_) ImGui::Checkbox("Telegraph Hit Start", &ev_.telegraphHitStart);
+    if (!isAttackTemplateEvent_)
+    {
+        ImGui::Checkbox("Telegraph Hit Start", &ev_.telegraphHitStart);
+    }
     if (!isAttackTemplateEvent_ && (ev_.telegraphHitStart || (ev_.startAction.find("Enable") != std::string::npos &&
         ev_.startAction.find("HitBox") != std::string::npos)))
+    {
         AttackTelegraphRuntime::DrawSettings(ev_.telegraph, gameObjectManager, modelComp->GetGameObject());
+    }
 
     if (isAttackTemplateEvent_)
     {
@@ -2649,8 +2873,14 @@ void AnimationEditorWindow::DrawEventSequencer(
         ImGui::SameLine();
         if (ImGui::Checkbox("Loop Preview", &loopSelectedEffectPreview))
         {
-            if (loopSelectedEffectPreview) PlaySelectedEffectPreview(ev_);
-            else StopSelectedEffectPreview();
+            if (loopSelectedEffectPreview)
+            {
+                PlaySelectedEffectPreview(ev_);
+            }
+            else
+            {
+                StopSelectedEffectPreview();
+            }
         }
 
         if (loopSelectedEffectPreview)
@@ -2724,7 +2954,10 @@ void AnimationEditorWindow::DrawEventSequencer(
                         ev_.meshVFXAssetPath = assetKey_;
                         effectPreviewChanged_ = true;
                     }
-                    if (selected_) ImGui::SetItemDefaultFocus();
+                    if (selected_)
+                    {
+                        ImGui::SetItemDefaultFocus();
+                    }
                 }
 
                 ImGui::EndCombo();
@@ -3069,7 +3302,10 @@ void AnimationEditorWindow::DrawEventSequencer(
                             {
                                 write_.stringValue = assetKey_;
                             }
-                            if (selected_) ImGui::SetItemDefaultFocus();
+                            if (selected_)
+                            {
+                                ImGui::SetItemDefaultFocus();
+                            }
                         }
 
                         ImGui::EndCombo();

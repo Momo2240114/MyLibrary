@@ -15,6 +15,7 @@ public:
         DirectX::XMFLOAT4 source{ 0,0,0,0 };
         bool valid = false;
     };
+
     // 既存ResourceLoaderのキャッシュから各シートを一度だけ取得する。
     void Initialize();
     // ピクセル単位の矩形を返す。未収録コードはテキストへフォールバックする。
@@ -33,6 +34,7 @@ private:
         Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture;
         D3D11_TEXTURE2D_DESC description{};
     };
+
     std::array<Sheet, 3> sheets;
     bool initialized = false;
 };

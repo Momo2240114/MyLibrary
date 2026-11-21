@@ -4,6 +4,7 @@ Texture2D effectTexture : register(t1);
 Texture2D glowTexture : register(t2);
 Texture2D sceneSnapshot : register(t3);
 SamplerState noiseSampler : register(s0);
+
 cbuffer TransitionConstants : register(b0)
 {
     float4 color;
@@ -25,11 +26,26 @@ float Evaluate(float ratio_, int easing_)
     float t_ = saturate(ratio_);
     float inverse_ = 1 - t_;
     float result_ = t_;
-    if (easing_ == 1) result_ = t_ * t_ * t_;
-    else if (easing_ == 2) result_ = 1 - inverse_ * inverse_ * inverse_;
-    else if (easing_ == 3) result_ = t_ < 0.5 ? 4 * t_ * t_ * t_ : 1 - 4 * inverse_ * inverse_ * inverse_;
-    else if (easing_ == 4) result_ = t_ >= 1 ? 1 : 1 - exp2(-10 * t_);
-    else if (easing_ == 5) result_ = 1 - 2.70158 * inverse_ * inverse_ * inverse_ + 1.70158 * inverse_ * inverse_;
+    if (easing_ == 1)
+    {
+        result_ = t_ * t_ * t_;
+    }
+    else if (easing_ == 2)
+    {
+        result_ = 1 - inverse_ * inverse_ * inverse_;
+    }
+    else if (easing_ == 3)
+    {
+        result_ = t_ < 0.5 ? 4 * t_ * t_ * t_ : 1 - 4 * inverse_ * inverse_ * inverse_;
+    }
+    else if (easing_ == 4)
+    {
+        result_ = t_ >= 1 ? 1 : 1 - exp2(-10 * t_);
+    }
+    else if (easing_ == 5)
+    {
+        result_ = 1 - 2.70158 * inverse_ * inverse_ * inverse_ + 1.70158 * inverse_ * inverse_;
+    }
     return result_;
 }
 
@@ -52,6 +68,7 @@ float2 TransformUV(float2 uv_)
     sincos(maskParameters.y, sine_, cosine_);
     return float2(point_.x * cosine_ - point_.y * sine_,point_.x * sine_ + point_.y * cosine_) + 0.5 + maskUV.zw;
 }
+
 float4 Composite(float distance_, float flash_)
 {
     float coverage_ = smoothstep(-style.y, style.y, distance_);

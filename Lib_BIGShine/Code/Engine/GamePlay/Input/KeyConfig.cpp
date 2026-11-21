@@ -15,13 +15,19 @@ using json = nlohmann::json;
 
 // --- バインド ---
 void KeyConfig::BindAction(const std::string& action_, const InputCombo& combo_) {
-    if (combo_.empty()) return;
+    if (combo_.empty())
+    {
+        return;
+    }
     actionMap[action_].push_back(combo_);
     ++bindingsRevision;
 }
 
 void KeyConfig::SetBinds(const std::string& action_, const std::vector<InputCombo>& combos_) {
-    if (action_.empty()) return;
+    if (action_.empty())
+    {
+        return;
+    }
     actionMap[action_] = combos_;
     ++bindingsRevision;
 }
@@ -32,10 +38,16 @@ void KeyConfig::RemoveAction(const std::string& action_) {
 }
 
 bool KeyConfig::RenameAction(const std::string& oldAction_, const std::string& newAction_) {
-    if (oldAction_.empty() || newAction_.empty() || oldAction_ == newAction_) return false;
+    if (oldAction_.empty() || newAction_.empty() || oldAction_ == newAction_)
+    {
+        return false;
+    }
 
     auto it = actionMap.find(oldAction_);
-    if (it == actionMap.end() || actionMap.find(newAction_) != actionMap.end()) return false;
+    if (it == actionMap.end() || actionMap.find(newAction_) != actionMap.end())
+    {
+        return false;
+    }
 
     auto combos = std::move(it->second);
     actionMap.erase(it);
@@ -58,38 +70,67 @@ bool KeyConfig::CheckUnit(const InputUnit& unit_, int type_) const
             return MouseInput::Instance().GetButtonState(unit_.code, type_);
         }
         // キーボード判定
-        if (type_ == 0) return KeyInput::KeyPressed(unit_.code);
-        if (type_ == 1) return KeyInput::KeyPressedIn(unit_.code);
+        if (type_ == 0)
+        {
+            return KeyInput::KeyPressed(unit_.code);
+        }
+        if (type_ == 1)
+        {
+            return KeyInput::KeyPressedIn(unit_.code);
+        }
         return KeyInput::KeyPressedOut(unit_.code);
     }
-    else { // Gamepad
+    else
+    { // Gamepad
         auto& pad_ = ControllerInput::Instance();
-        if (type_ == 0) return pad_.ButtonPressed((PadCode)unit_.code);
-        if (type_ == 1) return pad_.ButtonPressedIn((PadCode)unit_.code);
+        if (type_ == 0)
+        {
+            return pad_.ButtonPressed((PadCode)unit_.code);
+        }
+        if (type_ == 1)
+        {
+            return pad_.ButtonPressedIn((PadCode)unit_.code);
+        }
         return pad_.ButtonPressedOut((PadCode)unit_.code);
     }
 }
 
 bool KeyConfig::CheckCombo(const InputCombo& combo_, int type_) const {
-    if (combo_.empty()) return false;
+    if (combo_.empty())
+    {
+        return false;
+    }
 
     // 瞬間入力(In/Out)判定：
     // 「どれか一つがトリガー(type)を引き、かつ全員が押されている(Hold)」場合に成立
     if (type_ != 0) {
         bool triggered_ = false;
         for (const auto& unit : combo_) {
-            if (CheckUnit(unit, type_)) { triggered_ = true; break; }
+            if (CheckUnit(unit, type_))
+            {
+                triggered_ = true;
+                break;
+            }
         }
-        if (!triggered_) return false;
+        if (!triggered_)
+        {
+            return false;
+        }
         for (const auto& unit : combo_) {
-            if (!CheckUnit(unit, 0)) return false;
+            if (!CheckUnit(unit, 0))
+            {
+                return false;
+            }
         }
         return true;
     }
 
     // 継続入力(Hold)判定
     for (const auto& unit : combo_) {
-        if (!CheckUnit(unit, 0)) return false;
+        if (!CheckUnit(unit, 0))
+        {
+            return false;
+        }
     }
     return true;
 }
@@ -97,35 +138,74 @@ bool KeyConfig::CheckCombo(const InputCombo& combo_, int type_) const {
 // --- 公開判定関数 ---
 bool KeyConfig::ActionPressed(const std::string& action_) const {
     // 遷移中もデバイス状態は更新し、ゲーム向けの入力結果だけを抑止する。
-    if (ScreenTransitionManager::Instance().IsInputBlocked()) return false;
+    if (ScreenTransitionManager::Instance().IsInputBlocked())
+    {
+        return false;
+    }
     auto it = actionMap.find(action_);
-    if (it == actionMap.end()) return false;
-    for (const auto& combo_ : it->second) if (CheckCombo(combo_, 0)) return true;
+    if (it == actionMap.end())
+    {
+        return false;
+    }
+    for (const auto& combo_ : it->second)
+    {
+        if (CheckCombo(combo_, 0))
+        {
+            return true;
+        }
+    }
     return false;
 }
 
 bool KeyConfig::ActionPressedIn(const std::string& action_) const {
     // 遷移中もデバイス状態は更新し、ゲーム向けの入力結果だけを抑止する。
-    if (ScreenTransitionManager::Instance().IsInputBlocked()) return false;
+    if (ScreenTransitionManager::Instance().IsInputBlocked())
+    {
+        return false;
+    }
     auto it = actionMap.find(action_);
-    if (it == actionMap.end()) return false;
-    for (const auto& combo_ : it->second) if (CheckCombo(combo_, 1)) return true;
+    if (it == actionMap.end())
+    {
+        return false;
+    }
+    for (const auto& combo_ : it->second)
+    {
+        if (CheckCombo(combo_, 1))
+        {
+            return true;
+        }
+    }
     return false;
 }
 
 bool KeyConfig::ActionPressedOut(const std::string& action_) const {
     // 遷移中もデバイス状態は更新し、ゲーム向けの入力結果だけを抑止する。
-    if (ScreenTransitionManager::Instance().IsInputBlocked()) return false;
+    if (ScreenTransitionManager::Instance().IsInputBlocked())
+    {
+        return false;
+    }
     auto it = actionMap.find(action_);
-    if (it == actionMap.end()) return false;
-    for (const auto& combo_ : it->second) if (CheckCombo(combo_, 2)) return true;
+    if (it == actionMap.end())
+    {
+        return false;
+    }
+    for (const auto& combo_ : it->second)
+    {
+        if (CheckCombo(combo_, 2))
+        {
+            return true;
+        }
+    }
     return false;
 }
 
 // --- JSON保存 ---
 bool KeyConfig::Save(const std::string& filename)
 {
-    if (filename.empty()) return false;
+    if (filename.empty())
+    {
+        return false;
+    }
 
     json root = json::object();
     root["actions"] = json::object();
@@ -172,7 +252,10 @@ bool KeyConfig::Save(const std::string& filename)
     }
 
     std::ofstream ofs_(filename);
-    if (!ofs_) return false;
+    if (!ofs_)
+    {
+        return false;
+    }
 
     ofs_ << root.dump(4);
     return true;
@@ -181,10 +264,16 @@ bool KeyConfig::Save(const std::string& filename)
 // --- JSON読み込み ---
 bool KeyConfig::Load(const std::string& filename)
 {
-    if (filename.empty()) return false;
+    if (filename.empty())
+    {
+        return false;
+    }
 
     std::ifstream ifs_(filename);
-    if (!ifs_) return false;
+    if (!ifs_)
+    {
+        return false;
+    }
 
     json root_;
 
@@ -205,7 +294,10 @@ bool KeyConfig::Load(const std::string& filename)
 
     for (auto& [name_, actionVal_] : actions_.items())
     {
-        if (name_ == "axes") continue;
+        if (name_ == "axes")
+        {
+            continue;
+        }
 
         for (auto& comboVal_ : actionVal_)
         {
@@ -244,16 +336,23 @@ bool KeyConfig::Load(const std::string& filename)
 
     return true;
 }
+
 //-----Axis-----
 void KeyConfig::BindAxis(const std::string& axisName_, const AxisUnit& unit_)
 {
-    if (axisName_.empty()) return;
+    if (axisName_.empty())
+    {
+        return;
+    }
     axisMap[axisName_].push_back(unit_);
 }
 
 void KeyConfig::SetAxisBinds(const std::string& axisName_, const AxisBind& binds_)
 {
-    if (axisName_.empty()) return;
+    if (axisName_.empty())
+    {
+        return;
+    }
     axisMap[axisName_] = binds_;
 }
 
@@ -266,17 +365,29 @@ float KeyConfig::GetAxis(const std::string& axisName_) const
 {
     float value_ = GetRawAxis(axisName_);
 
-    if (value_ > 1.0f) value_ = 1.0f;
-    if (value_ < -1.0f) value_ = -1.0f;
+    if (value_ > 1.0f)
+    {
+        value_ = 1.0f;
+    }
+    if (value_ < -1.0f)
+    {
+        value_ = -1.0f;
+    }
 
     return value_;
 }
 
 float KeyConfig::GetRawAxis(const std::string& axisName_) const
 {
-    if (ScreenTransitionManager::Instance().IsInputBlocked()) return 0.0f;
+    if (ScreenTransitionManager::Instance().IsInputBlocked())
+    {
+        return 0.0f;
+    }
     auto it_ = axisMap.find(axisName_);
-    if (it_ == axisMap.end()) return 0.0f;
+    if (it_ == axisMap.end())
+    {
+        return 0.0f;
+    }
 
     float value_ = 0.0f;
 
@@ -353,8 +464,15 @@ float KeyConfig::GetAxisUnitValue(const AxisUnit& unit_) const
 
 
 
-bool KeyConfig::Save() { return Save(configFile); }
-bool KeyConfig::Load() { return Load(configFile); }
+bool KeyConfig::Save()
+{
+    return Save(configFile);
+}
+
+bool KeyConfig::Load()
+{
+    return Load(configFile);
+}
 
 // 新規操作だけを観測し、KeyPressedInの共有状態やゲーム操作のタイミングを変更しない。
 void KeyConfig::UpdateActiveDevice(bool focused_)
@@ -371,18 +489,31 @@ void KeyConfig::UpdateActiveDevice(bool focused_)
     }
     bool click_ = false;
     for (const int code_ : { VK_LBUTTON, VK_RBUTTON, VK_MBUTTON, VK_XBUTTON1, VK_XBUTTON2 })
+    {
         click_ |= mouse_.GetButtonState(code_,1);
+    }
     const auto delta_ = mouse_.GetSubMousePos();
     const bool wheel_ = observedWheelRevision != mouse_.GetWheelRevision();
     observedWheelRevision = mouse_.GetWheelRevision();
     if (focused_ && observationInitialized)
     {
         // 明確なボタン操作を移動より優先し、4ピクセル未満のマウス振動を無視する。
-        if (keyboard_ || click_ || wheel_) activeDevice = InputDisplayDevice::KEYBOARD_MOUSE;
-        else if (pad_.HasMeaningfulInput()) activeDevice = pad_.IsPlayStation() ? InputDisplayDevice::PLAYSTATION_PAD : InputDisplayDevice::XBOX_PAD;
-        else if (delta_.x * delta_.x + delta_.y * delta_.y >= 16.0f) activeDevice = InputDisplayDevice::KEYBOARD_MOUSE;
+        if (keyboard_ || click_ || wheel_)
+        {
+            activeDevice = InputDisplayDevice::KEYBOARD_MOUSE;
+        }
+        else if (pad_.HasMeaningfulInput())
+        {
+            activeDevice = pad_.IsPlayStation() ? InputDisplayDevice::PLAYSTATION_PAD : InputDisplayDevice::XBOX_PAD;
+        }
+        else if (delta_.x * delta_.x + delta_.y * delta_.y >= 16.0f)
+        {
+            activeDevice = InputDisplayDevice::KEYBOARD_MOUSE;
+        }
     }
     if (!pad_.IsConnected() && activeDevice != InputDisplayDevice::KEYBOARD_MOUSE)
+    {
         activeDevice = InputDisplayDevice::KEYBOARD_MOUSE;
+    }
     observationInitialized = focused_;
 }

@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 struct ID3D11RenderTargetView;
+
 // 再生状態から独立し、視覚表現と固有リソースだけを扱うStrategy。
 class ITransitionEffect
 {
@@ -18,6 +19,7 @@ public:
     virtual void Gui(TransitionParameters& parameters_) = 0;
     virtual bool IsReady() const = 0;
 };
+
 // 種類名と生成関数を登録し、毎フレームの種類判定を不要にする。
 class TransitionEffectFactory
 {

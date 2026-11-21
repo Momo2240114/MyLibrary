@@ -25,7 +25,10 @@ namespace
     double CalculateMedian(const std::vector<double>& sortedValues_)
     {
         // 呼び出し側でソート済みの読み込み時間から中央値を出す。
-        if (sortedValues_.empty()) return 0.0;
+        if (sortedValues_.empty())
+        {
+            return 0.0;
+        }
         return sortedValues_.size() % 2 == 0
             ? (sortedValues_[sortedValues_.size() / 2 - 1] + sortedValues_[sortedValues_.size() / 2]) * 0.5
             : sortedValues_[sortedValues_.size() / 2];
@@ -52,7 +55,10 @@ namespace
                 }),
             values_.end());
 
-        if (values_.size() < 4) return;
+        if (values_.size() < 4)
+        {
+            return;
+        }
 
         std::sort(values_.begin(), values_.end());
         const double median_ = CalculateMedian(values_);
@@ -76,13 +82,19 @@ bool ModelLoadProfileManager::LoadProfile(const std::filesystem::path& filePath_
     profileEntries.clear();
 
     std::ifstream file_(filePath_);
-    if (!file_.is_open()) return false;
+    if (!file_.is_open())
+    {
+        return false;
+    }
 
     try
     {
         nlohmann::json json_;
         file_ >> json_;
-        if (json_.value("version", 0) != MODEL_LOAD_PROFILE_VERSION) return false;
+        if (json_.value("version", 0) != MODEL_LOAD_PROFILE_VERSION)
+        {
+            return false;
+        }
 
         const nlohmann::json models_ = json_.value("models", nlohmann::json::object());
         for (auto iterator_ = models_.begin(); iterator_ != models_.end(); ++iterator_)
@@ -100,7 +112,10 @@ bool ModelLoadProfileManager::LoadProfile(const std::filesystem::path& filePath_
             entry_.standardDeviationMilliseconds = item_.value("standardDeviationMilliseconds", 0.0);
             entry_.fileSize = item_.value("fileSize", static_cast<uintmax_t>(0));
             entry_.fileLastWriteTime = item_.value("fileLastWriteTime", static_cast<int64_t>(0));
-            if (entry_.estimatedLoadMilliseconds <= 0.0) continue;
+            if (entry_.estimatedLoadMilliseconds <= 0.0)
+            {
+                continue;
+            }
             profileEntries[iterator_.key()] = entry_;
         }
     }
@@ -153,13 +168,19 @@ bool ModelLoadProfileManager::LoadHistory(const std::filesystem::path& filePath_
     historyEntries.clear();
 
     std::ifstream file_(filePath_);
-    if (!file_.is_open()) return false;
+    if (!file_.is_open())
+    {
+        return false;
+    }
 
     try
     {
         nlohmann::json json_;
         file_ >> json_;
-        if (json_.value("version", 0) != MODEL_LOAD_HISTORY_VERSION) return false;
+        if (json_.value("version", 0) != MODEL_LOAD_HISTORY_VERSION)
+        {
+            return false;
+        }
 
         const nlohmann::json models_ = json_.value("models", nlohmann::json::object());
         for (auto iterator_ = models_.begin(); iterator_ != models_.end(); ++iterator_)
@@ -182,10 +203,16 @@ bool ModelLoadProfileManager::LoadHistory(const std::filesystem::path& filePath_
                 sample_.recordedAt = sampleJson_.value("recordedAt", std::string());
                 sample_.buildConfiguration = sampleJson_.value("buildConfiguration", std::string());
                 sample_.workerCount = sampleJson_.value("workerCount", 0u);
-                if (sample_.totalLoadMilliseconds > 0.0) entry_.samples.push_back(sample_);
+                if (sample_.totalLoadMilliseconds > 0.0)
+                {
+                    entry_.samples.push_back(sample_);
+                }
             }
 
-            if (!entry_.samples.empty()) historyEntries[entry_.modelPath] = entry_;
+            if (!entry_.samples.empty())
+            {
+                historyEntries[entry_.modelPath] = entry_;
+            }
         }
     }
     catch (...)
@@ -259,7 +286,10 @@ bool ModelLoadProfileManager::GenerateProfileFromHistory()
             }
         }
         RemoveLongLoadOutliers(values_);
-        if (values_.empty()) continue;
+        if (values_.empty())
+        {
+            continue;
+        }
 
         // 平均・中央値・分散を出し、読み込みバーなどで使う推定時間へ変換する。
         std::sort(values_.begin(), values_.end());
@@ -315,7 +345,10 @@ void ModelLoadProfileManager::RecordLoadResult(
     double loadMilliseconds_,
     unsigned int workerCount_)
 {
-    if (loadMilliseconds_ <= 0.0) return;
+    if (loadMilliseconds_ <= 0.0)
+    {
+        return;
+    }
 
     const std::string normalizedPath_ = NormalizePath(modelPath_);
     std::lock_guard<std::mutex> lock_(profileMutex);
@@ -327,7 +360,10 @@ void ModelLoadProfileManager::RecordLoadResult(
     {
         const double outlierLimit_ =
             CalculateOutlierLimit(profileFound_->second.medianLoadMilliseconds);
-        if (loadMilliseconds_ > outlierLimit_) return;
+        if (loadMilliseconds_ > outlierLimit_)
+        {
+            return;
+        }
     }
     else if (loadMilliseconds_ > MODEL_LOAD_ABSOLUTE_SAMPLE_LIMIT_MS)
     {
@@ -392,7 +428,10 @@ double ModelLoadProfileManager::GetRelativeLoadWeight(
     }
 
     const double averageMilliseconds_ = GetAverageProfileMilliseconds();
-    if (averageMilliseconds_ <= 0.0) return 1.0;
+    if (averageMilliseconds_ <= 0.0)
+    {
+        return 1.0;
+    }
     return (std::max)(0.1, EstimateFromSimilarFiles(modelPath_) / averageMilliseconds_);
 }
 
@@ -440,16 +479,25 @@ bool ModelLoadProfileManager::SaveJsonAtomically(
     {
         // 途中で失敗しても既存ファイルを壊しにくいよう、一度tmpへ書いてから置き換える。
         const std::filesystem::path parentPath_ = filePath_.parent_path();
-        if (!parentPath_.empty()) std::filesystem::create_directories(parentPath_);
+        if (!parentPath_.empty())
+        {
+            std::filesystem::create_directories(parentPath_);
+        }
 
         std::filesystem::path temporaryPath_ = filePath_;
         temporaryPath_ += ".tmp";
 
         {
             std::ofstream file_(temporaryPath_);
-            if (!file_.is_open()) return false;
+            if (!file_.is_open())
+            {
+                return false;
+            }
             file_ << json_.dump(4);
-            if (!file_.good()) return false;
+            if (!file_.good())
+            {
+                return false;
+            }
         }
 
         std::error_code errorCode_;
@@ -479,7 +527,10 @@ std::string ModelLoadProfileManager::NormalizePath(
     }
 #ifdef _WIN32
     std::transform(normalizedPath_.begin(), normalizedPath_.end(), normalizedPath_.begin(),
-        [](unsigned char character_) { return static_cast<char>(std::tolower(character_)); });
+        [](unsigned char character_)
+    {
+        return static_cast<char>(std::tolower(character_));
+    });
 #endif
     return normalizedPath_;
 }
@@ -499,7 +550,10 @@ double ModelLoadProfileManager::EstimateFromSimilarFiles(
     for (const auto& pair_ : profileEntries)
     {
         const ModelLoadProfileEntry& entry_ = pair_.second;
-        if (entry_.estimatedLoadMilliseconds <= 0.0) continue;
+        if (entry_.estimatedLoadMilliseconds <= 0.0)
+        {
+            continue;
+        }
 
         allMilliseconds_ += entry_.estimatedLoadMilliseconds;
         ++allCount_;
@@ -521,8 +575,14 @@ double ModelLoadProfileManager::EstimateFromSimilarFiles(
         totalWeight_ += weight_;
     }
 
-    if (totalWeight_ > 0.0) return weightedMilliseconds_ / totalWeight_;
-    if (allCount_ > 0) return allMilliseconds_ / static_cast<double>(allCount_);
+    if (totalWeight_ > 0.0)
+    {
+        return weightedMilliseconds_ / totalWeight_;
+    }
+    if (allCount_ > 0)
+    {
+        return allMilliseconds_ / static_cast<double>(allCount_);
+    }
 
     // 参考になる履歴がない場合は、ファイルサイズから最低限の推定値を作る。
     if (fileSize_ > 0)
@@ -536,13 +596,19 @@ double ModelLoadProfileManager::EstimateFromSimilarFiles(
 
 double ModelLoadProfileManager::GetAverageProfileMilliseconds() const
 {
-    if (profileEntries.empty()) return defaultEstimatedLoadMilliseconds;
+    if (profileEntries.empty())
+    {
+        return defaultEstimatedLoadMilliseconds;
+    }
 
     double milliseconds_ = 0.0;
     int count_ = 0;
     for (const auto& pair_ : profileEntries)
     {
-        if (pair_.second.estimatedLoadMilliseconds <= 0.0) continue;
+        if (pair_.second.estimatedLoadMilliseconds <= 0.0)
+        {
+            continue;
+        }
         milliseconds_ += pair_.second.estimatedLoadMilliseconds;
         ++count_;
     }
@@ -556,7 +622,10 @@ uintmax_t ModelLoadProfileManager::GetFileSize(
     const std::filesystem::path& modelPath_) const
 {
     std::error_code errorCode_;
-    if (!std::filesystem::exists(modelPath_, errorCode_)) return 0;
+    if (!std::filesystem::exists(modelPath_, errorCode_))
+    {
+        return 0;
+    }
     const uintmax_t fileSize_ = std::filesystem::file_size(modelPath_, errorCode_);
     return errorCode_ ? 0 : fileSize_;
 }
@@ -566,7 +635,10 @@ int64_t ModelLoadProfileManager::GetFileLastWriteTime(
 {
     std::error_code errorCode_;
     const auto writeTime_ = std::filesystem::last_write_time(modelPath_, errorCode_);
-    if (errorCode_) return 0;
+    if (errorCode_)
+    {
+        return 0;
+    }
     return std::chrono::duration_cast<std::chrono::seconds>(
         writeTime_.time_since_epoch()).count();
 }

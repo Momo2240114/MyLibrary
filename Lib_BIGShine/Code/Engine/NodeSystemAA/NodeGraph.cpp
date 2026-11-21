@@ -7,7 +7,10 @@ namespace NodeSystem
 
     void NodeGraph::Update()
     {
-        if (needsRebuild) Rebuild();
+        if (needsRebuild)
+        {
+            Rebuild();
+        }
 
         // ノード評価前にリンク先へ値を転送し、各ノードが最新の入力を参照できるようにする。
         for (const auto& link_ : links) {
@@ -35,7 +38,10 @@ namespace NodeSystem
     {
         links.erase(
             std::remove_if(links.begin(), links.end(),
-                [linkId_](const Link& link_) { return link_.id == linkId_; }),
+                [linkId_](const Link& link_)
+        {
+            return link_.id == linkId_;
+        }),
             links.end()
         );
 
@@ -56,8 +62,20 @@ namespace NodeSystem
     Pin* NodeGraph::FindPin(uintptr_t pinId_)
     {
         for (auto& node_ : nodes) {
-            for (auto& pin_ : node_->inputs) if (pin_.id == pinId_) return &pin_;
-            for (auto& pin_ : node_->outputs) if (pin_.id == pinId_) return &pin_;
+            for (auto& pin_ : node_->inputs)
+            {
+                if (pin_.id == pinId_)
+                {
+                    return &pin_;
+                }
+            }
+            for (auto& pin_ : node_->outputs)
+            {
+                if (pin_.id == pinId_)
+                {
+                    return &pin_;
+                }
+            }
         }
         return nullptr;
     }
@@ -68,11 +86,17 @@ namespace NodeSystem
         {
             for (auto& pin_ : node_->inputs)
             {
-                if (pin_.id == pinId_) return node_.get();
+                if (pin_.id == pinId_)
+                {
+                    return node_.get();
+                }
             }
             for (auto& pin_ : node_->outputs)
             {
-                if (pin_.id == pinId_) return node_.get();
+                if (pin_.id == pinId_)
+                {
+                    return node_.get();
+                }
             }
         }
         return nullptr;

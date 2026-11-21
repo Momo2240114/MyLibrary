@@ -32,8 +32,13 @@ public:
     // TimeScale中でも物理速度へ正しく変換するため、元のDeltaTimeを渡す。
     void SetUnscaledDeltaTime(float deltaTime_);
     void AddRootMotionDelta(const DirectX::XMFLOAT3& delta_);
+
     // 攻撃の中断時に、未反映の元移動とWarp移動だけを破棄し、被弾のImpulseは残す。
-    void ClearRootMotionDelta() { rootMotionDelta = { 0.0f, 0.0f, 0.0f }; }
+    void ClearRootMotionDelta()
+    {
+        rootMotionDelta = { 0.0f, 0.0f, 0.0f };
+    }
+
     void AddImpulse(const DirectX::XMFLOAT3& impulse_);
     void ResetVerticalVelocity();
     void SetFacingDirection(const DirectX::XMFLOAT3& direction_, bool immediate_ = true);
@@ -45,6 +50,7 @@ public:
     }
 
     std::shared_ptr<ColliderComponent> ResolveCollider();
+
 private:
 
     // 予約された向きをTransformへ反映する。

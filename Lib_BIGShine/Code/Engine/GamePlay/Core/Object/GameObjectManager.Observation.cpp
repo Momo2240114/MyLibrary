@@ -30,10 +30,16 @@ void GameObjectManager::EnsureCombatObservationRuntime()
         component_->SetSystem(combatObservationSystem);
     }
     // Inspector操作でもBossの子にはせず、常にScene直下の監視Objectとして扱う。
-    if (monitor_->transform && !monitor_->transform->parent.expired()) monitor_->SetParent(nullptr);
+    if (monitor_->transform && !monitor_->transform->parent.expired())
+    {
+        monitor_->SetParent(nullptr);
+    }
     if (firstInitialization_)
     {
         // 初期化前に作られたObjectだけを一度登録し、以降は生成・構成変更通知で追加する。
-        for (const auto& object_ : objects) combatObservationSystem->RegisterObject(object_);
+        for (const auto& object_ : objects)
+        {
+            combatObservationSystem->RegisterObject(object_);
+        }
     }
 }

@@ -19,7 +19,9 @@ namespace NodeSystem {
     /// グラフ構造が変更された場合のみ評価順序を再構築し、通常更新時の処理負荷を抑える。
     class NodeGraph {
     public:
-        NodeGraph() : nextId(1) {} // 0を無効IDとして扱えるよう、1から採番する
+        NodeGraph() : nextId(1)
+        {
+        } // 0を無効IDとして扱えるよう、1から採番する
 
         /// ノード、ピン、リンクで共有できる一意なIDを発行する。
         uintptr_t GenerateUniqueId() {
@@ -47,8 +49,15 @@ namespace NodeSystem {
         void RemoveLink(uintptr_t linkId_);
 
         // --- エディタ用アクセサ ---
-        const std::vector<std::unique_ptr<Node>>& GetNodes() const { return nodes; }
-        const std::vector<Link>& GetLinks() const { return links; }
+        const std::vector<std::unique_ptr<Node>>& GetNodes() const
+        {
+            return nodes;
+        }
+
+        const std::vector<Link>& GetLinks() const
+        {
+            return links;
+        }
 
     private:
         // ノード本体はグラフが所有し、リンクはIDによってピンを参照する。

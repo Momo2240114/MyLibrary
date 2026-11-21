@@ -34,7 +34,10 @@ float4 main(VS_OUT input_) : SV_TARGET
     float lumaSe_ = Luma(se_);
     float lumaMin_ = min(lumaCenter_, min(min(lumaNw_, lumaNe_), min(lumaSw_, lumaSe_)));
     float lumaMax_ = max(lumaCenter_, max(max(lumaNw_, lumaNe_), max(lumaSw_, lumaSe_)));
-    if (lumaMax_ - lumaMin_ < max(edgeThresholdMin, lumaMax_ * edgeThreshold)) return center_;
+    if (lumaMax_ - lumaMin_ < max(edgeThresholdMin, lumaMax_ * edgeThreshold))
+    {
+        return center_;
+    }
 
     float2 direction_ = float2(
         -((lumaNw_ + lumaNe_) - (lumaSw_ + lumaSe_)),

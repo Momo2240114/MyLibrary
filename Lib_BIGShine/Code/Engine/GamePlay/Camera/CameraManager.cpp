@@ -44,7 +44,10 @@ void CameraManager::Update(float et_, const std::vector<std::shared_ptr<GameObje
     int highestPriority_ = -2147483648;
 
     for (auto& obj : objects_) {
-        if (!obj) continue;
+        if (!obj)
+        {
+            continue;
+        }
         auto cam = obj->GetComponent<CameraComponent>();
         if (cam && cam->IsEnabled()) {
             if (cam->GetPriority() >= highestPriority_) {
@@ -121,10 +124,16 @@ std::shared_ptr<CameraComponent> CameraManager::GetSourceCamera() const
 
 void CameraManager::CopyActiveCameraToEditorCamera()
 {
-    if (!editorCameraComponent) return;
+    if (!editorCameraComponent)
+    {
+        return;
+    }
 
     const std::shared_ptr<CameraComponent> sourceCamera_ = GetActiveCamera();
-    if (!sourceCamera_) return;
+    if (!sourceCamera_)
+    {
+        return;
+    }
 
     // Runtime側のCameraComponentは変更せず、Editor用Cameraへ現在の視点だけ複製する。
     editorCameraComponent->CopyFrom(sourceCamera_.get());
@@ -132,7 +141,10 @@ void CameraManager::CopyActiveCameraToEditorCamera()
 
 void CameraManager::StartTransition(std::shared_ptr<CameraComponent> nextCam)
 {
-    if (!nextCam) return;
+    if (!nextCam)
+    {
+        return;
+    }
     targetCamera = nextCam;
     transitionTimer = 0.0f;
     isTransitioning = true;

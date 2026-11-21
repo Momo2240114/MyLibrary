@@ -1,0 +1,280 @@
+{
+    "CollisionMask": 0,
+    "Components": [
+        {
+            "Data": {
+                "BoardId": "boss_phase2_title",
+                "BoardLayer": 20,
+                "BoardName": "BossPhase2Title",
+                "InputEnabled": false,
+                "ReferenceResolution": [
+                    1920.0,
+                    1080.0
+                ],
+                "ScaleMode": "EXPAND",
+                "Version": 1,
+                "Visible": true,
+                "ZOrder": 100
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "WidgetBoardComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "InputEnabled": false,
+                "ParentWidgetId": "",
+                "RaycastTarget": false,
+                "RectTransform": {
+                    "AnchorMax": [
+                        0.5,
+                        0.7799999713897705
+                    ],
+                    "AnchorMin": [
+                        0.5,
+                        0.7799999713897705
+                    ],
+                    "AnchoredPosition": [
+                        0.0,
+                        0.0
+                    ],
+                    "LocalRotation": 0.0,
+                    "LocalScale": [
+                        1.0,
+                        1.0
+                    ],
+                    "Pivot": [
+                        0.5,
+                        0.5
+                    ],
+                    "SizeDelta": [
+                        796.0,
+                        123.0
+                    ]
+                },
+                "Version": 1,
+                "Visible": true,
+                "WidgetId": "BossPhase2Name",
+                "ZOrder": 100
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "UIWidgetComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "CatPos": [
+                    0.0,
+                    0.0
+                ],
+                "CatSize": [
+                    796.0,
+                    123.0
+                ],
+                "Color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "LinearSampling": true,
+                "LocalSize": [
+                    796.0,
+                    123.0
+                ],
+                "SdrTexture": false,
+                "ShaderID": 0,
+                "TexturePath": "",
+                "Visible": false,
+                "pivotType": 0
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "SpriteRenderer",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "AutoSizeWidget": true,
+                "Color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "FontPath": "Data/Font/Zen_Old_Mincho/ZenOldMincho-Black.ttf",
+                "FontSize": 68.0,
+                "FontStrokeWidth": 0.0,
+                "HorizontalAlign": "CENTER",
+                "MaxWidth": 780.0,
+                "Padding": 8.0,
+                "Text": "黒泥の鏡像",
+                "Version": 1,
+                "VerticalAlign": "CENTER"
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "UITextComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "BossName": "黒泥の鏡像",
+                "DisplayDuration": 1.1799999475479126,
+                "DissolveOnFadeOut": true,
+                "FadeInDuration": 0.4000000059604645,
+                "FadeOutDuration": 0.7799999713897705,
+                "SubName": ""
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "BossNamePresentationComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 100
+        },
+        {
+            "Data": {
+                "PlayOnStart": false,
+                "Preset": "MaskWipe",
+                "Settings": {
+                    "BurnColor": [
+                        0.26,
+                        0.05,
+                        0.4,
+                        0.56
+                    ],
+                    "EdgeWidth": 0.19,
+                    "GlowColor": [
+                        0.65,
+                        0.24,
+                        0.99,
+                        1.0
+                    ],
+                    "GlowIntensity": 0.72,
+                    "GlowRadius": 9.0,
+                    "GradientBottom": [
+                        0.46,
+                        0.25,
+                        0.62,
+                        1.0
+                    ],
+                    "GradientStrength": 0.92,
+                    "GradientTop": [
+                        0.98,
+                        0.89,
+                        1.0,
+                        1.0
+                    ],
+                    "MaskInvert": false,
+                    "MaskOffset": [
+                        0.07,
+                        0.06
+                    ],
+                    "MaskScale": [
+                        0.9,
+                        0.88
+                    ],
+                    "MaskTexture": "Data/Texture/TransitionMasks/Waves.png",
+                    "OutlineColor": [
+                        0.045,
+                        0.015,
+                        0.07,
+                        0.98
+                    ],
+                    "OutlineWidth": 2.2,
+                    "PulseAmount": 0.17,
+                    "PulseSpeed": 1.9,
+                    "ShadowColor": [
+                        0.04,
+                        0.012,
+                        0.055,
+                        0.85
+                    ],
+                    "ShadowOffset": [
+                        0.0,
+                        5.0
+                    ],
+                    "ShadowOpacity": 0.95,
+                    "ShadowSoftness": 4.0
+                }
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "UIVisualEffectComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "PlayOnStart": false,
+                "Preset": "PopIn",
+                "Settings": {
+                    "Duration": 0.53,
+                    "Easing": 2,
+                    "OffsetFrom": [
+                        0.0,
+                        -4.0
+                    ],
+                    "OffsetTo": [
+                        0.0,
+                        0.0
+                    ],
+                    "ScaleFrom": [
+                        1.035,
+                        1.08
+                    ],
+                    "ScaleTo": [
+                        1.0,
+                        1.0
+                    ]
+                }
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "UIMotionComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        }
+    ],
+    "Layer": 16,
+    "Name": "BossPhase2Name",
+    "ParentName": "",
+    "RequiredForSceneStart": true,
+    "Transform": {
+        "Pos": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

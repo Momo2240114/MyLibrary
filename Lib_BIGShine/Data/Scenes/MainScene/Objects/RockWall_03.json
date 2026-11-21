@@ -55,6 +55,13 @@
                     }
                 ],
                 "ModelName": "./Data/Model/Stage/Rock/Rock01.gltf",
+                "OutlineColor": [
+                    0.019999999552965164,
+                    0.019999999552965164,
+                    0.02500000037252903,
+                    1.0
+                ],
+                "OverrideOutlineColor": false,
                 "RootMotionName": "",
                 "ShaderID": 1,
                 "StaticModel": true,

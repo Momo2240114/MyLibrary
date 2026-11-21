@@ -52,7 +52,10 @@ namespace
     {
         while (object_)
         {
-            if (const auto collider_ = object_->GetComponent<CharacterCollider>()) return collider_;
+            if (const auto collider_ = object_->GetComponent<CharacterCollider>())
+            {
+                return collider_;
+            }
             const auto parent_ = object_->transform ? object_->transform->parent.lock() : nullptr;
             object_ = parent_ ? parent_->gameObject.lock() : nullptr;
         }
@@ -64,9 +67,15 @@ void HumanBossActionComponent::InitializeAttackAssist()
 {
     BS_PROFILE_SCOPE("HumanBossActionComponent::InitializeAttackAssist");
     const auto owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
     const auto warp_ = owner_->GetOrAddComponent<MotionWarpComponent>(false);
-    if (!warp_) return;
+    if (!warp_)
+    {
+        return;
+    }
     warp_->SetRegisterGlobalActions(false);
     // 保存された調整値を維持し、敵用の未設定プリセットだけを追加する。
     for (int index_ = 0; index_ < 7; ++index_)
@@ -129,7 +138,10 @@ bool HumanBossActionComponent::CanWarpPath(const DirectX::XMFLOAT3& start_, cons
     const auto owner_ = gameObject.lock();
     const auto collider_ = ResolveAttackCharacter(owner_);
     auto scene_ = PhysXSystem::GetScene();
-    if (!owner_ || !owner_->transform || !collider_ || !scene_) return false;
+    if (!owner_ || !owner_->transform || !collider_ || !scene_)
+    {
+        return false;
+    }
     const auto capsule_ = collider_->GetCapsuleData();
     DirectX::XMFLOAT3 center_{};
     DirectX::XMStoreFloat3(&center_, DirectX::XMVectorScale(DirectX::XMVectorAdd(capsule_.p0, capsule_.p1), 0.5f));
@@ -138,7 +150,10 @@ bool HumanBossActionComponent::CanWarpPath(const DirectX::XMFLOAT3& start_, cons
     const float deltaX_ = end_.x - start_.x;
     const float deltaZ_ = end_.z - start_.z;
     const float distance_ = std::sqrt(deltaX_ * deltaX_ + deltaZ_ * deltaZ_);
-    if (!std::isfinite(distance_)) return false;
+    if (!std::isfinite(distance_))
+    {
+        return false;
+    }
     const float skin_ = (std::max)(collider_->GetContactOffset(), 0.02f);
     physx::PxQueryFilterData filter_;
     filter_.flags = physx::PxQueryFlag::eSTATIC | physx::PxQueryFlag::eDYNAMIC | physx::PxQueryFlag::ePREFILTER;
@@ -152,7 +167,10 @@ bool HumanBossActionComponent::CanWarpPath(const DirectX::XMFLOAT3& start_, cons
         const physx::PxCapsuleGeometry geometry_((std::max)(capsule_.radius - skin_, 0.01f), halfHeight_);
         const physx::PxTransform pose_(queryCenter_, physx::PxQuat(physx::PxHalfPi, physx::PxVec3(0.0f, 0.0f, 1.0f)));
         if (scene_->sweep(geometry_, pose_, physx::PxVec3(deltaX_ / distance_, 0.0f, deltaZ_ / distance_), distance_, hit_,
-            physx::PxHitFlag::eDEFAULT, filter_, callback_) && hit_.hasBlock) return false;
+            physx::PxHitFlag::eDEFAULT, filter_, callback_) && hit_.hasBlock)
+        {
+            return false;
+        }
     }
     const float step_ = collider_->GetStepOffset();
     const float snap_ = collider_->GetGroundSnapDistance();
@@ -165,9 +183,15 @@ bool HumanBossActionComponent::CanWarpPath(const DirectX::XMFLOAT3& start_, cons
         physx::PxRaycastBuffer ground_;
         const physx::PxVec3 origin_(queryCenter_.x + deltaX_ * rate_, footY_ + step_ + skin_, queryCenter_.z + deltaZ_ * rate_);
         if (!scene_->raycast(origin_, physx::PxVec3(0.0f, -1.0f, 0.0f), step_ + snap_ + skin_, ground_,
-            physx::PxHitFlag::eDEFAULT, filter_, callback_) || !ground_.hasBlock || ground_.block.normal.y < 0.5f) return false;
+            physx::PxHitFlag::eDEFAULT, filter_, callback_) || !ground_.hasBlock || ground_.block.normal.y < 0.5f)
+        {
+            return false;
+        }
         const auto groundCollider_ = ground_.block.actor ? static_cast<const ColliderComponent*>(ground_.block.actor->userData) : nullptr;
-        if (groundCollider_ && !groundCollider_->CanBeCharacterGround()) return false;
+        if (groundCollider_ && !groundCollider_->CanBeCharacterGround())
+        {
+            return false;
+        }
     }
     return true;
 }
@@ -188,36 +212,67 @@ bool HumanBossActionComponent::BuildAttackAssistPlan(const SkillPhase& phase_,
     const auto ownCollider_ = ResolveAttackCharacter(owner_);
     const auto targetCollider_ = ResolveAttackCharacter(target_);
     if (!owner_ || !owner_->transform || !target_ || !target_->transform || !animation_ || !preset_ || !ownCollider_ || !targetCollider_ || !ownCollider_->enabled || !targetCollider_->enabled)
-    { validationError = "Attack assist target, preset, animation or CharacterCollider missing."; return false; }
+    {
+        validationError = "Attack assist target, preset, animation or CharacterCollider missing.";
+        return false;
+    }
     const auto stateIterator_ = animation_->GetStateCatalog().find(phase_.animationState);
-    if (stateIterator_ == animation_->GetStateCatalog().end() || !stateIterator_->second) return false;
+    if (stateIterator_ == animation_->GetStateCatalog().end() || !stateIterator_->second)
+    {
+        return false;
+    }
     const auto& state_ = *stateIterator_->second;
     if (!phase_.motionWarpPreset.empty() && attackAssistEnabled && warp_ && warp_->IsEnabled() &&
         (preset_->warpPosition || preset_->warpRotation) && !state_.rootMotion.enable)
-    { validationError = "Attack assist requires the existing RootMotion application path."; return false; }
+    {
+        validationError = "Attack assist requires the existing RootMotion application path.";
+        return false;
+    }
     const auto model_ = owner_->GetComponent<GltfModelCommponennt>();
-    if (!model_ || !model_->IsModelReady() || state_.animationIndex < 0 || state_.animationIndex >= static_cast<int>(model_->GetAnimations().size())) return false;
+    if (!model_ || !model_->IsModelReady() || state_.animationIndex < 0 || state_.animationIndex >= static_cast<int>(model_->GetAnimations().size()))
+    {
+        return false;
+    }
     const float duration_ = model_->GetAnimations()[state_.animationIndex].secondsLength;
-    if (duration_ <= 0.0001f) return false;
+    if (duration_ <= 0.0001f)
+    {
+        return false;
+    }
     auto& templates_ = AttackTemplateManager::Instance();
-    if (templates_.GetTemplates().empty()) templates_.LoadAll();
+    if (templates_.GetTemplates().empty())
+    {
+        templates_.LoadAll();
+    }
     float firstHit_ = duration_;
     bool hasAttack_ = false;
     for (const auto& event_ : state_.events)
     {
-        if (event_.eventTemplateType != ANIMATION_EVENT_TEMPLATE_TYPE::ATTACK_TEMPLATE) continue;
+        if (event_.eventTemplateType != ANIMATION_EVENT_TEMPLATE_TYPE::ATTACK_TEMPLATE)
+        {
+            continue;
+        }
         const auto template_ = templates_.FindTemplate(event_.attackTemplateId);
-        if (!template_ || !template_->weaponHitBox.enabled) continue;
+        if (!template_ || !template_->weaponHitBox.enabled)
+        {
+            continue;
+        }
         firstHit_ = (std::min)(firstHit_, event_.startTime + template_->weaponHitBox.activeStartTime);
         hasAttack_ = true;
     }
-    if (!hasAttack_) { validationError = "Attack assist requires a timed AttackTemplate event."; return false; }
+    if (!hasAttack_)
+    {
+        validationError = "Attack assist requires a timed AttackTemplate event.";
+        return false;
+    }
     // ヒット開始直前で補正を閉じ、速度カーブで再生時間が変わっても追尾窓を延ばさない。
     endNormalizedTime_ = (std::min)(preset_->endNormalizedTime, (std::max)(0.0f, firstHit_ - 0.01f) / duration_);
     const float start_ = (std::max)(preset_->startNormalizedTime, phase_.animationStartTime / duration_);
     DirectX::XMFLOAT3 localMotion_{};
     if (!animation_->EstimateRootMotion(phase_.animationState, start_, endNormalizedTime_, localMotion_, playbackDuration_))
-    { validationError = "Attack assist RootMotion window cannot be estimated."; return false; }
+    {
+        validationError = "Attack assist RootMotion window cannot be estimated.";
+        return false;
+    }
     const auto rotation_ = owner_->transform->GetWorldRotation();
     const auto orientation_ = DirectX::SimpleMath::Quaternion::CreateFromYawPitchRoll(
         DirectX::XMConvertToRadians(rotation_.y), DirectX::XMConvertToRadians(rotation_.x), DirectX::XMConvertToRadians(rotation_.z));
@@ -227,17 +282,27 @@ bool HumanBossActionComponent::BuildAttackAssistPlan(const SkillPhase& phase_,
     const auto ownerPosition_ = owner_->transform->GetWorldPosition();
     const auto targetPosition_ = target_->transform->GetWorldPosition();
     if (std::abs(targetPosition_.y - ownerPosition_.y) > ownCollider_->GetStepOffset() + ownCollider_->GetGroundSnapDistance())
-    { validationError = "Attack assist target height rejected."; return false; }
+    {
+        validationError = "Attack assist target height rejected.";
+        return false;
+    }
     DirectX::XMFLOAT3 direction_{ targetPosition_.x - ownerPosition_.x, 0.0f, targetPosition_.z - ownerPosition_.z };
     const float distance_ = std::sqrt(direction_.x * direction_.x + direction_.z * direction_.z);
     if ((checkReachability_ && distance_ > preset_->maximumWarpTargetDistance) || distance_ < 0.0001f)
-    { validationError = "Attack assist target distance rejected."; return false; }
-    direction_.x /= distance_; direction_.z /= distance_;
+    {
+        validationError = "Attack assist target distance rejected.";
+        return false;
+    }
+    direction_.x /= distance_;
+    direction_.z /= distance_;
     const float needed_ = (std::max)(0.0f, distance_ - stopDistance_);
     const float approach_ = plannedMotion_.x * direction_.x + plannedMotion_.z * direction_.z;
     const float correctionX_ = direction_.x * needed_ - plannedMotion_.x;
     const float correctionZ_ = direction_.z * needed_ - plannedMotion_.z;
-    if (!checkReachability_) return true;
+    if (!checkReachability_)
+    {
+        return true;
+    }
     const float required_ = distance_ > stopDistance_ + approach_ ?  std::sqrt(correctionX_ * correctionX_ + correctionZ_ * correctionZ_) : 0.0f;
     const bool positionEnabled_ = attackAssistEnabled && warp_ && warp_->IsEnabled() && preset_->warpPosition && preset_->positionMode == MOTION_WARP_POSITION_MODE::TARGET_END_POSITION;
     const float frameCount_ = std::ceil(playbackDuration_ / (std::max)(assistFrameDeltaTime, 0.001f));
@@ -245,7 +310,11 @@ bool HumanBossActionComponent::BuildAttackAssistPlan(const SkillPhase& phase_,
         (std::min)(preset_->maximumPositionCorrectionPerSecond * playbackDuration_, preset_->maximumPositionCorrectionPerFrame * frameCount_)) : 0.0f;
     debugPlannedDistance = std::sqrt(plannedMotion_.x * plannedMotion_.x + plannedMotion_.z * plannedMotion_.z);
     debugRequiredCorrection = required_;
-    if (required_ > capacity_ + 0.001f) { validationError = "Required Warp exceeds correction or time budget."; return false; }
+    if (required_ > capacity_ + 0.001f)
+    {
+        validationError = "Required Warp exceeds correction or time budget.";
+        return false;
+    }
     if (positionEnabled_ && required_ > 0.001f)
     {
         // カーブ終端と実際の更新間隔まで見込み、上限内でも期間中に完了できない補正を選ばない。
@@ -259,15 +328,26 @@ bool HumanBossActionComponent::BuildAttackAssistPlan(const SkillPhase& phase_,
         {
             float speed_ = state_.playbackSpeed;
             if (curve_ && !state_.speedCurveName.empty() && curve_->HasTrack(state_.speedCurveName))
+            {
                 speed_ = curve_->GetValue(state_.speedCurveName, normalized_);
+            }
             for (const auto& event_ : state_.events)
+            {
                 if (event_.overridePlaybackSpeed && normalized_ * duration_ >= event_.startTime && normalized_ * duration_ <= event_.endTime)
+                {
                     speed_ = (std::max)(event_.playbackSpeed, 0.01f);
-            if (!std::isfinite(speed_) || speed_ <= 0.0001f) break;
+                }
+            }
+            if (!std::isfinite(speed_) || speed_ <= 0.0001f)
+            {
+                break;
+            }
             normalized_ = (std::min)(endNormalizedTime_, normalized_ + frameTime_ * speed_ / duration_);
             float progress_ = std::clamp((normalized_ - start_) / (endNormalizedTime_ - start_), 0.0f, 1.0f);
             if (curve_ && !preset_->positionCorrectionCurveName.empty() && curve_->HasTrack(preset_->positionCorrectionCurveName))
+            {
                 progress_ = std::clamp(curve_->GetValue(preset_->positionCorrectionCurveName, progress_), 0.0f, 1.0f);
+            }
             const float frameLimit_ = (std::min)((std::max)(0.0f, preset_->maximumTotalPositionCorrection - used_),
                 (std::min)(preset_->maximumPositionCorrectionPerFrame, preset_->maximumPositionCorrectionPerSecond * frameTime_));
             const float correction_ = std::clamp(required_ * progress_ - delivered_, -frameLimit_, frameLimit_);
@@ -275,7 +355,10 @@ bool HumanBossActionComponent::BuildAttackAssistPlan(const SkillPhase& phase_,
             used_ += std::abs(correction_);
         }
         if (delivered_ + 0.01f < required_)
-        { validationError = "Warp curve cannot finish before the attack window."; return false; }
+        {
+            validationError = "Warp curve cannot finish before the attack window.";
+            return false;
+        }
     }
 
     const auto forward_ = owner_->transform->GetFront();
@@ -286,15 +369,24 @@ bool HumanBossActionComponent::BuildAttackAssistPlan(const SkillPhase& phase_,
     float facingDuration_ = 0.0f;
     const bool rotationEnabled_ = attackAssistEnabled && warp_ && warp_->IsEnabled() && preset_->warpRotation && preset_->rotationMode == MOTION_WARP_ROTATION_MODE::FACE_TARGET;
     if (rotationEnabled_)
+    {
         animation_->EstimateRootMotion(phase_.animationState, (std::max)(start_, preset_->rotationStartNormalizedTime),
             (std::min)(endNormalizedTime_, preset_->rotationEndNormalizedTime), facingMotion_, facingDuration_);
+    }
     // 終盤の減衰分を見込み、最大角度だけでなく回転を終えられる時間も開始条件にする。
     const float angleCapacity_ = rotationEnabled_ ? (std::min)(preset_->maximumRotationDegrees,
         preset_->maximumRotationDegreesPerSecond * preset_->rotationStrength * facingDuration_ * 0.5f) : 10.0f;
     if (angle_ > angleCapacity_)
-    { validationError = "Attack assist facing angle or rotation time rejected."; return false; }
+    {
+        validationError = "Attack assist facing angle or rotation time rejected.";
+        return false;
+    }
     const DirectX::XMFLOAT3 destination_{ ownerPosition_.x + direction_.x * needed_, ownerPosition_.y, ownerPosition_.z + direction_.z * needed_ };
-    if (!CanWarpPath(ownerPosition_, destination_)) { validationError = "Attack assist path blocked or unsupported."; return false; }
+    if (!CanWarpPath(ownerPosition_, destination_))
+    {
+        validationError = "Attack assist path blocked or unsupported.";
+        return false;
+    }
     return true;
 }
 
@@ -304,24 +396,39 @@ float HumanBossActionComponent::GetAttackStartReach(const SkillDefinition& skill
     const auto owner_ = gameObject.lock();
     const auto animation_ = owner_ ? AnimationGraphBridgeComponent::Acquire(owner_) : nullptr;
     const auto warp_ = owner_ ? owner_->GetComponent<MotionWarpComponent>() : nullptr;
-    if (!animation_ || !owner_->transform || !target_ || !target_->transform) return 0.0f;
+    if (!animation_ || !owner_->transform || !target_ || !target_->transform)
+    {
+        return 0.0f;
+    }
     for (const auto& phase_ : skill_.phases)
     {
         const auto state_ = animation_->GetStateCatalog().find(phase_.animationState);
         if (state_ == animation_->GetStateCatalog().end() || !state_->second ||
             std::none_of(state_->second->events.begin(), state_->second->events.end(),
-                [](const AnimEvent& event_) { return event_.eventTemplateType == ANIMATION_EVENT_TEMPLATE_TYPE::ATTACK_TEMPLATE; })) continue;
+                [](const AnimEvent& event_)
+        {
+            return event_.eventTemplateType == ANIMATION_EVENT_TEMPLATE_TYPE::ATTACK_TEMPLATE;
+        }))
+        {
+            continue;
+        }
         DirectX::XMFLOAT3 motion_{};
         float stop_ = 0.0f;
         float end_ = 0.0f;
         float duration_ = 0.0f;
-        if (!BuildAttackAssistPlan(phase_, target_, motion_, stop_, end_, duration_, false)) return 0.0f;
+        if (!BuildAttackAssistPlan(phase_, target_, motion_, stop_, end_, duration_, false))
+        {
+            return 0.0f;
+        }
         const auto ownPosition_ = owner_->transform->GetWorldPosition();
         const auto targetPosition_ = target_->transform->GetWorldPosition();
         const float deltaX_ = targetPosition_.x - ownPosition_.x;
         const float deltaZ_ = targetPosition_.z - ownPosition_.z;
         const float distance_ = std::sqrt(deltaX_ * deltaX_ + deltaZ_ * deltaZ_);
-        if (distance_ <= 0.0001f) return 0.0f;
+        if (distance_ <= 0.0001f)
+        {
+            return 0.0f;
+        }
         const float approach_ = (motion_.x * deltaX_ + motion_.z * deltaZ_) / distance_;
         float reach_ = (std::max)(0.0f, stop_ + approach_);
         const auto preset_ = warp_ ? warp_->GetPreset(phase_.motionWarpPreset) : nullptr;
@@ -331,7 +438,9 @@ float HumanBossActionComponent::GetAttackStartReach(const SkillDefinition& skill
             float curveEnd_ = 1.0f;
             const auto curve_ = owner_->GetComponent<CurveComponent>();
             if (curve_ && !preset_->positionCorrectionCurveName.empty() && curve_->HasTrack(preset_->positionCorrectionCurveName))
+            {
                 curveEnd_ = std::clamp(curve_->GetValue(preset_->positionCorrectionCurveName, 1.0f), 0.0f, 1.0f);
+            }
             const float frames_ = std::ceil(duration_ / (std::max)(assistFrameDeltaTime, 0.001f));
             reach_ += (std::min)(preset_->maximumTotalPositionCorrection * preset_->positionStrength * curveEnd_,
                 (std::min)(preset_->maximumPositionCorrectionPerSecond * duration_, preset_->maximumPositionCorrectionPerFrame * frames_));
@@ -345,11 +454,20 @@ float HumanBossActionComponent::GetAttackStartReach(const SkillDefinition& skill
 bool HumanBossActionComponent::CanContinueAttack(const SkillPhase& phase_)
 {
     // 再出現後の派生攻撃へ、影渡りの無敵を持ち越さない。
-    if (shadowShiftActive && execution.GetPhaseIndex() == 0) SetShadowInvulnerable(false);
+    if (shadowShiftActive && execution.GetPhaseIndex() == 0)
+    {
+        SetShadowInvulnerable(false);
+    }
     // 移動時間が終了しても実位置が未到着なら、派生のWarpや攻撃を開始しない。
     if (shadowShiftActive && execution.GetPhaseIndex() == 0 && !shadowArrived)
-    { status = "Shadow follow-up rejected: destination not reached."; return false; }
-    if (shadowChain && phase_.warpHeight > 0.0f && !CanRaiseShadowDive(phase_.warpHeight)) return false;
+    {
+        status = "Shadow follow-up rejected: destination not reached.";
+        return false;
+    }
+    if (shadowChain && phase_.warpHeight > 0.0f && !CanRaiseShadowDive(phase_.warpHeight))
+    {
+        return false;
+    }
     if (shadowChain && !phase_.motionWarpPreset.empty())
     {
         DirectX::XMFLOAT3 motion_{};
@@ -359,7 +477,9 @@ bool HumanBossActionComponent::CanContinueAttack(const SkillPhase& phase_)
     BS_PROFILE_SCOPE("HumanBossActionComponent::CanContinueAttack");
     // 予兆中にガード解除・回避・離脱した相手を、拘束位置へ引き戻さない。
     if (execution.GetSkillName() == "GUARD_EXECUTION" && phase_.enterAction == "HumanBoss_ExecutionCapture")
+    {
         return CanCaptureGuardingPlayer(attackTarget.lock());
+    }
     if (execution.GetSkillName() == "COUNTER_ATTACK" && phase_.enterAction == "HumanBoss_ExecutionCapture")
     {
         // 確定反撃は次の開始処理で拘束位置へ揃えるため、通常攻撃の到達判定では打ち切らない。
@@ -373,20 +493,39 @@ bool HumanBossActionComponent::CanContinueAttack(const SkillPhase& phase_)
         }
         return true;
     }
-    if (!attackAssistSkill) return true;
+    if (!attackAssistSkill)
+    {
+        return true;
+    }
     const auto owner_ = GetGameObject();
     const auto animation_ = owner_ ? AnimationGraphBridgeComponent::Acquire(owner_) : nullptr;
-    if (!animation_) { status = "Follow-up stopped: animation missing."; return false; }
+    if (!animation_)
+    {
+        status = "Follow-up stopped: animation missing.";
+        return false;
+    }
     const auto state_ = animation_->GetStateCatalog().find(phase_.animationState);
     if (state_ == animation_->GetStateCatalog().end() || !state_->second)
-    { status = "Follow-up stopped: state missing: " + phase_.animationState; return false; }
+    {
+        status = "Follow-up stopped: state missing: " + phase_.animationState;
+        return false;
+    }
     // 構えや待機Phaseは維持し、次の打撃へ移る時だけ到達判定を行う。
     if (std::none_of(state_->second->events.begin(), state_->second->events.end(),
-        [](const AnimEvent& event_) { return event_.eventTemplateType == ANIMATION_EVENT_TEMPLATE_TYPE::ATTACK_TEMPLATE; })) return true;
+        [](const AnimEvent& event_)
+    {
+        return event_.eventTemplateType == ANIMATION_EVENT_TEMPLATE_TYPE::ATTACK_TEMPLATE;
+    }))
+    {
+        return true;
+    }
     const auto target_ = attackTarget.lock();
     const auto health_ = target_ ? target_->GetComponent<HealthComponent>() : nullptr;
     if (!target_ || !target_->transform || (health_ && health_->IsDead()))
-    { status = "Follow-up stopped: target missing or dead."; return false; }
+    {
+        status = "Follow-up stopped: target missing or dead.";
+        return false;
+    }
     DirectX::XMFLOAT3 motion_{};
     float stopDistance_ = 0.0f;
     float end_ = 0.0f;
@@ -395,7 +534,10 @@ bool HumanBossActionComponent::CanContinueAttack(const SkillPhase& phase_)
     // 継続判定だけ小さな余裕を持たせ、近距離でわずかに後退する段を過度に切らない。
     constexpr float FOLLOW_UP_REACH_MARGIN = 0.25f;
     if (!BuildAttackAssistPlan(phase_, target_, motion_, stopDistance_, end_, duration_, true, FOLLOW_UP_REACH_MARGIN))
-    { status = "Follow-up stopped before " + phase_.animationState + ": " + validationError; return false; }
+    {
+        status = "Follow-up stopped before " + phase_.animationState + ": " + validationError;
+        return false;
+    }
     const auto warp_ = owner_->GetComponent<MotionWarpComponent>();
     const auto preset_ = warp_ ? warp_->GetPreset(phase_.motionWarpPreset) : nullptr;
     if ((hasAttackTargetPosition || windupFacingTracked) && attackAssistEnabled && warp_ && warp_->IsEnabled() && preset_ &&
@@ -419,7 +561,10 @@ bool HumanBossActionComponent::CanContinueAttack(const SkillPhase& phase_)
             constexpr float MAXIMUM_AIM_TOLERANCE_DEGREES = 30.0f;
             const float tolerance_ = std::clamp(preset_->maximumRotationDegrees, MINIMUM_AIM_TOLERANCE_DEGREES, MAXIMUM_AIM_TOLERANCE_DEGREES);
             if (angle_ > tolerance_)
-            { status = "Follow-up stopped: target left the locked attack direction."; return false; }
+            {
+                status = "Follow-up stopped: target left the locked attack direction.";
+                return false;
+            }
             // 各段の開始時だけ近距離の後退へ狙いを更新し、振り始めた後の追尾は行わない。
             const float travelX_ = actual_.x - attackTargetPosition.x;
             const float travelZ_ = actual_.z - attackTargetPosition.z;
@@ -449,9 +594,15 @@ bool HumanBossActionComponent::CanContinueAttack(const SkillPhase& phase_)
             const float remainingX_ = actual_.x - destination_.x;
             const float remainingZ_ = actual_.z - destination_.z;
             if (std::sqrt(remainingX_ * remainingX_ + remainingZ_ * remainingZ_) > stopDistance_)
-            { status = "Follow-up stopped: locked movement cannot reach the current target."; return false; }
+            {
+                status = "Follow-up stopped: locked movement cannot reach the current target.";
+                return false;
+            }
             if (!CanWarpPath(position_, destination_))
-            { status = "Follow-up stopped: locked movement path blocked."; return false; }
+            {
+                status = "Follow-up stopped: locked movement path blocked.";
+                return false;
+            }
         }
     }
     return true;
@@ -462,7 +613,10 @@ void HumanBossActionComponent::BeginAttackAssist(const SkillPhase& phase_)
     BS_PROFILE_SCOPE("HumanBossActionComponent::BeginAttackAssist");
     const auto owner_ = GetGameObject();
     const auto warp_ = owner_ ? owner_->GetComponent<MotionWarpComponent>() : nullptr;
-    if (!warp_) return;
+    if (!warp_)
+    {
+        return;
+    }
     warp_->Stop();
     if (shadowChain && !phase_.motionWarpPreset.empty())
     {
@@ -475,15 +629,23 @@ void HumanBossActionComponent::BeginAttackAssist(const SkillPhase& phase_)
         windupRotationCorrection = 0.0f;
         attackStartPosition = owner_->transform->GetWorldPosition();
         if (const auto target_ = attackTarget.lock())
+        {
             attackInitialTargetPosition = attackTargetPosition = target_->transform->GetWorldPosition();
+        }
     }
-    if (!attackAssistEnabled || !attackAssistSkill || phase_.motionWarpPreset.empty()) return;
+    if (!attackAssistEnabled || !attackAssistSkill || phase_.motionWarpPreset.empty())
+    {
+        return;
+    }
     const auto target_ = attackTarget.lock();
     DirectX::XMFLOAT3 plannedMotion_{};
     float stopDistance_ = 0.0f;
     float end_ = 0.0f;
     float duration_ = 0.0f;
-    if (!BuildAttackAssistPlan(phase_, target_, plannedMotion_, stopDistance_, end_, duration_)) return;
+    if (!BuildAttackAssistPlan(phase_, target_, plannedMotion_, stopDistance_, end_, duration_))
+    {
+        return;
+    }
     const auto animation_ = AnimationGraphBridgeComponent::Acquire(owner_);
     const auto model_ = owner_->GetComponent<GltfModelCommponennt>();
     const auto& state_ = *animation_->GetStateCatalog().at(phase_.animationState);
@@ -522,88 +684,168 @@ void HumanBossActionComponent::Start()
     InitializeAttackAssist();
     RegisterActions();
     const auto owner_ = GetGameObject();
-    if (!owner_ || !owner_->manager) return;
+    if (!owner_ || !owner_->manager)
+    {
+        return;
+    }
     // 成功イベントの攻撃元を確認し、このボスへの反撃時だけ無敵解除Actionを実行する。
     const std::weak_ptr<HumanBossActionComponent> weak_ = owner_->GetComponent<HumanBossActionComponent>();
     owner_->GetManager().GetJustGuardSystem().AddJustGuardCallback([weak_](const JustGuardEvent& event_)
     {
         const auto self_ = weak_.lock();
-        if (!self_) return;
+        if (!self_)
+        {
+            return;
+        }
         self_->NotifyCounterOpportunity(event_.attacker.lock());
         const auto boss_ = self_->GetGameObject();
         const auto player_ = event_.defender.lock();
         auto hitObject_ = event_.hitBox ? event_.hitBox->GetGameObject() : nullptr;
-        if (!boss_ || !player_ || !player_->GetComponent<PlayerControllerComponent>()) return;
+        if (!boss_ || !player_ || !player_->GetComponent<PlayerControllerComponent>())
+        {
+            return;
+        }
         while (hitObject_ && !hitObject_->GetComponent<ProjectileMotionComponent>())
         {
             const auto parent_ = hitObject_->transform ? hitObject_->transform->parent.lock() : nullptr;
             hitObject_ = parent_ ? parent_->gameObject.lock() : nullptr;
         }
         if (!hitObject_ || std::none_of(self_->shadowOrbs.begin(), self_->shadowOrbs.end(),
-            [&hitObject_](const std::weak_ptr<GameObject>& orb_) { return orb_.lock() == hitObject_; })) return;
+            [&hitObject_](const std::weak_ptr<GameObject>& orb_)
+        {
+            return orb_.lock() == hitObject_;
+        }))
+        {
+            return;
+        }
         const auto hit_ = hitObject_->GetComponent<AttackEffectHitComponent>();
         const auto motion_ = hitObject_->GetComponent<ProjectileMotionComponent>();
-        if (!hit_ || !motion_ || !hit_->IsOwnedBy(boss_.get())) return;
+        if (!hit_ || !motion_ || !hit_->IsOwnedBy(boss_.get()))
+        {
+            return;
+        }
         hit_->SetRuntimeHitOwner(player_.get());
         hit_->SetRuntimeHitTeamId(0);
         hit_->SetRuntimeSourceAction("HumanBossShadowOrbReflected");
         hit_->ClearHitHistory();
         motion_->Reflect(boss_, player_, self_->orbReflectSpeedMultiplier);
         if (const auto mesh_ = hitObject_->GetComponent<MeshVFXComponent>())
+        {
             mesh_->SetRuntimeAppearance({ 1.0f, 1.0f, 1.0f }, { 0.65f, 0.9f, 1.0f, 1.0f },
                 { 1.0f, 0.82f, 0.3f, 1.0f });
-        if (const auto ai_ = boss_->GetComponent<HumanBossAIComponent>()) ai_->NotifyReflectedOrb();
+        }
+        if (const auto ai_ = boss_->GetComponent<HumanBossAIComponent>())
+        {
+            ai_->NotifyReflectedOrb();
+        }
     });
     owner_->GetManager().GetJustDodgeSystem().AddJustDodgeCallback([weak_](const JustDodgeEvent& event_)
     {
-        if (const auto self_ = weak_.lock()) self_->NotifyCounterOpportunity(event_.attacker.lock());
+        if (const auto self_ = weak_.lock())
+        {
+            self_->NotifyCounterOpportunity(event_.attacker.lock());
+        }
     });
 }
 
 void HumanBossActionComponent::RegisterActions()
 {
     const auto owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
     // Registryより先にComponentが破棄されても、通知から解放済みのthisを参照しない。
     const std::weak_ptr<HumanBossActionComponent> weak_ = owner_->GetComponent<HumanBossActionComponent>();
     RegisterRangedActions();
     owner_->RegisterAction("HumanBoss", "HumanBoss_ReleaseCounterInvulnerability", [weak_]()
-    { if (const auto self_ = weak_.lock()) self_->ReleaseCounterInvulnerability(); });
+    {
+        if (const auto self_ = weak_.lock())
+        {
+            self_->ReleaseCounterInvulnerability();
+        }
+    });
     owner_->RegisterAction("HumanBoss", "ActionEnd", [weak_]()
     {
-        if (const auto self_ = weak_.lock()) self_->execution.NotifyPhaseEnd();
+        if (const auto self_ = weak_.lock())
+        {
+            self_->execution.NotifyPhaseEnd();
+        }
     });
     owner_->RegisterAction("HumanBoss", "OnGuardSucceeded", [weak_]()
     {
         if (const auto self_ = weak_.lock())
-            if (self_->IsActive() && (self_->currentDefense == HumanBossDefense::GUARD || self_->currentDefense == HumanBossDefense::JUST_GUARD)) self_->guardSucceeded = true;
+        {
+            if (self_->IsActive() && (self_->currentDefense == HumanBossDefense::GUARD || self_->currentDefense == HumanBossDefense::JUST_GUARD))
+            {
+                self_->guardSucceeded = true;
+            }
+        }
     });
     owner_->RegisterAction("HumanBoss", "OnJustGuard", [weak_]()
     {
         if (const auto self_ = weak_.lock())
         {
-            if (self_->IsActive() && self_->currentDefense == HumanBossDefense::JUST_GUARD) self_->justGuardSucceeded = true;
+            if (self_->IsActive() && self_->currentDefense == HumanBossDefense::JUST_GUARD)
+            {
+                self_->justGuardSucceeded = true;
+            }
         }
     });
     owner_->RegisterAction("HumanBoss", "HumanBoss_ExecutionCapture", [weak_]()
-    { if (const auto self_ = weak_.lock()) self_->BeginExecutionCapture(); });
+    {
+        if (const auto self_ = weak_.lock())
+        {
+            self_->BeginExecutionCapture();
+        }
+    });
     owner_->RegisterAction("HumanBoss", "HumanBoss_ExecutionRecoil", [weak_]()
-    { if (const auto self_ = weak_.lock()) self_->BeginExecutionRecoil(); });
+    {
+        if (const auto self_ = weak_.lock())
+        {
+            self_->BeginExecutionRecoil();
+        }
+    });
     owner_->RegisterAction("HumanBoss", "HumanBoss_ExecutionRelease", [weak_]()
-    { if (const auto self_ = weak_.lock()) self_->ReleaseExecutionCapture(); });
+    {
+        if (const auto self_ = weak_.lock())
+        {
+            self_->ReleaseExecutionCapture();
+        }
+    });
     owner_->RegisterAction("HumanBoss", "HumanBoss_ExecutionCamera", [weak_]()
-    { if (const auto self_ = weak_.lock()) self_->PlayExecutionCamera(); });
+    {
+        if (const auto self_ = weak_.lock())
+        {
+            self_->PlayExecutionCamera();
+        }
+    });
     owner_->RegisterAction("HumanBoss", "HumanBoss_ExecutionGrabFeedback", [weak_]()
-    { if (const auto self_ = weak_.lock()) self_->PlayExecutionGrabFeedback(); });
+    {
+        if (const auto self_ = weak_.lock())
+        {
+            self_->PlayExecutionGrabFeedback();
+        }
+    });
     owner_->RegisterAction("HumanBoss", "HumanBoss_ExecutionSlamFeedback", [weak_]()
-    { if (const auto self_ = weak_.lock()) self_->PlayExecutionSlamFeedback(); });
+    {
+        if (const auto self_ = weak_.lock())
+        {
+            self_->PlayExecutionSlamFeedback();
+        }
+    });
     owner_->RegisterAction("HumanBoss", "HumanBoss_WindupBegin", [weak_]()
     {
         if (const auto self_ = weak_.lock())
         {
             self_->windupTracking = true;
             if (const auto actor_ = self_->GetGameObject())
-                if (const auto blackboard_ = actor_->GetComponent<BlackboardComponent>()) blackboard_->SetBool("HumanBossAI", "TelegraphActive", true);
+            {
+                if (const auto blackboard_ = actor_->GetComponent<BlackboardComponent>())
+                {
+                    blackboard_->SetBool("HumanBossAI", "TelegraphActive", true);
+                }
+            }
         }
     });
     owner_->RegisterAction("HumanBoss", "HumanBoss_WindupEnd", [weak_]()
@@ -612,22 +854,43 @@ void HumanBossActionComponent::RegisterActions()
         {
             self_->windupTracking = false;
             if (const auto actor_ = self_->GetGameObject())
-                if (const auto blackboard_ = actor_->GetComponent<BlackboardComponent>()) blackboard_->SetBool("HumanBossAI", "TelegraphActive", false);
+            {
+                if (const auto blackboard_ = actor_->GetComponent<BlackboardComponent>())
+                {
+                    blackboard_->SetBool("HumanBossAI", "TelegraphActive", false);
+                }
+            }
         }
     });
     // 各攻撃のAnimation Eventから操作し、開始時に前段の軌跡を切り離す。
     owner_->RegisterAction("HumanBoss", "HumanBoss_TrailBegin", [weak_]()
     {
-        if (const auto self_ = weak_.lock()) self_->SetWeaponTrails(true, true);
+        if (const auto self_ = weak_.lock())
+        {
+            self_->SetWeaponTrails(true, true);
+        }
     });
     owner_->RegisterAction("HumanBoss", "HumanBoss_TrailEnd", [weak_]()
     {
-        if (const auto self_ = weak_.lock()) self_->SetWeaponTrails(false, false);
+        if (const auto self_ = weak_.lock())
+        {
+            self_->SetWeaponTrails(false, false);
+        }
     });
     owner_->RegisterAction("HumanBoss", "HumanBoss_ShadowShowArea", [weak_]()
-    { if (const auto self_ = weak_.lock()) self_->ShowShadowArea(); });
+    {
+        if (const auto self_ = weak_.lock())
+        {
+            self_->ShowShadowArea();
+        }
+    });
     owner_->RegisterAction("HumanBoss", "HumanBoss_ShadowStrike", [weak_]()
-    { if (const auto self_ = weak_.lock()) self_->StrikeShadowArea(); });
+    {
+        if (const auto self_ = weak_.lock())
+        {
+            self_->StrikeShadowArea();
+        }
+    });
     owner_->RegisterAction("HumanBoss", "HumanBoss_ShadowSlashStep", [weak_]()
     {
         const auto self_ = weak_.lock();
@@ -635,18 +898,34 @@ void HumanBossActionComponent::RegisterActions()
         const auto phase_ = self_ ? self_->execution.GetCurrentPhase() : nullptr;
         const auto target_ = self_ ? self_->attackTarget.lock() : nullptr;
         if (!actor_ || !actor_->transform || !target_ || !target_->transform || !phase_ ||
-            self_->rangedSkill != "SHADOW_SLASH" || phase_->animationState != "SS_Sp_Skill1") return;
+            self_->rangedSkill != "SHADOW_SLASH" || phase_->animationState != "SS_Sp_Skill1")
+        {
+            return;
+        }
         DirectX::XMFLOAT3 ground_{};
         DirectX::XMFLOAT3 currentGround_{};
         const auto start_ = actor_->transform->GetWorldPosition();
         if (!self_->ResolveShadowDiveGround(ground_) || !self_->ResolveShadowGround(start_, currentGround_))
-        { self_->Stop(); return; }
+        {
+            self_->Stop();
+            return;
+        }
         const DirectX::XMFLOAT3 destination_{ ground_.x, start_.y + ground_.y - currentGround_.y, ground_.z };
         // 瞬間移動では途中の経路を通らない。出現地点だけをカプセルで検証する。
-        if (!self_->CanRaiseShadowDive(0.1f)) { self_->Stop(); return; }
+        if (!self_->CanRaiseShadowDive(0.1f))
+        {
+            self_->Stop();
+            return;
+        }
         self_->SpawnShadowEffect();
-        if (const auto warp_ = actor_->GetComponent<MotionWarpComponent>()) warp_->Stop();
-        if (const auto movement_ = actor_->GetComponent<CharacterMovementComponent>()) movement_->StopHorizontalMovementImmediately();
+        if (const auto warp_ = actor_->GetComponent<MotionWarpComponent>())
+        {
+            warp_->Stop();
+        }
+        if (const auto movement_ = actor_->GetComponent<CharacterMovementComponent>())
+        {
+            movement_->StopHorizontalMovementImmediately();
+        }
         actor_->transform->ApplyWorldMatrix(actor_->transform->GetWorldMatrix() * DirectX::XMMatrixTranslation(
             destination_.x - start_.x, destination_.y - start_.y, destination_.z - start_.z));
         actor_->UpdateTransform();
@@ -659,15 +938,27 @@ void HumanBossActionComponent::RegisterActions()
         self_->SpawnShadowEffect();
     });
     owner_->RegisterAction("HumanBoss", "HumanBoss_ShadowClear", [weak_]()
-    { if (const auto self_ = weak_.lock()) self_->ClearShadowArea(); });
+    {
+        if (const auto self_ = weak_.lock())
+        {
+            self_->ClearShadowArea();
+        }
+    });
     owner_->RegisterAction("HumanBoss", "HumanBoss_ShadowDiveStart", [weak_]()
     {
         if (const auto self_ = weak_.lock())
         {
             const auto actor_ = self_->GetGameObject();
             const auto phase_ = self_->execution.GetCurrentPhase();
-            if (!actor_ || !actor_->transform || !phase_) return;
-            if (!self_->ResolveShadowDiveGround(self_->shadowGroundPosition)) { self_->Stop(); return; }
+            if (!actor_ || !actor_->transform || !phase_)
+            {
+                return;
+            }
+            if (!self_->ResolveShadowDiveGround(self_->shadowGroundPosition))
+            {
+                self_->Stop();
+                return;
+            }
             // プレイヤーの正面上へ出現させ、移動距離によらず着地攻撃の位置を揃える。
             const auto position_ = actor_->transform->GetWorldPosition();
             const DirectX::XMFLOAT3 destination_{ self_->shadowGroundPosition.x,
@@ -679,22 +970,32 @@ void HumanBossActionComponent::RegisterActions()
             {
                 movement_->StopHorizontalMovementImmediately();
                 if (const auto target_ = self_->attackTarget.lock())
+                {
                     if (target_->transform)
                     {
                         const auto targetPosition_ = target_->transform->GetWorldPosition();
                         movement_->SetFacingDirection({ targetPosition_.x - destination_.x, 0.0f,
                             targetPosition_.z - destination_.z }, true);
                     }
+                }
             }
             self_->shadowLandingLocked = false;
             if (const auto target_ = self_->attackTarget.lock())
-                if (target_->transform) self_->shadowPreviousTargetPosition = target_->transform->GetWorldPosition();
+            {
+                if (target_->transform)
+                {
+                    self_->shadowPreviousTargetPosition = target_->transform->GetWorldPosition();
+                }
+            }
             self_->SpawnShadowEffect();
         }
     });
     owner_->RegisterAction("HumanBoss", "HumanBossStop", [weak_]()
     {
-        if (const auto self_ = weak_.lock()) self_->Stop();
+        if (const auto self_ = weak_.lock())
+        {
+            self_->Stop();
+        }
     });
 }
 
@@ -703,16 +1004,25 @@ bool HumanBossActionComponent::ResolveShadowGround(const DirectX::XMFLOAT3& posi
     const auto owner_ = gameObject.lock();
     const auto collider_ = ResolveAttackCharacter(owner_);
     auto scene_ = PhysXSystem::GetScene();
-    if (!scene_ || !collider_) return false;
+    if (!scene_ || !collider_)
+    {
+        return false;
+    }
     physx::PxQueryFilterData filter_;
     filter_.flags = physx::PxQueryFlag::eSTATIC | physx::PxQueryFlag::eDYNAMIC | physx::PxQueryFlag::ePREFILTER;
     filter_.data.word3 = collider_->GetCollisionOwnerId();
     physx::PxRaycastBuffer hit_;
     if (!scene_->raycast(physx::PxVec3(position_.x, position_.y + 1.0f, position_.z), physx::PxVec3(0, -1, 0),
         12.0f, hit_, physx::PxHitFlag::eDEFAULT, filter_, PhysXSystem::GetCharacterControllerQueryFilterCallback()) ||
-        !hit_.hasBlock || hit_.block.normal.y < 0.5f) return false;
+        !hit_.hasBlock || hit_.block.normal.y < 0.5f)
+    {
+        return false;
+    }
     const auto groundCollider_ = hit_.block.actor ? static_cast<const ColliderComponent*>(hit_.block.actor->userData) : nullptr;
-    if (groundCollider_ && !groundCollider_->CanBeCharacterGround()) return false;
+    if (groundCollider_ && !groundCollider_->CanBeCharacterGround())
+    {
+        return false;
+    }
     ground_ = { hit_.block.position.x, hit_.block.position.y, hit_.block.position.z };
     return true;
 }
@@ -724,10 +1034,16 @@ bool HumanBossActionComponent::ResolveShadowDiveGround(DirectX::XMFLOAT3& ground
     const auto target_ = attackTarget.lock();
     const auto ownCollider_ = ResolveAttackCharacter(owner_);
     const auto targetCollider_ = ResolveAttackCharacter(target_);
-    if (!owner_ || !owner_->transform || !target_ || !target_->transform || !ownCollider_ || !targetCollider_) return false;
+    if (!owner_ || !owner_->transform || !target_ || !target_->transform || !ownCollider_ || !targetCollider_)
+    {
+        return false;
+    }
     const auto forward_ = target_->transform->GetFront();
     const float length_ = std::sqrt(forward_.x * forward_.x + forward_.z * forward_.z);
-    if (!std::isfinite(length_) || length_ < 0.0001f) return false;
+    if (!std::isfinite(length_) || length_ < 0.0001f)
+    {
+        return false;
+    }
     const float distance_ = ownCollider_->GetCapsuleData().radius + targetCollider_->GetCapsuleData().radius + 0.5f;
     auto position_ = target_->transform->GetWorldPosition();
     // 着地時の体同士の重なりを避ける間合いを、プレイヤーの前方向へ確保する。
@@ -744,7 +1060,10 @@ bool HumanBossActionComponent::CanRaiseShadowDive(float height_) const
     auto scene_ = PhysXSystem::GetScene();
     DirectX::XMFLOAT3 ground_{};
     if (!owner_ || !owner_->transform || !collider_ || !scene_ || height_ <= 0.0f || height_ > 10.0f ||
-        !ResolveShadowDiveGround(ground_)) return false;
+        !ResolveShadowDiveGround(ground_))
+    {
+        return false;
+    }
     const auto capsule_ = collider_->GetCapsuleData();
     DirectX::XMFLOAT3 center_{};
     DirectX::XMStoreFloat3(&center_, DirectX::XMVectorScale(DirectX::XMVectorAdd(capsule_.p0, capsule_.p1), 0.5f));
@@ -767,11 +1086,17 @@ void HumanBossActionComponent::UpdateShadowDive(float deltaTime_)
 {
     BS_PROFILE_SCOPE("HumanBossActionComponent::UpdateShadowDive");
     const auto phase_ = execution.GetCurrentPhase();
-    if (!phase_ || phase_->warpHeight <= 0.0f || shadowLandingLocked || execution.GetPhaseTime() > shadowLandingTrackTime) return;
+    if (!phase_ || phase_->warpHeight <= 0.0f || shadowLandingLocked || execution.GetPhaseTime() > shadowLandingTrackTime)
+    {
+        return;
+    }
     const auto owner_ = GetGameObject();
     const auto target_ = attackTarget.lock();
     const auto movement_ = owner_ ? owner_->GetComponent<CharacterMovementComponent>() : nullptr;
-    if (!movement_ || !owner_->transform || !target_ || !target_->transform || deltaTime_ <= 0.0f) return;
+    if (!movement_ || !owner_->transform || !target_ || !target_->transform || deltaTime_ <= 0.0f)
+    {
+        return;
+    }
     const auto position_ = owner_->transform->GetWorldPosition();
     auto targetPosition_ = target_->transform->GetWorldPosition();
     const auto currentTarget_ = targetPosition_;
@@ -781,10 +1106,16 @@ void HumanBossActionComponent::UpdateShadowDive(float deltaTime_)
     shadowPreviousTargetPosition = currentTarget_;
     const auto ownCollider_ = ResolveAttackCharacter(owner_);
     const auto targetCollider_ = ResolveAttackCharacter(target_);
-    if (!ownCollider_ || !targetCollider_) return;
+    if (!ownCollider_ || !targetCollider_)
+    {
+        return;
+    }
     const auto forward_ = target_->transform->GetFront();
     const float forwardLength_ = std::sqrt(forward_.x * forward_.x + forward_.z * forward_.z);
-    if (!std::isfinite(forwardLength_) || forwardLength_ < 0.0001f) return;
+    if (!std::isfinite(forwardLength_) || forwardLength_ < 0.0001f)
+    {
+        return;
+    }
     const float frontDistance_ = ownCollider_->GetCapsuleData().radius + targetCollider_->GetCapsuleData().radius + 0.5f;
     // 出現後の短い追従も正面位置を目標にし、プレイヤーの真上へ寄せない。
     targetPosition_.x += forward_.x / forwardLength_ * frontDistance_;
@@ -792,14 +1123,23 @@ void HumanBossActionComponent::UpdateShadowDive(float deltaTime_)
     const float dx_ = targetPosition_.x - position_.x;
     const float dz_ = targetPosition_.z - position_.z;
     const float distance_ = std::sqrt(dx_ * dx_ + dz_ * dz_);
-    if (distance_ <= 0.05f) return;
+    if (distance_ <= 0.05f)
+    {
+        return;
+    }
     const float step_ = (std::min)(distance_, 6.0f * deltaTime_);
     DirectX::XMFLOAT3 groundStart_{ position_.x, shadowGroundPosition.y, position_.z };
     DirectX::XMFLOAT3 groundEnd_{ position_.x + dx_ / distance_ * step_, shadowGroundPosition.y, position_.z + dz_ / distance_ * step_ };
-    if (!CanWarpPath(groundStart_, groundEnd_)) return;
+    if (!CanWarpPath(groundStart_, groundEnd_))
+    {
+        return;
+    }
     // 地上経路だけでなく空中の高さでも経路を検査し、梁を横切らないようにする。
     auto scene_ = PhysXSystem::GetScene();
-    if (!scene_) return;
+    if (!scene_)
+    {
+        return;
+    }
     const auto capsule_ = ownCollider_->GetCapsuleData();
     DirectX::XMFLOAT3 center_{};
     DirectX::XMStoreFloat3(&center_, DirectX::XMVectorScale(DirectX::XMVectorAdd(capsule_.p0, capsule_.p1), 0.5f));
@@ -811,7 +1151,10 @@ void HumanBossActionComponent::UpdateShadowDive(float deltaTime_)
     const physx::PxCapsuleGeometry geometry_((std::max)(0.01f, capsule_.radius - ownCollider_->GetContactOffset()), halfHeight_);
     const physx::PxTransform pose_(physx::PxVec3(center_.x, center_.y, center_.z), physx::PxQuat(physx::PxHalfPi, physx::PxVec3(0, 0, 1)));
     if (scene_->sweep(geometry_, pose_, physx::PxVec3(dx_ / distance_, 0, dz_ / distance_), step_, hit_, physx::PxHitFlag::eDEFAULT,
-        filter_, PhysXSystem::GetCharacterControllerQueryFilterCallback()) && hit_.hasBlock) return;
+        filter_, PhysXSystem::GetCharacterControllerQueryFilterCallback()) && hit_.hasBlock)
+    {
+        return;
+    }
     movement_->SetHorizontalVelocity({ dx_ / distance_ * step_ / deltaTime_, 0, dz_ / distance_ * step_ / deltaTime_ });
 }
 
@@ -820,12 +1163,26 @@ void HumanBossActionComponent::ShowShadowArea()
     BS_PROFILE_SCOPE("HumanBossActionComponent::ShowShadowArea");
     const auto owner_ = GetGameObject();
     const auto phase_ = execution.GetCurrentPhase();
-    if (!owner_ || !owner_->transform || !shadowChain || !phase_ || shadowAreaTemplate.empty()) return;
+    if (!owner_ || !owner_->transform || !shadowChain || !phase_ || shadowAreaTemplate.empty())
+    {
+        return;
+    }
     auto& manager_ = AttackTemplateManager::Instance();
-    if (manager_.GetTemplates().empty()) manager_.LoadAll();
+    if (manager_.GetTemplates().empty())
+    {
+        manager_.LoadAll();
+    }
     const auto attack_ = manager_.FindTemplate(shadowAreaTemplate);
-    if (!attack_ || attack_->attackEffects.empty() || attack_->attackEffects[0].hitShapes.empty()) { Stop(); return; }
-    if (!ResolveShadowGround(owner_->transform->GetWorldPosition(), shadowLandingPosition)) { Stop(); return; }
+    if (!attack_ || attack_->attackEffects.empty() || attack_->attackEffects[0].hitShapes.empty())
+    {
+        Stop();
+        return;
+    }
+    if (!ResolveShadowGround(owner_->transform->GetWorldPosition(), shadowLandingPosition))
+    {
+        Stop();
+        return;
+    }
     shadowAttackSnapshot = std::make_shared<AttackTemplate>(*attack_);
     shadowLandingLocked = true;
     shadowAreaStruck = false;
@@ -859,12 +1216,14 @@ void HumanBossActionComponent::ShowShadowArea()
         visual_->transform->MarkDirty();
         visual_->UpdateTransform();
         if (const auto mesh_ = visual_->GetComponent<MeshVFXComponent>())
+        {
             for (auto& part_ : mesh_->GetAsset().parts)
             {
                 part_.duration = danger_.lifeTime;
                 part_.loop = false;
                 part_.animateAlpha = false;
             }
+        }
         shadowVisuals.push_back(visual_);
     }
 }
@@ -873,19 +1232,31 @@ void HumanBossActionComponent::StrikeShadowArea()
 {
     BS_PROFILE_SCOPE("HumanBossActionComponent::StrikeShadowArea");
     const auto owner_ = GetGameObject();
-    if (!owner_ || !shadowLandingLocked || !shadowAttackSnapshot || shadowAreaStruck) return;
+    if (!owner_ || !shadowLandingLocked || !shadowAttackSnapshot || shadowAreaStruck)
+    {
+        return;
+    }
     if (shadowAreaTemplate != "HumanBossShadowDomain")
     {
         const auto movement_ = owner_->GetComponent<CharacterMovementComponent>();
         const auto collider_ = movement_ ? movement_->ResolveCollider() : nullptr;
-        if (!collider_ || !collider_->isGrounded) return;
+        if (!collider_ || !collider_->isGrounded)
+        {
+            return;
+        }
     }
     shadowAreaStruck = true;
     // 接地後も実際の地面を再確認し、消えた足場へ攻撃を発生させない。
     DirectX::XMFLOAT3 ground_{};
     if (!ResolveShadowGround(shadowLandingPosition, ground_) || std::abs(ground_.y - shadowLandingPosition.y) > 0.5f)
-    { Stop(); return; }
-    if (const auto danger_ = owner_->GetComponent<DangerAreaComponent>()) danger_->StopAll();
+    {
+        Stop();
+        return;
+    }
+    if (const auto danger_ = owner_->GetComponent<DangerAreaComponent>())
+    {
+        danger_->StopAll();
+    }
     const auto instance_ = owner_->GetManager().GetAttackSystem().CreateAttackInstance();
     // 複数の範囲判定を生成しても、接地した中心から発動音を一度だけ鳴らす。
     const auto& feedback_ = shadowAttackSnapshot->feedback;
@@ -923,7 +1294,10 @@ void HumanBossActionComponent::NotifyCounterOpportunity(std::shared_ptr<GameObje
 {
     BS_PROFILE_SCOPE("HumanBossActionComponent::NotifyCounterOpportunity");
     const auto owner_ = GetGameObject();
-    if (!IsEnabled() || !owner_ || owner_->IsPendingDestroy()) return;
+    if (!IsEnabled() || !owner_ || owner_->IsPendingDestroy())
+    {
+        return;
+    }
     // 武器や部位が攻撃Ownerでも、親をたどって自身の攻撃だけを対象にする。
     while (attacker_)
     {
@@ -944,24 +1318,47 @@ void HumanBossActionComponent::ReleaseCounterInvulnerability()
     // 本体だけでなく部位のAction由来の無敵も解除し、反撃の接近補正と被弾を受け付ける。
     const std::function<void(const std::shared_ptr<GameObject>&)> release_ = [&](const std::shared_ptr<GameObject>& object_)
     {
-        if (!object_) return;
+        if (!object_)
+        {
+            return;
+        }
         for (const auto& hurt_ : object_->GetComponents<HurtBox>())
-            if (hurt_) hurt_->SetInvincible(false);
+        {
+            if (hurt_)
+            {
+                hurt_->SetInvincible(false);
+            }
+        }
         if (object_->transform)
+        {
             for (const auto& child_ : object_->transform->children)
-                if (child_) release_(child_->gameObject.lock());
+            {
+                if (child_)
+                {
+                    release_(child_->gameObject.lock());
+                }
+            }
+        }
     };
     release_(GetGameObject());
 }
 
 void HumanBossActionComponent::SetShadowInvulnerable(bool invulnerable_)
 {
-    if (invulnerable_ == shadowInvulnerabilityApplied) return;
+    if (invulnerable_ == shadowInvulnerabilityApplied)
+    {
+        return;
+    }
     BS_PROFILE_SCOPE("HumanBossActionComponent::SetShadowInvulnerable");
     if (!invulnerable_)
     {
         for (const auto& reference_ : shadowProtectedHurtBoxes)
-            if (const auto hurt_ = reference_.lock()) hurt_->SetTemporaryInvincible(false);
+        {
+            if (const auto hurt_ = reference_.lock())
+            {
+                hurt_->SetTemporaryInvincible(false);
+            }
+        }
         shadowProtectedHurtBoxes.clear();
         shadowInvulnerabilityApplied = false;
         return;
@@ -969,16 +1366,29 @@ void HumanBossActionComponent::SetShadowInvulnerable(bool invulnerable_)
     // Scene全体を検索せず、自身と装備・部位のHurtBoxだけを保護する。
     const std::function<void(const std::shared_ptr<GameObject>&)> protect_ = [&](const std::shared_ptr<GameObject>& object_)
     {
-        if (!object_) return;
+        if (!object_)
+        {
+            return;
+        }
         for (const auto& hurt_ : object_->GetComponents<HurtBox>())
         {
-            if (!hurt_) continue;
+            if (!hurt_)
+            {
+                continue;
+            }
             hurt_->SetTemporaryInvincible(true);
             shadowProtectedHurtBoxes.push_back(hurt_);
         }
         if (object_->transform)
+        {
             for (const auto& child_ : object_->transform->children)
-                if (child_) protect_(child_->gameObject.lock());
+            {
+                if (child_)
+                {
+                    protect_(child_->gameObject.lock());
+                }
+            }
+        }
     };
     protect_(GetGameObject());
     shadowInvulnerabilityApplied = true;
@@ -989,25 +1399,46 @@ void HumanBossActionComponent::SetShadowVisible(bool visible_)
     if (visible_)
     {
         for (const auto& entry_ : hiddenShadowModels)
-            if (const auto model_ = entry_.first.lock()) model_->SetRuntimeVisible(entry_.second);
+        {
+            if (const auto model_ = entry_.first.lock())
+            {
+                model_->SetRuntimeVisible(entry_.second);
+            }
+        }
         hiddenShadowModels.clear();
         shadowModelsHidden = false;
         return;
     }
-    if (shadowModelsHidden || !shadowHideModels) return;
+    if (shadowModelsHidden || !shadowHideModels)
+    {
+        return;
+    }
     BS_PROFILE_SCOPE("HumanBossActionComponent::SetShadowVisible");
     const std::function<void(const std::shared_ptr<GameObject>&)> hide_ = [&](const std::shared_ptr<GameObject>& object_)
     {
-        if (!object_) return;
+        if (!object_)
+        {
+            return;
+        }
         for (const auto& model_ : object_->GetComponents<GltfModelCommponennt>())
         {
-            if (!model_) continue;
+            if (!model_)
+            {
+                continue;
+            }
             hiddenShadowModels.emplace_back(model_, model_->IsRuntimeVisible());
             model_->SetRuntimeVisible(false);
         }
         if (object_->transform)
+        {
             for (const auto& child_ : object_->transform->children)
-                if (child_) hide_(child_->gameObject.lock());
+            {
+                if (child_)
+                {
+                    hide_(child_->gameObject.lock());
+                }
+            }
+        }
     };
     hide_(GetGameObject());
     shadowModelsHidden = true;
@@ -1019,9 +1450,17 @@ void HumanBossActionComponent::ClearShadowArea()
     const auto owner_ = GetGameObject();
     if (owner_)
     {
-        if (const auto danger_ = owner_->GetComponent<DangerAreaComponent>()) danger_->StopAll();
+        if (const auto danger_ = owner_->GetComponent<DangerAreaComponent>())
+        {
+            danger_->StopAll();
+        }
         for (const auto& reference_ : shadowVisuals)
-            if (const auto visual_ = reference_.lock()) owner_->GetManager().GetEffectManager().StopEffect(visual_, this);
+        {
+            if (const auto visual_ = reference_.lock())
+            {
+                owner_->GetManager().GetEffectManager().StopEffect(visual_, this);
+            }
+        }
     }
     shadowVisuals.clear();
     shadowAttackSnapshot.reset();
@@ -1039,13 +1478,19 @@ bool HumanBossActionComponent::BuildShadowPath(HumanBossShadowShift mode_,
     const auto movement_ = owner_ ? owner_->GetComponent<CharacterMovementComponent>() : nullptr;
     const auto health_ = target_ ? target_->GetComponent<HealthComponent>() : nullptr;
     if (!owner_ || !owner_->transform || !target_ || !target_->transform || !ownCollider_ ||
-        !targetCollider_ || !movement_ || !movement_->ResolveCollider() || !ownCollider_->enabled || !targetCollider_->enabled || (health_ && health_->IsDead())) return false;
+        !targetCollider_ || !movement_ || !movement_->ResolveCollider() || !ownCollider_->enabled || !targetCollider_->enabled || (health_ && health_->IsDead()))
+    {
+        return false;
+    }
     const auto start_ = owner_->transform->GetWorldPosition();
     const auto targetPosition_ = target_->transform->GetWorldPosition();
     const float dx_ = targetPosition_.x - start_.x;
     const float dz_ = targetPosition_.z - start_.z;
     const float distance_ = std::sqrt(dx_ * dx_ + dz_ * dz_);
-    if (!std::isfinite(distance_) || distance_ < 0.1f) return false;
+    if (!std::isfinite(distance_) || distance_ < 0.1f)
+    {
+        return false;
+    }
     const DirectX::XMFLOAT3 direction_{ dx_ / distance_, 0.0f, dz_ / distance_ };
     const float sign_ = side_ < 0.0f ? -1.0f : 1.0f;
     const DirectX::XMFLOAT3 lateral_{ direction_.z * sign_, 0.0f, -direction_.x * sign_ };
@@ -1053,7 +1498,10 @@ bool HumanBossActionComponent::BuildShadowPath(HumanBossShadowShift mode_,
     auto destination_ = start_;
     if (mode_ == HumanBossShadowShift::APPROACH)
     {
-        if (distance_ <= clearance_ + 0.75f) return false;
+        if (distance_ <= clearance_ + 0.75f)
+        {
+            return false;
+        }
         const float travel_ = (std::min)(shadowApproachDistance, distance_ - clearance_);
         destination_.x += direction_.x * travel_;
         destination_.z += direction_.z * travel_;
@@ -1073,7 +1521,10 @@ bool HumanBossActionComponent::BuildShadowPath(HumanBossShadowShift mode_,
         // 対象の正面を横切らず、側面の中継点から背後へ回る。
         const auto forward_ = target_->transform->GetFront();
         const float length_ = std::sqrt(forward_.x * forward_.x + forward_.z * forward_.z);
-        if (length_ < 0.0001f) return false;
+        if (length_ < 0.0001f)
+        {
+            return false;
+        }
         const DirectX::XMFLOAT3 waypoint_{ targetPosition_.x + lateral_.x * (clearance_ + 0.6f), start_.y,
             targetPosition_.z + lateral_.z * (clearance_ + 0.6f) };
         waypoints_.push_back(waypoint_);
@@ -1088,7 +1539,10 @@ bool HumanBossActionComponent::BuildShadowPath(HumanBossShadowShift mode_,
         const float segmentX_ = waypoint_.x - previous_.x;
         const float segmentZ_ = waypoint_.z - previous_.z;
         totalDistance_ += std::sqrt(segmentX_ * segmentX_ + segmentZ_ * segmentZ_);
-        if (totalDistance_ > shadowMaximumPathDistance || !CanWarpPath(previous_, waypoint_)) return false;
+        if (totalDistance_ > shadowMaximumPathDistance || !CanWarpPath(previous_, waypoint_))
+        {
+            return false;
+        }
         previous_ = waypoint_;
     }
     return true;
@@ -1100,14 +1554,24 @@ bool HumanBossActionComponent::PlanShadowTrajectory(HumanBossShadowShift mode_,
     BS_PROFILE_SCOPE("HumanBossActionComponent::PlanShadowTrajectory");
     constexpr int SAMPLE_COUNT = 64;
     const auto owner_ = GetGameObject();
-    if (!owner_ || !owner_->transform || waypoints_.empty()) return false;
+    if (!owner_ || !owner_->transform || waypoints_.empty())
+    {
+        return false;
+    }
     shadowBaseWaypoints = { owner_->transform->GetWorldPosition() };
     shadowBaseWaypoints.insert(shadowBaseWaypoints.end(), waypoints_.begin(), waypoints_.end());
     const auto curve_ = owner_->GetComponent<CurveComponent>();
     // Editorで選択した既存Curveを読み込み、実行中は評価結果を固定する。
     if (curve_)
+    {
         for (const auto& name_ : { shadowSwayCurve, shadowSpeedCurve })
-            if (!name_.empty() && !curve_->HasTrack(name_)) curve_->LoadTrackAsset("Data/Curve/" + name_ + ".json");
+        {
+            if (!name_.empty() && !curve_->HasTrack(name_))
+            {
+                curve_->LoadTrackAsset("Data/Curve/" + name_ + ".json");
+            }
+        }
+    }
     const auto evaluate_ = [&](const std::string& name_, float progress_, float fallback_)
     {
         const float value_ = curve_ && curve_->HasTrack(name_) ? curve_->GetValue(name_, progress_) : fallback_;
@@ -1123,22 +1587,36 @@ bool HumanBossActionComponent::PlanShadowTrajectory(HumanBossShadowShift mode_,
     const float speedExponent_ = 1.0f + random_(shadowRandom) * shadowSwayRandomness * 0.2f;
     std::vector<float> baseDistances_{ 0.0f };
     const auto length_ = [](const DirectX::XMFLOAT3& a_, const DirectX::XMFLOAT3& b_)
-    { const float x_ = b_.x - a_.x; const float z_ = b_.z - a_.z; return std::sqrt(x_ * x_ + z_ * z_); };
+    {
+        const float x_ = b_.x - a_.x;
+        const float z_ = b_.z - a_.z;
+        return std::sqrt(x_ * x_ + z_ * z_);
+    };
     for (std::size_t index_ = 1; index_ < shadowBaseWaypoints.size(); ++index_)
+    {
         baseDistances_.push_back(baseDistances_.back() + length_(shadowBaseWaypoints[index_ - 1], shadowBaseWaypoints[index_]));
-    if (baseDistances_.back() < 0.0001f) return false;
+    }
+    if (baseDistances_.back() < 0.0001f)
+    {
+        return false;
+    }
     // BEHINDの中継点はHermite補間で滑らかにつなぎ、対象の側面を弧状に回る。
     const auto basePosition_ = [&](float progress_, bool smooth_)
     {
         const float distance_ = progress_ * baseDistances_.back();
         std::size_t segment_ = 0;
-        while (segment_ + 2 < baseDistances_.size() && distance_ > baseDistances_[segment_ + 1]) ++segment_;
+        while (segment_ + 2 < baseDistances_.size() && distance_ > baseDistances_[segment_ + 1])
+        {
+            ++segment_;
+        }
         const auto a_ = shadowBaseWaypoints[segment_];
         const auto b_ = shadowBaseWaypoints[segment_ + 1];
         const float u_ = std::clamp((distance_ - baseDistances_[segment_]) /
             (std::max)(0.0001f, baseDistances_[segment_ + 1] - baseDistances_[segment_]), 0.0f, 1.0f);
         if (!smooth_ || shadowBaseWaypoints.size() < 3)
+        {
             return DirectX::XMFLOAT3{ a_.x + (b_.x - a_.x) * u_, a_.y, a_.z + (b_.z - a_.z) * u_ };
+        }
         const auto previous_ = segment_ > 0 ? shadowBaseWaypoints[segment_ - 1] : a_;
         const auto next_ = segment_ + 2 < shadowBaseWaypoints.size() ? shadowBaseWaypoints[segment_ + 2] : b_;
         const float u2_ = u_ * u_, u3_ = u2_ * u_;
@@ -1172,33 +1650,58 @@ bool HumanBossActionComponent::PlanShadowTrajectory(HumanBossShadowShift mode_,
             const float offset_ = width_ * envelope_ * std::clamp(sign_ * wave_ + shadowSwayBias * 0.2f, -1.0f, 1.0f);
             point_.x += (after_.z - before_.z) / tangentLength_ * offset_;
             point_.z -= (after_.x - before_.x) / tangentLength_ * offset_;
-            if (index_ == 0) point_ = shadowBaseWaypoints.front();
-            if (index_ == SAMPLE_COUNT) point_ = shadowBaseWaypoints.back();
+            if (index_ == 0)
+            {
+                point_ = shadowBaseWaypoints.front();
+            }
+            if (index_ == SAMPLE_COUNT)
+            {
+                point_ = shadowBaseWaypoints.back();
+            }
             if (!shadowTrajectory.empty())
             {
                 // 蛇行した全区間にCapsule Sweepと足場確認を適用する。
-                if (!CanWarpPath(shadowTrajectory.back(), point_)) safe_ = false;
+                if (!CanWarpPath(shadowTrajectory.back(), point_))
+                {
+                    safe_ = false;
+                }
                 shadowTrajectoryDistances.push_back(shadowTrajectoryDistances.back() + length_(shadowTrajectory.back(), point_));
             }
             shadowTrajectory.push_back(point_);
         }
         if (safe_ && shadowTrajectoryDistances.back() <= shadowMaximumPathDistance)
-        { shadowPathValidated = true; shadowActualWidth = width_; }
+        {
+            shadowPathValidated = true;
+            shadowActualWidth = width_;
+        }
     }
-    if (!shadowPathValidated) return false;
+    if (!shadowPathValidated)
+    {
+        return false;
+    }
     shadowSpeedProgress = { 0.0f };
     float previousSpeed_ = 0.0f, peakSpeed_ = 0.0f;
     for (int index_ = 0; index_ <= SAMPLE_COUNT; ++index_)
     {
         const float progress_ = static_cast<float>(index_) / SAMPLE_COUNT;
         const float speed_ = std::pow(evaluate_(shadowSpeedCurve, progress_, 6.0f * progress_ * (1.0f - progress_)), speedExponent_);
-        if (index_ > 0) shadowSpeedProgress.push_back(shadowSpeedProgress.back() + (previousSpeed_ + speed_) * 0.5f / SAMPLE_COUNT);
+        if (index_ > 0)
+        {
+            shadowSpeedProgress.push_back(shadowSpeedProgress.back() + (previousSpeed_ + speed_) * 0.5f / SAMPLE_COUNT);
+        }
         peakSpeed_ = (std::max)(peakSpeed_, speed_);
         previousSpeed_ = speed_;
     }
     const float integral_ = shadowSpeedProgress.back();
-    if (integral_ < 0.0001f) { shadowPathValidated = false; return false; }
-    for (auto& progress_ : shadowSpeedProgress) progress_ /= integral_;
+    if (integral_ < 0.0001f)
+    {
+        shadowPathValidated = false;
+        return false;
+    }
+    for (auto& progress_ : shadowSpeedProgress)
+    {
+        progress_ /= integral_;
+    }
     // 蛇行の実距離とカーブの最大倍率から、最高速度を超えずに到着できる時間を確保する。
     shadowPlannedDuration = (std::max)(shadowMoveEndTime - shadowMoveStartTime,
         shadowTrajectoryDistances.back() * peakSpeed_ / integral_ / (std::max)(1.0f, shadowMoveSpeed));
@@ -1210,10 +1713,19 @@ bool HumanBossActionComponent::PlanShadowTrajectory(HumanBossShadowShift mode_,
 
 DirectX::XMFLOAT3 HumanBossActionComponent::SampleShadowTrajectory(float distance_) const
 {
-    if (shadowTrajectory.empty()) return {};
+    if (shadowTrajectory.empty())
+    {
+        return {};
+    }
     const auto iterator_ = std::lower_bound(shadowTrajectoryDistances.begin(), shadowTrajectoryDistances.end(), distance_);
-    if (iterator_ == shadowTrajectoryDistances.begin()) return shadowTrajectory.front();
-    if (iterator_ == shadowTrajectoryDistances.end()) return shadowTrajectory.back();
+    if (iterator_ == shadowTrajectoryDistances.begin())
+    {
+        return shadowTrajectory.front();
+    }
+    if (iterator_ == shadowTrajectoryDistances.end())
+    {
+        return shadowTrajectory.back();
+    }
     const std::size_t index_ = static_cast<std::size_t>(iterator_ - shadowTrajectoryDistances.begin());
     const float rate_ = std::clamp((distance_ - shadowTrajectoryDistances[index_ - 1]) /
         (std::max)(0.0001f, shadowTrajectoryDistances[index_] - shadowTrajectoryDistances[index_ - 1]), 0.0f, 1.0f);
@@ -1229,20 +1741,38 @@ bool HumanBossActionComponent::CanShadowShift(const SkillDefinition& skill_, Hum
     if (skill_.category != SkillCategory::UTILITY || skill_.phases.empty() ||
         skill_.phases[0].endCondition != SkillPhaseEnd::DURATION || skill_.phases[0].duration <= 0.0f ||
         skill_.phases[0].forwardSpeed != 0.0f || !skill_.phases[0].forwardSpeedCurveName.empty() ||
-        !skill_.phases[0].motionWarpPreset.empty()) return false;
+        !skill_.phases[0].motionWarpPreset.empty())
+    {
+        return false;
+    }
     const auto owner_ = gameObject.lock();
     const auto animation_ = owner_ ? AnimationGraphBridgeComponent::Acquire(owner_) : nullptr;
-    if (!animation_) return false;
+    if (!animation_)
+    {
+        return false;
+    }
     const auto state_ = animation_->GetStateCatalog().find(skill_.phases[0].animationState);
-    if (state_ == animation_->GetStateCatalog().end() || !state_->second) return false;
+    if (state_ == animation_->GetStateCatalog().end() || !state_->second)
+    {
+        return false;
+    }
     if (state_->second->rootMotion.enable && state_->second->rootMotionScale != 0.0f &&
-        (state_->second->rootMotion.applyPositionX || state_->second->rootMotion.applyPositionZ)) return false;
+        (state_->second->rootMotion.applyPositionX || state_->second->rootMotion.applyPositionZ))
+    {
+        return false;
+    }
     std::vector<DirectX::XMFLOAT3> waypoints_;
     // 横・背後移動は左右のどちらかが塞がれていても、反対側を検討する。
     const auto canFollowUp_ = [&]()
     {
-        if (skill_.phases.size() == 1) return true;
-        if (!target_ || !target_->transform || waypoints_.empty()) return false;
+        if (skill_.phases.size() == 1)
+        {
+            return true;
+        }
+        if (!target_ || !target_->transform || waypoints_.empty())
+        {
+            return false;
+        }
         const auto targetPosition_ = target_->transform->GetWorldPosition();
         const auto destination_ = waypoints_.back();
         const float dx_ = targetPosition_.x - destination_.x;
@@ -1251,13 +1781,22 @@ bool HumanBossActionComponent::CanShadowShift(const SkillDefinition& skill_, Hum
         if (skill_.name != "SHADOW_SLASH")
         {
             auto& manager_ = AttackTemplateManager::Instance();
-            if (manager_.GetTemplates().empty()) manager_.LoadAll();
+            if (manager_.GetTemplates().empty())
+            {
+                manager_.LoadAll();
+            }
             const std::string id_ = skill_.name == "SHADOW_DIVE_01" ? "HumanBossShadowDive01" :
                 skill_.name == "SHADOW_DIVE_02" ? "HumanBossShadowDive02" : "HumanBossShadowDomain";
             const auto attack_ = manager_.FindTemplate(id_);
-            if (!attack_ || attack_->attackEffects.empty() || attack_->attackEffects[0].hitShapes.empty()) return false;
+            if (!attack_ || attack_->attackEffects.empty() || attack_->attackEffects[0].hitShapes.empty())
+            {
+                return false;
+            }
             reach_ = attack_->attackEffects[0].hitShapes[0].radius - 0.25f;
-            if (skill_.name != "SHADOW_DOMAIN") reach_ += 6.0f * shadowLandingTrackTime;
+            if (skill_.name != "SHADOW_DOMAIN")
+            {
+                reach_ += 6.0f * shadowLandingTrackTime;
+            }
         }
         // 移動後も明らかに届かない派生は抽選へ出さず、単独移動を残す。
         return std::sqrt(dx_ * dx_ + dz_ * dz_) <= reach_;
@@ -1271,17 +1810,32 @@ bool HumanBossActionComponent::BeginShadowShift(const SkillDefinition& skill_, H
     const std::shared_ptr<GameObject>& target_, float side_)
 {
     BS_PROFILE_SCOPE("HumanBossActionComponent::BeginShadowShift");
-    if (!CanShadowShift(skill_, mode_, target_, side_)) return false;
+    if (!CanShadowShift(skill_, mode_, target_, side_))
+    {
+        return false;
+    }
     std::vector<DirectX::XMFLOAT3> waypoints_;
     if (!BuildShadowPath(mode_, target_, side_, waypoints_) &&
         !((mode_ == HumanBossShadowShift::SIDE || mode_ == HumanBossShadowShift::BEHIND) &&
-            BuildShadowPath(mode_, target_, -side_, waypoints_))) return false;
-    if (!PlanShadowTrajectory(mode_, waypoints_)) return false;
+            BuildShadowPath(mode_, target_, -side_, waypoints_)))
+    {
+        return false;
+    }
+    if (!PlanShadowTrajectory(mode_, waypoints_))
+    {
+        return false;
+    }
     auto plannedSkill_ = skill_;
     plannedSkill_.phases[0].duration = (std::max)(plannedSkill_.phases[0].duration,
         shadowMoveStartTime + shadowPlannedDuration + shadowReappearDuration);
-    if (plannedSkill_.phases[0].duration >= plannedSkill_.phases[0].maximumDuration) return false;
-    if (!Begin(plannedSkill_, HumanBossDefense::NONE, {}, target_)) return false;
+    if (plannedSkill_.phases[0].duration >= plannedSkill_.phases[0].maximumDuration)
+    {
+        return false;
+    }
+    if (!Begin(plannedSkill_, HumanBossDefense::NONE, {}, target_))
+    {
+        return false;
+    }
     shadowChain = skill_.phases.size() > 1;
     shadowAreaTemplate = skill_.name == "SHADOW_DIVE_01" ? "HumanBossShadowDive01" :
         skill_.name == "SHADOW_DIVE_02" ? "HumanBossShadowDive02" : skill_.name == "SHADOW_DOMAIN" ? "HumanBossShadowDomain" : "";
@@ -1289,8 +1843,12 @@ bool HumanBossActionComponent::BeginShadowShift(const SkillDefinition& skill_, H
     shadowLandingLocked = false;
     shadowDiveFallSpeed = 27.6f;
     for (const auto& phase_ : skill_.phases)
+    {
         if (phase_.endCondition == SkillPhaseEnd::GROUND_CONTACT && phase_.verticalSpeed < 0.0f)
+        {
             shadowDiveFallSpeed = std::abs(phase_.verticalSpeed);
+        }
+    }
     shadowWaypoints = std::move(waypoints_);
     shadowWaypoint = 0;
     shadowElapsed = 0.0f;
@@ -1306,7 +1864,10 @@ void HumanBossActionComponent::SpawnShadowEffect()
 {
     BS_PROFILE_SCOPE("HumanBossActionComponent::SpawnShadowEffect");
     const auto owner_ = GetGameObject();
-    if (!owner_ || !owner_->transform) return;
+    if (!owner_ || !owner_->transform)
+    {
+        return;
+    }
     MeshVFXSpawnRequest request_;
     const bool usesPurpleShadow_ = shadowChain || rangedSkill == "SHADOW_SLASH" ||
         rangedSkill == "SHADOW_CHARGE" || rangedSkill == "SHADOW_RAGNAROK";
@@ -1341,7 +1902,10 @@ void HumanBossActionComponent::UpdateShadowShift(float deltaTime_)
     SetShadowVisible(shadowElapsed < shadowMoveStartTime || shadowArrived || shadowPathBlocked);
     movement_->StopHorizontalMovement();
     const auto blackboard_ = owner_->GetComponent<BlackboardComponent>();
-    if (blackboard_) blackboard_->SetVector2(AnimationGraphBlackboardKeys::ANIMATION_CATEGORY, AnimationGraphBlackboardKeys::GUARD_MOVE_INPUT, { 0.0f, 0.0f });
+    if (blackboard_)
+    {
+        blackboard_->SetVector2(AnimationGraphBlackboardKeys::ANIMATION_CATEGORY, AnimationGraphBlackboardKeys::GUARD_MOVE_INPUT, { 0.0f, 0.0f });
+    }
     const auto position_ = owner_->transform->GetWorldPosition();
     FaceTarget({ target_->transform->GetWorldPosition().x - position_.x, 0.0f,
         target_->transform->GetWorldPosition().z - position_.z });
@@ -1351,9 +1915,15 @@ void HumanBossActionComponent::UpdateShadowShift(float deltaTime_)
         const float pendingX_ = shadowPendingPosition.x - position_.x;
         const float pendingZ_ = shadowPendingPosition.z - position_.z;
         if (pendingX_ * pendingX_ + pendingZ_ * pendingZ_ <= 0.000025f)
-        { shadowTravelDistance = shadowPendingDistance; shadowPendingMove = false; }
+        {
+            shadowTravelDistance = shadowPendingDistance;
+            shadowPendingMove = false;
+        }
     }
-    if (shadowElapsed < shadowMoveStartTime || shadowArrived || shadowPathBlocked || shadowTrajectory.empty()) return;
+    if (shadowElapsed < shadowMoveStartTime || shadowArrived || shadowPathBlocked || shadowTrajectory.empty())
+    {
+        return;
+    }
     const auto final_ = shadowTrajectory.back();
     const float finalX_ = final_.x - position_.x, finalZ_ = final_.z - position_.z;
     if (shadowTravelDistance >= shadowTrajectoryDistances.back() - 0.0001f && finalX_ * finalX_ + finalZ_ * finalZ_ <= 0.000025f)
@@ -1373,7 +1943,10 @@ void HumanBossActionComponent::UpdateShadowShift(float deltaTime_)
     const auto destination_ = SampleShadowTrajectory((std::max)(shadowTravelDistance, nextDistance_));
     const float dx_ = destination_.x - position_.x, dz_ = destination_.z - position_.z;
     const float remaining_ = std::sqrt(dx_ * dx_ + dz_ * dz_);
-    if (remaining_ < 0.0001f || deltaTime_ <= 0.0001f) return;
+    if (remaining_ < 0.0001f || deltaTime_ <= 0.0001f)
+    {
+        return;
+    }
     const float step_ = (std::min)(remaining_, shadowMoveSpeed * deltaTime_);
     const DirectX::XMFLOAT3 next_{ position_.x + dx_ / remaining_ * step_, position_.y, position_.z + dz_ / remaining_ * step_ };
     if (!CanWarpPath(position_, next_))
@@ -1403,7 +1976,10 @@ void HumanBossActionComponent::UpdateShadowShift(float deltaTime_)
     // 高速移動でも残像の間が開きすぎないよう、時間と移動距離で発生間隔を管理する。
     if (!shadowHasEffectPosition || shadowEffectTimer <= 0.0f ||
         effectX_ * effectX_ + effectZ_ * effectZ_ >= shadowEffectSpacing * shadowEffectSpacing)
-    { SpawnShadowEffect(); shadowEffectTimer = shadowEffectInterval; }
+    {
+        SpawnShadowEffect();
+        shadowEffectTimer = shadowEffectInterval;
+    }
 }
 
 bool HumanBossActionComponent::CanStart(const SkillDefinition& skill_, HumanBossDefense defense_,
@@ -1411,27 +1987,53 @@ bool HumanBossActionComponent::CanStart(const SkillDefinition& skill_, HumanBoss
 {
     const auto owner_ = gameObject.lock();
     validationError.clear();
-    if (!owner_ || execution.IsActive()) { validationError = "Owner missing or another action is running."; return false; }
+    if (!owner_ || execution.IsActive())
+    {
+        validationError = "Owner missing or another action is running.";
+        return false;
+    }
     if (skill_.name == "COUNTER_ATTACK" || skill_.name == "GUARD_EXECUTION")
     {
         const auto player_ = target_ ? target_->GetComponent<PlayerControllerComponent>() : nullptr;
-        if (!player_ || !player_->CanBeginEnemyExecution()) { validationError = "Execution target or player graph unavailable."; return false; }
+        if (!player_ || !player_->CanBeginEnemyExecution())
+        {
+            validationError = "Execution target or player graph unavailable.";
+            return false;
+        }
         if (skill_.name == "GUARD_EXECUTION" && !CanCaptureGuardingPlayer(target_))
-        { validationError = "Guard execution requires a grounded guarding target within reach."; return false; }
+        {
+            validationError = "Guard execution requires a grounded guarding target within reach.";
+            return false;
+        }
     }
-    if ((defense_ == HumanBossDefense::GUARD || defense_ == HumanBossDefense::JUST_GUARD) && !owner_->GetComponent<GuardCollider>()) { validationError = "GuardCollider missing."; return false; }
+    if ((defense_ == HumanBossDefense::GUARD || defense_ == HumanBossDefense::JUST_GUARD) && !owner_->GetComponent<GuardCollider>())
+    {
+        validationError = "GuardCollider missing.";
+        return false;
+    }
     if (defense_ == HumanBossDefense::DODGE)
     {
         const auto movement_ = owner_->GetComponent<CharacterMovementComponent>();
-        if (!owner_->GetComponent<HurtBox>() || !movement_ || !movement_->ResolveCollider()) { validationError = "Dodge requires HurtBox, Movement and Collider."; return false; }
+        if (!owner_->GetComponent<HurtBox>() || !movement_ || !movement_->ResolveCollider())
+        {
+            validationError = "Dodge requires HurtBox, Movement and Collider.";
+            return false;
+        }
     }
     const auto animation_ = AnimationGraphBridgeComponent::Acquire(owner_);
-    if (!animation_ || animation_->IsSkillOwned()) { validationError = "Animation missing or controlled by another skill."; return false; }
+    if (!animation_ || animation_->IsSkillOwned())
+    {
+        validationError = "Animation missing or controlled by another skill.";
+        return false;
+    }
     // RootMotionを使うPhaseへ前進速度も足すと、同じ移動が二重に適用される。
     for (const auto& phase_ : skill_.phases)
     {
         const auto state_ = animation_->GetStateCatalog().find(phase_.animationState);
-        if (state_ == animation_->GetStateCatalog().end() || !state_->second) continue;
+        if (state_ == animation_->GetStateCatalog().end() || !state_->second)
+        {
+            continue;
+        }
         const auto& motion_ = state_->second->rootMotion;
         const bool usesHorizontalRootMotion_ = motion_.enable && state_->second->rootMotionScale != 0.0f &&
             (motion_.applyPositionX || motion_.applyPositionZ);
@@ -1441,18 +2043,53 @@ bool HumanBossActionComponent::CanStart(const SkillDefinition& skill_, HumanBoss
             return false;
         }
     }
-    if (!SkillExecution::CanExecute(owner_, skill_, validationError)) return false;
-    if (!CanStartRanged(skill_.name, target_)) return false;
+    if (!SkillExecution::CanExecute(owner_, skill_, validationError))
+    {
+        return false;
+    }
+    if (!CanStartRanged(skill_.name, target_))
+    {
+        return false;
+    }
+    if ((skill_.name == "HumanBoss_COMBO_PATTERN_01" || skill_.name == "HumanBoss_COMBO_PATTERN_02") &&
+        std::any_of(skill_.phases.begin(), skill_.phases.end(),
+            [](const SkillPhase& phase_)
+    {
+        return phase_.animationState == "Charge_Air_Attack_Loop_Seq";
+    }))
+    {
+        // 接近前は打撃の距離で除外せず、Loopの終了時に同じ到達判定を使う。
+        const auto movement_ = owner_->GetComponent<CharacterMovementComponent>();
+        const auto health_ = target_ ? target_->GetComponent<HealthComponent>() : nullptr;
+        if (!target_ || !target_->transform || (health_ && health_->IsDead()) || !movement_ || !movement_->ResolveCollider())
+        {
+            validationError = "Combo approach target or movement missing.";
+            return false;
+        }
+        return true;
+    }
     // 対になる反撃は専用の位置固定で間合いを作るため、通常攻撃の接近補正では除外しない。
-    if (skill_.name == "COUNTER_ATTACK" || skill_.name == "GUARD_EXECUTION") return true;
+    if (skill_.name == "COUNTER_ATTACK" || skill_.name == "GUARD_EXECUTION")
+    {
+        return true;
+    }
     // 最初の打撃Phaseで開始可否を決め、補正OFFでも自然なRootMotionで届く範囲へ絞る。
-    if (skill_.category != SkillCategory::ATTACK && skill_.category != SkillCategory::COUNTER) return true;
+    if (skill_.category != SkillCategory::ATTACK && skill_.category != SkillCategory::COUNTER)
+    {
+        return true;
+    }
     for (const auto& phase_ : skill_.phases)
     {
         const auto state_ = animation_->GetStateCatalog().find(phase_.animationState);
         if (state_ == animation_->GetStateCatalog().end() || !state_->second ||
             std::none_of(state_->second->events.begin(), state_->second->events.end(),
-                [](const AnimEvent& event_) { return event_.eventTemplateType == ANIMATION_EVENT_TEMPLATE_TYPE::ATTACK_TEMPLATE; })) continue;
+                [](const AnimEvent& event_)
+        {
+            return event_.eventTemplateType == ANIMATION_EVENT_TEMPLATE_TYPE::ATTACK_TEMPLATE;
+        }))
+        {
+            continue;
+        }
         DirectX::XMFLOAT3 plannedMotion_{};
         float stopDistance_ = 0.0f;
         float endNormalizedTime_ = 0.0f;
@@ -1467,7 +2104,11 @@ bool HumanBossActionComponent::Begin(const SkillDefinition& skill_, HumanBossDef
 {
     BS_PROFILE_SCOPE("HumanBossActionComponent::Begin");
     InitializeAttackAssist();
-    if (!CanStart(skill_, defense_, target_)) { status = validationError; return false; }
+    if (!CanStart(skill_, defense_, target_))
+    {
+        status = validationError;
+        return false;
+    }
     currentDefense = defense_;
     justGuardSucceeded = false;
     guardSucceeded = false;
@@ -1486,13 +2127,21 @@ bool HumanBossActionComponent::Begin(const SkillDefinition& skill_, HumanBossDef
                   (std::sin(yaw_) * dodgeDirection_.x + std::cos(yaw_) * dodgeDirection_.z) * inverseSpeed_ });
         }
     }
-    if (const auto movement_ = owner_->GetComponent<CharacterMovementComponent>()) movement_->StopHorizontalMovement();
+    if (const auto movement_ = owner_->GetComponent<CharacterMovementComponent>())
+    {
+        movement_->StopHorizontalMovement();
+    }
     SetWeaponTrails(false, true);
     rangedSkill = skill_.name;
     orbSpawnCommitted = false;
     if (rangedSkill == "SHADOW_CHARGE" || rangedSkill == "SHADOW_ORB" || rangedSkill == "SHADOW_RAGNAROK")
+    {
         rangedProgress = rangedSkill + ": starting";
-    if (rangedSkill == "SHADOW_RAGNAROK") ragnarokRound = 0;
+    }
+    if (rangedSkill == "SHADOW_RAGNAROK")
+    {
+        ragnarokRound = 0;
+    }
     attackTarget = target_;
     hasAttackTargetPosition = false;
     windupFacingTracked = false;
@@ -1500,15 +2149,28 @@ bool HumanBossActionComponent::Begin(const SkillDefinition& skill_, HumanBossDef
     windupRotationCorrection = 0.0f;
     windupWarpPresetName.clear();
     attackStartPosition = owner_->transform ? owner_->transform->GetWorldPosition() : DirectX::XMFLOAT3{};
-    if (target_ && target_->transform) attackInitialTargetPosition = attackTargetPosition = target_->transform->GetWorldPosition();
+    if (target_ && target_->transform)
+    {
+        attackInitialTargetPosition = attackTargetPosition = target_->transform->GetWorldPosition();
+    }
     for (const auto& phase_ : skill_.phases)
-        if (!phase_.motionWarpPreset.empty()) { windupWarpPresetName = phase_.motionWarpPreset; break; }
+    {
+        if (!phase_.motionWarpPreset.empty())
+        {
+            windupWarpPresetName = phase_.motionWarpPreset;
+            break;
+        }
+    }
     attackAssistSkill = skill_.category == SkillCategory::ATTACK || skill_.category == SkillCategory::COUNTER;
     const std::weak_ptr<HumanBossActionComponent> weak_ = owner_->GetComponent<HumanBossActionComponent>();
     const auto runtimeSkill_ = PrepareRangedSkill(skill_);
     if (!execution.Start(owner_, runtimeSkill_, [weak_](const SkillPhase& phase_)
     {
-        if (const auto self_ = weak_.lock()) { self_->BeginAttackAssist(phase_); self_->BeginRangedPhase(phase_); }
+        if (const auto self_ = weak_.lock())
+        {
+            self_->BeginAttackAssist(phase_);
+            self_->BeginRangedPhase(phase_);
+        }
     }, [weak_](const SkillPhase& phase_)
     {
         const auto self_ = weak_.lock();
@@ -1518,21 +2180,36 @@ bool HumanBossActionComponent::Begin(const SkillDefinition& skill_, HumanBossDef
         status = execution.GetError();
         currentDefense = HumanBossDefense::NONE;
         attackAssistSkill = false;
-        if (const auto warp_ = owner_->GetComponent<MotionWarpComponent>()) warp_->Stop();
+        if (const auto warp_ = owner_->GetComponent<MotionWarpComponent>())
+        {
+            warp_->Stop();
+        }
         return false;
     }
     if (!execution.IsActive() && (skill_.name == "SHADOW_CHARGE" || skill_.name == "SHADOW_ORB" || skill_.name == "SHADOW_RAGNAROK"))
     {
-        if (!execution.GetError().empty()) status = execution.GetError();
-        else if (status.empty()) status = "Ranged skill interrupted during start";
+        if (!execution.GetError().empty())
+        {
+            status = execution.GetError();
+        }
+        else if (status.empty())
+        {
+            status = "Ranged skill interrupted during start";
+        }
         return false; // 開始失敗に長いCooldownを付けず、AIへ失敗として返す。
     }
     attackActive = execution.IsActive() && (skill_.category == SkillCategory::ATTACK || skill_.category == SkillCategory::COUNTER ||
         skill_.name == "SHADOW_CHARGE" || skill_.name == "SHADOW_ORB" || skill_.name == "SHADOW_RAGNAROK");
-    if (!execution.IsActive()) CloseDefense();
+    if (!execution.IsActive())
+    {
+        CloseDefense();
+    }
     SyncComboState();
     UpdateHitProtection(0.0f);
-    if (skill_.name != "SHADOW_RAGNAROK" || execution.IsActive()) status.clear();
+    if (skill_.name != "SHADOW_RAGNAROK" || execution.IsActive())
+    {
+        status.clear();
+    }
     return true;
 }
 
@@ -1541,21 +2218,110 @@ void HumanBossActionComponent::Tick(float deltaTime_)
     BS_PROFILE_SCOPE("HumanBossActionComponent::Tick");
     UpdateRagnarokParticles(deltaTime_);
     if (!attackAssistEnabled)
+    {
         if (const auto owner_ = GetGameObject())
-            if (const auto warp_ = owner_->GetComponent<MotionWarpComponent>()) warp_->Stop();
-    if (deltaTime_ > 0.0001f) assistFrameDeltaTime = deltaTime_;
+        {
+            if (const auto warp_ = owner_->GetComponent<MotionWarpComponent>())
+            {
+                warp_->Stop();
+            }
+        }
+    }
+    if (deltaTime_ > 0.0001f)
+    {
+        assistFrameDeltaTime = deltaTime_;
+    }
     const bool active_ = execution.IsActive();
     if (hasAttackTargetPosition)
+    {
         if (const auto owner_ = GetGameObject())
-            if (const auto warp_ = owner_->GetComponent<MotionWarpComponent>()) attackTargetPosition = warp_->GetTargetPosition();
+        {
+            if (const auto warp_ = owner_->GetComponent<MotionWarpComponent>())
+            {
+                attackTargetPosition = warp_->GetTargetPosition();
+            }
+        }
+    }
     execution.Update(deltaTime_);
+    const auto phase_ = execution.GetCurrentPhase();
+    const bool approachingCombo_ = execution.GetSkillName() == "HumanBoss_COMBO_PATTERN_01" ||
+        execution.GetSkillName() == "HumanBoss_COMBO_PATTERN_02";
+    if (approachingCombo_ && phase_ && (phase_->animationState == "SS_Take" ||
+        phase_->animationState == "Charge_Air_Attack_Start_Seq" || phase_->animationState == "Charge_Air_Attack_Loop_Seq"))
+    {
+        const auto owner_ = GetGameObject();
+        const auto target_ = attackTarget.lock();
+        const auto movement_ = owner_ ? owner_->GetComponent<CharacterMovementComponent>() : nullptr;
+        const auto health_ = target_ ? target_->GetComponent<HealthComponent>() : nullptr;
+        if (!owner_ || !owner_->transform || !target_ || !target_->transform || !movement_ || (health_ && health_->IsDead()))
+        {
+            Stop();
+            return;
+        }
+        const auto position_ = owner_->transform->GetWorldPosition();
+        const auto targetPosition_ = target_->transform->GetWorldPosition();
+        const float dx_ = targetPosition_.x - position_.x;
+        const float dz_ = targetPosition_.z - position_.z;
+        const float distance_ = std::sqrt(dx_ * dx_ + dz_ * dz_);
+        movement_->SetFacingDirection({ dx_, 0.0f, dz_ }, true);
+        float stopDistance_ = 1.5f;
+        bool canStrike_ = false;
+        if (phase_->animationState == "Charge_Air_Attack_Loop_Seq")
+        {
+            const auto strike_ = execution.GetNextPhase();
+            DirectX::XMFLOAT3 motion_{};
+            float end_ = 0.0f, duration_ = 0.0f;
+            if (!strike_)
+            {
+                Stop();
+                return;
+            }
+            canStrike_ = BuildAttackAssistPlan(*strike_, target_, motion_, stopDistance_, end_, duration_);
+        }
+        if (phase_->animationState == "SS_Take" || canStrike_)
+        {
+            movement_->StopHorizontalMovementImmediately();
+            if (canStrike_)
+            {
+                execution.NotifyPhaseEnd();
+            }
+        }
+        else
+        {
+            const auto velocity_ = movement_->GetDesiredHorizontalVelocity();
+            const float requestedSpeed_ = std::sqrt(velocity_.x * velocity_.x + velocity_.z * velocity_.z);
+            // 物理移動を使い、至近距離でも通り越さない速度へ制限する。
+            const float speed_ = (std::min)(requestedSpeed_, (std::max)(0.0f, distance_ - stopDistance_) /
+                (std::max)(deltaTime_, 0.0001f));
+            const float scale_ = distance_ > 0.0001f ? speed_ / distance_ : 0.0f;
+            movement_->SetHorizontalVelocity({ dx_ * scale_, 0.0f, dz_ * scale_ });
+        }
+    }
     if (shadowShiftActive && execution.IsActive())
     {
-        if (execution.GetPhaseIndex() == 0) UpdateShadowShift(deltaTime_);
-        else { SetShadowInvulnerable(false); shadowShiftActive = false; SetShadowVisible(true); if (!shadowArrived) SpawnShadowEffect(); }
+        if (execution.GetPhaseIndex() == 0)
+        {
+            UpdateShadowShift(deltaTime_);
+        }
+        else
+        {
+            SetShadowInvulnerable(false);
+            shadowShiftActive = false;
+            SetShadowVisible(true);
+            if (!shadowArrived)
+            {
+                SpawnShadowEffect();
+            }
+        }
     }
-    if (shadowChain && execution.IsActive()) UpdateShadowDive(deltaTime_);
-    if (execution.IsActive()) UpdateRangedAttack();
+    if (shadowChain && execution.IsActive())
+    {
+        UpdateShadowDive(deltaTime_);
+    }
+    if (execution.IsActive())
+    {
+        UpdateRangedAttack();
+    }
     if (active_ && !execution.IsActive() &&
         (execution.GetResult() == SkillExecutionResult::TIMEOUT || execution.GetResult() == SkillExecutionResult::PHASE_START_FAILED ||
             execution.GetResult() == SkillExecutionResult::FOLLOW_UP_REJECTED))
@@ -1564,15 +2330,31 @@ void HumanBossActionComponent::Tick(float deltaTime_)
         const auto owner_ = GetGameObject();
         const auto animation_ = owner_ ? AnimationGraphBridgeComponent::Acquire(owner_) : nullptr;
         if (animation_ && !animation_->IsSkillOwned() && animation_->GetStateCatalog().count("SS_Idle"))
+        {
             animation_->RequestStateTransition("SS_Idle", 0.1f);
-        if (execution.GetResult() == SkillExecutionResult::FOLLOW_UP_REJECTED) StopAttackHitBoxes(false);
+        }
+        if (execution.GetResult() == SkillExecutionResult::FOLLOW_UP_REJECTED)
+        {
+            StopAttackHitBoxes(false);
+        }
     }
     UpdateHitProtection(0.0f);
     if (execution.IsActive() && windupTracking)
-        if (const auto owner_ = GetGameObject()) owner_->ExecuteAction("HumanBoss_WindupFaceTarget");
-    if ((active_ || currentDefense != HumanBossDefense::NONE) && !execution.IsActive()) CloseDefense();
+    {
+        if (const auto owner_ = GetGameObject())
+        {
+            owner_->ExecuteAction("HumanBoss_WindupFaceTarget");
+        }
+    }
+    if ((active_ || currentDefense != HumanBossDefense::NONE) && !execution.IsActive())
+    {
+        CloseDefense();
+    }
     SyncComboState();
-    if (!execution.GetError().empty()) status = execution.GetError();
+    if (!execution.GetError().empty())
+    {
+        status = execution.GetError();
+    }
 }
 
 bool HumanBossActionComponent::CanCaptureGuardingPlayer(const std::shared_ptr<GameObject>& target_) const
@@ -1580,7 +2362,10 @@ bool HumanBossActionComponent::CanCaptureGuardingPlayer(const std::shared_ptr<Ga
     const auto actor_ = gameObject.lock();
     const auto player_ = target_ ? target_->GetComponent<PlayerControllerComponent>() : nullptr;
     if (!actor_ || !actor_->transform || !target_ || !target_->transform || !player_ ||
-        player_->GetCurrentAction() != PLAYER_ACTION::GUARD || player_->IsAirborneForAction() || !player_->CanBeginEnemyExecution()) return false;
+        player_->GetCurrentAction() != PLAYER_ACTION::GUARD || player_->IsAirborneForAction() || !player_->CanBeginEnemyExecution())
+    {
+        return false;
+    }
     const auto position_ = actor_->transform->GetWorldPosition();
     const auto targetPosition_ = target_->transform->GetWorldPosition();
     const float deltaX_ = targetPosition_.x - position_.x;
@@ -1616,10 +2401,18 @@ void HumanBossActionComponent::BeginExecutionCapture()
     const auto target_ = attackTarget.lock();
     const auto player_ = target_ ? target_->GetComponent<PlayerControllerComponent>() : nullptr;
     if (!actor_ || !actor_->transform || !target_ || !target_->transform || !player_)
-    { status = "Execution target unavailable"; Stop(); return; }
+    {
+        status = "Execution target unavailable";
+        Stop();
+        return;
+    }
     // Animation切替時の通知で状態が変わった場合も、対ガードの掴み条件を再確認する。
     if (execution.GetSkillName() == "GUARD_EXECUTION" && !CanCaptureGuardingPlayer(target_))
-    { status = "Guard execution avoided"; Stop(); return; }
+    {
+        status = "Guard execution avoided";
+        Stop();
+        return;
+    }
     const auto position_ = actor_->transform->GetWorldPosition();
     const auto targetPosition_ = target_->transform->GetWorldPosition();
     if (const auto movement_ = actor_->GetComponent<CharacterMovementComponent>())
@@ -1637,9 +2430,15 @@ void HumanBossActionComponent::BeginExecutionCapture()
     const auto actorCollider_ = ResolveAttackCharacter(actor_);
     const auto targetCollider_ = ResolveAttackCharacter(target_);
     if (actorCollider_ && targetCollider_)
+    {
         distance_ = (std::max)(distance_, actorCollider_->GetCapsuleData().radius + targetCollider_->GetCapsuleData().radius + 0.15f);
+    }
     if (!player_->BeginEnemyExecution(actor_, executionHoldTime, distance_))
-    { status = "Execution player graph rejected capture"; Stop(); return; }
+    {
+        status = "Execution player graph rejected capture";
+        Stop();
+        return;
+    }
     executionCapturedPlayer = target_;
     executionGrabFeedbackPlayed = false;
     executionSlamFeedbackPlayed = false;
@@ -1651,16 +2450,28 @@ void HumanBossActionComponent::BeginExecutionCapture()
 void HumanBossActionComponent::PlayExecutionCamera()
 {
     BS_PROFILE_SCOPE("HumanBossActionComponent::PlayExecutionCamera");
-    if (executionCapturedPlayer.expired() || executionCameraAction.empty()) return;
+    if (executionCapturedPlayer.expired() || executionCameraAction.empty())
+    {
+        return;
+    }
     // ひるみから本拘束へ移っても、進行中のカメラを先頭から再生し直さない。
-    if (!executionCameraDirector.expired() && activeExecutionCameraAction == executionCameraAction) return;
+    if (!executionCameraDirector.expired() && activeExecutionCameraAction == executionCameraAction)
+    {
+        return;
+    }
     const auto actor_ = GetGameObject();
-    if (!actor_ || !actor_->manager || !actor_->transform) return;
+    if (!actor_ || !actor_->manager || !actor_->transform)
+    {
+        return;
+    }
     const auto cameras_ = actor_->GetManager().GetCameraManager();
     const auto camera_ = cameras_ ? cameras_->GetSourceCamera() : nullptr;
     const auto cameraObject_ = camera_ ? camera_->GetGameObject() : nullptr;
     const auto director_ = cameraObject_ ? cameraObject_->GetComponent<CameraActionDirectorComponent>() : nullptr;
-    if (!director_) return;
+    if (!director_)
+    {
+        return;
+    }
     const float yaw_ = DirectX::XMConvertToRadians(actor_->transform->GetWorldRotation().y);
     // TARGET_LOCAL_RELATIVEへ敵の正面を渡し、プレイヤーの向きで構図が反転しないようにする。
     director_->PlayActionAtPosition(executionCameraAction, actor_->transform->GetWorldPosition(),
@@ -1672,9 +2483,15 @@ void HumanBossActionComponent::PlayExecutionCamera()
 void HumanBossActionComponent::PlayExecutionGrabFeedback()
 {
     BS_PROFILE_SCOPE("HumanBossActionComponent::PlayExecutionGrabFeedback");
-    if (executionCapturedPlayer.expired() || executionGrabFeedbackPlayed) return;
+    if (executionCapturedPlayer.expired() || executionGrabFeedbackPlayed)
+    {
+        return;
+    }
     const auto actor_ = GetGameObject();
-    if (!actor_ || !actor_->manager) return;
+    if (!actor_ || !actor_->manager)
+    {
+        return;
+    }
     executionGrabFeedbackPlayed = true;
     if (const auto time_ = actor_->GetManager().GetTimeManager())
     {
@@ -1694,17 +2511,28 @@ void HumanBossActionComponent::PlayExecutionSlamFeedback()
     BS_PROFILE_SCOPE("HumanBossActionComponent::PlayExecutionSlamFeedback");
     const auto target_ = executionCapturedPlayer.lock();
     const auto phase_ = execution.GetCurrentPhase();
-    if (!target_ || executionSlamFeedbackPlayed || !phase_ || phase_->enterAction != "HumanBoss_ExecutionCapture") return;
+    if (!target_ || executionSlamFeedbackPlayed || !phase_ || phase_->enterAction != "HumanBoss_ExecutionCapture")
+    {
+        return;
+    }
     const auto actor_ = GetGameObject();
-    if (!actor_ || !actor_->manager) return;
+    if (!actor_ || !actor_->manager)
+    {
+        return;
+    }
     executionSlamFeedbackPlayed = true;
     // 死亡通知で処理が再入しても重複せず、カメラの有無に関係なく叩きつけのダメージを与える。
     if (const auto health_ = target_->GetComponent<HealthComponent>(); health_ && !health_->IsDead())
+    {
         health_->ApplyDamage(executionSlamDamage);
+    }
     const auto cameras_ = actor_->GetManager().GetCameraManager();
     const auto camera_ = cameras_ ? cameras_->GetSourceCamera() : nullptr;
     const auto cameraObject_ = camera_ ? camera_->GetGameObject() : nullptr;
-    if (!cameraObject_) return;
+    if (!cameraObject_)
+    {
+        return;
+    }
     // シェイクはカメラActionより後段の既存Componentへ渡し、正面カットへ重ねる。
     cameraObject_->GetOrAddComponent<CameraShakeComponent>()->PlayShake(executionSlamShakeDuration,
         executionSlamShakeStrength, executionSlamShakeStrength * 12.0f, executionSlamShakeFrequency, 30);
@@ -1714,10 +2542,18 @@ void HumanBossActionComponent::ReleaseExecutionCapture()
 {
     // 正常終了だけでなく、死亡・演出ロック・開始失敗でもPlayerを固定したまま残さない。
     if (const auto target_ = executionCapturedPlayer.lock())
-        if (const auto player_ = target_->GetComponent<PlayerControllerComponent>()) player_->ReleaseEnemyExecution(GetGameObject());
+    {
+        if (const auto player_ = target_->GetComponent<PlayerControllerComponent>())
+        {
+            player_->ReleaseEnemyExecution(GetGameObject());
+        }
+    }
     executionCapturedPlayer.reset();
     // 正常終了・死亡・中断で通常カメラへ戻す。別の優先演出へ切り替わっていた場合は維持する。
-    if (const auto director_ = executionCameraDirector.lock()) director_->StopActionByName(activeExecutionCameraAction);
+    if (const auto director_ = executionCameraDirector.lock())
+    {
+        director_->StopActionByName(activeExecutionCameraAction);
+    }
     executionCameraDirector.reset();
     activeExecutionCameraAction.clear();
     executionGrabFeedbackPlayed = false;
@@ -1728,17 +2564,31 @@ void HumanBossActionComponent::CloseDefense()
 {
     ReleaseExecutionCapture();
     if (rangedSkill == "SHADOW_CHARGE" || rangedSkill == "SHADOW_ORB" || rangedSkill == "SHADOW_RAGNAROK")
+    {
         rangedProgress = rangedSkill + (execution.GetResult() == SkillExecutionResult::COMPLETED ? ": completed" :
             ": stopped - " + (execution.GetError().empty() ? status : execution.GetError()));
+    }
     if (rangedSkill == "SHADOW_RAGNAROK")
+    {
         if (const auto owner_ = GetGameObject())
-            if (const auto movement_ = owner_->GetComponent<CharacterMovementComponent>()) movement_->StopHorizontalMovementImmediately();
+        {
+            if (const auto movement_ = owner_->GetComponent<CharacterMovementComponent>())
+            {
+                movement_->StopHorizontalMovementImmediately();
+            }
+        }
+    }
     ClearRangedArea();
     rangedSkill.clear();
     SetShadowInvulnerable(false);
     // 派生の判定と予約を閉じても、先に確定した周回弾は発射と寿命を継続する。
     if (shadowChain)
-        if (const auto owner_ = GetGameObject()) owner_->GetManager().GetEffectManager().StopAttackEffects(owner_, shadowOrbs);
+    {
+        if (const auto owner_ = GetGameObject())
+        {
+            owner_->GetManager().GetEffectManager().StopAttackEffects(owner_, shadowOrbs);
+        }
+    }
     SetShadowVisible(true);
     ClearShadowArea();
     shadowChain = false;
@@ -1748,7 +2598,12 @@ void HumanBossActionComponent::CloseDefense()
     recoveryProtectionTimer = 0.0f;
     recoveryArmor = 0.0f;
     if (armorApplied)
-        if (const auto reaction_ = protectedReaction.lock()) reaction_->SetArmor(previousReactionArmor);
+    {
+        if (const auto reaction_ = protectedReaction.lock())
+        {
+            reaction_->SetArmor(previousReactionArmor);
+        }
+    }
     armorApplied = false;
     protectedReaction.reset();
     const auto owner_ = GetGameObject();
@@ -1759,8 +2614,14 @@ void HumanBossActionComponent::CloseDefense()
     windupTargetLocked = false;
     windupRotationCorrection = 0.0f;
     windupWarpPresetName.clear();
-    if (!owner_) return;
-    if (const auto warp_ = owner_->GetComponent<MotionWarpComponent>()) warp_->Stop();
+    if (!owner_)
+    {
+        return;
+    }
+    if (const auto warp_ = owner_->GetComponent<MotionWarpComponent>())
+    {
+        warp_->Stop();
+    }
     if (currentDefense == HumanBossDefense::GUARD || currentDefense == HumanBossDefense::JUST_GUARD)
     {
         if (const auto guard_ = owner_->GetComponent<GuardCollider>())
@@ -1770,13 +2631,27 @@ void HumanBossActionComponent::CloseDefense()
         }
     }
     if (currentDefense == HumanBossDefense::DODGE)
-        if (const auto hurt_ = owner_->GetComponent<HurtBox>()) hurt_->SetInvincible(false);
-    if (const auto movement_ = owner_->GetComponent<CharacterMovementComponent>()) movement_->StopHorizontalMovement();
-    if (attackActive) SetWeaponTrails(false, false);
+    {
+        if (const auto hurt_ = owner_->GetComponent<HurtBox>())
+        {
+            hurt_->SetInvincible(false);
+        }
+    }
+    if (const auto movement_ = owner_->GetComponent<CharacterMovementComponent>())
+    {
+        movement_->StopHorizontalMovement();
+    }
+    if (attackActive)
+    {
+        SetWeaponTrails(false, false);
+    }
     currentDefense = HumanBossDefense::NONE;
     windupTracking = false;
     attackActive = false;
-    if (const auto blackboard_ = owner_->GetComponent<BlackboardComponent>()) blackboard_->SetBool("HumanBossAI", "TelegraphActive", false);
+    if (const auto blackboard_ = owner_->GetComponent<BlackboardComponent>())
+    {
+        blackboard_->SetBool("HumanBossAI", "TelegraphActive", false);
+    }
     SyncComboState();
 }
 
@@ -1784,7 +2659,10 @@ void HumanBossActionComponent::SyncComboState()
 {
     const auto owner_ = GetGameObject();
     const auto blackboard_ = owner_ ? owner_->GetComponent<BlackboardComponent>() : nullptr;
-    if (!blackboard_) return;
+    if (!blackboard_)
+    {
+        return;
+    }
     const auto phase_ = execution.GetCurrentPhase();
     int pattern_ = 0;
     int stage_ = 0;
@@ -1797,7 +2675,9 @@ void HumanBossActionComponent::SyncComboState()
         {
             bool digits_ = true;
             for (const std::size_t offset_ : { 0u, 1u, 3u, 4u })
+            {
                 digits_ = digits_ && name_[PREFIX_LENGTH + offset_] >= '0' && name_[PREFIX_LENGTH + offset_] <= '9';
+            }
             if (digits_)
             {
                 pattern_ = (name_[PREFIX_LENGTH] - '0') * 10 + name_[PREFIX_LENGTH + 1] - '0';
@@ -1821,7 +2701,9 @@ void HumanBossActionComponent::Stop(const std::string& idleState_)
     const auto owner_ = GetGameObject();
     const auto animation_ = owner_ ? AnimationGraphBridgeComponent::Acquire(owner_) : nullptr;
     if (wasActive_ && animation_ && !animation_->IsSkillOwned() && animation_->GetStateCatalog().count(idleState_))
+    {
         animation_->RequestStateTransition(idleState_, 0.1f);
+    }
     StopAttackHitBoxes();
     justGuardSucceeded = false;
     guardSucceeded = false;
@@ -1832,17 +2714,29 @@ void HumanBossActionComponent::StopAttackHitBoxes(bool clearTrail_)
     BS_PROFILE_SCOPE("HumanBossActionComponent::StopAttackHitBoxes");
     // Idleへの遷移が成立しない場合も、旧攻撃の未発生予兆を残さない。
     if (const auto animation_ = AnimationGraphBridgeComponent::Acquire(GetGameObject()))
+    {
         animation_->RequestCancelAttackTelegraphs();
+    }
     ragnarokParticleSweeps.clear();
     if (const auto actor_ = GetGameObject())
-        if (const auto warp_ = actor_->GetComponent<MotionWarpComponent>()) warp_->Stop();
+    {
+        if (const auto warp_ = actor_->GetComponent<MotionWarpComponent>())
+        {
+            warp_->Stop();
+        }
+    }
     const auto owner_ = GetGameObject();
     SetWeaponTrails(false, clearTrail_);
-    if (!owner_ || !owner_->manager) return;
+    if (!owner_ || !owner_->manager)
+    {
+        return;
+    }
     const auto health_ = owner_->GetComponent<HealthComponent>();
     bool locked_ = false;
     if (const auto mode_ = owner_->GetManager().GetGameModeManager())
+    {
         mode_->GetGlobalBlackboard().GetBool(GameModeBlackboardKeys::CATEGORY_GAME, GameModeBlackboardKeys::ENEMY_AI_LOCKED, locked_);
+    }
     // 通常の行動変更だけを保証し、死亡や戦闘演出への移行では従来どおり弾も閉じる。
     const bool preserveOrbs_ = !locked_ && !owner_->IsPendingDestroy() && owner_->IsCombatReady() && (!health_ || !health_->IsDead());
     const auto preservedEffects_ = preserveOrbs_ ? shadowOrbs : std::vector<std::weak_ptr<GameObject>>{};
@@ -1850,7 +2744,10 @@ void HumanBossActionComponent::StopAttackHitBoxes(bool clearTrail_)
     // 子の武器と独立Runtime HitBoxも、攻撃Ownerの参照で対象を選ぶ。
     for (const auto& object_ : owner_->GetManager().GetObjects())
     {
-        if (!object_) continue;
+        if (!object_)
+        {
+            continue;
+        }
         // 弾本体を残す場合は、その子HitBoxも停止せず、見た目だけ飛び続ける状態を防ぐ。
         bool preserved_ = false;
         auto transform_ = object_->transform;
@@ -1864,9 +2761,17 @@ void HumanBossActionComponent::StopAttackHitBoxes(bool clearTrail_)
                 });
             transform_ = transform_->parent.lock();
         }
-        if (preserved_) continue;
+        if (preserved_)
+        {
+            continue;
+        }
         for (const auto& hitBox_ : object_->GetComponents<HitBox>())
-            if (hitBox_->GetAttackOwner() == owner_) hitBox_->Deactivate();
+        {
+            if (hitBox_->GetAttackOwner() == owner_)
+            {
+                hitBox_->Deactivate();
+            }
+        }
     }
 }
 
@@ -1877,16 +2782,36 @@ void HumanBossActionComponent::SetWeaponTrails(bool emitting_, bool clearExistin
     const std::function<void(const std::shared_ptr<GameObject>&)> apply_ =
         [&](const std::shared_ptr<GameObject>& object_)
     {
-        if (!object_) return;
+        if (!object_)
+        {
+            return;
+        }
         for (const auto& trail_ : object_->GetComponents<WeaponTrailComponent>())
         {
-            if (!trail_) continue;
-            if (emitting_) trail_->BeginTrail(clearExisting_);
-            else trail_->EndTrail(clearExisting_);
+            if (!trail_)
+            {
+                continue;
+            }
+            if (emitting_)
+            {
+                trail_->BeginTrail(clearExisting_);
+            }
+            else
+            {
+                trail_->EndTrail(clearExisting_);
+            }
         }
-        if (!object_->transform) return;
+        if (!object_->transform)
+        {
+            return;
+        }
         for (const auto& child_ : object_->transform->children)
-            if (child_) apply_(child_->gameObject.lock());
+        {
+            if (child_)
+            {
+                apply_(child_->gameObject.lock());
+            }
+        }
     };
     apply_(GetGameObject());
 }
@@ -1911,17 +2836,28 @@ void HumanBossActionComponent::FaceTarget(const DirectX::XMFLOAT3& direction_, b
         const auto preset_ = warp_ ? warp_->GetPreset(windupWarpPresetName) : nullptr;
         if (!attackAssistEnabled || !phase_ || phase_->animationState != "HumanBossAttackTell" ||
             !owner_ || !owner_->transform || !target_ || !target_->transform || !preset_ || !preset_->warpRotation ||
-            preset_->rotationMode != MOTION_WARP_ROTATION_MODE::FACE_TARGET || windupWarpPresetName.empty()) return;
+            preset_->rotationMode != MOTION_WARP_ROTATION_MODE::FACE_TARGET || windupWarpPresetName.empty())
+        {
+            return;
+        }
         const auto animation_ = AnimationGraphBridgeComponent::Acquire(owner_);
         const float duration_ = animation_ ? animation_->GetPlaybackDuration() : 0.0f;
         const float normalized_ = duration_ > 0.0001f ? animation_->GetPlaybackTime() / duration_ : 0.0f;
-        if (normalized_ < preset_->rotationStartNormalizedTime || normalized_ > preset_->rotationEndNormalizedTime) return;
+        if (normalized_ < preset_->rotationStartNormalizedTime || normalized_ > preset_->rotationEndNormalizedTime)
+        {
+            return;
+        }
         float weight_ = 1.0f;
         if (normalized_ > preset_->rotationFullStrengthEndNormalizedTime)
+        {
             weight_ = std::clamp((preset_->rotationEndNormalizedTime - normalized_) /
                 (std::max)(preset_->rotationEndNormalizedTime - preset_->rotationFullStrengthEndNormalizedTime, 0.0001f), 0.0f, 1.0f);
+        }
         windupFacingTracked = true;
-        if (preset_->lockTargetOnStart || normalized_ >= preset_->lockTargetNormalizedTime) windupTargetLocked = true;
+        if (preset_->lockTargetOnStart || normalized_ >= preset_->lockTargetNormalizedTime)
+        {
+            windupTargetLocked = true;
+        }
         const auto candidate_ = target_->transform->GetWorldPosition();
         const float travelX_ = candidate_.x - attackInitialTargetPosition.x;
         const float travelZ_ = candidate_.z - attackInitialTargetPosition.z;
@@ -1929,8 +2865,14 @@ void HumanBossActionComponent::FaceTarget(const DirectX::XMFLOAT3& direction_, b
         const float candidateYaw_ = std::atan2(candidate_.x - attackStartPosition.x, candidate_.z - attackStartPosition.z);
         const float travelAngle_ = DirectX::XMConvertToDegrees(std::atan2(std::sin(candidateYaw_ - initialYaw_), std::cos(candidateYaw_ - initialYaw_)));
         if (std::sqrt(travelX_ * travelX_ + travelZ_ * travelZ_) > preset_->maximumTargetTravelDistance ||
-            std::abs(travelAngle_) > preset_->maximumTargetTravelAngleDegrees) windupTargetLocked = true;
-        if (!windupTargetLocked) attackTargetPosition = candidate_;
+            std::abs(travelAngle_) > preset_->maximumTargetTravelAngleDegrees)
+        {
+            windupTargetLocked = true;
+        }
+        if (!windupTargetLocked)
+        {
+            attackTargetPosition = candidate_;
+        }
         const auto position_ = owner_->transform->GetWorldPosition();
         const auto forward_ = owner_->transform->GetFront();
         const float yaw_ = std::atan2(forward_.x, forward_.z);
@@ -1949,15 +2891,22 @@ void HumanBossActionComponent::FaceTarget(const DirectX::XMFLOAT3& direction_, b
         return;
     }
     if (const auto owner_ = GetGameObject())
+    {
         if (const auto movement_ = owner_->GetComponent<CharacterMovementComponent>())
+        {
             movement_->SetFacingDirection(direction_, immediate_);
+        }
+    }
 }
 
 void HumanBossActionComponent::SetLocomotion(const std::string& state_,
     const DirectX::XMFLOAT3& velocity_, const DirectX::XMFLOAT3& facing_, const DirectX::XMFLOAT2& blendInput_)
 {
     const auto owner_ = GetGameObject();
-    if (!owner_ || IsActive()) return;
+    if (!owner_ || IsActive())
+    {
+        return;
+    }
     if (const auto movement_ = owner_->GetComponent<CharacterMovementComponent>())
     {
         movement_->SetHorizontalVelocity(velocity_);
@@ -1970,10 +2919,15 @@ void HumanBossActionComponent::SetLocomotion(const std::string& state_,
     }
     if (const auto animation_ = AnimationGraphBridgeComponent::Acquire(owner_))
     {
-        if (animation_->IsSkillOwned()) return;
+        if (animation_->IsSkillOwned())
+        {
+            return;
+        }
         const auto current_ = animation_->GetActiveState();
         if ((!current_ || current_->name != state_) && animation_->GetStateCatalog().count(state_))
+        {
             animation_->RequestStateTransition(state_, 0.15f);
+        }
     }
 }
 
@@ -1991,29 +2945,51 @@ void HumanBossActionComponent::DrawShadowTrajectoryPreview()
         std::vector<DirectX::XMFLOAT3> waypoints_;
         if (!BuildShadowPath(static_cast<HumanBossShadowShift>(shadowPreviewMode), target_, 1.0f, waypoints_) ||
             !PlanShadowTrajectory(static_cast<HumanBossShadowShift>(shadowPreviewMode), waypoints_))
-        { shadowPathValidated = false; status = "Trajectory preview unavailable: target or safe path missing."; }
+        {
+            shadowPathValidated = false;
+            status = "Trajectory preview unavailable: target or safe path missing.";
+        }
     }
     ImGui::EndDisabled();
-    if (shadowTrajectory.empty()) return;
+    if (shadowTrajectory.empty())
+    {
+        return;
+    }
     const auto owner_ = GetGameObject();
     const auto current_ = owner_ && owner_->transform ? owner_->transform->GetWorldPosition() : shadowTrajectory.front();
     float minX_ = current_.x, maxX_ = current_.x, minZ_ = current_.z, maxZ_ = current_.z;
     for (const auto& point_ : shadowTrajectory)
-    { minX_ = (std::min)(minX_, point_.x); maxX_ = (std::max)(maxX_, point_.x); minZ_ = (std::min)(minZ_, point_.z); maxZ_ = (std::max)(maxZ_, point_.z); }
+    {
+        minX_ = (std::min)(minX_, point_.x);
+        maxX_ = (std::max)(maxX_, point_.x);
+        minZ_ = (std::min)(minZ_, point_.z);
+        maxZ_ = (std::max)(maxZ_, point_.z);
+    }
     for (const auto& point_ : shadowBaseWaypoints)
-    { minX_ = (std::min)(minX_, point_.x); maxX_ = (std::max)(maxX_, point_.x); minZ_ = (std::min)(minZ_, point_.z); maxZ_ = (std::max)(maxZ_, point_.z); }
+    {
+        minX_ = (std::min)(minX_, point_.x);
+        maxX_ = (std::max)(maxX_, point_.x);
+        minZ_ = (std::min)(minZ_, point_.z);
+        maxZ_ = (std::max)(maxZ_, point_.z);
+    }
     const ImVec2 origin_ = ImGui::GetCursorScreenPos();
     const ImVec2 size_{ (std::max)(180.0f, ImGui::GetContentRegionAvail().x), 190.0f };
     const float scale_ = (std::min)((size_.x - 24.0f) / (std::max)(1.0f, maxX_ - minX_), (size_.y - 24.0f) / (std::max)(1.0f, maxZ_ - minZ_));
     const auto project_ = [&](const DirectX::XMFLOAT3& point_)
-    { return ImVec2{ origin_.x + 12.0f + (point_.x - minX_) * scale_, origin_.y + size_.y - 12.0f - (point_.z - minZ_) * scale_ }; };
+    {
+        return ImVec2{ origin_.x + 12.0f + (point_.x - minX_) * scale_, origin_.y + size_.y - 12.0f - (point_.z - minZ_) * scale_ };
+    };
     auto draw_ = ImGui::GetWindowDrawList();
     draw_->AddRectFilled(origin_, { origin_.x + size_.x, origin_.y + size_.y }, IM_COL32(22, 24, 29, 255));
     for (std::size_t index_ = 1; index_ < shadowBaseWaypoints.size(); ++index_)
+    {
         draw_->AddLine(project_(shadowBaseWaypoints[index_ - 1]), project_(shadowBaseWaypoints[index_]), IM_COL32(135, 135, 135, 255));
+    }
     const auto color_ = shadowPathValidated && !shadowPathBlocked ? IM_COL32(120, 220, 165, 255) : IM_COL32(240, 100, 100, 255);
     for (std::size_t index_ = 1; index_ < shadowTrajectory.size(); ++index_)
+    {
         draw_->AddLine(project_(shadowTrajectory[index_ - 1]), project_(shadowTrajectory[index_]), color_, 2.0f);
+    }
     draw_->AddCircleFilled(project_(shadowTrajectory.front()), 4.0f, IM_COL32(100, 170, 255, 255));
     draw_->AddCircleFilled(project_(shadowTrajectory.back()), 4.0f, IM_COL32(210, 130, 255, 255));
     draw_->AddCircleFilled(project_(current_), 3.0f, IM_COL32(255, 225, 90, 255));
@@ -2039,7 +3015,10 @@ void HumanBossActionComponent::Gui()
         ImGui::Checkbox("Enable Sway", &shadowSwayEnabled);
         ImGui::DragFloat("Maximum Sway Width", &shadowSwayWidth, 0.01f, 0.0f, 2.0f);
         const char* MODE_NAMES[] = { "BACK Strength", "SIDE Strength", "BEHIND Strength", "APPROACH Strength" };
-        for (int index_ = 0; index_ < 4; ++index_) ImGui::DragFloat(MODE_NAMES[index_], &shadowSwayStrength[index_], 0.01f, 0.0f, 1.0f);
+        for (int index_ = 0; index_ < 4; ++index_)
+        {
+            ImGui::DragFloat(MODE_NAMES[index_], &shadowSwayStrength[index_], 0.01f, 0.0f, 1.0f);
+        }
         ImGui::DragFloat("Sway Cycles", &shadowSwayCycles, 0.01f, 0.5f, 2.5f);
         ImGui::DragFloat("Sway Randomness", &shadowSwayRandomness, 0.01f, 0.0f, 0.5f);
         ImGui::DragFloat("Sway Side Bias", &shadowSwayBias, 0.01f, -1.0f, 1.0f);
@@ -2087,7 +3066,9 @@ void HumanBossActionComponent::Gui()
         ImGui::Text("Elapsed: %.2f / Duration: %.2f / Timeout: %.2f", execution.GetPhaseTime(), phase_->duration, phase_->maximumDuration);
         const auto owner_ = GetGameObject();
         if (const auto animation_ = owner_ ? AnimationGraphBridgeComponent::Acquire(owner_) : nullptr)
+        {
             ImGui::Text("Animation: %.2f / %.2f", animation_->GetPlaybackTime(), animation_->GetPlaybackDuration());
+        }
     }
     ImGui::Text("Result: %d", static_cast<int>(execution.GetResult()));
     ImGui::Text("Windup tracking: %s", windupTracking ? "ON" : "OFF");
@@ -2102,7 +3083,10 @@ void HumanBossActionComponent::UpdateHitProtection(float deltaTime_)
 {
     BS_PROFILE_SCOPE("HumanBossActionComponent::UpdateHitProtection");
     recoveryProtectionTimer = (std::max)(0.0f, recoveryProtectionTimer - (std::max)(0.0f, deltaTime_));
-    if (recoveryProtectionTimer <= 0.0f) recoveryArmor = 0.0f;
+    if (recoveryProtectionTimer <= 0.0f)
+    {
+        recoveryArmor = 0.0f;
+    }
     const auto owner_ = GetGameObject();
     const auto animation_ = owner_ ? AnimationGraphBridgeComponent::Acquire(owner_) : nullptr;
     const auto phase_ = execution.GetCurrentPhase();
@@ -2123,18 +3107,23 @@ void HumanBossActionComponent::UpdateHitProtection(float deltaTime_)
         float lastHitEnd_ = 0.0f;
         float firstHitStart_ = (std::numeric_limits<float>::max)();
         for (const auto& event_ : state_->events)
+        {
             if (event_.eventTemplateType == ANIMATION_EVENT_TEMPLATE_TYPE::ATTACK_TEMPLATE)
             {
                 firstHitStart_ = (std::min)(firstHitStart_, event_.startTime);
                 lastHitEnd_ = (std::max)(lastHitEnd_, event_.endTime);
             }
+        }
         windingUp_ = windingUp_ || (lastHitEnd_ > 0.0f && animation_->GetPlaybackTime() < firstHitStart_);
         striking_ = phase_->preventFlinch && lastHitEnd_ > 0.0f && animation_->GetPlaybackTime() < lastHitEnd_;
     }
     if (windingUp_ || striking_ || recoveryProtectionTimer > 0.0f || ragnarokActive_ || executionCounterActive_ || berserkProtection)
     {
         const auto reaction_ = owner_ ? owner_->GetComponent<HitReactionComponent>() : nullptr;
-        if (!reaction_) return;
+        if (!reaction_)
+        {
+            return;
+        }
         if (!armorApplied)
         {
             previousReactionArmor = reaction_->GetArmor();
@@ -2148,7 +3137,10 @@ void HumanBossActionComponent::UpdateHitProtection(float deltaTime_)
     }
     else if (armorApplied)
     {
-        if (const auto reaction_ = protectedReaction.lock()) reaction_->SetArmor(previousReactionArmor);
+        if (const auto reaction_ = protectedReaction.lock())
+        {
+            reaction_->SetArmor(previousReactionArmor);
+        }
         protectedReaction.reset();
         armorApplied = false;
     }
@@ -2207,7 +3199,9 @@ void HumanBossActionComponent::Deserialize(const nlohmann::json& json_)
     Stop();
     // 設定の再読み込みでは旧実行中の弾を残さず、追跡参照を消す前に判定を閉じる。
     if (const auto owner_ = GetGameObject(); owner_ && owner_->manager)
+    {
         owner_->GetManager().GetEffectManager().StopAttackEffects(owner_);
+    }
     orbSpawnCommitted = false;
     ragnarokUsed = false;
     executionHoldTime = std::clamp(json_.value("ExecutionHoldTime", 1.92f), 0.1f, 10.0f);
@@ -2232,7 +3226,10 @@ void HumanBossActionComponent::Deserialize(const nlohmann::json& json_)
     shadowSwayEnabled = json_.value("ShadowSwayEnabled", shadowSwayEnabled);
     shadowSwayWidth = std::clamp(json_.value("ShadowSwayWidth", shadowSwayWidth), 0.0f, 2.0f);
     shadowSwayStrength = json_.value("ShadowSwayStrength", shadowSwayStrength);
-    for (auto& strength_ : shadowSwayStrength) strength_ = std::clamp(strength_, 0.0f, 1.0f);
+    for (auto& strength_ : shadowSwayStrength)
+    {
+        strength_ = std::clamp(strength_, 0.0f, 1.0f);
+    }
     shadowSwayCycles = std::clamp(json_.value("ShadowSwayCycles", shadowSwayCycles), 0.5f, 2.5f);
     shadowSwayRandomness = std::clamp(json_.value("ShadowSwayRandomness", shadowSwayRandomness), 0.0f, 0.5f);
     shadowSwayBias = std::clamp(json_.value("ShadowSwayBias", shadowSwayBias), -1.0f, 1.0f);
@@ -2263,6 +3260,9 @@ bool HumanBossActionComponent::ConsumeGuardSuccess()
 bool HumanBossActionComponent::ExtendComboDelay(float extension_, float maximum_)
 {
     const auto phase_ = execution.GetCurrentPhase();
-    if (!phase_ || execution.GetPhaseIndex() <= 0 || phase_->animationState != "SS_Guard") return false;
+    if (!phase_ || execution.GetPhaseIndex() <= 0 || phase_->animationState != "SS_Guard")
+    {
+        return false;
+    }
     return execution.ExtendCurrentDuration(extension_, maximum_);
 }

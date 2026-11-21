@@ -21,9 +21,13 @@ DirectX::XMFLOAT3 QuaternionToEuler(const DirectX::XMFLOAT4& q_in)
     // Pitch (x-axis rotation)
     float sinp = 2.0f * (w * x - y * z);
     if (std::abs(sinp) >= 1.0f)
+    {
         euler.x = std::copysign(DirectX::XM_PIDIV2, sinp); // 90度でロック（ジンバルロック対策）
+    }
     else
+    {
         euler.x = std::asin(sinp);
+    }
 
     // Yaw (y-axis rotation)
     float siny_cosp = 2.0f * (w * y + z * x);
@@ -55,13 +59,20 @@ void ModelAttachmentComponent::SetTargetNode(std::shared_ptr<GltfModelCommponenn
         }
     }
 }
+
 std::shared_ptr<GltfModelCommponennt> ModelAttachmentComponent::ResolveTargetModel()
 {
     auto model = targetModel.lock();
-    if (model) return model;
+    if (model)
+    {
+        return model;
+    }
 
     auto ownerGO = GetGameObject();
-    if (!ownerGO) return nullptr;
+    if (!ownerGO)
+    {
+        return nullptr;
+    }
 
     if (!targetGameObjectName.empty() && ownerGO->manager) {
         auto targetObject = ownerGO->GetManager().Find(targetGameObjectName);
@@ -133,7 +144,10 @@ bool ModelAttachmentComponent::ResolveTargetNodeIndex(const std::shared_ptr<Gltf
 bool ModelAttachmentComponent::IsLoadReady() const
 {
     auto model_ = const_cast<ModelAttachmentComponent*>(this)->ResolveTargetModel();
-    if (!model_) return true;
+    if (!model_)
+    {
+        return true;
+    }
 
     model_->UpdateLoadState();
     return !model_->IsModelLoading();
@@ -154,10 +168,16 @@ void ModelAttachmentComponent::LateUpdate(float deltaTime_)
 void ModelAttachmentComponent::SyncAttachment()
 {
     auto myGo_ = GetGameObject();
-    if (!myGo_) return;
+    if (!myGo_)
+    {
+        return;
+    }
 
     auto myTransform_ = myGo_->transform;
-    if (!myTransform_) return;
+    if (!myTransform_)
+    {
+        return;
+    }
 
     auto model_ = ResolveTargetModel();
     if (!model_)
@@ -207,13 +227,22 @@ void ModelAttachmentComponent::SyncAttachment()
 void ShowNodeTree(const GltfModelCommponennt::Node* node,
     const std::vector<GltfModelCommponennt::Node>& allNodes,
     int& tempSelectedIdx) {
-    if (!node) return;
+    if (!node)
+    {
+        return;
+    }
 
     int nodeIdx = static_cast<int>(node - allNodes.data());
 
     ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen;
-    if (tempSelectedIdx == nodeIdx) flags |= ImGuiTreeNodeFlags_Selected;
-    if (node->children.empty()) flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+    if (tempSelectedIdx == nodeIdx)
+    {
+        flags |= ImGuiTreeNodeFlags_Selected;
+    }
+    if (node->children.empty())
+    {
+        flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+    }
 
     std::string label = (node->name.empty() ? "Node_" + std::to_string(nodeIdx) : node->name);
 
@@ -238,13 +267,22 @@ void ShowNodeTree(const GltfModelCommponennt::Node* node,
     const std::shared_ptr<GltfModelCommponennt>& currentProcessingModel)
 {
     // 1. ポインタの妥当性確認
-    if (!node) return;
+    if (!node)
+    {
+        return;
+    }
 
     // 2. インデックスを安全に特定 (allNodes の範囲内にあるか確認)
     auto it = std::find_if(allNodes.begin(), allNodes.end(),
-        [node](const GltfModelCommponennt::Node& n) { return &n == node; });
+        [node](const GltfModelCommponennt::Node& n)
+    {
+        return &n == node;
+    });
 
-    if (it == allNodes.end()) return; // 範囲外なら何もしない
+    if (it == allNodes.end())
+    {
+        return; // 範囲外なら何もしない
+    }
     int nodeIdx = static_cast<int>(std::distance(allNodes.begin(), it));
 
     //// node からインデックスを逆算する際、ポインタの計算が正しいか確認
@@ -256,7 +294,10 @@ void ShowNodeTree(const GltfModelCommponennt::Node* node,
     }
 
     // 子がいなければ Leaf
-    if (node->children.empty()) flags |= ImGuiTreeNodeFlags_Leaf;
+    if (node->children.empty())
+    {
+        flags |= ImGuiTreeNodeFlags_Leaf;
+    }
 
     std::string label = (node->name.empty() ? "Node_" + std::to_string(nodeIdx) : node->name);
 
@@ -284,7 +325,10 @@ void ModelAttachmentComponent::Gui()
 {
     // --- 現在の状態表示 ---
     auto currentModel = targetModel.lock();
-    if (currentModel) currentModel->UpdateLoadState();
+    if (currentModel)
+    {
+        currentModel->UpdateLoadState();
+    }
     const auto* currentNodes =
         currentModel && currentModel->IsModelReady() ? &currentModel->GetNodes() : nullptr;
     bool hasCurrentNode = currentNodes && targetNodeIndex >= 0 && targetNodeIndex < static_cast<int>(currentNodes->size());

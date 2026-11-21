@@ -153,7 +153,10 @@ void PlayerStateEditorWindow::Draw()
 PlayerControllerComponent* PlayerStateEditorWindow::ResolveTarget()
 {
     // 選択中オブジェクトを優先し、無ければ前回対象、さらに無ければシーン内のPlayerControllerを探す。
-    if (!gameObjectManager) return nullptr;
+    if (!gameObjectManager)
+    {
+        return nullptr;
+    }
 
     const std::shared_ptr<GameObject> selectedObject_ = gameObjectManager->GetSelectedObject();
     if (selectedObject_)
@@ -172,15 +175,24 @@ PlayerControllerComponent* PlayerStateEditorWindow::ResolveTarget()
     {
         const std::shared_ptr<PlayerControllerComponent> player_ =
             currentTarget_->GetComponent<PlayerControllerComponent>();
-        if (player_) return player_.get();
+        if (player_)
+        {
+            return player_.get();
+        }
     }
 
     for (const std::shared_ptr<GameObject>& object_ : gameObjectManager->GetObjects())
     {
-        if (!object_) continue;
+        if (!object_)
+        {
+            continue;
+        }
         const std::shared_ptr<PlayerControllerComponent> player_ =
             object_->GetComponent<PlayerControllerComponent>();
-        if (!player_) continue;
+        if (!player_)
+        {
+            continue;
+        }
         targetObject = object_;
         return player_.get();
     }
@@ -201,14 +213,20 @@ void PlayerStateEditorWindow::DrawToolbar(PlayerControllerComponent* player_)
     {
         for (const std::shared_ptr<GameObject>& object_ : gameObjectManager->GetObjects())
         {
-            if (!object_ || !object_->GetComponent<PlayerControllerComponent>()) continue;
+            if (!object_ || !object_->GetComponent<PlayerControllerComponent>())
+            {
+                continue;
+            }
             const bool selected_ = object_ == target_;
             if (ImGui::Selectable(object_->GetName().c_str(), selected_))
             {
                 targetObject = object_;
                 gameObjectManager->SetSelectedObject(object_);
             }
-            if (selected_) ImGui::SetItemDefaultFocus();
+            if (selected_)
+            {
+                ImGui::SetItemDefaultFocus();
+            }
         }
         ImGui::EndCombo();
     }
@@ -372,7 +390,10 @@ void PlayerStateEditorWindow::DrawCancelGraph(PlayerControllerComponent* player_
     for (const PlayerCancelTransition& transition_ : activeTransitions_)
     {
         // 現在編集中Actionから出ている遷移だけをリンクとして描く。
-        if (transition_.from != editingAction || transition_.to == editingAction) continue;
+        if (transition_.from != editingAction || transition_.to == editingAction)
+        {
+            continue;
+        }
         ed::Link(
             GetLinkId(transition_.from, transition_.to),
             GetOutputPinId(transition_.from),
@@ -488,7 +509,10 @@ void PlayerStateEditorWindow::DrawInspector(PlayerControllerComponent* player_)
     ImGui::Text("Group: %s", GetActionGroupName(GetPlayerActionGroup(editingAction)));
     ImGui::Text("Timeline Driven: %s", IsPlayerActionTimelineDriven(editingAction) ? "Yes" : "No");
 
-    if (!player_) return;
+    if (!player_)
+    {
+        return;
+    }
 
     ImGui::Spacing();
     ImGui::SeparatorText(editDodgeCancelRoutes ? "Dodge Cancel Destinations" : "Action Branch Destinations");
@@ -508,7 +532,10 @@ void PlayerStateEditorWindow::DrawInspector(PlayerControllerComponent* player_)
     int routeCount_ = 0;
     for (const PlayerCancelTransition& transition_ : activeTransitions_)
     {
-        if (transition_.from != editingAction) continue;
+        if (transition_.from != editingAction)
+        {
+            continue;
+        }
         ++routeCount_;
         ImGui::PushID(static_cast<int>(transition_.to));
         ImGui::TextUnformatted(GetPlayerActionName(transition_.to));
@@ -547,7 +574,10 @@ void PlayerStateEditorWindow::ArrangeNodes()
     constexpr int TARGET_COUNT = static_cast<int>(PLAYER_ACTIONS.size()) - 1;
     for (const PLAYER_ACTION action_ : PLAYER_ACTIONS)
     {
-        if (action_ == editingAction) continue;
+        if (action_ == editingAction)
+        {
+            continue;
+        }
         const float angle_ = -PI * 0.5f + PI * 2.0f *
             static_cast<float>(targetIndex_) / static_cast<float>(TARGET_COUNT);
         const ImVec2 position_(
@@ -561,7 +591,10 @@ void PlayerStateEditorWindow::ArrangeNodes()
 void PlayerStateEditorWindow::SelectEditingAction(PLAYER_ACTION action_)
 {
     // 編集元Actionを切り替えたら、次回描画でノード配置も新しい中心Actionへ合わせ直す。
-    if (editingAction == action_) return;
+    if (editingAction == action_)
+    {
+        return;
+    }
     editingAction = action_;
     needsNodeLayout = true;
 }

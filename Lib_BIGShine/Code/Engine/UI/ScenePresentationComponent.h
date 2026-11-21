@@ -31,6 +31,7 @@ public:
     void Serialize(nlohmann::json& json_) const override;
     // Scene Objectの演出設定を復元する。
     void Deserialize(const nlohmann::json& json_) override;
+
 private:
     // 保存時は設定だけを出力し、時間や外部リソースの所有権は保存しない。
     nlohmann::json settings = {{"Presentation", nlohmann::json::object()}};

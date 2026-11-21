@@ -34,8 +34,14 @@ namespace
             ImGui::GetItemRectMin(),
             ImGui::GetItemRectMax(),
             ImGui::GetColorU32(hovered_ || active_ ? ImGuiCol_SeparatorHovered : ImGuiCol_Separator));
-        if (hovered_ || active_) ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
-        if (active_) width_ += ImGui::GetIO().MouseDelta.x * direction_;
+        if (hovered_ || active_)
+        {
+            ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+        }
+        if (active_)
+        {
+            width_ += ImGui::GetIO().MouseDelta.x * direction_;
+        }
     }
 
     void DrawHorizontalSplitter(const char* id_, float width_, float& height_, float direction_)
@@ -47,15 +53,24 @@ namespace
             ImGui::GetItemRectMin(),
             ImGui::GetItemRectMax(),
             ImGui::GetColorU32(hovered_ || active_ ? ImGuiCol_SeparatorHovered : ImGuiCol_Separator));
-        if (hovered_ || active_) ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);
-        if (active_) height_ += ImGui::GetIO().MouseDelta.y * direction_;
+        if (hovered_ || active_)
+        {
+            ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);
+        }
+        if (active_)
+        {
+            height_ += ImGui::GetIO().MouseDelta.y * direction_;
+        }
     }
 
     int CalculateTransformDepth(const std::shared_ptr<GameObject>& object_)
     {
         // Transform階層の深さを求め、Hierarchy表示のIndentに使う。
         int depth_ = 0;
-        if (!object_ || !object_->transform) return depth_;
+        if (!object_ || !object_->transform)
+        {
+            return depth_;
+        }
 
         auto parentTransform_ = object_->transform->parent.lock();
         while (parentTransform_)
@@ -82,7 +97,10 @@ void UIWidgetEditorWindow::Draw()
     BS_PROFILE_SCOPE("UIWidgetEditorWindow::Draw");
 
     // Scene上のUI構成が変わってもPreview/Hierarchyへ追従できるよう、自動更新する。
-    if (autoRefresh) RefreshCache();
+    if (autoRefresh)
+    {
+        RefreshCache();
+    }
 
     if (!BeginWorkspaceWindow(ImGuiWindowFlags_MenuBar))
     {
@@ -144,18 +162,30 @@ void UIWidgetEditorWindow::RefreshCache()
 
     widgets.clear();
     boardObjects.clear();
-    if (!gameObjectManager) return;
+    if (!gameObjectManager)
+    {
+        return;
+    }
 
     // Scene内Objectを走査し、BoardとWidgetの両方をEditor用Cacheへ集める。
     for (const std::shared_ptr<GameObject>& object_ : gameObjectManager->GetObjects())
     {
-        if (!object_) continue;
+        if (!object_)
+        {
+            continue;
+        }
 
         std::shared_ptr<WidgetBoardComponent> board_ = object_->GetComponent<WidgetBoardComponent>();
-        if (board_) boardObjects.push_back(object_);
+        if (board_)
+        {
+            boardObjects.push_back(object_);
+        }
 
         std::shared_ptr<UIWidgetComponent> widget_ = object_->GetComponent<UIWidgetComponent>();
-        if (!widget_) continue;
+        if (!widget_)
+        {
+            continue;
+        }
 
         WidgetEntry entry_;
         entry_.object = object_;
@@ -217,7 +247,10 @@ void UIWidgetEditorWindow::DrawHierarchyPanel()
     // BoardはCanvas単位なので、Widget一覧とは別に先頭へ表示する。
     for (const std::shared_ptr<GameObject>& boardObject_ : boardObjects)
     {
-        if (!boardObject_) continue;
+        if (!boardObject_)
+        {
+            continue;
+        }
         const bool selected_ = selectedObject.lock() == boardObject_;
         if (ImGui::Selectable(boardObject_->GetName().c_str(), selected_))
         {
@@ -229,7 +262,10 @@ void UIWidgetEditorWindow::DrawHierarchyPanel()
     ImGui::Text("Widgets");
     for (WidgetEntry& entry_ : widgets)
     {
-        if (!entry_.object || !entry_.widget) continue;
+        if (!entry_.object || !entry_.widget)
+        {
+            continue;
+        }
 
         const int depth_ = CalculateTransformDepth(entry_.object);
         // Transform階層の深さでIndentし、親子関係を視覚的に分かりやすくする。
@@ -271,7 +307,10 @@ void UIWidgetEditorWindow::DrawPreviewPanel(const ImVec2& previewSize_)
 
     ImGui::Text("Canvas %.0fx%.0f", designSize_.x, designSize_.y);
     ImGui::SameLine();
-    if (ImGui::SmallButton("Fit")) previewAutoFit = true;
+    if (ImGui::SmallButton("Fit"))
+    {
+        previewAutoFit = true;
+    }
     ImGui::SameLine();
     if (ImGui::SmallButton("100%"))
     {
@@ -353,7 +392,10 @@ void UIWidgetEditorWindow::DrawPreviewPanel(const ImVec2& previewSize_)
 
     for (WidgetEntry& entry_ : widgets)
     {
-        if (!entry_.widget || !entry_.object) continue;
+        if (!entry_.widget || !entry_.object)
+        {
+            continue;
+        }
 
         // Preview上でも実際のLayout計算と同じ経路を使い、表示差を減らす。
         UIWidgetComponent* parentWidget_ = ResolveParentWidget(entry_.widget.get());
@@ -520,7 +562,10 @@ void UIWidgetEditorWindow::DrawAnimationPanel()
 
 void UIWidgetEditorWindow::DrawSelectedObjectTools()
 {
-    if (!gameObjectManager) return;
+    if (!gameObjectManager)
+    {
+        return;
+    }
 
     std::shared_ptr<GameObject> sceneSelected_ = gameObjectManager->GetSelectedObject();
     if (!sceneSelected_)
@@ -554,9 +599,15 @@ void UIWidgetEditorWindow::SelectObject(const std::shared_ptr<GameObject>& objec
 
 void UIWidgetEditorWindow::EnsureWidgetObject()
 {
-    if (!gameObjectManager) return;
+    if (!gameObjectManager)
+    {
+        return;
+    }
     std::shared_ptr<GameObject> object_ = gameObjectManager->GetSelectedObject();
-    if (!object_) return;
+    if (!object_)
+    {
+        return;
+    }
 
     // UI WidgetとしてPreview/編集するために必要な基本Componentを追加する。
     object_->GetOrAddComponent<SpriteRenderer>();
@@ -568,10 +619,16 @@ void UIWidgetEditorWindow::EnsureWidgetObject()
 std::shared_ptr<WidgetBoardComponent> UIWidgetEditorWindow::ResolveBoard(
     const std::shared_ptr<GameObject>& object_) const
 {
-    if (!object_ || !object_->transform) return nullptr;
+    if (!object_ || !object_->transform)
+    {
+        return nullptr;
+    }
 
     std::shared_ptr<WidgetBoardComponent> board_ = object_->GetComponent<WidgetBoardComponent>();
-    if (board_) return board_;
+    if (board_)
+    {
+        return board_;
+    }
 
     // 自身にBoardが無い場合は親Transformをたどって所属Boardを探す。
     auto parentTransform_ = object_->transform->parent.lock();
@@ -581,7 +638,10 @@ std::shared_ptr<WidgetBoardComponent> UIWidgetEditorWindow::ResolveBoard(
         if (parentObject_)
         {
             board_ = parentObject_->GetComponent<WidgetBoardComponent>();
-            if (board_) return board_;
+            if (board_)
+            {
+                return board_;
+            }
         }
         parentTransform_ = parentTransform_->parent.lock();
     }
@@ -591,6 +651,9 @@ std::shared_ptr<WidgetBoardComponent> UIWidgetEditorWindow::ResolveBoard(
 
 UIWidgetComponent* UIWidgetEditorWindow::ResolveParentWidget(UIWidgetComponent* widget_) const
 {
-    if (!widget_) return nullptr;
+    if (!widget_)
+    {
+        return nullptr;
+    }
     return widget_->GetParentWidget();
 }

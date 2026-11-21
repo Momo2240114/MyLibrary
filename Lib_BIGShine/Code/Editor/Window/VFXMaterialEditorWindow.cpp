@@ -23,7 +23,11 @@ void VFXMaterialEditorWindow::Draw()
     BS_PROFILE_SCOPE("VFXMaterialEditorWindow::Draw");
 
     // 上部でマテリアルの読み書き、下部で選択中マテリアルの各パラメータを編集する。
-    if (!BeginEditorWindow()) { EndEditorWindow(); return; }
+    if (!BeginEditorWindow())
+    {
+        EndEditorWindow();
+        return;
+    }
     DrawMaterialToolbar();
     ImGui::Separator();
     DrawMaterialEditor();
@@ -118,7 +122,10 @@ void VFXMaterialEditorWindow::DrawMaterialToolbar()
                 L"Save VFX Material",
                 "Data/VFXMaterials/NewVFXMaterial.vfxmat",
                 GraphicsDeviceManager::Instance().GetWindowHandle());
-            if (!selectedPath_.empty()) SaveMaterial(selectedPath_);
+            if (!selectedPath_.empty())
+            {
+                SaveMaterial(selectedPath_);
+            }
         }
         else
         {
@@ -132,7 +139,10 @@ void VFXMaterialEditorWindow::DrawMaterialToolbar()
             L"Save VFX Material As",
             materialPath.empty() ? "Data/VFXMaterials/NewVFXMaterial.vfxmat" : materialPath,
             GraphicsDeviceManager::Instance().GetWindowHandle());
-        if (!selectedPath_.empty()) SaveMaterial(selectedPath_);
+        if (!selectedPath_.empty())
+        {
+            SaveMaterial(selectedPath_);
+        }
     }
 }
 
@@ -142,7 +152,10 @@ void VFXMaterialEditorWindow::DrawMaterialEditor()
 
     // 編集対象が無い場合でも操作できるよう、必要なら一時マテリアルを作ってから編集する。
     EnsureEditableMaterial();
-    if (!materialResource) return;
+    if (!materialResource)
+    {
+        return;
+    }
 
     ImGui::TextDisabled("This material is a shared Resource. Changes affect every VFX using the same material.");
     VFXMaterialData& materialData_ = materialResource->GetEditableMaterialData();
@@ -233,7 +246,10 @@ void VFXMaterialEditorWindow::DrawUvEditor(
     BS_PROFILE_SCOPE("VFXMaterialEditorWindow::DrawUvEditor");
 
     // UVはスケール、オフセット、スクロール、回転をまとめて持ち、テクスチャごとの流れを作る。
-    if (!ImGui::TreeNode(label_)) return;
+    if (!ImGui::TreeNode(label_))
+    {
+        return;
+    }
     ImGui::DragFloat2("Scale", &uv_.scale.x, 0.01f);
     ImGui::DragFloat2("Offset", &uv_.offset.x, 0.01f);
     ImGui::DragFloat2("Scroll Speed", &uv_.scrollSpeed.x, 0.01f);
@@ -373,7 +389,10 @@ void VFXMaterialEditorWindow::SaveMaterial(const std::string& path_)
 
     // 保存前に一時マテリアルを保証し、現在スロットのパスも保存先へ更新する。
     EnsureEditableMaterial();
-    if (!materialResource) return;
+    if (!materialResource)
+    {
+        return;
+    }
     VFXMaterialResourceManager::GetInstance().Save(path_, materialResource);
     materialPath = path_;
     StoreSelectedMaterialSlot();
@@ -384,7 +403,10 @@ void VFXMaterialEditorWindow::EnsureEditableMaterial()
     BS_PROFILE_SCOPE("VFXMaterialEditorWindow::EnsureEditableMaterial");
 
     // まだ読み込み先が無い場合は、編集操作の受け皿になる一時リソースを作る。
-    if (materialResource) return;
+    if (materialResource)
+    {
+        return;
+    }
     VFXMaterialData materialData_{};
     materialData_.materialName = "TemporaryVFXMaterial";
     materialResource = VFXMaterialResourceManager::GetInstance().CreateTemporary(materialData_);

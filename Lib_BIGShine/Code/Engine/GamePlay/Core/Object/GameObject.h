@@ -31,6 +31,7 @@ enum class LayerType : uint32_t
     MaxLayers = 1 << 8,
     Wall = 1 << 9,
     Item = 1 << 10,
+    EFFECT = 1 << 11,
 };
 
 // Scene上に配置されるObject本体。
@@ -55,28 +56,62 @@ public:
 
     // 自身が属するGameObjectManagerへのポインタ。
     GameObjectManager* manager = nullptr;
+
 private:
     bool pendingDestroy = false;
     bool combatReady = true;
     float runtimePlaybackRate = 1.0f; // 演出・暴走用の共通時計倍率。保存データには書き込まない。
     bool runtimeHierarchyVisible = false; // Scene保存対象とは独立した、実行時ObjectのHierarchy表示。
     std::vector<std::pair<std::string, std::string>> globalActions;
+
 public:
-    bool IsPendingDestroy() const { return pendingDestroy; }
-    bool IsCombatReady() const { return combatReady && !pendingDestroy; }
-    void SetCombatReady(bool ready_) { combatReady = ready_; }
-    void SetRuntimePlaybackRate(float rate_) { runtimePlaybackRate = (std::clamp)(rate_, 0.1f, 3.0f); }
-    float GetRuntimePlaybackRate() const { return runtimePlaybackRate; }
-    bool IsRuntimeHierarchyVisible() const { return runtimeHierarchyVisible; }
-    void SetRuntimeHierarchyVisible(bool visible_) { runtimeHierarchyVisible = visible_; }
+    bool IsPendingDestroy() const
+    {
+        return pendingDestroy;
+    }
+
+    bool IsCombatReady() const
+    {
+        return combatReady && !pendingDestroy;
+    }
+
+    void SetCombatReady(bool ready_)
+    {
+        combatReady = ready_;
+    }
+
+    void SetRuntimePlaybackRate(float rate_)
+    {
+        runtimePlaybackRate = (std::clamp)(rate_, 0.1f, 3.0f);
+    }
+
+    float GetRuntimePlaybackRate() const
+    {
+        return runtimePlaybackRate;
+    }
+
+    bool IsRuntimeHierarchyVisible() const
+    {
+        return runtimeHierarchyVisible;
+    }
+
+    void SetRuntimeHierarchyVisible(bool visible_)
+    {
+        runtimeHierarchyVisible = visible_;
+    }
+
     // 削除予約時点で更新・戦闘・物理・Actionを停止する。複数回の通知は無視する。
     void PrepareForDestroy();
     // 起動待ちのPrefab階層全体が、演出Actionを受け取れる状態か判定する。
     bool IsHierarchyReady();
     // Objectに所属する、接頭辞なしのGlobal Actionも寿命管理の対象にする。
     void RegisterNamedGlobalAction(const std::string& category_, const std::string& name_, const ActionRegistry::ActionFunc& function_);
+
     // このObjectを管理しているManagerへのアクセス。
-    GameObjectManager& GetManager() const { return *manager; }
+    GameObjectManager& GetManager() const
+    {
+        return *manager;
+    }
 
     // マネージャーを設定する（生成時に呼ばれる）
     void SetManager(GameObjectManager* manager_);
@@ -94,7 +129,10 @@ public:
 
 
     // ゲッター
-    ActionRegistry& GetLocalRegistry() { return localRegistry; };
+    ActionRegistry& GetLocalRegistry()
+    {
+        return localRegistry;
+    };
 
     GameObject(const std::string& name_ = "GameObject")
     {
@@ -114,14 +152,21 @@ public:
         auto comp = GetComponent<T>();
 
         // 2. 見つかったらそれを返し、二重生成を防ぐ。
-        if (comp) return comp;
+        if (comp)
+        {
+            return comp;
+        }
 
         // 3. なければ新しく作って追加する。
         return AddComponent<T>(collStartFlg);
     }
 
     // 名前へのアクセスを簡潔に
-    const std::string& GetName() const { return nameComponent->name; }
+    const std::string& GetName() const
+    {
+        return nameComponent->name;
+    }
+
     void SetName(const std::string& newName_);
 
 
@@ -131,7 +176,10 @@ public:
         static_assert(std::is_base_of<Component, T>::value, "T must inherit from Component");
 
         auto comp = std::make_shared<T>(std::forward<Args>(args_)...);
-        if (!comp) return nullptr; // 生成失敗
+        if (!comp)
+        {
+            return nullptr; // 生成失敗
+        }
 
         comp->SetGameObject(shared_from_this());
 
@@ -179,7 +227,9 @@ public:
         for (auto& collider_ : colliderComponents)
         {
             if (auto casted = std::dynamic_pointer_cast<T>(collider_))
+            {
                 return casted;
+            }
         }
         return nullptr;
     }
@@ -191,11 +241,17 @@ public:
         std::vector<std::shared_ptr<T>> results_;
         for (auto& comp_ : components)
         {
-            if (auto casted_ = std::dynamic_pointer_cast<T>(comp_)) results_.push_back(casted_);
+            if (auto casted_ = std::dynamic_pointer_cast<T>(comp_))
+            {
+                results_.push_back(casted_);
+            }
         }
         for (auto& collider_ : colliderComponents)
         {
-            if (auto casted_ = std::dynamic_pointer_cast<T>(collider_)) results_.push_back(casted_);
+            if (auto casted_ = std::dynamic_pointer_cast<T>(collider_))
+            {
+                results_.push_back(casted_);
+            }
         }
         return results_;
     }
@@ -207,7 +263,11 @@ public:
     bool IsRuntimeReady() const;
     bool HasRuntimeFailure() const;
     bool IsRequiredForSceneStart() const;
-    void SetRequiredForSceneStart(bool required_) { requiredForSceneStart = required_; }
+
+    void SetRequiredForSceneStart(bool required_)
+    {
+        requiredForSceneStart = required_;
+    }
     
     // ========================================
     // 名前でコンポーネントを取得
@@ -220,7 +280,10 @@ public:
     std::shared_ptr<T> GetComponentByNameAs(const std::string& compName) const
     {
         auto comp = GetComponentByName(compName);
-        if (!comp) return nullptr;
+        if (!comp)
+        {
+            return nullptr;
+        }
         return std::dynamic_pointer_cast<T>(comp);
     }
 
@@ -240,8 +303,12 @@ public:
     {
         // 描画Submitは通常Componentだけを対象にする。
         for (auto& comp : components)
+        {
             if (comp->IsEnabled() && comp->IsStarted())
+            {
                 comp->Submit(context_);
+            }
+        }
     }
 
     void TransformGui();
@@ -261,10 +328,29 @@ public:
     nlohmann::json Save() const;
     void Load(const nlohmann::json& j);
 
-    void SetNoSaveObject() { saveFlg = false; };
-    void SetLayer(LayerType type) { if (layer != type) { layer = type; NotifyComponentCompositionChanged(); } }
-    LayerType GetLayer() const { return layer; }
-    uint32_t GetLayerBit() const { return static_cast<uint32_t>(layer); }
+    void SetNoSaveObject()
+    {
+        saveFlg = false;
+    };
+
+    void SetLayer(LayerType type)
+    {
+        if (layer != type)
+        {
+            layer = type;
+            NotifyComponentCompositionChanged();
+        }
+    }
+
+    LayerType GetLayer() const
+    {
+        return layer;
+    }
+
+    uint32_t GetLayerBit() const
+    {
+        return static_cast<uint32_t>(layer);
+    }
 
 private:
     // 一個体の構成変更だけを通知し、監視対象の再発見を毎Frameに持ち込まない。

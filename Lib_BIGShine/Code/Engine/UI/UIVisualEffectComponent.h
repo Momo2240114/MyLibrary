@@ -6,6 +6,7 @@
 #include <DirectXMath.h>
 #include <d3d11.h>
 #include <wrl/client.h>
+
 // 画像とFontUIで共有する、任意に組み合わせ可能な見た目の設定。
 struct UIVisualEffectSettings
 {
@@ -22,6 +23,7 @@ struct UIVisualEffectSettings
     int trailCount = 0;
     float trailLifetime = 0.25f, trailInterval = 0.035f, trailScale = 1;
 };
+
 // Rendererの頂点型に依存せず、過去の字形・色・位置を保持する。
 struct UIEffectTrailSample
 {
@@ -31,6 +33,7 @@ struct UIEffectTrailSample
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture;
     float time = 0;
 };
+
 // SpriteRenderer経由で既存画像・UIText・ボタン装飾へ共通の効果を付加する。
 class UIVisualEffectComponent : public Component
 {
@@ -50,18 +53,52 @@ public:
     void SetProgress(float progress_);
     // 再生時間を維持したまま、選択状態に応じた効果量だけを調整する。
     void SetRuntimeStrength(float strength_);
+    void SetRuntimeDissolve(float dissolve_);
+
+    float GetRuntimeDissolve() const
+    {
+        return runtimeDissolve;
+    }
+
     bool LoadPreset(const std::string& name_);
-    const UIVisualEffectSettings& GetSettings() const { return parameters; }
-    ID3D11ShaderResourceView* GetMaskTexture() const { return maskTexture.Get(); }
+
+    const UIVisualEffectSettings& GetSettings() const
+    {
+        return parameters;
+    }
+
+    ID3D11ShaderResourceView* GetMaskTexture() const
+    {
+        return maskTexture.Get();
+    }
+
     // 解像度が変わった時点で、旧NDC座標の残像を破棄する。
     void PrepareTrailView(const DirectX::XMFLOAT2& screenSize_);
-    float GetTime() const { return playTime; }
-    float GetStrength() const { return (restored ? 0.0f : tweenStrength ? progress : 1.0f) * runtimeStrength; }
-    float GetTrailTime() const { return trailTime; }
-    const std::deque<UIEffectTrailSample>& GetTrails() const { return trails; }
+
+    float GetTime() const
+    {
+        return playTime;
+    }
+
+    float GetStrength() const
+    {
+        return (restored ? 0.0f : tweenStrength ? progress : 1.0f) * runtimeStrength;
+    }
+
+    float GetTrailTime() const
+    {
+        return trailTime;
+    }
+
+    const std::deque<UIEffectTrailSample>& GetTrails() const
+    {
+        return trails;
+    }
+
     // 複数Viewで描画されても、更新一回につき一つだけ履歴を記録する。
     void CaptureTrail(UIEffectTrailSample sample_,const DirectX::XMFLOAT2& screenSize_);
     void ClearTrails();
+
 private:
     // JSONを型付き設定へ正規化し、描画中の不正値と過剰な履歴枚数を防ぐ。
     void Normalize();
@@ -74,6 +111,7 @@ private:
     bool restored = false;
     bool playOnStart = true, playing = false, paused = false, preview = false, tweenStrength = false;
     float runtimeStrength = 1.0f;
+    float runtimeDissolve = 0.0f;
     float playTime = 0, trailTime = 0, progress = 0;
     std::uint64_t frameSerial = 0, capturedSerial = UINT64_MAX;
     DirectX::XMFLOAT2 trailScreenSize{0,0};

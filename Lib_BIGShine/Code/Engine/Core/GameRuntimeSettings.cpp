@@ -21,7 +21,10 @@ bool GameRuntimeSettings::Initialize(std::string& error_)
     {
         wchar_t executablePath_[32768]{};
         const DWORD length_ = GetModuleFileNameW(nullptr, executablePath_, 32768);
-        if (length_ == 0 || length_ >= 32768) throw std::runtime_error("Executable path could not be resolved.");
+        if (length_ == 0 || length_ >= 32768)
+        {
+            throw std::runtime_error("Executable path could not be resolved.");
+        }
         const auto directory_ = std::filesystem::path(executablePath_).parent_path();
         const auto settingsPath_ = directory_ / "GamePackage.json";
         const bool hasPackageSettings_ = std::filesystem::exists(settingsPath_);
@@ -34,11 +37,15 @@ bool GameRuntimeSettings::Initialize(std::string& error_)
             file_ >> settings_;
             if (settings_.at("FormatVersion").get<int>() != 1 ||
                 !settings_.at("GameOnly").get<bool>())
+            {
                 throw std::runtime_error("Unsupported game package settings.");
+            }
             startupScene = settings_.at("StartupScene").get<std::string>();
             if (startupScene.empty() || startupScene == "." || startupScene == ".." ||
                 startupScene.find_first_of("/\\:") != std::string::npos)
+            {
                 throw std::runtime_error("Invalid startup scene name.");
+            }
 #if defined(BS_BUILD_RELEASE) && !defined(BS_APP_GAME) && !defined(BS_APP_ENGINE)
             // 通常のReleaseだけは、書き出した配布版でもタイトルからF1でEditorへ入れるようにする。
             gameOnly = false;
@@ -77,7 +84,10 @@ bool GameRuntimeSettings::Initialize(std::string& error_)
                             break;
                         }
                         const auto parentDirectory_ = candidateDirectory_.parent_path();
-                        if (parentDirectory_ == candidateDirectory_) break;
+                        if (parentDirectory_ == candidateDirectory_)
+                        {
+                            break;
+                        }
                         candidateDirectory_ = parentDirectory_;
                     }
                 }
@@ -89,11 +99,15 @@ bool GameRuntimeSettings::Initialize(std::string& error_)
         const auto keyConfigPathUtf8_ = keyConfigPath_.u8string();
         const std::string keyConfigPathText_(keyConfigPathUtf8_.begin(), keyConfigPathUtf8_.end());
         if (!std::filesystem::is_regular_file(keyConfigPath_))
+        {
             throw std::runtime_error("Input configuration is missing. Check Data/Input/KeyConfig.json.\nPath: " + keyConfigPathText_);
+        }
         auto& keys_ = KeyConfig::Instance();
         keys_.SetConfigFile("Data/Input/KeyConfig.json");
         if (!keys_.Load())
+        {
             throw std::runtime_error("Input configuration could not be read. Check file access and JSON syntax.\nPath: " + keyConfigPathText_);
+        }
         error_.clear();
         return true;
     }

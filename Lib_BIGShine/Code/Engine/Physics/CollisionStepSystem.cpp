@@ -205,11 +205,17 @@ namespace
 
     bool IsAllowedCombatTriggerPair(ColliderComponent* colliderA_, ColliderComponent* colliderB_)
     {
-        if (!colliderA_ || !colliderB_) return false;
+        if (!colliderA_ || !colliderB_)
+        {
+            return false;
+        }
 
         const ColliderComponent::CollisionRole roleA_ = colliderA_->GetCollisionRole();
         const ColliderComponent::CollisionRole roleB_ = colliderB_->GetCollisionRole();
-        if (!IsCombatOnlyRole(roleA_) && !IsCombatOnlyRole(roleB_)) return true;
+        if (!IsCombatOnlyRole(roleA_) && !IsCombatOnlyRole(roleB_))
+        {
+            return true;
+        }
 
         const bool hitHurtPair_ =
             (roleA_ == ColliderComponent::CollisionRole::HIT_BOX &&
@@ -233,7 +239,10 @@ namespace
     bool ShouldSuppressTriggerPair(ColliderComponent* colliderA_, ColliderComponent* colliderB_)
     {
         // 同じ所有者内の判定や、Combat用途として不正な組み合わせは通知しない。
-        if (!colliderA_ || !colliderB_) return true;
+        if (!colliderA_ || !colliderB_)
+        {
+            return true;
+        }
         const uint32_t ownerIdA_ = colliderA_->GetCollisionOwnerId();
         const uint32_t ownerIdB_ = colliderB_->GetCollisionOwnerId();
         return (ownerIdA_ != 0u && ownerIdB_ != 0u && ownerIdA_ == ownerIdB_) ||
@@ -243,8 +252,14 @@ namespace
     bool CanStepCollider(const std::shared_ptr<ColliderComponent>& collider_)
     {
         // Load未完了や無効Colliderは、このFrameの判定対象から外す。
-        if (!collider_ || !collider_->IsEnabled()) return false;
-        if (!collider_->IsStarted()) return false;
+        if (!collider_ || !collider_->IsEnabled())
+        {
+            return false;
+        }
+        if (!collider_->IsStarted())
+        {
+            return false;
+        }
 
         collider_->UpdateLoadState();
         return collider_->IsLoadReady();
@@ -256,11 +271,17 @@ namespace
         {
             const std::shared_ptr<Transform> parentTransform_ =
                 object_->transform->parent.lock();
-            if (!parentTransform_) break;
+            if (!parentTransform_)
+            {
+                break;
+            }
 
             const std::shared_ptr<GameObject> parentObject_ =
                 parentTransform_->gameObject.lock();
-            if (!parentObject_) break;
+            if (!parentObject_)
+            {
+                break;
+            }
 
             object_ = parentObject_;
         }
@@ -273,11 +294,17 @@ namespace
         HurtBox* hurtBox_,
         const std::vector<SuppressedHitTarget>& suppressedTargets_)
     {
-        if (!hitBox_ || !hurtBox_) return false;
+        if (!hitBox_ || !hurtBox_)
+        {
+            return false;
+        }
 
         const std::shared_ptr<GameObject> hurtObject_ = hurtBox_->GetGameObject();
         const std::shared_ptr<GameObject> hurtRoot_ = GetHierarchyRoot(hurtObject_);
-        if (!hurtRoot_) return false;
+        if (!hurtRoot_)
+        {
+            return false;
+        }
 
         for (const SuppressedHitTarget& suppressedTarget_ : suppressedTargets_)
         {
@@ -297,11 +324,17 @@ namespace
         std::vector<SuppressedHitTarget>& suppressedTargets_)
     {
         // Guard/JustGuard済みの防御者階層だけ、後段HurtBoxへのHit通知を止める。
-        if (!hitBox_ || !defender_) return;
+        if (!hitBox_ || !defender_)
+        {
+            return;
+        }
 
         const std::shared_ptr<GameObject> defenderRoot_ =
             GetHierarchyRoot(defender_);
-        if (!defenderRoot_) return;
+        if (!defenderRoot_)
+        {
+            return;
+        }
 
         suppressedTargets_.push_back(
             { hitBox_, defenderRoot_.get() });
@@ -312,7 +345,10 @@ void CollisionStepSystem::RegisterCollider(
     const std::shared_ptr<ColliderComponent>& collider_)
 {
     // 同じColliderを二重登録しないよう確認してから弱参照で保持する。
-    if (!collider_) return;
+    if (!collider_)
+    {
+        return;
+    }
 
     RemoveExpiredColliders();
     const bool registered_ = std::any_of(
@@ -322,21 +358,33 @@ void CollisionStepSystem::RegisterCollider(
         {
             return registeredCollider_.lock().get() == collider_.get();
         });
-    if (!registered_) colliders.emplace_back(collider_);
+    if (!registered_)
+    {
+        colliders.emplace_back(collider_);
+    }
 }
 
 void CollisionStepSystem::UnregisterCollider(ColliderComponent* collider_)
 {
     // Collider削除時は、他Colliderが持つTrigger中情報からも対象Objectを外す。
-    if (!collider_) return;
+    if (!collider_)
+    {
+        return;
+    }
 
     const std::shared_ptr<GameObject> removedObject_ = collider_->GetGameObject();
     for (const std::weak_ptr<ColliderComponent>& registeredCollider_ : colliders)
     {
         const std::shared_ptr<ColliderComponent> currentCollider_ = registeredCollider_.lock();
-        if (!currentCollider_) continue;
+        if (!currentCollider_)
+        {
+            continue;
+        }
 
-        if (removedObject_) currentCollider_->currentTriggers.erase(removedObject_);
+        if (removedObject_)
+        {
+            currentCollider_->currentTriggers.erase(removedObject_);
+        }
     }
     collider_->currentTriggers.clear();
 
@@ -375,7 +423,10 @@ std::vector<std::shared_ptr<HitBox>> CollisionStepSystem::CollectActiveHitBoxes(
     {
         const std::shared_ptr<ColliderComponent> collider_ =
             registeredCollider_.lock();
-        if (!CanStepCollider(collider_)) continue;
+        if (!CanStepCollider(collider_))
+        {
+            continue;
+        }
 
         if (const std::shared_ptr<HitBox> hitBox_ =
             std::dynamic_pointer_cast<HitBox>(collider_))
@@ -394,7 +445,10 @@ void CollisionStepSystem::SyncFromPhysics(float deltaTime_)
     {
         if (const std::shared_ptr<ColliderComponent> collider_ = registeredCollider_.lock())
         {
-            if (!CanStepCollider(collider_)) continue;
+            if (!CanStepCollider(collider_))
+            {
+                continue;
+            }
             collider_->SyncFromPhysics(deltaTime_);
         }
     }
@@ -407,7 +461,10 @@ void CollisionStepSystem::PrepareInitialPhysicsState(float deltaTime_)
     {
         if (const std::shared_ptr<ColliderComponent> collider_ = registeredCollider_.lock())
         {
-            if (!CanStepCollider(collider_)) continue;
+            if (!CanStepCollider(collider_))
+            {
+                continue;
+            }
             collider_->PreparePhysicsStep(deltaTime_);
         }
     }
@@ -431,7 +488,10 @@ void CollisionStepSystem::Step(float deltaTime_)
         for (const std::weak_ptr<ColliderComponent>& registeredCollider_ : colliders)
         {
             const std::shared_ptr<ColliderComponent> collider_ = registeredCollider_.lock();
-            if (!CanStepCollider(collider_)) continue;
+            if (!CanStepCollider(collider_))
+            {
+                continue;
+            }
 
             collider_->isGrounded = false;
             collider_->SetHitFlag(false);
@@ -460,11 +520,17 @@ void CollisionStepSystem::HandleTriggerPair(
     const AttackHitContact* contact_)
 {
     // Trigger Enter/Stay/Exitを更新し、HitBox/HurtBoxならAttackSystemへ通知する。
-    if (!colliderA_ || !colliderB_) return;
+    if (!colliderA_ || !colliderB_)
+    {
+        return;
+    }
 
     const std::shared_ptr<GameObject> objectA_ = colliderA_->GetGameObject();
     const std::shared_ptr<GameObject> objectB_ = colliderB_->GetGameObject();
-    if (!objectA_ || !objectB_) return;
+    if (!objectA_ || !objectB_)
+    {
+        return;
+    }
 
     const bool existsA_ = colliderA_->currentTriggers.count(objectB_) != 0;
     const bool existsB_ = colliderB_->currentTriggers.count(objectA_) != 0;
@@ -483,7 +549,10 @@ void CollisionStepSystem::HandleTriggerPair(
             for (const ColliderComponent::CollisionCallback& callback_ :
                 colliderA_->onTriggerEnterCallbacks)
             {
-                if (callback_) callback_(objectB_);
+                if (callback_)
+                {
+                    callback_(objectB_);
+                }
             }
         }
         else
@@ -498,7 +567,10 @@ void CollisionStepSystem::HandleTriggerPair(
             for (const ColliderComponent::CollisionCallback& callback_ :
                 colliderB_->onTriggerEnterCallbacks)
             {
-                if (callback_) callback_(objectA_);
+                if (callback_)
+                {
+                    callback_(objectA_);
+                }
             }
         }
         else
@@ -547,11 +619,17 @@ void CollisionStepSystem::HandlePhysXContact(
     const CollisionContact& contactB_)
 {
     // PhysXから渡された接触を、両ColliderのCollision callbackへ橋渡しする。
-    if (!colliderA_ || !colliderB_) return;
+    if (!colliderA_ || !colliderB_)
+    {
+        return;
+    }
 
     const std::shared_ptr<GameObject> objectA_ = colliderA_->GetGameObject();
     const std::shared_ptr<GameObject> objectB_ = colliderB_->GetGameObject();
-    if (!objectA_ || !objectB_) return;
+    if (!objectA_ || !objectB_)
+    {
+        return;
+    }
     if (colliderA_->GetCollisionOwnerId() == colliderB_->GetCollisionOwnerId())
     {
         return;
@@ -562,12 +640,18 @@ void CollisionStepSystem::HandlePhysXContact(
     for (const ColliderComponent::CollisionContactCallback& callback_ :
         colliderA_->onCollisionContactCallbacks)
     {
-        if (callback_) callback_(objectB_, contactA_);
+        if (callback_)
+        {
+            callback_(objectB_, contactA_);
+        }
     }
     for (const ColliderComponent::CollisionContactCallback& callback_ :
         colliderB_->onCollisionContactCallbacks)
     {
-        if (callback_) callback_(objectA_, contactB_);
+        if (callback_)
+        {
+            callback_(objectA_, contactB_);
+        }
     }
 }
 
@@ -601,7 +685,10 @@ void CollisionStepSystem::StepCombatPairs()
         {
             const std::shared_ptr<ColliderComponent> collider_ =
                 registeredCollider_.lock();
-            if (!collider_) continue;
+            if (!collider_)
+            {
+                continue;
+            }
 
             if (const std::shared_ptr<HitBox> hitBox_ =
                 std::dynamic_pointer_cast<HitBox>(collider_))
@@ -851,7 +938,10 @@ void CollisionStepSystem::StepCombatPairs()
                     for (const auto& guard_ : guardColliders_)
                     {
                         if (!guard_->IsEnabled() || !guard_->GuardsBodyContact() ||
-                            GetHierarchyRoot(guard_->GetGuardOwner()) != hurtOwner_) continue;
+                            GetHierarchyRoot(guard_->GetGuardOwner()) != hurtOwner_)
+                        {
+                            continue;
+                        }
                         bool guarded_ = false;
                         if (guard_->IsJustGuardEnabled() && justGuardSystem)
                         {
@@ -896,5 +986,8 @@ void CollisionStepSystem::StepCombatPairs()
     }
 
     // 同じ軌道を全防御判定と命中判定で使い終えてから、一時判定だけを閉じる。
-    for (const auto& hitBox_ : hitBoxes_) hitBox_->FinishFrameSweep();
+    for (const auto& hitBox_ : hitBoxes_)
+    {
+        hitBox_->FinishFrameSweep();
+    }
 }

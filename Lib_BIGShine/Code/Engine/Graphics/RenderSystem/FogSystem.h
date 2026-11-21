@@ -37,6 +37,7 @@ private:
         DirectX::XMFLOAT4 controls;
         DirectX::XMFLOAT4 texture;
     };
+
     static_assert(sizeof(CbFog) == 64);
 
     int width = 0;

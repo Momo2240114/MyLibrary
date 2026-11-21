@@ -2,8 +2,19 @@
 #include "SpiralTransition.h"
 #include <imgui.h>
 #include "Engine/Debug/TracyProfiler.h"
-namespace { const bool REGISTERED = TransitionEffectFactory::Register("SPIRAL",[]() { return std::make_unique<SpiralTransition>(); }); }
-SpiralTransition::SpiralTransition() : ShaderTransitionEffect("Data/Shader/SpiralTransitionPS.cso") {}
+
+namespace
+{
+    const bool REGISTERED = TransitionEffectFactory::Register("SPIRAL",[]()
+    {
+        return std::make_unique<SpiralTransition>();
+    });
+}
+
+SpiralTransition::SpiralTransition() : ShaderTransitionEffect("Data/Shader/SpiralTransitionPS.cso")
+{
+}
+
 // 固有の形状設定を共通Inspectorへ公開する。
 void SpiralTransition::Gui(TransitionParameters& parameters_)
 {

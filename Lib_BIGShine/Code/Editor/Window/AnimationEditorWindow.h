@@ -38,7 +38,10 @@ public:
     void Update(float deltaTime_) override;
 
     /// アニメーション編集中はゲーム本編のScene更新を停止する。
-    bool ShouldPauseScene() const override { return true; }
+    bool ShouldPauseScene() const override
+    {
+        return true;
+    }
 
 private:
     /// 選択中のプレビューObjectから、編集対象のモデルとアニメーション制御を取得する。

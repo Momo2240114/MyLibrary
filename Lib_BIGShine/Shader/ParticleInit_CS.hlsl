@@ -8,7 +8,10 @@ RWStructuredBuffer<ParticleHeader> particleHeaderBuffer : register(u3);
 void main(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
     uint index = dispatchThreadID.x;
-    if (index >= systemNumParticles) return;
+    if (index >= systemNumParticles)
+    {
+        return;
+    }
 
     Particle p = (Particle)0;
     p.scale = float4(1, 1, 1, 0);

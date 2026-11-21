@@ -4614,7 +4614,7 @@
                         "attackTemplateId": "",
                         "blackboardWrites": [],
                         "callEndOnStateExit": false,
-                        "endTime": 0.9833333492279053,
+                        "endTime": 0.6166666746139526,
                         "eventTemplateType": "NONE",
                         "label": "ActionEnd",
                         "localPosition": [
@@ -4639,7 +4639,7 @@
                         "overridePlaybackSpeed": false,
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
-                        "startTime": 0.75,
+                        "startTime": 0.6000000238418579,
                         "telegraph": {
                             "attachNodeName": "",
                             "berserkLeadFrames": 9.0,

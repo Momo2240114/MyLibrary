@@ -38,7 +38,10 @@ namespace
     {
         // ObjectのWorld行列からPhysX Actor用のPoseとScaleを取り出す。
         // PhysX ShapeのサイズにはScaleを焼き込み、Actor Poseには位置/回転だけを渡す。
-        if (!owner_ || !owner_->transform) return false;
+        if (!owner_ || !owner_->transform)
+        {
+            return false;
+        }
 
         const DirectX::XMMATRIX world_ = owner_->transform->GetWorldMatrix();
         DirectX::XMVECTOR scaleVector_;
@@ -108,7 +111,10 @@ namespace
             indices_.push_back(topCurrent_);
         }
 
-        if (!addCaps_) return;
+        if (!addCaps_)
+        {
+            return;
+        }
 
         const uint32_t bottomCenter_ = static_cast<uint32_t>(vertices_.size());
         vertices_.push_back({ 0.0f, -halfHeight_, 0.0f });
@@ -132,6 +138,7 @@ namespace
         }
     }
 }
+
 ContainmentVolumeComponent::~ContainmentVolumeComponent()
 {
     // Component破棄時にPhysX Sceneへ残ったStatic Actorを必ず解放する。
@@ -149,10 +156,16 @@ void ContainmentVolumeComponent::Update(float deltaTime_)
     // UpdateではDebug形状の表示だけを行う。
     // 実際の閉じ込めはApplyContainmentでPhysX Actorを更新する流れに分けている。
     (void)deltaTime_;
-    if (!showDebugShape) return;
+    if (!showDebugShape)
+    {
+        return;
+    }
 
     auto owner_ = GetGameObject();
-    if (!owner_ || !owner_->transform) return;
+    if (!owner_ || !owner_->transform)
+    {
+        return;
+    }
 
     const DirectX::XMFLOAT3 scale_ = owner_->transform->GetWorldScale();
     const float worldRadius_ = GetEffectiveRadius() * (std::max)(std::abs(scale_.x), std::abs(scale_.z));
@@ -174,11 +187,17 @@ void ContainmentVolumeComponent::ApplyContainment()
     // GameObjectManagerの移動処理後に呼ばれ、Transform変更や設定変更をPhysX壁へ反映する。
     // 手動で対象Objectを押し戻すのではなく、Static Mesh壁として接触解決させる設計。
     auto owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     PxTransform pose_;
     DirectX::XMFLOAT3 scale_;
-    if (!BuildWorldPose(owner_, pose_, scale_)) return;
+    if (!BuildWorldPose(owner_, pose_, scale_))
+    {
+        return;
+    }
 
     const bool settingsChanged_ =
         physicsDirty ||
@@ -222,11 +241,17 @@ void ContainmentVolumeComponent::RebuildPhysicsVolume()
     auto owner_ = GetGameObject();
     auto physics_ = PhysXSystem::GetPhysics();
     auto scene_ = PhysXSystem::GetScene();
-    if (!owner_ || !physics_ || !scene_) return;
+    if (!owner_ || !physics_ || !scene_)
+    {
+        return;
+    }
 
     PxTransform pose_;
     DirectX::XMFLOAT3 scale_;
-    if (!BuildWorldPose(owner_, pose_, scale_)) return;
+    if (!BuildWorldPose(owner_, pose_, scale_))
+    {
+        return;
+    }
 
     ReleasePhysicsVolume();
 
@@ -241,7 +266,10 @@ void ContainmentVolumeComponent::RebuildPhysicsVolume()
 
     // Staticな閉じ込め壁なのでTriangle Meshを使う。動的に動かす用途ではなく、必要時に再構築する。
     auto mesh_ = PhysXSystem::CreateTriangleMesh(vertices_, indices_);
-    if (!mesh_) return;
+    if (!mesh_)
+    {
+        return;
+    }
 
     actor = physics_->createRigidStatic(pose_);
     if (!actor)
@@ -283,6 +311,8 @@ void ContainmentVolumeComponent::RebuildPhysicsVolume()
     const PxU32 ownerId_ = static_cast<PxU32>(reinterpret_cast<uintptr_t>(this) & 0x7FFFFFFF);
     filterData_.word3 = ownerId_ | PHYSICS_RESPONSE_BIT;
     shape_->setSimulationFilterData(filterData_);
+    // カメラ用の除外フラグはScene Queryにだけ載せ、物理衝突用のマスクを保つ。
+    filterData_.word1 = ignoreCameraCollision ? IGNORE_CAMERA_QUERY_BIT : 0u;
     shape_->setQueryFilterData(filterData_);
 
     scene_->addActor(*actor);
@@ -301,7 +331,10 @@ void ContainmentVolumeComponent::RebuildPhysicsVolume()
 void ContainmentVolumeComponent::ReleasePhysicsVolume()
 {
     // ActorがSceneに登録済みならSceneから外してからreleaseする。
-    if (!actor) return;
+    if (!actor)
+    {
+        return;
+    }
 
     if (auto scene_ = actor->getScene())
     {
@@ -355,6 +388,11 @@ void ContainmentVolumeComponent::Gui()
         MarkPhysicsDirty();
     }
 
+    if (ImGui::Checkbox("Ignore Camera Collision", &ignoreCameraCollision))
+    {
+        MarkPhysicsDirty();
+    }
+
     ImGui::Separator();
     ImGui::Checkbox("Debug Shape", &showDebugShape);
     if (showDebugShape)
@@ -379,6 +417,7 @@ void ContainmentVolumeComponent::Serialize(nlohmann::json& json_) const
     json_["TargetRadius"] = targetRadius;
     json_["ConstrainHeight"] = constrainHeight;
     json_["Segments"] = segments;
+    json_["IgnoreCameraCollision"] = ignoreCameraCollision;
     json_["ShowDebugShape"] = showDebugShape;
     json_["DebugShapeColor"] = {
         debugShapeColor.x,
@@ -400,6 +439,7 @@ void ContainmentVolumeComponent::Deserialize(const nlohmann::json& json_)
     targetRadius = json_.value("TargetRadius", targetRadius);
     constrainHeight = json_.value("ConstrainHeight", constrainHeight);
     segments = std::clamp(json_.value("Segments", segments), 8, 128);
+    ignoreCameraCollision = json_.value("IgnoreCameraCollision", false);
     showDebugShape = json_.value("ShowDebugShape", showDebugShape);
     if (json_.contains("DebugShapeColor"))
     {

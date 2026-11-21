@@ -127,9 +127,15 @@ void HitBox::SetAttackBox(float halfWidth_, float halfHeight_, float halfLength_
 
 bool HitBox::IsWithinAttackSector(GameObject* target_) const
 {
-    if (sectorRange <= 0.0f && attackBoxHalfExtents.x <= 0.0f) return true;
+    if (sectorRange <= 0.0f && attackBoxHalfExtents.x <= 0.0f)
+    {
+        return true;
+    }
     const auto owner_ = gameObject.lock();
-    if (!owner_ || !owner_->transform || !target_ || !target_->transform) return false;
+    if (!owner_ || !owner_->transform || !target_ || !target_->transform)
+    {
+        return false;
+    }
     const auto center_ = owner_->transform->GetWorldPosition();
     const auto position_ = target_->transform->GetWorldPosition();
     if (attackBoxHalfExtents.x > 0.0f)
@@ -144,8 +150,14 @@ bool HitBox::IsWithinAttackSector(GameObject* target_) const
     const float dx_ = position_.x - center_.x;
     const float dz_ = position_.z - center_.z;
     const float distance_ = std::sqrt(dx_ * dx_ + dz_ * dz_);
-    if (distance_ > sectorRange || std::abs(position_.y - center_.y) > sectorHalfHeight) return false;
-    if (distance_ < 0.0001f) return true;
+    if (distance_ > sectorRange || std::abs(position_.y - center_.y) > sectorHalfHeight)
+    {
+        return false;
+    }
+    if (distance_ < 0.0001f)
+    {
+        return true;
+    }
     const float yaw_ = DirectX::XMConvertToRadians(owner_->transform->GetWorldRotation().y);
     const float dot_ = (dx_ * std::sin(yaw_) + dz_ * std::cos(yaw_)) / distance_;
     return dot_ >= std::cos(DirectX::XMConvertToRadians(sectorAngle * 0.5f));
@@ -155,10 +167,22 @@ bool HitBox::CanHit(GameObject* target_) const
 {
     // ownerへの自爆判定と、同一Activation内の多重Hitをここで止める。
     // AttackSystem側のattackInstanceId履歴とあわせて、HitBox単体でも最低限の重複防止を持つ。
-    if (target_ == nullptr || !IsWithinAttackSector(target_)) return false;
-    if (!canHitOwner && ownerObject == target_) return false;
-    if (!allowMultiHit) return alreadyHitTargets.count(target_) == 0u;
-    if (maxHitCount <= 0) return true;
+    if (target_ == nullptr || !IsWithinAttackSector(target_))
+    {
+        return false;
+    }
+    if (!canHitOwner && ownerObject == target_)
+    {
+        return false;
+    }
+    if (!allowMultiHit)
+    {
+        return alreadyHitTargets.count(target_) == 0u;
+    }
+    if (maxHitCount <= 0)
+    {
+        return true;
+    }
 
     const auto iterator_ = hitTargetCounts.find(target_);
     return iterator_ == hitTargetCounts.end() || iterator_->second < maxHitCount;
@@ -220,7 +244,10 @@ void HitBox::Activate()
     }
     ClearHitTargets();
     ++activationId;
-    if (activationId == 0) ++activationId;
+    if (activationId == 0)
+    {
+        ++activationId;
+    }
     // Trigger状態を消してから有効化し、前回受付窓の接触状態を引きずらないようにする。
     currentTriggers.clear();
     SetEnabled(true);
@@ -247,13 +274,19 @@ void HitBox::AddFrameSweepSample(const Capsule& capsule_)
     {
         const auto owner_ = GetAttackOwner();
         frameSweepOwner = owner_;
-        if (owner_ && owner_->transform) frameSweepOwnerPosition = owner_->transform->GetWorldPosition();
+        if (owner_ && owner_->transform)
+        {
+            frameSweepOwnerPosition = owner_->transform->GetWorldPosition();
+        }
     }
     if (!IsEnabled())
     {
         deactivateAfterFrameSweep = true;
         ++activationId;
-        if (activationId == 0) ++activationId;
+        if (activationId == 0)
+        {
+            ++activationId;
+        }
         SetEnabled(true);
     }
     frameSweepSamples.push_back(capsule_);
@@ -262,7 +295,10 @@ void HitBox::AddFrameSweepSample(const Capsule& capsule_)
 // 窓内の姿勢と姿勢間を調べ、現在の終端姿勢だけによる当たり抜けを抑える。
 CollisionManifold HitBox::CheckFrameSweep(const Capsule& other_, Capsule& contactCapsule_) const
 {
-    if (frameSweepSamples.empty()) return CollisionMath::CapsuleVsCapsule(contactCapsule_, other_);
+    if (frameSweepSamples.empty())
+    {
+        return CollisionMath::CapsuleVsCapsule(contactCapsule_, other_);
+    }
     BS_PROFILE_SCOPE("HitBox::CheckFrameSweep");
     DirectX::XMVECTOR displacement_ = DirectX::XMVectorZero();
     if (const auto owner_ = frameSweepOwner.lock(); owner_ && owner_->transform)
@@ -302,7 +338,10 @@ void HitBox::FinishFrameSweep()
 {
     frameSweepSamples.clear();
     frameSweepOwner.reset();
-    if (deactivateAfterFrameSweep) Deactivate();
+    if (deactivateAfterFrameSweep)
+    {
+        Deactivate();
+    }
     deactivateAfterFrameSweep = false;
 }
 
@@ -360,12 +399,21 @@ void HitBox::Gui()
     ImGui::TextColored(
         enabled ? ImVec4(0.2f, 1.0f, 0.3f, 1.0f) : ImVec4(1.0f, 0.3f, 0.2f, 1.0f),
         enabled ? "HitBox: ACTIVE" : "HitBox: INACTIVE");
-    if (ImGui::Button("Activate HitBox (Test)")) Activate();
+    if (ImGui::Button("Activate HitBox (Test)"))
+    {
+        Activate();
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Deactivate HitBox (Test)")) Deactivate();
+    if (ImGui::Button("Deactivate HitBox (Test)"))
+    {
+        Deactivate();
+    }
     char attackTagBuffer_[64];
     strncpy_s(attackTagBuffer_, attackTag.c_str(), sizeof(attackTagBuffer_));
-    if (ImGui::InputText("Attack Tag", attackTagBuffer_, sizeof(attackTagBuffer_))) attackTag = attackTagBuffer_;
+    if (ImGui::InputText("Attack Tag", attackTagBuffer_, sizeof(attackTagBuffer_)))
+    {
+        attackTag = attackTagBuffer_;
+    }
     char justGuardedActionBuffer_[128];
     strncpy_s(justGuardedActionBuffer_, justGuardedActionName.c_str(), sizeof(justGuardedActionBuffer_));
     if (ImGui::InputText("Just Guarded Action", justGuardedActionBuffer_, sizeof(justGuardedActionBuffer_)))
@@ -376,10 +424,16 @@ void HitBox::Gui()
     ImGui::SeparatorText("Hit Particle");
     char particleAssetBuffer_[256];
     strncpy_s(particleAssetBuffer_, hitParticleAssetPath.c_str(), sizeof(particleAssetBuffer_));
-    if (ImGui::InputText("Particle Asset", particleAssetBuffer_, sizeof(particleAssetBuffer_))) hitParticleAssetPath = particleAssetBuffer_;
+    if (ImGui::InputText("Particle Asset", particleAssetBuffer_, sizeof(particleAssetBuffer_)))
+    {
+        hitParticleAssetPath = particleAssetBuffer_;
+    }
     char particleEmitterBuffer_[128];
     strncpy_s(particleEmitterBuffer_, hitParticleEmitterName.c_str(), sizeof(particleEmitterBuffer_));
-    if (ImGui::InputText("Particle Emitter", particleEmitterBuffer_, sizeof(particleEmitterBuffer_))) hitParticleEmitterName = particleEmitterBuffer_;
+    if (ImGui::InputText("Particle Emitter", particleEmitterBuffer_, sizeof(particleEmitterBuffer_)))
+    {
+        hitParticleEmitterName = particleEmitterBuffer_;
+    }
     ImGui::DragFloat("Particle Life Time", &hitParticleLifeTime, 0.01f, 0.0f, 30.0f);
     ImGui::DragFloat("Particle Normal Offset", &hitParticleNormalOffset, 0.01f, -10.0f, 10.0f);
     ImGui::Checkbox("Use Particle Impact Axis", &hitParticleUseImpactAxis);
@@ -396,17 +450,26 @@ void HitBox::Gui()
     ImGui::SeparatorText("Hit MeshVFX");
     char meshVFXAssetBuffer_[256];
     strncpy_s(meshVFXAssetBuffer_, hitMeshVFXAssetPath.c_str(), sizeof(meshVFXAssetBuffer_));
-    if (ImGui::InputText("MeshVFX Asset", meshVFXAssetBuffer_, sizeof(meshVFXAssetBuffer_))) hitMeshVFXAssetPath = meshVFXAssetBuffer_;
+    if (ImGui::InputText("MeshVFX Asset", meshVFXAssetBuffer_, sizeof(meshVFXAssetBuffer_)))
+    {
+        hitMeshVFXAssetPath = meshVFXAssetBuffer_;
+    }
     ImGui::DragFloat("MeshVFX Life Time", &hitMeshVFXLifeTime, 0.01f, 0.0f, 30.0f);
     ImGui::DragFloat("MeshVFX Normal Offset", &hitMeshVFXNormalOffset, 0.01f, -10.0f, 10.0f);
     char impactEffectAssetBuffer_[256];
     strncpy_s(impactEffectAssetBuffer_, hitImpactEffectAssetPath.c_str(), sizeof(impactEffectAssetBuffer_));
-    if (ImGui::InputText("Impact Effect Asset", impactEffectAssetBuffer_, sizeof(impactEffectAssetBuffer_))) hitImpactEffectAssetPath = impactEffectAssetBuffer_;
+    if (ImGui::InputText("Impact Effect Asset", impactEffectAssetBuffer_, sizeof(impactEffectAssetBuffer_)))
+    {
+        hitImpactEffectAssetPath = impactEffectAssetBuffer_;
+    }
 
     ImGui::SeparatorText("Hit Sound");
     char hitSoundPathBuffer_[256];
     strncpy_s(hitSoundPathBuffer_, hitSoundPath.c_str(), sizeof(hitSoundPathBuffer_));
-    if (ImGui::InputText("Hit Sound Path", hitSoundPathBuffer_, sizeof(hitSoundPathBuffer_))) hitSoundPath = hitSoundPathBuffer_;
+    if (ImGui::InputText("Hit Sound Path", hitSoundPathBuffer_, sizeof(hitSoundPathBuffer_)))
+    {
+        hitSoundPath = hitSoundPathBuffer_;
+    }
     ImGui::DragFloat("Hit Sound Volume", &hitSoundVolume, 0.01f, 0.0f, 1.0f);
     ImGui::Checkbox("Hit Sound Muffled", &hitSoundMuffled);
     ImGui::DragFloat("Hit Sound Cutoff", &hitSoundMuffledCutoff, 10.0f, 10.0f, 22000.0f);
@@ -441,25 +504,46 @@ void HitBox::Gui()
     ImGui::SeparatorText("Blackboard Input");
     char categoryBuffer_[64];
     strncpy_s(categoryBuffer_, blackboardCategory.c_str(), sizeof(categoryBuffer_));
-    if (ImGui::InputText("Category", categoryBuffer_, sizeof(categoryBuffer_))) blackboardCategory = categoryBuffer_;
+    if (ImGui::InputText("Category", categoryBuffer_, sizeof(categoryBuffer_)))
+    {
+        blackboardCategory = categoryBuffer_;
+    }
     char damageKeyBuffer_[64];
     strncpy_s(damageKeyBuffer_, damageKey.c_str(), sizeof(damageKeyBuffer_));
-    if (ImGui::InputText("Damage Key", damageKeyBuffer_, sizeof(damageKeyBuffer_))) damageKey = damageKeyBuffer_;
+    if (ImGui::InputText("Damage Key", damageKeyBuffer_, sizeof(damageKeyBuffer_)))
+    {
+        damageKey = damageKeyBuffer_;
+    }
     char damageRateKeyBuffer_[64];
     strncpy_s(damageRateKeyBuffer_, damageRateKey.c_str(), sizeof(damageRateKeyBuffer_));
-    if (ImGui::InputText("Damage Rate Key", damageRateKeyBuffer_, sizeof(damageRateKeyBuffer_))) damageRateKey = damageRateKeyBuffer_;
+    if (ImGui::InputText("Damage Rate Key", damageRateKeyBuffer_, sizeof(damageRateKeyBuffer_)))
+    {
+        damageRateKey = damageRateKeyBuffer_;
+    }
     char fixedDamageKeyBuffer_[64];
     strncpy_s(fixedDamageKeyBuffer_, fixedDamageKey.c_str(), sizeof(fixedDamageKeyBuffer_));
-    if (ImGui::InputText("Fixed Damage Key", fixedDamageKeyBuffer_, sizeof(fixedDamageKeyBuffer_))) fixedDamageKey = fixedDamageKeyBuffer_;
+    if (ImGui::InputText("Fixed Damage Key", fixedDamageKeyBuffer_, sizeof(fixedDamageKeyBuffer_)))
+    {
+        fixedDamageKey = fixedDamageKeyBuffer_;
+    }
     char hitStopKeyBuffer_[64];
     strncpy_s(hitStopKeyBuffer_, hitStopDurationKey.c_str(), sizeof(hitStopKeyBuffer_));
-    if (ImGui::InputText("Hit Stop Duration Key", hitStopKeyBuffer_, sizeof(hitStopKeyBuffer_))) hitStopDurationKey = hitStopKeyBuffer_;
+    if (ImGui::InputText("Hit Stop Duration Key", hitStopKeyBuffer_, sizeof(hitStopKeyBuffer_)))
+    {
+        hitStopDurationKey = hitStopKeyBuffer_;
+    }
     char knockBackKeyBuffer_[64];
     strncpy_s(knockBackKeyBuffer_, knockBackPowerKey.c_str(), sizeof(knockBackKeyBuffer_));
-    if (ImGui::InputText("Knock Back Key", knockBackKeyBuffer_, sizeof(knockBackKeyBuffer_))) knockBackPowerKey = knockBackKeyBuffer_;
+    if (ImGui::InputText("Knock Back Key", knockBackKeyBuffer_, sizeof(knockBackKeyBuffer_)))
+    {
+        knockBackPowerKey = knockBackKeyBuffer_;
+    }
     char hitSoundKeyBuffer_[64];
     strncpy_s(hitSoundKeyBuffer_, hitSoundPathKey.c_str(), sizeof(hitSoundKeyBuffer_));
-    if (ImGui::InputText("Hit Sound Path Key", hitSoundKeyBuffer_, sizeof(hitSoundKeyBuffer_))) hitSoundPathKey = hitSoundKeyBuffer_;
+    if (ImGui::InputText("Hit Sound Path Key", hitSoundKeyBuffer_, sizeof(hitSoundKeyBuffer_)))
+    {
+        hitSoundPathKey = hitSoundKeyBuffer_;
+    }
 }
 
 void HitBox::Serialize(nlohmann::json& j_) const
@@ -611,7 +695,10 @@ void HitBox::Deserialize(const nlohmann::json& j_)
     if (hitStopDurationKey.empty())
     {
         hitStopDurationKey = j_.value("HitStopTimeKey", std::string("HitStopDuration"));
-        if (hitStopDurationKey == "HitStopTime") hitStopDurationKey = "HitStopDuration";
+        if (hitStopDurationKey == "HitStopTime")
+        {
+            hitStopDurationKey = "HitStopDuration";
+        }
     }
     knockBackPowerKey = j_.value("KnockBackPowerKey", std::string("KnockBackPower"));
     hitSoundPathKey = j_.value("HitSoundPathKey", std::string("HitSoundPath"));
@@ -674,15 +761,27 @@ void HitBox::ApplyBlackboardValues()
     while (owner_ && owner_->transform)
     {
         blackboard_ = owner_->GetComponent<BlackboardComponent>();
-        if (blackboard_) break;
+        if (blackboard_)
+        {
+            break;
+        }
 
         const std::shared_ptr<Transform> parentTransform_ = owner_->transform->parent.lock();
-        if (!parentTransform_) break;
+        if (!parentTransform_)
+        {
+            break;
+        }
         const std::shared_ptr<GameObject> parentObject_ = parentTransform_->gameObject.lock();
-        if (!parentObject_) break;
+        if (!parentObject_)
+        {
+            break;
+        }
         owner_ = parentObject_;
     }
-    if (!blackboard_) return;
+    if (!blackboard_)
+    {
+        return;
+    }
 
     float value_ = 0.0f;
     int intValue_ = 0;
@@ -844,7 +943,10 @@ void HitBox::RegisterActions()
     BS_PROFILE_SCOPE("HitBox::RegisterActions");
 
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     // Animation Sequencerから名前でHitBoxをON/OFFできるよう、Local Actionとして公開する。
     // lambdaはweak_ptr経由にし、Object削除後にActionが呼ばれても安全に抜けるようにする。
@@ -891,8 +993,11 @@ void HitBox::RegisterActions()
             if (const std::shared_ptr<HitBox> hitBox_ = weakHitBox_.lock())
             {
                 const std::shared_ptr<GameObject> object_ = hitBox_->GetGameObject();
-                if (!object_) return;
-                hitBox_->SetAttackInstanceId(
+                if (!object_)
+            {
+                return;
+            }
+            hitBox_->SetAttackInstanceId(
                     object_->GetManager().GetAttackSystem().CreateAttackInstance());
             }
         });

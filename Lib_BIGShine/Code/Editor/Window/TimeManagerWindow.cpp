@@ -6,7 +6,10 @@
 
 void TimeManagerWindow::Draw()
 {
-    if (!isVisible) return;
+    if (!isVisible)
+    {
+        return;
+    }
 
     // TimeManagerのLayer別Scaleと、一時停止/フレーム送りを確認するデバッグWindow。
     if (BeginEditorWindow())
@@ -156,10 +159,16 @@ void TimeManagerWindow::Draw()
 void TimeManagerWindow::ApplyTimeScale()
 {
     // UIで設定した目標ScaleをAll Layerへ適用する。
-    if (!gameObjectManager) return;
+    if (!gameObjectManager)
+    {
+        return;
+    }
 
     const std::shared_ptr<TimeManager> timeManager_ = gameObjectManager->GetTimeManager();
-    if (!timeManager_) return;
+    if (!timeManager_)
+    {
+        return;
+    }
 
     timeManager_->SetTargetScale(
         static_cast<uint32_t>(TarGetLayerType::All),

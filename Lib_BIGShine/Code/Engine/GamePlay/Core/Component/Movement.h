@@ -13,7 +13,11 @@ enum class RotationType {
 class Movement : public Component
 {
 public:
-    const std::string& GetName() const override { static std::string name = "Movement"; return name; }
+    const std::string& GetName() const override
+    {
+        static std::string name = "Movement";
+        return name;
+    }
 
     // velocityに掛ける移動速度。
     float moveSpeed = 5.0f;
@@ -23,10 +27,16 @@ public:
     void Update(float deltaTime) override;
 
     // 外部AIや入力から、次フレームの移動方向を指定する。
-    void SetVelocity(const DirectX::XMFLOAT3& v) { velocity = v; }
+    void SetVelocity(const DirectX::XMFLOAT3& v)
+    {
+        velocity = v;
+    }
 
     // 移動方向へ向けるかどうかを切り替える。
-    void SetRotationType(RotationType type) { rotationType = type; }
+    void SetRotationType(RotationType type)
+    {
+        rotationType = type;
+    }
 
 private:
     // velocityがある時、Transformの向きを補間して移動方向へ寄せる。

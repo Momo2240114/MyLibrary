@@ -5,6 +5,7 @@
 
 #include"GameObjectManager.h"
 #include"SearchAreaManager.h"
+
 void AreaComponent::Start()
 {
 	// SearchAreaManagerへ自身を登録し、検索範囲の中心として使えるようにする。

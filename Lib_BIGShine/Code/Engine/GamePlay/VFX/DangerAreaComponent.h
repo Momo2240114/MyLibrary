@@ -55,7 +55,11 @@ void from_json(const nlohmann::json& json_, DangerAreaTemplate& template_);
 class DangerAreaComponent : public Component, public IActionProvider
 {
 public:
-    const std::string& GetName() const override { return componentName; }
+    const std::string& GetName() const override
+    {
+        return componentName;
+    }
+
     void Start() override;
     void Update(float deltaTime_) override;
     void Gui() override;
@@ -71,15 +75,27 @@ public:
     // 生成済みの予兆だけを回転・伸長し、毎フレームのObject生成を避ける。
     void UpdateAt(const std::shared_ptr<GameObject>& object_, const DirectX::XMFLOAT3& position_,
         float yawDegrees_, float lengthScale_ = 1.0f);
-    void OnDestroy() override { StopAll(); }
+
+    void OnDestroy() override
+    {
+        StopAll();
+    }
+
     // 所有者の強制中断時に、このComponentが生成した予兆を解除する。
     void StopAll();
 
     // Template名またはAction名から危険範囲を生成する。
     void ShowByName(const std::string& templateName_);
 
-    std::vector<DangerAreaTemplate>& GetTemplates() { return templates; }
-    const std::vector<DangerAreaTemplate>& GetTemplates() const { return templates; }
+    std::vector<DangerAreaTemplate>& GetTemplates()
+    {
+        return templates;
+    }
+
+    const std::vector<DangerAreaTemplate>& GetTemplates() const
+    {
+        return templates;
+    }
 
 private:
     struct DangerAreaInstance

@@ -1,0 +1,33 @@
+{
+    "AssetType": "AnimationState",
+    "AssetVersion": 1,
+    "State": {
+        "animIndexA": -1,
+        "animIndexB": -1,
+        "animationIndex": 28,
+        "blendParamName": "BlendAlpha",
+        "customAnimIndex": -1,
+        "events": [],
+        "loop": false,
+        "name": "SS_Take",
+        "rootMotion": {
+            "applyPositionX": false,
+            "applyPositionY": false,
+            "applyPositionZ": false,
+            "applyRotationX": false,
+            "applyRotationY": false,
+            "applyRotationZ": false,
+            "enable": true,
+            "sourceNodeName": "root",
+            "cutVisualPositionX": true,
+            "cutVisualPositionY": true,
+            "cutVisualPositionZ": true
+        },
+        "rootMotionScale": 0.0,
+        "rootMotionScaleCurveName": "",
+        "sequencer": "",
+        "speed": 1.0,
+        "speedCurveName": "",
+        "type": 0
+    }
+}

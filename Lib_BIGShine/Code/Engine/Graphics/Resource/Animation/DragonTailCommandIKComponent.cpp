@@ -41,8 +41,14 @@ namespace
 
     float NormalizeAngleDegrees(float degrees_)
     {
-        while (degrees_ > 180.0f) degrees_ -= 360.0f;
-        while (degrees_ < -180.0f) degrees_ += 360.0f;
+        while (degrees_ > 180.0f)
+        {
+            degrees_ -= 360.0f;
+        }
+        while (degrees_ < -180.0f)
+        {
+            degrees_ += 360.0f;
+        }
         return degrees_;
     }
 
@@ -75,14 +81,20 @@ namespace
 
     bool TryNormalizeVector(DirectX::XMVECTOR& value_)
     {
-        if (LengthSquared(value_) <= EPSILON * EPSILON) return false;
+        if (LengthSquared(value_) <= EPSILON * EPSILON)
+        {
+            return false;
+        }
         value_ = DirectX::XMVector3Normalize(value_);
         return true;
     }
 
     bool TryStoreNormalizedVector(DirectX::XMFLOAT3& result_, DirectX::XMVECTOR value_)
     {
-        if (!TryNormalizeVector(value_)) return false;
+        if (!TryNormalizeVector(value_))
+        {
+            return false;
+        }
         DirectX::XMStoreFloat3(&result_, value_);
         return true;
     }
@@ -113,7 +125,10 @@ bool DragonTailCommandIKComponent::IsLoadReady() const
 {
     const auto owner_ = const_cast<DragonTailCommandIKComponent*>(this)->GetGameObject();
     const auto model_ = owner_ ? owner_->GetComponent<GltfModelCommponennt>() : nullptr;
-    if (!model_) return true;
+    if (!model_)
+    {
+        return true;
+    }
 
     model_->UpdateLoadState();
     return !model_->IsModelLoading();
@@ -121,9 +136,15 @@ bool DragonTailCommandIKComponent::IsLoadReady() const
 
 void DragonTailCommandIKComponent::LateUpdate(float deltaTime_)
 {
-    if (!model || !ikMap) return;
+    if (!model || !ikMap)
+    {
+        return;
+    }
     model->UpdateLoadState();
-    if (!model->IsModelReady()) return;
+    if (!model->IsModelReady())
+    {
+        return;
+    }
 
     // アニメーション更新後のLateUpdateでIKを重ね、最終的な尻尾姿勢を作る。
     commandTimer += deltaTime_;
@@ -165,7 +186,10 @@ void DragonTailCommandIKComponent::SetFollowBody()
 void DragonTailCommandIKComponent::UnregisterActions()
 {
     const auto owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     const std::string localCategory_ =
         registeredActionCategory.empty() ? actionCategory : registeredActionCategory;
@@ -189,7 +213,10 @@ void DragonTailCommandIKComponent::UnregisterActions()
 void DragonTailCommandIKComponent::RegisterActions()
 {
     const auto owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     // AIやアニメーションイベントから尻尾攻撃を発火できるようにActionを登録する。
     UnregisterActions();
@@ -205,8 +232,11 @@ void DragonTailCommandIKComponent::RegisterActions()
             {
                 const std::string globalActionName_ =
                     owner_->RegisterGlobalAction(actionCategory, actionName_, action_);
-                if (!globalActionName_.empty()) registeredGlobalActionNames.push_back(globalActionName_);
+                if (!globalActionName_.empty())
+            {
+                registeredGlobalActionNames.push_back(globalActionName_);
             }
+        }
         };
 
     registerAction_(ACTION_FOLLOW_BODY, [this]()
@@ -286,7 +316,10 @@ void DragonTailCommandIKComponent::StartSpinSweep(float duration_)
 
 float DragonTailCommandIKComponent::CalculateCommandRate() const
 {
-    if (currentCommand.duration <= 0.0001f) return 1.0f;
+    if (currentCommand.duration <= 0.0001f)
+    {
+        return 1.0f;
+    }
 
     return std::clamp(
         (commandTimer - currentCommand.blendInTime) / currentCommand.duration,
@@ -314,20 +347,32 @@ float DragonTailCommandIKComponent::CalculateSpinLagRate(
 
 float DragonTailCommandIKComponent::CalculateBlendRate() const
 {
-    if (currentCommand.mode == DRAGON_TAIL_IK_MODE::DISABLED) return 0.0f;
+    if (currentCommand.mode == DRAGON_TAIL_IK_MODE::DISABLED)
+    {
+        return 0.0f;
+    }
 
     // コマンドのblendIn/hold/blendOutに応じてIK影響度を返す。
     if (commandTimer < currentCommand.blendInTime)
     {
-        if (currentCommand.blendInTime <= 0.0001f) return 1.0f;
+        if (currentCommand.blendInTime <= 0.0001f)
+        {
+            return 1.0f;
+        }
         return SmoothStep(commandTimer / currentCommand.blendInTime);
     }
 
     const float holdEndTime_ = currentCommand.blendInTime + currentCommand.duration;
-    if (commandTimer <= holdEndTime_) return 1.0f;
+    if (commandTimer <= holdEndTime_)
+    {
+        return 1.0f;
+    }
 
     const float blendOutTimer_ = commandTimer - holdEndTime_;
-    if (currentCommand.blendOutTime <= 0.0001f) return 0.0f;
+    if (currentCommand.blendOutTime <= 0.0001f)
+    {
+        return 0.0f;
+    }
 
     return 1.0f - SmoothStep(blendOutTimer_ / currentCommand.blendOutTime);
 }
@@ -337,16 +382,28 @@ bool DragonTailCommandIKComponent::ApplyTailIK(float deltaTime_)
     BS_PROFILE_SCOPE("DragonTailCommandIKComponent::ApplyTailIK");
 
     auto* chain_ = ikMap->FindChain(chainName);
-    if (!chain_ || !chain_->enabled) return false;
-    if (!ikMap->ResolveChainByName(chainName)) return false;
-    if (chain_->nodeIndices.size() < 2) return false;
+    if (!chain_ || !chain_->enabled)
+    {
+        return false;
+    }
+    if (!ikMap->ResolveChainByName(chainName))
+    {
+        return false;
+    }
+    if (chain_->nodeIndices.size() < 2)
+    {
+        return false;
+    }
 
     // アニメーション姿勢へ尻尾IKを後乗せするため、補正前の回転/World行列を保存する。
     auto& nodes_ = model->GetNodes();
     const size_t boneCount_ = chain_->nodeIndices.size();
     for (const int nodeIndex_ : chain_->nodeIndices)
     {
-        if (nodeIndex_ < 0 || nodeIndex_ >= static_cast<int>(nodes_.size())) return false;
+        if (nodeIndex_ < 0 || nodeIndex_ >= static_cast<int>(nodes_.size()))
+        {
+            return false;
+        }
     }
 
     std::vector<DirectX::XMFLOAT4> animationRotations_;
@@ -392,11 +449,17 @@ bool DragonTailCommandIKComponent::ApplyTailIK(float deltaTime_)
     {
         // 対象へ尻尾先端を向けるため、先端の現在前方向とターゲット方向の差分角を求める。
         const auto owner_ = GetGameObject();
-        if (!owner_ || currentCommand.targetName.empty()) break;
+        if (!owner_ || currentCommand.targetName.empty())
+        {
+            break;
+        }
 
         const std::shared_ptr<GameObject> targetObject_ =
             owner_->GetManager().Find(currentCommand.targetName);
-        if (!targetObject_ || !targetObject_->transform) break;
+        if (!targetObject_ || !targetObject_->transform)
+        {
+            break;
+        }
 
         const DirectX::XMFLOAT3 targetPosition_ = targetObject_->transform->GetWorldPosition();
         const int aimBaseNodeIndex_ = chain_->nodeIndices[boneCount_ - 2];
@@ -546,7 +609,10 @@ bool DragonTailCommandIKComponent::ApplyTailIK(float deltaTime_)
         weightTotal_ += weights_[boneIndex_];
     }
 
-    if (weightTotal_ <= EPSILON) return false;
+    if (weightTotal_ <= EPSILON)
+    {
+        return false;
+    }
 
     for (float& weight_ : weights_)
     {
@@ -649,7 +715,10 @@ bool DragonTailCommandIKComponent::ApplyTailIK(float deltaTime_)
         // 元のアニメーション回転へコマンド回転を重ね、チェーン先頭からTransformを更新する。
         DirectX::XMFLOAT4 resultRotationStorage_;
         DirectX::XMStoreFloat4(&resultRotationStorage_, resultRotation_);
-        if (!IsFinite(resultRotationStorage_)) continue;
+        if (!IsFinite(resultRotationStorage_))
+        {
+            continue;
+        }
 
         node_.rotation = resultRotationStorage_;
         model->UpdateNodeTransformOnly(nodeIndex_);
@@ -662,15 +731,24 @@ bool DragonTailCommandIKComponent::ApplyTailIK(float deltaTime_)
 bool DragonTailCommandIKComponent::GetTailTipWorldPosition(DirectX::XMFLOAT3& position_) const
 {
     // 尻尾先端に攻撃判定やエフェクトを出すため、チェーン末端ノードのWorld座標を返す。
-    if (!model || !ikMap) return false;
+    if (!model || !ikMap)
+    {
+        return false;
+    }
 
     const auto* chain_ = ikMap->FindChain(chainName);
-    if (!chain_ || chain_->nodeIndices.empty()) return false;
+    if (!chain_ || chain_->nodeIndices.empty())
+    {
+        return false;
+    }
 
     const int tipNodeIndex_ = chain_->nodeIndices.back();
     const auto& nodes_ = model->GetNodes();
 
-    if (tipNodeIndex_ < 0 || tipNodeIndex_ >= static_cast<int>(nodes_.size())) return false;
+    if (tipNodeIndex_ < 0 || tipNodeIndex_ >= static_cast<int>(nodes_.size()))
+    {
+        return false;
+    }
 
     position_ = GetTranslation(nodes_.at(tipNodeIndex_).worldTransform);
     return true;
@@ -679,13 +757,22 @@ bool DragonTailCommandIKComponent::GetTailTipWorldPosition(DirectX::XMFLOAT3& po
 // 尻尾IKと同じチェーンから根元を取得し、判定とモデルの参照先を揃える。
 bool DragonTailCommandIKComponent::GetTailRootWorldPosition(DirectX::XMFLOAT3& position_) const
 {
-    if (!model || !ikMap) return false;
+    if (!model || !ikMap)
+    {
+        return false;
+    }
     const auto* chain_ = ikMap->FindChain(chainName);
-    if (!chain_ || chain_->nodeIndices.empty()) return false;
+    if (!chain_ || chain_->nodeIndices.empty())
+    {
+        return false;
+    }
 
     const int rootNodeIndex_ = chain_->nodeIndices.front();
     const auto& nodes_ = model->GetNodes();
-    if (rootNodeIndex_ < 0 || rootNodeIndex_ >= static_cast<int>(nodes_.size())) return false;
+    if (rootNodeIndex_ < 0 || rootNodeIndex_ >= static_cast<int>(nodes_.size()))
+    {
+        return false;
+    }
     position_ = GetTranslation(nodes_[rootNodeIndex_].worldTransform);
     return true;
 }
@@ -694,9 +781,15 @@ bool DragonTailCommandIKComponent::GetTailWorldPositions(std::vector<DirectX::XM
 {
     BS_PROFILE_SCOPE("DragonTailCommandIKComponent::GetTailWorldPositions");
     positions_.clear();
-    if (!model || !ikMap) return false;
+    if (!model || !ikMap)
+    {
+        return false;
+    }
     const auto chain_ = ikMap->FindChain(chainName);
-    if (!chain_ || chain_->nodeIndices.size() < 2) return false;
+    if (!chain_ || chain_->nodeIndices.size() < 2)
+    {
+        return false;
+    }
     const auto& nodes_ = model->GetNodes();
     positions_.reserve(chain_->nodeIndices.size());
     for (const int nodeIndex_ : chain_->nodeIndices)
@@ -714,15 +807,24 @@ bool DragonTailCommandIKComponent::GetTailWorldPositions(std::vector<DirectX::XM
 bool DragonTailCommandIKComponent::GetTailTipWorldForward(DirectX::XMFLOAT3& forward_) const
 {
     // 尻尾先端の向きを、エフェクトや判定方向へ渡せるWorld前方向として返す。
-    if (!model || !ikMap) return false;
+    if (!model || !ikMap)
+    {
+        return false;
+    }
 
     const auto* chain_ = ikMap->FindChain(chainName);
-    if (!chain_ || chain_->nodeIndices.empty()) return false;
+    if (!chain_ || chain_->nodeIndices.empty())
+    {
+        return false;
+    }
 
     const int tipNodeIndex_ = chain_->nodeIndices.back();
     const auto& nodes_ = model->GetNodes();
 
-    if (tipNodeIndex_ < 0 || tipNodeIndex_ >= static_cast<int>(nodes_.size())) return false;
+    if (tipNodeIndex_ < 0 || tipNodeIndex_ >= static_cast<int>(nodes_.size()))
+    {
+        return false;
+    }
 
     const DirectX::XMMATRIX worldMatrix_ = DirectX::XMLoadFloat4x4(&nodes_.at(tipNodeIndex_).worldTransform);
     DirectX::XMStoreFloat3(

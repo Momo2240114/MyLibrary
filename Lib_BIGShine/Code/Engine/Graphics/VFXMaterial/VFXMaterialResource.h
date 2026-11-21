@@ -11,26 +11,58 @@ class VFXMaterialResource
 {
 public:
     // 描画に使うMaterial設定を読み取り専用で取得する。
-    const VFXMaterialData& GetMaterialData() const { return materialData; }
+    const VFXMaterialData& GetMaterialData() const
+    {
+        return materialData;
+    }
+
     // Editor編集用にMaterialDataへ直接アクセスする。
-    VFXMaterialData& GetEditableMaterialData() { return materialData; }
+    VFXMaterialData& GetEditableMaterialData()
+    {
+        return materialData;
+    }
 
     // MaterialData内のTexture PathからSRVを読み込み、足りないSlotはDummy Textureで補う。
     bool LoadTextures(ID3D11Device* device_);
     // Serializerなどで読み込んだDataをResourceへ反映する。
     bool ApplyLoadedData(const VFXMaterialData& materialData_);
 
-    const std::string& GetSourceFilePath() const { return sourceFilePath; }
+    const std::string& GetSourceFilePath() const
+    {
+        return sourceFilePath;
+    }
 
     // Assetとして保存・再読み込みする時の元ファイルパスを保持する。
-    void SetSourceFilePath(const std::string& sourceFilePath_) { sourceFilePath = sourceFilePath_; }
+    void SetSourceFilePath(const std::string& sourceFilePath_)
+    {
+        sourceFilePath = sourceFilePath_;
+    }
 
     // MeshVFX/Particle/Decalの描画時にShaderへ渡すTexture SRV。
-    ID3D11ShaderResourceView* GetBaseTexture() const { return baseTexture.Get(); }
-    ID3D11ShaderResourceView* GetMaskTexture() const { return maskTexture.Get(); }
-    ID3D11ShaderResourceView* GetNoiseTexture() const { return noiseTexture.Get(); }
-    ID3D11ShaderResourceView* GetNormalTexture() const { return normalTexture.Get(); }
-    ID3D11ShaderResourceView* GetDistortionTexture() const { return distortionTexture.Get(); }
+    ID3D11ShaderResourceView* GetBaseTexture() const
+    {
+        return baseTexture.Get();
+    }
+
+    ID3D11ShaderResourceView* GetMaskTexture() const
+    {
+        return maskTexture.Get();
+    }
+
+    ID3D11ShaderResourceView* GetNoiseTexture() const
+    {
+        return noiseTexture.Get();
+    }
+
+    ID3D11ShaderResourceView* GetNormalTexture() const
+    {
+        return normalTexture.Get();
+    }
+
+    ID3D11ShaderResourceView* GetDistortionTexture() const
+    {
+        return distortionTexture.Get();
+    }
 
 private:
     // 1つのTexture Slotを読み込む。Pathが空/失敗時はfallbackColorの1px Textureを返す。

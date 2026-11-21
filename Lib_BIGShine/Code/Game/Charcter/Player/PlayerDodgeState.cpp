@@ -31,7 +31,10 @@ void PlayerDodgeState::Enter()
     RegisterJustDodgeActions();
 
     PlayerControllerComponent* player_ = GetPlayerController();
-    if (!player_) return;
+    if (!player_)
+    {
+        return;
+    }
 
     dodgeActive = true;
     justDodgeFrameActive = false;
@@ -83,7 +86,10 @@ void PlayerDodgeState::Enter()
 void PlayerDodgeState::Execute(float elapsedTime_)
 {
     PlayerControllerComponent* player_ = GetPlayerController();
-    if (!player_) return;
+    if (!player_)
+    {
+        return;
+    }
 
     if (justDodgeFrameTimer > 0.0f)
     {
@@ -111,7 +117,10 @@ void PlayerDodgeState::Execute(float elapsedTime_)
 void PlayerDodgeState::Exit()
 {
     PlayerControllerComponent* player_ = GetPlayerController();
-    if (!player_) return;
+    if (!player_)
+    {
+        return;
+    }
 
     EndJustDodgeFrame();
 
@@ -155,10 +164,16 @@ void PlayerDodgeState::NotifyJustDodgeSucceeded()
 // 回避Animationから呼ばれるジャスト回避受付ActionをOwnerへ登録する。
 void PlayerDodgeState::RegisterJustDodgeActions()
 {
-    if (justDodgeActionsRegistered) return;
+    if (justDodgeActionsRegistered)
+    {
+        return;
+    }
 
     const std::shared_ptr<GameObject> owner_ = GetOwner();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     owner_->RegisterAction("Player", frameStartActionName, [this]()
         {
@@ -196,10 +211,16 @@ void PlayerDodgeState::DeactivateDodgeCollision()
 void PlayerDodgeState::SuspendAirDodgeVerticalMovement()
 {
     PlayerControllerComponent* player_ = GetPlayerController();
-    if (!player_) return;
+    if (!player_)
+    {
+        return;
+    }
 
     ColliderComponent* collider_ = player_->GetCollider();
-    if (!collider_) return;
+    if (!collider_)
+    {
+        return;
+    }
 
     if (CharacterMovementComponent* movement_ = player_->GetMovement())
     {
@@ -219,7 +240,10 @@ void PlayerDodgeState::SuspendAirDodgeVerticalMovement()
 // 空中回避前の重力設定を復元し、垂直速度をリセットする。
 void PlayerDodgeState::RestoreAirDodgeVerticalMovement()
 {
-    if (!airDodgeGravityOverridden) return;
+    if (!airDodgeGravityOverridden)
+    {
+        return;
+    }
 
     PlayerControllerComponent* player_ = GetPlayerController();
     ColliderComponent* collider_ = player_ ? player_->GetCollider() : nullptr;
@@ -274,9 +298,15 @@ void PlayerDodgeState::HandleJustDodgeSuccess()
     // 回避Animationの無敵解除後も、成功時に付与した時間だけ被弾を拒否する。
     const auto hurtBox_ = GetComponent<HurtBox>();
     const auto player_ = GetPlayerController();
-    if (hurtBox_ && player_) hurtBox_->AddInvincibilityTime(player_->justDodgeInvincibilityDuration);
+    if (hurtBox_ && player_)
+    {
+        hurtBox_->AddInvincibilityTime(player_->justDodgeInvincibilityDuration);
+    }
     SetCounterAvailable(true);
-    if (player_) player_->GrantJustDodgeCounterTag();
+    if (player_)
+    {
+        player_->GrantJustDodgeCounterTag();
+    }
 
     const std::shared_ptr<BlackboardComponent> blackboard_ =
         GetComponent<BlackboardComponent>();
@@ -304,7 +334,10 @@ void PlayerDodgeState::HandleJustDodgeSuccess()
         owner_->ExecuteAction("Controller.RumbleJustDodge");
         const std::shared_ptr<JustDodgeReactionComponent> reaction_ =
             owner_->GetComponent<JustDodgeReactionComponent>();
-        if (reaction_) reaction_->ExecuteReaction();
+        if (reaction_)
+        {
+            reaction_->ExecuteReaction();
+        }
     }
 }
 
@@ -313,7 +346,10 @@ void PlayerDodgeState::ClearJustDodgeBlackboard()
 {
     const std::shared_ptr<BlackboardComponent> blackboard_ =
         GetComponent<BlackboardComponent>();
-    if (!blackboard_) return;
+    if (!blackboard_)
+    {
+        return;
+    }
 
     blackboard_->SetBool("Dodge", "JustDodgeSucceeded", false);
     blackboard_->SetBool("Dodge", "CanCounter", false);
@@ -340,7 +376,10 @@ void PlayerDodgeState::SetCounterAvailable(bool enabled_)
 
     const std::shared_ptr<BlackboardComponent> blackboard_ =
         GetComponent<BlackboardComponent>();
-    if (!blackboard_) return;
+    if (!blackboard_)
+    {
+        return;
+    }
 
     blackboard_->SetBool("Dodge", "CanCounter", enabled_);
 
@@ -359,10 +398,16 @@ void PlayerDodgeState::SetCounterAvailable(bool enabled_)
 // 文字列Action名をOwnerのActionRegistryへ委譲して実行する。
 void PlayerDodgeState::ExecuteOwnerAction(const std::string& actionName_)
 {
-    if (actionName_.empty()) return;
+    if (actionName_.empty())
+    {
+        return;
+    }
 
     const std::shared_ptr<GameObject> owner_ = GetOwner();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     owner_->ExecuteAction(actionName_);
 }
@@ -373,7 +418,10 @@ void PlayerDodgeState::SendDodgeInputToBlackboard(
 {
     const std::shared_ptr<BlackboardComponent> blackboard_ =
         GetComponent<BlackboardComponent>();
-    if (!blackboard_) return;
+    if (!blackboard_)
+    {
+        return;
+    }
 
     blackboard_->SetVector2(
         PlayerBlackboardCategory::PLAYER,

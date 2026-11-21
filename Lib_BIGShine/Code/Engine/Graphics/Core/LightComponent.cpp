@@ -7,7 +7,10 @@
 void  LightComponent::Update(float et)
 {
     auto t = gameObject.lock()->transform;
-    if (!t) return;
+    if (!t)
+    {
+        return;
+    }
 
     // 1. 最新のワールド行列を取得 (isDirtyなら内部で再計算される)
     DirectX::XMMATRIX worldMat = t->GetWorldMatrix();

@@ -30,70 +30,160 @@ namespace
         const Json_& json_, const char* key_, const DirectX::XMFLOAT3& fallback_)
     {
         const Json_ value_ = json_.value(key_, Json_::array());
-        if (!value_.is_array() || value_.size() < 3u) return fallback_;
+        if (!value_.is_array() || value_.size() < 3u)
+        {
+            return fallback_;
+        }
         return { value_[0].get<float>(), value_[1].get<float>(), value_[2].get<float>() };
     }
 
     template<typename Enum_>
     Enum_ ReadEnum(const Json_& json_, const char* key_, Enum_ fallback_)
     {
-        if (!json_.contains(key_)) return fallback_;
+        if (!json_.contains(key_))
+        {
+            return fallback_;
+        }
         const Json_& value_ = json_[key_];
-        if (value_.is_number_integer()) return static_cast<Enum_>(value_.get<int>());
-        if (!value_.is_string()) return fallback_;
+        if (value_.is_number_integer())
+        {
+            return static_cast<Enum_>(value_.get<int>());
+        }
+        if (!value_.is_string())
+        {
+            return fallback_;
+        }
         const std::string name_ = value_.get<std::string>();
         if constexpr (std::is_same_v<Enum_, ATTACK_TEMPLATE_OWNER_TARGET>)
         {
-            if (name_ == "OWNER") return Enum_::OWNER;
-            if (name_ == "WEAPON") return Enum_::WEAPON;
-            if (name_ == "TARGET") return Enum_::TARGET;
-            if (name_ == "LOCK_ON_TARGET") return Enum_::LOCK_ON_TARGET;
+            if (name_ == "OWNER")
+            {
+                return Enum_::OWNER;
+            }
+            if (name_ == "WEAPON")
+            {
+                return Enum_::WEAPON;
+            }
+            if (name_ == "TARGET")
+            {
+                return Enum_::TARGET;
+            }
+            if (name_ == "LOCK_ON_TARGET")
+            {
+                return Enum_::LOCK_ON_TARGET;
+            }
             return Enum_::SELF;
         }
         if constexpr (std::is_same_v<Enum_, EFFECT_HIT_SHAPE>)
         {
-            if (name_ == "NONE") return Enum_::NONE;
-            if (name_ == "CAPSULE") return Enum_::CAPSULE;
-            if (name_ == "SPHERE_GROUP") return Enum_::SPHERE_GROUP;
-            if (name_ == "FAN") return Enum_::FAN;
+            if (name_ == "NONE")
+            {
+                return Enum_::NONE;
+            }
+            if (name_ == "CAPSULE")
+            {
+                return Enum_::CAPSULE;
+            }
+            if (name_ == "SPHERE_GROUP")
+            {
+                return Enum_::SPHERE_GROUP;
+            }
+            if (name_ == "FAN")
+            {
+                return Enum_::FAN;
+            }
             return Enum_::BOX;
         }
         if constexpr (std::is_same_v<Enum_, KNOCK_BACK_TYPE>)
         {
-            if (name_ == "EFFECT_FORWARD") return Enum_::EFFECT_FORWARD;
-            if (name_ == "FROM_OWNER_TO_TARGET") return Enum_::FROM_OWNER_TO_TARGET;
-            if (name_ == "FROM_EFFECT_TO_TARGET") return Enum_::FROM_EFFECT_TO_TARGET;
+            if (name_ == "EFFECT_FORWARD")
+            {
+                return Enum_::EFFECT_FORWARD;
+            }
+            if (name_ == "FROM_OWNER_TO_TARGET")
+            {
+                return Enum_::FROM_OWNER_TO_TARGET;
+            }
+            if (name_ == "FROM_EFFECT_TO_TARGET")
+            {
+                return Enum_::FROM_EFFECT_TO_TARGET;
+            }
             return Enum_::OWNER_FORWARD;
         }
         if constexpr (std::is_same_v<Enum_, CAMERA_SHAKE_POWER_LEVEL>)
         {
-            if (name_ == "MEDIUM") return Enum_::MEDIUM;
-            if (name_ == "HEAVY") return Enum_::HEAVY;
+            if (name_ == "MEDIUM")
+            {
+                return Enum_::MEDIUM;
+            }
+            if (name_ == "HEAVY")
+            {
+                return Enum_::HEAVY;
+            }
             return Enum_::MINIMUM;
         }
         if constexpr (std::is_same_v<Enum_, ATTACK_EFFECT_TYPE>)
         {
-            if (name_ == "PROJECTILE") return Enum_::PROJECTILE;
-            if (name_ == "AREA_OVER_TIME") return Enum_::AREA_OVER_TIME;
-            if (name_ == "BEAM") return Enum_::BEAM;
-            if (name_ == "BREATH") return Enum_::BREATH;
+            if (name_ == "PROJECTILE")
+            {
+                return Enum_::PROJECTILE;
+            }
+            if (name_ == "AREA_OVER_TIME")
+            {
+                return Enum_::AREA_OVER_TIME;
+            }
+            if (name_ == "BEAM")
+            {
+                return Enum_::BEAM;
+            }
+            if (name_ == "BREATH")
+            {
+                return Enum_::BREATH;
+            }
             return Enum_::INSTANT_AREA;
         }
         if constexpr (std::is_same_v<Enum_, DAMAGE_APPLY_TYPE>)
         {
-            if (name_ == "MULTI_HIT") return Enum_::MULTI_HIT;
-            if (name_ == "DAMAGE_OVER_TIME") return Enum_::DAMAGE_OVER_TIME;
+            if (name_ == "MULTI_HIT")
+            {
+                return Enum_::MULTI_HIT;
+            }
+            if (name_ == "DAMAGE_OVER_TIME")
+            {
+                return Enum_::DAMAGE_OVER_TIME;
+            }
             return Enum_::SINGLE_HIT;
         }
         if constexpr (std::is_same_v<Enum_, ATTACK_HIT_SHAPE>)
         {
-            if (name_ == "NONE") return Enum_::NONE;
-            if (name_ == "BOX") return Enum_::BOX;
-            if (name_ == "CAPSULE") return Enum_::CAPSULE;
-            if (name_ == "SPHERE_GROUP") return Enum_::SPHERE_GROUP;
-            if (name_ == "FAN") return Enum_::FAN;
-            if (name_ == "CONE") return Enum_::CONE;
-            if (name_ == "RAY") return Enum_::RAY;
+            if (name_ == "NONE")
+            {
+                return Enum_::NONE;
+            }
+            if (name_ == "BOX")
+            {
+                return Enum_::BOX;
+            }
+            if (name_ == "CAPSULE")
+            {
+                return Enum_::CAPSULE;
+            }
+            if (name_ == "SPHERE_GROUP")
+            {
+                return Enum_::SPHERE_GROUP;
+            }
+            if (name_ == "FAN")
+            {
+                return Enum_::FAN;
+            }
+            if (name_ == "CONE")
+            {
+                return Enum_::CONE;
+            }
+            if (name_ == "RAY")
+            {
+                return Enum_::RAY;
+            }
             return Enum_::SPHERE;
         }
         return fallback_;
@@ -161,7 +251,10 @@ namespace
         const char* preview_ = previewValue_.empty() ? "(None)" : previewValue_.c_str();
         if (ImGui::BeginCombo(label_, preview_))
         {
-            if (ImGui::Selectable("(None)", value_.empty())) value_.clear();
+            if (ImGui::Selectable("(None)", value_.empty()))
+            {
+                value_.clear();
+            }
             for (const std::string& assetKey_ : assets_)
             {
                 const bool selected_ = previewValue_ == assetKey_;
@@ -173,13 +266,19 @@ namespace
                         label_,
                         value_.c_str());
                 }
-                if (selected_) ImGui::SetItemDefaultFocus();
+                if (selected_)
+                {
+                    ImGui::SetItemDefaultFocus();
+                }
             }
             ImGui::EndCombo();
         }
         ImGui::SameLine();
         const std::string clearLabel_ = std::string("Clear##") + label_;
-        if (ImGui::SmallButton(clearLabel_.c_str())) value_.clear();
+        if (ImGui::SmallButton(clearLabel_.c_str()))
+        {
+            value_.clear();
+        }
         ImGui::SetNextItemWidth(-1.0f);
         const std::string pathLabel_ = std::string("Path##") + label_;
         ImGui::InputText(pathLabel_.c_str(), &value_);
@@ -198,17 +297,26 @@ namespace
                         const std::string disableSuffix_ = "_DisableHitBox";
                         if (actionName_.size() > enableSuffix_.size() &&
                             actionName_.ends_with(enableSuffix_))
-                            prefixes_.push_back(actionName_.substr(0, actionName_.size() - enableSuffix_.size()));
-                        else if (actionName_.size() > disableSuffix_.size() &&
-                            actionName_.ends_with(disableSuffix_))
-                            prefixes_.push_back(actionName_.substr(0, actionName_.size() - disableSuffix_.size()));
+                    {
+                        prefixes_.push_back(actionName_.substr(0, actionName_.size() - enableSuffix_.size()));
                     }
+                    else if (actionName_.size() > disableSuffix_.size() &&
+                            actionName_.ends_with(disableSuffix_))
+                    {
+                        prefixes_.push_back(actionName_.substr(0, actionName_.size() - disableSuffix_.size()));
+                    }
+                }
                 }
             };
         if (gameObjectManager_)
         {
             for (const std::shared_ptr<GameObject>& object_ : gameObjectManager_->GetObjects())
-                if (object_) collectRegistry_(object_->localRegistry);
+            {
+                if (object_)
+                {
+                    collectRegistry_(object_->localRegistry);
+                }
+            }
         }
         collectRegistry_(ActionRegistry::Instance());
         std::sort(prefixes_.begin(), prefixes_.end());
@@ -228,8 +336,14 @@ namespace
             for (const std::string& prefix_ : prefixes_)
             {
                 const bool selected_ = value_ == prefix_;
-                if (ImGui::Selectable(prefix_.c_str(), selected_)) value_ = prefix_;
-                if (selected_) ImGui::SetItemDefaultFocus();
+                if (ImGui::Selectable(prefix_.c_str(), selected_))
+                {
+                    value_ = prefix_;
+                }
+                if (selected_)
+                {
+                    ImGui::SetItemDefaultFocus();
+                }
             }
             ImGui::EndCombo();
         }
@@ -270,7 +384,9 @@ namespace
     {
         Json_ spheres_ = Json_::array();
         for (const AttackEffectSphereTemplate& sphere_ : shape_.spheres)
+        {
             spheres_.push_back({ { "localOffset", ToVectorJson(sphere_.localOffset) }, { "radius", sphere_.radius } });
+        }
         return {
             { "enabled", shape_.enabled }, { "hitBoxName", shape_.hitBoxName },
             { "shape", static_cast<int>(NormalizeAttackHitShape(shape_.shape)) },
@@ -320,15 +436,27 @@ namespace
         for (const std::filesystem::path& root_ : roots_)
         {
             std::error_code error_;
-            if (!std::filesystem::exists(root_, error_)) continue;
+            if (!std::filesystem::exists(root_, error_))
+            {
+                continue;
+            }
             for (const std::filesystem::directory_entry& entry_ :
                 std::filesystem::recursive_directory_iterator(root_, error_))
             {
-                if (error_) break;
-                if (!entry_.is_regular_file() || entry_.path().extension() != ".json") continue;
+                if (error_)
+                {
+                    break;
+                }
+                if (!entry_.is_regular_file() || entry_.path().extension() != ".json")
+                {
+                    continue;
+                }
 
                 std::ifstream input_(entry_.path(), std::ios::binary);
-                if (!input_) continue;
+                if (!input_)
+                {
+                    continue;
+                }
                 std::string contents_(
                     (std::istreambuf_iterator<char>(input_)),
                     std::istreambuf_iterator<char>());
@@ -341,7 +469,10 @@ namespace
                 ReplaceAll(contents_, oldPretty_, newPretty_);
                 ReplaceAll(contents_, oldCompact_, newCompact_);
                 std::ofstream output_(entry_.path(), std::ios::binary | std::ios::trunc);
-                if (output_) output_.write(contents_.data(), contents_.size());
+                if (output_)
+                {
+                    output_.write(contents_.data(), contents_.size());
+                }
             }
         }
     }
@@ -363,7 +494,10 @@ void AttackTemplateManager::LoadAll()
     for (const std::filesystem::directory_entry& entry_ :
         std::filesystem::directory_iterator(root_, error_))
     {
-        if (error_) break;
+        if (error_)
+        {
+            break;
+        }
         if (entry_.is_regular_file() && entry_.path().extension() == ".json")
         {
             LoadTemplate(WindowsDialogHelper::PathToUtf8(entry_.path()));
@@ -392,10 +526,19 @@ bool AttackTemplateManager::LoadTemplate(const std::string& path_)
 {
     // 旧キーも読み取れるようfallbackを多めに持ち、保存済みAssetを壊さず復元する。
     std::ifstream stream_(WindowsDialogHelper::Utf8ToPath(NormalizeAttackTemplatePath(path_)));
-    if (!stream_) return false;
+    if (!stream_)
+    {
+        return false;
+    }
     Json_ json_ = Json_::parse(stream_, nullptr, false);
-    if (json_.is_discarded()) return false;
-    if (json_.value("AssetType", std::string("AttackTemplate")) != "AttackTemplate") return false;
+    if (json_.is_discarded())
+    {
+        return false;
+    }
+    if (json_.value("AssetType", std::string("AttackTemplate")) != "AttackTemplate")
+    {
+        return false;
+    }
 
     AttackTemplate result_{};
     result_.telegraph = AttackTelegraphRuntime::DeserializeSettings(json_.value("telegraph", Json_::object()));
@@ -533,17 +676,28 @@ bool AttackTemplateManager::LoadTemplate(const std::string& path_)
         effect_.speed = effectJson_.value("speed", 0.0f);
         effect_.localDirection = ReadVector3(effectJson_, "localDirection", effect_.localDirection);
         for (const Json_& shapeJson_ : effectJson_.value("hitShapes", Json_::array()))
+        {
             effect_.hitShapes.push_back(ReadAttackHitShape(shapeJson_));
+        }
         result_.attackEffects.push_back(effect_);
     }
-    if (AttackTemplate* existing_ = FindTemplate(result_.id)) *existing_ = result_;
-    else templates.push_back(result_);
+    if (AttackTemplate* existing_ = FindTemplate(result_.id))
+    {
+        *existing_ = result_;
+    }
+    else
+    {
+        templates.push_back(result_);
+    }
     return true;
 }
 
 bool AttackTemplateManager::SaveTemplate(const AttackTemplate& attackTemplate_)
 {
-    if (attackTemplate_.id.empty()) return false;
+    if (attackTemplate_.id.empty())
+    {
+        return false;
+    }
 
     // Editorで調整した攻撃データを、Animation Sequencerから参照できるID付きJSONとして保存する。
     std::printf(
@@ -579,7 +733,9 @@ bool AttackTemplateManager::SaveTemplate(const AttackTemplate& attackTemplate_)
     {
         Json_ hitShapes_ = Json_::array();
         for (const AttackEffectHitShapeTemplate& shape_ : effect_.hitShapes)
+        {
             hitShapes_.push_back(WriteAttackHitShape(shape_));
+        }
         attackEffects_.push_back({
             { "enabled", effect_.enabled }, { "effectType", static_cast<int>(effect_.effectType) },
             { "particlePath", effect_.particlePath }, { "meshVfxPath", effect_.meshVfxPath },
@@ -652,20 +808,29 @@ bool AttackTemplateManager::SaveTemplate(const AttackTemplate& attackTemplate_)
     std::error_code error_;
     std::filesystem::create_directories(path_.parent_path(), error_);
     std::ofstream stream_(path_);
-    if (!stream_) return false;
+    if (!stream_)
+    {
+        return false;
+    }
     stream_ << json_.dump(4);
     return true;
 }
 
 bool AttackTemplateManager::DuplicateTemplate(const AttackTemplate& source_, const std::string& newId_)
 {
-    if (newId_.empty() || FindTemplate(newId_)) return false;
+    if (newId_.empty() || FindTemplate(newId_))
+    {
+        return false;
+    }
 
     // 既存テンプレートをベースに、IDだけ差し替えた新規攻撃Assetを作る。
     AttackTemplate copy_ = source_;
     copy_.id = newId_;
     copy_.displayName = newId_;
-    if (!SaveTemplate(copy_)) return false;
+    if (!SaveTemplate(copy_))
+    {
+        return false;
+    }
     templates.push_back(copy_);
     return true;
 }
@@ -697,7 +862,10 @@ std::string AttackTemplateManager::ResolveRenamedTemplateId(
     for (size_t depth_ = 0; depth_ < renamedTemplateIds.size(); ++depth_)
     {
         const auto iterator_ = renamedTemplateIds.find(resolvedId_);
-        if (iterator_ == renamedTemplateIds.end() || iterator_->second == resolvedId_) break;
+        if (iterator_ == renamedTemplateIds.end() || iterator_->second == resolvedId_)
+        {
+            break;
+        }
         resolvedId_ = iterator_->second;
     }
 
@@ -708,15 +876,24 @@ std::string AttackTemplateManager::NormalizeAttackTemplatePath(const std::string
 {
     // IDだけ渡された場合でもData/AttackTemplate/*.jsonとして扱えるようパスを正規化する。
     std::filesystem::path path_ = WindowsDialogHelper::Utf8ToPath(pathOrId_);
-    if (path_.extension() != ".json") path_ += ".json";
-    if (!path_.has_parent_path()) path_ = WindowsDialogHelper::Utf8ToPath("Data/AttackTemplate") / path_;
+    if (path_.extension() != ".json")
+    {
+        path_ += ".json";
+    }
+    if (!path_.has_parent_path())
+    {
+        path_ = WindowsDialogHelper::Utf8ToPath("Data/AttackTemplate") / path_;
+    }
     return WindowsDialogHelper::PathToUtf8(path_.lexically_normal());
 }
 
 void AttackTemplateManager::OpenEditor(const std::string& id_)
 {
     // Window版Editorを開く前に一覧を読み込み、編集対象IDとリネーム用バッファをそろえる。
-    if (!loaded) LoadAll();
+    if (!loaded)
+    {
+        LoadAll();
+    }
     editingTemplateId = id_;
     editingIdBuffer = id_;
     renamedTemplateId.clear();
@@ -1333,7 +1510,10 @@ bool AttackTemplateManager::DrawEditorContent(
 
     if (ImGui::CollapsingHeader("Attack Effects", ImGuiTreeNodeFlags_DefaultOpen))
     {
-        if (ImGui::Button("Add Attack Effect")) attackTemplate_->attackEffects.emplace_back();
+        if (ImGui::Button("Add Attack Effect"))
+        {
+            attackTemplate_->attackEffects.emplace_back();
+        }
         int removeEffectIndex_ = -1;
         int duplicateEffectIndex_ = -1;
         for (int effectIndex_ = 0; effectIndex_ < static_cast<int>(attackTemplate_->attackEffects.size()); ++effectIndex_)
@@ -1346,7 +1526,9 @@ bool AttackTemplateManager::DrawEditorContent(
                 int effectType_ = static_cast<int>(effect_.effectType);
                 const char* effectNames_[] = { "Instant Area", "Projectile", "Area Over Time", "Beam", "Breath" };
                 if (ImGui::Combo("Effect Type", &effectType_, effectNames_, IM_ARRAYSIZE(effectNames_)))
+                {
                     effect_.effectType = static_cast<ATTACK_EFFECT_TYPE>(effectType_);
+                }
                 DrawAssetPathCombo("Particle Path", effect_.particlePath, particleAssets_, effectManager_, true);
                 DrawAssetPathCombo("Mesh VFX Path", effect_.meshVfxPath, meshVfxAssets_, effectManager_, false);
                 ImGui::DragFloat("Spawn Time Offset", &effect_.spawnTimeOffset, 0.01f, 0.0f);
@@ -1359,7 +1541,10 @@ bool AttackTemplateManager::DrawEditorContent(
                 ImGui::InputText("Base Node", &effect_.baseNodeName);
                 ImGui::DragFloat("Speed", &effect_.speed, 0.1f, 0.0f);
                 DrawVector3("Local Direction", effect_.localDirection);
-                if (ImGui::Button("Add Hit Shape")) effect_.hitShapes.emplace_back();
+                if (ImGui::Button("Add Hit Shape"))
+                {
+                    effect_.hitShapes.emplace_back();
+                }
                 int removeShapeIndex_ = -1;
                 for (int shapeIndex_ = 0; shapeIndex_ < static_cast<int>(effect_.hitShapes.size()); ++shapeIndex_)
                 {
@@ -1392,7 +1577,9 @@ bool AttackTemplateManager::DrawEditorContent(
                             }
                         }
                         if (ImGui::Combo("Shape", &shapeType_, shapeNames_, IM_ARRAYSIZE(shapeNames_)))
+                        {
                             shape_.shape = supportedShapes_[shapeType_];
+                        }
                         DrawVector3("Hit Offset", shape_.localOffset);
                         DrawVector3("Hit Rotation", shape_.localRotation);
                         DrawVector3("Hit Scale", shape_.localScale);
@@ -1404,7 +1591,9 @@ bool AttackTemplateManager::DrawEditorContent(
                             ImGui::DragFloat("Fan Half Height", &shape_.halfHeight, .1f, 0.0f, 10.0f);
                         }
                         if (shape_.shape == ATTACK_HIT_SHAPE::CAPSULE)
+                        {
                             ImGui::DragFloat("Half Height", &shape_.halfHeight, 0.01f, 0.0f);
+                        }
                         if (shape_.shape == ATTACK_HIT_SHAPE::BOX)
                         {
                             ImGui::DragFloat("Box Length", &shape_.range, 0.1f, 0.01f, 200.0f);
@@ -1417,7 +1606,10 @@ bool AttackTemplateManager::DrawEditorContent(
                         ImGui::Checkbox("Allow Multi Hit", &shape_.allowMultiHit);
                         if (shape_.shape == ATTACK_HIT_SHAPE::SPHERE_GROUP)
                         {
-                            if (ImGui::Button("Add Sphere")) shape_.spheres.emplace_back();
+                            if (ImGui::Button("Add Sphere"))
+                            {
+                                shape_.spheres.emplace_back();
+                            }
                             int removeSphereIndex_ = -1;
                             for (int sphereIndex_ = 0; sphereIndex_ < static_cast<int>(shape_.spheres.size()); ++sphereIndex_)
                             {
@@ -1425,31 +1617,52 @@ bool AttackTemplateManager::DrawEditorContent(
                                 ImGui::Text("Sphere %d", sphereIndex_ + 1);
                                 DrawVector3("Sphere Offset", shape_.spheres[sphereIndex_].localOffset);
                                 ImGui::DragFloat("Sphere Radius", &shape_.spheres[sphereIndex_].radius, 0.01f, 0.01f);
-                                if (ImGui::Button("Remove Sphere")) removeSphereIndex_ = sphereIndex_;
+                                if (ImGui::Button("Remove Sphere"))
+                                {
+                                    removeSphereIndex_ = sphereIndex_;
+                                }
                                 ImGui::PopID();
                             }
                             if (removeSphereIndex_ >= 0)
+                            {
                                 shape_.spheres.erase(shape_.spheres.begin() + removeSphereIndex_);
+                            }
                         }
-                        if (ImGui::Button("Remove Hit Shape")) removeShapeIndex_ = shapeIndex_;
+                        if (ImGui::Button("Remove Hit Shape"))
+                        {
+                            removeShapeIndex_ = shapeIndex_;
+                        }
                         ImGui::TreePop();
                     }
                     ImGui::PopID();
                 }
-                if (removeShapeIndex_ >= 0) effect_.hitShapes.erase(effect_.hitShapes.begin() + removeShapeIndex_);
-                if (ImGui::Button("Duplicate Effect")) duplicateEffectIndex_ = effectIndex_;
+                if (removeShapeIndex_ >= 0)
+                {
+                    effect_.hitShapes.erase(effect_.hitShapes.begin() + removeShapeIndex_);
+                }
+                if (ImGui::Button("Duplicate Effect"))
+                {
+                    duplicateEffectIndex_ = effectIndex_;
+                }
                 ImGui::SameLine();
-                if (ImGui::Button("Remove Effect")) removeEffectIndex_ = effectIndex_;
+                if (ImGui::Button("Remove Effect"))
+                {
+                    removeEffectIndex_ = effectIndex_;
+                }
                 ImGui::TreePop();
             }
             ImGui::PopID();
         }
         if (duplicateEffectIndex_ >= 0)
+        {
             attackTemplate_->attackEffects.insert(
                 attackTemplate_->attackEffects.begin() + duplicateEffectIndex_ + 1,
                 attackTemplate_->attackEffects[duplicateEffectIndex_]);
+        }
         if (removeEffectIndex_ >= 0)
+        {
             attackTemplate_->attackEffects.erase(attackTemplate_->attackEffects.begin() + removeEffectIndex_);
+        }
     }
 
     ImGui::Separator();
@@ -1476,10 +1689,16 @@ bool AttackTemplateManager::DrawEditorContent(
                     std::string newPath_ = NormalizeAttackTemplatePath(requestedId_);
                     std::transform(
                         oldPath_.begin(), oldPath_.end(), oldPath_.begin(),
-                        [](unsigned char character_) { return static_cast<char>(std::tolower(character_)); });
+                        [](unsigned char character_)
+                    {
+                        return static_cast<char>(std::tolower(character_));
+                    });
                     std::transform(
                         newPath_.begin(), newPath_.end(), newPath_.begin(),
-                        [](unsigned char character_) { return static_cast<char>(std::tolower(character_)); });
+                        [](unsigned char character_)
+                    {
+                        return static_cast<char>(std::tolower(character_));
+                    });
                     if (oldPath_ != newPath_)
                     {
                         std::error_code error_;
@@ -1502,7 +1721,10 @@ bool AttackTemplateManager::DrawEditorContent(
     if (ImGui::BeginPopup("AttackTemplateIdConflict"))
     {
         ImGui::TextDisabled("That AttackTemplate ID already exists.");
-        if (ImGui::Button("OK")) ImGui::CloseCurrentPopup();
+        if (ImGui::Button("OK"))
+        {
+            ImGui::CloseCurrentPopup();
+        }
         ImGui::EndPopup();
     }
 

@@ -29,7 +29,10 @@ namespace
         case VFX_MATERIAL_COLOR_RAMP_WRAP_MODE::MIRROR:
         {
             position_ = std::fmod(position_, 2.0f);
-            if (position_ < 0.0f) position_ += 2.0f;
+            if (position_ < 0.0f)
+            {
+                position_ += 2.0f;
+            }
             return position_ > 1.0f ? 2.0f - position_ : position_;
         }
         default:
@@ -117,13 +120,22 @@ DirectX::XMFLOAT4 VFXMaterialColorUtility::SampleColorRamp(
             return left_.position < right_.position;
         });
 
-    if (position_ <= stops_.front().position) return stops_.front().color;
-    if (position_ >= stops_.back().position) return stops_.back().color;
+    if (position_ <= stops_.front().position)
+    {
+        return stops_.front().color;
+    }
+    if (position_ >= stops_.back().position)
+    {
+        return stops_.back().color;
+    }
 
     for (size_t stopIndex_ = 1u; stopIndex_ < stops_.size(); ++stopIndex_)
     {
         const VFXMaterialColorRampStopData& nextStop_ = stops_[stopIndex_];
-        if (position_ > nextStop_.position) continue;
+        if (position_ > nextStop_.position)
+        {
+            continue;
+        }
 
         const VFXMaterialColorRampStopData& previousStop_ = stops_[stopIndex_ - 1u];
         const float range_ = (std::max)(nextStop_.position - previousStop_.position, 0.0001f);
@@ -171,7 +183,10 @@ DirectX::XMFLOAT4 VFXMaterialColorUtility::ApplyColorRamp(
 {
     BS_PROFILE_SCOPE("VFXMaterialColorUtility::ApplyColorRamp");
 
-    if (!colorRamp_.enabled) return baseColor_;
+    if (!colorRamp_.enabled)
+    {
+        return baseColor_;
+    }
     // Rampが無効なら元色をそのまま返し、有効ならBlendColorに合成を任せる。
     return BlendColor(
         baseColor_,
@@ -188,7 +203,10 @@ DirectX::XMFLOAT4 VFXMaterialColorUtility::ApplyRandomColor(
 {
     BS_PROFILE_SCOPE("VFXMaterialColorUtility::ApplyRandomColor");
 
-    if (!randomColorData_.enabled) return baseColor_;
+    if (!randomColorData_.enabled)
+    {
+        return baseColor_;
+    }
     const VFX_MATERIAL_COLOR_RAMP_BLEND_MODE blendMode_ =
         randomColorData_.mode == VFX_MATERIAL_RANDOM_COLOR_MODE::OVERRIDE
             ? VFX_MATERIAL_COLOR_RAMP_BLEND_MODE::OVERRIDE
@@ -240,6 +258,9 @@ DirectX::XMFLOAT4 VFXMaterialColorUtility::BlendColor(
         break;
     }
 
-    if (!affectAlpha_) targetColor_.w = baseColor_.w;
+    if (!affectAlpha_)
+    {
+        targetColor_.w = baseColor_.w;
+    }
     return LerpColor(baseColor_, targetColor_, influenceClamped_);
 }

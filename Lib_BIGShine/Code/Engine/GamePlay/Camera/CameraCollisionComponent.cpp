@@ -4,11 +4,13 @@
 
 #include "CameraComponent.h"
 #include "CameraLockOnComponent.h"
+#include "SpecialAttackCameraComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/GamePlay/Serialize/ComponentRegistry.h"
 #include "Engine/GamePlay/Transform/Transform.h"
 #include "Engine/Physics/ColliderComponent.h"
+#include "Engine/Physics/ContainmentVolumeComponent.h"
 #include "Engine/Physics/PhysXSystem.h"
 
 #include <algorithm>
@@ -43,7 +45,10 @@ namespace
 
     const char* GetCameraCollisionLayerName(uint32_t layer_)
     {
-        if (layer_ == static_cast<uint32_t>(LayerType::Default)) return "Default";
+        if (layer_ == static_cast<uint32_t>(LayerType::Default))
+        {
+            return "Default";
+        }
 
         for (const CameraCollisionLayerView& layerView_ : cameraCollisionLayerViews_)
         {
@@ -59,14 +64,20 @@ namespace
     ColliderComponent* GetColliderFromActor(const PxRigidActor* actor_)
     {
         // PhysX ActorのuserDataにはColliderComponentを入れている想定。
-        if (!actor_ || !actor_->userData) return nullptr;
+        if (!actor_ || !actor_->userData)
+        {
+            return nullptr;
+        }
         return static_cast<ColliderComponent*>(actor_->userData);
     }
 
     uint32_t GetShapeLayer(const PxShape* shape_)
     {
         // Query用FilterDataを優先し、未設定ならSimulation側のLayerを見る。
-        if (!shape_) return static_cast<uint32_t>(LayerType::Default);
+        if (!shape_)
+        {
+            return static_cast<uint32_t>(LayerType::Default);
+        }
 
         PxFilterData filterData_ = shape_->getQueryFilterData();
         if (filterData_.word0 == 0u)
@@ -88,9 +99,16 @@ namespace
         uint32_t layerMask_)
     {
         // Shape/ActorがCamera Collision対象Layerかを判定する。
-        if (!shape_ || !actor_) return false;
+        if (!shape_ || !actor_)
+        {
+            return false;
+        }
 
         PxFilterData filterData_ = shape_->getQueryFilterData();
+        if ((filterData_.word1 & ContainmentVolumeComponent::IGNORE_CAMERA_QUERY_BIT) != 0u)
+        {
+            return false;
+        }
         if (filterData_.word0 == 0u)
         {
             filterData_ = shape_->getSimulationFilterData();
@@ -133,7 +151,10 @@ namespace
             // Scene Query不可、Trigger、Mask外、Ignore対象はSweep/Raycastから除外する。
             (void)filterData_;
             (void)queryFlags_;
-            if (!shape_ || !actor_) return PxQueryHitType::eNONE;
+            if (!shape_ || !actor_)
+            {
+                return PxQueryHitType::eNONE;
+            }
             if (!shape_->getFlags().isSet(PxShapeFlag::eSCENE_QUERY_SHAPE))
             {
                 return PxQueryHitType::eNONE;
@@ -181,11 +202,17 @@ namespace
         std::vector<const void*>& userData_)
     {
         // 指定Object配下のColliderComponentをPhysX userData比較用に集める。
-        if (!object_) return;
+        if (!object_)
+        {
+            return;
+        }
         for (const std::shared_ptr<ColliderComponent>& collider_ :
             object_->GetComponents<ColliderComponent>())
         {
-            if (collider_) userData_.push_back(collider_.get());
+            if (collider_)
+            {
+                userData_.push_back(collider_.get());
+            }
         }
     }
 
@@ -222,14 +249,28 @@ void CameraCollisionComponent::LateUpdate(float deltaTime_)
 {
     ResolveReferences();
     // 他Camera制御やDebug用途でSuppressed中は補正しない。
-    if (collisionSuppressed) return;
+    if (collisionSuppressed)
+    {
+        return;
+    }
 
     const std::shared_ptr<CameraComponent> camera_ = camera.lock();
-    if (!camera_ || !PhysXSystem::GetScene()) return;
+    if (!camera_ || !PhysXSystem::GetScene())
+    {
+        return;
+    }
 
-    const DirectX::XMFLOAT3 start_ = camera_->GetFocus();
+    const auto owner_ = GetGameObject();
+    const auto special_ = owner_ ? owner_->GetComponent<SpecialAttackCameraComponent>() : nullptr;
+    const bool specialTracking_ = special_ && special_->HasTrackingPose();
+    const auto lockOnCamera_ = lockOnCamera.lock();
+    const DirectX::XMFLOAT3 focus_ = camera_->GetFocus();
+    // 通常ロックオンでは敵側へ動く注視点を避け、TPSと同じプレイヤー基準で遮蔽を探す。
+    const DirectX::XMFLOAT3 start_ = !specialTracking_ && lockOnCamera_ && lockOnCamera_->HasTrackingPose()
+        ? lockOnCamera_->GetCollisionAnchor()
+        : focus_;
     const DirectX::XMFLOAT3 desiredPosition_ = camera_->GetEye();
-    // Focusから現在Camera位置までを理想Camera Lineとして扱う。
+    // 衝突判定の基準点からカメラまでをスイープする。
     const DirectX::XMFLOAT3 difference_
     {
         desiredPosition_.x - start_.x,
@@ -240,16 +281,22 @@ void CameraCollisionComponent::LateUpdate(float deltaTime_)
         difference_.x * difference_.x +
         difference_.y * difference_.y +
         difference_.z * difference_.z);
-    if (desiredDistance_ <= 0.001f) return;
+    if (desiredDistance_ <= 0.001f)
+    {
+        return;
+    }
 
-    const std::shared_ptr<CameraLockOnComponent> lockOnCamera_ =
-        lockOnCamera.lock();
     std::vector<const void*> ignoredUserData_;
     // 自分自身、追従Target、LockOn対象などはCamera遮蔽物として扱わない。
     CollectIgnoredUserData(GetGameObject(), ignoredUserData_);
     CollectIgnoredUserData(ignoreTarget.lock(), ignoredUserData_);
     CollectIgnoredUserData(ignoreLockOnTarget.lock(), ignoredUserData_);
-    if (lockOnCamera_)
+    if (specialTracking_)
+    {
+        CollectIgnoredUserData(special_->GetPlayerTarget(), ignoredUserData_);
+        CollectIgnoredUserData(special_->GetAttackTarget(), ignoredUserData_);
+    }
+    else if (lockOnCamera_)
     {
         CollectIgnoredUserData(lockOnCamera_->GetPlayerTarget(), ignoredUserData_);
         CollectIgnoredUserData(lockOnCamera_->GetLockOnTarget(), ignoredUserData_);
@@ -261,7 +308,10 @@ void CameraCollisionComponent::LateUpdate(float deltaTime_)
         desiredPosition_,
         ignoredUserData_,
         hitDistance_);
-    if (hasHit_ && !std::isfinite(hitDistance_)) return;
+    if (hasHit_ && !std::isfinite(hitDistance_))
+    {
+        return;
+    }
 
     const DirectX::XMFLOAT3 direction_
     {
@@ -296,16 +346,9 @@ void CameraCollisionComponent::LateUpdate(float deltaTime_)
         0.0f,
         1.0f);
 
-    const bool isLockOnActive_ =
-        lockOnCamera_ &&
-        lockOnCamera_->IsLockOnEnabled();
-    const bool canLift_ = enableLockOnCollisionLift && isLockOnActive_;
-    // 壁際専用カメラが内側へ逃がした後に、通常の持ち上げ補正で上へ跳ねすぎないよう弱める。
-    const float arenaWallCameraRate_ =
-        reduceCollisionLiftWhenArenaWallCameraActive &&
-            lockOnCamera_ &&
-            lockOnCamera_->IsWallCameraActive()
-        ? lockOnCamera_->GetWallCameraRate()
+    const bool canLift_ = enableLockOnCollisionLift && specialTracking_;
+    const float arenaWallCameraRate_ = reduceCollisionLiftWhenArenaWallCameraActive && specialTracking_ && special_->IsWallCameraActive()
+        ? special_->GetWallCameraRate()
         : 0.0f;
     const float safeLiftStartRate_ = std::clamp(
         collisionLiftStartRate,
@@ -332,10 +375,9 @@ void CameraCollisionComponent::LateUpdate(float deltaTime_)
         1.0f - std::exp(-(std::max)(liftSpeed_, 0.1f) * safeDeltaTime_),
         0.0f,
         1.0f);
-    currentCollisionLift = std::lerp(
-        currentCollisionLift,
-        targetCollisionLift_,
-        smoothingRate_);
+    currentCollisionLift = specialTracking_
+        ? std::lerp(currentCollisionLift, targetCollisionLift_, smoothingRate_)
+        : 0.0f;
 
     DirectX::XMFLOAT3 finalPosition_ = limitedPosition_;
     if (canLift_ && currentCollisionLift > 0.001f)
@@ -370,25 +412,28 @@ void CameraCollisionComponent::LateUpdate(float deltaTime_)
         return;
     }
 
-    if (isLockOnActive_ &&
-        lockOnCamera_->ApplyCollisionComposition(
+    if (specialTracking_ &&
+        special_->ApplyCollisionComposition(
             finalPosition_,
             start_,
             debugCompressionRate,
             currentCollisionLift,
             deltaTime_))
     {
-        // LockOn側が壁際専用構図へ補正できた場合は、ここではPoseを上書きしない。
+        // 特殊攻撃カメラが壁際の構図まで補正した場合は、その姿勢を使う。
         return;
     }
-    ApplyCameraPose(finalPosition_, start_);
+    ApplyCameraPose(finalPosition_, focus_);
 }
 
 void CameraCollisionComponent::ResolveReferences()
 {
     // 必要なComponentとIgnore対象を、失効している場合だけ再取得する。
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     if (camera.expired())
     {
@@ -420,10 +465,16 @@ bool CameraCollisionComponent::SweepCameraSegment(
     BS_PROFILE_SCOPE("CameraCollisionComponent::SweepCameraSegment");
 
     PxScene* scene_ = PhysXSystem::GetScene();
-    if (!scene_) return false;
+    if (!scene_)
+    {
+        return false;
+    }
 
     const float distance_ = DistanceFloat3(startPosition_, endPosition_);
-    if (distance_ <= 0.001f) return false;
+    if (distance_ <= 0.001f)
+    {
+        return false;
+    }
 
     debugLastHitObjectName.clear();
     debugLastHitColliderName.clear();
@@ -441,7 +492,10 @@ bool CameraCollisionComponent::SweepCameraSegment(
 
     PxQueryFlags queryFlags_ = PxQueryFlag::eSTATIC | PxQueryFlag::ePREFILTER;
     // 動的ColliderをCamera衝突へ含めるかは設定で切り替える。
-    if (includeDynamicColliders) queryFlags_ |= PxQueryFlag::eDYNAMIC;
+    if (includeDynamicColliders)
+    {
+        queryFlags_ |= PxQueryFlag::eDYNAMIC;
+    }
     const PxQueryFilterData filterData_(
         PxFilterData(cameraCollisionLayerMask, 0u, 0u, 0u),
         queryFlags_);
@@ -503,7 +557,10 @@ bool CameraCollisionComponent::SweepCameraSegment(
         }
     }
 
-    if (!hasHit_) return false;
+    if (!hasHit_)
+    {
+        return false;
+    }
 
     hitDistance_ = nearestHitDistance_;
     return true;
@@ -550,7 +607,10 @@ void CameraCollisionComponent::ApplyCameraPose(
 {
     // CameraのLookAt姿勢をTransformにも反映し、GameObject上のCamera位置と実Viewを同期する。
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_ || !owner_->transform) return;
+    if (!owner_ || !owner_->transform)
+    {
+        return;
+    }
 
     const DirectX::XMMATRIX viewMatrix_ = DirectX::XMMatrixLookAtLH(
         DirectX::XMLoadFloat3(&cameraPosition_),
@@ -609,9 +669,9 @@ void CameraCollisionComponent::Gui()
     ImGui::Checkbox("Include Dynamic Colliders", &includeDynamicColliders);
     ImGui::Checkbox("Collision Suppressed", &collisionSuppressed);
     DrawCollisionLayerMaskGui();
-    ImGui::SeparatorText("LockOn Collision Lift");
+    ImGui::SeparatorText("Special Attack Camera Lift");
     ImGui::Checkbox(
-        "Enable LockOn Collision Lift",
+        "Enable Special Attack Camera Lift",
         &enableLockOnCollisionLift);
     ImGui::Checkbox(
         "Reduce Lift When Arena Wall Camera Active",
@@ -640,15 +700,10 @@ void CameraCollisionComponent::Gui()
         0.1f,
         0.1f,
         100.0f);
-    if (const std::shared_ptr<CameraLockOnComponent> lockOnCamera_ =
-        lockOnCamera.lock();
-        lockOnCamera_ && lockOnCamera_->IsLockOnEnabled())
-    {
-        ImGui::Text("Desired Distance: %.3f", debugDesiredDistance);
-        ImGui::Text("Corrected Distance: %.3f", debugCorrectedDistance);
-        ImGui::Text("Compression Rate: %.3f", debugCompressionRate);
-        ImGui::Text("Current Collision Lift: %.3f", currentCollisionLift);
-    }
+    ImGui::Text("Desired Distance: %.3f", debugDesiredDistance);
+    ImGui::Text("Corrected Distance: %.3f", debugCorrectedDistance);
+    ImGui::Text("Compression Rate: %.3f", debugCompressionRate);
+    ImGui::Text("Current Collision Lift: %.3f", currentCollisionLift);
     ImGui::SeparatorText("Last Camera Collision Hit");
     ImGui::Text(
         "Object: %s",
@@ -665,7 +720,11 @@ void CameraCollisionComponent::Gui()
 
 void CameraCollisionComponent::Serialize(nlohmann::json& json_) const
 {
-    if (runtimeSettingsActive) { json_ = originalRuntimeSettings; return; }
+    if (runtimeSettingsActive)
+    {
+        json_ = originalRuntimeSettings;
+        return;
+    }
     // Debug値や現在Lift量はRuntime状態なので保存しない。
     json_["ignoreTargetName"] = ignoreTargetName;
     json_["ignoreLockOnTargetName"] = ignoreLockOnTargetName;
@@ -745,7 +804,10 @@ void CameraCollisionComponent::ApplyRuntimeSettings(const nlohmann::json& settin
 
 void CameraCollisionComponent::ClearRuntimeSettings()
 {
-    if (!runtimeSettingsActive) return;
+    if (!runtimeSettingsActive)
+    {
+        return;
+    }
     const auto original_ = originalRuntimeSettings;
     Deserialize(original_);
 }

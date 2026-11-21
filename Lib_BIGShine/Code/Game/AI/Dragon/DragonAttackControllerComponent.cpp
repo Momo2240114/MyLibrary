@@ -24,6 +24,7 @@
 #include "Engine/Graphics/VFX/TrailMeshComponent.h"
 #include "Engine/Math/RandomHelper.h"
 #include "Engine/Physics/ColliderComponent.h"
+#include "Engine/Physics/HitBox.h"
 #include "Engine/Physics/PhysXSystem.h"
 
 #include <algorithm>
@@ -83,7 +84,10 @@ namespace
                 return physx::PxQueryHitType::eNONE;
             }
             physx::PxFilterData shapeFilter_ = shape_->getQueryFilterData();
-            if (shapeFilter_.word0 == 0u) shapeFilter_ = shape_->getSimulationFilterData();
+            if (shapeFilter_.word0 == 0u)
+            {
+                shapeFilter_ = shape_->getSimulationFilterData();
+            }
             constexpr uint32_t GROUND_LAYERS =
                 static_cast<uint32_t>(LayerType::Environment) | static_cast<uint32_t>(LayerType::Terrain);
             if ((shapeFilter_.word0 & GROUND_LAYERS) == 0u ||
@@ -125,7 +129,10 @@ namespace
             value_.x * value_.x +
             value_.y * value_.y +
             value_.z * value_.z);
-        if (length_ <= EPSILON) return { 0.0f, 0.0f, 1.0f };
+        if (length_ <= EPSILON)
+        {
+            return { 0.0f, 0.0f, 1.0f };
+        }
         return {
             value_.x / length_,
             value_.y / length_,
@@ -218,14 +225,20 @@ void DragonAttackControllerComponent::Update(float deltaTime_)
 bool DragonAttackControllerComponent::CanSpawnAttack() const
 {
     const auto owner_ = gameObject.lock();
-    if (!IsEnabled() || !owner_ || !owner_->manager || !owner_->IsCombatReady()) return false;
+    if (!IsEnabled() || !owner_ || !owner_->manager || !owner_->IsCombatReady())
+    {
+        return false;
+    }
     const auto health_ = owner_->GetComponent<HealthComponent>();
     return !health_ || !health_->IsDead();
 }
 
 void DragonAttackControllerComponent::PlayBreath()
 {
-    if (!CanSpawnAttack()) return;
+    if (!CanSpawnAttack())
+    {
+        return;
+    }
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::PlayBreath");
 
     // 旧Action名はシーケンサー互換の入口として残し、実体はProjectileテンプレート生成へ寄せる。
@@ -234,7 +247,10 @@ void DragonAttackControllerComponent::PlayBreath()
 
 void DragonAttackControllerComponent::PlayBreathProjectileSingle()
 {
-    if (!CanSpawnAttack()) return;
+    if (!CanSpawnAttack())
+    {
+        return;
+    }
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::PlayBreathProjectileSingle");
 
     SpawnBreathProjectile("DragonBreathLightSingle");
@@ -242,7 +258,10 @@ void DragonAttackControllerComponent::PlayBreathProjectileSingle()
 
 void DragonAttackControllerComponent::PlayBreathProjectileBeam()
 {
-    if (!CanSpawnAttack()) return;
+    if (!CanSpawnAttack())
+    {
+        return;
+    }
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::PlayBreathProjectileBeam");
 
     SpawnBreathProjectile("DragonBreathLightBeam", BREATH_BEAM_TARGET_AIM_BLEND);
@@ -250,7 +269,10 @@ void DragonAttackControllerComponent::PlayBreathProjectileBeam()
 
 void DragonAttackControllerComponent::PlayBreathProjectileFan()
 {
-    if (!CanSpawnAttack()) return;
+    if (!CanSpawnAttack())
+    {
+        return;
+    }
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::PlayBreathProjectileFan");
 
     SpawnBreathProjectile("DragonBreathLightFan");
@@ -258,7 +280,10 @@ void DragonAttackControllerComponent::PlayBreathProjectileFan()
 
 void DragonAttackControllerComponent::PlayBite()
 {
-    if (!CanSpawnAttack()) return;
+    if (!CanSpawnAttack())
+    {
+        return;
+    }
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::PlayBite");
 
     SpawnAttackHit(
@@ -281,7 +306,10 @@ void DragonAttackControllerComponent::PlayBite()
 
 void DragonAttackControllerComponent::PlayTailSweep()
 {
-    if (!CanSpawnAttack()) return;
+    if (!CanSpawnAttack())
+    {
+        return;
+    }
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::PlayTailSweep");
 
     SpawnAttackHit(
@@ -303,15 +331,26 @@ void DragonAttackControllerComponent::PlayTailSweep()
 
 void DragonAttackControllerComponent::PlaySpinSweep(float rotationDuration_)
 {
-    if (!CanSpawnAttack()) return;
+    if (!CanSpawnAttack())
+    {
+        return;
+    }
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::PlaySpinSweep");
 
     EnsureDependencies();
     for (const RuntimeAttack& runtime_ : runtimeAttacks)
-        if (runtime_.spinSweep) return;
+    {
+        if (runtime_.spinSweep)
+        {
+            return;
+        }
+    }
 
     const auto danger_ = std::find_if(runtimeAttacks.begin(), runtimeAttacks.end(),
-        [](const RuntimeAttack& runtime_) { return runtime_.followSpinDanger; });
+        [](const RuntimeAttack& runtime_)
+    {
+        return runtime_.followSpinDanger;
+    });
     const float radius_ = danger_ != runtimeAttacks.end() ? danger_->dangerAreaRadius : ResolveSpinSweepRadius();
 
     const float lifeTime_ = rotationDuration_ > 0.0f ? rotationDuration_ : spinSweepLifeTime;
@@ -336,7 +375,10 @@ void DragonAttackControllerComponent::StopSpinSweep()
 {
     std::erase_if(runtimeAttacks, [this](RuntimeAttack& runtime_)
     {
-        if (!runtime_.spinSweep && !runtime_.followSpinDanger) return false;
+        if (!runtime_.spinSweep && !runtime_.followSpinDanger)
+        {
+            return false;
+        }
         StopRuntimeAttack(runtime_);
         return true;
     });
@@ -344,7 +386,10 @@ void DragonAttackControllerComponent::StopSpinSweep()
 
 void DragonAttackControllerComponent::PlayStamp()
 {
-    if (!CanSpawnAttack()) return;
+    if (!CanSpawnAttack())
+    {
+        return;
+    }
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::PlayStamp");
 
     SpawnStampHit();
@@ -352,7 +397,10 @@ void DragonAttackControllerComponent::PlayStamp()
 
 void DragonAttackControllerComponent::ShowBreathDangerArea()
 {
-    if (!CanSpawnAttack()) return;
+    if (!CanSpawnAttack())
+    {
+        return;
+    }
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::ShowBreathDangerArea");
 
     ShowBreathProjectileBeamDangerArea();
@@ -360,7 +408,10 @@ void DragonAttackControllerComponent::ShowBreathDangerArea()
 
 void DragonAttackControllerComponent::ShowBreathProjectileSingleDangerArea()
 {
-    if (!CanSpawnAttack()) return;
+    if (!CanSpawnAttack())
+    {
+        return;
+    }
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::ShowBreathProjectileSingleDangerArea");
 
     SpawnBreathChargeEffect();
@@ -378,7 +429,10 @@ void DragonAttackControllerComponent::ShowBreathProjectileSingleDangerArea()
 
 void DragonAttackControllerComponent::ShowBreathProjectileBeamDangerArea()
 {
-    if (!CanSpawnAttack()) return;
+    if (!CanSpawnAttack())
+    {
+        return;
+    }
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::ShowBreathProjectileBeamDangerArea");
 
     SpawnBreathChargeEffect();
@@ -388,14 +442,23 @@ void DragonAttackControllerComponent::ShowBreathProjectileBeamDangerArea()
     DirectX::XMFLOAT3 position_{};
     DirectX::XMFLOAT3 forward_{};
     const auto emitter_ = ResolveBreathAttackEmitterComponent(position_, forward_, BREATH_BEAM_TARGET_AIM_BLEND);
-    if (!emitter_) return;
-    if (!breathProjectileEmitterAssetPath.empty() && !emitter_->LoadAsset(breathProjectileEmitterAssetPath)) return;
+    if (!emitter_)
+    {
+        return;
+    }
+    if (!breathProjectileEmitterAssetPath.empty() && !emitter_->LoadAsset(breathProjectileEmitterAssetPath))
+    {
+        return;
+    }
     forward_ = Normalize(forward_);
     DirectX::XMFLOAT3 start_{};
     DirectX::XMFLOAT3 end_{};
     float radius_ = 0.0f;
     if (!emitter_->ResolveBeamGeometryAt("DragonBreathLightBeam",
-        Add(position_, Scale(forward_, breathProjectileMouthForwardOffset)), forward_, start_, end_, radius_)) return;
+        Add(position_, Scale(forward_, breathProjectileMouthForwardOffset)), forward_, start_, end_, radius_))
+    {
+        return;
+    }
 
     // 判定の両端をXZへ投影し、水平な直線ブレスの全長と発射補正を予兆へ反映する。
     const float deltaX_ = end_.x - start_.x;
@@ -437,7 +500,10 @@ void DragonAttackControllerComponent::ShowBreathProjectileBeamDangerArea()
 
 void DragonAttackControllerComponent::ShowBreathProjectileFanDangerArea()
 {
-    if (!CanSpawnAttack()) return;
+    if (!CanSpawnAttack())
+    {
+        return;
+    }
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::ShowBreathProjectileFanDangerArea");
     BS_PROFILE_PLOT("DragonAttack::FanDangerAreaObjectCount", 1.0f);
 
@@ -454,8 +520,42 @@ void DragonAttackControllerComponent::ShowBreathProjectileFanDangerArea()
 
 void DragonAttackControllerComponent::ShowBiteDangerArea()
 {
-    if (!CanSpawnAttack()) return;
+    if (!dangerAreaEnabled || !CanSpawnAttack())
+    {
+        return;
+    }
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::ShowBiteDangerArea");
+
+    const auto owner_ = GetGameObject();
+    const auto headPart_ = owner_ ? owner_->GetManager().Find("HeadPart") : nullptr;
+    if (headPart_)
+    {
+        for (const auto& hitBox_ : headPart_->GetComponents<HitBox>())
+        {
+            if (hitBox_->GetColliderName() != "BiteHitBox" ||
+                hitBox_->GetCollisionOwnerObjectName() != owner_->GetName())
+            {
+                continue;
+            }
+
+            const Capsule capsule_ = hitBox_->GetCapsuleData();
+            DirectX::XMFLOAT3 segment_{};
+            DirectX::XMStoreFloat3(&segment_, DirectX::XMVectorSubtract(capsule_.p1, capsule_.p0));
+            const float halfLength_ = std::hypot(segment_.x, segment_.z) * 0.5f;
+
+            RuntimeAttack runtime_{};
+            runtime_.lifeTimer = biteLifeTime;
+            runtime_.biteDangerHitBox = hitBox_;
+            AttachDangerArea(runtime_, "RuntimeDragonBiteDangerArea", {}, capsule_.radius,
+                halfLength_ + dangerAreaLengthPadding);
+            if (runtime_.hasDangerArea)
+            {
+                ApplyDangerAreaTransform(runtime_);
+                runtimeAttacks.push_back(runtime_);
+            }
+            return;
+        }
+    }
 
     SpawnDangerArea(
         "RuntimeDragonBiteDangerArea",
@@ -470,7 +570,10 @@ void DragonAttackControllerComponent::ShowBiteDangerArea()
 
 void DragonAttackControllerComponent::ShowTailSweepDangerArea()
 {
-    if (!CanSpawnAttack()) return;
+    if (!CanSpawnAttack())
+    {
+        return;
+    }
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::ShowTailSweepDangerArea");
 
     SpawnDangerArea(
@@ -486,14 +589,25 @@ void DragonAttackControllerComponent::ShowTailSweepDangerArea()
 
 void DragonAttackControllerComponent::ShowSpinSweepDangerArea()
 {
-    if (!CanSpawnAttack()) return;
+    if (!CanSpawnAttack())
+    {
+        return;
+    }
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::ShowSpinSweepDangerArea");
     for (const RuntimeAttack& runtime_ : runtimeAttacks)
-        if (runtime_.followSpinDanger) return;
+    {
+        if (runtime_.followSpinDanger)
+        {
+            return;
+        }
+    }
 
     EnsureDependencies();
     const auto attack_ = std::find_if(runtimeAttacks.begin(), runtimeAttacks.end(),
-        [](const RuntimeAttack& runtime_) { return runtime_.spinSweep; });
+        [](const RuntimeAttack& runtime_)
+    {
+        return runtime_.spinSweep;
+    });
 
     RuntimeAttack preview_{};
     preview_.lifeTimer = spinSweepLifeTime;
@@ -502,19 +616,31 @@ void DragonAttackControllerComponent::ShowSpinSweepDangerArea()
     const float radius_ = hasAttack_ ? runtime_.dangerAreaRadius : ResolveSpinSweepRadius();
 
     AttachDangerArea(runtime_, "RuntimeDragonSpinSweepDangerArea", { 0.0f, 0.0f, 0.0f }, radius_, 0.0f);
-    if (!runtime_.hasDangerArea) return;
+    if (!runtime_.hasDangerArea)
+    {
+        return;
+    }
 
     runtime_.followSpinDanger = true;
     ApplyDangerAreaTransform(runtime_);
-    if (!hasAttack_) runtimeAttacks.push_back(std::move(preview_));
+    if (!hasAttack_)
+    {
+        runtimeAttacks.push_back(std::move(preview_));
+    }
 }
 
 void DragonAttackControllerComponent::ShowStampDangerArea()
 {
-    if (!CanSpawnAttack()) return;
+    if (!CanSpawnAttack())
+    {
+        return;
+    }
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::ShowStampDangerArea");
 
-    if (!dangerAreaEnabled) return;
+    if (!dangerAreaEnabled)
+    {
+        return;
+    }
 
     RuntimeAttack runtime_{};
     runtime_.lifeTimer = stampDangerLifeTime;
@@ -595,7 +721,10 @@ void DragonAttackControllerComponent::StopAttack()
         {
             if (const auto emitterOwner_ = owner_->GetManager().Find(breathEmitterObjectName))
             {
-                if (std::find(owners_.begin(), owners_.end(), emitterOwner_) == owners_.end()) owners_.push_back(emitterOwner_);
+                if (std::find(owners_.begin(), owners_.end(), emitterOwner_) == owners_.end())
+                {
+                    owners_.push_back(emitterOwner_);
+                }
                 {
                     for (const auto& actor_ : owners_) 
                     {
@@ -610,7 +739,10 @@ void DragonAttackControllerComponent::StopAttack()
 void DragonAttackControllerComponent::RegisterActions()
 {
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     UnregisterActions();
     registeredActionCategory = actionCategory;
@@ -622,31 +754,91 @@ void DragonAttackControllerComponent::RegisterActions()
             registeredActionNames.push_back(owner_->BuildActionName(actionName_));
         };
 
-    registerAction_(ACTION_PLAY_BREATH, [this]() { PlayBreath(); });
-    registerAction_(ACTION_PLAY_BREATH_PROJECTILE_SINGLE, [this]() { PlayBreathProjectileSingle(); });
-    registerAction_(ACTION_PLAY_BREATH_PROJECTILE_BEAM, [this]() { PlayBreathProjectileBeam(); });
-    registerAction_(ACTION_PLAY_BREATH_PROJECTILE_FAN, [this]() { PlayBreathProjectileFan(); });
-    registerAction_(ACTION_PLAY_BITE, [this]() { PlayBite(); });
-    registerAction_(ACTION_PLAY_TAIL_SWEEP, [this]() { PlayTailSweep(); });
-    registerAction_(ACTION_PLAY_SPIN_SWEEP, [this]() { PlaySpinSweep(); });
-    registerAction_(ACTION_PLAY_STAMP, [this]() { PlayStamp(); });
-    registerAction_(ACTION_SHOW_BREATH_DANGER_AREA, [this]() { ShowBreathDangerArea(); });
-    registerAction_(ACTION_SHOW_BREATH_PROJECTILE_SINGLE_DANGER_AREA, [this]() { ShowBreathProjectileSingleDangerArea(); });
-    registerAction_(ACTION_SHOW_BREATH_PROJECTILE_BEAM_DANGER_AREA, [this]() { ShowBreathProjectileBeamDangerArea(); });
-    registerAction_(ACTION_SHOW_BREATH_PROJECTILE_FAN_DANGER_AREA, [this]() { ShowBreathProjectileFanDangerArea(); });
-    registerAction_(ACTION_SHOW_BITE_DANGER_AREA, [this]() { ShowBiteDangerArea(); });
-    registerAction_(ACTION_SHOW_TAIL_SWEEP_DANGER_AREA, [this]() { ShowTailSweepDangerArea(); });
-    registerAction_(ACTION_SHOW_SPIN_SWEEP_DANGER_AREA, [this]() { ShowSpinSweepDangerArea(); });
-    registerAction_(ACTION_SHOW_STAMP_DANGER_AREA, [this]() { ShowStampDangerArea(); });
-    registerAction_(ACTION_STOP, [this]() { StopAttack(); });
-    registerAction_("DragonSpecial_ReturnCamera", [this]() { BeginSpecialCameraReturn(); });
-    registerAction_("DragonSpecial_Abort", [this]() { StopSpecialAction(); });
+    registerAction_(ACTION_PLAY_BREATH, [this]()
+    {
+        PlayBreath();
+    });
+    registerAction_(ACTION_PLAY_BREATH_PROJECTILE_SINGLE, [this]()
+    {
+        PlayBreathProjectileSingle();
+    });
+    registerAction_(ACTION_PLAY_BREATH_PROJECTILE_BEAM, [this]()
+    {
+        PlayBreathProjectileBeam();
+    });
+    registerAction_(ACTION_PLAY_BREATH_PROJECTILE_FAN, [this]()
+    {
+        PlayBreathProjectileFan();
+    });
+    registerAction_(ACTION_PLAY_BITE, [this]()
+    {
+        PlayBite();
+    });
+    registerAction_(ACTION_PLAY_TAIL_SWEEP, [this]()
+    {
+        PlayTailSweep();
+    });
+    registerAction_(ACTION_PLAY_SPIN_SWEEP, [this]()
+    {
+        PlaySpinSweep();
+    });
+    registerAction_(ACTION_PLAY_STAMP, [this]()
+    {
+        PlayStamp();
+    });
+    registerAction_(ACTION_SHOW_BREATH_DANGER_AREA, [this]()
+    {
+        ShowBreathDangerArea();
+    });
+    registerAction_(ACTION_SHOW_BREATH_PROJECTILE_SINGLE_DANGER_AREA, [this]()
+    {
+        ShowBreathProjectileSingleDangerArea();
+    });
+    registerAction_(ACTION_SHOW_BREATH_PROJECTILE_BEAM_DANGER_AREA, [this]()
+    {
+        ShowBreathProjectileBeamDangerArea();
+    });
+    registerAction_(ACTION_SHOW_BREATH_PROJECTILE_FAN_DANGER_AREA, [this]()
+    {
+        ShowBreathProjectileFanDangerArea();
+    });
+    registerAction_(ACTION_SHOW_BITE_DANGER_AREA, [this]()
+    {
+        ShowBiteDangerArea();
+    });
+    registerAction_(ACTION_SHOW_TAIL_SWEEP_DANGER_AREA, [this]()
+    {
+        ShowTailSweepDangerArea();
+    });
+    registerAction_(ACTION_SHOW_SPIN_SWEEP_DANGER_AREA, [this]()
+    {
+        ShowSpinSweepDangerArea();
+    });
+    registerAction_(ACTION_SHOW_STAMP_DANGER_AREA, [this]()
+    {
+        ShowStampDangerArea();
+    });
+    registerAction_(ACTION_STOP, [this]()
+    {
+        StopAttack();
+    });
+    registerAction_("DragonSpecial_ReturnCamera", [this]()
+    {
+        BeginSpecialCameraReturn();
+    });
+    registerAction_("DragonSpecial_Abort", [this]()
+    {
+        StopSpecialAction();
+    });
 }
 
 void DragonAttackControllerComponent::UnregisterActions()
 {
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     const std::string removeCategory_ =
         registeredActionCategory.empty() ? actionCategory : registeredActionCategory;
@@ -661,7 +853,10 @@ void DragonAttackControllerComponent::UnregisterActions()
 void DragonAttackControllerComponent::EnsureDependencies()
 {
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     neckIK = owner_->GetComponent<DragonNeckCommandIKComponent>();
     tailIK = owner_->GetComponent<DragonTailCommandIKComponent>();
@@ -673,11 +868,17 @@ void DragonAttackControllerComponent::UpdateRuntimeAttacks(float deltaTime_)
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::UpdateRuntimeAttacks");
     const float safeDeltaTime_ = (std::max)(deltaTime_, 0.0f);
     pendingBeamFrameTimer = (std::max)(pendingBeamFrameTimer - safeDeltaTime_, 0.0f);
-    if (pendingBeamFrameTimer <= 0.0f) pendingBeamFrameValid = false;
+    if (pendingBeamFrameTimer <= 0.0f)
+    {
+        pendingBeamFrameValid = false;
+    }
 
     for (RuntimeAttack& runtime_ : runtimeAttacks)
     {
-        if (!runtime_.spinSweepUsesAIRotation) runtime_.lifeTimer -= safeDeltaTime_;
+        if (!runtime_.spinSweepUsesAIRotation)
+        {
+            runtime_.lifeTimer -= safeDeltaTime_;
+        }
         runtime_.dangerAreaGroundQueryTimer -= safeDeltaTime_;
         ApplyFollowTransform(runtime_);
         ApplyDangerAreaTransform(runtime_);
@@ -690,7 +891,10 @@ void DragonAttackControllerComponent::UpdateRuntimeAttacks(float deltaTime_)
             const float progress_ = runtime_.spinSweepUsesAIRotation
                 ? (ai_ ? ai_->GetSpinTailSweepProgress() : -1.0f)
                 : 1.0f - runtime_.lifeTimer / (std::max)(spinSweepLifeTime, 0.01f);
-            if (progress_ < 0.0f || !CanSpawnAttack()) runtime_.lifeTimer = 0.0f;
+            if (progress_ < 0.0f || !CanSpawnAttack())
+            {
+                runtime_.lifeTimer = 0.0f;
+            }
 
             constexpr float HIT_START_RATE = 0.5f;
             constexpr float HIT_END_RATE = 0.75f;
@@ -699,8 +903,14 @@ void DragonAttackControllerComponent::UpdateRuntimeAttacks(float deltaTime_)
             if (const auto hitComponent_ = runtime_.hitComponent.lock())
             {
                 // 回転角が有効範囲へ入った時だけ再生し、命中履歴を維持する。
-                if (active_ && !runtime_.spinSweepHitActive) hitComponent_->Play();
-                if (!active_ && runtime_.spinSweepHitActive) hitComponent_->Stop();
+                if (active_ && !runtime_.spinSweepHitActive)
+                {
+                    hitComponent_->Play();
+                }
+                if (!active_ && runtime_.spinSweepHitActive)
+                {
+                    hitComponent_->Stop();
+                }
             }
             runtime_.spinSweepHitActive = active_;
             UpdateSpinTailTrails(runtime_, active_);
@@ -710,8 +920,14 @@ void DragonAttackControllerComponent::UpdateRuntimeAttacks(float deltaTime_)
             const auto tailIK_ = tailIK.lock();
             if (const auto hitComponent_ = runtime_.hitComponent.lock())
             {
-                if (tailIK_ && tailIK_->IsAttackActive()) hitComponent_->Play();
-                else hitComponent_->Stop();
+                if (tailIK_ && tailIK_->IsAttackActive())
+                {
+                    hitComponent_->Play();
+                }
+                else
+                {
+                    hitComponent_->Stop();
+                }
             }
         }
     }
@@ -722,8 +938,11 @@ void DragonAttackControllerComponent::UpdateRuntimeAttacks(float deltaTime_)
             runtimeAttacks.end(),
             [this](RuntimeAttack& runtime_)
             {
-                if (runtime_.lifeTimer > 0.0f) return false;
-                StopRuntimeAttack(runtime_);
+                if (runtime_.lifeTimer > 0.0f)
+        {
+            return false;
+        }
+        StopRuntimeAttack(runtime_);
                 return true;
             }),
         runtimeAttacks.end());
@@ -731,7 +950,10 @@ void DragonAttackControllerComponent::UpdateRuntimeAttacks(float deltaTime_)
 
 void DragonAttackControllerComponent::UpdateBreathVFX(float deltaTime_)
 {
-    if (runtimeAttacks.empty()) return;
+    if (runtimeAttacks.empty())
+    {
+        return;
+    }
 
     bool hasBreath_ = false;
     for (const RuntimeAttack& runtime_ : runtimeAttacks)
@@ -742,10 +964,16 @@ void DragonAttackControllerComponent::UpdateBreathVFX(float deltaTime_)
             break;
         }
     }
-    if (!hasBreath_) return;
+    if (!hasBreath_)
+    {
+        return;
+    }
 
     breathVFXTimer -= (std::max)(deltaTime_, 0.0f);
-    if (breathVFXTimer > 0.0f) return;
+    if (breathVFXTimer > 0.0f)
+    {
+        return;
+    }
 
     breathVFXTimer = (std::max)(breathVFXInterval, 0.01f);
     SpawnBreathVFX();
@@ -769,17 +997,26 @@ std::shared_ptr<AttackEffectHitComponent> DragonAttackControllerComponent::Spawn
 {
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::SpawnAttackHit");
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return nullptr;
+    if (!owner_)
+    {
+        return nullptr;
+    }
 
     std::shared_ptr<GameObject> attackObject_ = owner_->GetManager().Create(objectName_);
-    if (!attackObject_) return nullptr;
+    if (!attackObject_)
+    {
+        return nullptr;
+    }
 
     attackObject_->SetNoSaveObject();
     attackObject_->SetLayer(LayerType::EnemyBullet);
 
     std::shared_ptr<AttackEffectHitComponent> hitComponent_ =
         attackObject_->AddComponent<AttackEffectHitComponent>();
-    if (!hitComponent_) return nullptr;
+    if (!hitComponent_)
+    {
+        return nullptr;
+    }
 
     AttackEffectHitShapeTemplate shape_{};
     shape_.hitBoxName = objectName_ + "_Shape";
@@ -842,17 +1079,29 @@ std::shared_ptr<AttackEffectHitComponent> DragonAttackControllerComponent::Spawn
             halfHeight_ + dangerAreaLengthPadding);
         ApplyDangerAreaTransform(runtime_);
     }
-    if (spinSweep_) hitComponent_->Stop();
-    else hitComponent_->Play();
+    if (spinSweep_)
+    {
+        hitComponent_->Stop();
+    }
+    else
+    {
+        hitComponent_->Play();
+    }
     runtimeAttacks.push_back(std::move(runtime_));
-    if (spinSweep_ && showDangerAreaOnAttackStart) ShowSpinSweepDangerArea();
+    if (spinSweep_ && showDangerAreaOnAttackStart)
+    {
+        ShowSpinSweepDangerArea();
+    }
 
     return hitComponent_;
 }
 
 void DragonAttackControllerComponent::ApplyFollowTransform(RuntimeAttack& runtime_)
 {
-    if (!runtime_.object || !runtime_.object->transform) return;
+    if (runtime_.fixedHitPosition || !runtime_.object || !runtime_.object->transform)
+    {
+        return;
+    }
     DirectX::XMFLOAT3 position_{ 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 forward_{ 0.0f, 0.0f, 1.0f };
     bool resolved_ = false;
@@ -880,7 +1129,10 @@ void DragonAttackControllerComponent::ApplyFollowTransform(RuntimeAttack& runtim
     if (!resolved_)
     {
         const std::shared_ptr<GameObject> owner_ = GetGameObject();
-        if (!owner_ || !owner_->transform) return;
+        if (!owner_ || !owner_->transform)
+        {
+            return;
+        }
         position_ = owner_->transform->GetWorldPosition();
         const Vector3 ownerForward_ = owner_->transform->GetFront();
         forward_ = { ownerForward_.x, ownerForward_.y, ownerForward_.z };
@@ -903,11 +1155,29 @@ void DragonAttackControllerComponent::ApplyDangerAreaTransform(RuntimeAttack& ru
     DirectX::XMFLOAT3 position_{ 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 forward_{ 0.0f, 0.0f, 1.0f };
     bool resolved_ = false;
+    float lengthScale_ = 1.0f;
 
-    if (runtime_.followSpinDanger)
+    if (const auto biteHitBox_ = runtime_.biteDangerHitBox.lock())
+    {
+        // 口先と胸側の判定を地面へ投影し、噛みつき中の頭の動きに予告を追従させる。
+        const Capsule capsule_ = biteHitBox_->GetCapsuleData();
+        DirectX::XMStoreFloat3(&position_, DirectX::XMVectorScale(
+            DirectX::XMVectorAdd(capsule_.p0, capsule_.p1), 0.5f));
+        DirectX::XMStoreFloat3(&forward_, DirectX::XMVectorSubtract(capsule_.p0, capsule_.p1));
+        const float halfLength_ = std::hypot(forward_.x, forward_.z) * 0.5f;
+        const float meshHalfLength_ = (std::max)(runtime_.dangerAreaHalfHeight, 0.0f) +
+            (std::max)(runtime_.dangerAreaRadius, 0.01f);
+        lengthScale_ = ((std::max)(halfLength_ + dangerAreaLengthPadding, 0.0f) + capsule_.radius) /
+            meshHalfLength_;
+        resolved_ = true;
+    }
+    else if (runtime_.followSpinDanger)
     {
         const auto owner_ = GetGameObject();
-        if (!owner_ || !owner_->transform) return;
+        if (!owner_ || !owner_->transform)
+        {
+            return;
+        }
         position_ = owner_->transform->GetWorldPosition();
         forward_ = runtime_.dangerAreaFixedForward;
         resolved_ = true;
@@ -959,7 +1229,10 @@ void DragonAttackControllerComponent::ApplyDangerAreaTransform(RuntimeAttack& ru
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!resolved_)
     {
-        if (!owner_ || !owner_->transform) return;
+        if (!owner_ || !owner_->transform)
+        {
+            return;
+        }
         position_ = owner_->transform->GetWorldPosition();
         const Vector3 ownerForward_ = owner_->transform->GetFront();
         forward_ = { ownerForward_.x, ownerForward_.y, ownerForward_.z };
@@ -985,7 +1258,7 @@ void DragonAttackControllerComponent::ApplyDangerAreaTransform(RuntimeAttack& ru
     runtime_.dangerAreaObject->transform->localPosition = groundPosition_;
     runtime_.dangerAreaObject->transform->localRotation =
         ResolveDangerAreaGroundRotation(normalizedForward_, groundNormal_);
-    runtime_.dangerAreaObject->transform->localScale = { 1.0f, 1.0f, 1.0f };
+    runtime_.dangerAreaObject->transform->localScale = { 1.0f, 1.0f, lengthScale_ };
     runtime_.dangerAreaObject->transform->MarkDirty();
 }
 
@@ -1028,7 +1301,10 @@ bool DragonAttackControllerComponent::ResolveDangerAreaGroundHeight(
     {
         for (const auto& collider_ : owner_->GetComponents<ColliderComponent>())
         {
-            if (collider_) ignoredUserData_.push_back(collider_.get());
+            if (collider_)
+            {
+                ignoredUserData_.push_back(collider_.get());
+            }
         }
     }
     DangerAreaGroundQueryFilter queryFilter_(ignoredUserData_);
@@ -1037,8 +1313,11 @@ bool DragonAttackControllerComponent::ResolveDangerAreaGroundHeight(
     int rayCount_ = 0;
     auto queryGround_ = [&](const DirectX::XMFLOAT3& sample_, physx::PxRaycastHit& hit_)
         {
-            if (!scene_) return false;
-            ++rayCount_;
+            if (!scene_)
+        {
+            return false;
+        }
+        ++rayCount_;
             physx::PxRaycastBuffer buffer_;
             const float rayStartY_ = (std::max)(rayReferenceHeight_, sample_.y) +
                 (std::max)(dangerAreaRayStartHeight, 0.01f);
@@ -1082,8 +1361,11 @@ bool DragonAttackControllerComponent::ResolveDangerAreaGroundHeight(
                 const DirectX::XMFLOAT3 sample_{
                     position_.x + offset_.x, baseHeight_ + offset_.y, position_.z + offset_.z };
                 physx::PxRaycastHit hit_;
-                if (!queryGround_(sample_, hit_)) return;
-                // 傾斜した表示平面より高い接地点だけを補正し、段差での埋まりを防ぐ。
+                if (!queryGround_(sample_, hit_))
+            {
+                return;
+            }
+            // 傾斜した表示平面より高い接地点だけを補正し、段差での埋まりを防ぐ。
                 const float requiredHeight_ = hit_.position.y - offset_.y;
                 height_ = resolved_ ? (std::max)(height_, requiredHeight_) : requiredHeight_;
                 resolved_ = true;
@@ -1112,7 +1394,10 @@ bool DragonAttackControllerComponent::ResolveDangerAreaGroundHeight(
             {
                 for (int column_ = -1; column_ <= 1; ++column_)
                 {
-                    if (row_ == 0 && column_ == 0) continue;
+                    if (row_ == 0 && column_ == 0)
+                    {
+                        continue;
+                    }
                     sampleOffset_(radius_ * static_cast<float>(column_), halfLength_ * static_cast<float>(row_));
                 }
             }
@@ -1168,7 +1453,10 @@ void DragonAttackControllerComponent::SpawnDangerArea(
     float radius_,
     float halfHeight_)
 {
-    if (!dangerAreaEnabled) return;
+    if (!dangerAreaEnabled)
+    {
+        return;
+    }
 
     RuntimeAttack runtime_{};
     runtime_.lifeTimer = lifeTime_;
@@ -1192,7 +1480,10 @@ void DragonAttackControllerComponent::SpawnFanDangerArea(
 {
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::SpawnFanDangerArea");
 
-    if (!dangerAreaEnabled) return;
+    if (!dangerAreaEnabled)
+    {
+        return;
+    }
 
     RuntimeAttack runtime_{};
     runtime_.lifeTimer = lifeTime_;
@@ -1223,13 +1514,22 @@ void DragonAttackControllerComponent::AttachDangerArea(
 {
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::AttachDangerArea");
 
-    if (!dangerAreaEnabled || dangerAreaVFXAssetPath.empty()) return;
+    if (!dangerAreaEnabled || dangerAreaVFXAssetPath.empty())
+    {
+        return;
+    }
 
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     std::shared_ptr<GameObject> dangerObject_ = owner_->GetManager().Create(objectName_);
-    if (!dangerObject_) return;
+    if (!dangerObject_)
+    {
+        return;
+    }
 
     dangerObject_->SetNoSaveObject();
     std::shared_ptr<MeshVFXComponent> meshVFX_ = dangerObject_->AddComponent<MeshVFXComponent>();
@@ -1262,7 +1562,10 @@ void DragonAttackControllerComponent::ConfigureDangerAreaVFX(
 {
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::ConfigureDangerAreaVFX");
 
-    if (!meshVFX_) return;
+    if (!meshVFX_)
+    {
+        return;
+    }
 
     MeshVFXAsset asset_ = meshVFX_->GetAsset();
     const float safeRadius_ = (std::max)(radius_, 0.01f);
@@ -1285,14 +1588,23 @@ void DragonAttackControllerComponent::ConfigureDangerAreaVFX(
 
 void DragonAttackControllerComponent::SpawnBreathVFX()
 {
-    if (breathVFXAssetPath.empty()) return;
+    if (breathVFXAssetPath.empty())
+    {
+        return;
+    }
 
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     DirectX::XMFLOAT3 position_{ 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 forward_{ 0.0f, 0.0f, 1.0f };
-    if (!ResolveBreathSourceFrame(position_, forward_)) return;
+    if (!ResolveBreathSourceFrame(position_, forward_))
+    {
+        return;
+    }
 
     forward_ = Normalize(forward_);
     MeshVFXSpawnRequest request_{};
@@ -1309,14 +1621,20 @@ void DragonAttackControllerComponent::SpawnBreathChargeEffect()
 {
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::SpawnBreathChargeEffect");
 
-    if (!showBreathChargeOnDanger || breathChargeEffectTemplateName.empty()) return;
+    if (!showBreathChargeOnDanger || breathChargeEffectTemplateName.empty())
+    {
+        return;
+    }
 
     EnsureDependencies();
     DirectX::XMFLOAT3 position_{ 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 forward_{ 0.0f, 0.0f, 1.0f };
     const std::shared_ptr<AttackEmitterComponent> emitter_ =
         ResolveBreathAttackEmitterComponent(position_, forward_);
-    if (!emitter_) return;
+    if (!emitter_)
+    {
+        return;
+    }
 
     if (!breathProjectileEmitterAssetPath.empty())
     {
@@ -1352,7 +1670,10 @@ bool DragonAttackControllerComponent::ResolveMouthFrame(
     DirectX::XMFLOAT3& forward_) const
 {
     const std::shared_ptr<GameObject> owner_ = gameObject.lock();
-    if (!owner_ || !owner_->transform) return false;
+    if (!owner_ || !owner_->transform)
+    {
+        return false;
+    }
 
     if (ResolveActualMouthFrame(position_, forward_))
     {
@@ -1373,10 +1694,16 @@ bool DragonAttackControllerComponent::ResolveBreathSourceFrame(
     float targetAimBlendOverride_) const
 {
     const std::shared_ptr<GameObject> owner_ = gameObject.lock();
-    if (!owner_ || !owner_->transform) return false;
+    if (!owner_ || !owner_->transform)
+    {
+        return false;
+    }
 
     DirectX::XMFLOAT3 baseForward_{ 0.0f, 0.0f, 1.0f };
-    if (!ResolveBreathBaseForward(baseForward_)) return false;
+    if (!ResolveBreathBaseForward(baseForward_))
+    {
+        return false;
+    }
 
     DirectX::XMFLOAT3 ignoredNodeForward_{ 0.0f, 0.0f, 1.0f };
     if (ResolveActualMouthFrame(position_, ignoredNodeForward_))
@@ -1424,7 +1751,10 @@ bool DragonAttackControllerComponent::ResolveBreathBaseForward(
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::ResolveBreathBaseForward");
 
     const std::shared_ptr<GameObject> owner_ = gameObject.lock();
-    if (!owner_ || !owner_->transform) return false;
+    if (!owner_ || !owner_->transform)
+    {
+        return false;
+    }
 
     // ビーム用モデルは本体の水平前方を基準に作られているため、Mouthノードの局所回転は使わない。
     const Vector3 ownerForward_ = owner_->transform->GetFront();
@@ -1441,7 +1771,10 @@ bool DragonAttackControllerComponent::ResolveBreathAimForward(
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::ResolveBreathAimForward");
 
     const std::shared_ptr<GameObject> owner_ = gameObject.lock();
-    if (!owner_) return false;
+    if (!owner_)
+    {
+        return false;
+    }
 
     const std::shared_ptr<GameObject> targetObject_ = owner_->GetManager().Find(targetObjectName);
     if (!targetObject_ || !targetObject_->transform)
@@ -1485,13 +1818,22 @@ bool DragonAttackControllerComponent::ResolveNamedObjectFrame(
 {
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::ResolveNamedObjectFrame");
 
-    if (objectName_.empty()) return false;
+    if (objectName_.empty())
+    {
+        return false;
+    }
 
     const std::shared_ptr<GameObject> owner_ = gameObject.lock();
-    if (!owner_) return false;
+    if (!owner_)
+    {
+        return false;
+    }
 
     const std::shared_ptr<GameObject> sourceObject_ = owner_->GetManager().Find(objectName_);
-    if (!sourceObject_ || !sourceObject_->transform) return false;
+    if (!sourceObject_ || !sourceObject_->transform)
+    {
+        return false;
+    }
 
     // 部位ObjectがModelAttachmentで更新された後のTransformを、攻撃発生位置として使う。
     position_ = sourceObject_->transform->GetWorldPosition();
@@ -1513,7 +1855,10 @@ bool DragonAttackControllerComponent::ResolveStampSourceFrame(
     }
 
     const std::shared_ptr<GameObject> owner_ = gameObject.lock();
-    if (!owner_ || !owner_->transform) return false;
+    if (!owner_ || !owner_->transform)
+    {
+        return false;
+    }
 
     if (!stampSourceNodeName.empty())
     {
@@ -1546,7 +1891,10 @@ std::shared_ptr<AttackEmitterComponent> DragonAttackControllerComponent::Resolve
     float targetAimBlendOverride_) const
 {
     const std::shared_ptr<GameObject> owner_ = gameObject.lock();
-    if (!owner_) return nullptr;
+    if (!owner_)
+    {
+        return nullptr;
+    }
 
     bool hasSourceFrame_ = false;
     std::shared_ptr<AttackEmitterComponent> sourceEmitter_;
@@ -1595,7 +1943,10 @@ void DragonAttackControllerComponent::SpawnBreathProjectile(
         forward_ = pendingBeamForward;
         for (RuntimeAttack& runtime_ : runtimeAttacks)
         {
-            if (runtime_.dangerAreaFixedFrame) ApplyDangerAreaTransform(runtime_);
+            if (runtime_.dangerAreaFixedFrame)
+            {
+                ApplyDangerAreaTransform(runtime_);
+            }
         }
         position_ = pendingBeamPosition;
     }
@@ -1603,11 +1954,17 @@ void DragonAttackControllerComponent::SpawnBreathProjectile(
     {
         emitter_ = ResolveBreathAttackEmitterComponent(position_, forward_, targetAimBlendOverride_);
     }
-    if (!emitter_) return;
+    if (!emitter_)
+    {
+        return;
+    }
 
     if (!breathProjectileEmitterAssetPath.empty())
     {
-        if (!emitter_->LoadAsset(breathProjectileEmitterAssetPath)) return;
+        if (!emitter_->LoadAsset(breathProjectileEmitterAssetPath))
+        {
+            return;
+        }
     }
 
     // ブレス本体はAttackEmitter Asset内の判定・モデル・着弾演出をまとめて生成する。
@@ -1624,10 +1981,16 @@ void DragonAttackControllerComponent::SpawnBreathProjectile(
         // 発射後も予兆を残す場合は、実際の判定寿命と同じ時刻に消す。
         for (const auto& template_ : emitter_->GetTemplates())
         {
-            if (template_.name != templateName_) continue;
+            if (template_.name != templateName_)
+            {
+                continue;
+            }
             for (RuntimeAttack& runtime_ : runtimeAttacks)
             {
-                if (runtime_.dangerAreaFixedFrame) runtime_.lifeTimer = template_.lifeTime;
+                if (runtime_.dangerAreaFixedFrame)
+                {
+                    runtime_.lifeTimer = template_.lifeTime;
+                }
             }
             break;
         }
@@ -1638,11 +2001,17 @@ void DragonAttackControllerComponent::SpawnBiteVFX()
 {
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::SpawnBiteVFX");
 
-    if (biteVFXAssetPath.empty()) return;
+    if (biteVFXAssetPath.empty())
+    {
+        return;
+    }
 
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     const std::shared_ptr<DragonNeckCommandIKComponent> neckIK_ = neckIK.lock();
-    if (!owner_ || !neckIK_) return;
+    if (!owner_ || !neckIK_)
+    {
+        return;
+    }
 
     DirectX::XMFLOAT3 position_{ 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 forward_{ 0.0f, 0.0f, 1.0f };
@@ -1675,23 +2044,33 @@ void DragonAttackControllerComponent::UpdateSpinTailTrails(RuntimeAttack& runtim
     {
         // 攻撃できない時間には残像も消し、見た目と判定の有効期間を揃える。
         for (const auto& object_ : runtime_.spinTailTrailObjects)
+        {
             if (object_)
+            {
                 if (const auto trail_ = object_->GetComponent<TrailMeshComponent>())
                 {
                     trail_->StopTrail();
                     trail_->ClearTrail();
                 }
+            }
+        }
         return;
     }
     const std::size_t segmentCount_ = positions_.size() - 1;
-    if (runtime_.spinTailTrailObjects.empty()) runtime_.spinTailTrailObjects.resize(segmentCount_);
+    if (runtime_.spinTailTrailObjects.empty())
+    {
+        runtime_.spinTailTrailObjects.resize(segmentCount_);
+    }
     for (std::size_t index_ = 0; index_ < segmentCount_ && index_ < runtime_.spinTailTrailObjects.size(); ++index_)
     {
         auto& object_ = runtime_.spinTailTrailObjects[index_];
         if (!object_)
         {
             object_ = owner_->GetManager().Create("RuntimeDragonSpinTailTrail_" + std::to_string(index_));
-            if (!object_) continue;
+            if (!object_)
+            {
+                continue;
+            }
             object_->SetNoSaveObject();
             const auto trail_ = object_->AddComponent<TrailMeshComponent>();
             if (!trail_)
@@ -1716,7 +2095,10 @@ void DragonAttackControllerComponent::UpdateSpinTailTrails(RuntimeAttack& runtim
             trail_->Play();
         }
         const auto trail_ = object_->GetComponent<TrailMeshComponent>();
-        if (!trail_) continue;
+        if (!trail_)
+        {
+            continue;
+        }
         trail_->SetLifeTime(spinTailTrailLifeTime);
         trail_->StartTrail();
         // World座標の節の両端を直接渡し、回転と尻尾IKの曲がりをそのまま軌跡へ反映する。
@@ -1731,7 +2113,10 @@ float DragonAttackControllerComponent::ResolveSpinSweepRadius() const
     const auto tailIK_ = tailIK.lock();
     std::vector<DirectX::XMFLOAT3> positions_;
     if (!owner_ || !owner_->transform || !tailIK_ ||
-        !tailIK_->GetTailWorldPositions(positions_)) return padding_;
+        !tailIK_->GetTailWorldPositions(positions_))
+    {
+        return padding_;
+    }
 
     const DirectX::XMFLOAT3 center_ = owner_->transform->GetWorldPosition();
     const auto& root_ = positions_.front();
@@ -1740,8 +2125,10 @@ float DragonAttackControllerComponent::ResolveSpinSweepRadius() const
     // 曲がった現在姿勢の直線距離ではなく総延長を使い、伸びた尻尾の到達範囲も予告する。
     float tailLength_ = 0.0f;
     for (std::size_t index_ = 0; index_ + 1 < positions_.size(); ++index_)
+    {
         tailLength_ += DirectX::XMVectorGetX(DirectX::XMVector3Length(
             DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&positions_[index_ + 1]), DirectX::XMLoadFloat3(&positions_[index_]))));
+    }
 
     return rootDistance_ + tailLength_ + padding_;
 }
@@ -1750,11 +2137,20 @@ void DragonAttackControllerComponent::PlaySpecialImpact(
     const DirectX::XMFLOAT3& position_, float radius_, float damage_, const std::string& effectPath_)
 {
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::PlaySpecialImpact");
-    if (!CanSpawnAttack()) return;
+    if (!CanSpawnAttack())
+    {
+        return;
+    }
     const auto owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
     const auto attack_ = owner_->GetManager().Create("RuntimeDragonSpecialImpact");
-    if (!attack_) return;
+    if (!attack_)
+    {
+        return;
+    }
     if (!attack_->transform)
     {
         owner_->GetManager().Destroy(attack_);
@@ -1796,6 +2192,8 @@ void DragonAttackControllerComponent::PlaySpecialImpact(
     runtime_.object = attack_;
     runtime_.hitComponent = hit_;
     runtime_.lifeTimer = 0.2f;
+    // 着弾判定は、次のフレーム以降もドラゴン本体の位置へ追従させない。
+    runtime_.fixedHitPosition = true;
     runtimeAttacks.push_back(runtime_);
     owner_->GetManager().GetEffectManager().SpawnImpactEffectAsset(effectPath_, position_, { 0.0f, 1.0f, 0.0f }, owner_);
 }
@@ -1806,11 +2204,17 @@ void DragonAttackControllerComponent::SpawnStampHit()
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::SpawnStampHit");
 
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_ || !owner_->transform) return;
+    if (!owner_ || !owner_->transform)
+    {
+        return;
+    }
 
     DirectX::XMFLOAT3 sourcePosition_{ 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 sourceForward_{ 0.0f, 0.0f, 1.0f };
-    if (!ResolveStampSourceFrame(sourcePosition_, sourceForward_)) return;
+    if (!ResolveStampSourceFrame(sourcePosition_, sourceForward_))
+    {
+        return;
+    }
 
     const DirectX::XMFLOAT3 forward_ = Normalize({ sourceForward_.x, 0.0f, sourceForward_.z });
     const DirectX::XMFLOAT3 stampLocalOffset_{ 0.0f, 0.0f, stampForwardOffset };
@@ -1818,7 +2222,10 @@ void DragonAttackControllerComponent::SpawnStampHit()
         ApplyLocalOffsetToFrame(sourcePosition_, forward_, stampLocalOffset_);
 
     std::shared_ptr<GameObject> attackObject_ = owner_->GetManager().Create("RuntimeDragonStampHit");
-    if (!attackObject_) return;
+    if (!attackObject_)
+    {
+        return;
+    }
     if (!attackObject_->transform)
     {
         owner_->GetManager().Destroy(attackObject_);
@@ -1841,7 +2248,8 @@ void DragonAttackControllerComponent::SpawnStampHit()
 
     AttackEffectHitShapeTemplate shape_{};
     shape_.hitBoxName = "RuntimeDragonStampHit_Sphere";
-    shape_.shape = ATTACK_HIT_SHAPE::SPHERE;;
+    shape_.shape = ATTACK_HIT_SHAPE::SPHERE;
+    ;
     shape_.radius = (std::max)(stampRadius, 0.01f);
     shape_.activeStartTime = 0.0f;
     shape_.activeEndTime = stampLifeTime;
@@ -1902,10 +2310,16 @@ void DragonAttackControllerComponent::SpawnStampRockVFX(const DirectX::XMFLOAT3&
 {
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::SpawnStampRockVFX");
 
-    if (stampRockVFXAssetPath.empty()) return;
+    if (stampRockVFXAssetPath.empty())
+    {
+        return;
+    }
 
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_ || !owner_->transform) return;
+    if (!owner_ || !owner_->transform)
+    {
+        return;
+    }
 
     DirectX::XMFLOAT3 sourcePosition_{ 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 sourceForward_{ 0.0f, 0.0f, 1.0f };
@@ -1956,10 +2370,16 @@ void DragonAttackControllerComponent::SpawnStampRockVFXAt(
 {
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::SpawnStampRockVFXAt");
 
-    if (stampRockVFXAssetPath.empty()) return;
+    if (stampRockVFXAssetPath.empty())
+    {
+        return;
+    }
 
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     MeshVFXSpawnRequest request_{};
     request_.assetPath = stampRockVFXAssetPath;
@@ -2007,13 +2427,19 @@ void DragonAttackControllerComponent::StopRuntimeAttack(RuntimeAttack& runtime_)
     // 強制停止でも軌跡用の独立Objectを残さず、攻撃と同じ寿命で片付ける。
     for (const auto& object_ : runtime_.spinTailTrailObjects)
     {
-        if (!object_) continue;
+        if (!object_)
+        {
+            continue;
+        }
         if (const auto trail_ = object_->GetComponent<TrailMeshComponent>())
         {
             trail_->StopTrail();
             trail_->ClearTrail();
         }
-        if (object_->manager) object_->GetManager().Destroy(object_);
+        if (object_->manager)
+        {
+            object_->GetManager().Destroy(object_);
+        }
     }
     runtime_.spinTailTrailObjects.clear();
     if (const std::shared_ptr<AttackEffectHitComponent> hitComponent_ = runtime_.hitComponent.lock())
@@ -2156,34 +2582,79 @@ void DragonAttackControllerComponent::Gui()
     ImGui::DragFloat("Stamp Rock Rise Start Offset", &stampRockRiseStartOffset, 0.01f, -5.0f, 1.0f);
     ImGui::Text("Runtime Attacks: %d", static_cast<int>(runtimeAttacks.size()));
 
-    if (ImGui::Button("Play Breath")) PlayBreath();
+    if (ImGui::Button("Play Breath"))
+    {
+        PlayBreath();
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Breath Beam")) PlayBreathProjectileBeam();
+    if (ImGui::Button("Breath Beam"))
+    {
+        PlayBreathProjectileBeam();
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Breath Fan")) PlayBreathProjectileFan();
+    if (ImGui::Button("Breath Fan"))
+    {
+        PlayBreathProjectileFan();
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Bite")) PlayBite();
+    if (ImGui::Button("Bite"))
+    {
+        PlayBite();
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Tail Sweep")) PlayTailSweep();
+    if (ImGui::Button("Tail Sweep"))
+    {
+        PlayTailSweep();
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Spin Sweep")) PlaySpinSweep();
+    if (ImGui::Button("Spin Sweep"))
+    {
+        PlaySpinSweep();
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Stamp")) PlayStamp();
-    if (ImGui::Button("Show Breath Danger")) ShowBreathDangerArea();
+    if (ImGui::Button("Stamp"))
+    {
+        PlayStamp();
+    }
+    if (ImGui::Button("Show Breath Danger"))
+    {
+        ShowBreathDangerArea();
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Show Breath Single Danger")) ShowBreathProjectileSingleDangerArea();
+    if (ImGui::Button("Show Breath Single Danger"))
+    {
+        ShowBreathProjectileSingleDangerArea();
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Show Breath Fan Danger")) ShowBreathProjectileFanDangerArea();
+    if (ImGui::Button("Show Breath Fan Danger"))
+    {
+        ShowBreathProjectileFanDangerArea();
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Show Bite Danger")) ShowBiteDangerArea();
+    if (ImGui::Button("Show Bite Danger"))
+    {
+        ShowBiteDangerArea();
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Show Tail Danger")) ShowTailSweepDangerArea();
+    if (ImGui::Button("Show Tail Danger"))
+    {
+        ShowTailSweepDangerArea();
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Show Spin Danger")) ShowSpinSweepDangerArea();
+    if (ImGui::Button("Show Spin Danger"))
+    {
+        ShowSpinSweepDangerArea();
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Show Stamp Danger")) ShowStampDangerArea();
+    if (ImGui::Button("Show Stamp Danger"))
+    {
+        ShowStampDangerArea();
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Stop")) StopAttack();
+    if (ImGui::Button("Stop"))
+    {
+        StopAttack();
+    }
 }
 
 void DragonAttackControllerComponent::Serialize(nlohmann::json& json_) const

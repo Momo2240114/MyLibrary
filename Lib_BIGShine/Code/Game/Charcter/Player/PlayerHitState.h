@@ -8,7 +8,11 @@ class PlayerHitState : public PlayerState
 public:
     using PlayerState::PlayerState;
 
-    const char* GetName() const override { return GetPlayerActionName(PLAYER_ACTION::HIT); }
+    const char* GetName() const override
+    {
+        return GetPlayerActionName(PLAYER_ACTION::HIT);
+    }
+
     // 被弾情報と接地状態から、地上・空中の反応フラグを設定する。
     void Enter() override;
     // 通常の被弾は保険時間で終了し、空中ノックダウンは終了通知を待つ。

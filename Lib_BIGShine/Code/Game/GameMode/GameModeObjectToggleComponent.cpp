@@ -24,15 +24,30 @@ void GameModeObjectToggleComponent::Start()
 void GameModeObjectToggleComponent::RegisterActions()
 {
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
-    owner_->RegisterAction("GameModeObject", ACTION_SHOW, [this]() { SetObjectEnabled(true); });
-    owner_->RegisterAction("GameModeObject", ACTION_HIDE, [this]() { SetObjectEnabled(false); });
+    owner_->RegisterAction("GameModeObject", ACTION_SHOW, [this]()
+    {
+        SetObjectEnabled(true);
+    });
+    owner_->RegisterAction("GameModeObject", ACTION_HIDE, [this]()
+    {
+        SetObjectEnabled(false);
+    });
 
     if (registeredGlobalActions)
     {
-        owner_->RegisterGlobalAction("GameModeObject", ACTION_SHOW, [this]() { SetObjectEnabled(true); });
-        owner_->RegisterGlobalAction("GameModeObject", ACTION_HIDE, [this]() { SetObjectEnabled(false); });
+        owner_->RegisterGlobalAction("GameModeObject", ACTION_SHOW, [this]()
+        {
+            SetObjectEnabled(true);
+        });
+        owner_->RegisterGlobalAction("GameModeObject", ACTION_HIDE, [this]()
+        {
+            SetObjectEnabled(false);
+        });
     }
 }
 
@@ -49,7 +64,10 @@ void GameModeObjectToggleComponent::SetObjectEnabled(bool enabled_)
 void GameModeObjectToggleComponent::CaptureEnabledStates()
 {
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     normalComponentEnabledStates.clear();
     colliderComponentEnabledStates.clear();
@@ -69,20 +87,29 @@ void GameModeObjectToggleComponent::CaptureEnabledStates()
 void GameModeObjectToggleComponent::ApplyEnabledStates(bool enabled_)
 {
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     if (includeNormalComponents)
     {
         for (size_t index_ = 0; index_ < owner_->components.size(); ++index_)
         {
             const std::shared_ptr<Component>& component_ = owner_->components[index_];
-            if (!component_ || component_.get() == this) continue;
+            if (!component_ || component_.get() == this)
+            {
+                continue;
+            }
 
             const bool restoreEnabled_ =
                 index_ < normalComponentEnabledStates.size()
                 ? normalComponentEnabledStates[index_]
                 : true;
-            if (enabled_) component_->SetEnabled(restoreEnabled_);
+            if (enabled_)
+            {
+                component_->SetEnabled(restoreEnabled_);
+            }
             component_->SetRuntimeSuppressed(!enabled_);
         }
     }
@@ -92,23 +119,31 @@ void GameModeObjectToggleComponent::ApplyEnabledStates(bool enabled_)
         for (size_t index_ = 0; index_ < owner_->colliderComponents.size(); ++index_)
         {
             const std::shared_ptr<Component>& component_ = owner_->colliderComponents[index_];
-            if (!component_) continue;
+            if (!component_)
+            {
+                continue;
+            }
 
             const bool restoreEnabled_ =
                 index_ < colliderComponentEnabledStates.size()
                 ? colliderComponentEnabledStates[index_]
                 : true;
-            if (enabled_) component_->SetEnabled(restoreEnabled_);
+            if (enabled_)
+            {
+                component_->SetEnabled(restoreEnabled_);
+            }
             // 初期無効のHitBoxもShow時は一時停止を解除し、後続のActivateを受け付ける。
             component_->SetRuntimeSuppressed(!enabled_);
             // 非表示ObjectのColliderがPhysX内へ残り、見えない壁になるのを防ぐ。
             if (!enabled_)
+            {
                 if (const auto collider_ = std::dynamic_pointer_cast<ColliderComponent>(component_))
                 {
                     collider_->currentTriggers.clear();
                     collider_->m_CollisionMainFolds.clear();
                     collider_->ReleasePhysXActor();
                 }
+            }
         }
     }
 }
@@ -125,9 +160,15 @@ void GameModeObjectToggleComponent::Gui()
     {
         RegisterActions();
     }
-    if (ImGui::Button("Show")) SetObjectEnabled(true);
+    if (ImGui::Button("Show"))
+    {
+        SetObjectEnabled(true);
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Hide")) SetObjectEnabled(false);
+    if (ImGui::Button("Hide"))
+    {
+        SetObjectEnabled(false);
+    }
 }
 
 void GameModeObjectToggleComponent::Serialize(nlohmann::json& json_) const

@@ -9,13 +9,22 @@
 
 bool FxaaSystem::Initialize(ID3D11Device* device_, int width_, int height_)
 {
-    if (!device_ || width_ <= 0 || height_ <= 0) return false;
+    if (!device_ || width_ <= 0 || height_ <= 0)
+    {
+        return false;
+    }
     width = width_;
     height = height_;
     if (FAILED(CPUResourceLoader::LoadVertexShader(device_, "Data/Shader/FullScreenVS.cso",
-        nullptr, 0, nullptr, fullScreenVs.GetAddressOf()))) return false;
+        nullptr, 0, nullptr, fullScreenVs.GetAddressOf())))
+    {
+        return false;
+    }
     if (FAILED(CPUResourceLoader::LoadPixelShader(device_, "Data/Shader/FxaaPS.cso",
-        pixelShader.GetAddressOf()))) return false;
+        pixelShader.GetAddressOf())))
+    {
+        return false;
+    }
 
     D3D11_BUFFER_DESC desc_{};
     desc_.ByteWidth = sizeof(DirectX::XMFLOAT4);
@@ -36,13 +45,19 @@ void FxaaSystem::Execute(const RenderContext& rc_, ID3D11ShaderResourceView* sce
     ID3D11RenderTargetView* outputRTV_, const Parameters& parameters_)
 {
     if (!rc_.deviceContext || !rc_.renderState || !sceneSRV_ || !outputRTV_ ||
-        !pixelShader || !constantBuffer) return;
+        !pixelShader || !constantBuffer)
+    {
+        return;
+    }
 
     const DirectX::XMFLOAT4 constants_ {
         1.0f / static_cast<float>(width), 1.0f / static_cast<float>(height),
         parameters_.edgeThreshold, parameters_.edgeThresholdMin };
     D3D11_MAPPED_SUBRESOURCE mapped_{};
-    if (FAILED(rc_.deviceContext->Map(constantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped_))) return;
+    if (FAILED(rc_.deviceContext->Map(constantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped_)))
+    {
+        return;
+    }
     std::memcpy(mapped_.pData, &constants_, sizeof(constants_));
     rc_.deviceContext->Unmap(constantBuffer.Get(), 0);
 

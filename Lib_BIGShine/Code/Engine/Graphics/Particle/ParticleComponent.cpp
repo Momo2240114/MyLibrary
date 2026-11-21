@@ -68,6 +68,7 @@ namespace
         return static_cast<uint32_t>(std::hash<std::string>{}(key_));
     }
 }
+
 void ParticleComponent::Start()
 {
     // Editor候補の更新と、保存済みAssetが指定されている場合の遅延読み込みを行う。
@@ -86,7 +87,10 @@ void ParticleComponent::RegisterActions()
 {
     // ActionSequencerなどからParticleを操作できるよう、GameObjectローカルActionを登録する。
     auto gameObject_ = GetGameObject();
-    if (!gameObject_) return;
+    if (!gameObject_)
+    {
+        return;
+    }
 
     auto& registry_ = gameObject_->GetLocalRegistry();
     for (const std::string& actionName_ : registeredActionNames)
@@ -102,16 +106,31 @@ void ParticleComponent::RegisterActions()
             registeredActionNames.push_back(actionName_);
         };
 
-    registerAction_(objectName_ + "_Particle_Play", [this]() { Play(); });
-    registerAction_(objectName_ + "_Particle_Stop", [this]() { Stop(); });
+    registerAction_(objectName_ + "_Particle_Play", [this]()
+    {
+        Play();
+    });
+    registerAction_(objectName_ + "_Particle_Stop", [this]()
+    {
+        Stop();
+    });
 
     for (const EmitterTrack& track_ : tracks)
     {
         const std::string emitterName_ = track_.name;
         const std::string actionPrefix_ = objectName_ + "_Particle_" + emitterName_;
-        registerAction_(actionPrefix_ + "_Play", [this, emitterName_]() { PlayEmitter(emitterName_); });
-        registerAction_(actionPrefix_ + "_Stop", [this, emitterName_]() { StopEmitter(emitterName_); });
-        registerAction_(actionPrefix_ + "_Trigger", [this, emitterName_]() { TriggerEmitter(emitterName_); });
+        registerAction_(actionPrefix_ + "_Play", [this, emitterName_]()
+        {
+            PlayEmitter(emitterName_);
+        });
+        registerAction_(actionPrefix_ + "_Stop", [this, emitterName_]()
+        {
+            StopEmitter(emitterName_);
+        });
+        registerAction_(actionPrefix_ + "_Trigger", [this, emitterName_]()
+        {
+            TriggerEmitter(emitterName_);
+        });
     }
 }
 
@@ -143,7 +162,10 @@ void ParticleComponent::Gui()
         nullptr,
         "Data/Particle"))
     {
-        if (!selectedAssetPath_.empty()) LoadAsset(selectedAssetPath_);
+        if (!selectedAssetPath_.empty())
+        {
+            LoadAsset(selectedAssetPath_);
+        }
     }
 
     if (ImGui::Button("Save Particle JSON..."))
@@ -155,7 +177,10 @@ void ParticleComponent::Gui()
             L"Save Particle Asset",
             initialPath_,
             GraphicsDeviceManager::Instance().GetWindowHandle());
-        if (!selectedPath_.empty() && SaveAsset(selectedPath_)) RefreshAssetList();
+        if (!selectedPath_.empty() && SaveAsset(selectedPath_))
+        {
+            RefreshAssetList();
+        }
     }
     ImGui::SameLine();
     if (ImGui::Button("Reload Asset") && !assetPath.empty())
@@ -165,13 +190,22 @@ void ParticleComponent::Gui()
 
     ImGui::SeparatorText("Playback");
 
-    if (ImGui::Button("Play Effect")) Play();
+    if (ImGui::Button("Play Effect"))
+    {
+        Play();
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Stop")) Stop();
+    if (ImGui::Button("Stop"))
+    {
+        Stop();
+    }
     ImGui::SameLine();
     if (ImGui::Button("Reset All"))
     {
-        for (auto& track : tracks) track.Reset();
+        for (auto& track : tracks)
+        {
+            track.Reset();
+        }
     }
 
     ImGui::Separator();
@@ -214,13 +248,22 @@ void ParticleComponent::Gui()
             nullptr,
             "Data/Particle/Emitter"))
         {
-            if (!emitterAssetPath.empty()) LoadEmitterAsset(emitterAssetPath);
+            if (!emitterAssetPath.empty())
+            {
+                LoadEmitterAsset(emitterAssetPath);
+            }
         }
         return;
     }
 
-    if (selectedEmitterIndex >= static_cast<int>(tracks.size())) selectedEmitterIndex = static_cast<int>(tracks.size()) - 1;
-    if (selectedEmitterIndex < 0) selectedEmitterIndex = 0;
+    if (selectedEmitterIndex >= static_cast<int>(tracks.size()))
+    {
+        selectedEmitterIndex = static_cast<int>(tracks.size()) - 1;
+    }
+    if (selectedEmitterIndex < 0)
+    {
+        selectedEmitterIndex = 0;
+    }
 
     ImGui::Text("Emitter List");
     ImGui::BeginChild("EmitterList", ImVec2(160, 96), true);
@@ -228,7 +271,10 @@ void ParticleComponent::Gui()
     {
         ImGui::PushID(i);
         const std::string label_ = std::to_string(i) + ": " + tracks[i].name;
-        if (ImGui::Selectable(label_.c_str(), selectedEmitterIndex == i)) selectedEmitterIndex = i;
+        if (ImGui::Selectable(label_.c_str(), selectedEmitterIndex == i))
+        {
+            selectedEmitterIndex = i;
+        }
         ImGui::PopID();
     }
     ImGui::EndChild();
@@ -263,13 +309,19 @@ void ParticleComponent::Gui()
             selectedEmitterIndex = static_cast<int>(tracks.size()) - 1;
         }
     }
-    if (ImGui::Button("Refresh Textures")) RefreshTextureList();
+    if (ImGui::Button("Refresh Textures"))
+    {
+        RefreshTextureList();
+    }
     ImGui::EndGroup();
 
     if (shouldRemove)
     {
         tracks.erase(tracks.begin() + selectedEmitterIndex);
-        if (selectedEmitterIndex > 0) --selectedEmitterIndex;
+        if (selectedEmitterIndex > 0)
+        {
+            --selectedEmitterIndex;
+        }
         RefreshEmitterNameIndex();
         RegisterActions();
         return;
@@ -288,14 +340,26 @@ void ParticleComponent::Gui()
         RegisterActions();
     }
     ImGui::SameLine();
-    if (ImGui::Button("Play Emitter")) PlayEmitter(track.name);
+    if (ImGui::Button("Play Emitter"))
+    {
+        PlayEmitter(track.name);
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Stop Emitter")) StopEmitter(track.name);
+    if (ImGui::Button("Stop Emitter"))
+    {
+        StopEmitter(track.name);
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Trigger Emitter")) TriggerEmitter(track.name);
+    if (ImGui::Button("Trigger Emitter"))
+    {
+        TriggerEmitter(track.name);
+    }
 
     const bool hasDuplicateName_ = std::count_if(tracks.begin(), tracks.end(),
-        [&](const EmitterTrack& track_) { return track_.name == track.name; }) > 1;
+        [&](const EmitterTrack& track_)
+    {
+        return track_.name == track.name;
+    }) > 1;
     if (hasDuplicateName_)
     {
         ImGui::TextColored(ImVec4(1.0f, 0.45f, 0.25f, 1.0f),
@@ -309,7 +373,10 @@ void ParticleComponent::Gui()
         {
             // 発生数・寿命・初速など、Particleがいつ何個生まれるかを調整する。
             int maxCount = static_cast<int>(s.maxParticleCount);
-            if (ImGui::DragInt("Max Count", &maxCount, 1, 2000000)) s.maxParticleCount = static_cast<uint32_t>(maxCount);
+            if (ImGui::DragInt("Max Count", &maxCount, 1, 2000000))
+            {
+                s.maxParticleCount = static_cast<uint32_t>(maxCount);
+            }
             ImGui::DragFloat("Delay", &track.delay, 0.01f, 0.0f, 60.0f);
             ImGui::DragFloat2("Life Min/Max", &s.lifespan.x, 0.05f, 0.01f, 60.0f);
             ImGui::DragFloat2("Initial Speed Min/Max", &s.emissionSpeed.x, 0.05f, 0.0f, 100.0f);
@@ -323,7 +390,10 @@ void ParticleComponent::Gui()
             else
             {
                 ImGui::DragInt("Burst Count", reinterpret_cast<int*>(&s.burstCount), 1, 0, static_cast<int>(s.maxParticleCount));
-                if (ImGui::Button("Fire Burst")) s.burstTrigger = 1.0f;
+                if (ImGui::Button("Fire Burst"))
+                {
+                    s.burstTrigger = 1.0f;
+                }
             }
             ImGui::EndTabItem();
         }
@@ -435,14 +505,35 @@ void ParticleComponent::Gui()
                 }
             }
 
+            bool useRandomColor_ = s.useRandomColor != 0;
+            if (ImGui::Checkbox("Random Color", &useRandomColor_))
+            {
+                s.useRandomColor = useRandomColor_ ? 1u : 0u;
+            }
             if (s.useColorOverLife != 0)
             {
-                ImGuiColorEditor::DrawColorEdit4("Start Color", &s.colorStart.x);
-                ImGuiColorEditor::DrawColorEdit4("End Color", &s.colorEnd.x);
+                ImGuiColorEditor::DrawColorEdit4(useRandomColor_ ? "Start Color A" : "Start Color", &s.colorStart.x);
+                if (useRandomColor_)
+                {
+                    ImGuiColorEditor::DrawColorEdit4("Start Color B", &s.randomColorStart.x);
+                }
+                ImGuiColorEditor::DrawColorEdit4(useRandomColor_ ? "End Color A" : "End Color", &s.colorEnd.x);
+                if (useRandomColor_)
+                {
+                    ImGuiColorEditor::DrawColorEdit4("End Color B", &s.randomColorEnd.x);
+                }
             }
             else
             {
-                ImGuiColorEditor::DrawColorEdit4("Color", &s.manualColor.x);
+                ImGuiColorEditor::DrawColorEdit4(useRandomColor_ ? "Color A" : "Color", &s.manualColor.x);
+                if (useRandomColor_)
+                {
+                    ImGuiColorEditor::DrawColorEdit4("Color B", &s.randomColorStart.x);
+                }
+            }
+            if (useRandomColor_ && s.useGradientTexture != 0)
+            {
+                ImGui::TextDisabled("Gradient Texture supplies RGB. Random Color still varies alpha.");
             }
 
             ImGui::DragFloat2("Size Start/End", &s.emissionSize.x, 0.02f, 0.01f, 100.0f);
@@ -455,8 +546,14 @@ void ParticleComponent::Gui()
             {
                 ImGui::DragFloat2("Start Size Random", &s.sizeRandomStart.x, 0.01f, 0.01f, 20.0f, "%.2f");
                 ImGui::DragFloat2("End Size Random", &s.sizeRandomEnd.x, 0.01f, 0.01f, 20.0f, "%.2f");
-                if (s.sizeRandomStart.x > s.sizeRandomStart.y) std::swap(s.sizeRandomStart.x, s.sizeRandomStart.y);
-                if (s.sizeRandomEnd.x > s.sizeRandomEnd.y) std::swap(s.sizeRandomEnd.x, s.sizeRandomEnd.y);
+                if (s.sizeRandomStart.x > s.sizeRandomStart.y)
+                {
+                    std::swap(s.sizeRandomStart.x, s.sizeRandomStart.y);
+                }
+                if (s.sizeRandomEnd.x > s.sizeRandomEnd.y)
+                {
+                    std::swap(s.sizeRandomEnd.x, s.sizeRandomEnd.y);
+                }
             }
             ImGui::DragFloat2("Fade In/Out", &s.fadeDuration.x, 0.01f, 0.0f, 10.0f);
             ImGui::EndTabItem();
@@ -465,7 +562,10 @@ void ParticleComponent::Gui()
         if (ImGui::BeginTabItem("Texture"))
         {
             // 色Texture、Mask、Gradient、SpriteSheetを差し替える。
-            if (track.materialPaths.empty()) track.materialPaths.push_back(track.materialPath);
+            if (track.materialPaths.empty())
+            {
+                track.materialPaths.push_back(track.materialPath);
+            }
             int removeMaterialIndex_ = -1;
             for (int materialIndex_ = 0; materialIndex_ < static_cast<int>(track.materialPaths.size()); ++materialIndex_)
             {
@@ -489,7 +589,10 @@ void ParticleComponent::Gui()
                 if (track.materialPaths.size() > 1u)
                 {
                     ImGui::SameLine();
-                    if (ImGui::Button("Remove")) removeMaterialIndex_ = materialIndex_;
+                    if (ImGui::Button("Remove"))
+                    {
+                        removeMaterialIndex_ = materialIndex_;
+                    }
                 }
                 ImGui::PopID();
             }
@@ -514,24 +617,48 @@ void ParticleComponent::Gui()
                     ID3D11ShaderResourceView* texture_ = nullptr;
                     if (track.emitter)
                     {
-                        if (slot_ == 0) texture_ = track.emitter->GetTextureSRV();
-                        else if (slot_ == 1) texture_ = track.emitter->GetMaskTextureSRV();
-                        else if (slot_ == 2) texture_ = track.emitter->GetGradientTextureSRV();
-                        else texture_ = track.emitter->GetShadeGradientTextureSRV();
+                        if (slot_ == 0)
+                    {
+                        texture_ = track.emitter->GetTextureSRV();
                     }
+                    else if (slot_ == 1)
+                    {
+                        texture_ = track.emitter->GetMaskTextureSRV();
+                    }
+                    else if (slot_ == 2)
+                    {
+                        texture_ = track.emitter->GetGradientTextureSRV();
+                    }
+                    else
+                    {
+                        texture_ = track.emitter->GetShadeGradientTextureSRV();
+                    }
+                }
                     if (!AssetSlotGui::Draw(
-                        label_, AssetSlotType::TEXTURE, path_, texture_, "Data/Texture/Particle")) return;
+                        label_, AssetSlotType::TEXTURE, path_, texture_, "Data/Texture/Particle"))
+                {
+                    return;
+                }
 
-                    fileName_ = path_.empty()
+                fileName_ = path_.empty()
                         ? std::string()
                         : WindowsDialogHelper::PathToUtf8(
                             WindowsDialogHelper::Utf8ToPath(path_).filename());
                     if (!path_.empty() && LoadEmitterTextureSlot(track, path_, slot_))
                     {
-                        if (slot_ == 1) s.useMaskTexture = 1;
-                        if (slot_ == 2) s.useGradientTexture = 1;
-                        if (slot_ == 3) s.useShadeGradientTexture = 1;
-                        return;
+                        if (slot_ == 1)
+                    {
+                        s.useMaskTexture = 1;
+                    }
+                    if (slot_ == 2)
+                    {
+                        s.useGradientTexture = 1;
+                    }
+                    if (slot_ == 3)
+                    {
+                        s.useShadeGradientTexture = 1;
+                    }
+                    return;
                     }
 
                     auto device_ = GraphicsDeviceManager::Instance().GetDevice();
@@ -539,15 +666,36 @@ void ParticleComponent::Gui()
                     CPUResourceLoader::CreateDummyTexture(device_, 0xFFFFFFFFu, dummyTexture_.GetAddressOf());
                     if (track.emitter)
                     {
-                        if (slot_ == 0) track.emitter->SetTexture(dummyTexture_);
-                        else if (slot_ == 1) track.emitter->SetMaskTexture(dummyTexture_);
-                        else if (slot_ == 2) track.emitter->SetGradientTexture(dummyTexture_);
-                        else track.emitter->SetShadeGradientTexture(dummyTexture_);
+                        if (slot_ == 0)
+                    {
+                        track.emitter->SetTexture(dummyTexture_);
                     }
-                    if (slot_ == 1) s.useMaskTexture = 0;
-                    if (slot_ == 2) s.useGradientTexture = 0;
-                    if (slot_ == 3) s.useShadeGradientTexture = 0;
-                };
+                    else if (slot_ == 1)
+                    {
+                        track.emitter->SetMaskTexture(dummyTexture_);
+                    }
+                    else if (slot_ == 2)
+                    {
+                        track.emitter->SetGradientTexture(dummyTexture_);
+                    }
+                    else
+                    {
+                        track.emitter->SetShadeGradientTexture(dummyTexture_);
+                    }
+                }
+                    if (slot_ == 1)
+                {
+                    s.useMaskTexture = 0;
+                }
+                if (slot_ == 2)
+                {
+                    s.useGradientTexture = 0;
+                }
+                if (slot_ == 3)
+                {
+                    s.useShadeGradientTexture = 0;
+                }
+            };
 
             drawTextureSlot_("Base Texture", track.textureFileName, track.texturePath, 0);
             drawTextureSlot_("Mask Texture", track.maskTextureFileName, track.maskTexturePath, 1);
@@ -556,35 +704,51 @@ void ParticleComponent::Gui()
             bool useMask = s.useMaskTexture != 0;
             bool useGradient = s.useGradientTexture != 0;
             bool useShadeGradient_ = s.useShadeGradientTexture != 0;
-            if (ImGui::Checkbox("Use Mask", &useMask)) s.useMaskTexture = useMask ? 1u : 0u;
-            if (ImGui::Checkbox("Use Gradient Texture", &useGradient)) s.useGradientTexture = useGradient ? 1u : 0u;
+            if (ImGui::Checkbox("Use Mask", &useMask))
+            {
+                s.useMaskTexture = useMask ? 1u : 0u;
+            }
+            if (ImGui::Checkbox("Use Gradient Texture", &useGradient))
+            {
+                s.useGradientTexture = useGradient ? 1u : 0u;
+            }
             if (s.useGradientTexture != 0)
             {
                 ImGui::TextDisabled("GradientTexture enabled: Particle RGB color is ignored. Alpha is still used.");
                 int sampleMode_ = static_cast<int>(s.gradientSampleMode);
                 const char* sampleModeNames_[] = { "Horizontal", "Vertical" };
                 if (ImGui::Combo("Gradient Sample Mode", &sampleMode_, sampleModeNames_, IM_ARRAYSIZE(sampleModeNames_)))
+                {
                     s.gradientSampleMode = static_cast<uint32_t>(sampleMode_);
+                }
                 int direction_ = static_cast<int>(s.gradientDirection);
                 const char* directionNames_[] = { "Forward", "Reverse" };
                 if (ImGui::Combo("Gradient Direction", &direction_, directionNames_, IM_ARRAYSIZE(directionNames_)))
+                {
                     s.gradientDirection = static_cast<uint32_t>(direction_);
+                }
                 ImGui::SliderFloat("Gradient Fixed UV", &s.gradientFixedUv, 0.0f, 1.0f);
                 ImGui::SliderFloat("Gradient Start UV", &s.gradientStartUv, 0.0f, 1.0f);
                 ImGui::SliderFloat("Gradient End UV", &s.gradientEndUv, 0.0f, 1.0f);
             }
             if (ImGui::Checkbox("Use Shade Gradient Texture", &useShadeGradient_))
+            {
                 s.useShadeGradientTexture = useShadeGradient_ ? 1u : 0u;
+            }
             if (s.useShadeGradientTexture != 0)
             {
                 int sampleMode_ = static_cast<int>(s.shadeGradientSampleMode);
                 const char* sampleModeNames_[] = { "Horizontal", "Vertical" };
                 if (ImGui::Combo("Shade Gradient Sample Mode", &sampleMode_, sampleModeNames_, IM_ARRAYSIZE(sampleModeNames_)))
+                {
                     s.shadeGradientSampleMode = static_cast<uint32_t>(sampleMode_);
+                }
                 int direction_ = static_cast<int>(s.shadeGradientDirection);
                 const char* directionNames_[] = { "Forward", "Reverse" };
                 if (ImGui::Combo("Shade Gradient Direction", &direction_, directionNames_, IM_ARRAYSIZE(directionNames_)))
+                {
                     s.shadeGradientDirection = static_cast<uint32_t>(direction_);
+                }
                 ImGui::SliderFloat("Shade Gradient Fixed UV", &s.shadeGradientFixedUv, 0.0f, 1.0f);
                 ImGui::SliderFloat("Shade Gradient Start UV", &s.shadeGradientStartUv, 0.0f, 1.0f);
                 ImGui::SliderFloat("Shade Gradient End UV", &s.shadeGradientEndUv, 0.0f, 1.0f);
@@ -607,7 +771,10 @@ void ParticleComponent::Gui()
 
             const uint32_t totalCells_ = s.textureSplitCount.x * s.textureSplitCount.y;
             bool useSpriteAnimation_ = s.useSpriteAnimation != 0;
-            if (ImGui::Checkbox("Animate Sprite Index", &useSpriteAnimation_)) s.useSpriteAnimation = useSpriteAnimation_ ? 1u : 0u;
+            if (ImGui::Checkbox("Animate Sprite Index", &useSpriteAnimation_))
+            {
+                s.useSpriteAnimation = useSpriteAnimation_ ? 1u : 0u;
+            }
             if (s.useSpriteAnimation != 0)
             {
                 int animationRange_[2] = { static_cast<int>(s.spriteAnimationStartIndex), static_cast<int>(s.spriteAnimationEndIndex) };
@@ -618,7 +785,10 @@ void ParticleComponent::Gui()
                 }
                 ImGui::DragFloat("Frames Per Second", &s.spriteAnimationFps, 0.1f, 0.0f, 120.0f, "%.1f");
                 bool spriteAnimationLoop_ = s.spriteAnimationLoop != 0;
-                if (ImGui::Checkbox("Loop Sprite Animation", &spriteAnimationLoop_)) s.spriteAnimationLoop = spriteAnimationLoop_ ? 1u : 0u;
+                if (ImGui::Checkbox("Loop Sprite Animation", &spriteAnimationLoop_))
+                {
+                    s.spriteAnimationLoop = spriteAnimationLoop_ ? 1u : 0u;
+                }
             }
             ImGui::Text("Selected Linear Index: %u", s.spriteSheetIndex.y * s.textureSplitCount.x + s.spriteSheetIndex.x);
             ImGui::EndTabItem();
@@ -669,7 +839,10 @@ void ParticleComponent::Gui()
     {
         const bool wasPlaying_ = isPlaying;
         RebuildEmitterResources();
-        if (wasPlaying_) Play();
+        if (wasPlaying_)
+        {
+            Play();
+        }
         applyFeedbackUntil = ImGui::GetTime() + 2.5;
     }
     ImGui::PopStyleColor(3);
@@ -693,7 +866,10 @@ bool ParticleComponent::LoadEmitterTexture(EmitterTrack& track, const std::strin
 
 bool ParticleComponent::LoadEmitterTextureSlot(EmitterTrack& track, const std::string& fullPath, int slot)
 {
-    if (!track.emitter || fullPath.empty()) return false;
+    if (!track.emitter || fullPath.empty())
+    {
+        return false;
+    }
 
     // slot番号でColor/Mask/Gradientを切り替え、Emitter内部のSRVへ反映する。
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv;
@@ -737,7 +913,10 @@ bool ParticleComponent::LoadEmitterMaterial(
 {
     BS_PROFILE_SCOPE("ParticleComponent::LoadEmitterMaterial");
 
-    if (!LoadEmitterMaterialResource(track_, materialPath_)) return false;
+    if (!LoadEmitterMaterialResource(track_, materialPath_))
+    {
+        return false;
+    }
 
     ApplyEmitterMaterialTextures(track_);
 
@@ -772,7 +951,10 @@ bool ParticleComponent::LoadEmitterMaterialResource(
     {
         track_.materialPath = track_.materialPaths.front();
     }
-    if (track_.materialPaths.empty() && track_.materialPath.empty()) return false;
+    if (track_.materialPaths.empty() && track_.materialPath.empty())
+    {
+        return false;
+    }
 
     for (const std::string& materialPath_ : track_.materialPaths)
     {
@@ -795,13 +977,19 @@ bool ParticleComponent::LoadEmitterMaterialResource(
         track_.materialRandomColors.push_back(VFXMaterialColorUtility::SampleRandomColor(
             materialData_.randomColor,
             BuildParticleMaterialRandomSeed(materialPath_, track_.name)));
-        if (!track_.materialResource) track_.materialResource = materialResource_;
+        if (!track_.materialResource)
+        {
+            track_.materialResource = materialResource_;
+        }
         if (materialData_.renderState.blendMode == VFX_MATERIAL_BLEND_MODE::ADDITIVE)
         {
             track_.runtimeBlendMode = ParticleBlendMode::ADDITIVE;
         }
     }
-    if (!track_.materialResource) return false;
+    if (!track_.materialResource)
+    {
+        return false;
+    }
 
     const VFXMaterialData& materialData_ = track_.materialResource->GetMaterialData();
     track_.materialRandomSeed = BuildParticleMaterialRandomSeed(track_.materialPath, track_.name);
@@ -826,7 +1014,10 @@ bool ParticleComponent::ConvertEmitterToMaterial(EmitterTrack& track_)
         L"Convert Particle Emitter To VFX Material",
         defaultPath_,
         GraphicsDeviceManager::Instance().GetWindowHandle());
-    if (selectedPath_.empty()) return false;
+    if (selectedPath_.empty())
+    {
+        return false;
+    }
 
     VFXMaterialData materialData_ = VFXMaterialConversionUtility::FromParticleEmitter(
         track_.settings,
@@ -834,10 +1025,19 @@ bool ParticleComponent::ConvertEmitterToMaterial(EmitterTrack& track_)
         track_.texturePath,
         track_.maskTexturePath,
         track_.blendMode);
-    if (!VFXMaterialSerializer::Save(selectedPath_, materialData_)) return false;
+    if (!VFXMaterialSerializer::Save(selectedPath_, materialData_))
+    {
+        return false;
+    }
 
-    if (track_.materialPaths.empty()) track_.materialPaths.push_back(selectedPath_);
-    else track_.materialPaths.front() = selectedPath_;
+    if (track_.materialPaths.empty())
+    {
+        track_.materialPaths.push_back(selectedPath_);
+    }
+    else
+    {
+        track_.materialPaths.front() = selectedPath_;
+    }
     track_.materialPath = selectedPath_;
     return LoadEmitterMaterial(track_, selectedPath_);
 }
@@ -849,13 +1049,19 @@ void ParticleComponent::ApplyEmitterMaterialToSettings(
 {
     BS_PROFILE_SCOPE("ParticleComponent::ApplyEmitterMaterialToSettings");
 
-    if (track_.materialResources.empty() && !track_.materialResource) return;
+    if (track_.materialResources.empty() && !track_.materialResource)
+    {
+        return;
+    }
     const size_t materialCount_ = track_.materialResources.empty() ? 1u : track_.materialResources.size();
     for (size_t materialIndex_ = 0; materialIndex_ < materialCount_; ++materialIndex_)
     {
         const std::shared_ptr<VFXMaterialResource>& materialResource_ =
             track_.materialResources.empty() ? track_.materialResource : track_.materialResources[materialIndex_];
-        if (!materialResource_) continue;
+        if (!materialResource_)
+        {
+            continue;
+        }
         const VFXMaterialData& materialData_ = materialResource_->GetMaterialData();
         const DirectX::XMFLOAT4 randomColor_ =
             materialIndex_ < track_.materialRandomColors.size()
@@ -880,6 +1086,11 @@ void ParticleComponent::ApplyEmitterMaterialToSettings(
         ApplyParticleMaterialColor(settings_.manualColor, materialData_, manualRampColor_, randomColor_);
         ApplyParticleMaterialColor(settings_.colorStart, materialData_, startRampColor_, randomColor_);
         ApplyParticleMaterialColor(settings_.colorEnd, materialData_, endRampColor_, randomColor_);
+        if (settings_.useRandomColor != 0)
+        {
+            ApplyParticleMaterialColor(settings_.randomColorStart, materialData_, startRampColor_, randomColor_);
+            ApplyParticleMaterialColor(settings_.randomColorEnd, materialData_, endRampColor_, randomColor_);
+        }
         if (materialData_.colorRamp.enabled && useRampLife_)
         {
             settings_.useColorOverLife = 1u;
@@ -896,20 +1107,29 @@ void ParticleComponent::ApplyEmitterMaterialTextures(EmitterTrack& track_)
 {
     BS_PROFILE_SCOPE("ParticleComponent::ApplyEmitterMaterialTextures");
 
-    if (track_.materialResources.empty() && !track_.materialResource) return;
+    if (track_.materialResources.empty() && !track_.materialResource)
+    {
+        return;
+    }
     const size_t materialCount_ = track_.materialResources.empty() ? 1u : track_.materialResources.size();
     for (size_t materialIndex_ = 0; materialIndex_ < materialCount_; ++materialIndex_)
     {
         const std::shared_ptr<VFXMaterialResource>& materialResource_ =
             track_.materialResources.empty() ? track_.materialResource : track_.materialResources[materialIndex_];
-        if (!materialResource_) continue;
+        if (!materialResource_)
+        {
+            continue;
+        }
         const VFXMaterialData& materialData_ = materialResource_->GetMaterialData();
 
         Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> baseTexture_;
         baseTexture_ = materialResource_->GetBaseTexture();
         if (baseTexture_)
         {
-            if (track_.emitter) track_.emitter->SetTexture(baseTexture_);
+            if (track_.emitter)
+            {
+                track_.emitter->SetTexture(baseTexture_);
+            }
             if (!materialData_.baseTexturePath.empty())
             {
                 track_.texturePath = materialData_.baseTexturePath;
@@ -922,7 +1142,10 @@ void ParticleComponent::ApplyEmitterMaterialTextures(EmitterTrack& track_)
         maskTexture_ = materialResource_->GetMaskTexture();
         if (maskTexture_)
         {
-            if (track_.emitter) track_.emitter->SetMaskTexture(maskTexture_);
+            if (track_.emitter)
+            {
+                track_.emitter->SetMaskTexture(maskTexture_);
+            }
             if (!materialData_.maskTexturePath.empty())
             {
                 track_.maskTexturePath = materialData_.maskTexturePath;
@@ -939,7 +1162,10 @@ void ParticleComponent::Stop()
     for (EmitterTrack& track_ : tracks)
     {
         track_.isPlaybackEnabled = false;
-        if (track_.emitter) track_.emitter->SetEmissionEnabled(false);
+        if (track_.emitter)
+        {
+            track_.emitter->SetEmissionEnabled(false);
+        }
     }
 }
 
@@ -960,7 +1186,10 @@ void ParticleComponent::ResetRuntime()
             track_.hasBeamVisualOverride = false;
         }
         track_.isStarted = false;
-        if (!track_.emitter) continue;
+        if (!track_.emitter)
+        {
+            continue;
+        }
         track_.emitter->ResetRuntime();
         track_.emitter->SetEmissionEnabled(false);
     }
@@ -968,7 +1197,10 @@ void ParticleComponent::ResetRuntime()
 
 bool ParticleComponent::HasRuntimeResources() const
 {
-    if (tracks.empty()) return false;
+    if (tracks.empty())
+    {
+        return false;
+    }
     return std::all_of(
         tracks.begin(),
         tracks.end(),
@@ -977,15 +1209,22 @@ bool ParticleComponent::HasRuntimeResources() const
             return track_.emitter && track_.emitter->HasGPUResources();
         });
 }
+
 void ParticleComponent::RefreshTextureList()
 {
     textureFiles.clear();
     std::string path = "Data/Texture/Particle/";
-    if (!std::filesystem::exists(path)) return;
+    if (!std::filesystem::exists(path))
+    {
+        return;
+    }
 
     for (const auto& entry : std::filesystem::directory_iterator(path))
     {
-        if (entry.is_regular_file()) textureFiles.push_back(entry.path().filename().string());
+        if (entry.is_regular_file())
+        {
+            textureFiles.push_back(entry.path().filename().string());
+        }
     }
 }
 
@@ -993,11 +1232,17 @@ void ParticleComponent::RefreshAssetList()
 {
     assetFiles.clear();
     std::string path_ = "Data/Particle/";
-    if (!std::filesystem::exists(path_)) return;
+    if (!std::filesystem::exists(path_))
+    {
+        return;
+    }
 
     for (const auto& entry_ : std::filesystem::directory_iterator(path_))
     {
-        if (!entry_.is_regular_file()) continue;
+        if (!entry_.is_regular_file())
+        {
+            continue;
+        }
         if (entry_.path().extension() == ".json")
         {
             assetFiles.push_back(entry_.path().filename().string());
@@ -1090,15 +1335,24 @@ bool ParticleComponent::LoadAssetDataOnly(
     ParticleEffectAsset& asset_)
 {
     // VFXManagerなどが一覧読み込みするため、Componentとして起動せずAsset情報だけ読む。
-    if (path_.empty()) return false;
+    if (path_.empty())
+    {
+        return false;
+    }
 
     const std::filesystem::path filePath_ =
         WindowsDialogHelper::Utf8ToPath(path_);
 
-    if (!std::filesystem::exists(filePath_)) return false;
+    if (!std::filesystem::exists(filePath_))
+    {
+        return false;
+    }
 
     std::ifstream file_(filePath_);
-    if (!file_.is_open()) return false;
+    if (!file_.is_open())
+    {
+        return false;
+    }
 
     nlohmann::json json_;
     try
@@ -1118,7 +1372,10 @@ bool ParticleComponent::LoadAssetDataOnly(
 
     ParticleComponent component_;
     component_.Deserialize(json_);
-    if (component_.tracks.empty()) return false;
+    if (component_.tracks.empty())
+    {
+        return false;
+    }
 
     asset_ = component_.GetAsset();
     return true;
@@ -1127,7 +1384,10 @@ bool ParticleComponent::LoadAssetDataOnly(
 bool ParticleComponent::SaveAsset(const std::string& path_)
 {
     // 編集中の全Emitterを1つのParticleEffect JSONとして保存する。
-    if (path_.empty()) return false;
+    if (path_.empty())
+    {
+        return false;
+    }
 
     std::filesystem::path assetPath_ = path_;
     std::filesystem::create_directories(assetPath_.parent_path());
@@ -1154,10 +1414,16 @@ bool ParticleComponent::SaveAsset(const std::string& path_)
 bool ParticleComponent::LoadAsset(const std::string& path_)
 {
     // ParticleEffect JSONを読み込み、TextureやEmitterのGPUリソースを再構築する。
-    if (path_.empty() || !std::filesystem::exists(WindowsDialogHelper::Utf8ToPath(path_))) return false;
+    if (path_.empty() || !std::filesystem::exists(WindowsDialogHelper::Utf8ToPath(path_)))
+    {
+        return false;
+    }
 
     std::ifstream file_(WindowsDialogHelper::Utf8ToPath(path_));
-    if (!file_.is_open()) return false;
+    if (!file_.is_open())
+    {
+        return false;
+    }
 
     nlohmann::json json_;
     file_ >> json_;
@@ -1175,7 +1441,10 @@ bool ParticleComponent::LoadAsset(const std::string& path_)
 bool ParticleComponent::SaveEmitterAsset(size_t emitterIndex_, const std::string& path_)
 {
     // 選択中Emitterだけを単体JSONとして保存し、別Particleへ再利用できるようにする。
-    if (path_.empty() || emitterIndex_ >= tracks.size()) return false;
+    if (path_.empty() || emitterIndex_ >= tracks.size())
+    {
+        return false;
+    }
 
     nlohmann::json componentJson_;
     Serialize(componentJson_);
@@ -1194,7 +1463,10 @@ bool ParticleComponent::SaveEmitterAsset(size_t emitterIndex_, const std::string
     emitterJson_["Emitter"] = componentJson_["Emitters"][emitterIndex_];
 
     std::ofstream file_(emitterPath_, std::ios::out | std::ios::trunc);
-    if (!file_.is_open()) return false;
+    if (!file_.is_open())
+    {
+        return false;
+    }
 
     file_ << emitterJson_.dump(4);
     return true;
@@ -1204,10 +1476,16 @@ bool ParticleComponent::LoadEmitterAsset(const std::string& path_)
 {
     // 単体Emitter JSONを読み込み、現在のParticleComponentへ追加する。
     const std::filesystem::path emitterPath_ = WindowsDialogHelper::Utf8ToPath(path_);
-    if (path_.empty() || !std::filesystem::exists(emitterPath_)) return false;
+    if (path_.empty() || !std::filesystem::exists(emitterPath_))
+    {
+        return false;
+    }
 
     std::ifstream file_(emitterPath_);
-    if (!file_.is_open()) return false;
+    if (!file_.is_open())
+    {
+        return false;
+    }
 
     nlohmann::json emitterAssetJson_;
     file_ >> emitterAssetJson_;
@@ -1220,7 +1498,10 @@ bool ParticleComponent::LoadEmitterAsset(const std::string& path_)
     const nlohmann::json& emitterJson_ = emitterAssetJson_.contains("Emitter")
         ? emitterAssetJson_["Emitter"]
         : emitterAssetJson_;
-    if (!emitterJson_.is_object()) return false;
+    if (!emitterJson_.is_object())
+    {
+        return false;
+    }
 
     nlohmann::json componentJson_;
     componentJson_["Emitters"] = nlohmann::json::array({ emitterJson_ });
@@ -1228,7 +1509,10 @@ bool ParticleComponent::LoadEmitterAsset(const std::string& path_)
 
     ParticleComponent loadedComponent_;
     loadedComponent_.Deserialize(componentJson_);
-    if (loadedComponent_.tracks.empty()) return false;
+    if (loadedComponent_.tracks.empty())
+    {
+        return false;
+    }
 
     tracks.push_back(std::move(loadedComponent_.tracks.front()));
     RefreshEmitterNameIndex();
@@ -1245,7 +1529,10 @@ void ParticleComponent::Play()
     {
         track_.isPlaybackEnabled = true;
         track_.isStarted = track_.delay <= 0.0f;
-        if (track_.emitter) track_.emitter->SetEmissionEnabled(track_.isStarted);
+        if (track_.emitter)
+        {
+            track_.emitter->SetEmissionEnabled(track_.isStarted);
+        }
         if (track_.isStarted && track_.settings.emissionMode == 1)
         {
             track_.settings.burstTrigger = 1.0f;
@@ -1256,23 +1543,38 @@ void ParticleComponent::Play()
 bool ParticleComponent::PlayEmitter(const std::string& emitterName_)
 {
     EmitterTrack* track_ = FindEmitterTrack(emitterName_);
-    if (!track_) return false;
+    if (!track_)
+    {
+        return false;
+    }
 
     isPlaying = true;
     track_->isPlaybackEnabled = true;
     track_->isStarted = true;
-    if (track_->emitter) track_->emitter->SetEmissionEnabled(true);
-    if (track_->settings.emissionMode == 1) track_->settings.burstTrigger = 1.0f;
+    if (track_->emitter)
+    {
+        track_->emitter->SetEmissionEnabled(true);
+    }
+    if (track_->settings.emissionMode == 1)
+    {
+        track_->settings.burstTrigger = 1.0f;
+    }
     return true;
 }
 
 bool ParticleComponent::StopEmitter(const std::string& emitterName_)
 {
     EmitterTrack* track_ = FindEmitterTrack(emitterName_);
-    if (!track_) return false;
+    if (!track_)
+    {
+        return false;
+    }
 
     track_->isPlaybackEnabled = false;
-    if (track_->emitter) track_->emitter->SetEmissionEnabled(false);
+    if (track_->emitter)
+    {
+        track_->emitter->SetEmissionEnabled(false);
+    }
     return true;
 }
 
@@ -1280,12 +1582,18 @@ bool ParticleComponent::TriggerEmitter(const std::string& emitterName_)
 {
     // 指定Emitterだけを即時再生する。Burstの場合はtriggerを立てて1回だけ発生させる。
     EmitterTrack* track_ = FindEmitterTrack(emitterName_);
-    if (!track_) return false;
+    if (!track_)
+    {
+        return false;
+    }
 
     isPlaying = true;
     track_->isPlaybackEnabled = true;
     track_->isStarted = true;
-    if (track_->emitter) track_->emitter->SetEmissionEnabled(true);
+    if (track_->emitter)
+    {
+        track_->emitter->SetEmissionEnabled(true);
+    }
     track_->settings.burstTrigger = 1.0f;
     return true;
 }
@@ -1297,7 +1605,10 @@ bool ParticleComponent::SetEmitterPosition(
 {
     // AnimationEventやVFXManagerから、Emitterの発生位置を直接差し替えるための入口。
     EmitterTrack* track_ = FindEmitterTrack(emitterName_);
-    if (!track_) return false;
+    if (!track_)
+    {
+        return false;
+    }
 
     track_->settings.emissionPosition = { position_.x, position_.y, position_.z, 1.0f };
     track_->spawnSpace = spawnSpace_;
@@ -1324,7 +1635,10 @@ bool ParticleComponent::SetEmitterLine(
     if (!emitterName_.empty())
     {
         EmitterTrack* track_ = FindEmitterTrack(emitterName_);
-        if (!track_) return false;
+        if (!track_)
+        {
+            return false;
+        }
 
         applyLine_(*track_);
         return true;
@@ -1373,11 +1687,17 @@ void ParticleComponent::Update(float deltaTime)
 {
     BS_PROFILE_SCOPE("ParticleComponent::Update");
     // Component再生時間、Emitterのdelay、Owner相対座標、Mesh頂点発生をまとめて処理する。
-    if (isPlaying) timer += deltaTime;
+    if (isPlaying)
+    {
+        timer += deltaTime;
+    }
 
     auto context_ = GraphicsDeviceManager::Instance().GetContext();
     auto owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     const Vector3 worldPosition_ = owner_->transform->GetWorldPosition();
     float healthEmissionMultiplier_ = 1.0f;
@@ -1403,11 +1723,20 @@ void ParticleComponent::Update(float deltaTime)
         {
             // delayが終わったEmitterだけを有効化し、Burstならこの瞬間に発火させる
             track_.isStarted = true;
-            if (track_.emitter) track_.emitter->SetEmissionEnabled(true);
-            if (track_.settings.emissionMode == 1) track_.settings.burstTrigger = 1.0f;
+            if (track_.emitter)
+            {
+                track_.emitter->SetEmissionEnabled(true);
+            }
+            if (track_.settings.emissionMode == 1)
+            {
+                track_.settings.burstTrigger = 1.0f;
+            }
         }
 
-        if (!track_.isStarted || !track_.emitter) continue;
+        if (!track_.isStarted || !track_.emitter)
+        {
+            continue;
+        }
 
         if (track_.settings.spawnShape == 5)
         {
@@ -1449,7 +1778,9 @@ void ParticleComponent::Update(float deltaTime)
         }
         // 既存粒子は消さず、新しく発生する粒子数だけを環境遷移に合わせる。
         if (tempSettings_.emissionMode == 0)
+        {
             tempSettings_.burstCount = static_cast<uint32_t>(tempSettings_.burstCount * emissionScale);
+        }
         if (scaleEmissionByHealth)
         {
             // 環境の発生量補正とHP補正を合成し、補正後も発生要求の上限を守る。
@@ -1461,7 +1792,10 @@ void ParticleComponent::Update(float deltaTime)
         track_.emitter->SetDepthSortInterval(2);
         track_.emitter->Update(context_, deltaTime);
 
-        if (track_.settings.burstTrigger > 0.0f) track_.settings.burstTrigger = 0.0f;
+        if (track_.settings.burstTrigger > 0.0f)
+        {
+            track_.settings.burstTrigger = 0.0f;
+        }
     }
 }
 
@@ -1538,6 +1872,9 @@ void ParticleComponent::Serialize(nlohmann::json& j) const
         ej["ColorStart"] = { s.colorStart.x, s.colorStart.y, s.colorStart.z, s.colorStart.w };
         ej["ColorEnd"] = { s.colorEnd.x, s.colorEnd.y, s.colorEnd.z, s.colorEnd.w };
         ej["UseColorOverLife"] = s.useColorOverLife;
+        ej["UseRandomColor"] = s.useRandomColor;
+        ej["RandomColorStart"] = { s.randomColorStart.x, s.randomColorStart.y, s.randomColorStart.z, s.randomColorStart.w };
+        ej["RandomColorEnd"] = { s.randomColorEnd.x, s.randomColorEnd.y, s.randomColorEnd.z, s.randomColorEnd.w };
         ej["Size"] = { s.emissionSize.x, s.emissionSize.y };
         ej["SizeRandomStart"] = { s.sizeRandomStart.x, s.sizeRandomStart.y };
         ej["SizeRandomEnd"] = { s.sizeRandomEnd.x, s.sizeRandomEnd.y };
@@ -1620,10 +1957,22 @@ void ParticleComponent::Deserialize(const nlohmann::json& j)
                 "gradientTexturePath",
                 ej.value("GradientTexturePath", ej.value("color_temper_path", std::string{})));
             track.shadeGradientTexturePath = ej.value("shadeGradientTexturePath", std::string{});
-            if (!track.texturePath.empty()) track.textureFileName = std::filesystem::path(track.texturePath).filename().string();
-            if (!track.maskTexturePath.empty()) track.maskTextureFileName = std::filesystem::path(track.maskTexturePath).filename().string();
-            if (!track.gradientTexturePath.empty()) track.gradientTextureFileName = std::filesystem::path(track.gradientTexturePath).filename().string();
-            if (!track.shadeGradientTexturePath.empty()) track.shadeGradientTextureFileName = std::filesystem::path(track.shadeGradientTexturePath).filename().string();
+            if (!track.texturePath.empty())
+            {
+                track.textureFileName = std::filesystem::path(track.texturePath).filename().string();
+            }
+            if (!track.maskTexturePath.empty())
+            {
+                track.maskTextureFileName = std::filesystem::path(track.maskTexturePath).filename().string();
+            }
+            if (!track.gradientTexturePath.empty())
+            {
+                track.gradientTextureFileName = std::filesystem::path(track.gradientTexturePath).filename().string();
+            }
+            if (!track.shadeGradientTexturePath.empty())
+            {
+                track.shadeGradientTextureFileName = std::filesystem::path(track.shadeGradientTexturePath).filename().string();
+            }
 
             track.delay = ej.value("Delay", 0.0f);
             track.meshVertexSampleCount = ej.value("MeshVertexSampleCount", 2048u);
@@ -1645,8 +1994,14 @@ void ParticleComponent::Deserialize(const nlohmann::json& j)
             s.shadeGradientStartUv = ej.value("shadeGradientStartUv", 0.0f);
             s.shadeGradientEndUv = ej.value("shadeGradientEndUv", 1.0f);
             s.gravity = ej.value("Gravity", -9.8f);
-            if (ej.contains("Acceleration")) s.windVelocity = { ej["Acceleration"][0], ej["Acceleration"][1], ej["Acceleration"][2], 0.0f };
-            else if (ej.contains("Wind")) s.windVelocity = { ej["Wind"][0], ej["Wind"][1], ej["Wind"][2], 0.0f };
+            if (ej.contains("Acceleration"))
+            {
+                s.windVelocity = { ej["Acceleration"][0], ej["Acceleration"][1], ej["Acceleration"][2], 0.0f };
+            }
+            else if (ej.contains("Wind"))
+            {
+                s.windVelocity = { ej["Wind"][0], ej["Wind"][1], ej["Wind"][2], 0.0f };
+            }
             s.drag = ej.value("Drag", 0.0f);
             s.noiseStrength = ej.value("NoiseStrength", ej.value("NoiseScale", 0.0f));
             s.noiseScale = s.noiseStrength;
@@ -1657,8 +2012,14 @@ void ParticleComponent::Deserialize(const nlohmann::json& j)
             s.verticalSpawnRange = ej.value("VerticalSpawnRange", 0.0f);
             s.spawnDirectionMode = static_cast<uint32_t>(
                 std::clamp(ej.value("SpawnDirectionMode", 0), 0, 3));
-            if (ej.contains("EmissionAxis")) s.emissionAxis = { ej["EmissionAxis"][0], ej["EmissionAxis"][1], ej["EmissionAxis"][2], 0.0f };
-            if (ej.contains("TargetPosition")) s.targetPosition = { ej["TargetPosition"][0], ej["TargetPosition"][1], ej["TargetPosition"][2], 1.0f };
+            if (ej.contains("EmissionAxis"))
+            {
+                s.emissionAxis = { ej["EmissionAxis"][0], ej["EmissionAxis"][1], ej["EmissionAxis"][2], 0.0f };
+            }
+            if (ej.contains("TargetPosition"))
+            {
+                s.targetPosition = { ej["TargetPosition"][0], ej["TargetPosition"][1], ej["TargetPosition"][2], 1.0f };
+            }
             s.useTargetAttraction = ej.value("UseTargetAttraction", 0u);
             s.targetAttractionStrength = ej.value("TargetAttractionStrength", 0.0f);
             s.targetAttractionRange = ej.value("TargetAttractionRange", 0.0f);
@@ -1672,28 +2033,99 @@ void ParticleComponent::Deserialize(const nlohmann::json& j)
             s.fresnelPower = ej.value("FresnelPower", 2.0f);
             s.fresnelStrength = ej.value("FresnelStrength", 1.0f);
 
-            if (ej.contains("PosOffset")) s.emissionPosition = { ej["PosOffset"][0], ej["PosOffset"][1], ej["PosOffset"][2], 1.0f };
-            if (ej.contains("ShapeStart")) s.shapeStart = { ej["ShapeStart"][0], ej["ShapeStart"][1], ej["ShapeStart"][2], 1.0f };
-            if (ej.contains("ShapeEnd")) s.shapeEnd = { ej["ShapeEnd"][0], ej["ShapeEnd"][1], ej["ShapeEnd"][2], 1.0f };
-            if (ej.contains("ShapeSize")) s.shapeSize = { ej["ShapeSize"][0], ej["ShapeSize"][1], ej["ShapeSize"][2], 0.0f };
-            if (ej.contains("LegacyRadius")) s.emissionOffset = { ej["LegacyRadius"][0], ej["LegacyRadius"][1] };
-            if (ej.contains("Lifespan")) s.lifespan = { ej["Lifespan"][0], ej["Lifespan"][1] };
-            if (ej.contains("Speed")) s.emissionSpeed = { ej["Speed"][0], ej["Speed"][1] };
-            if (ej.contains("ConeAngle")) s.emissionConeAngle = { ej["ConeAngle"][0], ej["ConeAngle"][1] };
-            if (ej.contains("RotationSpeed")) s.emissionAngularSpeed = { ej["RotationSpeed"][0], ej["RotationSpeed"][1] };
-            if (ej.contains("Color")) s.manualColor = { ej["Color"][0], ej["Color"][1], ej["Color"][2], ej["Color"][3] };
-            if (ej.contains("ColorStart")) s.colorStart = { ej["ColorStart"][0], ej["ColorStart"][1], ej["ColorStart"][2], ej["ColorStart"][3] };
-            else s.colorStart = s.manualColor;
-            if (ej.contains("ColorEnd")) s.colorEnd = { ej["ColorEnd"][0], ej["ColorEnd"][1], ej["ColorEnd"][2], ej["ColorEnd"][3] };
-            else s.colorEnd = s.manualColor;
+            if (ej.contains("PosOffset"))
+            {
+                s.emissionPosition = { ej["PosOffset"][0], ej["PosOffset"][1], ej["PosOffset"][2], 1.0f };
+            }
+            if (ej.contains("ShapeStart"))
+            {
+                s.shapeStart = { ej["ShapeStart"][0], ej["ShapeStart"][1], ej["ShapeStart"][2], 1.0f };
+            }
+            if (ej.contains("ShapeEnd"))
+            {
+                s.shapeEnd = { ej["ShapeEnd"][0], ej["ShapeEnd"][1], ej["ShapeEnd"][2], 1.0f };
+            }
+            if (ej.contains("ShapeSize"))
+            {
+                s.shapeSize = { ej["ShapeSize"][0], ej["ShapeSize"][1], ej["ShapeSize"][2], 0.0f };
+            }
+            if (ej.contains("LegacyRadius"))
+            {
+                s.emissionOffset = { ej["LegacyRadius"][0], ej["LegacyRadius"][1] };
+            }
+            if (ej.contains("Lifespan"))
+            {
+                s.lifespan = { ej["Lifespan"][0], ej["Lifespan"][1] };
+            }
+            if (ej.contains("Speed"))
+            {
+                s.emissionSpeed = { ej["Speed"][0], ej["Speed"][1] };
+            }
+            if (ej.contains("ConeAngle"))
+            {
+                s.emissionConeAngle = { ej["ConeAngle"][0], ej["ConeAngle"][1] };
+            }
+            if (ej.contains("RotationSpeed"))
+            {
+                s.emissionAngularSpeed = { ej["RotationSpeed"][0], ej["RotationSpeed"][1] };
+            }
+            if (ej.contains("Color"))
+            {
+                s.manualColor = { ej["Color"][0], ej["Color"][1], ej["Color"][2], ej["Color"][3] };
+            }
+            if (ej.contains("ColorStart"))
+            {
+                s.colorStart = { ej["ColorStart"][0], ej["ColorStart"][1], ej["ColorStart"][2], ej["ColorStart"][3] };
+            }
+            else
+            {
+                s.colorStart = s.manualColor;
+            }
+            if (ej.contains("ColorEnd"))
+            {
+                s.colorEnd = { ej["ColorEnd"][0], ej["ColorEnd"][1], ej["ColorEnd"][2], ej["ColorEnd"][3] };
+            }
+            else
+            {
+                s.colorEnd = s.manualColor;
+            }
             s.useColorOverLife = ej.value("UseColorOverLife", 0u);
-            if (ej.contains("Size")) s.emissionSize = { ej["Size"][0], ej["Size"][1] };
-            if (ej.contains("SizeRandomStart")) s.sizeRandomStart = { ej["SizeRandomStart"][0], ej["SizeRandomStart"][1] };
-            if (ej.contains("SizeRandomEnd")) s.sizeRandomEnd = { ej["SizeRandomEnd"][0], ej["SizeRandomEnd"][1] };
+            s.useRandomColor = ej.value("UseRandomColor", 0u);
+            if (ej.contains("RandomColorStart"))
+            {
+                s.randomColorStart = { ej["RandomColorStart"][0], ej["RandomColorStart"][1],
+                    ej["RandomColorStart"][2], ej["RandomColorStart"][3] };
+            }
+            if (ej.contains("RandomColorEnd"))
+            {
+                s.randomColorEnd = { ej["RandomColorEnd"][0], ej["RandomColorEnd"][1],
+                    ej["RandomColorEnd"][2], ej["RandomColorEnd"][3] };
+            }
+            if (ej.contains("Size"))
+            {
+                s.emissionSize = { ej["Size"][0], ej["Size"][1] };
+            }
+            if (ej.contains("SizeRandomStart"))
+            {
+                s.sizeRandomStart = { ej["SizeRandomStart"][0], ej["SizeRandomStart"][1] };
+            }
+            if (ej.contains("SizeRandomEnd"))
+            {
+                s.sizeRandomEnd = { ej["SizeRandomEnd"][0], ej["SizeRandomEnd"][1] };
+            }
             s.useRandomSize = ej.value("UseRandomSize", 0u);
-            if (ej.contains("Fade")) s.fadeDuration = { ej["Fade"][0], ej["Fade"][1] };
-            if (ej.contains("TextureSplitCount")) s.textureSplitCount = { ej["TextureSplitCount"][0], ej["TextureSplitCount"][1] };
-            if (ej.contains("SpriteSheetIndex")) s.spriteSheetIndex = { ej["SpriteSheetIndex"][0], ej["SpriteSheetIndex"][1] };
+            if (ej.contains("Fade"))
+            {
+                s.fadeDuration = { ej["Fade"][0], ej["Fade"][1] };
+            }
+            if (ej.contains("TextureSplitCount"))
+            {
+                s.textureSplitCount = { ej["TextureSplitCount"][0], ej["TextureSplitCount"][1] };
+            }
+            if (ej.contains("SpriteSheetIndex"))
+            {
+                s.spriteSheetIndex = { ej["SpriteSheetIndex"][0], ej["SpriteSheetIndex"][1] };
+            }
             s.useSpriteAnimation = ej.value("UseSpriteAnimation", 0u);
             s.spriteAnimationLoop = ej.value("SpriteAnimationLoop", 1u);
             if (ej.contains("SpriteAnimationRange"))
@@ -1709,14 +2141,20 @@ void ParticleComponent::Deserialize(const nlohmann::json& j)
 
     RebuildEmitterResources();
 
-    if (j.value("IsPlaying", false)) Play();
+    if (j.value("IsPlaying", false))
+    {
+        Play();
+    }
 }
 
 void ParticleComponent::UpdateMeshSpawnPositions(EmitterTrack& track_)
 {
     BS_PROFILE_SCOPE("ParticleComponent::UpdateMeshSpawnPositions");
     // 現在のGltfModel頂点をワールド座標へ変換し、Particleの発生候補点としてEmitterへ渡す
-    if (!track_.emitter) return;
+    if (!track_.emitter)
+    {
+        return;
+    }
 
     auto owner_ = GetGameObject();
     if (owner_ && owner_->manager && !meshSourceObjectName.empty())
@@ -1724,7 +2162,11 @@ void ParticleComponent::UpdateMeshSpawnPositions(EmitterTrack& track_)
         const auto source_ = owner_->GetManager().Find(meshSourceObjectName);
         const auto model_ = source_ ? source_->GetComponent<GltfModelCommponennt>() : nullptr;
         auto& points_ = track_.emitter->GetMeshSpawnPositions();
-        if (!model_) { points_.clear(); return; }
+        if (!model_)
+        {
+            points_.clear();
+            return;
+        }
         model_->CollectWorldVertexSamples(points_, track_.meshVertexSampleCount);
         if (emitDissolveBoundary)
         {
@@ -1791,7 +2233,10 @@ void ParticleComponent::UpdateMeshSpawnPositions(EmitterTrack& track_)
 
         for (const auto& vertex_ : mesh_.vertices)
         {
-            if ((vertexIndex_++ % sampleStride_) != 0) continue;
+            if ((vertexIndex_++ % sampleStride_) != 0)
+            {
+                continue;
+            }
 
             DirectX::XMVECTOR pos_ = DirectX::XMLoadFloat3(&vertex_.position);
             pos_ = DirectX::XMVector3TransformCoord(pos_, finalWorld_);
@@ -1802,10 +2247,16 @@ void ParticleComponent::UpdateMeshSpawnPositions(EmitterTrack& track_)
             DirectX::XMStoreFloat3(&out_, pos_);
             positions_.push_back(out_);
 
-            if (positions_.size() >= sampleLimit_) break;
+            if (positions_.size() >= sampleLimit_)
+            {
+                break;
+            }
         }
 
-        if (positions_.size() >= sampleLimit_) break;
+        if (positions_.size() >= sampleLimit_)
+        {
+            break;
+        }
     }
 
 }
@@ -1816,7 +2267,10 @@ void ParticleComponent::RebuildEmitterResources()
     // 設定変更後はGPUバッファとTexture SRVを作り直し、Emitterへ最新設定を反映する
     auto device_ = GraphicsDeviceManager::Instance().GetDevice();
     RefreshEmitterNameIndex();
-    if (!device_) return;
+    if (!device_)
+    {
+        return;
+    }
 
     RefreshTextureList();
 
@@ -1833,10 +2287,22 @@ void ParticleComponent::RebuildEmitterResources()
             LoadEmitterMaterialResource(track_, track_.materialPath);
             ApplyEmitterMaterialTextures(track_);
         }
-        if (!track_.texturePath.empty()) LoadEmitterTextureSlot(track_, track_.texturePath, 0);
-        if (!track_.maskTexturePath.empty()) LoadEmitterTextureSlot(track_, track_.maskTexturePath, 1);
-        if (!track_.gradientTexturePath.empty()) LoadEmitterTextureSlot(track_, track_.gradientTexturePath, 2);
-        if (!track_.shadeGradientTexturePath.empty()) LoadEmitterTextureSlot(track_, track_.shadeGradientTexturePath, 3);
+        if (!track_.texturePath.empty())
+        {
+            LoadEmitterTextureSlot(track_, track_.texturePath, 0);
+        }
+        if (!track_.maskTexturePath.empty())
+        {
+            LoadEmitterTextureSlot(track_, track_.maskTexturePath, 1);
+        }
+        if (!track_.gradientTexturePath.empty())
+        {
+            LoadEmitterTextureSlot(track_, track_.gradientTexturePath, 2);
+        }
+        if (!track_.shadeGradientTexturePath.empty())
+        {
+            LoadEmitterTextureSlot(track_, track_.shadeGradientTexturePath, 3);
+        }
         track_.settings.useMaskTexture = useMaskTexture_;
         track_.settings.useGradientTexture = useGradientTexture_;
         track_.settings.useShadeGradientTexture = useShadeGradientTexture_;
@@ -1864,7 +2330,10 @@ void ParticleComponent::RefreshEmitterNameIndex()
 std::string ParticleComponent::BuildAssetPathFromName() const
 {
     std::string name_ = assetNameBuffer;
-    if (name_.empty()) name_ = "NewParticle";
+    if (name_.empty())
+    {
+        name_ = "NewParticle";
+    }
 
     for (char& char_ : name_)
     {
@@ -1903,7 +2372,10 @@ const ParticleComponent::EmitterTrack* ParticleComponent::FindEmitterTrack(const
 std::string ParticleComponent::BuildEmitterAssetPathFromName(size_t emitterIndex_) const
 {
     std::string name_ = emitterIndex_ < tracks.size() ? tracks[emitterIndex_].name : "Emitter";
-    if (name_.empty()) name_ = "Emitter";
+    if (name_.empty())
+    {
+        name_ = "Emitter";
+    }
 
     for (char& char_ : name_)
     {

@@ -90,7 +90,10 @@ namespace
 
     bool HasAnyGraph(const std::shared_ptr<GameObject>& object_)
     {
-        if (!object_) return false;
+        if (!object_)
+        {
+            return false;
+        }
         return object_->GetComponent<AIControllerComponent>() != nullptr ||
             object_->GetComponent<DragonAIComponent>() != nullptr ||
             object_->GetComponent<AnimationControllerComponent>() != nullptr;
@@ -168,7 +171,10 @@ namespace
                     scopeId_ = scope_;
                     followRuntimeScope_ = false;
                 }
-                if (selected_) ImGui::SetItemDefaultFocus();
+                if (selected_)
+                {
+                    ImGui::SetItemDefaultFocus();
+                }
             }
             ImGui::EndCombo();
         }
@@ -204,7 +210,10 @@ namespace
 
         ImVec2 direction_(to_.x - from_.x, to_.y - from_.y);
         const float length_ = std::sqrt(direction_.x * direction_.x + direction_.y * direction_.y);
-        if (length_ <= 0.001f) return;
+        if (length_ <= 0.001f)
+        {
+            return;
+        }
 
         direction_.x /= length_;
         direction_.y /= length_;
@@ -257,7 +266,10 @@ void NodeGraphMonitorWindow::Draw()
 
 std::shared_ptr<GameObject> NodeGraphMonitorWindow::ResolveTargetObject()
 {
-    if (!gameObjectManager) return nullptr;
+    if (!gameObjectManager)
+    {
+        return nullptr;
+    }
 
     // Follow Selected中は、選択中オブジェクトが監視可能なグラフを持つ場合だけ対象を差し替える。
     if (followSelectedObject)
@@ -271,12 +283,18 @@ std::shared_ptr<GameObject> NodeGraphMonitorWindow::ResolveTargetObject()
     }
 
     std::shared_ptr<GameObject> currentTarget_ = targetObject.lock();
-    if (HasAnyGraph(currentTarget_)) return currentTarget_;
+    if (HasAnyGraph(currentTarget_))
+    {
+        return currentTarget_;
+    }
 
     // 選択対象が無効になった時は、シーン内で最初に見つかった監視可能オブジェクトへフォールバックする。
     for (const std::shared_ptr<GameObject>& object_ : gameObjectManager->GetObjects())
     {
-        if (!HasAnyGraph(object_)) continue;
+        if (!HasAnyGraph(object_))
+        {
+            continue;
+        }
         targetObject = object_;
         return object_;
     }
@@ -286,7 +304,10 @@ std::shared_ptr<GameObject> NodeGraphMonitorWindow::ResolveTargetObject()
 
 void NodeGraphMonitorWindow::DrawTargetControls(std::shared_ptr<GameObject>& targetObject_)
 {
-    if (!gameObjectManager) return;
+    if (!gameObjectManager)
+    {
+        return;
+    }
 
     // 追従・グラフ種別・対象オブジェクトをメニューバーにまとめ、実行中でも素早く切り替えられるようにする。
     ImGui::Checkbox("Follow Selected", &followSelectedObject);
@@ -305,7 +326,10 @@ void NodeGraphMonitorWindow::DrawTargetControls(std::shared_ptr<GameObject>& tar
                 graphType = type_;
                 graphTypeIndex_ = index_;
             }
-            if (selected_) ImGui::SetItemDefaultFocus();
+            if (selected_)
+            {
+                ImGui::SetItemDefaultFocus();
+            }
         }
         ImGui::EndCombo();
     }
@@ -318,14 +342,20 @@ void NodeGraphMonitorWindow::DrawTargetControls(std::shared_ptr<GameObject>& tar
     {
         for (const std::shared_ptr<GameObject>& object_ : gameObjectManager->GetObjects())
         {
-            if (!HasAnyGraph(object_)) continue;
+            if (!HasAnyGraph(object_))
+            {
+                continue;
+            }
             const bool selected_ = object_ == targetObject_;
             if (ImGui::Selectable(object_->GetName().c_str(), selected_))
             {
                 targetObject = object_;
                 targetObject_ = object_;
             }
-            if (selected_) ImGui::SetItemDefaultFocus();
+            if (selected_)
+            {
+                ImGui::SetItemDefaultFocus();
+            }
         }
         ImGui::EndCombo();
     }
@@ -391,7 +421,10 @@ void NodeGraphMonitorWindow::DrawGraphView(const std::shared_ptr<GameObject>& ta
                 focusMode = mode_;
                 focusModeIndex_ = index_;
             }
-            if (selected_) ImGui::SetItemDefaultFocus();
+            if (selected_)
+            {
+                ImGui::SetItemDefaultFocus();
+            }
         }
         ImGui::EndCombo();
     }
@@ -442,7 +475,10 @@ void NodeGraphMonitorWindow::DrawAIBehaviorGraph(AIBehaviorGraph& graph_)
         }
     }
 
-    if (!HasScope(scopes_, aiScopeId)) aiScopeId = "Root";
+    if (!HasScope(scopes_, aiScopeId))
+    {
+        aiScopeId = "Root";
+    }
 
     ImVec2 activeNodePosition_(0.0f, 0.0f);
     std::string activeNodeScopeId_ = "Root";
@@ -450,7 +486,10 @@ void NodeGraphMonitorWindow::DrawAIBehaviorGraph(AIBehaviorGraph& graph_)
     // 実行中ノードを探し、Follow Runtime Scope中はそのノードが属するスコープへ自動で移動する。
     for (const AIBehaviorNode& node_ : graph_.GetNodes())
     {
-        if (!graph_.IsNodeRuntimeActive(node_.id)) continue;
+        if (!graph_.IsNodeRuntimeActive(node_.id))
+        {
+            continue;
+        }
         activeNodePosition_ = ImVec2(
             node_.position.x + NODE_SIZE.x * 0.5f / zoom,
             node_.position.y + NODE_SIZE.y * 0.5f / zoom);
@@ -462,9 +501,15 @@ void NodeGraphMonitorWindow::DrawAIBehaviorGraph(AIBehaviorGraph& graph_)
         }
     }
 
-    if (!HasScope(scopes_, aiScopeId)) aiScopeId = "Root";
+    if (!HasScope(scopes_, aiScopeId))
+    {
+        aiScopeId = "Root";
+    }
     DrawScopeCombo("Scope", aiScopeId, scopes_, followRuntimeScope);
-    if (!IsScopeMatch(activeNodeScopeId_, aiScopeId)) hasActiveNode_ = false;
+    if (!IsScopeMatch(activeNodeScopeId_, aiScopeId))
+    {
+        hasActiveNode_ = false;
+    }
 
     const ImVec2 canvasSize_ = ImGui::GetContentRegionAvail();
     ImGui::BeginChild("AIBehaviorGraphMonitorCanvas", canvasSize_, true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
@@ -478,14 +523,23 @@ void NodeGraphMonitorWindow::DrawAIBehaviorGraph(AIBehaviorGraph& graph_)
     ImVec2 maximumPosition_(-FLT_MAX, -FLT_MAX);
     for (const AIBehaviorNode& node_ : graph_.GetNodes())
     {
-        if (!IsScopeMatch(node_.scopeId, aiScopeId)) continue;
+        if (!IsScopeMatch(node_.scopeId, aiScopeId))
+        {
+            continue;
+        }
         minimumPosition_.x = (std::min)(minimumPosition_.x, node_.position.x);
         minimumPosition_.y = (std::min)(minimumPosition_.y, node_.position.y);
         maximumPosition_.x = (std::max)(maximumPosition_.x, node_.position.x);
         maximumPosition_.y = (std::max)(maximumPosition_.y, node_.position.y);
     }
-    if (minimumPosition_.x == FLT_MAX) minimumPosition_ = ImVec2(0.0f, 0.0f);
-    if (maximumPosition_.x == -FLT_MAX) maximumPosition_ = minimumPosition_;
+    if (minimumPosition_.x == FLT_MAX)
+    {
+        minimumPosition_ = ImVec2(0.0f, 0.0f);
+    }
+    if (maximumPosition_.x == -FLT_MAX)
+    {
+        maximumPosition_ = minimumPosition_;
+    }
 
     ImVec2 offset_ = BuildOriginOffset(minimumPosition_, zoom);
     if (focusMode == NODE_GRAPH_MONITOR_FOCUS_MODE::SCOPE_CENTER)
@@ -504,7 +558,10 @@ void NodeGraphMonitorWindow::DrawAIBehaviorGraph(AIBehaviorGraph& graph_)
     // 先にノード中心座標を作っておくことで、リンク描画はID同士の接続だけを見ればよくなる。
     for (const AIBehaviorNode& node_ : graph_.GetNodes())
     {
-        if (!IsScopeMatch(node_.scopeId, aiScopeId)) continue;
+        if (!IsScopeMatch(node_.scopeId, aiScopeId))
+        {
+            continue;
+        }
         const ImVec2 nodeMinimum_ = BuildCanvasPosition(
             canvasOrigin_,
             ImVec2(node_.position.x, node_.position.y),
@@ -517,7 +574,10 @@ void NodeGraphMonitorWindow::DrawAIBehaviorGraph(AIBehaviorGraph& graph_)
     {
         const auto fromIt_ = nodeCenters_.find(link_.fromNodeId);
         const auto toIt_ = nodeCenters_.find(link_.toNodeId);
-        if (fromIt_ == nodeCenters_.end() || toIt_ == nodeCenters_.end()) continue;
+        if (fromIt_ == nodeCenters_.end() || toIt_ == nodeCenters_.end())
+        {
+            continue;
+        }
         const bool active_ = graph_.IsNodeRuntimeActive(link_.fromNodeId) && graph_.IsNodeRuntimeActive(link_.toNodeId);
         DrawArrowLine(drawList_, fromIt_->second, toIt_->second, active_ ? IM_COL32(80, 255, 150, 255) : IM_COL32(130, 136, 148, 255), active_ ? 3.0f : 1.5f);
     }
@@ -525,7 +585,10 @@ void NodeGraphMonitorWindow::DrawAIBehaviorGraph(AIBehaviorGraph& graph_)
     // ノードはリンクの上に描画し、実行中ノードの強調が線に隠れないようにする。
     for (const AIBehaviorNode& node_ : graph_.GetNodes())
     {
-        if (!IsScopeMatch(node_.scopeId, aiScopeId)) continue;
+        if (!IsScopeMatch(node_.scopeId, aiScopeId))
+        {
+            continue;
+        }
         const ImVec2 nodeMinimum_ = BuildCanvasPosition(
             canvasOrigin_,
             ImVec2(node_.position.x, node_.position.y),
@@ -571,7 +634,10 @@ void NodeGraphMonitorWindow::DrawAnimationGraph(const std::shared_ptr<GameObject
         AddUniqueScope(scopes_, transition_.scopeId);
     }
 
-    if (!HasScope(scopes_, animationScopeId)) animationScopeId = "Root";
+    if (!HasScope(scopes_, animationScopeId))
+    {
+        animationScopeId = "Root";
+    }
 
     ImVec2 activeNodePosition_(0.0f, 0.0f);
     std::string activeNodeScopeId_ = "Root";
@@ -579,7 +645,10 @@ void NodeGraphMonitorWindow::DrawAnimationGraph(const std::shared_ptr<GameObject
     // 現在ステート名と一致するノードをランタイム上のアクティブノードとして扱う。
     for (const AnimGraphNode& node_ : nodes_)
     {
-        if (activeStateName_.empty() || node_.stateName != activeStateName_) continue;
+        if (activeStateName_.empty() || node_.stateName != activeStateName_)
+        {
+            continue;
+        }
         activeNodePosition_ = ImVec2(
             node_.pos.x + NODE_SIZE.x * 0.5f / zoom,
             node_.pos.y + NODE_SIZE.y * 0.5f / zoom);
@@ -591,9 +660,15 @@ void NodeGraphMonitorWindow::DrawAnimationGraph(const std::shared_ptr<GameObject
         }
     }
 
-    if (!HasScope(scopes_, animationScopeId)) animationScopeId = "Root";
+    if (!HasScope(scopes_, animationScopeId))
+    {
+        animationScopeId = "Root";
+    }
     DrawScopeCombo("Scope", animationScopeId, scopes_, followRuntimeScope);
-    if (!IsScopeMatch(activeNodeScopeId_, animationScopeId)) hasActiveNode_ = false;
+    if (!IsScopeMatch(activeNodeScopeId_, animationScopeId))
+    {
+        hasActiveNode_ = false;
+    }
 
     const ImVec2 canvasSize_ = ImGui::GetContentRegionAvail();
     ImGui::BeginChild("AnimationGraphMonitorCanvas", canvasSize_, true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
@@ -607,14 +682,23 @@ void NodeGraphMonitorWindow::DrawAnimationGraph(const std::shared_ptr<GameObject
     ImVec2 maximumPosition_(-FLT_MAX, -FLT_MAX);
     for (const AnimGraphNode& node_ : nodes_)
     {
-        if (!IsScopeMatch(node_.scopeId, animationScopeId)) continue;
+        if (!IsScopeMatch(node_.scopeId, animationScopeId))
+        {
+            continue;
+        }
         minimumPosition_.x = (std::min)(minimumPosition_.x, node_.pos.x);
         minimumPosition_.y = (std::min)(minimumPosition_.y, node_.pos.y);
         maximumPosition_.x = (std::max)(maximumPosition_.x, node_.pos.x);
         maximumPosition_.y = (std::max)(maximumPosition_.y, node_.pos.y);
     }
-    if (minimumPosition_.x == FLT_MAX) minimumPosition_ = ImVec2(0.0f, 0.0f);
-    if (maximumPosition_.x == -FLT_MAX) maximumPosition_ = minimumPosition_;
+    if (minimumPosition_.x == FLT_MAX)
+    {
+        minimumPosition_ = ImVec2(0.0f, 0.0f);
+    }
+    if (maximumPosition_.x == -FLT_MAX)
+    {
+        maximumPosition_ = minimumPosition_;
+    }
 
     ImVec2 offset_ = BuildOriginOffset(minimumPosition_, zoom);
     if (focusMode == NODE_GRAPH_MONITOR_FOCUS_MODE::SCOPE_CENTER)
@@ -633,17 +717,26 @@ void NodeGraphMonitorWindow::DrawAnimationGraph(const std::shared_ptr<GameObject
     // アニメーショングラフのリンクはステート名で結ばれるため、ステート名から中心座標を引ける形にする。
     for (const AnimGraphNode& node_ : nodes_)
     {
-        if (!IsScopeMatch(node_.scopeId, animationScopeId)) continue;
+        if (!IsScopeMatch(node_.scopeId, animationScopeId))
+        {
+            continue;
+        }
         const ImVec2 nodeMinimum_ = BuildCanvasPosition(canvasOrigin_, node_.pos, offset_, zoom);
         nodeCenters_[node_.stateName] = ImVec2(nodeMinimum_.x + NODE_SIZE.x * 0.5f, nodeMinimum_.y + NODE_SIZE.y * 0.5f);
     }
 
     for (const AnimTransition& transition_ : transitions_)
     {
-        if (!IsScopeMatch(transition_.scopeId, animationScopeId)) continue;
+        if (!IsScopeMatch(transition_.scopeId, animationScopeId))
+        {
+            continue;
+        }
         const auto fromIt_ = nodeCenters_.find(transition_.fromStateName);
         const auto toIt_ = nodeCenters_.find(transition_.toStateName);
-        if (fromIt_ == nodeCenters_.end() || toIt_ == nodeCenters_.end()) continue;
+        if (fromIt_ == nodeCenters_.end() || toIt_ == nodeCenters_.end())
+        {
+            continue;
+        }
         const bool active_ = !activeStateName_.empty() &&
             (transition_.fromStateName == activeStateName_ || transition_.toStateName == activeStateName_);
         DrawArrowLine(drawList_, fromIt_->second, toIt_->second, active_ ? IM_COL32(90, 195, 255, 255) : IM_COL32(130, 136, 148, 255), active_ ? 3.0f : 1.5f);
@@ -652,7 +745,10 @@ void NodeGraphMonitorWindow::DrawAnimationGraph(const std::shared_ptr<GameObject
     // 最後にノード本体を描画して、現在ステートと通常ノードを色で見分ける。
     for (const AnimGraphNode& node_ : nodes_)
     {
-        if (!IsScopeMatch(node_.scopeId, animationScopeId)) continue;
+        if (!IsScopeMatch(node_.scopeId, animationScopeId))
+        {
+            continue;
+        }
         const bool active_ = !activeStateName_.empty() && node_.stateName == activeStateName_;
         const ImVec2 nodeMinimum_ = BuildCanvasPosition(canvasOrigin_, node_.pos, offset_, zoom);
         const std::string displayName_ = GetAnimationNodeDisplayName(node_);
@@ -665,12 +761,27 @@ void NodeGraphMonitorWindow::DrawAnimationGraph(const std::shared_ptr<GameObject
 
 NODE_GRAPH_MONITOR_TYPE NodeGraphMonitorWindow::ResolveGraphType(const std::shared_ptr<GameObject>& targetObject_) const
 {
-    if (!targetObject_) return NODE_GRAPH_MONITOR_TYPE::AUTO;
-    if (graphType != NODE_GRAPH_MONITOR_TYPE::AUTO) return graphType;
+    if (!targetObject_)
+    {
+        return NODE_GRAPH_MONITOR_TYPE::AUTO;
+    }
+    if (graphType != NODE_GRAPH_MONITOR_TYPE::AUTO)
+    {
+        return graphType;
+    }
 
     // Auto時は専用AI、汎用AI、アニメーションの順に優先し、ゲーム中の意図に近いグラフを初期表示する。
-    if (targetObject_->GetComponent<DragonAIComponent>()) return NODE_GRAPH_MONITOR_TYPE::DRAGON_AI;
-    if (targetObject_->GetComponent<AIControllerComponent>()) return NODE_GRAPH_MONITOR_TYPE::AI_BEHAVIOR;
-    if (targetObject_->GetComponent<AnimationControllerComponent>()) return NODE_GRAPH_MONITOR_TYPE::ANIMATION;
+    if (targetObject_->GetComponent<DragonAIComponent>())
+    {
+        return NODE_GRAPH_MONITOR_TYPE::DRAGON_AI;
+    }
+    if (targetObject_->GetComponent<AIControllerComponent>())
+    {
+        return NODE_GRAPH_MONITOR_TYPE::AI_BEHAVIOR;
+    }
+    if (targetObject_->GetComponent<AnimationControllerComponent>())
+    {
+        return NODE_GRAPH_MONITOR_TYPE::ANIMATION;
+    }
     return NODE_GRAPH_MONITOR_TYPE::AUTO;
 }

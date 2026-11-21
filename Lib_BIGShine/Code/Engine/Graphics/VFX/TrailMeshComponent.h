@@ -51,8 +51,16 @@ public:
 
     // サンプルと GPU バッファ状態を破棄し、次回追加時にメッシュを作り直す。
     void Clear();
-    void SetEmitting(bool emitting_) { emitting = emitting_; }
-    bool IsEmitting() const { return emitting; }
+
+    void SetEmitting(bool emitting_)
+    {
+        emitting = emitting_;
+    }
+
+    bool IsEmitting() const
+    {
+        return emitting;
+    }
 
     void SetLifeTime(float lifeTime_);
     // 泥の帯を盛り上げる。0なら従来の平面Trailを使用する。
@@ -80,7 +88,9 @@ protected:
     };
 
     // 派生クラスが追加状態をまとめて破棄したい時のフック。
-    virtual void OnTrailCleared() {}
+    virtual void OnTrailCleared()
+    {
+    }
 
 private:
     // 現在の頂点数・インデックス数に合わせて D3D11Buffer を作成または更新する。

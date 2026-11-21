@@ -39,8 +39,14 @@ void ActorPresentationActionComponent::OnDestroy()
     while (!frozenActors.empty())
     {
         const auto actor_ = frozenActors.back().actor.lock();
-        if (!actor_ || actor_->IsPendingDestroy()) frozenActors.pop_back();
-        else SetActorFrozen(actor_, false);
+        if (!actor_ || actor_->IsPendingDestroy())
+        {
+            frozenActors.pop_back();
+        }
+        else
+        {
+            SetActorFrozen(actor_, false);
+        }
     }
     RestoreRuntimePositions();
 }
@@ -48,34 +54,50 @@ void ActorPresentationActionComponent::OnDestroy()
 void ActorPresentationActionComponent::RegisterActions()
 {
     const auto owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
     const std::weak_ptr<GameObject> weakOwner_ = owner_;
     owner_->RegisterGlobalAction("ActorPresentation", "RestoreSpawnPoints", [weakOwner_]()
     {
         const auto owner_ = weakOwner_.lock();
         const auto component_ = owner_ ? owner_->GetComponent<ActorPresentationActionComponent>() : nullptr;
-        if (component_) component_->RestoreSpawnPoints();
+        if (component_)
+        {
+            component_->RestoreSpawnPoints();
+        }
     });
     owner_->RegisterGlobalAction("ActorPresentation", "CaptureRuntimePositions", [weakOwner_]()
     {
         const auto owner_ = weakOwner_.lock();
         if (const auto component_ = owner_ ? owner_->GetComponent<ActorPresentationActionComponent>() : nullptr)
+        {
             component_->CaptureRuntimePositions();
+        }
     });
     owner_->RegisterGlobalAction("ActorPresentation", "RestoreRuntimePositions", [weakOwner_]()
     {
         const auto owner_ = weakOwner_.lock();
         if (const auto component_ = owner_ ? owner_->GetComponent<ActorPresentationActionComponent>() : nullptr)
+        {
             component_->RestoreRuntimePositions();
+        }
     });
     for (int index_ = 0; index_ < static_cast<int>(presets.size()); ++index_)
     {
-        if (presets[index_].actionName.empty()) continue;
+        if (presets[index_].actionName.empty())
+        {
+            continue;
+        }
         owner_->RegisterGlobalAction("ActorPresentation", presets[index_].actionName, [weakOwner_, index_]()
         {
             const auto owner_ = weakOwner_.lock();
             const auto component_ = owner_ ? owner_->GetComponent<ActorPresentationActionComponent>() : nullptr;
-            if (component_) component_->ExecutePreset(index_);
+            if (component_)
+            {
+                component_->ExecutePreset(index_);
+            }
         });
     }
 }
@@ -84,15 +106,30 @@ void ActorPresentationActionComponent::CaptureMissingSpawnPoints()
 {
     BS_PROFILE_SCOPE("ActorPresentationActionComponent::CaptureMissingSpawnPoints");
     const auto owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
     for (const auto& preset_ : presets)
     {
-        if (preset_.actorName.empty()) continue;
+        if (preset_.actorName.empty())
+        {
+            continue;
+        }
         const auto existing_ = std::find_if(spawnPoints.begin(), spawnPoints.end(),
-            [&](const ActorPresentationSpawnPoint& point_) { return point_.actorName == preset_.actorName; });
-        if (existing_ != spawnPoints.end()) continue;
+            [&](const ActorPresentationSpawnPoint& point_)
+        {
+            return point_.actorName == preset_.actorName;
+        });
+        if (existing_ != spawnPoints.end())
+        {
+            continue;
+        }
         const auto actor_ = owner_->GetManager().Find(preset_.actorName);
-        if (!actor_ || !actor_->transform) continue;
+        if (!actor_ || !actor_->transform)
+        {
+            continue;
+        }
         spawnPoints.push_back({ preset_.actorName,
             actor_->transform->localPosition, actor_->transform->localRotation });
     }
@@ -103,11 +140,17 @@ void ActorPresentationActionComponent::CaptureSpawnPoints()
     BS_PROFILE_SCOPE("ActorPresentationActionComponent::CaptureSpawnPoints");
     CaptureMissingSpawnPoints();
     const auto owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
     for (auto& point_ : spawnPoints)
     {
         const auto actor_ = owner_->GetManager().Find(point_.actorName);
-        if (!actor_ || !actor_->transform) continue;
+        if (!actor_ || !actor_->transform)
+        {
+            continue;
+        }
         point_.position = actor_->transform->localPosition;
         point_.rotation = actor_->transform->localRotation;
     }
@@ -117,7 +160,10 @@ void ActorPresentationActionComponent::RestoreSpawnPoints()
 {
     BS_PROFILE_SCOPE("ActorPresentationActionComponent::RestoreSpawnPoints");
     const auto owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
     CaptureMissingSpawnPoints();
     // 前回の移動・旋回補間が、復元直後の配置を上書きしないようにする。
     movingActor.reset();
@@ -125,7 +171,10 @@ void ActorPresentationActionComponent::RestoreSpawnPoints()
     for (const auto& point_ : spawnPoints)
     {
         const auto actor_ = owner_->GetManager().Find(point_.actorName);
-        if (!actor_ || !actor_->transform) continue;
+        if (!actor_ || !actor_->transform)
+        {
+            continue;
+        }
         actor_->transform->localPosition = point_.position;
         actor_->transform->localRotation = point_.rotation;
         actor_->transform->MarkDirty();
@@ -136,17 +185,31 @@ void ActorPresentationActionComponent::RestoreSpawnPoints()
 void ActorPresentationActionComponent::CaptureRuntimePositions()
 {
     BS_PROFILE_SCOPE("ActorPresentationActionComponent::CaptureRuntimePositions");
-    if (!runtimePositions.empty()) return;
+    if (!runtimePositions.empty())
+    {
+        return;
+    }
     const auto owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
     for (const auto& preset_ : presets)
     {
         const auto duplicate_ = std::find_if(runtimePositions.begin(), runtimePositions.end(),
-            [&](const ActorPresentationSpawnPoint& point_) { return point_.actorName == preset_.actorName; });
-        if (duplicate_ != runtimePositions.end()) continue;
+            [&](const ActorPresentationSpawnPoint& point_)
+        {
+            return point_.actorName == preset_.actorName;
+        });
+        if (duplicate_ != runtimePositions.end())
+        {
+            continue;
+        }
         const auto actor_ = owner_->GetManager().Find(preset_.actorName);
         if (actor_ && actor_->transform)
+        {
             runtimePositions.push_back({ preset_.actorName, actor_->transform->localPosition, actor_->transform->localRotation });
+        }
     }
 }
 
@@ -154,13 +217,19 @@ void ActorPresentationActionComponent::RestoreRuntimePositions()
 {
     BS_PROFILE_SCOPE("ActorPresentationActionComponent::RestoreRuntimePositions");
     const auto owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
     movingActor.reset();
     turningActor.reset();
     for (const auto& point_ : runtimePositions)
     {
         const auto actor_ = owner_->GetManager().Find(point_.actorName);
-        if (!actor_ || !actor_->transform) continue;
+        if (!actor_ || !actor_->transform)
+        {
+            continue;
+        }
         actor_->transform->localPosition = point_.position;
         actor_->transform->MarkDirty();
         actor_->transform->SetRotation(point_.rotation);
@@ -172,38 +241,60 @@ void ActorPresentationActionComponent::RestoreRuntimePositions()
 void ActorPresentationActionComponent::ExecutePreset(int index_)
 {
     BS_PROFILE_SCOPE("ActorPresentationActionComponent::ExecutePreset");
-    if (index_ < 0 || index_ >= static_cast<int>(presets.size())) return;
+    if (index_ < 0 || index_ >= static_cast<int>(presets.size()))
+    {
+        return;
+    }
     const auto owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
     const auto& preset_ = presets[index_];
     // 旧JSONの種別値を残し、生成・削除の実処理は専用Componentへ委譲する。
     if (preset_.type == ActorPresentationActionType::SPAWN_PREFAB)
     {
         if (const auto spawner_ = owner_->GetComponent<PrefabSpawnActionComponent>())
+        {
             spawner_->SpawnPrefab(preset_.prefabName, preset_.actorName);
+        }
         return;
     }
     if (preset_.type == ActorPresentationActionType::DESTROY_ACTOR)
     {
         if (const auto deleter_ = owner_->GetComponent<ObjectDeleteActionComponent>())
+        {
             deleter_->DeleteActor(preset_.actorName, preset_.skipInPreview);
+        }
         return;
     }
     if (preset_.type == ActorPresentationActionType::CLEANUP_SPAWNED)
     {
-        if (const auto deleter_ = owner_->GetComponent<ObjectDeleteActionComponent>()) deleter_->CleanupSpawnedObjects(true);
+        if (const auto deleter_ = owner_->GetComponent<ObjectDeleteActionComponent>())
+        {
+            deleter_->CleanupSpawnedObjects(true);
+        }
         return;
     }
     const auto actor_ = owner_->GetManager().Find(preset_.actorName);
-    if (!actor_) return;
+    if (!actor_)
+    {
+        return;
+    }
     if (preset_.type == ActorPresentationActionType::COMMIT_ACTOR)
     {
-        if (const auto spawner_ = owner_->GetComponent<PrefabSpawnActionComponent>()) spawner_->CommitActor(actor_);
+        if (const auto spawner_ = owner_->GetComponent<PrefabSpawnActionComponent>())
+        {
+            spawner_->CommitActor(actor_);
+        }
         return;
     }
     if (preset_.type == ActorPresentationActionType::SET_UI_TEXT)
     {
-        if (const auto text_ = actor_->GetComponent<UITextComponent>()) text_->SetText(preset_.stateName);
+        if (const auto text_ = actor_->GetComponent<UITextComponent>())
+        {
+            text_->SetText(preset_.stateName);
+        }
         return;
     }
     if (preset_.type == ActorPresentationActionType::SET_LOCK_ON_TARGET)
@@ -220,7 +311,15 @@ void ActorPresentationActionComponent::ExecutePreset(int index_)
     {
         // 撃破時点で開いている武器やProjectileの受付窓を閉じる。
         for (const auto& object_ : owner_->GetManager().GetObjects())
-            if (object_) for (const auto& hitBox_ : object_->GetComponents<HitBox>()) hitBox_->Deactivate();
+        {
+            if (object_)
+            {
+                for (const auto& hitBox_ : object_->GetComponents<HitBox>())
+                {
+                    hitBox_->Deactivate();
+                }
+            }
+        }
         return;
     }
     if (preset_.type == ActorPresentationActionType::FREEZE_ACTOR ||
@@ -235,8 +334,14 @@ void ActorPresentationActionComponent::ExecutePreset(int index_)
             {
                 for (const auto& child_ : transform_->children)
                 {
-                    if (!child_) continue;
-                    if (const auto childActor_ = child_->gameObject.lock()) SetActorFrozen(childActor_, frozen_);
+                    if (!child_)
+                    {
+                        continue;
+                    }
+                    if (const auto childActor_ = child_->gameObject.lock())
+                    {
+                        SetActorFrozen(childActor_, frozen_);
+                    }
                     self_(self_, child_);
                 }
             };
@@ -248,7 +353,9 @@ void ActorPresentationActionComponent::ExecutePreset(int index_)
         preset_.type == ActorPresentationActionType::SET_HIDDEN)
     {
         if (const auto model_ = actor_->GetComponent<GltfModelCommponennt>())
+        {
             model_->SetRuntimeVisible(preset_.type == ActorPresentationActionType::SET_VISIBLE);
+        }
         return;
     }
     if (preset_.type == ActorPresentationActionType::PLAY_AUDIO ||
@@ -256,15 +363,24 @@ void ActorPresentationActionComponent::ExecutePreset(int index_)
     {
         if (const auto audio_ = actor_->GetComponent<AudioComponent>())
         {
-            if (preset_.type == ActorPresentationActionType::PLAY_AUDIO) audio_->Play();
-            else audio_->Stop();
+            if (preset_.type == ActorPresentationActionType::PLAY_AUDIO)
+            {
+                audio_->Play();
+            }
+            else
+            {
+                audio_->Stop();
+            }
         }
         return;
     }
     if (preset_.type == ActorPresentationActionType::MOVE_TO_TARGET)
     {
         const auto target_ = owner_->GetManager().Find(preset_.targetName);
-        if (!target_ || !target_->transform || !actor_->transform) return;
+        if (!target_ || !target_->transform || !actor_->transform)
+        {
+            return;
+        }
         startMovePosition = actor_->transform->localPosition;
         // Markerのワールド位置を対象の親座標へ戻し、親付きObjectでも同じ地点へ配置する。
         auto worldPosition_ = target_->transform->GetWorldPosition();
@@ -274,8 +390,10 @@ void ActorPresentationActionComponent::ExecutePreset(int index_)
         worldPosition_.z += preset_.positionOffset.z;
         auto position_ = DirectX::XMLoadFloat3(&worldPosition_);
         if (const auto parent_ = actor_->transform->parent.lock())
+        {
             position_ = DirectX::XMVector3TransformCoord(position_,
                 DirectX::XMMatrixInverse(nullptr, parent_->GetWorldMatrix()));
+        }
         DirectX::XMStoreFloat3(&targetMovePosition, position_);
         movingActor = actor_;
         moveElapsed = 0.0f;
@@ -303,16 +421,28 @@ void ActorPresentationActionComponent::ExecutePreset(int index_)
         preset_.type == ActorPresentationActionType::STOP_MESH_VFX)
     {
         const auto meshVfx_ = actor_->GetComponent<MeshVFXComponent>();
-        if (!meshVfx_) return;
+        if (!meshVfx_)
+        {
+            return;
+        }
         const bool play_ = preset_.type == ActorPresentationActionType::PLAY_MESH_VFX;
         if (const auto trail_ = actor_->GetComponent<WeaponTrailComponent>())
         {
-            if (play_) trail_->BeginTrail(true);
-            else trail_->EndTrail(true);
+            if (play_)
+            {
+                trail_->BeginTrail(true);
+            }
+            else
+            {
+                trail_->EndTrail(true);
+            }
             return;
         }
         // Stopだけでは時刻が止まってMeshが残るため、描画フラグも切り替える。
-        for (auto& part_ : meshVfx_->GetAsset().parts) part_.renderEnabled = play_;
+        for (auto& part_ : meshVfx_->GetAsset().parts)
+        {
+            part_.renderEnabled = play_;
+        }
         if (const auto trail_ = actor_->GetComponent<TrailMeshComponent>())
         {
             trail_->Clear();
@@ -323,7 +453,10 @@ void ActorPresentationActionComponent::ExecutePreset(int index_)
             meshVfx_->Reset();
             meshVfx_->Play();
         }
-        else meshVfx_->Stop();
+        else
+        {
+            meshVfx_->Stop();
+        }
         return;
     }
     if (preset_.type == ActorPresentationActionType::PLAY_PARTICLE ||
@@ -331,16 +464,31 @@ void ActorPresentationActionComponent::ExecutePreset(int index_)
         preset_.type == ActorPresentationActionType::RESET_PARTICLE)
     {
         const auto particle_ = actor_->GetComponent<ParticleComponent>();
-        if (!particle_) return;
+        if (!particle_)
+        {
+            return;
+        }
         // 通常停止では粒子を寿命まで残し、復元用Resetでは残留粒子も消す。
-        if (preset_.type == ActorPresentationActionType::RESET_PARTICLE) particle_->ResetRuntime();
-        else if (preset_.type == ActorPresentationActionType::PLAY_PARTICLE) particle_->Play();
-        else particle_->Stop();
+        if (preset_.type == ActorPresentationActionType::RESET_PARTICLE)
+        {
+            particle_->ResetRuntime();
+        }
+        else if (preset_.type == ActorPresentationActionType::PLAY_PARTICLE)
+        {
+            particle_->Play();
+        }
+        else
+        {
+            particle_->Stop();
+        }
         return;
     }
     if (preset_.type == ActorPresentationActionType::MOVE_FROM_OFFSET)
     {
-        if (!actor_->transform) return;
+        if (!actor_->transform)
+        {
+            return;
+        }
         targetMovePosition = actor_->transform->localPosition;
         startMovePosition =
         {
@@ -360,12 +508,18 @@ void ActorPresentationActionComponent::ExecutePreset(int index_)
     if (preset_.type == ActorPresentationActionType::FACE_TARGET)
     {
         const auto target_ = owner_->GetManager().Find(preset_.targetName);
-        if (!target_ || !actor_->transform || !target_->transform) return;
+        if (!target_ || !actor_->transform || !target_->transform)
+        {
+            return;
+        }
         const auto actorPosition_ = actor_->transform->GetWorldPosition();
         const auto targetPosition_ = target_->transform->GetWorldPosition();
         const float x_ = targetPosition_.x - actorPosition_.x;
         const float z_ = targetPosition_.z - actorPosition_.z;
-        if (x_ * x_ + z_ * z_ <= 0.0001f) return;
+        if (x_ * x_ + z_ * z_ <= 0.0001f)
+        {
+            return;
+        }
         // 水平方向だけを向け、親の回転を差し引いてローカルYawへ戻す。
         startYaw = actor_->transform->localRotation.y;
         const float parentYaw_ = actor_->transform->GetWorldRotation().y - startYaw;
@@ -384,7 +538,10 @@ void ActorPresentationActionComponent::ExecutePreset(int index_)
         return;
     }
     const auto animation_ = actor_->GetComponent<AnimationControllerComponent>();
-    if (!animation_) return;
+    if (!animation_)
+    {
+        return;
+    }
     // 明示した演出だけAssetを再反映し、既存のScene内Stateを優先する設定は維持する。
     if (!preset_.stateAssetPath.empty() && (preset_.refreshStateAssetOnPlay ||
         animation_->GetStates().find(preset_.stateName) == animation_->GetStates().end()))
@@ -400,14 +557,23 @@ void ActorPresentationActionComponent::ExecutePreset(int index_)
         {
             nlohmann::json assetJson_;
             file_ >> assetJson_;
-            if (assetJson_.contains("AssetType") && assetJson_.value("AssetType", "") != "AnimationState") return;
+            if (assetJson_.contains("AssetType") && assetJson_.value("AssetType", "") != "AnimationState")
+            {
+                return;
+            }
             const AnimState loadedState_ = assetJson_.contains("State")
                 ? assetJson_["State"].get<AnimState>() : assetJson_.get<AnimState>();
-            if (preset_.stateName.empty() || loadedState_.name != preset_.stateName) return;
+            if (preset_.stateName.empty() || loadedState_.name != preset_.stateName)
+            {
+                return;
+            }
             animation_->AddState(preset_.stateName, loadedState_.animationIndex);
             auto& states_ = animation_->GetStates();
             const auto stateIterator_ = states_.find(preset_.stateName);
-            if (stateIterator_ == states_.end() || !stateIterator_->second) return;
+            if (stateIterator_ == states_.end() || !stateIterator_->second)
+            {
+                return;
+            }
             // AddStateが用意した実体を保ち、Loop・イベント・RootMotionなどの保存設定を反映する。
             *stateIterator_->second = loadedState_;
         }
@@ -420,7 +586,10 @@ void ActorPresentationActionComponent::ExecutePreset(int index_)
     if (preset_.type == ActorPresentationActionType::RELEASE_ANIMATION)
     {
         // 復帰Stateを先に反映してから、通常の遷移グラフへ制御を返す。
-        if (!preset_.stateName.empty()) animation_->ChangeState(preset_.stateName, preset_.duration);
+        if (!preset_.stateName.empty())
+        {
+            animation_->ChangeState(preset_.stateName, preset_.duration);
+        }
         animation_->SetPresentationControlled(false);
         return;
     }
@@ -439,14 +608,20 @@ void ActorPresentationActionComponent::Update(float deltaTime_)
     BS_PROFILE_SCOPE("ActorPresentationActionComponent::Update");
     UpdateMovement(deltaTime_);
     const auto actor_ = turningActor.lock();
-    if (!actor_ || actor_->IsPendingDestroy() || !actor_->manager || !actor_->transform) return;
+    if (!actor_ || actor_->IsPendingDestroy() || !actor_->manager || !actor_->transform)
+    {
+        return;
+    }
     turnElapsed += (std::max)(deltaTime_, 0.0f);
     const float rate_ = turnDuration <= 0.0f ? 1.0f : std::clamp(turnElapsed / turnDuration, 0.0f, 1.0f);
     const float easedRate_ = rate_ * rate_ * (3.0f - 2.0f * rate_);
     auto rotation_ = actor_->transform->localRotation;
     rotation_.y = startYaw + (targetYaw - startYaw) * easedRate_;
     actor_->transform->SetRotation(rotation_);
-    if (rate_ >= 1.0f) turningActor.reset();
+    if (rate_ >= 1.0f)
+    {
+        turningActor.reset();
+    }
 }
 
 void ActorPresentationActionComponent::UpdateMovement(float deltaTime_)
@@ -490,14 +665,20 @@ void ActorPresentationActionComponent::UpdateMovement(float deltaTime_)
                 {position_.x - sideX_, position_.y, position_.z - sideZ_});
         }
     }
-    if (rate_ >= 1.0f) movingActor.reset();
+    if (rate_ >= 1.0f)
+    {
+        movingActor.reset();
+    }
 }
 
 // Animationと描画を継続し、通常移動・AI・物理判定だけを一時停止する。
 void ActorPresentationActionComponent::SetActorFrozen(const std::shared_ptr<GameObject>& actor_, bool frozen_)
 {
     BS_PROFILE_SCOPE("ActorPresentationActionComponent::SetActorFrozen");
-    if (!actor_ || actor_->IsPendingDestroy()) return;
+    if (!actor_ || actor_->IsPendingDestroy())
+    {
+        return;
+    }
     // 単体再生を繰り返しても、破棄した生成物の復帰記録を残さない。
     frozenActors.erase(std::remove_if(frozenActors.begin(), frozenActors.end(), [](const FrozenActor& entry_)
     {
@@ -505,10 +686,16 @@ void ActorPresentationActionComponent::SetActorFrozen(const std::shared_ptr<Game
         return !object_ || object_->IsPendingDestroy();
     }), frozenActors.end());
     const auto existing_ = std::find_if(frozenActors.begin(), frozenActors.end(),
-        [&](const FrozenActor& item_) { return item_.actor.lock() == actor_; });
+        [&](const FrozenActor& item_)
+    {
+        return item_.actor.lock() == actor_;
+    });
     if (!frozen_)
     {
-        if (existing_ == frozenActors.end()) return;
+        if (existing_ == frozenActors.end())
+        {
+            return;
+        }
         if (const auto movement_ = actor_->GetComponent<CharacterMovementComponent>())
         {
             movement_->ResetMovementRequests();
@@ -517,12 +704,20 @@ void ActorPresentationActionComponent::SetActorFrozen(const std::shared_ptr<Game
         for (const auto& state_ : existing_->componentStates)
         {
             const auto component_ = state_.first.lock();
-            if (!component_) continue;
+            if (!component_)
+            {
+                continue;
+            }
             if (const auto collider_ = std::dynamic_pointer_cast<ColliderComponent>(component_))
+            {
                 collider_->velocity = { 0.0f, 0.0f, 0.0f };
+            }
             // 旧攻撃の受付窓は再開せず、次の戦闘ActionによるActivateを待つ。
             component_->SetRuntimeSuppressed(state_.second);
-            if (const auto hitBox_ = std::dynamic_pointer_cast<HitBox>(component_)) hitBox_->Deactivate();
+            if (const auto hitBox_ = std::dynamic_pointer_cast<HitBox>(component_))
+            {
+                hitBox_->Deactivate();
+            }
         }
         frozenActors.erase(existing_);
         return;
@@ -531,16 +726,29 @@ void ActorPresentationActionComponent::SetActorFrozen(const std::shared_ptr<Game
     {
         // 単体再生の切り替えでShowが呼ばれても、最初の復帰状態を保持して停止し直す。
         for (const auto& state_ : existing_->componentStates)
-            if (const auto component_ = state_.first.lock()) component_->SetRuntimeSuppressed(true);
-        if (const auto movement_ = actor_->GetComponent<CharacterMovementComponent>()) movement_->ResetMovementRequests();
+        {
+            if (const auto component_ = state_.first.lock())
+            {
+                component_->SetRuntimeSuppressed(true);
+            }
+        }
+        if (const auto movement_ = actor_->GetComponent<CharacterMovementComponent>())
+        {
+            movement_->ResetMovementRequests();
+        }
         return;
     }
     FrozenActor item_;
     item_.actor = actor_;
     // 通常戦闘の補正要求が、演出後のIdleやMarker移動へ持ち越されないようにする。
-    if (const auto warp_ = actor_->GetComponent<MotionWarpComponent>()) warp_->Clear();
+    if (const auto warp_ = actor_->GetComponent<MotionWarpComponent>())
+    {
+        warp_->Clear();
+    }
     if (const auto sequence_ = actor_->GetComponent<ActionSequence>())
+    {
         sequence_->StopPlayback(sequence_->GetPlaybackGeneration());
+    }
     if (const auto movement_ = actor_->GetComponent<CharacterMovementComponent>())
     {
         movement_->ResetMovementRequests();
@@ -548,19 +756,28 @@ void ActorPresentationActionComponent::SetActorFrozen(const std::shared_ptr<Game
     }
     for (const auto& component_ : actor_->components)
     {
-        if (!component_) continue;
+        if (!component_)
+        {
+            continue;
+        }
         const auto& name_ = component_->GetName();
         if (name_ != "CharacterMovementComponent" && name_ != "MotionWarpComponent" &&
             name_ != "AIControllerComponent" && name_ != "DragonAIComponent" &&
             name_ != "DragonAttackControllerComponent" && name_ != "AIActionComponent" &&
             name_ != "AttackEmitterComponent" &&
-            name_ != "HumanBossAIComponent" && name_ != "HumanBossActionComponent") continue;
+            name_ != "HumanBossAIComponent" && name_ != "HumanBossActionComponent")
+        {
+            continue;
+        }
         item_.componentStates.push_back({ component_, component_->IsRuntimeSuppressed() });
         component_->SetRuntimeSuppressed(true);
     }
     for (const auto& component_ : actor_->colliderComponents)
     {
-        if (!component_) continue;
+        if (!component_)
+        {
+            continue;
+        }
         item_.componentStates.push_back({ component_, component_->IsRuntimeSuppressed() });
         if (const auto collider_ = std::dynamic_pointer_cast<ColliderComponent>(component_))
         {
@@ -580,9 +797,15 @@ void ActorPresentationActionComponent::Gui()
 {
     ImGui::SeparatorText("Spawn Points");
     ImGui::TextUnformatted("Spawn points are saved separately from current actor transforms.");
-    if (ImGui::Button("Capture Current Positions")) CaptureSpawnPoints();
+    if (ImGui::Button("Capture Current Positions"))
+    {
+        CaptureSpawnPoints();
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Restore Spawn Positions")) RestoreSpawnPoints();
+    if (ImGui::Button("Restore Spawn Positions"))
+    {
+        RestoreSpawnPoints();
+    }
     ImGui::TextUnformatted("Capture the intended layout, then save the scene.");
     for (int index_ = 0; index_ < static_cast<int>(spawnPoints.size()); ++index_)
     {
@@ -621,7 +844,10 @@ void ActorPresentationActionComponent::Gui()
         ImGui::InputText("Prefab Name", &preset_.prefabName);
         ImGui::Checkbox("Skip Destruction In Preview", &preset_.skipInPreview);
         int type_ = static_cast<int>(preset_.type);
-        if (ImGui::Combo("Type", &type_, TYPES, IM_ARRAYSIZE(TYPES))) preset_.type = static_cast<ActorPresentationActionType>(type_);
+        if (ImGui::Combo("Type", &type_, TYPES, IM_ARRAYSIZE(TYPES)))
+        {
+            preset_.type = static_cast<ActorPresentationActionType>(type_);
+        }
         ImGui::InputText("Animation State", &preset_.stateName);
         ImGui::InputText("State Asset Path", &preset_.stateAssetPath);
         ImGui::Checkbox("Refresh Asset And Restart On Play", &preset_.refreshStateAssetOnPlay);
@@ -629,9 +855,13 @@ void ActorPresentationActionComponent::Gui()
         ImGui::DragFloat("Blend / Turn / Move Duration", &preset_.duration, 0.01f, 0.0f, 60.0f);
         if (preset_.type == ActorPresentationActionType::FREEZE_ACTOR ||
             preset_.type == ActorPresentationActionType::RELEASE_ACTOR)
+        {
             ImGui::Checkbox("Include Child Actors", &preset_.includeChildren);
+        }
         if (preset_.type == ActorPresentationActionType::MOVE_FROM_OFFSET)
+        {
             ImGui::DragFloat3("Entry Position Offset", &preset_.positionOffset.x, 0.05f);
+        }
         if (preset_.type == ActorPresentationActionType::MOVE_TO_TARGET)
         {
             ImGui::DragFloat3("Target World Position Offset", &preset_.positionOffset.x, 0.05f);
@@ -644,8 +874,14 @@ void ActorPresentationActionComponent::Gui()
         ImGui::Separator();
         ImGui::PopID();
     }
-    if (ImGui::Button("Add Actor Action")) presets.emplace_back();
-    if (ImGui::Button("Register Actor Actions")) RegisterActions();
+    if (ImGui::Button("Add Actor Action"))
+    {
+        presets.emplace_back();
+    }
+    if (ImGui::Button("Register Actor Actions"))
+    {
+        RegisterActions();
+    }
 }
 
 void ActorPresentationActionComponent::Serialize(nlohmann::json& json_) const
@@ -661,6 +897,7 @@ void ActorPresentationActionComponent::Serialize(nlohmann::json& json_) const
     }
     json_["Presets"] = nlohmann::json::array();
     for (const auto& preset_ : presets)
+    {
         json_["Presets"].push_back({ {"ActionName", preset_.actionName}, {"ActorName", preset_.actorName},
             {"StateName", preset_.stateName}, {"StateAssetPath", preset_.stateAssetPath}, {"RefreshStateAssetOnPlay", preset_.refreshStateAssetOnPlay}, {"TargetName", preset_.targetName}, {"PrefabName", preset_.prefabName}, {"SkipInPreview", preset_.skipInPreview}, {"TrailWidth", preset_.trailWidth},
             {"Type", static_cast<int>(preset_.type)}, {"Duration", preset_.duration},
@@ -668,6 +905,7 @@ void ActorPresentationActionComponent::Serialize(nlohmann::json& json_) const
             {"MatchTargetRotation", preset_.matchTargetRotation},
             {"IncludeChildren", preset_.includeChildren},
             {"PositionOffset", {preset_.positionOffset.x, preset_.positionOffset.y, preset_.positionOffset.z}} });
+    }
 }
 
 void ActorPresentationActionComponent::Deserialize(const nlohmann::json& json_)
@@ -677,14 +915,22 @@ void ActorPresentationActionComponent::Deserialize(const nlohmann::json& json_)
     {
         for (const auto& item_ : json_["SpawnPoints"])
         {
-            if (!item_.is_object()) continue;
+            if (!item_.is_object())
+            {
+                continue;
+            }
             ActorPresentationSpawnPoint point_;
             point_.actorName = item_.value("ActorName", std::string{});
             if (point_.actorName.empty() || !item_.contains("Position") ||
-                !item_["Position"].is_array() || item_["Position"].size() != 3) continue;
+                !item_["Position"].is_array() || item_["Position"].size() != 3)
+            {
+                continue;
+            }
             point_.position = { item_["Position"][0], item_["Position"][1], item_["Position"][2] };
             if (item_.contains("Rotation") && item_["Rotation"].is_array() && item_["Rotation"].size() == 3)
+            {
                 point_.rotation = { item_["Rotation"][0], item_["Rotation"][1], item_["Rotation"][2] };
+            }
             spawnPoints.push_back(point_);
         }
     }
@@ -693,7 +939,10 @@ void ActorPresentationActionComponent::Deserialize(const nlohmann::json& json_)
     movingActor.reset();
     moveElapsed = 0.0f;
     moveDuration = 0.0f;
-    if (!json_.contains("Presets") || !json_["Presets"].is_array()) return;
+    if (!json_.contains("Presets") || !json_["Presets"].is_array())
+    {
+        return;
+    }
     for (const auto& item_ : json_["Presets"])
     {
         ActorPresentationActionPreset preset_;
@@ -715,7 +964,9 @@ void ActorPresentationActionComponent::Deserialize(const nlohmann::json& json_)
         preset_.swayCycles = (std::max)(item_.value("SwayCycles", 2.0f), 0.0f);
         // 旧JSONではオフセットを0とし、既存のAnimation・旋回設定を維持する。
         if (item_.contains("PositionOffset") && item_["PositionOffset"].is_array() && item_["PositionOffset"].size() == 3)
+        {
             preset_.positionOffset = { item_["PositionOffset"][0], item_["PositionOffset"][1], item_["PositionOffset"][2] };
+        }
         presets.push_back(preset_);
     }
 }

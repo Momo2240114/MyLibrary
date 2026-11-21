@@ -52,6 +52,7 @@ public:
 
     // Layout再計算が必要な状態にする。
     void MarkLayoutDirty();
+
     // 保存対象のRectを変えず、メニュー演出の移動と拡縮だけをレイアウトへ重ねる。
     void SetRuntimeVisualTransform(const DirectX::XMFLOAT2& offset_, float scale_)
     {
@@ -59,6 +60,7 @@ public:
         runtimeVisualScale = scale_;
         MarkLayoutDirty();
     }
+
     // Transformの親をたどり、親Widgetを探す。
     void ResolveParentWidget();
     // Board/親Widget/画面Sizeから、このWidgetのScreenRectを計算する。
@@ -67,21 +69,69 @@ public:
         UIWidgetComponent* parentWidget_,
         const DirectX::XMFLOAT2& screenSize_);
 
-    const std::string& GetWidgetId() const { return widgetId; }
-    const std::string& GetParentWidgetId() const { return parentWidgetId; }
-    UIRectTransform& GetRectTransform() { return rectTransform; }
-    const UIRectTransform& GetRectTransform() const { return rectTransform; }
-    const UIScreenRect& GetScreenRect() const { return screenRect; }
+    const std::string& GetWidgetId() const
+    {
+        return widgetId;
+    }
+
+    const std::string& GetParentWidgetId() const
+    {
+        return parentWidgetId;
+    }
+
+    UIRectTransform& GetRectTransform()
+    {
+        return rectTransform;
+    }
+
+    const UIRectTransform& GetRectTransform() const
+    {
+        return rectTransform;
+    }
+
+    const UIScreenRect& GetScreenRect() const
+    {
+        return screenRect;
+    }
+
     // 保存された回転と独立したモーションの回転を合成する。
     float GetVisualRotation();
-    int GetZOrder() const { return zOrder + runtimeZOrderOffset; }
+
+    int GetZOrder() const
+    {
+        return zOrder + runtimeZOrderOffset;
+    }
+
     // 拡大表示などの一時的な前面化を、保存対象の描画順から分離する。
-    void SetRuntimeZOrderOffset(int offset_) { runtimeZOrderOffset = offset_; }
-    bool IsVisible() const { return visible; }
-    bool IsInputEnabled() const { return inputEnabled; }
-    bool IsRaycastTarget() const { return raycastTarget; }
-    bool IsLayoutDirty() const { return layoutDirty; }
-    UIWidgetComponent* GetParentWidget() const { return parentWidget.lock().get(); }
+    void SetRuntimeZOrderOffset(int offset_)
+    {
+        runtimeZOrderOffset = offset_;
+    }
+
+    bool IsVisible() const
+    {
+        return visible;
+    }
+
+    bool IsInputEnabled() const
+    {
+        return inputEnabled;
+    }
+
+    bool IsRaycastTarget() const
+    {
+        return raycastTarget;
+    }
+
+    bool IsLayoutDirty() const
+    {
+        return layoutDirty;
+    }
+
+    UIWidgetComponent* GetParentWidget() const
+    {
+        return parentWidget.lock().get();
+    }
 
 private:
     // UI内で参照するためのIDと、親Widgetを明示指定するID。

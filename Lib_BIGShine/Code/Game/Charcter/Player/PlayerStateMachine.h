@@ -48,7 +48,11 @@ public:
     void Update(float dt_);
 
     const char* GetCurrentStateName() const;
-    PLAYER_ACTION GetCurrentAction() const { return currentAction; }
+
+    PLAYER_ACTION GetCurrentAction() const
+    {
+        return currentAction;
+    }
 
 private:
     // Action種別ごとに所有するPlayerState。

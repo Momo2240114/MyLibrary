@@ -67,7 +67,10 @@ namespace
     {
         const XMFLOAT3 difference_ = Subtract(endPosition_, startPosition_);
         const float length_ = Length(difference_);
-        if (length_ <= EPSILON) return;
+        if (length_ <= EPSILON)
+        {
+            return;
+        }
 
         const XMVECTOR forward_ = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
         const XMVECTOR direction_ = XMVector3Normalize(XMLoadFloat3(&difference_));
@@ -110,7 +113,10 @@ void UpperBodyLeanIKComponent::Start()
     if (ikMap_)
     {
         ikMap_->AddUpperBodyLeanChain("UpperBodyLean");
-        if (ikChainName == "UPPER_BODY") ikChainName = "UpperBodyLean";
+        if (ikChainName == "UPPER_BODY")
+        {
+            ikChainName = "UpperBodyLean";
+        }
     }
 
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
@@ -125,7 +131,10 @@ bool UpperBodyLeanIKComponent::IsLoadReady() const
 {
     const auto owner_ = const_cast<UpperBodyLeanIKComponent*>(this)->GetGameObject();
     const auto model_ = owner_ ? owner_->GetComponent<GltfModelCommponennt>() : nullptr;
-    if (!model_) return true;
+    if (!model_)
+    {
+        return true;
+    }
 
     model_->UpdateLoadState();
     return !model_->IsModelLoading();
@@ -135,11 +144,23 @@ bool UpperBodyLeanIKComponent::ResolveDependencies()
 {
     // 同じGameObject上のIKMap、モデル、AnimationControllerを必要になった時点で解決する。
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return false;
+    if (!owner_)
+    {
+        return false;
+    }
 
-    if (ikMap.expired()) ikMap = owner_->GetComponent<IKMapComponent>();
-    if (model.expired()) model = owner_->GetComponent<GltfModelCommponennt>();
-    if (animationController.expired()) animationController = owner_->GetComponent<AnimationControllerComponent>();
+    if (ikMap.expired())
+    {
+        ikMap = owner_->GetComponent<IKMapComponent>();
+    }
+    if (model.expired())
+    {
+        model = owner_->GetComponent<GltfModelCommponennt>();
+    }
+    if (animationController.expired())
+    {
+        animationController = owner_->GetComponent<AnimationControllerComponent>();
+    }
 
     return !ikMap.expired() && !model.expired();
 }
@@ -167,7 +188,10 @@ void UpperBodyLeanIKComponent::ResetLean()
 
 void UpperBodyLeanIKComponent::AddApplyAnimationName(const std::string& animationName_)
 {
-    if (animationName_.empty()) return;
+    if (animationName_.empty())
+    {
+        return;
+    }
     if (std::find(applyAnimationNames.begin(), applyAnimationNames.end(), animationName_) != applyAnimationNames.end())
     {
         return;
@@ -187,28 +211,46 @@ std::vector<std::string> UpperBodyLeanIKComponent::GetCurrentAnimationNames() co
 
     auto addName_ = [&names_](const std::string& name_)
         {
-            if (name_.empty()) return;
-            if (std::find(names_.begin(), names_.end(), name_) != names_.end()) return;
-            names_.push_back(name_);
+            if (name_.empty())
+        {
+            return;
+        }
+        if (std::find(names_.begin(), names_.end(), name_) != names_.end())
+        {
+            return;
+        }
+        names_.push_back(name_);
         };
 
     const std::shared_ptr<AnimationControllerComponent> animationController_ = animationController.lock();
-    if (!animationController_) return names_;
+    if (!animationController_)
+    {
+        return names_;
+    }
 
     const AnimState* currentState_ = animationController_->GetCurrentState();
-    if (!currentState_) return names_;
+    if (!currentState_)
+    {
+        return names_;
+    }
 
     addName_(currentState_->name);
     addName_(currentState_->sequencerDataName);
 
     const std::shared_ptr<GltfModelCommponennt> model_ = model.lock();
-    if (!model_) return names_;
+    if (!model_)
+    {
+        return names_;
+    }
 
     const std::vector<GltfModelCommponennt::Animation>& animations_ = model_->GetAnimations();
     auto addClipName_ = [&animations_, &addName_](int animationIndex_)
         {
-            if (animationIndex_ < 0 || animationIndex_ >= static_cast<int>(animations_.size())) return;
-            addName_(animations_[animationIndex_].name);
+            if (animationIndex_ < 0 || animationIndex_ >= static_cast<int>(animations_.size()))
+        {
+            return;
+        }
+        addName_(animations_[animationIndex_].name);
         };
 
     addClipName_(currentState_->animationIndex);
@@ -233,14 +275,23 @@ std::vector<std::string> UpperBodyLeanIKComponent::GetCurrentAnimationNames() co
 
 bool UpperBodyLeanIKComponent::MatchesAnimationName(const std::string& currentName_) const
 {
-    if (currentName_.empty()) return false;
+    if (currentName_.empty())
+    {
+        return false;
+    }
 
     for (const std::string& animationName_ : applyAnimationNames)
     {
-        if (animationName_.empty()) continue;
+        if (animationName_.empty())
+        {
+            continue;
+        }
         if (usePartialNameMatch)
         {
-            if (currentName_.find(animationName_) != std::string::npos) return true;
+            if (currentName_.find(animationName_) != std::string::npos)
+            {
+                return true;
+            }
         }
         else if (currentName_ == animationName_)
         {
@@ -254,13 +305,22 @@ bool UpperBodyLeanIKComponent::MatchesAnimationName(const std::string& currentNa
 bool UpperBodyLeanIKComponent::ShouldApplyForCurrentAnimation() const
 {
     // 歩き/走りなど、指定したアニメーション中だけ体を傾けたい場合のON/OFF判定。
-    if (!useAnimationFilter) return true;
+    if (!useAnimationFilter)
+    {
+        return true;
+    }
 
     const std::shared_ptr<AnimationControllerComponent> animationController_ = animationController.lock();
-    if (!animationController_) return !disableWhenNoAnimationMatched;
+    if (!animationController_)
+    {
+        return !disableWhenNoAnimationMatched;
+    }
 
     const std::vector<std::string> currentNames_ = GetCurrentAnimationNames();
-    if (currentNames_.empty()) return !disableWhenNoAnimationMatched;
+    if (currentNames_.empty())
+    {
+        return !disableWhenNoAnimationMatched;
+    }
 
     const bool matched_ = std::any_of(
         currentNames_.begin(),
@@ -285,10 +345,16 @@ XMFLOAT3 UpperBodyLeanIKComponent::ResolveMoveVelocity(float deltaTime_)
         return manualMoveVelocity;
     }
 
-    if (!useOwnerVelocity) return {};
+    if (!useOwnerVelocity)
+    {
+        return {};
+    }
 
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_ || !owner_->transform) return {};
+    if (!owner_ || !owner_->transform)
+    {
+        return {};
+    }
 
     const XMFLOAT3 currentPosition_ = owner_->transform->GetWorldPosition();
     XMFLOAT3 velocity_{};
@@ -307,7 +373,10 @@ XMFLOAT3 UpperBodyLeanIKComponent::ToOwnerLocalDirection(const XMFLOAT3& worldDi
 {
     // ワールド移動方向をキャラクター基準の前後左右へ変換し、前傾/横傾きへ割り当てやすくする。
     const std::shared_ptr<GameObject> owner_ = gameObject.lock();
-    if (!owner_ || !owner_->transform) return {};
+    if (!owner_ || !owner_->transform)
+    {
+        return {};
+    }
 
     XMMATRIX ownerWorld_ = owner_->transform->GetWorldMatrix();
     ownerWorld_.r[3] = XMVectorSet(0, 0, 0, 1);
@@ -368,7 +437,10 @@ void UpperBodyLeanIKComponent::LateUpdate(float deltaTime_)
         return;
     }
     const std::shared_ptr<GltfModelCommponennt> modelReady_ = model.lock();
-    if (modelReady_) modelReady_->UpdateLoadState();
+    if (modelReady_)
+    {
+        modelReady_->UpdateLoadState();
+    }
     if (!modelReady_ || !modelReady_->IsModelReady())
     {
         ResetLean();
@@ -386,13 +458,25 @@ void UpperBodyLeanIKComponent::LateUpdate(float deltaTime_)
     UpdateLeanAngles(localMoveDirection_, speed_, deltaTime_, shouldApply_);
 
     const std::shared_ptr<IKMapComponent> ikMap_ = ikMap.lock();
-    if (!ikMap_) return;
+    if (!ikMap_)
+    {
+        return;
+    }
 
     IKMapComponent::IKChain* chain_ = ikMap_->FindChain(ikChainName);
-    if (chain_ && chain_->type != IKMapComponent::IK_TYPE::UPPER_BODY_LEAN) chain_ = nullptr;
+    if (chain_ && chain_->type != IKMapComponent::IK_TYPE::UPPER_BODY_LEAN)
+    {
+        chain_ = nullptr;
+    }
     chainMissingWarning = chain_ == nullptr;
-    if (!chain_) return;
-    if (!chain_->enabled || !ResolveChain(*chain_)) return;
+    if (!chain_)
+    {
+        return;
+    }
+    if (!chain_->enabled || !ResolveChain(*chain_))
+    {
+        return;
+    }
 
     if (std::abs(currentForwardLean) > EPSILON || std::abs(currentSideLean) > EPSILON)
     {
@@ -405,11 +489,20 @@ void UpperBodyLeanIKComponent::LateUpdate(float deltaTime_)
 bool UpperBodyLeanIKComponent::ResolveChain(IKMapComponent::IKChain& chain_)
 {
     // IKMapに登録されたチェーン名から、実際のボーンindex列を解決する。
-    if (chain_.rootNodeName.empty() || chain_.tipNodeName.empty()) return false;
-    if (!chain_.nodeIndices.empty()) return chain_.nodeIndices.size() >= 2;
+    if (chain_.rootNodeName.empty() || chain_.tipNodeName.empty())
+    {
+        return false;
+    }
+    if (!chain_.nodeIndices.empty())
+    {
+        return chain_.nodeIndices.size() >= 2;
+    }
 
     const std::shared_ptr<IKMapComponent> ikMap_ = ikMap.lock();
-    if (!ikMap_) return false;
+    if (!ikMap_)
+    {
+        return false;
+    }
 
     return ikMap_->ResolveChainByName(chain_.name);
 }
@@ -418,10 +511,16 @@ void UpperBodyLeanIKComponent::ApplyLeanChain(IKMapComponent::IKChain& chain_)
 {
     // チェーン上の各ボーンに重み付きでローカル回転を足し、腰から胸へ自然に傾きを分配する。
     const std::shared_ptr<GltfModelCommponennt> model_ = model.lock();
-    if (!model_) return;
+    if (!model_)
+    {
+        return;
+    }
 
     std::vector<GltfModelCommponennt::Node>& nodes_ = model_->GetNodes();
-    if (chain_.nodeIndices.empty()) return;
+    if (chain_.nodeIndices.empty())
+    {
+        return;
+    }
 
     std::vector<float> weights_ = boneWeights;
     if (weights_.size() != chain_.nodeIndices.size())
@@ -432,10 +531,16 @@ void UpperBodyLeanIKComponent::ApplyLeanChain(IKMapComponent::IKChain& chain_)
     if (autoNormalizeWeights)
     {
         float weightSum_ = 0.0f;
-        for (const float weight_ : weights_) weightSum_ += (std::max)(weight_, 0.0f);
+        for (const float weight_ : weights_)
+        {
+            weightSum_ += (std::max)(weight_, 0.0f);
+        }
         if (weightSum_ > EPSILON)
         {
-            for (float& weight_ : weights_) weight_ = (std::max)(weight_, 0.0f) / weightSum_;
+            for (float& weight_ : weights_)
+            {
+                weight_ = (std::max)(weight_, 0.0f) / weightSum_;
+            }
         }
     }
 
@@ -448,7 +553,10 @@ void UpperBodyLeanIKComponent::ApplyLeanChain(IKMapComponent::IKChain& chain_)
 
         GltfModelCommponennt::Node& node_ = nodes_.at(nodeIndex_);
         const float chainWeight_ = pointIndex_ < weights_.size() ? weights_[pointIndex_] : 0.0f;
-        if (chainWeight_ <= EPSILON) continue;
+        if (chainWeight_ <= EPSILON)
+        {
+            continue;
+        }
 
         const float forwardRadians_ = XMConvertToRadians(currentForwardLean * chainWeight_ * chain_.influence);
         const float sideRadians_ = XMConvertToRadians(currentSideLean * chainWeight_ * chain_.influence);
@@ -476,10 +584,16 @@ void UpperBodyLeanIKComponent::ApplyLeanChain(IKMapComponent::IKChain& chain_)
 
 void UpperBodyLeanIKComponent::DrawDebugShapes(const IKMapComponent::IKChain& chain_) const
 {
-    if (!showDebugShapes || chain_.nodeIndices.size() < 2) return;
+    if (!showDebugShapes || chain_.nodeIndices.size() < 2)
+    {
+        return;
+    }
 
     const std::shared_ptr<GltfModelCommponennt> model_ = model.lock();
-    if (!model_) return;
+    if (!model_)
+    {
+        return;
+    }
 
     ShapeRenderSystem& renderer_ = GraphicsDeviceManager::Instance().GetShapeRendererSystem();
     const std::vector<GltfModelCommponennt::Node>& nodes_ = model_->GetNodes();
@@ -522,7 +636,10 @@ void UpperBodyLeanIKComponent::Gui()
         {
             for (IKMapComponent::IKChain& chain_ : ikMap_->GetChains())
             {
-                if (chain_.type != IKMapComponent::IK_TYPE::UPPER_BODY_LEAN) continue;
+                if (chain_.type != IKMapComponent::IK_TYPE::UPPER_BODY_LEAN)
+                {
+                    continue;
+                }
                 if (ImGui::Selectable(chain_.name.c_str(), chain_.name == ikChainName))
                 {
                     ikChainName = chain_.name;
@@ -595,7 +712,10 @@ void UpperBodyLeanIKComponent::Gui()
         stateNames_.reserve(animationController_->GetStates().size());
         for (const auto& statePair_ : animationController_->GetStates())
         {
-            if (statePair_.second) stateNames_.push_back(statePair_.first);
+            if (statePair_.second)
+            {
+                stateNames_.push_back(statePair_.first);
+            }
         }
         std::sort(stateNames_.begin(), stateNames_.end());
 
@@ -604,7 +724,10 @@ void UpperBodyLeanIKComponent::Gui()
             ImGui::PushID(stateName_.c_str());
             ImGui::TextUnformatted(stateName_.c_str());
             ImGui::SameLine(260.0f);
-            if (ImGui::Button("Add##State")) AddApplyAnimationName(stateName_);
+            if (ImGui::Button("Add##State"))
+            {
+                AddApplyAnimationName(stateName_);
+            }
             ImGui::PopID();
         }
     }
@@ -616,12 +739,18 @@ void UpperBodyLeanIKComponent::Gui()
         for (size_t animationIndex_ = 0; animationIndex_ < animations_.size(); ++animationIndex_)
         {
             const std::string& clipName_ = animations_[animationIndex_].name;
-            if (clipName_.empty()) continue;
+            if (clipName_.empty())
+            {
+                continue;
+            }
 
             ImGui::PushID(static_cast<int>(animationIndex_));
             ImGui::TextUnformatted(clipName_.c_str());
             ImGui::SameLine(260.0f);
-            if (ImGui::Button("Add##Clip")) AddApplyAnimationName(clipName_);
+            if (ImGui::Button("Add##Clip"))
+            {
+                AddApplyAnimationName(clipName_);
+            }
             ImGui::PopID();
         }
     }
@@ -632,7 +761,10 @@ void UpperBodyLeanIKComponent::Gui()
         ImGui::PushID(static_cast<int>(animationIndex_));
         ImGui::TextUnformatted(applyAnimationNames[animationIndex_].c_str());
         ImGui::SameLine();
-        if (ImGui::Button("Remove##ApplyAnimationName")) removeAnimationIndex_ = static_cast<int>(animationIndex_);
+        if (ImGui::Button("Remove##ApplyAnimationName"))
+        {
+            removeAnimationIndex_ = static_cast<int>(animationIndex_);
+        }
         ImGui::PopID();
     }
     if (removeAnimationIndex_ >= 0)
@@ -644,7 +776,10 @@ void UpperBodyLeanIKComponent::Gui()
     // チェーン解決後の各ボーンへ、どれだけ傾きを分配するかを個別に調整する。
     ImGui::Checkbox("Auto Normalize Weights", &autoNormalizeWeights);
     IKMapComponent::IKChain* chain_ = ikMap_ ? ikMap_->FindChain(ikChainName) : nullptr;
-    if (chain_ && chain_->type != IKMapComponent::IK_TYPE::UPPER_BODY_LEAN) chain_ = nullptr;
+    if (chain_ && chain_->type != IKMapComponent::IK_TYPE::UPPER_BODY_LEAN)
+    {
+        chain_ = nullptr;
+    }
     if (chain_ && ResolveChain(*chain_))
     {
         if (boneWeights.size() != chain_->nodeIndices.size())
@@ -679,7 +814,10 @@ void UpperBodyLeanIKComponent::Gui()
         ImGui::Text("Move Speed: %.3f", debugMoveSpeed);
         ImGui::Text("Current Forward Lean: %.2f", currentForwardLean);
         ImGui::Text("Current Side Lean: %.2f", currentSideLean);
-        if (chainMissingWarning) ImGui::TextDisabled("IK chain was not found.");
+        if (chainMissingWarning)
+        {
+            ImGui::TextDisabled("IK chain was not found.");
+        }
     }
 }
 

@@ -18,7 +18,10 @@ ActionRegistry* JustDodgeReactionComponent::GetSelectedRegistry()
     case JUST_DODGE_REACTION_ACTION_SOURCE::SELF_LOCAL:
     {
         std::shared_ptr<GameObject> owner_ = GetGameObject();
-        if (!owner_) return nullptr;
+        if (!owner_)
+        {
+            return nullptr;
+        }
 
         return &owner_->localRegistry;
     }
@@ -35,7 +38,10 @@ const ActionRegistry* JustDodgeReactionComponent::GetSelectedRegistry() const
     case JUST_DODGE_REACTION_ACTION_SOURCE::SELF_LOCAL:
     {
         std::shared_ptr<GameObject> owner_ = gameObject.lock();
-        if (!owner_) return nullptr;
+        if (!owner_)
+        {
+            return nullptr;
+        }
 
         return &owner_->localRegistry;
     }
@@ -142,7 +148,10 @@ void JustDodgeReactionComponent::Gui()
     {
         for (const std::string& actionName_ : actionNames_)
         {
-            if (actionName_ == "---") continue;
+            if (actionName_ == "---")
+            {
+                continue;
+            }
 
             const bool selected_ = actionName_ == selectedActionName;
             if (ImGui::Selectable(actionName_.c_str(), selected_))

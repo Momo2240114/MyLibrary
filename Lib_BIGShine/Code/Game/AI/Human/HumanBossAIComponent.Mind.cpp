@@ -17,6 +17,7 @@ namespace
         float minimum;
         float maximum;
     };
+
     constexpr MindParameter PARAMETERS[] =
     {
         { "ReactionDelay", &HumanBossMindSettings::reactionDelay, 0.01f, 1.0f },
@@ -83,12 +84,21 @@ void HumanBossMindSettings::Gui()
     ImGui::DragFloat3("Phase Delay Multipliers", phaseDelay.data(), 0.05f, 0.1f, 3.0f);
     ImGui::DragFloat3("Phase Observation Multipliers", phaseObserve.data(), 0.05f, 0.1f, 3.0f);
     ImGui::DragFloat3("Phase Aggression Multipliers", phaseAggression.data(), 0.05f, 0.1f, 3.0f);
-    for (auto* values_ : { &phaseDelay, &phaseObserve, &phaseAggression }) for (auto& value_ : *values_) value_ = std::clamp(value_, 0.1f, 3.0f);
+    for (auto* values_ : { &phaseDelay, &phaseObserve, &phaseAggression })
+    {
+        for (auto& value_ : *values_)
+        {
+            value_ = std::clamp(value_, 0.1f, 3.0f);
+        }
+    }
 }
 
 void HumanBossMindSettings::Serialize(nlohmann::json& json_) const
 {
-    for (const auto& parameter_ : PARAMETERS) json_[parameter_.key] = this->*parameter_.value;
+    for (const auto& parameter_ : PARAMETERS)
+    {
+        json_[parameter_.key] = this->*parameter_.value;
+    }
     json_["PhaseDelay"] = phaseDelay;
     json_["PhaseObserve"] = phaseObserve;
     json_["PhaseAggression"] = phaseAggression;
@@ -96,18 +106,36 @@ void HumanBossMindSettings::Serialize(nlohmann::json& json_) const
 
 void HumanBossMindSettings::Deserialize(const nlohmann::json& json_)
 {
-    for (const auto& parameter_ : PARAMETERS) this->*parameter_.value = std::clamp(json_.value(parameter_.key, this->*parameter_.value), parameter_.minimum, parameter_.maximum);
+    for (const auto& parameter_ : PARAMETERS)
+    {
+        this->*parameter_.value = std::clamp(json_.value(parameter_.key, this->*parameter_.value), parameter_.minimum, parameter_.maximum);
+    }
     phaseDelay = json_.value("PhaseDelay", phaseDelay);
     phaseObserve = json_.value("PhaseObserve", phaseObserve);
     phaseAggression = json_.value("PhaseAggression", phaseAggression);
-    for (auto* values_ : { &phaseDelay, &phaseObserve, &phaseAggression }) for (auto& value_ : *values_) value_ = std::clamp(value_, 0.1f, 3.0f);
+    for (auto* values_ : { &phaseDelay, &phaseObserve, &phaseAggression })
+    {
+        for (auto& value_ : *values_)
+        {
+            value_ = std::clamp(value_, 0.1f, 3.0f);
+        }
+    }
 }   
 
 float HumanBossAIComponent::GetReactionCost(HumanBossActionType type_) const
 {
-    if (type_ == HumanBossActionType::BACK_DODGE || type_ == HumanBossActionType::SIDE_DODGE) return mindSettings.dodgeCost;
-    if (type_ == HumanBossActionType::GUARD) return mindSettings.guardCost;
-    if (type_ == HumanBossActionType::JUST_GUARD) return mindSettings.justGuardCost;
+    if (type_ == HumanBossActionType::BACK_DODGE || type_ == HumanBossActionType::SIDE_DODGE)
+    {
+        return mindSettings.dodgeCost;
+    }
+    if (type_ == HumanBossActionType::GUARD)
+    {
+        return mindSettings.guardCost;
+    }
+    if (type_ == HumanBossActionType::JUST_GUARD)
+    {
+        return mindSettings.justGuardCost;
+    }
     return 0.0f;
 }
 
@@ -163,11 +191,20 @@ void HumanBossAIComponent::UpdateMind(float deltaTime_)
         intentReason = "Observing player before the next attack";
         return;
     }
-    if (TrySelectAirHeavyIntent()) return;
+    if (TrySelectAirHeavyIntent())
+    {
+        return;
+    }
 
     // 実行中の行動と、まだ有効な意図の固定時間を優先する。
-    if (currentAction >= 0 || debugForceIntent || intentLockTimer > 0.0f) return;
-    if (intent == HumanBossIntent::BAIT && baitTimer > 0.0f && !IsReactionReady()) return;
+    if (currentAction >= 0 || debugForceIntent || intentLockTimer > 0.0f)
+    {
+        return;
+    }
+    if (intent == HumanBossIntent::BAIT && baitTimer > 0.0f && !IsReactionReady())
+    {
+        return;
+    }
     SelectIntent();
 }
 
@@ -179,7 +216,10 @@ void HumanBossAIComponent::UpdateMindMemory(float deltaTime_)
     whiffTimer = (std::max)(0.0f, whiffTimer - deltaTime_);
     airHeavyPressureTimer = (std::max)(0.0f, airHeavyPressureTimer - deltaTime_);
     airHeavyMemoryTimer = (std::max)(0.0f, airHeavyMemoryTimer - deltaTime_);
-    if (airHeavyMemoryTimer <= 0.0f) airHeavyAttackChain = 0;
+    if (airHeavyMemoryTimer <= 0.0f)
+    {
+        airHeavyAttackChain = 0;
+    }
     if (playerObservation.airborne && playerObservation.heavyAttack && playerObservation.attackPhase != ObservedAttackPhase::NONE &&
         airHeavyAttackSerial != playerObservation.serial)
     {
@@ -188,10 +228,16 @@ void HumanBossAIComponent::UpdateMindMemory(float deltaTime_)
         airHeavyAttackChain = (std::min)(airHeavyAttackChain + 1, 8);
         airHeavyMemoryTimer = mindSettings.airHeavyMemoryWindow;
         airHeavyPressureTimer = mindSettings.airHeavyPressureWindow;
-        if (currentAction < 0) intentLockTimer = 0.0f;
+        if (currentAction < 0)
+        {
+            intentLockTimer = 0.0f;
+        }
     }
     feintTimer = (std::max)(0.0f, feintTimer - deltaTime_);
-    if (distance <= preferredCombatDistance + 0.25f) baitTimer = (std::max)(0.0f, baitTimer - deltaTime_);
+    if (distance <= preferredCombatDistance + 0.25f)
+    {
+        baitTimer = (std::max)(0.0f, baitTimer - deltaTime_);
+    }
     counterWindowTimer = (std::max)(0.0f, counterWindowTimer - deltaTime_);
     if (currentAction < 0 && counterWindowTimer <= 0.0f)
     {
@@ -199,13 +245,18 @@ void HumanBossAIComponent::UpdateMindMemory(float deltaTime_)
         lightCounterPending = false;
     }
     bossHitChainTimer = (std::max)(0.0f, bossHitChainTimer - deltaTime_);
-    if (bossHitChainTimer <= 0.0f) bossHitStreak = 0;
+    if (bossHitChainTimer <= 0.0f)
+    {
+        bossHitStreak = 0;
+    }
     const float repeats_ = std::clamp(static_cast<float>(sameActionRepeatCount - 1) / 4.0f, 0.0f, 1.0f);
     const float airDelay_ = playerObservation.heavyAttack ? (playerObservation.airborne ? mindSettings.airHeavyReactionDelayMultiplier : mindSettings.heavyReactionDelayMultiplier) : 1.0f;
     const float delay_ = (std::max)(0.06f, mindSettings.reactionDelay * mindSettings.phaseDelay[phase] * airDelay_ * (1.0f - repeats_ * mindSettings.repeatPredictionDiscount));
     reactionDelayRemaining = (std::max)(0.0f, delay_ - playerObservation.attackAge);
     if (!debugFreezeBudget && currentAction < 0 && hitTimer <= 0.0f)
+    {
         reactionBudget = (std::min)(mindSettings.reactionBudgetMax, reactionBudget + mindSettings.reactionBudgetRecovery * deltaTime_);
+    }
     reactionBudget = std::clamp(reactionBudget, 0.0f, mindSettings.reactionBudgetMax);
     if (hasPreviousPlayerPosition && deltaTime_ > 0.0f)
     {
@@ -233,17 +284,29 @@ void HumanBossAIComponent::UpdateMindMemory(float deltaTime_)
     if (mindPlayerSerial != playerObservation.serial)
     {
         if (playerObservation.dodging && currentAction >= 0 && state == HumanBossState::OFFENSE && phase >= 1 &&
-            std::uniform_real_distribution<float>(0.0f, 1.0f)(random) < mindSettings.punishChance) comboDelayPending = true;
-        if (playerObservation.attackPhase == ObservedAttackPhase::STARTUP) attackWasThreatening = false;
+            std::uniform_real_distribution<float>(0.0f, 1.0f)(random) < mindSettings.punishChance)
+        {
+            comboDelayPending = true;
+        }
+        if (playerObservation.attackPhase == ObservedAttackPhase::STARTUP)
+        {
+            attackWasThreatening = false;
+        }
         mindPlayerSerial = playerObservation.serial;
     }
-    if (playerAttackDetected) attackWasThreatening = true;
+    if (playerAttackDetected)
+    {
+        attackWasThreatening = true;
+    }
     if (playerObservation.attackPhase == ObservedAttackPhase::RECOVERY && attackWasThreatening && !playerObservation.attackMadeContact && whiffSerial != playerObservation.serial)
     {
         whiffSerial = playerObservation.serial;
         whiffTimer = mindSettings.whiffWindow;
     }
-    if (!playerObservation.guarding) guardProbeCount = 0;
+    if (!playerObservation.guarding)
+    {
+        guardProbeCount = 0;
+    }
     // 一つの新しい攻撃に対して一度だけ、反応時間の満了時に判断の機会を設ける。
     if (currentAction < 0 && IsReactionReady() && reactionDecisionSerial != playerObservation.serial)
     {
@@ -346,7 +409,10 @@ void HumanBossAIComponent::SelectIntent()
     {
         intent = candidates_[std::discrete_distribution<std::size_t>(weights_.begin(), weights_.end())(random)];
     }
-    if (intent == HumanBossIntent::BAIT) baitTimer = mindSettings.baitWait;
+    if (intent == HumanBossIntent::BAIT)
+    {
+        baitTimer = mindSettings.baitWait;
+    }
     intentLockTimer = mindSettings.decisionLockTime;
     intentReason = std::string(GetHumanBossIntentName(intent)) + " / weak=" + std::to_string(playerObservation.weakAttackRate) +
         " guard=" + std::to_string(guardFrequency) + " dodge=" + std::to_string(dodgeFrequency) + " distance=" + std::to_string(distance);
@@ -359,15 +425,27 @@ float HumanBossAIComponent::GetIntentActionModifier(std::size_t index_) const
     if (definition_.category == HumanBossState::REACTION)
     {
         // 判定開始後に追加する反応はジャストガードだけとし、通常ガードや回避の受付は広げない。
-        if (playerObservation.attackPhase == ObservedAttackPhase::ACTIVE && type_ != HumanBossActionType::JUST_GUARD) return 0.0f;
-        if (intent != HumanBossIntent::DEFEND || !IsReactionReady() || reactionBudget < GetReactionCost(type_)) return 0.0f;
-        if (IsHeavyJustGuardReady() && type_ != HumanBossActionType::JUST_GUARD) return 0.0f;
+        if (playerObservation.attackPhase == ObservedAttackPhase::ACTIVE && type_ != HumanBossActionType::JUST_GUARD)
+        {
+            return 0.0f;
+        }
+        if (intent != HumanBossIntent::DEFEND || !IsReactionReady() || reactionBudget < GetReactionCost(type_))
+        {
+            return 0.0f;
+        }
+        if (IsHeavyJustGuardReady() && type_ != HumanBossActionType::JUST_GUARD)
+        {
+            return 0.0f;
+        }
         const float delayMultiplier_ = type_ == HumanBossActionType::GUARD ? mindSettings.guardDelayMultiplier :
             type_ == HumanBossActionType::JUST_GUARD ? mindSettings.justGuardDelayMultiplier : mindSettings.dodgeDelayMultiplier;
         const float repeatRead_ = std::clamp(static_cast<float>(sameActionRepeatCount - 1) / 4.0f, 0.0f, 1.0f);
         const float airDelay_ = playerObservation.heavyAttack ? (playerObservation.airborne ? mindSettings.airHeavyReactionDelayMultiplier : mindSettings.heavyReactionDelayMultiplier) : 1.0f;
         const float requiredDelay_ = (std::max)(0.06f, mindSettings.reactionDelay * mindSettings.phaseDelay[phase] * airDelay_ * delayMultiplier_ * (1.0f - repeatRead_ * mindSettings.repeatPredictionDiscount));
-        if (playerObservation.attackAge < requiredDelay_) return 0.0f;
+        if (playerObservation.attackAge < requiredDelay_)
+        {
+            return 0.0f;
+        }
         float weight_ = static_cast<int>(index_) == lastReaction ? std::pow(mindSettings.sameReactionPenalty, static_cast<float>((std::max)(1, reactionStreak))) : 1.0f;
         if (type_ == HumanBossActionType::JUST_GUARD)
         {
@@ -376,40 +454,85 @@ float HumanBossAIComponent::GetIntentActionModifier(std::size_t index_) const
         }
         return weight_;
     }
-    if (type_ == HumanBossActionType::COUNTER_ATTACK) return intent == HumanBossIntent::COUNTER_ATTACK && counterPending ? 1.0f : 0.0f;
+    if (type_ == HumanBossActionType::COUNTER_ATTACK)
+    {
+        return intent == HumanBossIntent::COUNTER_ATTACK && counterPending ? 1.0f : 0.0f;
+    }
     if (type_ == HumanBossActionType::GUARD_EXECUTION)
+    {
         return intent == HumanBossIntent::BREAK_GUARD && playerObservation.guarding &&
             playerObservation.guardHoldTime >= mindSettings.guardExecutionHoldThreshold ? 1.0f : 0.0f;
-    if (type_ == HumanBossActionType::LIGHT_COUNTER) return intent == HumanBossIntent::COUNTER_ATTACK && lightCounterPending ? 1.0f : 0.0f;
-    if (type_ == HumanBossActionType::WHIFF_PUNISH) return intent == HumanBossIntent::PUNISH && whiffTimer > 0.0f ? 2.0f : 0.0f;
-    if (type_ == HumanBossActionType::DELAY_ATTACK) return intent == HumanBossIntent::PUNISH_DODGE ? 1.0f + dodgeFrequency * mindSettings.dodgeReadBoost : 0.0f;
-    if (type_ == HumanBossActionType::GUARD_BREAK) return intent == HumanBossIntent::BREAK_GUARD && guardProbeCount > 0 && playerObservation.guarding ? 1.0f + guardFrequency * mindSettings.guardReadBoost : 0.0f;
-    if (type_ == HumanBossActionType::ATTACK_FEINT) return intent == HumanBossIntent::BAIT && baitTimer <= 0.0f && feintTimer <= 0.0f ? mindSettings.feintChance * (lastAction == static_cast<int>(index_) ? mindSettings.feintRecentPenalty : 1.0f) : 0.0f;
+    }
+    if (type_ == HumanBossActionType::LIGHT_COUNTER)
+    {
+        return intent == HumanBossIntent::COUNTER_ATTACK && lightCounterPending ? 1.0f : 0.0f;
+    }
+    if (type_ == HumanBossActionType::WHIFF_PUNISH)
+    {
+        return intent == HumanBossIntent::PUNISH && whiffTimer > 0.0f ? 2.0f : 0.0f;
+    }
+    if (type_ == HumanBossActionType::DELAY_ATTACK)
+    {
+        return intent == HumanBossIntent::PUNISH_DODGE ? 1.0f + dodgeFrequency * mindSettings.dodgeReadBoost : 0.0f;
+    }
+    if (type_ == HumanBossActionType::GUARD_BREAK)
+    {
+        return intent == HumanBossIntent::BREAK_GUARD && guardProbeCount > 0 && playerObservation.guarding ? 1.0f + guardFrequency * mindSettings.guardReadBoost : 0.0f;
+    }
+    if (type_ == HumanBossActionType::ATTACK_FEINT)
+    {
+        return intent == HumanBossIntent::BAIT && baitTimer <= 0.0f && feintTimer <= 0.0f ? mindSettings.feintChance * (lastAction == static_cast<int>(index_) ? mindSettings.feintRecentPenalty : 1.0f) : 0.0f;
+    }
     if (type_ == HumanBossActionType::SHADOW_CHARGE || type_ == HumanBossActionType::SHADOW_ORB)
     {
-        if (intent == HumanBossIntent::DEFEND || intent == HumanBossIntent::COUNTER_ATTACK || intent == HumanBossIntent::OBSERVE) return 0.0f;
+        if (intent == HumanBossIntent::DEFEND || intent == HumanBossIntent::COUNTER_ATTACK || intent == HumanBossIntent::OBSERVE)
+        {
+            return 0.0f;
+        }
         // 距離だけで強制せず、退避傾向と遠距離の維持時間を既存Weightへ加える。
         return 1.0f + retreatTendency * 2.0f + rangedPressureTime * 0.3f;
     }
-    if (type_ == HumanBossActionType::SHADOW_RAGNAROK) return 1.0f;
+    if (type_ == HumanBossActionType::SHADOW_RAGNAROK)
+    {
+        return 1.0f;
+    }
     if (definition_.category == HumanBossState::SHADOW)
     {
         if (type_ >= HumanBossActionType::SHADOW_SLASH)
         {
             if (type_ == HumanBossActionType::SHADOW_DOMAIN)
+            {
                 return intent == HumanBossIntent::BAIT || intent == HumanBossIntent::DISENGAGE || playerObservation.guarding ? 0.6f : 0.0f;
+            }
             if (type_ == HumanBossActionType::SHADOW_SLASH)
+            {
                 return intent == HumanBossIntent::CHASE || intent == HumanBossIntent::PUNISH || intent == HumanBossIntent::PUNISH_DODGE ? 1.0f : 0.0f;
+            }
             return intent == HumanBossIntent::CHASE || intent == HumanBossIntent::PUNISH || intent == HumanBossIntent::REPOSITION ? 0.6f : 0.0f;
         }
-        if (type_ == HumanBossActionType::SHADOW_SHIFT_APPROACH) return intent == HumanBossIntent::CHASE ? 1.0f + retreatTendency : 0.0f;
-        if (type_ == HumanBossActionType::SHADOW_SHIFT_BACK) return intent == HumanBossIntent::DISENGAGE || intent == HumanBossIntent::REPOSITION ? 1.0f : 0.0f;
+        if (type_ == HumanBossActionType::SHADOW_SHIFT_APPROACH)
+        {
+            return intent == HumanBossIntent::CHASE ? 1.0f + retreatTendency : 0.0f;
+        }
+        if (type_ == HumanBossActionType::SHADOW_SHIFT_BACK)
+        {
+            return intent == HumanBossIntent::DISENGAGE || intent == HumanBossIntent::REPOSITION ? 1.0f : 0.0f;
+        }
         if (type_ == HumanBossActionType::SHADOW_SHIFT_SIDE)
+        {
             return intent == HumanBossIntent::REPOSITION || intent == HumanBossIntent::DISENGAGE || intent == HumanBossIntent::BAIT ? 1.0f : 0.0f;
+        }
         return intent == HumanBossIntent::BAIT || (intent == HumanBossIntent::PUNISH && !playerObservation.airborne) ? 0.7f : 0.0f;
     }
+    if ((type_ == HumanBossActionType::NORMAL_ATTACK_A || type_ == HumanBossActionType::NORMAL_ATTACK_B) &&
+        intent == HumanBossIntent::CHASE)
+    {
+        return 1.0f;
+    }
     if (definition_.category == HumanBossState::OFFENSE)
+    {
         return (intent == HumanBossIntent::CHASE && airHeavyPressureTimer > 0.0f && !playerObservation.airborne) || intent == HumanBossIntent::PRESSURE || intent == HumanBossIntent::PUNISH || intent == HumanBossIntent::BREAK_GUARD || intent == HumanBossIntent::PUNISH_DODGE || (intent == HumanBossIntent::BAIT && baitTimer <= 0.0f) ? 1.0f : 0.0f;
+    }
     return 1.0f;
 }
 
@@ -433,7 +556,12 @@ void HumanBossAIComponent::DrawMindGui()
         GetGraphActionWeight("HumanBoss_SHADOW_CHARGE"), GetGraphActionWeight("HumanBoss_SHADOW_ORB"));
     std::array<int, 5> directions_{};
     for (const auto& action_ : playerObservation.history)
-        if (action_.dodge) ++directions_[std::clamp(static_cast<int>(action_.dodgeDirection), 0, 4)];
+    {
+        if (action_.dodge)
+        {
+            ++directions_[std::clamp(static_cast<int>(action_.dodgeDirection), 0, 4)];
+        }
+    }
     ImGui::Text("Dodge directions L:%d R:%d B:%d F:%d", directions_[1], directions_[2], directions_[3], directions_[4]);
     ImGui::TextWrapped("Reason: %s", intentReason.c_str());
     ImGui::SliderFloat("Aggression", &aggression, 0.0f, 1.0f);
@@ -442,19 +570,34 @@ void HumanBossAIComponent::DrawMindGui()
     ImGui::Checkbox("Freeze Budget Debug", &debugFreezeBudget);
     ImGui::Checkbox("Force Intent Debug", &debugForceIntent);
     ImGui::Checkbox("Force Phase Debug", &debugForcePhase);
-    if (debugForcePhase) ImGui::SliderInt("Debug Phase Index", &debugPhase, 0, 2);
+    if (debugForcePhase)
+    {
+        ImGui::SliderInt("Debug Phase Index", &debugPhase, 0, 2);
+    }
     if (debugForceIntent)
     {
         const char* NAMES[] = { "NONE", "OBSERVE", "PRESSURE", "BAIT", "PUNISH", "DEFEND", "REPOSITION", "DISENGAGE", "CHASE", "BREAK_GUARD", "PUNISH_DODGE", "COUNTER_ATTACK" };
         int value_ = static_cast<int>(intent);
-        if (ImGui::Combo("Forced Intent", &value_, NAMES, 12)) intent = static_cast<HumanBossIntent>(value_);
+        if (ImGui::Combo("Forced Intent", &value_, NAMES, 12))
+        {
+            intent = static_cast<HumanBossIntent>(value_);
+        }
     }
-    if (ImGui::TreeNode("Mind Settings")) { mindSettings.Gui(); ImGui::TreePop(); }
+    if (ImGui::TreeNode("Mind Settings"))
+    {
+        mindSettings.Gui();
+        ImGui::TreePop();
+    }
     if (ImGui::TreeNode("Manager Player Observation Debug"))
     {
         const auto owner_ = GetGameObject();
         if (owner_ && owner_->manager)
-            if (const auto observation_ = owner_->GetManager().GetCombatObservationSystem()) observation_->DrawPlayerActionObservationDebug(playerObjectName);
+        {
+            if (const auto observation_ = owner_->GetManager().GetCombatObservationSystem())
+            {
+                observation_->DrawPlayerActionObservationDebug(playerObjectName);
+            }
+        }
         ImGui::TreePop();
     }
 }

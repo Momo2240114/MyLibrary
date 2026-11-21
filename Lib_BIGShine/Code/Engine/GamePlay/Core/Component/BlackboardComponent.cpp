@@ -70,8 +70,14 @@ namespace
             DirectX::SimpleMath::Vector2 value_{ 0.0f, 0.0f };
             if (valueJson_.contains("value") && valueJson_["value"].is_array())
             {
-                if (valueJson_["value"].size() > 0) value_.x = valueJson_["value"][0].get<float>();
-                if (valueJson_["value"].size() > 1) value_.y = valueJson_["value"][1].get<float>();
+                if (valueJson_["value"].size() > 0)
+                {
+                    value_.x = valueJson_["value"][0].get<float>();
+                }
+                if (valueJson_["value"].size() > 1)
+                {
+                    value_.y = valueJson_["value"][1].get<float>();
+                }
             }
             return value_;
         }
@@ -80,9 +86,18 @@ namespace
             DirectX::SimpleMath::Vector3 value_{ 0.0f, 0.0f, 0.0f };
             if (valueJson_.contains("value") && valueJson_["value"].is_array())
             {
-                if (valueJson_["value"].size() > 0) value_.x = valueJson_["value"][0].get<float>();
-                if (valueJson_["value"].size() > 1) value_.y = valueJson_["value"][1].get<float>();
-                if (valueJson_["value"].size() > 2) value_.z = valueJson_["value"][2].get<float>();
+                if (valueJson_["value"].size() > 0)
+                {
+                    value_.x = valueJson_["value"][0].get<float>();
+                }
+                if (valueJson_["value"].size() > 1)
+                {
+                    value_.y = valueJson_["value"][1].get<float>();
+                }
+                if (valueJson_["value"].size() > 2)
+                {
+                    value_.z = valueJson_["value"][2].get<float>();
+                }
             }
             return value_;
         }
@@ -115,13 +130,21 @@ void BlackboardComponent::Gui()
         {
             switch (newType_)
             {
-            case 0: SetFloat(category_, key_, 0.0f); break;
-            case 1: SetInt(category_, key_, 0); break;
-            case 2: SetBool(category_, key_, false); break;
-            case 3: SetVector2(category_, key_, { 0.0f, 0.0f }); break;
-            case 4: SetVector3(category_, key_, { 0.0f, 0.0f, 0.0f }); break;
-            case 5: SetString(category_, key_, ""); break;
-            case 6: SetTrigger(category_, key_); ResetTrigger(category_, key_); break;
+            case 0: SetFloat(category_, key_, 0.0f);
+                break;
+            case 1: SetInt(category_, key_, 0);
+                break;
+            case 2: SetBool(category_, key_, false);
+                break;
+            case 3: SetVector2(category_, key_, { 0.0f, 0.0f });
+                break;
+            case 4: SetVector3(category_, key_, { 0.0f, 0.0f, 0.0f });
+                break;
+            case 5: SetString(category_, key_, "");
+                break;
+            case 6: SetTrigger(category_, key_);
+                ResetTrigger(category_, key_);
+                break;
             default: break;
             }
 
@@ -282,7 +305,10 @@ void BlackboardComponent::SetTrigger(const std::string& category_, const std::st
 bool BlackboardComponent::HasValue(const std::string& category_, const std::string& key_) const
 {
     const auto categoryIt_ = board.find(category_);
-    if (categoryIt_ == board.end()) return false;
+    if (categoryIt_ == board.end())
+    {
+        return false;
+    }
 
     return categoryIt_->second.find(key_) != categoryIt_->second.end();
 }
@@ -290,10 +316,16 @@ bool BlackboardComponent::HasValue(const std::string& category_, const std::stri
 const BlackBoardValue* BlackboardComponent::GetValue(const std::string& category_, const std::string& key_) const
 {
     const auto categoryIt_ = board.find(category_);
-    if (categoryIt_ == board.end()) return nullptr;
+    if (categoryIt_ == board.end())
+    {
+        return nullptr;
+    }
 
     const auto valueIt_ = categoryIt_->second.find(key_);
-    if (valueIt_ == categoryIt_->second.end()) return nullptr;
+    if (valueIt_ == categoryIt_->second.end())
+    {
+        return nullptr;
+    }
 
     return &valueIt_->second;
 }
@@ -301,10 +333,16 @@ const BlackBoardValue* BlackboardComponent::GetValue(const std::string& category
 BlackBoardValue* BlackboardComponent::GetValue(const std::string& category_, const std::string& key_)
 {
     auto categoryIt_ = board.find(category_);
-    if (categoryIt_ == board.end()) return nullptr;
+    if (categoryIt_ == board.end())
+    {
+        return nullptr;
+    }
 
     auto valueIt_ = categoryIt_->second.find(key_);
-    if (valueIt_ == categoryIt_->second.end()) return nullptr;
+    if (valueIt_ == categoryIt_->second.end())
+    {
+        return nullptr;
+    }
 
     return &valueIt_->second;
 }
@@ -312,7 +350,10 @@ BlackBoardValue* BlackboardComponent::GetValue(const std::string& category_, con
 bool BlackboardComponent::GetFloat(const std::string& category_, const std::string& key_, float& value_) const
 {
     const auto* valuePtr_ = GetValue(category_, key_);
-    if (!valuePtr_) return false;
+    if (!valuePtr_)
+    {
+        return false;
+    }
 
     value_ = ToFloat(*valuePtr_);
     return true;
@@ -321,7 +362,10 @@ bool BlackboardComponent::GetFloat(const std::string& category_, const std::stri
 bool BlackboardComponent::GetInt(const std::string& category_, const std::string& key_, int& value_) const
 {
     const auto* valuePtr_ = GetValue(category_, key_);
-    if (!valuePtr_) return false;
+    if (!valuePtr_)
+    {
+        return false;
+    }
 
     if (auto intValue_ = std::get_if<int>(valuePtr_))
     {
@@ -336,7 +380,10 @@ bool BlackboardComponent::GetInt(const std::string& category_, const std::string
 bool BlackboardComponent::GetBool(const std::string& category_, const std::string& key_, bool& value_) const
 {
     const auto* valuePtr_ = GetValue(category_, key_);
-    if (!valuePtr_) return false;
+    if (!valuePtr_)
+    {
+        return false;
+    }
 
     value_ = ToFloat(*valuePtr_) >= 0.5f;
     return true;
@@ -345,7 +392,10 @@ bool BlackboardComponent::GetBool(const std::string& category_, const std::strin
 bool BlackboardComponent::GetVector2(const std::string& category_, const std::string& key_, DirectX::SimpleMath::Vector2& value_) const
 {
     const auto* valuePtr_ = GetValue(category_, key_);
-    if (!valuePtr_) return false;
+    if (!valuePtr_)
+    {
+        return false;
+    }
 
     if (auto vector2Value_ = std::get_if<DirectX::SimpleMath::Vector2>(valuePtr_))
     {
@@ -359,7 +409,10 @@ bool BlackboardComponent::GetVector2(const std::string& category_, const std::st
 bool BlackboardComponent::GetVector3(const std::string& category_, const std::string& key_, DirectX::SimpleMath::Vector3& value_) const
 {
     const auto* valuePtr_ = GetValue(category_, key_);
-    if (!valuePtr_) return false;
+    if (!valuePtr_)
+    {
+        return false;
+    }
     if (auto vector3Value_ = std::get_if<DirectX::SimpleMath::Vector3>(valuePtr_))
     {
         value_ = *vector3Value_;
@@ -371,7 +424,10 @@ bool BlackboardComponent::GetVector3(const std::string& category_, const std::st
 bool BlackboardComponent::GetString(const std::string& category_, const std::string& key_, std::string& value_) const
 {
     const auto* valuePtr_ = GetValue(category_, key_);
-    if (!valuePtr_) return false;
+    if (!valuePtr_)
+    {
+        return false;
+    }
     if (auto stringValue_ = std::get_if<std::string>(valuePtr_))
     {
         value_ = *stringValue_;
@@ -384,7 +440,10 @@ bool BlackboardComponent::ConsumeTrigger(const std::string& category_, const std
 {
     // Animation遷移などの一度だけ使う信号として読み取り、発火済みならリセットする。
     auto* valuePtr_ = GetValue(category_, key_);
-    if (!valuePtr_) return false;
+    if (!valuePtr_)
+    {
+        return false;
+    }
 
     const bool isTriggered_ = ToFloat(*valuePtr_) >= 0.5f;
     if (isTriggered_)
@@ -406,7 +465,10 @@ void BlackboardComponent::ResetTrigger(const std::string& category_, const std::
 void BlackboardComponent::EraseValue(const std::string& category_, const std::string& key_)
 {
     auto categoryIt_ = board.find(category_);
-    if (categoryIt_ == board.end()) return;
+    if (categoryIt_ == board.end())
+    {
+        return;
+    }
 
     categoryIt_->second.erase(key_);
     if (categoryIt_->second.empty())
@@ -425,7 +487,10 @@ const BlackboardCategory& BlackboardComponent::GetCategory(const std::string& ca
     static const BlackboardCategory emptyCategory_;
 
     const auto categoryIt_ = board.find(category_);
-    if (categoryIt_ == board.end()) return emptyCategory_;
+    if (categoryIt_ == board.end())
+    {
+        return emptyCategory_;
+    }
 
     return categoryIt_->second;
 }
@@ -441,12 +506,30 @@ float BlackboardComponent::ToFloat(const BlackBoardValue& value_)
     return std::visit([](auto&& arg_) -> float {
         using T = std::decay_t<decltype(arg_)>;
 
-        if constexpr (std::is_same_v<T, float>) return arg_;
-        if constexpr (std::is_same_v<T, int>) return static_cast<float>(arg_);
-        if constexpr (std::is_same_v<T, bool>) return arg_ ? 1.0f : 0.0f;
-        if constexpr (std::is_same_v<T, DirectX::SimpleMath::Vector2>) return arg_.Length();
-        if constexpr (std::is_same_v<T, DirectX::SimpleMath::Vector3>) return arg_.Length();
-        if constexpr (std::is_same_v<T, std::string>) return arg_.empty() ? 0.0f : 1.0f;
+        if constexpr (std::is_same_v<T, float>)
+        {
+            return arg_;
+        }
+        if constexpr (std::is_same_v<T, int>)
+        {
+            return static_cast<float>(arg_);
+        }
+        if constexpr (std::is_same_v<T, bool>)
+        {
+            return arg_ ? 1.0f : 0.0f;
+        }
+        if constexpr (std::is_same_v<T, DirectX::SimpleMath::Vector2>)
+        {
+            return arg_.Length();
+        }
+        if constexpr (std::is_same_v<T, DirectX::SimpleMath::Vector3>)
+        {
+            return arg_.Length();
+        }
+        if constexpr (std::is_same_v<T, std::string>)
+        {
+            return arg_.empty() ? 0.0f : 1.0f;
+        }
         return 0.0f;
     }, value_);
 

@@ -17,7 +17,11 @@ public:
     void Draw() override;
     void Update(float deltaTime_) override;
 
-    bool ShouldPauseScene() const override{ return true; }
+    bool ShouldPauseScene() const override
+    {
+        return true;
+    }
+
 private:
     struct AudioPreset
     {

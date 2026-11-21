@@ -78,6 +78,7 @@ public:
         static std::string name = "ActionSequence";
         return name;
     }
+
     void Start();
     void OnDestroy() override;
     // 既存APIから専用の生成・削除Componentへ処理を委譲する。
@@ -86,14 +87,36 @@ public:
     void CleanupSpawnedObjects(bool includePersistent_ = false);
     void Update(float elapsedTime_) override;
     void StartSequence(int index_);
+
     // 外部Stateは開始時の世代を保存し、自分の予約だけを停止する。
-    unsigned int GetPlaybackGeneration() const { return playbackGeneration; }
+    unsigned int GetPlaybackGeneration() const
+    {
+        return playbackGeneration;
+    }
+
     // 汎用プレビューが実際のSequence時刻とロード待ちを表示するための情報。
-    float GetPlaybackTime() const { return std::clamp(playbackDuration - remainingDuration, 0.0f, (std::max)(0.0f, playbackDuration)); }
-    const std::string& GetPlayingSequenceName() const { return playingSequenceName; }
-    bool IsWaitingForObject() const { return waitingForObject; }
+    float GetPlaybackTime() const
+    {
+        return std::clamp(playbackDuration - remainingDuration, 0.0f, (std::max)(0.0f, playbackDuration));
+    }
+
+    const std::string& GetPlayingSequenceName() const
+    {
+        return playingSequenceName;
+    }
+
+    bool IsWaitingForObject() const
+    {
+        return waitingForObject;
+    }
+
     void StopPlayback(unsigned int generation_);
-    void SetRegisterGlobal(bool registerGlobal_) { registerGlobal = registerGlobal_; }
+
+    void SetRegisterGlobal(bool registerGlobal_)
+    {
+        registerGlobal = registerGlobal_;
+    }
+
     // 指定名の即時実行Sequenceが無ければ作成し、外部から呼べるActionとして登録する。
     void EnsureImmediateSequence(
         const std::string& sequenceName_,

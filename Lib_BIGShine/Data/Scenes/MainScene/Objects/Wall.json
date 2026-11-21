@@ -38,6 +38,7 @@
                             0.9686274528503418,
                             0.29411765933036804
                         ],
+                        "CullMode": 2,
                         "DissolveCurveName": "",
                         "DissolveEdgeColor": [
                             -107374176.0,
@@ -283,10 +284,11 @@
                     1.0
                 ],
                 "HalfHeight": 100.0,
+                "IgnoreCameraCollision": true,
                 "Radius": 70.0,
                 "Segments": 64,
                 "Shape": 0,
-                "ShowDebugShape": true,
+                "ShowDebugShape": false,
                 "TargetMask": 1,
                 "TargetRadius": 0.3499999940395355
             },
@@ -375,6 +377,18 @@
                             0.0
                         ],
                         "RadialVelocity": 0.0,
+                        "RandomColorEnd": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "RandomColorStart": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
                         "RenderType": 0,
                         "RotationSpeed": [
                             0.0,
@@ -443,6 +457,7 @@
                         "UseFresnel": 0,
                         "UseGradient": 0,
                         "UseMask": 0,
+                        "UseRandomColor": 0,
                         "UseRandomSize": 0,
                         "UseSpriteAnimation": 0,
                         "UseTargetAttraction": 0,

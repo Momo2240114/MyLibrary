@@ -61,13 +61,31 @@ namespace
             {
                 using T = std::decay_t<decltype(arg_)>;
 
-                if constexpr (std::is_same_v<T, float>) return "Float";
-                if constexpr (std::is_same_v<T, int>) return "Int";
-                if constexpr (std::is_same_v<T, bool>) return "Bool";
-                if constexpr (std::is_same_v<T, DirectX::SimpleMath::Vector2>) return "Vector2";
-                if constexpr (std::is_same_v<T, DirectX::SimpleMath::Vector3>) return "Vector3";
-                if constexpr (std::is_same_v<T, std::string>) return "String";
-                return "Unknown";
+                if constexpr (std::is_same_v<T, float>)
+            {
+                return "Float";
+            }
+            if constexpr (std::is_same_v<T, int>)
+            {
+                return "Int";
+            }
+            if constexpr (std::is_same_v<T, bool>)
+            {
+                return "Bool";
+            }
+            if constexpr (std::is_same_v<T, DirectX::SimpleMath::Vector2>)
+            {
+                return "Vector2";
+            }
+            if constexpr (std::is_same_v<T, DirectX::SimpleMath::Vector3>)
+            {
+                return "Vector3";
+            }
+            if constexpr (std::is_same_v<T, std::string>)
+            {
+                return "String";
+            }
+            return "Unknown";
             },
             value_);
     }
@@ -75,7 +93,10 @@ namespace
 
 void GameModeWindow::Draw()
 {
-    if (!isVisible) return;
+    if (!isVisible)
+    {
+        return;
+    }
 
     // GameModeManagerの現在状態とGlobalBlackboardをまとめて確認するデバッグWindow。
     if (BeginEditorWindow())
@@ -93,7 +114,10 @@ void GameModeWindow::Draw()
 
         const bool scenePlaybackBlocked_ = gameObjectManager->SupportsEditorPlayMode() &&
             gameObjectManager->GetEditorPlayMode() != EditorPlayMode::PLAY;
-        if (scenePlaybackBlocked_) ImGui::TextDisabled("Enter Play Mode to test scene events.");
+        if (scenePlaybackBlocked_)
+        {
+            ImGui::TextDisabled("Enter Play Mode to test scene events.");
+        }
         ImGui::BeginDisabled(scenePlaybackBlocked_);
         DrawState(*gameModeManager_);
         // 単体Sequenceを直接再生せず、GameModeのロックと復元を伴う入口Actionを使う。
@@ -106,23 +130,35 @@ void GameModeWindow::Draw()
         {
             const std::string sequence_ = std::string("Preview") + phase_;
             ImGui::BeginDisabled(!canPreview_ || !ActionRegistry::Instance().HasAction(sequence_));
-            if (ImGui::Button(phase_)) ActionRegistry::Instance().Call(std::string("GameMode.") + sequence_);
+            if (ImGui::Button(phase_))
+            {
+                ActionRegistry::Instance().Call(std::string("GameMode.") + sequence_);
+            }
             ImGui::EndDisabled();
         }
         ImGui::BeginDisabled(!gameModeManager_->IsPhaseTransitionPreview());
-        if (ImGui::Button("Restore First Form")) ActionRegistry::Instance().Call("GameMode.CancelPhaseTransitionPreview");
+        if (ImGui::Button("Restore First Form"))
+        {
+            ActionRegistry::Instance().Call("GameMode.CancelPhaseTransitionPreview");
+        }
         ImGui::EndDisabled();
         // 中断時も生成物と予約を復旧Sequenceで整理してから戦闘へ戻す。
         const bool canSkip_ = gameModeManager_->IsPhaseTransitionPreview() ||
             gameModeManager_->GetCurrentGameState() == GameProgressState::PHASE_1_DEFEAT ||
             gameModeManager_->GetCurrentGameState() == GameProgressState::PHASE_2_INTRO;
         ImGui::BeginDisabled(!canSkip_);
-        if (ImGui::Button("Skip Phase Transition")) ActionRegistry::Instance().Call("GameMode.SkipPhaseTransition");
+        if (ImGui::Button("Skip Phase Transition"))
+        {
+            ActionRegistry::Instance().Call("GameMode.SkipPhaseTransition");
+        }
         ImGui::EndDisabled();
         ImGui::SeparatorText("Global Blackboard");
         DrawGlobalBlackboard(gameModeManager_->GetGlobalBlackboard());
         ImGui::EndDisabled();
-        if (const auto director_ = gameObjectManager->GetPlayerDeathDirector()) director_->DrawSettingsGUI();
+        if (const auto director_ = gameObjectManager->GetPlayerDeathDirector())
+        {
+            director_->DrawSettingsGUI();
+        }
     }
     EndEditorWindow();
 }

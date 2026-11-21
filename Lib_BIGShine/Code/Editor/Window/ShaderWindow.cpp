@@ -7,7 +7,10 @@
 #include <imgui.h>
 
 void ShaderWindow::Draw() {
-    if (!isVisible) return;
+    if (!isVisible)
+    {
+        return;
+    }
 
 
     if (BeginEditorWindow()) {

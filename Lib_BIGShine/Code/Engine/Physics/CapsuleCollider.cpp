@@ -75,7 +75,10 @@ namespace
     {
         // Colliderが武器や部位などの子Objectに付いている場合、
         // 親階層にあるModel ObjectをNode追従候補としてEditorに出す。
-        if (!owner_ || !owner_->transform) return;
+        if (!owner_ || !owner_->transform)
+        {
+            return;
+        }
 
         std::shared_ptr<Transform> currentParent_ = owner_->transform->parent.lock();
         while (currentParent_)
@@ -118,7 +121,10 @@ void CapsuleCollider::Gui()
 
         for (const std::shared_ptr<GameObject>& parentObject_ : parentModelObjects_)
         {
-            if (!parentObject_) continue;
+            if (!parentObject_)
+            {
+                continue;
+            }
             const std::string& parentName_ = parentObject_->GetName();
             if (ImGui::Selectable(parentName_.c_str(), nodeModelObjectName == parentName_))
             {
@@ -137,9 +143,12 @@ void CapsuleCollider::Gui()
         int& nodeIndex_)
         {
             const char* preview_ = nodeName_.empty() ? "(Transform)" : nodeName_.c_str();
-            if (!ImGui::BeginCombo(label_, preview_)) return;
+            if (!ImGui::BeginCombo(label_, preview_))
+        {
+            return;
+        }
 
-            if (ImGui::Selectable("(Transform)", nodeName_.empty()))
+        if (ImGui::Selectable("(Transform)", nodeName_.empty()))
             {
                 nodeName_.clear();
                 nodeIndex_ = -1;
@@ -150,8 +159,11 @@ void CapsuleCollider::Gui()
                 for (int index_ = 0; index_ < static_cast<int>(nodes_.size()); ++index_)
                 {
                     const std::string& candidateName_ = nodes_[index_].name;
-                    if (candidateName_.empty()) continue;
-                    if (ImGui::Selectable(candidateName_.c_str(), candidateName_ == nodeName_))
+                    if (candidateName_.empty())
+                {
+                    continue;
+                }
+                if (ImGui::Selectable(candidateName_.c_str(), candidateName_ == nodeName_))
                     {
                         nodeName_ = candidateName_;
                         nodeIndex_ = index_;
@@ -180,14 +192,20 @@ void CapsuleCollider::Update(float deltaTime_)
     DirectX::XMFLOAT3 endPosition_{};
     if (TryGetNodeSegment(startPosition_, endPosition_))
     {
-        if (!shapeRenderEnabled) return;
+        if (!shapeRenderEnabled)
+        {
+            return;
+        }
 
         const float deltaX_ = endPosition_.x - startPosition_.x;
         const float deltaY_ = endPosition_.y - startPosition_.y;
         const float deltaZ_ = endPosition_.z - startPosition_.z;
         const float length_ = std::sqrt(
             deltaX_ * deltaX_ + deltaY_ * deltaY_ + deltaZ_ * deltaZ_);
-        if (length_ <= 0.00001f) return;
+        if (length_ <= 0.00001f)
+        {
+            return;
+        }
 
         DirectX::XMFLOAT4X4 drawWorld_{};
         DirectX::XMStoreFloat4x4(
@@ -264,14 +282,20 @@ std::shared_ptr<GltfModelCommponennt> CapsuleCollider::ResolveNodeModel()
     // nodeModelObjectNameが指定されていればScene内Object名からModelを探し、
     // 空ならColliderを持つObject自身のModelを使う。未LoadならNode追従は一旦無効扱いにする。
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return nullptr;
+    if (!owner_)
+    {
+        return nullptr;
+    }
 
     std::shared_ptr<GltfModelCommponennt> model_;
     if (!nodeModelObjectName.empty() && owner_->manager)
     {
         const std::shared_ptr<GameObject> targetObject_ =
             owner_->GetManager().Find(nodeModelObjectName);
-        if (targetObject_) model_ = targetObject_->GetComponent<GltfModelCommponennt>();
+        if (targetObject_)
+        {
+            model_ = targetObject_->GetComponent<GltfModelCommponennt>();
+        }
     }
     else
     {
@@ -281,7 +305,10 @@ std::shared_ptr<GltfModelCommponennt> CapsuleCollider::ResolveNodeModel()
     if (model_)
     {
         model_->UpdateLoadState();
-        if (!model_->IsModelReady()) return nullptr;
+        if (!model_->IsModelReady())
+        {
+            return nullptr;
+        }
     }
     return model_;
 }
@@ -303,7 +330,10 @@ bool CapsuleCollider::ResolveNodeIndex(
     const bool validIndex_ = nodeIndex_ >= 0 &&
         nodeIndex_ < static_cast<int>(nodes_.size()) &&
         nodes_[nodeIndex_].name == nodeName_;
-    if (!validIndex_) nodeIndex_ = model_->GetNodeIndex(nodeName_.c_str());
+    if (!validIndex_)
+    {
+        nodeIndex_ = model_->GetNodeIndex(nodeName_.c_str());
+    }
     return nodeIndex_ >= 0 && nodeIndex_ < static_cast<int>(nodes_.size());
 }
 
@@ -343,18 +373,30 @@ void CapsuleCollider::UpdateNodeSegmentShape(
     // PhysX Shapeを、Start/End Nodeを結ぶCapsuleへ更新する。
     // Actor自体のPoseはObject Transform基準なので、NodeのWorld中心と方向をActor Localへ変換してShape LocalPoseへ入れる。
     using namespace physx;
-    if (!actor) return;
+    if (!actor)
+    {
+        return;
+    }
 
     PxShape* shape_ = nullptr;
-    if (actor->getNbShapes() == 0) return;
+    if (actor->getNbShapes() == 0)
+    {
+        return;
+    }
     actor->getShapes(&shape_, 1);
-    if (!shape_) return;
+    if (!shape_)
+    {
+        return;
+    }
 
     const PxVec3 start_(startPosition_.x, startPosition_.y, startPosition_.z);
     const PxVec3 end_(endPosition_.x, endPosition_.y, endPosition_.z);
     const PxVec3 segment_ = end_ - start_;
     const float length_ = segment_.magnitude();
-    if (length_ <= 0.00001f) return;
+    if (length_ <= 0.00001f)
+    {
+        return;
+    }
 
     const auto worldScale_ = GetGameObject()->transform->GetWorldScale();
     const float radiusScale_ = (std::max)(std::abs(worldScale_.x), std::abs(worldScale_.z));

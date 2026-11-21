@@ -16,34 +16,99 @@ public:
     void Shutdown();
     void UpdateMatrices(const CameraComponent& camera, const DirectX::XMFLOAT3& lightDirection);
 
-    ID3D11DepthStencilView* GetDSV(int index) const { return shadowDSVs[index].Get(); }
-    ID3D11ShaderResourceView* GetSRV(int index) const { return shadowSRVs[index].Get(); }
-    const DirectX::XMFLOAT4X4& GetLightViewProjection(int index) const { return lightViewProjections[index]; }
-    DirectX::XMFLOAT4 GetCascadeSplits() const { return cascadeSplits; }
+    ID3D11DepthStencilView* GetDSV(int index) const
+    {
+        return shadowDSVs[index].Get();
+    }
+
+    ID3D11ShaderResourceView* GetSRV(int index) const
+    {
+        return shadowSRVs[index].Get();
+    }
+
+    const DirectX::XMFLOAT4X4& GetLightViewProjection(int index) const
+    {
+        return lightViewProjections[index];
+    }
+
+    DirectX::XMFLOAT4 GetCascadeSplits() const
+    {
+        return cascadeSplits;
+    }
 
     void SetViewport(ID3D11DeviceContext* dc) const;
 
     //ゲッター
-    bool IsUseCascadeShadow() const { return useCascadeShadow; }
-    void SetUseCascadeShadow(bool enable) { useCascadeShadow = enable; }
+    bool IsUseCascadeShadow() const
+    {
+        return useCascadeShadow;
+    }
 
-    bool IsDisplayCascadeArea() const { return displayCascadeArea; }
-    void SetDisplayCascadeArea(bool enable) { displayCascadeArea = enable; }
+    void SetUseCascadeShadow(bool enable)
+    {
+        useCascadeShadow = enable;
+    }
 
-    float GetLightDistance() const { return lightDistance; }
-    void SetLightDistance(float distance_) { lightDistance = distance_; }
+    bool IsDisplayCascadeArea() const
+    {
+        return displayCascadeArea;
+    }
 
-    float GetCascadeXyPadding() const { return cascadeXyPadding; }
-    void SetCascadeXyPadding(float padding_) { cascadeXyPadding = padding_; }
+    void SetDisplayCascadeArea(bool enable)
+    {
+        displayCascadeArea = enable;
+    }
 
-    float GetCascadeDepthPadding() const { return cascadeDepthPadding; }
-    void SetCascadeDepthPadding(float padding_) { cascadeDepthPadding = padding_; }
+    float GetLightDistance() const
+    {
+        return lightDistance;
+    }
 
-    bool IsTexelSnapEnabled() const { return texelSnapEnabled; }
-    void SetTexelSnapEnabled(bool enabled_) { texelSnapEnabled = enabled_; }
+    void SetLightDistance(float distance_)
+    {
+        lightDistance = distance_;
+    }
 
-    float* GetCascadeSplitDistances() { return cascadeSplitDistances; }
-    const float* GetCascadeSplitDistances() const { return cascadeSplitDistances; }
+    float GetCascadeXyPadding() const
+    {
+        return cascadeXyPadding;
+    }
+
+    void SetCascadeXyPadding(float padding_)
+    {
+        cascadeXyPadding = padding_;
+    }
+
+    float GetCascadeDepthPadding() const
+    {
+        return cascadeDepthPadding;
+    }
+
+    void SetCascadeDepthPadding(float padding_)
+    {
+        cascadeDepthPadding = padding_;
+    }
+
+    bool IsTexelSnapEnabled() const
+    {
+        return texelSnapEnabled;
+    }
+
+    void SetTexelSnapEnabled(bool enabled_)
+    {
+        texelSnapEnabled = enabled_;
+    }
+
+    float* GetCascadeSplitDistances()
+    {
+        return cascadeSplitDistances;
+    }
+
+    const float* GetCascadeSplitDistances() const
+    {
+        return cascadeSplitDistances;
+    }
+
     void SetCascadeSplitDistance(int index_, float distance_);
 
 private:

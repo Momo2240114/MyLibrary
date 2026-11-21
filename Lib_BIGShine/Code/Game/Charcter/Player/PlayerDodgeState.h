@@ -17,7 +17,11 @@ public:
         PlayerControllerComponent& playerController_,
         PLAYER_ACTION action_ = PLAYER_ACTION::DODGE);
 
-    const char* GetName() const override { return GetPlayerActionName(action); }
+    const char* GetName() const override
+    {
+        return GetPlayerActionName(action);
+    }
+
     // 回避方向とBlend入力を確定し、空中回避の場合は落下を一時停止する。
     void Enter() override;
     // ジャスト回避の受付時間を進め、回避中の入力と空中姿勢を更新する。

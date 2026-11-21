@@ -8,20 +8,57 @@
 class CurveComponent : public Component, public ImCurveEdit::Delegate
 {
 public:
-    const std::string& GetName() const override { static std::string name_ = "CurveComponent"; return name_; }
+    const std::string& GetName() const override
+    {
+        static std::string name_ = "CurveComponent";
+        return name_;
+    }
 
     // ImCurveEdit::Delegateとして、Editorへ現在のTrack数を返す。
-    size_t GetCurveCount() override { return tracks.size(); }
+    size_t GetCurveCount() override
+    {
+        return tracks.size();
+    }
+
     bool IsVisible(size_t curveIndex_) override;
-    bool IsEditable(size_t curveIndex_) const override { return IsEditableTrack(curveIndex_); }
-    ImCurveEdit::CurveType GetCurveType(size_t curveIndex_) const override { return tracks[curveIndex_].type; }
+
+    bool IsEditable(size_t curveIndex_) const override
+    {
+        return IsEditableTrack(curveIndex_);
+    }
+
+    ImCurveEdit::CurveType GetCurveType(size_t curveIndex_) const override
+    {
+        return tracks[curveIndex_].type;
+    }
+
     float Interpolate(size_t curveIndex_, size_t pointIndex_, float rate_) const override;
     float EvaluateSegment(size_t curveIndex_, size_t pointIndex_, float rate_) override;
-    ImVec2& GetMin() override { return minBounds; }
-    ImVec2& GetMax() override { return maxBounds; }
-    size_t GetPointCount(size_t curveIndex_) override { return tracks[curveIndex_].points.size(); }
-    uint32_t GetCurveColor(size_t curveIndex_) override { return tracks[curveIndex_].color; }
-    ImVec2* GetPoints(size_t curveIndex_) override { return tracks[curveIndex_].points.data(); }
+
+    ImVec2& GetMin() override
+    {
+        return minBounds;
+    }
+
+    ImVec2& GetMax() override
+    {
+        return maxBounds;
+    }
+
+    size_t GetPointCount(size_t curveIndex_) override
+    {
+        return tracks[curveIndex_].points.size();
+    }
+
+    uint32_t GetCurveColor(size_t curveIndex_) override
+    {
+        return tracks[curveIndex_].color;
+    }
+
+    ImVec2* GetPoints(size_t curveIndex_) override
+    {
+        return tracks[curveIndex_].points.data();
+    }
 
     int EditPoint(size_t curveIndex_, int pointIndex_, ImVec2 value_) override;
     void AddPoint(size_t curveIndex_, ImVec2 value_) override;
@@ -40,9 +77,18 @@ public:
     // Curve Editor本体を指定サイズで描画する。
     void DrawEditorContent(const ImVec2& size_ = ImVec2(0.0f, 0.0f));
 
-    unsigned int GetBackgroundColor() override { return 0xFF202020; }
-    void BeginEdit(int index_) override {}
-    void EndEdit() override {}
+    unsigned int GetBackgroundColor() override
+    {
+        return 0xFF202020;
+    }
+
+    void BeginEdit(int index_) override
+    {
+    }
+
+    void EndEdit() override
+    {
+    }
 
     void Gui() override;
     void Serialize(nlohmann::json& json_) const override;

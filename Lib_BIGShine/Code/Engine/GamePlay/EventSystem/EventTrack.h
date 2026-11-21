@@ -82,14 +82,30 @@ public:
         // Track全体の長さは、登録済みEventの最も遅いendTimeで決める。
         float maxTime = 0.0f;
         for (auto& ev : events)
-            if (ev.endTime > maxTime) maxTime = ev.endTime;
+        {
+            if (ev.endTime > maxTime)
+            {
+                maxTime = ev.endTime;
+            }
+        }
         return maxTime;
     }
 
     // アクセス
-    int GetItemCount() const { return (int)events.size(); }
-    const EventItem& GetEvent(int index) const { return events[index]; }
-    EventItem& GetEvent(int index) { return events[index]; }
+    int GetItemCount() const
+    {
+        return (int)events.size();
+    }
+
+    const EventItem& GetEvent(int index) const
+    {
+        return events[index];
+    }
+
+    EventItem& GetEvent(int index)
+    {
+        return events[index];
+    }
 
 private:
     // Track上に並ぶEvent一覧。

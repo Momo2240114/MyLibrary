@@ -23,10 +23,25 @@ public:
     // 指定スロットへPixelShader用SRVとして設定する
     void Set(ID3D11DeviceContext* deviceContext_, int slot_ = 0) const;
 
-    ID3D11ShaderResourceView* GetShaderResourceView() const { return shaderResourceView.Get(); }
-    const Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetShaderResourceViewComPtr() const { return shaderResourceView; }
-    int GetWidth() const { return width; }
-    int GetHeight() const { return height; }
+    ID3D11ShaderResourceView* GetShaderResourceView() const
+    {
+        return shaderResourceView.Get();
+    }
+
+    const Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetShaderResourceViewComPtr() const
+    {
+        return shaderResourceView;
+    }
+
+    int GetWidth() const
+    {
+        return width;
+    }
+
+    int GetHeight() const
+    {
+        return height;
+    }
 
 private:
     // HDRヘッダーから画像サイズを取得する

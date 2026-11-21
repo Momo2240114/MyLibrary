@@ -52,7 +52,12 @@ public:
     bool IsRegisteredObject(const std::shared_ptr<GameObject>& object_) const;
     // Playerレイヤーの登録済み候補だけを初回・失効時に参照する。
     std::shared_ptr<GameObject> FindPlayerObject(const std::shared_ptr<GameObject>& exclude_ = nullptr) const;
-    std::uint64_t GetRegistrationSerial() const { return registrationSerial; }
+
+    std::uint64_t GetRegistrationSerial() const
+    {
+        return registrationSerial;
+    }
+
     bool GetPlayerActionObservation(const std::shared_ptr<GameObject>& object_, PlayerActionObservation& observation_) const;
     std::uint64_t GetObservedHitCount(const std::shared_ptr<GameObject>& object_) const;
     bool GetPlayerActionObservation(const std::string& name_, PlayerActionObservation& observation_) const;
@@ -62,6 +67,7 @@ public:
     void DrawPlayerActionObservationDebug(const std::string& name_);
     // Player知覚の上書きと登録済みAIの状態を専用ObjectのInspectorへ表示する。
     void Gui();
+
 private:
     // 登録索引用の弱参照。Captureではこの全体索引を走査しない。
     struct ObjectReference
@@ -70,6 +76,7 @@ private:
         std::string name;
         bool playerLayer = false;
     };
+
     // Player専用の確定状態・履歴・Component参照。
     struct PlayerObservationCache
     {
@@ -85,6 +92,7 @@ private:
         float guardStart = 0.0f;
         std::uint64_t contactsAtAttackStart = 0;
     };
+
     // Combat Actorだけを保持し、同名の別個体へ命中履歴を引き継がない。
     struct ActorRecord
     {
@@ -96,6 +104,7 @@ private:
         std::uint64_t hits = 0;
         std::uint64_t contacts = 0;
     };
+
     void CapturePlayers();
     void CaptureActors();
     void RecordObservedContact(const std::shared_ptr<GameObject>& attacker_, bool hit_);

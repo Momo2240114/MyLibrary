@@ -54,7 +54,10 @@ void HealthComponent::Start()
 void HealthComponent::ApplyHit()
 {
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     // AttackSystemがBlackboardへ書いたHit/Damageを読み、Health側のダメージ処理へ変換する。
     const std::shared_ptr<BlackboardComponent> blackboard_ =
@@ -71,9 +74,14 @@ void HealthComponent::ApplyDamage(float damage_)
 {
     const auto actor_ = GetGameObject();
     if (actor_ && actor_->manager &&
-        (actor_->GetManager().IsBossFinishActive() || actor_->GetManager().IsPlayerDeathActive())) return;
+        (actor_->GetManager().IsBossFinishActive() || actor_->GetManager().IsPlayerDeathActive()))
+    {
+        return;
+    }
     if (const auto bossAI_ = actor_ ? actor_->GetComponent<HumanBossAIComponent>() : nullptr)
+    {
         damage_ = bossAI_->ConstrainBattleDamage(damage_);
+    }
     const bool wasDead_ = IsDead();
 
     // 0未満にならないようHPを減らし、死亡した瞬間だけDeath Actionを呼ぶ。
@@ -84,7 +92,10 @@ void HealthComponent::ApplyDamage(float damage_)
     if (!wasDead_ && IsDead() && owner_)
     {
         // 既存の死亡Actionを維持し、Playerだけは衝突走査後のコンテニュー演出も予約する。
-        if (owner_->manager) owner_->GetManager().RequestPlayerDeath(owner_);
+        if (owner_->manager)
+        {
+            owner_->GetManager().RequestPlayerDeath(owner_);
+        }
         owner_->ExecuteAction("Health_Death");
     }
 }
@@ -99,7 +110,12 @@ void HealthComponent::Heal(float amount_)
 void HealthComponent::ResetHealth()
 {
     if (const auto actor_ = GetGameObject())
-        if (const auto bossAI_ = actor_->GetComponent<HumanBossAIComponent>()) bossAI_->ResetBerserk();
+    {
+        if (const auto bossAI_ = actor_->GetComponent<HumanBossAIComponent>())
+        {
+            bossAI_->ResetBerserk();
+        }
+    }
     // デバッグやリトライ時に、死亡フラグも含めて正常な生存状態へ戻す。
     currentHealth = maxHealth;
     PublishToBlackboard();
@@ -107,16 +123,25 @@ void HealthComponent::ResetHealth()
 
 void HealthComponent::ConfirmPresentationDeath()
 {
-    if (IsDead()) return;
+    if (IsDead())
+    {
+        return;
+    }
     currentHealth = 0.0f;
     PublishToBlackboard();
-    if (const auto actor_ = GetGameObject()) actor_->ExecuteAction("Health_Death");
+    if (const auto actor_ = GetGameObject())
+    {
+        actor_->ExecuteAction("Health_Death");
+    }
 }
 
 void HealthComponent::RegisterActions()
 {
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     // HitReactionやActionSequenceからHealth_Hitとして呼べるよう、Healthカテゴリへ登録する。
     std::weak_ptr<HealthComponent> weakHealth_;
@@ -148,7 +173,9 @@ void HealthComponent::RegisterActions()
         float amount_ = 0.0f;
         if (health_ && !health_->IsDead() && blackboard_ &&
             blackboard_->GetFloat("Health", "HealAmount", amount_) && std::isfinite(amount_))
+        {
             health_->Heal(amount_);
+        }
     });
     owner_->RegisterAction("Health", "Health_Reset", [weakHealth_]()
     {
@@ -162,12 +189,18 @@ void HealthComponent::RegisterActions()
 void HealthComponent::PublishToBlackboard()
 {
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     // UI、AI、演出が同じHP状態を読めるよう、Healthカテゴリへ現在値を公開する。
     const std::shared_ptr<BlackboardComponent> blackboard_ =
         owner_->GetOrAddComponent<BlackboardComponent>();
-    if (!blackboard_) return;
+    if (!blackboard_)
+    {
+        return;
+    }
 
     blackboard_->SetFloat("Health", "Current", currentHealth);
     blackboard_->SetFloat("Health", "Max", maxHealth);
@@ -177,7 +210,9 @@ void HealthComponent::PublishToBlackboard()
     {
         const float rate_ = CalculateHealthRatio(currentHealth, maxHealth);
         if (const auto mode_ = owner_->GetManager().GetGameModeManager(); mode_ && mode_->GetPlayerHpRate() != rate_)
+        {
             mode_->SetPlayerHpRate(rate_);
+        }
     }
 }
 
@@ -219,7 +254,10 @@ void HealthComponent::Gui()
         Heal(100.0f);
     }
     ImGui::SameLine();
-    if (ImGui::Button("Reset Health")) ResetHealth();
+    if (ImGui::Button("Reset Health"))
+    {
+        ResetHealth();
+    }
     ImGui::InputFloat("Debug Health Amount", &debugHealthAmount, 10.0f, 100.0f);
     debugHealthAmount = (std::max)(debugHealthAmount, 0.0f);
     if (ImGui::Button("Damage Custom"))

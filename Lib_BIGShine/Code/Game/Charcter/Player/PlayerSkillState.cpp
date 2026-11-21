@@ -24,13 +24,27 @@ PlayerSkillState::~PlayerSkillState()
     StopPhaseMotionWarp();
     // Controllerの破棄中は参照を戻さず、残っているComponentの一時設定だけを解除する。
     for (const auto& snapshot_ : guardSnapshots)
+    {
         if (const auto guard_ = snapshot_.collider.lock())
         {
-            if (snapshot_.enabled) guard_->Activate(); else guard_->Deactivate();
+            if (snapshot_.enabled)
+            {
+                guard_->Activate();
+            }
+            else
+            {
+                guard_->Deactivate();
+            }
             guard_->SetJustGuardEnabled(snapshot_.justGuard);
         }
+    }
     if (armorApplied)
-        if (const auto reaction_ = protectedHitReaction.lock()) reaction_->SetArmor(previousReactionArmor);
+    {
+        if (const auto reaction_ = protectedHitReaction.lock())
+        {
+            reaction_->SetArmor(previousReactionArmor);
+        }
+    }
 }
 
 // 装備定義を検証して共通実行へ渡し、Phaseごとの防御と入力受付をPlayerへ反映する。
@@ -38,7 +52,10 @@ void PlayerSkillState::Enter()
 {
     BS_PROFILE_SCOPE("PlayerSkillState::Enter");
     auto* player_ = GetPlayerController();
-    if (!player_) return;
+    if (!player_)
+    {
+        return;
+    }
     finishing = false;
     active = false;
     player_->EnterAction(action);
@@ -46,7 +63,8 @@ void PlayerSkillState::Enter()
     if (!definition_)
     {
         // 空スロットや参照先不足では旧固定Skillへ流さず、通常終了経路へ戻す。
-        active = true;        finishing = true;
+        active = true;
+        finishing = true;
         SyncBlackboard();
 
         return;
@@ -63,8 +81,15 @@ void PlayerSkillState::Enter()
     // 発動時の空中判定を実行用コピーへ反映し、装備定義や着地後の再生Stateを変更しない。
     auto executionDefinition_ = *definition_;
     if (player_->IsAirborneForAction())
+    {
         for (auto& phase_ : executionDefinition_.phases)
-            if (!phase_.airAnimationState.empty()) phase_.animationState = phase_.airAnimationState;
+        {
+            if (!phase_.airAnimationState.empty())
+            {
+                phase_.animationState = phase_.airAnimationState;
+            }
+        }
+    }
     const bool started_ = execution.Start(GetOwner(), executionDefinition_, [this, player_](const SkillPhase& phase_)
     {
         ApplyPhaseDefence(phase_);
@@ -73,12 +98,20 @@ void PlayerSkillState::Enter()
         player_->SetCanBufferInput(phase_.canBufferInput);
         player_->SetCanCombo(false);
         player_->SetCanDodgeCancel(phase_.canDodgeCancel);
-        if (!active) return;
+        if (!active)
+        {
+            return;
+        }
         player_->SetCanActionBranch(phase_.canActionBranch);
     });
     if (started_ && execution.GetResult() != SkillExecutionResult::PHASE_START_FAILED)
+    {
         player_->NotifySkillStarted(action);
-    if (!execution.IsActive()) StopPhaseMotionWarp();
+    }
+    if (!execution.IsActive())
+    {
+        StopPhaseMotionWarp();
+    }
     SyncBlackboard();
 }
 
@@ -87,11 +120,17 @@ void PlayerSkillState::Execute(float elapsedTime_)
 {
     BS_PROFILE_SCOPE("PlayerSkillState::Execute");
     auto* player_ = GetPlayerController();
-    if (!player_) return;
+    if (!player_)
+    {
+        return;
+    }
     if (active)
     {
         execution.Update(elapsedTime_);
-        if (!active) return;
+        if (!active)
+        {
+            return;
+        }
         if (!execution.IsActive())
         {
             StopPhaseMotionWarp();
@@ -101,7 +140,10 @@ void PlayerSkillState::Execute(float elapsedTime_)
         }
         // Warp未指定の突進は既存の向き補正を使い、指定済みPhaseとの二重補正を避ける。
         const auto* phase_ = execution.GetCurrentPhase();
-        if (phase_ && phase_->forwardSpeed != 0.0f && phase_->motionWarpPreset.empty()) player_->ApplyGuardFacingToTarget();
+        if (phase_ && phase_->forwardSpeed != 0.0f && phase_->motionWarpPreset.empty())
+        {
+            player_->ApplyGuardFacingToTarget();
+        }
         SyncBlackboard();
     }
     player_->SendMoveInputToBlackboard(player_->GetMoveInput());
@@ -130,7 +172,10 @@ void PlayerSkillState::NotifyPhaseEnd()
 void PlayerSkillState::SyncBlackboard()
 {
     const auto blackboard_ = GetComponent<BlackboardComponent>();
-    if (!blackboard_) return;
+    if (!blackboard_)
+    {
+        return;
+    }
     blackboard_->SetBool(PlayerBlackboardCategory::PLAYER, PlayerBlackboardKey::IS_SKILL_ACTIVE, active);
     blackboard_->SetInt(PlayerBlackboardCategory::PLAYER, PlayerBlackboardKey::SKILL_PHASE, active ? execution.GetPhaseIndex() : -1);
     blackboard_->SetString(PlayerBlackboardCategory::PLAYER, PlayerBlackboardKey::CURRENT_SKILL,
@@ -141,12 +186,21 @@ void PlayerSkillState::SyncBlackboard()
 void PlayerSkillState::StopSkill()
 {
     BS_PROFILE_SCOPE("PlayerSkillState::StopSkill");
-    if (!active || finishing) return;
+    if (!active || finishing)
+    {
+        return;
+    }
     execution.Stop();
     StopPhaseMotionWarp();
-    if (!active) return;
+    if (!active)
+    {
+        return;
+    }
     finishing = true;
-    if (auto* player_ = GetPlayerController()) player_->NotifyActionEnd();
+    if (auto* player_ = GetPlayerController())
+    {
+        player_->NotifyActionEnd();
+    }
 }
 
 void PlayerSkillState::StartPhaseMotionWarp(const SkillPhase& phase_)
@@ -155,45 +209,89 @@ void PlayerSkillState::StartPhaseMotionWarp(const SkillPhase& phase_)
     StopPhaseMotionWarp();
     const auto owner_ = GetOwner();
     const auto player_ = GetPlayerController();
-    if (phase_.motionWarpPreset.empty() || !owner_ || !owner_->transform || !player_) return;
-    const auto target_ = player_->ResolveSkillMotionWarpTarget();
+    if (phase_.motionWarpPreset.empty() || !owner_ || !owner_->transform || !player_)
+    {
+        return;
+    }
+    constexpr float SKILL_ASSIST_RANGE = 14.0f;
+    constexpr float CONTACT_PADDING = 0.08f;
+    constexpr float MINIMUM_STOP_DISTANCE = 0.75f;
+    const auto target_ = player_->ResolveSkillMotionWarpTarget(SKILL_ASSIST_RANGE);
+    if (!target_)
+    {
+        return;
+    }
+    const auto capsuleRadius_ = [](const std::shared_ptr<GameObject>& object_)
+    {
+        const auto capsule_ = object_->GetComponent<CapsuleCollider>();
+        if (!capsule_)
+        {
+            return 0.0f;
+        }
+        const auto scale_ = object_->transform->GetWorldScale();
+        return capsule_->radius * capsule_->shapeSizeScale * (std::max)(std::abs(scale_.x), std::abs(scale_.z));
+    };
+    const float stopDistance_ = (std::max)(MINIMUM_STOP_DISTANCE,
+        capsuleRadius_(owner_) + capsuleRadius_(target_) + CONTACT_PADDING);
+
+    const auto ownerPosition_ = owner_->transform->GetWorldPosition();
+    const auto targetPosition_ = target_->transform->GetWorldPosition();
+    owner_->transform->SetForwardYawOnly(
+        { targetPosition_.x - ownerPosition_.x, 0.0f, targetPosition_.z - ownerPosition_.z }, 1.0f, 1.0f);
+
+    // 突進は速度側で追尾と停止を行い、位置Warpによる踏み込みを重ねない。
+    if (phase_.forwardSpeed > 0.0f)
+    {
+        execution.SetForwardTarget(target_, stopDistance_);
+        return;
+    }
+
     const auto animation_ = owner_->GetComponent<AnimationControllerComponent>();
-    if (!target_ || !target_->transform || !animation_) return;
+    if (!animation_)
+    {
+        return;
+    }
     const auto warp_ = owner_->GetOrAddComponent<MotionWarpComponent>();
-    if (!warp_) return;
+    if (!warp_)
+    {
+        return;
+    }
+
     MotionWarpPreset preset_;
     preset_.presetName = phase_.motionWarpPreset;
     preset_.positionMode = MOTION_WARP_POSITION_MODE::TARGET_END_POSITION;
-    preset_.targetDistance = 1.5f;
-    preset_.maximumWarpTargetDistance = 6.0f;
-    preset_.maximumTotalPositionCorrection = 2.0f;
-    preset_.maximumPositionCorrectionPerFrame = 0.15f;
-    preset_.maximumPositionCorrectionPerSecond = 6.0f;
-    preset_.maximumRotationDegrees = 65.0f;
-    preset_.endNormalizedTime = 0.5f;
-    preset_.rotationEndNormalizedTime = 0.5f;
-    // 突進速度は共通実行担当が所有するため、同じPhaseに接近移動を重ねない。
+    preset_.targetDistance = MINIMUM_STOP_DISTANCE;
+    preset_.maximumWarpTargetDistance = SKILL_ASSIST_RANGE + 2.0f;
+    preset_.maximumTotalPositionCorrection = SKILL_ASSIST_RANGE;
+    preset_.maximumPositionCorrectionPerFrame = 2.0f;
+    preset_.maximumPositionCorrectionPerSecond = 72.0f;
+    preset_.maximumRotationDegrees = 180.0f;
+    preset_.maximumRotationDegreesPerSecond = 1440.0f;
+    // 攻撃判定が出る前に寄せるため、踏み込み補正をアニメーション前半へ集中させる。
+    constexpr float ASSIST_END_NORMALIZED_TIME = 0.33f;
+    preset_.endNormalizedTime = ASSIST_END_NORMALIZED_TIME;
+    preset_.rotationFullStrengthEndNormalizedTime = ASSIST_END_NORMALIZED_TIME;
+    preset_.rotationEndNormalizedTime = ASSIST_END_NORMALIZED_TIME;
+    preset_.lockTargetOnStart = false;
+    preset_.lockTargetNormalizedTime = ASSIST_END_NORMALIZED_TIME;
+    preset_.maximumTargetTravelDistance = 8.0f;
+    preset_.maximumTargetTravelAngleDegrees = 180.0f;
     preset_.warpPosition = phase_.forwardSpeed == 0.0f;
     warp_->AddPresetIfMissing(preset_);
     const auto configuredPreset_ = warp_->GetPreset(phase_.motionWarpPreset);
-    if (!configuredPreset_) return;
+    if (!configuredPreset_)
+    {
+        return;
+    }
     DirectX::XMFLOAT3 localMotion_{ 0.0f, 0.0f, 0.0f };
     float duration_ = 0.0f;
     animation_->EstimateRootMotion(phase_.animationState, configuredPreset_->startNormalizedTime,
         configuredPreset_->endNormalizedTime, localMotion_, duration_);
-    // Animation側と同じ回転で予定RootMotionをワールドへ変換し、二重の踏み込みを避ける。
+    // 先に向きを合わせたので、実際に再生される方向で予定RootMotionを差し引く。
     const auto rotation_ = owner_->transform->localRotation;
     const auto quaternion_ = DirectX::SimpleMath::Quaternion::CreateFromYawPitchRoll(
         DirectX::XMConvertToRadians(rotation_.y), DirectX::XMConvertToRadians(rotation_.x), DirectX::XMConvertToRadians(rotation_.z));
     const auto plannedMotion_ = DirectX::SimpleMath::Vector3::Transform(DirectX::SimpleMath::Vector3(localMotion_), quaternion_);
-    const auto capsuleRadius_ = [](const std::shared_ptr<GameObject>& object_)
-    {
-        const auto capsule_ = object_->GetComponent<CapsuleCollider>();
-        if (!capsule_) return 0.0f;
-        const auto scale_ = object_->transform->GetWorldScale();
-        return capsule_->radius * capsule_->shapeSizeScale * (std::max)(std::abs(scale_.x), std::abs(scale_.z));
-    };
-    const float stopDistance_ = capsuleRadius_(owner_) + capsuleRadius_(target_) + 0.05f;
     if (warp_->PlayForTarget(phase_.motionWarpPreset, target_, plannedMotion_, stopDistance_,
         configuredPreset_->startNormalizedTime, configuredPreset_->endNormalizedTime))
     {
@@ -205,7 +303,12 @@ void PlayerSkillState::StartPhaseMotionWarp(const SkillPhase& phase_)
 void PlayerSkillState::StopPhaseMotionWarp()
 {
     if (!motionWarpRequestName.empty())
-        if (const auto warp_ = motionWarp.lock()) warp_->Stop(motionWarpRequestName);
+    {
+        if (const auto warp_ = motionWarp.lock())
+        {
+            warp_->Stop(motionWarpRequestName);
+        }
+    }
     motionWarpRequestName.clear();
     motionWarp.reset();
 }
@@ -215,15 +318,27 @@ void PlayerSkillState::ApplyPhaseDefence(const SkillPhase& phase_)
 {
     BS_PROFILE_SCOPE("PlayerSkillState::ApplyPhaseDefence");
     auto* player_ = GetPlayerController();
-    if (!player_) return;
+    if (!player_)
+    {
+        return;
+    }
     if (!phase_.enableGuard && guardApplied)
     {
         for (const auto& snapshot_ : guardSnapshots)
+        {
             if (const auto guard_ = snapshot_.collider.lock())
             {
-                if (snapshot_.enabled) guard_->Activate(); else guard_->Deactivate();
+                if (snapshot_.enabled)
+                {
+                    guard_->Activate();
+                }
+                else
+                {
+                    guard_->Deactivate();
+                }
                 guard_->SetJustGuardEnabled(snapshot_.justGuard);
             }
+        }
         guardSnapshots.clear();
         guardApplied = false;
     }
@@ -233,7 +348,10 @@ void PlayerSkillState::ApplyPhaseDefence(const SkillPhase& phase_)
         std::function<void(const std::shared_ptr<GameObject>&)> collect_;
         collect_ = [&](const std::shared_ptr<GameObject>& object_)
         {
-            if (!object_) return;
+            if (!object_)
+            {
+                return;
+            }
             for (const auto& guard_ : object_->GetComponents<GuardCollider>())
             {
                 guardSnapshots.push_back({ guard_, guard_->IsEnabled(), guard_->IsJustGuardEnabled() });
@@ -241,8 +359,15 @@ void PlayerSkillState::ApplyPhaseDefence(const SkillPhase& phase_)
                 guard_->Activate();
             }
             if (object_->transform)
+            {
                 for (const auto& child_ : object_->transform->children)
-                    if (child_) collect_(child_->gameObject.lock());
+                {
+                    if (child_)
+                    {
+                        collect_(child_->gameObject.lock());
+                    }
+                }
+            }
         };
         collect_(GetOwner());
         guardApplied = true;
@@ -261,7 +386,14 @@ void PlayerSkillState::ApplyPhaseDefence(const SkillPhase& phase_)
     }
     else if (!phase_.preventFlinch && armorApplied)
     {
-        if (previousArmorOverride) player_->SetRuntimeArmor(previousArmor); else player_->ResetRuntimeArmor();
+        if (previousArmorOverride)
+        {
+            player_->SetRuntimeArmor(previousArmor);
+        }
+        else
+        {
+            player_->ResetRuntimeArmor();
+        }
         armorApplied = false;
     }
 }

@@ -66,7 +66,10 @@ namespace
         {
             // CCT Move中に当たるShapeを選別する。
             // Combat用Volumeと同一OwnerのShapeは無視し、それ以外は移動を止めるBLOCKにする。
-            if (!shape_) return PxQueryHitType::eNONE;
+            if (!shape_)
+            {
+                return PxQueryHitType::eNONE;
+            }
 
             const PxFilterData shapeFilterData_ = shape_->getSimulationFilterData();
             if (IsCctMoveIgnoredRole(shapeFilterData_.word2))
@@ -138,7 +141,10 @@ namespace
                 static_cast<const ColliderComponent*>(controllerA_.getUserData());
             const ColliderComponent* colliderB_ =
                 static_cast<const ColliderComponent*>(controllerB_.getUserData());
-            if (!colliderA_ || !colliderB_) return true;
+            if (!colliderA_ || !colliderB_)
+            {
+                return true;
+            }
 
             if (HasSameCollisionOwner(
                 const_cast<ColliderComponent*>(colliderA_)->GetCollisionOwnerId(),
@@ -307,11 +313,20 @@ void PhysXSystem::Initialize()
 
 bool PhysXSystem::PreviewScene::Initialize()
 {
-    if (scene) return true;
-    if (!gPhysics || !gDispatcher) return false;
+    if (scene)
+    {
+        return true;
+    }
+    if (!gPhysics || !gDispatcher)
+    {
+        return false;
+    }
 
     scene = CreatePhysicsScene();
-    if (!scene) return false;
+    if (!scene)
+    {
+        return false;
+    }
 
     controllers = PxCreateControllerManager(*scene);
     if (!controllers)
@@ -326,8 +341,14 @@ bool PhysXSystem::PreviewScene::Initialize()
 
 PhysXSystem::PreviewScene::~PreviewScene()
 {
-    if (controllers) controllers->release();
-    if (scene) scene->release();
+    if (controllers)
+    {
+        controllers->release();
+    }
+    if (scene)
+    {
+        scene->release();
+    }
 }
 
 PhysXSystem::PreviewScene::Scope::Scope(PreviewScene& preview_)
@@ -350,10 +371,26 @@ void PhysXSystem::Finalize()
         gControllerManager = nullptr;
     }
 
-    if (gScene) { gScene->release(); gScene = nullptr; }
-    if (gDispatcher) { gDispatcher->release(); gDispatcher = nullptr; }
-    if (gDefaultMaterial) { gDefaultMaterial->release(); gDefaultMaterial = nullptr; }
-    if (gPhysics) { gPhysics->release(); gPhysics = nullptr; }
+    if (gScene)
+    {
+        gScene->release();
+        gScene = nullptr;
+    }
+    if (gDispatcher)
+    {
+        gDispatcher->release();
+        gDispatcher = nullptr;
+    }
+    if (gDefaultMaterial)
+    {
+        gDefaultMaterial->release();
+        gDefaultMaterial = nullptr;
+    }
+    if (gPhysics)
+    {
+        gPhysics->release();
+        gPhysics = nullptr;
+    }
 
     // PVD の後始末
     if (gPvd) {
@@ -365,7 +402,11 @@ void PhysXSystem::Finalize()
         gPvdTransport = nullptr;
     }
 
-    if (gFoundation) { gFoundation->release(); gFoundation = nullptr; }
+    if (gFoundation)
+    {
+        gFoundation->release();
+        gFoundation = nullptr;
+    }
 }
 
 
@@ -375,7 +416,10 @@ void PhysXSystem::Step(float dt)
     // scaleが0のHitStop中はsimulateせず、物理状態を止める。
     auto* scene_ = GetScene();
     const float scaledDt_ = dt * (gActivePreviewScene ? gActivePreviewScene->timeScale : gTimeScale);
-    if (!scene_ || scaledDt_ <= 0.0f) return;
+    if (!scene_ || scaledDt_ <= 0.0f)
+    {
+        return;
+    }
     scene_->simulate(scaledDt_);
     scene_->fetchResults(true);
 }
@@ -391,7 +435,10 @@ void PhysXSystem::ComputeCharacterControllerInteractions(float deltaTime_)
 {
     // CharacterController同士の重なり回復を、ColliderComponent更新前に計算する。
     auto* controllers_ = GetControllerManager();
-    if (!controllers_ || deltaTime_ <= 0.0f) return;
+    if (!controllers_ || deltaTime_ <= 0.0f)
+    {
+        return;
+    }
     controllers_->computeInteractions(
         deltaTime_,
         &gCharacterControllerFilterCallback);
@@ -487,7 +534,11 @@ physx::PxControllerBehaviorCallback* PhysXSystem::GetCharacterControllerBehavior
     return &gCharacterControllerBehaviorCallback;
 }
 
-PxPhysics* PhysXSystem::GetPhysics() { return gPhysics; }
+PxPhysics* PhysXSystem::GetPhysics()
+{
+    return gPhysics;
+}
+
 PxScene* PhysXSystem::GetScene()
 {
     return gActivePreviewScene ? gActivePreviewScene->scene : gScene;
@@ -501,7 +552,10 @@ PxControllerManager* PhysXSystem::GetControllerManager()
 PxConvexMesh* PhysXSystem::CreateConvexMesh(const std::vector<DirectX::XMFLOAT3>& vertices_)
 {
     // Dynamicにも使えるConvex MeshをCookする。PhysXの制限に合わせて頂点数を255へ制限する。
-    if (!gPhysics || vertices_.size() < 4) return nullptr;
+    if (!gPhysics || vertices_.size() < 4)
+    {
+        return nullptr;
+    }
 
     PxConvexMeshDesc desc_;
     desc_.points.count = static_cast<PxU32>(vertices_.size());
@@ -519,7 +573,10 @@ PxTriangleMesh* PhysXSystem::CreateTriangleMesh(
     const std::vector<uint32_t>& indices_)
 {
     // Static地形や背景用のTriangle MeshをCookする。Dynamic Actorには使わない前提。
-    if (!gPhysics || vertices_.size() < 3 || indices_.size() < 3) return nullptr;
+    if (!gPhysics || vertices_.size() < 3 || indices_.size() < 3)
+    {
+        return nullptr;
+    }
 
     PxTriangleMeshDesc desc_;
     desc_.points.count = static_cast<PxU32>(vertices_.size());

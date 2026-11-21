@@ -1,59 +1,82 @@
 {
     "GraphicsSettings": {
         "Bloom": {
-            "blurPasses": 5,
+            "blurPasses": 8,
             "enabled": true,
-            "exposure": 1.0,
-            "intensity": 0.6000000238418579,
+            "exposure": 1.350000023841858,
+            "intensity": 1.0,
             "kawaseScale": 3.0,
-            "threshold": 1.8899999856948853,
+            "threshold": 2.0999999046325684,
             "toneMappingEnabled": true
         },
-        "Fog": {
-            "enabled": true,
-            "color": [0.42, 0.48, 0.58],
-            "startDistance": 25.0,
-            "endDistance": 110.0,
-            "density": 0.25,
-            "texturePath": "Data/Texture/Decal/T_noise0.png",
-            "textureTiling": [1.0, 1.0],
-            "textureStrength": 0.15,
-            "hatchStrength": 0.0,
-            "hatchScale": 1.0
-        },
         "FXAA": {
+            "edgeThreshold": 0.3330000042915344,
+            "edgeThresholdMin": 0.08299999684095383,
+            "enabled": true
+        },
+        "Fog": {
+            "color": [
+                0.41999998688697815,
+                0.47999998927116394,
+                0.5799999833106995
+            ],
+            "density": 0.25,
             "enabled": true,
-            "edgeThreshold": 0.125,
-            "edgeThresholdMin": 0.0312
+            "endDistance": 110.0,
+            "hatchScale": 1.0,
+            "hatchStrength": 0.0,
+            "startDistance": 25.0,
+            "texturePath": "Data/Texture/Decal/T_noise0.png",
+            "textureStrength": 0.15000000596046448,
+            "textureTiling": [
+                1.0,
+                1.0
+            ]
         },
         "IBL": {
-            "hdrIntensity": 0.0024999999441206455,
+            "hdrIntensity": 0.0035000001080334187,
             "specularHdrPath": "Data/Texture/IBL/qwantani_dusk_2_2k.hdr"
         },
+        "LayerPostEffects": [
+            {
+                "enabled": true,
+                "layerId": 1,
+                "parameters": {
+                    "color": [
+                        0.3499999940395355,
+                        0.75,
+                        1.0,
+                        1.0
+                    ],
+                    "useOutlineColor": true
+                },
+                "type": 0
+            }
+        ],
         "ShadowMap": {
-            "cascadeDepthPadding": 180.0,
+            "cascadeDepthPadding": 750.0,
             "cascadeShadowBias": [
-                0.0008999999845400453,
-                0.0020000000949949026,
-                0.003000000026077032,
+                0.001500000013038516,
+                0.0024999999441206455,
+                0.0034000000450760126,
                 0.004999999888241291
             ],
-            "cascadeShadowSoftnessRadius": 2.0,
-            "cascadeShadowSoftnessSampleCount": 8,
+            "cascadeShadowSoftnessRadius": 1.4500000476837158,
+            "cascadeShadowSoftnessSampleCount": 11,
             "cascadeSplitDistances": [
-                22.100000381469727,
-                100.0,
-                250.0,
-                850.0
+                25.0,
+                75.5,
+                275.0,
+                1500.0
             ],
-            "cascadeXyPadding": 8.0,
+            "cascadeXyPadding": 12.5,
             "displayCascadeArea": false,
+            "indirectShadowAttenuation": 1.0,
             "lightDistance": 500.0,
-            "shadowAttenuation": 0.0,
-            "indirectShadowAttenuation": 0.5,
+            "shadowAttenuation": 0.2630000114440918,
             "texelSnapEnabled": true,
             "useCascadeShadow": true,
-            "useCascadeShadowRandomRotation": true,
+            "useCascadeShadowRandomRotation": false,
             "useCascadeShadowSoftness": true
         },
         "Toon": {
@@ -64,10 +87,10 @@
                 0.05000000074505806
             ],
             "shadeSteps": [
-                0.05000000074505806,
-                0.05000000074505806,
-                0.05000000074505806,
-                0.05000000074505806
+                0.027000000700354576,
+                0.1509999930858612,
+                0.1509999930858612,
+                0.1509999930858612
             ]
         },
         "ToonOutline": {
@@ -77,19 +100,48 @@
                 0.0784313753247261,
                 1.0
             ],
+            "distanceScalingEnabled": true,
+            "maxDistanceScale": 4.0,
+            "referenceDistance": 10.0,
             "thickness": 0.0
         },
         "ToonPBR": {
             "shadeFeathers": [
-                0.0010000000474974513,
-                0.03500000014901161,
+                0.20800000429153442,
+                0.2529999911785126,
                 0.0010000000474974513,
                 0.0010000000474974513
             ],
             "shadeSteps": [
-                0.3720000088214874,
-                0.8349999785423279,
-                0.847000002861023,
+                0.14800000190734863,
+                0.5830000042915344,
+                0.7620000243186951,
+                1.0
+            ]
+        },
+        "Vignette": {
+            "center": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                1.0,
+                0.8823529481887817,
+                1.0,
+                1.0
+            ],
+            "enabled": true,
+            "hatchScale": 1.0,
+            "hatchStrength": 0.0,
+            "intensity": 0.5,
+            "opacity": 1.0,
+            "rounded": 0.0,
+            "roundness": 1.0,
+            "smoothness": 0.20000000298023224,
+            "texturePath": "",
+            "textureStrength": 0.0,
+            "textureTiling": [
+                1.0,
                 1.0
             ]
         }
@@ -113,11 +165,11 @@
         "Wall",
         "JustDodgeEventPool",
         "UI",
-        "TestDamge",
         "ParryEvantPool",
         "EventCamera",
         "BossIntro",
         "BossIntroName",
+        "BossPhase2Name",
         "IntroFogGate",
         "IntroGateMist",
         "IntroGateLight",
@@ -253,6 +305,13 @@
         "HudGuide3SkillButton1",
         "HudGuide3SkillButton2",
         "HudGuide3SkillButton3",
+        "HudGuideFollowUpRushBackground",
+        "HudGuideFollowUpRushStar",
+        "HudGuideFollowUpRushButton",
+        "HudGuideFollowUpRushText",
+        "HudGuideFollowUpCounterBackground",
+        "HudGuideFollowUpCounterButton",
+        "HudGuideFollowUpCounterText",
         "TestTarget",
         "BodyPartRoot",
         "BodyPart",

@@ -17,7 +17,11 @@ struct CollisionContact;
 class ImpactEffectComponent : public Component
 {
 public:
-    const std::string& GetName() const override { return componentName; }
+    const std::string& GetName() const override
+    {
+        return componentName;
+    }
+
     void Start() override;
     void Update(float deltaTime_) override;
     void Gui() override;
@@ -32,9 +36,21 @@ public:
     bool LoadAsset(const std::string& path_);
     // 現在のAsset設定をJSONへ保存する。
     bool SaveAsset(const std::string& path_) const;
-    const std::string& GetAssetPath() const { return assetPath; }
-    ImpactEffectAsset& GetAsset() { return asset; }
-    const ImpactEffectAsset& GetAsset() const { return asset; }
+
+    const std::string& GetAssetPath() const
+    {
+        return assetPath;
+    }
+
+    ImpactEffectAsset& GetAsset()
+    {
+        return asset;
+    }
+
+    const ImpactEffectAsset& GetAsset() const
+    {
+        return asset;
+    }
 
 private:
     // 所有ObjectのColliderにCollision/Trigger Callbackを接続する。

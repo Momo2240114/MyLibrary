@@ -33,6 +33,7 @@ public:
     void Deserialize(const nlohmann::json & j);
 
     void RegisterActions();
+
 private:
     struct CombinedWaypoint {
         int transformIdx; // TransformDirector内の何番目か

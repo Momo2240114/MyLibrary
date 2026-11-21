@@ -17,7 +17,11 @@ class VFXMaterialPreviewWindow : public EditorWindow
 public:
     explicit VFXMaterialPreviewWindow(GameObjectManager* manager_);
     void Draw() override;
-    bool ShouldPauseScene() const override { return false; }
+
+    bool ShouldPauseScene() const override
+    {
+        return false;
+    }
 
 private:
     // Window内で完結するプレビュー用GameObjectとMeshVFX描画環境を準備する。

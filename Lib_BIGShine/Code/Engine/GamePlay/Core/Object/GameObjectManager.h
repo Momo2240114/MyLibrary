@@ -58,22 +58,79 @@ class GameObjectManager
 {
 public:
     void Initialize(bool deferEffectPreload_ = false);
+
     // 表示Componentへ渡す状態は値で保持し、ロード元Sceneの寿命に依存させない。
-    void SetPresentationLoadingStatus(const LoadingStatus& status_) { presentationLoadingStatus = status_; }
-    LoadingStatus GetPresentationLoadingStatus() const { return presentationLoadingStatus; }
-    void SetEngineLoadingPresentation(bool engine_) { engineLoadingPresentation = engine_; }
-    bool IsEngineLoadingPresentation() const { return engineLoadingPresentation; }
-    void SetPresentationRetryEnabled(bool enabled_) { presentationRetryEnabled = enabled_; }
-    bool IsPresentationRetryEnabled() const { return presentationRetryEnabled; }
-    void RequestPresentationRetry() { presentationRetryRequested = true; }
-    bool TakePresentationRetryRequest() { const bool requested_ = presentationRetryRequested; presentationRetryRequested = false; return requested_; }
-    void SetPresentationWarning(const std::string& warning_) { presentationWarning = warning_; }
-    const std::string& GetPresentationWarning() const { return presentationWarning; }
+    void SetPresentationLoadingStatus(const LoadingStatus& status_)
+    {
+        presentationLoadingStatus = status_;
+    }
+
+    LoadingStatus GetPresentationLoadingStatus() const
+    {
+        return presentationLoadingStatus;
+    }
+
+    void SetEngineLoadingPresentation(bool engine_)
+    {
+        engineLoadingPresentation = engine_;
+    }
+
+    bool IsEngineLoadingPresentation() const
+    {
+        return engineLoadingPresentation;
+    }
+
+    void SetPresentationRetryEnabled(bool enabled_)
+    {
+        presentationRetryEnabled = enabled_;
+    }
+
+    bool IsPresentationRetryEnabled() const
+    {
+        return presentationRetryEnabled;
+    }
+
+    void RequestPresentationRetry()
+    {
+        presentationRetryRequested = true;
+    }
+
+    bool TakePresentationRetryRequest()
+    {
+        const bool requested_ = presentationRetryRequested;
+        presentationRetryRequested = false;
+        return requested_;
+    }
+
+    void SetPresentationWarning(const std::string& warning_)
+    {
+        presentationWarning = warning_;
+    }
+
+    const std::string& GetPresentationWarning() const
+    {
+        return presentationWarning;
+    }
+
     // 通常描画が失敗した場合も、既に準備したUIだけを提出できる。
     void RenderUI();
-    void SetPresentationSilhouetteOverride(bool enabled_,bool white_) { presentationSilhouetteOverride = enabled_; presentationSilhouetteWhite = white_; }
-    bool HasPresentationSilhouetteOverride() const { return presentationSilhouetteOverride; }
-    bool IsPresentationSilhouetteWhite() const { return presentationSilhouetteWhite; }
+
+    void SetPresentationSilhouetteOverride(bool enabled_,bool white_)
+    {
+        presentationSilhouetteOverride = enabled_;
+        presentationSilhouetteWhite = white_;
+    }
+
+    bool HasPresentationSilhouetteOverride() const
+    {
+        return presentationSilhouetteOverride;
+    }
+
+    bool IsPresentationSilhouetteWhite() const
+    {
+        return presentationSilhouetteWhite;
+    }
+
     // 独立した監視サービスを公開する。観測値・履歴・戦闘結果の処理はSystemが担当する。
     std::shared_ptr<CombatObservationSystem> GetCombatObservationSystem() const;
 
@@ -88,7 +145,9 @@ public:
         {
             const std::string& n_ = o->nameComponent->name;
             if (n_ == baseName_ || n_.rfind(baseName_ + "_", 0) == 0)
+            {
                 count_++;
+            }
         }
 
         // 最終的に使うObject名を決定する。
@@ -125,7 +184,10 @@ public:
         // 全Objectから指定型Componentを1つずつ集める。
         for (auto& object_ : objects)
         {
-            if (!object_) continue;
+            if (!object_)
+            {
+                continue;
+            }
 
             // 各オブジェクトのコンポーネントリストを走査
             // ※GameObject側にコンポーネントを取得する GetComponent<T> がある前提です
@@ -144,20 +206,47 @@ public:
         ID3D11RenderTargetView* finalRenderTargetView_ = nullptr,
         const CameraComponent* overrideCamera_ = nullptr,
         bool clearSceneRenderTargets_ = false);
-    void SetModelRenderSystem(ModelRenderSystem* modelRenderSystem_) { modelRenderSystem = modelRenderSystem_; }
+
+    void SetModelRenderSystem(ModelRenderSystem* modelRenderSystem_)
+    {
+        modelRenderSystem = modelRenderSystem_;
+    }
+
     void RegisterMotionVelocityComponent(const std::shared_ptr<MotionVelocityComponent>& component_);
     void UnregisterMotionVelocityComponent(MotionVelocityComponent* component_);
 
     void Update(float elapsedTime_);
     // followActiveSession_がfalseなら、独立WorkspaceをEditorモードに固定する。
     void EnableEditorPlayMode(bool followActiveSession_ = true);
-    bool SupportsEditorPlayMode() const { return editorPlayModeEnabled; }
-    EditorPlayMode GetEditorPlayMode() const { return editorPlayModeEnabled ? editorPlayMode : EditorPlayMode::PLAY; }
-    bool CanStartEditorPlay() const { return editorPlayModeEnabled && editorPlayMode == EditorPlayMode::EDITOR && sceneRuntimeState == SCENE_RUNTIME_STATE::RUNNING; }
+
+    bool SupportsEditorPlayMode() const
+    {
+        return editorPlayModeEnabled;
+    }
+
+    EditorPlayMode GetEditorPlayMode() const
+    {
+        return editorPlayModeEnabled ? editorPlayMode : EditorPlayMode::PLAY;
+    }
+
+    bool CanStartEditorPlay() const
+    {
+        return editorPlayModeEnabled && editorPlayMode == EditorPlayMode::EDITOR && sceneRuntimeState == SCENE_RUNTIME_STATE::RUNNING;
+    }
+
     bool ShouldSimulatePhysics() const;
+
     // Sceneのメニュー停止を物理更新と音声管理にも共有する。
-    void SetGameMenuPaused(bool paused_) { gameMenuPaused = paused_; }
-    bool IsGameMenuPaused() const { return gameMenuPaused; }
+    void SetGameMenuPaused(bool paused_)
+    {
+        gameMenuPaused = paused_;
+    }
+
+    bool IsGameMenuPaused() const
+    {
+        return gameMenuPaused;
+    }
+
     // ActionSequenceの編集要求をWorkspaceへ渡す。Object走査中は切り替えない。
     void RequestCinematicEditor(const std::string& ownerName_, int sequenceIndex_);
     bool ConsumeCinematicEditorRequest(std::string& ownerName_, int& sequenceIndex_);
@@ -165,29 +254,89 @@ public:
     bool BeginCinematicSequencePreview(const std::string& ownerName_, int sequenceIndex_, const nlohmann::json& sequenceData_, GameProgressState context_, bool prepareFinish_ = false);
     void StopCinematicSequencePreview();
     void SeekCinematicSequencePreview(float time_);
-    bool IsCinematicSequencePreview() const { return cinematicPreviewActive; }
-    bool HasCinematicSequenceStopRequest() const { return cinematicPreviewActive && (cinematicStopRequested || pendingEditorPlayCommand == EditorPlayCommand::STOP); }
-    bool IsCinematicSequenceSeeking() const { return cinematicReplayTarget >= 0.0f || cinematicRebuild || cinematicPreparing; }
+
+    bool IsCinematicSequencePreview() const
+    {
+        return cinematicPreviewActive;
+    }
+
+    bool HasCinematicSequenceStopRequest() const
+    {
+        return cinematicPreviewActive && (cinematicStopRequested || pendingEditorPlayCommand == EditorPlayCommand::STOP);
+    }
+
+    bool IsCinematicSequenceSeeking() const
+    {
+        return cinematicReplayTarget >= 0.0f || cinematicRebuild || cinematicPreparing;
+    }
+
     bool IsCinematicFinishReady() const;
-    const std::string& GetCinematicPreviewError() const { return cinematicPreviewError; }
-    bool IsCinematicSequencePaused() const { return cinematicPaused; }
-    float GetCinematicSequenceTime() const { return cinematicTime; }
+
+    const std::string& GetCinematicPreviewError() const
+    {
+        return cinematicPreviewError;
+    }
+
+    bool IsCinematicSequencePaused() const
+    {
+        return cinematicPaused;
+    }
+
+    float GetCinematicSequenceTime() const
+    {
+        return cinematicTime;
+    }
+
     void SetCinematicSequencePaused(bool paused_);
     void SetCinematicSequenceRate(float rate_);
     // 決着中は専用時計だけを進め、物理や通常の行動予約を更新しない。
     bool IsBossFinishActive() const;
-    BossFinishDirector* GetBossFinishDirector() { return bossFinishDirector.get(); }
+
+    BossFinishDirector* GetBossFinishDirector()
+    {
+        return bossFinishDirector.get();
+    }
+
     // 死亡演出中は敵の行動予約、当たり判定、物理を通常更新から切り離す。
     bool IsPlayerDeathActive() const;
     void RequestPlayerDeath(const std::shared_ptr<GameObject>& player_);
-    PlayerDeathDirector* GetPlayerDeathDirector() { return playerDeathDirector.get(); }
-    void SetEditorWorkspacePaused(bool paused_) { editorWorkspacePaused = paused_; }
+
+    PlayerDeathDirector* GetPlayerDeathDirector()
+    {
+        return playerDeathDirector.get();
+    }
+
+    void SetEditorWorkspacePaused(bool paused_)
+    {
+        editorWorkspacePaused = paused_;
+    }
+
     // Object走査中の破棄を避けるため、GUIからは切替要求だけを記録する。
-    void RequestEditorPlayCommand(EditorPlayCommand command_) { pendingEditorPlayCommand = command_; }
-    bool IsEditorStopRequested() const { return pendingEditorPlayCommand == EditorPlayCommand::STOP; }
-    bool IsEditorPauseRequested() const { return pendingEditorPlayCommand == EditorPlayCommand::PAUSE; }
-    void SetPlayInputCaptured(bool captured_) { playInputCaptured = captured_; }
-    bool IsPlayInputCaptured() const { return playInputCaptured && GetEditorPlayMode() == EditorPlayMode::PLAY && !editorWorkspacePaused; }
+    void RequestEditorPlayCommand(EditorPlayCommand command_)
+    {
+        pendingEditorPlayCommand = command_;
+    }
+
+    bool IsEditorStopRequested() const
+    {
+        return pendingEditorPlayCommand == EditorPlayCommand::STOP;
+    }
+
+    bool IsEditorPauseRequested() const
+    {
+        return pendingEditorPlayCommand == EditorPlayCommand::PAUSE;
+    }
+
+    void SetPlayInputCaptured(bool captured_)
+    {
+        playInputCaptured = captured_;
+    }
+
+    bool IsPlayInputCaptured() const
+    {
+        return playInputCaptured && GetEditorPlayMode() == EditorPlayMode::PLAY && !editorWorkspacePaused;
+    }
+
     // 未保存の配置と設定をメモリ上のスナップショットから復元する。
     void RestoreEditorSnapshot(const nlohmann::json& snapshot_);
     // Play中は開始前の編集内容、それ以外は現在の編集内容を配布用に取得する。
@@ -197,20 +346,50 @@ public:
     void AdvanceSceneLoading(float deltaTime_);
     // 戦闘・AI・物理を進めず、専用Sceneの見た目だけを更新する。
     void UpdateLoadingPresentation(float deltaTime_);
-    const std::string& GetSceneLoadOperation() const { return sceneLoadOperation; }
-    void SetLoadingPresentation(bool enabled_) { loadingPresentation = enabled_; }
-    SCENE_RUNTIME_STATE GetSceneRuntimeState() const { return sceneRuntimeState; }
-    void SetSceneRuntimeState(SCENE_RUNTIME_STATE state) {  sceneRuntimeState = state; }
+
+    const std::string& GetSceneLoadOperation() const
+    {
+        return sceneLoadOperation;
+    }
+
+    void SetLoadingPresentation(bool enabled_)
+    {
+        loadingPresentation = enabled_;
+    }
+
+    SCENE_RUNTIME_STATE GetSceneRuntimeState() const
+    {
+        return sceneRuntimeState;
+    }
+
+    void SetSceneRuntimeState(SCENE_RUNTIME_STATE state)
+    {
+        sceneRuntimeState = state;
+    }
+
     // 編集用の入力欄ではなく、実際に読み込んだScene名を演出設定へ渡す。
-    const std::string& GetLoadedSceneName() const { return loadedSceneName; }
-    float GetSceneLoadProgress() const { return sceneLoadProgress; }
-    const std::string& GetSceneRuntimeError() const { return sceneRuntimeError; }
+    const std::string& GetLoadedSceneName() const
+    {
+        return loadedSceneName;
+    }
+
+    float GetSceneLoadProgress() const
+    {
+        return sceneLoadProgress;
+    }
+
+    const std::string& GetSceneRuntimeError() const
+    {
+        return sceneRuntimeError;
+    }
 
     void Submit(ID3D11DeviceContext* context_)
     {
         // 全Objectの描画Submitをまとめて呼ぶ。
         for (auto& object_ : objects)
+        {
             object_->Submit(context_);
+        }
     }
 
     // 指定したObjectを削除予約する。
@@ -223,8 +402,15 @@ public:
     void Clear(bool rebuildEffectPools_ = true);
 
     // 選択中オブジェクト
-    void SelectObject(std::shared_ptr<GameObject> object_) { selectedObject = object_; }
-    std::shared_ptr<GameObject> GetSelectedObject() { return selectedObject; }
+    void SelectObject(std::shared_ptr<GameObject> object_)
+    {
+        selectedObject = object_;
+    }
+
+    std::shared_ptr<GameObject> GetSelectedObject()
+    {
+        return selectedObject;
+    }
 
     void AddObject(std::shared_ptr<GameObject> object_);
     void DetachObject(const std::shared_ptr<GameObject>& object_);
@@ -235,14 +421,24 @@ public:
         const std::string& newName_);
 
     // 状態を尋ねる窓口。
-    const std::vector<std::shared_ptr<GameObject>>& GetObjects() const { return objects; }
+    const std::vector<std::shared_ptr<GameObject>>& GetObjects() const
+    {
+        return objects;
+    }
 
     // GUIは選択中Objectだけ表示する。
     void Gui();
     void DrawHierarchyNode(std::shared_ptr<GameObject> object_, GameObject** objectToDelete_);
 
-    std::shared_ptr<GameObject> GetSelectedObject() const { return selectedObject; }
-    void SetSelectedObject(std::shared_ptr<GameObject> object_) { selectedObject = object_; }
+    std::shared_ptr<GameObject> GetSelectedObject() const
+    {
+        return selectedObject;
+    }
+
+    void SetSelectedObject(std::shared_ptr<GameObject> object_)
+    {
+        selectedObject = object_;
+    }
 
     void ChangeScene(Scene* scene_)
     {
@@ -273,14 +469,31 @@ public:
     std::shared_ptr<GameObject> Instantiate(const std::string& prefabName_, bool preserveNames_ = false);
     // Prefabsフォルダ内のファイル一覧を更新
     void RefreshPrefabList();
-    const std::vector<std::string>& GetPrefabFiles() const { return prefabFiles; }
-    int GetSelectedPrefabIndex() const { return selectedPrefabIndex; }
+
+    const std::vector<std::string>& GetPrefabFiles() const
+    {
+        return prefabFiles;
+    }
+
+    int GetSelectedPrefabIndex() const
+    {
+        return selectedPrefabIndex;
+    }
+
     void SetSelectedPrefabIndex(int selectedPrefabIndex_);
 
     void ApplyDestroys(std::shared_ptr<GameObject> object_);
 
-    void SetShapeRenderEnabled(bool enabled_) { shapeRenderEnabled = enabled_; }
-    bool IsShapeRenderEnabled() const { return shapeRenderEnabled; }
+    void SetShapeRenderEnabled(bool enabled_)
+    {
+        shapeRenderEnabled = enabled_;
+    }
+
+    bool IsShapeRenderEnabled() const
+    {
+        return shapeRenderEnabled;
+    }
+
     size_t SetAllCollisionShapeRenderEnabled(bool enabled_);
     size_t SetCollisionShapeRenderEnabledInHierarchy(
         const std::string& rootObjectName_,
@@ -292,23 +505,65 @@ public:
         bool includeChildren_ = true);
 
     // 全Object/Componentが共有Resourceへアクセスするための窓口。
-    ResourceManager* GetResourceManager() { return resourceManager.get(); }
+    ResourceManager* GetResourceManager()
+    {
+        return resourceManager.get();
+    }
 
     void DrawHierarchyGui();   // ヒストリー(階層)GUI
     void DrawInspectorGui();   // インスペクターGUI
     void DrawSceneModals(); // モーダルを描画する専用の儀式
-    void RefreshSceneList() { sceneState.list = GetSceneDirectories(); }
-    std::shared_ptr<TimeManager> GetTimeManager() { return timeManager; }
 
-    GameModeManager* GetGameModeManager(){return gameModeManager.get();}
-    const GameModeManager* GetGameModeManager() const{return gameModeManager.get();}
+    void RefreshSceneList()
+    {
+        sceneState.list = GetSceneDirectories();
+    }
 
-    CollisionStepSystem& GetCollisionStepSystem() { return *collisionStepSystem; }
-    AttackSystem& GetAttackSystem() { return *attackSystem; }
-    JustDodgeSystem& GetJustDodgeSystem() { return *justDodgeSystem; }
-    JustGuardSystem& GetJustGuardSystem() { return *justGuardSystem; }
-    GuardSystem& GetGuardSystem() { return *guardSystem; }
-    EffectManager& GetEffectManager() { return *effectManager; }
+    std::shared_ptr<TimeManager> GetTimeManager()
+    {
+        return timeManager;
+    }
+
+    GameModeManager* GetGameModeManager()
+    {
+        return gameModeManager.get();
+    }
+
+    const GameModeManager* GetGameModeManager() const
+    {
+        return gameModeManager.get();
+    }
+
+    CollisionStepSystem& GetCollisionStepSystem()
+    {
+        return *collisionStepSystem;
+    }
+
+    AttackSystem& GetAttackSystem()
+    {
+        return *attackSystem;
+    }
+
+    JustDodgeSystem& GetJustDodgeSystem()
+    {
+        return *justDodgeSystem;
+    }
+
+    JustGuardSystem& GetJustGuardSystem()
+    {
+        return *justGuardSystem;
+    }
+
+    GuardSystem& GetGuardSystem()
+    {
+        return *guardSystem;
+    }
+
+    EffectManager& GetEffectManager()
+    {
+        return *effectManager;
+    }
+
 private:
     // 再構築・ロード待ち・固定刻みの再評価をフレーム予算内で処理する。
     void UpdateCinematicSequencePreview(float deltaTime_);
@@ -334,6 +589,7 @@ private:
     float cinematicRemainder = 0.0f;
     std::string requestedCinematicOwner;
     int requestedCinematicSequence = -1;
+
     // 指定名を基準に、Scene内で重複しない名前を作る。
     std::string MakeUniqueName(std::string baseName_)
     {
@@ -406,6 +662,14 @@ private:
     std::shared_ptr<PlayerDeathDirector> playerDeathDirector;
     std::unique_ptr<ResourceManager> resourceManager;
     std::vector<std::shared_ptr<GameObject>> objects;
+    struct LayerMotionTransform
+    {
+        std::weak_ptr<GameObject> object;
+        DirectX::XMFLOAT4X4 world;
+    };
+    std::unordered_map<const GameObject*, LayerMotionTransform> layerMotionHistory;
+    const CameraComponent* layerMotionCamera = nullptr;
+    DirectX::XMFLOAT4X4 layerMotionViewProjection{};
     // 読込・保存済みの配置データを、実行時に削除されたObjectの保存に使用する。
     std::unordered_map<std::string, nlohmann::json> sceneObjectSaveBaselines;
     std::vector<std::string> sceneObjectSaveOrder;
@@ -466,6 +730,10 @@ private:
     void EnsureGlobalActionObjects();
     void RegisterObjectNameIndex(const std::shared_ptr<GameObject>& object_);
     void UnregisterObjectNameIndex(GameObject* object_, const std::string& name_);
+
 public:
-        SceneState& GetSceneState() { return sceneState; }
+        SceneState& GetSceneState()
+    {
+        return sceneState;
+    }
 };

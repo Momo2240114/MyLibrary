@@ -43,7 +43,10 @@ public:
         const Parameters& parameters_);
 
     // Debug表示や後続Passで参照するAO結果。
-    ID3D11ShaderResourceView* GetAoSRV() const { return aoSrv.Get(); }
+    ID3D11ShaderResourceView* GetAoSRV() const
+    {
+        return aoSrv.Get();
+    }
 
 private:
     struct CbXeGtao

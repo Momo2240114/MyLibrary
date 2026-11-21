@@ -82,7 +82,10 @@ AudioResource::AudioResource(const char* filename)
 			// それ以外
 			else
 			{
-				if (readBytes + chunk.size == size) break;
+				if (readBytes + chunk.size == size)
+				{
+					break;
+				}
 
 				// 読み飛ばす
 				fseek(fp, chunk.size, SEEK_CUR);

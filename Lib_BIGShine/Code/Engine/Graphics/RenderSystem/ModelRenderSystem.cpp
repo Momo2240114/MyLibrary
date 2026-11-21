@@ -264,6 +264,7 @@ void ModelRenderSystem::Initialize(ID3D11Device* device)
 		device,
 		sizeof(CbGBufferMaterial),
 		gBufferMaterialConstantBuffer.GetAddressOf());
+	CPUResourceLoader::CreateConstantBuffer(device, sizeof(CbLayerModel), layerModelConstantBuffer.GetAddressOf());
 	CPUResourceLoader::CreateConstantBuffer(
 		device,
 		sizeof(CbSeparateMaterialMaps),
@@ -345,7 +346,10 @@ void ModelRenderSystem::SerializeGraphicsSettings(nlohmann::json& j_) const
 
 	j_["ToonOutline"] = {
 		{"color", {outlineColor.x, outlineColor.y, outlineColor.z, outlineColor.w}},
-		{"thickness", outlineThickness}
+		{"thickness", outlineThickness},
+		{"distanceScalingEnabled", outlineDistanceScalingEnabled},
+		{"referenceDistance", outlineReferenceDistance},
+		{"maxDistanceScale", outlineMaxDistanceScale}
 	};
 }
 
@@ -360,10 +364,22 @@ void ModelRenderSystem::DeserializeGraphicsSettings(const nlohmann::json& j_)
 			if (toonJson_.contains("shadeSteps") && toonJson_["shadeSteps"].is_array())
 			{
 				const auto& stepsJson_ = toonJson_["shadeSteps"];
-				if (stepsJson_.size() > 0) shadeSteps_.x = stepsJson_[0].get<float>();
-				if (stepsJson_.size() > 1) shadeSteps_.y = stepsJson_[1].get<float>();
-				if (stepsJson_.size() > 2) shadeSteps_.z = stepsJson_[2].get<float>();
-				if (stepsJson_.size() > 3) shadeSteps_.w = stepsJson_[3].get<float>();
+				if (stepsJson_.size() > 0)
+				{
+					shadeSteps_.x = stepsJson_[0].get<float>();
+				}
+				if (stepsJson_.size() > 1)
+				{
+					shadeSteps_.y = stepsJson_[1].get<float>();
+				}
+				if (stepsJson_.size() > 2)
+				{
+					shadeSteps_.z = stepsJson_[2].get<float>();
+				}
+				if (stepsJson_.size() > 3)
+				{
+					shadeSteps_.w = stepsJson_[3].get<float>();
+				}
 			}
 			else if (toonJson_.contains("shadeStep"))
 			{
@@ -374,10 +390,22 @@ void ModelRenderSystem::DeserializeGraphicsSettings(const nlohmann::json& j_)
 			if (toonJson_.contains("shadeFeathers") && toonJson_["shadeFeathers"].is_array())
 			{
 				const auto& feathersJson_ = toonJson_["shadeFeathers"];
-				if (feathersJson_.size() > 0) shadeFeathers_.x = feathersJson_[0].get<float>();
-				if (feathersJson_.size() > 1) shadeFeathers_.y = feathersJson_[1].get<float>();
-				if (feathersJson_.size() > 2) shadeFeathers_.z = feathersJson_[2].get<float>();
-				if (feathersJson_.size() > 3) shadeFeathers_.w = feathersJson_[3].get<float>();
+				if (feathersJson_.size() > 0)
+				{
+					shadeFeathers_.x = feathersJson_[0].get<float>();
+				}
+				if (feathersJson_.size() > 1)
+				{
+					shadeFeathers_.y = feathersJson_[1].get<float>();
+				}
+				if (feathersJson_.size() > 2)
+				{
+					shadeFeathers_.z = feathersJson_[2].get<float>();
+				}
+				if (feathersJson_.size() > 3)
+				{
+					shadeFeathers_.w = feathersJson_[3].get<float>();
+				}
 			}
 			else if (toonJson_.contains("shadeFeather"))
 			{
@@ -398,10 +426,22 @@ void ModelRenderSystem::DeserializeGraphicsSettings(const nlohmann::json& j_)
 			if (toonPbrJson_.contains("shadeSteps") && toonPbrJson_["shadeSteps"].is_array())
 			{
 				const auto& stepsJson_ = toonPbrJson_["shadeSteps"];
-				if (stepsJson_.size() > 0) shadeSteps_.x = stepsJson_[0].get<float>();
-				if (stepsJson_.size() > 1) shadeSteps_.y = stepsJson_[1].get<float>();
-				if (stepsJson_.size() > 2) shadeSteps_.z = stepsJson_[2].get<float>();
-				if (stepsJson_.size() > 3) shadeSteps_.w = stepsJson_[3].get<float>();
+				if (stepsJson_.size() > 0)
+				{
+					shadeSteps_.x = stepsJson_[0].get<float>();
+				}
+				if (stepsJson_.size() > 1)
+				{
+					shadeSteps_.y = stepsJson_[1].get<float>();
+				}
+				if (stepsJson_.size() > 2)
+				{
+					shadeSteps_.z = stepsJson_[2].get<float>();
+				}
+				if (stepsJson_.size() > 3)
+				{
+					shadeSteps_.w = stepsJson_[3].get<float>();
+				}
 			}
 			else if (toonPbrJson_.contains("shadeStep"))
 			{
@@ -412,10 +452,22 @@ void ModelRenderSystem::DeserializeGraphicsSettings(const nlohmann::json& j_)
 			if (toonPbrJson_.contains("shadeFeathers") && toonPbrJson_["shadeFeathers"].is_array())
 			{
 				const auto& feathersJson_ = toonPbrJson_["shadeFeathers"];
-				if (feathersJson_.size() > 0) shadeFeathers_.x = feathersJson_[0].get<float>();
-				if (feathersJson_.size() > 1) shadeFeathers_.y = feathersJson_[1].get<float>();
-				if (feathersJson_.size() > 2) shadeFeathers_.z = feathersJson_[2].get<float>();
-				if (feathersJson_.size() > 3) shadeFeathers_.w = feathersJson_[3].get<float>();
+				if (feathersJson_.size() > 0)
+				{
+					shadeFeathers_.x = feathersJson_[0].get<float>();
+				}
+				if (feathersJson_.size() > 1)
+				{
+					shadeFeathers_.y = feathersJson_[1].get<float>();
+				}
+				if (feathersJson_.size() > 2)
+				{
+					shadeFeathers_.z = feathersJson_[2].get<float>();
+				}
+				if (feathersJson_.size() > 3)
+				{
+					shadeFeathers_.w = feathersJson_[3].get<float>();
+				}
 			}
 			else if (toonPbrJson_.contains("shadeFeather"))
 			{
@@ -457,28 +509,61 @@ void ModelRenderSystem::DeserializeGraphicsSettings(const nlohmann::json& j_)
 		if (shadowJson_.contains("cascadeShadowBias") && shadowJson_["cascadeShadowBias"].is_array())
 		{
 			const auto& biasJson_ = shadowJson_["cascadeShadowBias"];
-			if (biasJson_.size() > 0) cascadeShadowBias.x = biasJson_[0].get<float>();
-			if (biasJson_.size() > 1) cascadeShadowBias.y = biasJson_[1].get<float>();
-			if (biasJson_.size() > 2) cascadeShadowBias.z = biasJson_[2].get<float>();
-			if (biasJson_.size() > 3) cascadeShadowBias.w = biasJson_[3].get<float>();
+			if (biasJson_.size() > 0)
+			{
+				cascadeShadowBias.x = biasJson_[0].get<float>();
+			}
+			if (biasJson_.size() > 1)
+			{
+				cascadeShadowBias.y = biasJson_[1].get<float>();
+			}
+			if (biasJson_.size() > 2)
+			{
+				cascadeShadowBias.z = biasJson_[2].get<float>();
+			}
+			if (biasJson_.size() > 3)
+			{
+				cascadeShadowBias.w = biasJson_[3].get<float>();
+			}
 		}
 	}
 
+	outlineDistanceScalingEnabled = true;
+	outlineReferenceDistance = DEFAULT_OUTLINE_REFERENCE_DISTANCE;
+	outlineMaxDistanceScale = DEFAULT_OUTLINE_MAX_DISTANCE_SCALE;
 	if (j_.contains("ToonOutline"))
 	{
 		const auto& outlineJson_ = j_["ToonOutline"];
+		outlineDistanceScalingEnabled = outlineJson_.value("distanceScalingEnabled", outlineDistanceScalingEnabled);
+		outlineReferenceDistance = std::clamp(
+			outlineJson_.value("referenceDistance", outlineReferenceDistance), 0.1f, 1000.0f);
+		outlineMaxDistanceScale = std::clamp(
+			outlineJson_.value("maxDistanceScale", outlineMaxDistanceScale), 1.0f, 16.0f);
 		outlineThickness = outlineJson_.value("thickness", outlineThickness);
 
 		if (outlineJson_.contains("color") && outlineJson_["color"].is_array())
 		{
 			const auto& colorJson_ = outlineJson_["color"];
-			if (colorJson_.size() > 0) outlineColor.x = colorJson_[0].get<float>();
-			if (colorJson_.size() > 1) outlineColor.y = colorJson_[1].get<float>();
-			if (colorJson_.size() > 2) outlineColor.z = colorJson_[2].get<float>();
-			if (colorJson_.size() > 3) outlineColor.w = colorJson_[3].get<float>();
+			if (colorJson_.size() > 0)
+			{
+				outlineColor.x = colorJson_[0].get<float>();
+			}
+			if (colorJson_.size() > 1)
+			{
+				outlineColor.y = colorJson_[1].get<float>();
+			}
+			if (colorJson_.size() > 2)
+			{
+				outlineColor.z = colorJson_[2].get<float>();
+			}
+			if (colorJson_.size() > 3)
+			{
+				outlineColor.w = colorJson_[3].get<float>();
+			}
 		}
 	}
 }
+
 void ModelRenderSystem::ShaderSettingGui()
 {
 	for (auto shader : shaders)
@@ -495,7 +580,20 @@ void ModelRenderSystem::ShaderSettingGui()
 	if (ImGui::CollapsingHeader("Toon Outline"))
 	{
 		ImGui::ColorEdit4("Outline Color", reinterpret_cast<float*>(&outlineColor));
-		ImGui::DragFloat("Outline Thickness", &outlineThickness, 0.0001f, 0.0f, 0.2f, "%.3f");
+		ImGui::TextDisabled("Set line thickness in each model material.");
+		if (ImGui::TreeNode("Distance Compensation"))
+		{
+			ImGui::Checkbox("Distance and FOV Scaling", &outlineDistanceScalingEnabled);
+			if (outlineDistanceScalingEnabled)
+			{
+				ImGui::DragFloat("Reference Distance", &outlineReferenceDistance,
+					0.1f, 0.1f, 1000.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
+				ImGui::SetItemTooltip("Use the normal gameplay camera distance as the reference.");
+				ImGui::DragFloat("Max Extrusion Scale", &outlineMaxDistanceScale,
+					0.05f, 1.0f, 16.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+			}
+			ImGui::TreePop();
+		}
 	}
 }
 
@@ -674,14 +772,19 @@ void ModelRenderSystem::OutLineSettingGui()
 // shaderId 使用するシェーダーID
 // model 描画対象のモデルコンポーネント
 //---
-void ModelRenderSystem::PushSubmit(ModelShaderID shaderId, std::shared_ptr<GltfModelCommponennt> model)
+void ModelRenderSystem::PushSubmit(ModelShaderID shaderId_, std::shared_ptr<GltfModelCommponennt> model_,
+	const DirectX::XMFLOAT4X4* previousWorld_)
 {
     // 非表示モデルをキューへ入れず、通常描画・Overlay・Shadowをまとめて抑止する。
-    if (!model || !model->IsRuntimeVisible()) return;
+    if (!model_ || !model_->IsRuntimeVisible())
+	{
+		return;
+	}
 	DrawInfo& drawInfo = drawInfos.emplace_back();
-	drawInfo.shaderId = shaderId;
-	drawInfo.model = model;
-	const std::shared_ptr<GameObject> owner_ = model ? model->GetGameObject() : nullptr;
+	drawInfo.shaderId = shaderId_;
+	drawInfo.model = model_;
+	drawInfo.previousWorld = previousWorld_;
+	const auto owner_ = model_->GetGameObject();
 	drawInfo.materialOverlay = owner_ ? owner_->GetComponent<MaterialOverlayComponent>() : nullptr;
 }
 
@@ -852,7 +955,10 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 	{
 		const RENDER_PROFILE_CATEGORY category_ = ResolveRenderProfileCategory(drawInfo_.model);
 		drawInfoCategories_.push_back(category_);
-		if (!drawInfo_.model) continue;
+		if (!drawInfo_.model)
+		{
+			continue;
+		}
 		meshSubmitCount_ += drawInfo_.model->GetMeshes().size();
 
 		++renderProfileFrame.total.visibleModelCount;
@@ -970,26 +1076,7 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 		{
 			BS_PROFILE_SCOPE("Render::UploadSkeletonConstants");
 			++skeletonUploadCount_;
-
-			CbSkeleton cbSkeleton_{};
-			const std::vector<DirectX::XMFLOAT4X4>& transforms_ =
-				model_.GetSkinningTransforms(meshIndex_);
-			const size_t transformCount_ = (std::min)(transforms_.size(), static_cast<size_t>(256));
-			if (transformCount_ > 0)
-			{
-				std::memcpy(
-					cbSkeleton_.boneTransforms,
-					transforms_.data(),
-					sizeof(DirectX::XMFLOAT4X4) * transformCount_);
-			}
-			else
-			{
-				DirectX::XMStoreFloat4x4(
-					&cbSkeleton_.boneTransforms[0],
-					DirectX::XMMatrixIdentity());
-			}
-
-			dc->UpdateSubresource(skeletonConstantBuffer.Get(), 0, nullptr, &cbSkeleton_, 0, 0);
+			const size_t transformCount_ = UploadSkeletonConstants(dc, model_, meshIndex_);
 			++renderProfileFrame.total.skeletonBufferUpdateCount;
 			renderProfileFrame.total.skeletonMatrixUploadCount += transformCount_;
 		};
@@ -1071,8 +1158,11 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 			const auto owner_ = model_.GetGameObject();
 			const auto materialComponent_ = owner_ ? owner_->GetComponent<ModelMaterialComponent>() : nullptr;
 			const bool hasOverride_ = materialComponent_ && materialComponent_->IsEnabled() && mesh_.material;
-			if (hasOverride_) materialComponent_->UpdateLoadState();
-			ID3D11ShaderResourceView* textures_[ModelMaterial::TEXTURE_SLOT_COUNT] =
+			if (hasOverride_)
+		{
+			materialComponent_->UpdateLoadState();
+		}
+		ID3D11ShaderResourceView* textures_[ModelMaterial::TEXTURE_SLOT_COUNT] =
 			{
 				mesh_.material ? mesh_.material->baseMap.Get() : nullptr,
 				mesh_.material ? mesh_.material->normalMap.Get() : nullptr,
@@ -1165,8 +1255,11 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 
 			// 更新
 			shader->Update(rc, mesh);
-			if (dynamic_cast<ToonPBRShader*>(shader)) bindModelDissolve_(model_, true);
-			bindMaterialTextures_(model_, mesh, meshIndex_);
+			if (dynamic_cast<ToonPBRShader*>(shader))
+		{
+			bindModelDissolve_(model_, true);
+		}
+		bindMaterialTextures_(model_, mesh, meshIndex_);
 
 			ID3D11SamplerState* materialSampler_ = rc.renderState->GetSamplerState(
 				mesh.material->uvAddressMode == GltfModelCommponennt::UV_ADDRESS_MODE::CLAMP
@@ -1296,9 +1389,12 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 							const bool matches_ = exactMatch_
 								? part_.meshIndex == meshIndex_
 								: part_.meshIndex < 0;
-							if (!matches_ || !part_.renderEnabled) continue;
+							if (!matches_ || !part_.renderEnabled)
+					{
+						continue;
+					}
 
-							selectedPart_ = &part_;
+					selectedPart_ = &part_;
 							selectedRuntime_ = &overlayRuntimeParts_[partIndex_];
 							return true;
 						}
@@ -1370,15 +1466,29 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 			return shaderId == ModelShaderID::Toon || shaderId == ModelShaderID::ToonPBR;
 		};
 
+	// 縦FOV 60度を基準に、射影行列のY倍率から現在のFOVによる拡大を相殺する。
+	constexpr float REFERENCE_PROJECTION_Y = 1.7320508f; // 1 / tan(60度 / 2)
+	const auto& projection_ = rc.camera->GetProjection();
+	const float outlineDepthScale_ =
+		outlineDistanceScalingEnabled && projection_._34 == 1.0f && projection_._22 > 0.0f
+		? REFERENCE_PROJECTION_Y / (projection_._22 * outlineReferenceDistance)
+		: 0.0f;
+
 	auto drawOutlineMesh = [&](GltfModelCommponennt& model_, const GltfModelCommponennt::Mesh& mesh, int meshIndex_)
 		{
             // 単色表示では背面拡張の輪郭を重ねず、身体や装備の内部に黒い線を残さない。
-            if (model_.HasRuntimeSilhouette()) return;
-			const auto owner_ = model_.GetGameObject();
+            if (model_.HasRuntimeSilhouette())
+		{
+			return;
+		}
+		const auto owner_ = model_.GetGameObject();
 			const auto dissolve_ = owner_ ? owner_->GetComponent<ModelDissolveComponent>() : nullptr;
 			// 消滅中に通常の輪郭だけが残るのを防ぐ。
-			if (dissolve_ && dissolve_->IsEnabled() && dissolve_->GetProgress() > 0.0f) return;
-			if (!mesh.material->disableOutline || mesh.material->outlineThicknessOffset < 0)
+			if (dissolve_ && dissolve_->IsEnabled() && dissolve_->GetProgress() > 0.0f)
+		{
+			return;
+		}
+		if (!mesh.material->disableOutline || mesh.material->outlineThicknessOffset < 0)
 			{
 				return;
 			}
@@ -1386,6 +1496,8 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 			CbOutline cbOutline{};
 			cbOutline.outlineColor = model_.HasOutlineColorOverride() ? model_.GetOutlineColor() : outlineColor;
 			cbOutline.outlineThickness = mesh.material->outlineThicknessOffset;
+			cbOutline.depthScale = outlineDepthScale_;
+			cbOutline.maxDistanceScale = outlineMaxDistanceScale;
 			dc->UpdateSubresource(outlineConstantBuffer.Get(), 0, nullptr, &cbOutline, 0, 0);
 
 			uploadSkeletonConstants_(model_, meshIndex_);
@@ -1451,7 +1563,10 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 		for (size_t drawInfoIndex_ = 0; drawInfoIndex_ < drawInfos.size(); ++drawInfoIndex_)
 		{
 			DrawInfo& drawInfo = drawInfos[drawInfoIndex_];
-			if (!drawInfo.model) continue;
+			if (!drawInfo.model)
+			{
+				continue;
+			}
 
 			const RENDER_PROFILE_CATEGORY category_ =
 				drawInfoIndex_ < drawInfoCategories_.size()
@@ -1461,8 +1576,14 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 			for (int meshIndex_ = 0; meshIndex_ < static_cast<int>(meshes_.size()); ++meshIndex_)
 			{
 				const GltfModelCommponennt::Mesh& mesh = meshes_[meshIndex_];
-				if (!mesh.material) continue;
-				if (!shouldRenderInvestigationMesh_(*drawInfo.model, mesh)) continue;
+				if (!mesh.material)
+				{
+					continue;
+				}
+				if (!shouldRenderInvestigationMesh_(*drawInfo.model, mesh))
+				{
+					continue;
+				}
 				const bool isSkinnedMeshResult_ = isSkinnedMesh_(*drawInfo.model, mesh);
 
 				// マテリアルからシェーダーIDを取得
@@ -1588,7 +1709,10 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 			for (size_t drawInfoIndex_ = 0; drawInfoIndex_ < drawInfos.size(); ++drawInfoIndex_)
 			{
 				DrawInfo& drawInfo = drawInfos[drawInfoIndex_];
-				if (!drawInfo.model) continue;
+				if (!drawInfo.model)
+				{
+					continue;
+				}
 
 				const RENDER_PROFILE_CATEGORY category_ =
 					drawInfoIndex_ < drawInfoCategories_.size()
@@ -1752,7 +1876,10 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 
 	// 定数バッファ設定解除
 	ID3D11Buffer* vsConstantBuffers[] = { nullptr, nullptr, nullptr };
-	for (ID3D11Buffer*& psConstantBuffer : psConstantBuffers) { psConstantBuffer = nullptr; }
+	for (ID3D11Buffer*& psConstantBuffer : psConstantBuffers)
+	{
+		psConstantBuffer = nullptr;
+	}
 	dc->VSSetConstantBuffers(5, _countof(vsConstantBuffers), vsConstantBuffers);
 	dc->PSSetConstantBuffers(7, _countof(psConstantBuffers), psConstantBuffers);
 
@@ -1760,7 +1887,10 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 
 
 	// サンプラステート設定解除
-	for (ID3D11SamplerState*& samplerState : samplerStates) { samplerState = nullptr; }
+	for (ID3D11SamplerState*& samplerState : samplerStates)
+	{
+		samplerState = nullptr;
+	}
 	dc->PSSetSamplers(0, _countof(samplerStates), samplerStates);
 	ID3D11SamplerState* nullSampler = nullptr;
 	dc->PSSetSamplers(1, 1, &nullSampler);
@@ -1773,9 +1903,169 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 	dc->PSSetConstantBuffers(4, 1, &nullBuffer);
 }
 
+size_t ModelRenderSystem::UploadSkeletonConstants(
+	ID3D11DeviceContext* dc_, GltfModelCommponennt& model_, int meshIndex_)
+{
+	CbSkeleton constants_{};
+	const auto& transforms_ = model_.GetSkinningTransforms(meshIndex_);
+	const size_t count_ = (std::min)(transforms_.size(), _countof(constants_.boneTransforms));
+	if (count_ > 0)
+	{
+		std::memcpy(constants_.boneTransforms, transforms_.data(), sizeof(DirectX::XMFLOAT4X4) * count_);
+	}
+	else
+	{
+		DirectX::XMStoreFloat4x4(&constants_.boneTransforms[0], DirectX::XMMatrixIdentity());
+	}
+	dc_->UpdateSubresource(skeletonConstantBuffer.Get(), 0, nullptr, &constants_, 0, 0);
+	return count_;
+}
+
+void ModelRenderSystem::RenderLayerDepthMask(const RenderContext& rc_)
+{
+	auto* dc_ = rc_.deviceContext;
+	if (drawInfos.empty() || !dc_ || !rc_.renderState || !rc_.layerDepthTarget || !rc_.layerModelMaskShader || !layerModelConstantBuffer)
+	{
+		drawInfos.clear();
+		return;
+	}
+
+	const bool bloomCapture_ = rc_.layerCaptureMode == LayerCaptureMode::BLOOM_COLOR;
+	const bool exclusionCapture_ = rc_.layerCaptureMode == LayerCaptureMode::SILHOUETTE_EXCLUSION;
+	auto* colorTarget_ = rc_.layerColorTarget;
+	dc_->OMSetRenderTargets(colorTarget_ ? 1 : 0, colorTarget_ ? &colorTarget_ : nullptr, rc_.layerDepthTarget);
+	dc_->OMSetDepthStencilState(rc_.renderState->GetDepthStencilState(
+		bloomCapture_ || exclusionCapture_ ? DepthState::TestOnly : DepthState::TestAndWrite), 0);
+	dc_->OMSetBlendState(rc_.renderState->GetBlendState(
+		bloomCapture_ ? BlendState::TransparencyKeepAlpha : BlendState::Opaque), nullptr, 0xFFFFFFFF);
+	dc_->RSSetState(rc_.renderState->GetRasterizerState(RasterizerState::SolidCullBack));
+	dc_->IASetInputLayout(gBufferInputLayout.Get());
+	dc_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	dc_->VSSetConstantBuffers(7, 1, sceneConstantBuffer.GetAddressOf());
+	dc_->GSSetShader(nullptr, nullptr, 0);
+	// マテリアルの透明部分を除いて、対象レイヤー用の深度・色・速度を描く。
+	dc_->PSSetShader(rc_.layerModelMaskShader, nullptr, 0);
+	dc_->PSSetConstantBuffers(0, 1, gBufferMaterialConstantBuffer.GetAddressOf());
+	dc_->PSSetConstantBuffers(1, 1, layerModelConstantBuffer.GetAddressOf());
+
+	const auto viewProjection_ = DirectX::XMLoadFloat4x4(&rc_.camera->GetView()) *
+		DirectX::XMLoadFloat4x4(&rc_.camera->GetProjection());
+	for (const DrawInfo& drawInfo_ : drawInfos)
+	{
+		auto& model_ = *drawInfo_.model;
+		const auto owner_ = model_.GetGameObject();
+		const auto dissolve_ = owner_ ? owner_->GetComponent<ModelDissolveComponent>() : nullptr;
+		if (model_.HasRuntimeSilhouette() || (dissolve_ && dissolve_->IsEnabled() && dissolve_->GetProgress() > 0.0f))
+		{
+			continue;
+		}
+
+		CbLayerModel layerConstants_{};
+		layerConstants_.mode = static_cast<uint32_t>(rc_.layerCaptureMode);
+		layerConstants_.pixelSize = rc_.layerPixelSize;
+		if (rc_.layerCaptureMode == LayerCaptureMode::MODEL_VELOCITY && drawInfo_.previousWorld &&
+			owner_ && owner_->transform)
+		{
+			const auto currentWorld_ = owner_->transform->GetWorldMatrix();
+			const float determinant_ = DirectX::XMVectorGetX(DirectX::XMMatrixDeterminant(currentWorld_));
+			if (std::isfinite(determinant_) && std::abs(determinant_) > 1.0e-12f)
+			{
+				DirectX::XMStoreFloat4x4(&layerConstants_.previousObjectProjection,
+					DirectX::XMMatrixInverse(nullptr, currentWorld_) *
+					DirectX::XMLoadFloat4x4(drawInfo_.previousWorld) * viewProjection_);
+				layerConstants_.hasObjectHistory = 1u;
+			}
+		}
+		dc_->UpdateSubresource(layerModelConstantBuffer.Get(), 0, nullptr, &layerConstants_, 0, 0);
+
+		const auto materialComponent_ = owner_ ? owner_->GetComponent<ModelMaterialComponent>() : nullptr;
+		const auto& meshes_ = model_.GetMeshes();
+		for (int meshIndex_ = 0; meshIndex_ < static_cast<int>(meshes_.size()); ++meshIndex_)
+		{
+			const auto& mesh_ = meshes_[meshIndex_];
+			if (!mesh_.material || !mesh_.vertexBuffer || !mesh_.indexBuffer || mesh_.indices.empty())
+			{
+				continue;
+			}
+			if (exclusionCapture_ && (mesh_.material->alphaMode == GltfModelCommponennt::AlphaMode::Blend ||
+				(mesh_.material->baseColor.w > 0.01f && mesh_.material->baseColor.w < 0.99f)))
+			{
+				continue;
+			}
+			const bool skinned_ = !model_.IsStaticModel() && !mesh_.bones.empty();
+			if (renderInvestigationSettings.enabled && (skinned_
+				? !renderInvestigationSettings.renderSkinnedModels : !renderInvestigationSettings.renderStaticModels))
+			{
+				continue;
+			}
+
+			if (skinned_)
+			{
+				UploadSkeletonConstants(dc_, model_, meshIndex_);
+				dc_->VSSetConstantBuffers(6, 1, skeletonConstantBuffer.GetAddressOf());
+			}
+			else
+			{
+				CbStaticMesh constants_{};
+				DirectX::XMStoreFloat4x4(&constants_.world, DirectX::XMMatrixIdentity());
+				if (mesh_.node)
+				{
+					constants_.world = mesh_.node->worldTransform;
+				}
+				dc_->UpdateSubresource(staticMeshConstantBuffer.Get(), 0, nullptr, &constants_, 0, 0);
+				dc_->VSSetConstantBuffers(5, 1, staticMeshConstantBuffer.GetAddressOf());
+			}
+			dc_->VSSetShader(skinned_ ? gBufferSkinnedVertexShader.Get() : gBufferStaticVertexShader.Get(), nullptr, 0);
+
+			const auto& material_ = *mesh_.material;
+			CbGBufferMaterial constants_{};
+			constants_.baseColor = material_.baseColor;
+			constants_.emissiveColor = material_.emissiveColor;
+			constants_.uvScale = material_.uvScale;
+			constants_.uvOffset = material_.uvOffset;
+			constants_.uvRotation = material_.uvRotation;
+			dc_->UpdateSubresource(gBufferMaterialConstantBuffer.Get(), 0, nullptr, &constants_, 0, 0);
+			auto* baseTexture_ = material_.baseMap.Get();
+			auto* emissiveTexture_ = bloomCapture_ ? material_.emissiveMap.Get() : nullptr;
+			if (materialComponent_ && materialComponent_->IsEnabled())
+			{
+				baseTexture_ = materialComponent_->ResolveTexture(
+					mesh_.materialIndex, ModelMaterial::TextureSlot::BASE_COLOR, baseTexture_, meshIndex_);
+				if (bloomCapture_)
+				{
+					emissiveTexture_ = materialComponent_->ResolveTexture(
+						mesh_.materialIndex, ModelMaterial::TextureSlot::EMISSIVE, emissiveTexture_, meshIndex_);
+				}
+			}
+			if (!baseTexture_)
+			{
+				baseTexture_ = whiteTextureSRV.Get();
+			}
+			ID3D11ShaderResourceView* textures_[]{ baseTexture_, emissiveTexture_ };
+			dc_->PSSetShaderResources(0, _countof(textures_), textures_);
+			auto* sampler_ = rc_.renderState->GetSamplerState(
+				material_.uvAddressMode == GltfModelCommponennt::UV_ADDRESS_MODE::CLAMP
+				? SamplerState::LinearClamp : SamplerState::LinearWrap);
+			dc_->PSSetSamplers(0, 1, &sampler_);
+
+			UINT stride_ = sizeof(GltfModelCommponennt::Vertex);
+			UINT offset_ = 0;
+			dc_->IASetVertexBuffers(0, 1, mesh_.vertexBuffer.GetAddressOf(), &stride_, &offset_);
+			dc_->IASetIndexBuffer(mesh_.indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+			dc_->DrawIndexed(static_cast<UINT>(mesh_.indices.size()), 0, 0);
+		}
+	}
+	drawInfos.clear();
+	ID3D11ShaderResourceView* nullTextures_[2]{};
+	dc_->PSSetShaderResources(0, _countof(nullTextures_), nullTextures_);
+}
+
 void ModelRenderSystem::UpdatePointLightBuffer(ID3D11DeviceContext* dc, const std::vector<PointLight>& lights)
 {
-	if (lights.empty()) return;
+	if (lights.empty())
+	{
+		return;
+	}
 
 	UINT numLights = static_cast<UINT>(lights.size());
 	ID3D11Device* device = nullptr;
@@ -1832,7 +2122,10 @@ void ModelRenderSystem::UpdatePointLightBuffer(ID3D11DeviceContext* dc, const st
 
 void ModelRenderSystem::UpdateSpotLightBuffer(ID3D11DeviceContext* dc, const std::vector<SpotLight>& lights)
 {
-	if (lights.empty()) return;
+	if (lights.empty())
+	{
+		return;
+	}
 
 	UINT numLights = static_cast<UINT>(lights.size());
 	ID3D11Device* device = nullptr;
@@ -1892,8 +2185,14 @@ void ModelRenderSystem::UpdateSpotLightBuffer(ID3D11DeviceContext* dc, const std
 void ModelRenderSystem::RenderDecals(const RenderContext& rc)
 {
 	// 必要なリソースが揃っているかチェック
-	if (!rc.decal || !rc.shapeSystem || !rc.depthSRV || !rc.deviceContext || !rc.renderState) return;
-	if (rc.decal->GetDecals().empty()) return;
+	if (!rc.decal || !rc.shapeSystem || !rc.depthSRV || !rc.deviceContext || !rc.renderState)
+	{
+		return;
+	}
+	if (rc.decal->GetDecals().empty())
+	{
+		return;
+	}
 
 	ID3D11DeviceContext* dc = rc.deviceContext;
 	auto& gdm = GraphicsDeviceManager::Instance();
@@ -2037,7 +2336,10 @@ void ModelRenderSystem::CreateDefaultTextures(ID3D11Device* device)
 
 void ModelRenderSystem::RenderCascadeShadowMaps(RenderContext& rc, const DirectX::XMFLOAT3& lightDirection)
 {
-	if (!rc.cascadeShadowMap || !rc.camera) return;
+	if (!rc.cascadeShadowMap || !rc.camera)
+	{
+		return;
+	}
 
 	ID3D11DeviceContext* dc = rc.deviceContext;
 	auto tracyGpuContext_ = GraphicsDeviceManager::Instance().GetTracyGpuContext();
@@ -2105,7 +2407,10 @@ void ModelRenderSystem::RenderShadowCasters(const RenderContext& rc, int cascade
 {
 	ID3D11DeviceContext* dc = rc.deviceContext;
 	ModelShader* shader = shaders[static_cast<int>(ModelShaderID::ShadowCaster)].get();
-	if (!shader || !rc.cascadeShadowMap) return;
+	if (!shader || !rc.cascadeShadowMap)
+	{
+		return;
+	}
 	auto tracyGpuContext_ = GraphicsDeviceManager::Instance().GetTracyGpuContext();
 	BS_PROFILE_SCOPE("RenderShadow::Casters");
 	BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::Shadow::Casters");
@@ -2193,11 +2498,17 @@ void ModelRenderSystem::RenderShadowCasters(const RenderContext& rc, int cascade
 	shader->Begin(rc);
 	for (const DrawInfo& drawInfo : drawInfos)
 	{
-		if (!drawInfo.model) continue;
+		if (!drawInfo.model)
+		{
+			continue;
+		}
 		const auto owner_ = drawInfo.model->GetGameObject();
 		const auto dissolve_ = owner_ ? owner_->GetComponent<ModelDissolveComponent>() : nullptr;
 		// Shadow用の完全なモデル影が、形成前の姿を先に表示しないようにする。
-		if (dissolve_ && dissolve_->IsEnabled() && dissolve_->GetProgress() > 0.0f) continue;
+		if (dissolve_ && dissolve_->IsEnabled() && dissolve_->GetProgress() > 0.0f)
+		{
+			continue;
+		}
 
 		const auto& meshes_ = drawInfo.model->GetMeshes();
 		for (int meshIndex_ = 0; meshIndex_ < static_cast<int>(meshes_.size()); ++meshIndex_)

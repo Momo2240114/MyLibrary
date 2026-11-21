@@ -16,7 +16,10 @@ GpuRenderInvestigationWindow::GpuRenderInvestigationWindow(
 
 void GpuRenderInvestigationWindow::Draw()
 {
-	if (!isVisible) return;
+	if (!isVisible)
+	{
+		return;
+	}
 
 	if (BeginEditorWindow())
 	{

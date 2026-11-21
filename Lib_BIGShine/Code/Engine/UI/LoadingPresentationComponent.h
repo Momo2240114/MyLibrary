@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine/GamePlay/Core/Component/ComponentBase.h"
 #include "LoadingPresentation.h"
+
 // Managerが公開するロード状態だけを使い、Sceneに依存せず起動・ロードUIを表示する。
 class LoadingPresentationComponent : public Component
 {
@@ -13,6 +14,7 @@ public:
     void Gui() override;
     void Serialize(nlohmann::json& json_) const override;
     void Deserialize(const nlohmann::json& json_) override;
+
 private:
     LoadingPresentation presentation;
     std::string brand = "AUTO";

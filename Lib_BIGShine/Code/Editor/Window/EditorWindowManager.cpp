@@ -31,7 +31,10 @@ void EditorWindowManager::BuildDefaultDockLayout(ImGuiID dockspaceId_, const ImV
     ImGui::DockBuilderDockWindow("Scene", sceneDockId);
     for (const auto& window_ : windows)
     {
-        if (window_->IsEditorWorkspace()) continue;
+        if (window_->IsEditorWorkspace())
+        {
+            continue;
+        }
 
         const std::string& name_ = window_->GetName();
         if (name_ == "Hierarchy")
@@ -56,7 +59,10 @@ void EditorWindowManager::DrawSceneEditorDockSpace()
     BS_PROFILE_SCOPE("EditorWindowManager::DrawSceneEditorDockSpace");
 
     const ImGuiViewport* viewport_ = ImGui::GetMainViewport();
-    if (!viewport_) return;
+    if (!viewport_)
+    {
+        return;
+    }
 
     const float workspaceSelectorHeight_ = GetWorkspaceSelectorHeight();
     ImVec2 dockspacePos_ = viewport_->WorkPos;
@@ -144,7 +150,9 @@ void EditorWindowManager::DrawSceneView()
             if (gameObjectManager && gameObjectManager->SupportsEditorPlayMode() &&
                 gameObjectManager->GetEditorPlayMode() == EditorPlayMode::PLAY &&
                 ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+            {
                 gameObjectManager->SetPlayInputCaptured(true);
+            }
             if (gameObjectManager && gameObjectManager->SupportsEditorPlayMode())
             {
                 if (gameObjectManager->GetEditorPlayMode() == EditorPlayMode::EDITOR)
@@ -172,21 +180,32 @@ void EditorWindowManager::DrawSceneView()
 void EditorWindowManager::DrawPlayModeToolbar()
 {
     BS_PROFILE_SCOPE("EditorPlayMode::Toolbar");
-    if (!gameObjectManager) return;
+    if (!gameObjectManager)
+    {
+        return;
+    }
     const bool supported_ = gameObjectManager->SupportsEditorPlayMode();
     const auto mode_ = gameObjectManager->GetEditorPlayMode();
     constexpr float BUTTON_WIDTH = 72.0f;
     const float toolbarWidth_ = BUTTON_WIDTH * 3.0f + ImGui::GetStyle().ItemSpacing.x * 2.0f;
     ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (std::max)(0.0f, (ImGui::GetContentRegionAvail().x - toolbarWidth_) * 0.5f));
     ImGui::BeginDisabled(!supported_ || !gameObjectManager->CanStartEditorPlay());
-    if (ImGui::Button("Play", ImVec2(BUTTON_WIDTH, 0))) gameObjectManager->RequestEditorPlayCommand(EditorPlayCommand::PLAY);
+    if (ImGui::Button("Play", ImVec2(BUTTON_WIDTH, 0)))
+    {
+        gameObjectManager->RequestEditorPlayCommand(EditorPlayCommand::PLAY);
+    }
     ImGui::EndDisabled();
     ImGui::SameLine();
     ImGui::BeginDisabled(!supported_ || mode_ == EditorPlayMode::EDITOR);
     if (ImGui::Button(mode_ == EditorPlayMode::PAUSED ? "Resume" : "Pause", ImVec2(BUTTON_WIDTH, 0)))
+    {
         gameObjectManager->RequestEditorPlayCommand(EditorPlayCommand::PAUSE);
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Stop", ImVec2(BUTTON_WIDTH, 0))) gameObjectManager->RequestEditorPlayCommand(EditorPlayCommand::STOP);
+    if (ImGui::Button("Stop", ImVec2(BUTTON_WIDTH, 0)))
+    {
+        gameObjectManager->RequestEditorPlayCommand(EditorPlayCommand::STOP);
+    }
     ImGui::EndDisabled();
     const char* status_ = !supported_ ? "Runtime" : mode_ == EditorPlayMode::EDITOR ? "Editor" :
         mode_ == EditorPlayMode::PAUSED ? "Paused - mouse released" :
@@ -202,9 +221,15 @@ const char* EditorWindowManager::GetWindowMenuCategory(
     const std::string& name_ = window_.GetName();
 
     // Windowメニューを用途別に整理し、増えたEditor Windowを探しやすくする。
-    if (window_.IsEditorWorkspace()) return "Workspace";
-    if (name_ == "Hierarchy" || name_ == "InspectorWindow") return "Core";
-	if (name_ == "Shader" ||
+    if (window_.IsEditorWorkspace())
+    {
+        return "Workspace";
+    }
+    if (name_ == "Hierarchy" || name_ == "InspectorWindow")
+    {
+        return "Core";
+    }
+    if (name_ == "Shader" ||
 		name_ == "GPU Render Investigation" ||
         name_ == "Editor Scene View" ||
 		name_ == "Shadow" ||
@@ -214,7 +239,10 @@ const char* EditorWindowManager::GetWindowMenuCategory(
 	{
 		return "Rendering";
 	}
-    if (name_ == "Input Editor" || name_ == "Input Monitor") return "Input";
+    if (name_ == "Input Editor" || name_ == "Input Monitor")
+    {
+        return "Input";
+    }
     if (name_ == "Asset Browser" ||
         name_ == "Curve Asset Editor" ||
         name_ == "Easing Preset Editor" ||
@@ -246,7 +274,10 @@ const char* EditorWindowManager::GetWindowMenuCategory(
 // 書き出しは明示操作だけで実行し、処理結果と保存先を同じWindowに残す。
 void EditorWindowManager::DrawGameExport()
 {
-    if (!showGameExport) return;
+    if (!showGameExport)
+    {
+        return;
+    }
     BS_PROFILE_SCOPE("EditorWindowManager::DrawGameExport");
     ImGui::SetNextWindowSize(ImVec2(620.0f, 380.0f), ImGuiCond_FirstUseEver);
     if (ImGui::Begin("Export Game", &showGameExport))
@@ -300,14 +331,26 @@ void EditorWindowManager::DrawMenuBar()
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("Scene")) {
             // 状態を直接書き換える
-            if (ImGui::MenuItem("Save Scene")) { gameObjectManager->GetSceneState().showSavePopup = true; }
-            if (ImGui::MenuItem("Load Scene")) { gameObjectManager->GetSceneState().showLoadPopup = true; }
-            if (ImGui::MenuItem("Export Game...")) showGameExport = true;
+            if (ImGui::MenuItem("Save Scene"))
+            {
+                gameObjectManager->GetSceneState().showSavePopup = true;
+            }
+            if (ImGui::MenuItem("Load Scene"))
+            {
+                gameObjectManager->GetSceneState().showLoadPopup = true;
+            }
+            if (ImGui::MenuItem("Export Game..."))
+            {
+                showGameExport = true;
+            }
             ImGui::Separator();
             // Play中の一時状態を編集Sceneへ保存しないよう、Stop後だけ離脱を受け付ける。
             const bool canReturn_ = gameObjectManager && gameObjectManager->CanStartEditorPlay() &&
                 !gameObjectManager->IsCinematicSequencePreview() && !SceneManager::IsTransitionActive() && !SceneManager::IsEditorPlaySessionActive();
-            if (ImGui::MenuItem("Return to Title...", nullptr, false, canReturn_)) requestTitle_ = true;
+            if (ImGui::MenuItem("Return to Title...", nullptr, false, canReturn_))
+            {
+                requestTitle_ = true;
+            }
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Window")) {
@@ -349,18 +392,30 @@ void EditorWindowManager::DrawMenuBar()
             for (const char* category_ : categories_) {
                 bool hasCategoryWindow_ = false;
                 for (const auto& window_ : windows) {
-                    if (!window_->ShouldShowInWindowMenu()) continue;
+                    if (!window_->ShouldShowInWindowMenu())
+                    {
+                        continue;
+                    }
                     if (std::string(GetWindowMenuCategory(*window_)) == category_) {
                         hasCategoryWindow_ = true;
                         break;
                     }
                 }
-                if (!hasCategoryWindow_) continue;
+                if (!hasCategoryWindow_)
+                {
+                    continue;
+                }
 
                 if (ImGui::BeginMenu(category_)) {
                     for (auto& window_ : windows) {
-                        if (!window_->ShouldShowInWindowMenu()) continue;
-                        if (std::string(GetWindowMenuCategory(*window_)) != category_) continue;
+                        if (!window_->ShouldShowInWindowMenu())
+                        {
+                            continue;
+                        }
+                        if (std::string(GetWindowMenuCategory(*window_)) != category_)
+                        {
+                            continue;
+                        }
 
                         bool visible_ = window_->IsVisible();
                         if (ImGui::MenuItem(window_->GetName().c_str(), nullptr, &visible_)) {
@@ -374,7 +429,10 @@ void EditorWindowManager::DrawMenuBar()
         }
         ImGui::EndMainMenuBar();
     }
-    if (requestTitle_) ImGui::OpenPopup("Return to Title##Editor");
+    if (requestTitle_)
+    {
+        ImGui::OpenPopup("Return to Title##Editor");
+    }
     if (ImGui::BeginPopupModal("Return to Title##Editor", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
         ImGui::TextUnformatted("Unsaved scene changes will be lost.");
@@ -392,7 +450,10 @@ void EditorWindowManager::DrawMenuBar()
             ImGui::CloseCurrentPopup();
         }
         ImGui::SameLine();
-        if (ImGui::Button("Cancel")) ImGui::CloseCurrentPopup();
+        if (ImGui::Button("Cancel"))
+        {
+            ImGui::CloseCurrentPopup();
+        }
         ImGui::EndPopup();
     }
 }
@@ -405,7 +466,10 @@ float EditorWindowManager::GetWorkspaceSelectorHeight() const
 void EditorWindowManager::DrawWorkspaceSelectorBar()
 {
     const ImGuiViewport* viewport = ImGui::GetMainViewport();
-    if (!viewport) return;
+    if (!viewport)
+    {
+        return;
+    }
 
     const float selectorHeight = GetWorkspaceSelectorHeight();
     ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x, viewport->WorkPos.y), ImGuiCond_Always);
@@ -438,14 +502,20 @@ void EditorWindowManager::DrawWorkspaceSelectorBar()
             for (int index_ = 0; index_ < static_cast<int>(windows.size()); ++index_)
             {
                 const auto& window_ = windows[index_];
-                if (!window_->IsEditorWorkspace()) continue;
+                if (!window_->IsEditorWorkspace())
+                {
+                    continue;
+                }
 
                 const bool selected_ = activeWorkspaceIndex == index_;
                 if (ImGui::Selectable(window_->GetName().c_str(), selected_))
                 {
                     SetActiveWorkspace(index_);
                 }
-                if (selected_) ImGui::SetItemDefaultFocus();
+                if (selected_)
+                {
+                    ImGui::SetItemDefaultFocus();
+                }
             }
             ImGui::EndCombo();
         }
@@ -477,18 +547,36 @@ std::string EditorWindowManager::GetActiveWorkspaceName() const
 
     return windows[activeWorkspaceIndex]->GetName();
 }
+
 void EditorWindowManager::Update(float deltaTime_)
 {
     // 他Workspaceが対象を取得する前に試写Sceneを戻し、生成物の参照を引き継がせない。
-    if (gameObjectManager && gameObjectManager->HasCinematicSequenceStopRequest()) gameObjectManager->Update(0.0f);
+    if (gameObjectManager && gameObjectManager->HasCinematicSequenceStopRequest())
+    {
+        gameObjectManager->Update(0.0f);
+    }
     // ComponentのGUI走査中にWorkspaceを切り替えず、次の更新開始時に対象を渡す。
     std::string ownerName_;
     int sequenceIndex_ = -1;
     if (gameObjectManager && gameObjectManager->ConsumeCinematicEditorRequest(ownerName_, sequenceIndex_))
+    {
         for (int index_ = 0; index_ < static_cast<int>(windows.size()); ++index_)
-            if (windows[index_]->OpenCinematicSequence(ownerName_, sequenceIndex_)) { SetActiveWorkspace(index_); break; }
-    if (activeWorkspaceIndex < 0 || activeWorkspaceIndex >= static_cast<int>(windows.size())) return;
-    if (!windows[activeWorkspaceIndex]->IsEditorWorkspace()) return;
+        {
+            if (windows[index_]->OpenCinematicSequence(ownerName_, sequenceIndex_))
+            {
+                SetActiveWorkspace(index_);
+                break;
+            }
+        }
+    }
+    if (activeWorkspaceIndex < 0 || activeWorkspaceIndex >= static_cast<int>(windows.size()))
+    {
+        return;
+    }
+    if (!windows[activeWorkspaceIndex]->IsEditorWorkspace())
+    {
+        return;
+    }
 
     windows[activeWorkspaceIndex]->Update(deltaTime_);
 }

@@ -26,6 +26,7 @@ public:
     void Serialize(nlohmann::json& j) const;
     // ロード用：引数の json オブジェクトから自分の変数を読み出す
     void Deserialize(const nlohmann::json& j);
+
 private:
     std::shared_ptr<GltfModelCommponennt> ResolveTargetModel();
     bool ResolveTargetNodeIndex(const std::shared_ptr<GltfModelCommponennt>& model);

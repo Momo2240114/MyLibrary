@@ -12,7 +12,10 @@ void AnimationStateMachineComponent::Start() {
 
 void AnimationStateMachineComponent::Update(float deltaTime) 
 {
-    if (!m_targetController) return;
+    if (!m_targetController)
+    {
+        return;
+    }
 
     // 遷移条件の評価
     EvaluateTransitions();
@@ -20,13 +23,19 @@ void AnimationStateMachineComponent::Update(float deltaTime)
 
 void AnimationStateMachineComponent::EvaluateTransitions() 
 {
-    if (!m_targetController) return;
+    if (!m_targetController)
+    {
+        return;
+    }
 
     // 1. 遷移のリストを拝借
     const auto& transitions = m_targetController->GetTransitions();
  
    const AnimState* currentState = m_targetController->GetCurrentState();
-    if (!currentState) return;
+    if (!currentState)
+    {
+        return;
+    }
 
     // 2. 遷移の判定
     for (const auto& transition : transitions) 

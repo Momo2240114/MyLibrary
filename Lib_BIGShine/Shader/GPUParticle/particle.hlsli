@@ -1,59 +1,59 @@
 //=====================================================================
 //  GPU Particle Initializer Shader
-//  —±q‚Ì‰Šú‰»ˆ—‚ğ’S“–‚·‚éComputeShader•â•ƒR[ƒh
+//  ç²’å­ã®åˆæœŸåŒ–å‡¦ç†ã‚’æ‹…å½“ã™ã‚‹ComputeShaderè£œåŠ©ã‚³ãƒ¼ãƒ‰
 //=====================================================================
 
 cbuffer PARTICLE_SYSTEM_CONSTANTS : register(b9)
 {
-    // ”­¶Œ¹iƒGƒ~ƒbƒ^j‚ÌŠî–{ƒpƒ‰ƒ[ƒ^ŒQ
-    float4 emission_position;       // —±q‚ª”­¶‚·‚é’†SˆÊ’uiƒ[ƒ‹ƒhÀ•Wj
-    float2 emission_offset;         // ”­¶”ÍˆÍi”¼Œajx:Å¬, y:Å‘å
-    float2 emission_size;           // ƒTƒCƒYİ’è x:oŒ», y:Á–Å
-    float2 emission_cone_angle;     // •úoŠp“x”ÍˆÍiƒ‰ƒWƒAƒ“j
-    float2 emission_speed;          // ‰‘¬“x”ÍˆÍ
-    float2 emission_angular_speed;  // Šp‘¬“x”ÍˆÍi‰ñ“]‰‰oj
-    float2 lifespan;                // õ–½i•bj”ÍˆÍ
-    float2 spawn_delay;             // oŒ»’x‰„i•bj”ÍˆÍ
-    float2 fade_duration;           // ƒtƒF[ƒhŠÔiin/outj
-    float4 manual_color;            // è“®ƒJƒ‰[•â³iRGBAæZj
+    // ç™ºç”Ÿæºï¼ˆã‚¨ãƒŸãƒƒã‚¿ï¼‰ã®åŸºæœ¬ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ç¾¤
+    float4 emission_position;       // ç²’å­ãŒç™ºç”Ÿã™ã‚‹ä¸­å¿ƒä½ç½®ï¼ˆãƒ¯ãƒ¼ãƒ«ãƒ‰åº§æ¨™ï¼‰
+    float2 emission_offset;         // ç™ºç”Ÿç¯„å›²ï¼ˆåŠå¾„ï¼‰x:æœ€å°, y:æœ€å¤§
+    float2 emission_size;           // ã‚µã‚¤ã‚ºè¨­å®š x:å‡ºç¾æ™‚, y:æ¶ˆæ»…æ™‚
+    float2 emission_cone_angle;     // æ”¾å‡ºè§’åº¦ç¯„å›²ï¼ˆãƒ©ã‚¸ã‚¢ãƒ³ï¼‰
+    float2 emission_speed;          // åˆé€Ÿåº¦ç¯„å›²
+    float2 emission_angular_speed;  // è§’é€Ÿåº¦ç¯„å›²ï¼ˆå›è»¢æ¼”å‡ºï¼‰
+    float2 lifespan;                // å¯¿å‘½ï¼ˆç§’ï¼‰ç¯„å›²
+    float2 spawn_delay;             // å‡ºç¾é…å»¶ï¼ˆç§’ï¼‰ç¯„å›²
+    float2 fade_duration;           // ãƒ•ã‚§ãƒ¼ãƒ‰æ™‚é–“ï¼ˆin/outï¼‰
+    float4 manual_color;            // æ‰‹å‹•ã‚«ãƒ©ãƒ¼è£œæ­£ï¼ˆRGBAä¹—ç®—ï¼‰
 
-    // ƒVƒ~ƒ…ƒŒ[ƒVƒ‡ƒ“‹¤’Ê’l
-    float time;                     // Œo‰ßŠÔiƒtƒŒ[ƒ€‘S‘Ìj
-    float delta_time;               // 1ƒtƒŒ[ƒ€‚ ‚½‚è‚ÌŒo‰ß•b”
-    float noise_scale;              // ˆÊ’uƒmƒCƒY‚â——¬‰‰o‚Ég‚¤ƒXƒP[ƒ‹
-    float gravity;                  // d—Í‰Á‘¬“xiƒ}ƒCƒiƒX’l‚Å‰ºŒü‚«j
+    // ã‚·ãƒŸãƒ¥ãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³å…±é€šå€¤
+    float time;                     // çµŒéæ™‚é–“ï¼ˆãƒ•ãƒ¬ãƒ¼ãƒ å…¨ä½“ï¼‰
+    float delta_time;               // 1ãƒ•ãƒ¬ãƒ¼ãƒ ã‚ãŸã‚Šã®çµŒéç§’æ•°
+    float noise_scale;              // ä½ç½®ãƒã‚¤ã‚ºã‚„ä¹±æµæ¼”å‡ºã«ä½¿ã†ã‚¹ã‚±ãƒ¼ãƒ«
+    float gravity;                  // é‡åŠ›åŠ é€Ÿåº¦ï¼ˆãƒã‚¤ãƒŠã‚¹å€¤ã§ä¸‹å‘ãï¼‰
 
-    uint2 sprite_sheet_grid;        // ƒXƒvƒ‰ƒCƒgƒAƒjƒ‚Ì•ªŠ„”i—ñ~sj
-    float2 particle_scale;          // ƒp[ƒeƒBƒNƒ‹‚Ì‘å‚«‚³
+    uint2 sprite_sheet_grid;        // ã‚¹ãƒ—ãƒ©ã‚¤ãƒˆã‚¢ãƒ‹ãƒ¡ã®åˆ†å‰²æ•°ï¼ˆåˆ—Ã—è¡Œï¼‰
+    float2 particle_scale;          // ãƒ‘ãƒ¼ãƒ†ã‚£ã‚¯ãƒ«ã®å¤§ãã•
     
-    int max_particle_count;        // ƒVƒXƒeƒ€‘S‘Ì‚Ì—±q”
-    int type;                      // © 0=Point, 1=Quad ‚ğw’è
-    int emission_mode = 0;         // 0: Œp‘±•úo, 1: ƒo[ƒXƒg(ˆê“I)
-    int burst_count = 100;         // ƒo[ƒXƒg‚Éˆê“x‚É•úo‚·‚é”
+    int max_particle_count;        // ã‚·ã‚¹ãƒ†ãƒ å…¨ä½“ã®ç²’å­æ•°
+    int type;                      // â† 0=Point, 1=Quad ã‚’æŒ‡å®š
+    int emission_mode = 0;         // 0: ç¶™ç¶šæ”¾å‡º, 1: ãƒãƒ¼ã‚¹ãƒˆ(ä¸€æ™‚çš„)
+    int burst_count = 100;         // ãƒãƒ¼ã‚¹ãƒˆæ™‚ã«ä¸€åº¦ã«æ”¾å‡ºã™ã‚‹æ•°
 
-    float burst_trigger = 0.0f;     // >0‚Åƒo[ƒXƒg”­“®
-    float particle_offset_y = 0.0f; // Y•ûŒü‚Ì”­¶ƒIƒtƒZƒbƒgi–¢g—pj
-    float emission_stretch_x; // X•ûŒü‚ÌƒIƒtƒZƒbƒgƒXƒgƒŒƒbƒ`ŒW”
-    float emission_stretch_z; // Z•ûŒü‚ÌƒIƒtƒZƒbƒgƒXƒgƒŒƒbƒ`ŒW”
+    float burst_trigger = 0.0f;     // >0ã§ãƒãƒ¼ã‚¹ãƒˆç™ºå‹•
+    float particle_offset_y = 0.0f; // Yæ–¹å‘ã®ç™ºç”Ÿã‚ªãƒ•ã‚»ãƒƒãƒˆï¼ˆæœªä½¿ç”¨ï¼‰
+    float emission_stretch_x; // Xæ–¹å‘ã®ã‚ªãƒ•ã‚»ãƒƒãƒˆã‚¹ãƒˆãƒ¬ãƒƒãƒä¿‚æ•°
+    float emission_stretch_z; // Zæ–¹å‘ã®ã‚ªãƒ•ã‚»ãƒƒãƒˆã‚¹ãƒˆãƒ¬ãƒƒãƒä¿‚æ•°
     
 
 }
 
 //--------------------------------------------
-// ƒV[ƒ“‹¤’Êƒf[ƒ^iƒJƒƒ‰Eƒ‰ƒCƒeƒBƒ“ƒO‚È‚Çj
+// ã‚·ãƒ¼ãƒ³å…±é€šãƒ‡ãƒ¼ã‚¿ï¼ˆã‚«ãƒ¡ãƒ©ãƒ»ãƒ©ã‚¤ãƒ†ã‚£ãƒ³ã‚°ãªã©ï¼‰
 //--------------------------------------------
 cbuffer SCENE_CONSTANT_BUFFER : register(b1)
 {
-    row_major float4x4 view_projection; // VPs—ñ
-    float4 light_direction; // ƒ‰ƒCƒg•ûŒü
-    float4 camera_position; // ƒJƒƒ‰ˆÊ’u
-    // ƒp[ƒeƒBƒNƒ‹•`‰æ—piŒÂ•Ê‚É•K—v‚Èê‡j
+    row_major float4x4 view_projection; // VPè¡Œåˆ—
+    float4 light_direction; // ãƒ©ã‚¤ãƒˆæ–¹å‘
+    float4 camera_position; // ã‚«ãƒ¡ãƒ©ä½ç½®
+    // ãƒ‘ãƒ¼ãƒ†ã‚£ã‚¯ãƒ«æç”»ç”¨ï¼ˆå€‹åˆ¥ã«å¿…è¦ãªå ´åˆï¼‰
     row_major float4x4 view;
     row_major float4x4 projection;
 }
 
 //--------------------------------------------
-// ’¸“_ƒVƒF[ƒ_[o—Í\‘¢‘Ì
+// é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼å‡ºåŠ›æ§‹é€ ä½“
 //--------------------------------------------
 struct VS_OUT
 {
@@ -61,63 +61,63 @@ struct VS_OUT
 };
 
 //--------------------------------------------
-// ƒWƒIƒƒgƒŠƒVƒF[ƒ_[o—Í\‘¢‘Ì
+// ã‚¸ã‚ªãƒ¡ãƒˆãƒªã‚·ã‚§ãƒ¼ãƒ€ãƒ¼å‡ºåŠ›æ§‹é€ ä½“
 //--------------------------------------------
 struct GS_OUT
 {
-    float4 position : SV_POSITION; // ƒXƒNƒŠ[ƒ“À•W
-    float4 color : COLOR; // F
-    float2 texcoord : TEXCOORD; // ƒeƒNƒXƒ`ƒƒÀ•W
-    uint type : TEXCOORD1; // ƒp[ƒeƒBƒNƒ‹ƒ^ƒCƒvi0=Point, 1=Quadj
+    float4 position : SV_POSITION; // ã‚¹ã‚¯ãƒªãƒ¼ãƒ³åº§æ¨™
+    float4 color : COLOR; // è‰²
+    float2 texcoord : TEXCOORD; // ãƒ†ã‚¯ã‚¹ãƒãƒ£åº§æ¨™
+    uint type : TEXCOORD1; // ãƒ‘ãƒ¼ãƒ†ã‚£ã‚¯ãƒ«ã‚¿ã‚¤ãƒ—ï¼ˆ0=Point, 1=Quadï¼‰
 };
 
 //--------------------------------------------
-// —±q1ŒÂ‚ ‚½‚è‚Ìƒf[ƒ^\‘¢
+// ç²’å­1å€‹ã‚ãŸã‚Šã®ãƒ‡ãƒ¼ã‚¿æ§‹é€ 
 //--------------------------------------------
 struct particle
 {
-    int state; // ó‘Ôi0:–¢g—p, 1:¶‘¶, 2:Á–Å‚È‚Çj
-    float angle; // ‰ñ“]Šp
+    int state; // çŠ¶æ…‹ï¼ˆ0:æœªä½¿ç”¨, 1:ç”Ÿå­˜, 2:æ¶ˆæ»…ãªã©ï¼‰
+    float angle; // å›è»¢è§’
     int pad0[2];
 
-    float4 color; // FiRGBAj
+    float4 color; // è‰²ï¼ˆRGBAï¼‰
 
-    float3 position; // ƒ[ƒ‹ƒh‹óŠÔã‚ÌÀ•W
-    float mass; // ¿—Êi•—‚âd—ÍŒvZ—pj
+    float3 position; // ãƒ¯ãƒ¼ãƒ«ãƒ‰ç©ºé–“ä¸Šã®åº§æ¨™
+    float mass; // è³ªé‡ï¼ˆé¢¨ã‚„é‡åŠ›è¨ˆç®—ç”¨ï¼‰
 
-    float angular_speed; // ‰ñ“]‘¬“x
-    float3 velocity; // ‘¬“xƒxƒNƒgƒ‹
+    float angular_speed; // å›è»¢é€Ÿåº¦
+    float3 velocity; // é€Ÿåº¦ãƒ™ã‚¯ãƒˆãƒ«
 
-    float lifespan; // ‘õ–½
-    float age; // Œo‰ßŠÔi•‰‚È‚ç‚Ü‚¾”­¶‘Oj
-    float2 size; // x:oŒ»ƒTƒCƒY, y:Á–ÅƒTƒCƒY    ƒXƒP[ƒ‹”ä—¦ŒÅ’è
+    float lifespan; // ç·å¯¿å‘½
+    float age; // çµŒéæ™‚é–“ï¼ˆè² ãªã‚‰ã¾ã ç™ºç”Ÿå‰ï¼‰
+    float2 size; // x:å‡ºç¾ã‚µã‚¤ã‚º, y:æ¶ˆæ»…ã‚µã‚¤ã‚º    ã‚¹ã‚±ãƒ¼ãƒ«æ¯”ç‡å›ºå®š
 
 
-    uint chip; // g—pƒXƒvƒ‰ƒCƒg‚ÌƒCƒ“ƒfƒbƒNƒX
-    uint type; // ‹éŒ`‚©‹…‘Ì‚©‚È‚Ç‚Ìƒ^ƒCƒv¯•Ê—pi«—ˆŠg’£—pj
-    float2 scale;   // ƒp[ƒeƒBƒNƒ‹‚Ì‘å‚«‚³       ƒXƒP[ƒ‹”ä—¦İ’è
+    uint chip; // ä½¿ç”¨ã‚¹ãƒ—ãƒ©ã‚¤ãƒˆã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹
+    uint type; // çŸ©å½¢ã‹çƒä½“ã‹ãªã©ã®ã‚¿ã‚¤ãƒ—è­˜åˆ¥ç”¨ï¼ˆå°†æ¥æ‹¡å¼µç”¨ï¼‰
+    float2 scale;   // ãƒ‘ãƒ¼ãƒ†ã‚£ã‚¯ãƒ«ã®å¤§ãã•       ã‚¹ã‚±ãƒ¼ãƒ«æ¯”ç‡è¨­å®š
 };
 
 //--------------------------------------------
-// ’è”
+// å®šæ•°
 //--------------------------------------------
 #define PI 3.14159265358979
-#define NUMTHREADS_X 16 // ComputeShaderƒXƒŒƒbƒh”iX•ûŒüj
+#define NUMTHREADS_X 16 // ComputeShaderã‚¹ãƒ¬ãƒƒãƒ‰æ•°ï¼ˆXæ–¹å‘ï¼‰
 
-// ƒp[ƒeƒBƒNƒ‹‚Ìó‘Ô’è‹`
-#define STATE_DEAD 0      // €–S/–¢g—p
-#define STATE_ALIVE 1     // ¶‘¶’†
+// ãƒ‘ãƒ¼ãƒ†ã‚£ã‚¯ãƒ«ã®çŠ¶æ…‹å®šç¾©
+#define STATE_DEAD 0      // æ­»äº¡/æœªä½¿ç”¨
+#define STATE_ALIVE 1     // ç”Ÿå­˜ä¸­
 
 //=====================================================================
-// ‹^——”ŠÖ”iƒXƒŒƒbƒhIDˆË‘¶j
+// ç–‘ä¼¼ä¹±æ•°é–¢æ•°ï¼ˆã‚¹ãƒ¬ãƒƒãƒ‰IDä¾å­˜ï¼‰
 //=====================================================================
 float rand(float n)
 {
-    // ŠÈˆÕ“I‚ÈƒnƒbƒVƒ…Œ^—”B0.0`1.0‚Ì”ÍˆÍ‚Å•Ô‚·B
+    // ç°¡æ˜“çš„ãªãƒãƒƒã‚·ãƒ¥å‹ä¹±æ•°ã€‚0.0ï½1.0ã®ç¯„å›²ã§è¿”ã™ã€‚
     return frac(sin(n) * 43758.5453123);
 }
 
-// ‚•i¿E“Æ—§—”iWang Hashj
+// é«˜å“è³ªãƒ»ç‹¬ç«‹ä¹±æ•°ï¼ˆWang Hashï¼‰
 uint wangHash(uint s)
 {
     s = (s ^ 61) ^ (s >> 16);
@@ -135,23 +135,23 @@ float randUint(uint s)
 
 
 //=====================================================================
-// —±q¶¬ŠÖ”F spawn()
-// ŠeƒXƒŒƒbƒh‚ª1‚Â‚Ì—±q‚ğ’S“–‚µA‰Šúƒpƒ‰ƒ[ƒ^‚ğİ’è‚·‚é
+// ç²’å­ç”Ÿæˆé–¢æ•°ï¼š spawn()
+// å„ã‚¹ãƒ¬ãƒƒãƒ‰ãŒ1ã¤ã®ç²’å­ã‚’æ‹…å½“ã—ã€åˆæœŸãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã‚’è¨­å®šã™ã‚‹
 //=====================================================================
 void spawn(in uint id, inout particle p)
 {
-    // “Æ—§—”‚ğ\•ª‚ÉŠm•Ûi—p“r‚²‚Æ‚É•ª‚¯‚éj
-    float r_rand = randUint(id * 1000u + 1u); // ˆÊ’ui”¼Œaj—p
-    float a_rand = randUint(id * 1000u + 2u); // Šp“x—p
-    float speed_rand = randUint(id * 1000u + 3u); // ‘¬“x‘å‚«‚³—p
-    float life_rand = randUint(id * 1000u + 4u); // õ–½—pi‚±‚±‚ªd—vj
-    float size_rand = randUint(id * 1000u + 5u); // ƒTƒCƒY—p
-    float chip_rand = randUint(id * 1000u + 6u); // ƒXƒvƒ‰ƒCƒg—p
-    float ang_rand = randUint(id * 1000u + 7u); // ‰ñ“]—p
-    float y_rand = randUint(id * 1000u + 8u); // YƒIƒtƒZƒbƒg—p
+    // ç‹¬ç«‹ä¹±æ•°ã‚’ååˆ†ã«ç¢ºä¿ï¼ˆç”¨é€”ã”ã¨ã«åˆ†ã‘ã‚‹ï¼‰
+    float r_rand = randUint(id * 1000u + 1u); // ä½ç½®ï¼ˆåŠå¾„ï¼‰ç”¨
+    float a_rand = randUint(id * 1000u + 2u); // è§’åº¦ç”¨
+    float speed_rand = randUint(id * 1000u + 3u); // é€Ÿåº¦å¤§ãã•ç”¨
+    float life_rand = randUint(id * 1000u + 4u); // å¯¿å‘½ç”¨ï¼ˆã“ã“ãŒé‡è¦ï¼‰
+    float size_rand = randUint(id * 1000u + 5u); // ã‚µã‚¤ã‚ºç”¨
+    float chip_rand = randUint(id * 1000u + 6u); // ã‚¹ãƒ—ãƒ©ã‚¤ãƒˆç”¨
+    float ang_rand = randUint(id * 1000u + 7u); // å›è»¢ç”¨
+    float y_rand = randUint(id * 1000u + 8u); // Yã‚ªãƒ•ã‚»ãƒƒãƒˆç”¨
 
     // -------------------------
-    // ˆÊ’ui‹Ïˆê‘È‰~j
+    // ä½ç½®ï¼ˆå‡ä¸€æ¥•å††ï¼‰
     // -------------------------
     float u = r_rand;
     float angle = a_rand * 2.0 * PI;
@@ -167,10 +167,10 @@ void spawn(in uint id, inout particle p)
     p.position = emission_position.xyz + offset;
 
     // -------------------------
-    // •ûŒüi‰~j‚Æ‘¬“x
+    // æ–¹å‘ï¼ˆå††éŒï¼‰ã¨é€Ÿåº¦
     // -------------------------
-    // •ûŒü‚ÌŠp‚Í•Ê—”i‚±‚±‚Í a_rand or another onej
-    float phi = 2.0 * PI * randUint(id * 1000u + 9u); // “Æ—§Šp“x
+    // æ–¹å‘ã®è§’ã¯åˆ¥ä¹±æ•°ï¼ˆã“ã“ã¯ a_rand or another oneï¼‰
+    float phi = 2.0 * PI * randUint(id * 1000u + 9u); // ç‹¬ç«‹è§’åº¦
     float theta = lerp(emission_cone_angle.x, emission_cone_angle.y, randUint(id * 1000u + 10u));
     float sin_theta = sin(theta);
     float cos_theta = cos(theta);
@@ -178,11 +178,11 @@ void spawn(in uint id, inout particle p)
     p.velocity.y = cos_theta;
     p.velocity.z = sin_theta * sin(phi);
 
-    // ‘¬“xƒXƒJƒ‰[‚Í speed_rand
+    // é€Ÿåº¦ã‚¹ã‚«ãƒ©ãƒ¼ã¯ speed_rand
     p.velocity *= lerp(emission_speed.x, emission_speed.y, speed_rand);
 
     // -------------------------
-    // Œ©‚½–ÚE‰ñ“]
+    // è¦‹ãŸç›®ãƒ»å›è»¢
     // -------------------------
     p.color = float4(1, 1, 1, 1);
     p.mass = 1.0f;
@@ -190,19 +190,23 @@ void spawn(in uint id, inout particle p)
     p.angular_speed = lerp(emission_angular_speed.x, emission_angular_speed.y, randUint(id * 1000u + 11u));
 
     // -------------------------
-    // õ–½@© ‚±‚±‚ğ“Æ—§‚³‚¹‚éid—vj
+    // å¯¿å‘½ã€€â† ã“ã“ã‚’ç‹¬ç«‹ã•ã›ã‚‹ï¼ˆé‡è¦ï¼‰
     // -------------------------
     p.lifespan = lerp(lifespan.x, lifespan.y, life_rand);
 
     if (emission_mode == 1)
+    {
         p.age = 0.0f;
+    }
     else
+    {
         p.age = -lerp(spawn_delay.x, spawn_delay.y, randUint(id * 1000u + 12u));
+    }
 
     p.state = STATE_ALIVE;
 
     // -------------------------
-    // ƒTƒCƒYEƒ`ƒbƒv‚È‚Ç
+    // ã‚µã‚¤ã‚ºãƒ»ãƒãƒƒãƒ—ãªã©
     // -------------------------
     p.size.x = emission_size.x * size_rand;
     p.size.y = emission_size.y * randUint(id * 1000u + 13u);
@@ -215,21 +219,21 @@ void spawn(in uint id, inout particle p)
 
 
 //=====================================================================
-// ƒtƒF[ƒhƒCƒ“•âŠÔŠÖ”
+// ãƒ•ã‚§ãƒ¼ãƒ‰ã‚¤ãƒ³è£œé–“é–¢æ•°
 //=====================================================================
-// age: Œo‰ßŠÔ, duration: ƒtƒF[ƒh‚É‚©‚©‚éŠÔ, exponent: •âŠÔƒJ[ƒu
+// age: çµŒéæ™‚é–“, duration: ãƒ•ã‚§ãƒ¼ãƒ‰ã«ã‹ã‹ã‚‹æ™‚é–“, exponent: è£œé–“ã‚«ãƒ¼ãƒ–
 float fade_in(float duration, float age, float exponent)
 {
-    // smoothstep: 0¨1ŠÔ‚ÅŠŠ‚ç‚©‚É•âŠÔApow‚ÅƒJ[ƒu‚ğ§Œä
+    // smoothstep: 0â†’1é–“ã§æ»‘ã‚‰ã‹ã«è£œé–“ã€powã§ã‚«ãƒ¼ãƒ–ã‚’åˆ¶å¾¡
     return pow(smoothstep(0.0, 1.0, age / duration), exponent);
 }
 
 //=====================================================================
-// ƒtƒF[ƒhƒAƒEƒg•âŠÔŠÖ”
+// ãƒ•ã‚§ãƒ¼ãƒ‰ã‚¢ã‚¦ãƒˆè£œé–“é–¢æ•°
 //=====================================================================
-// lifespan: ‘Sõ–½, age: Œ»İ‚Ì¶‘¶ŠÔ
+// lifespan: å…¨å¯¿å‘½, age: ç¾åœ¨ã®ç”Ÿå­˜æ™‚é–“
 float fade_out(float duration, float age, float lifespan, float exponent)
 {
-    // c‚èõ–½‚ğ‚à‚Æ‚ÉƒtƒF[ƒhƒAƒEƒg
+    // æ®‹ã‚Šå¯¿å‘½ã‚’ã‚‚ã¨ã«ãƒ•ã‚§ãƒ¼ãƒ‰ã‚¢ã‚¦ãƒˆ
     return pow(smoothstep(0.0, 1.0, (lifespan - age) / duration), exponent);
 }

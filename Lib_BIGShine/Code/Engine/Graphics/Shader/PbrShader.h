@@ -9,6 +9,7 @@ class PbrShader : public ModelShader
 public:
     PbrShader(ID3D11Device* device);
     ~PbrShader() override = default;
+
     // 名前を保持するメンバ変数
     const std::string& GetName() const override {
         static const std::string name = "PBR";

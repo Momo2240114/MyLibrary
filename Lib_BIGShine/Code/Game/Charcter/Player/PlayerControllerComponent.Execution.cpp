@@ -19,9 +19,15 @@ bool PlayerControllerComponent::CanBeginEnemyExecution() const
     const auto actor_ = gameObject.lock();
     const auto health_ = actor_ ? actor_->GetComponent<HealthComponent>() : nullptr;
     if (!actor_ || !actor_->transform || actor_->IsPendingDestroy() || !movement ||
-        enemyExecutionCaptured || enemyExecutionRecovering || IsPlayerControlLockedByGameMode() || (health_ && health_->IsDead())) return false;
+        enemyExecutionCaptured || enemyExecutionRecovering || IsPlayerControlLockedByGameMode() || (health_ && health_->IsDead()))
+    {
+        return false;
+    }
     const auto graph_ = AnimationGraphBridgeComponent::Acquire(actor_);
-    if (!graph_) return false;
+    if (!graph_)
+    {
+        return false;
+    }
     const auto& states_ = graph_->GetStateCatalog();
     return states_.count("Execution_Target_03_Seq") && states_.count("Roll_Combat_F") && states_.count("Get_Up_Seq");
 }
@@ -32,10 +38,18 @@ bool PlayerControllerComponent::BeginEnemyExecution(const std::shared_ptr<GameOb
     BS_PROFILE_SCOPE("PlayerControllerComponent::BeginEnemyExecution");
     // 同じ敵の予備段階から本拘束へ移る時だけ、一時設定を復元して通常の開始経路へ渡す。
     if (!showRecoil_ && enemyExecutionRecoilActive && enemyExecutionAttacker.lock() == attacker_)
+    {
         CancelEnemyExecution(false);
-    if (!attacker_ || !attacker_->transform || !CanBeginEnemyExecution()) return false;
+    }
+    if (!attacker_ || !attacker_->transform || !CanBeginEnemyExecution())
+    {
+        return false;
+    }
     const auto graph_ = AnimationGraphBridgeComponent::Acquire(GetGameObject());
-    if (!graph_ || (showRecoil_ && !graph_->GetStateCatalog().count("Block_Hit_Break_Seq"))) return false;
+    if (!graph_ || (showRecoil_ && !graph_->GetStateCatalog().count("Block_Hit_Break_Seq")))
+    {
+        return false;
+    }
     StopSkill();
     StopNormalGuard();
     stateMachine.ChangeState(PLAYER_ACTION::IDLE);
@@ -43,10 +57,27 @@ bool PlayerControllerComponent::BeginEnemyExecution(const std::shared_ptr<GameOb
     // 武器の判定を閉じ、拘束前の攻撃が固定中に命中し続けることを防ぐ。
     const auto deactivate_ = [&](const auto& self_, const std::shared_ptr<GameObject>& object_) -> void
     {
-        if (!object_) return;
-        for (const auto& hit_ : object_->GetComponents<HitBox>()) if (hit_) hit_->Deactivate();
+        if (!object_)
+        {
+            return;
+        }
+        for (const auto& hit_ : object_->GetComponents<HitBox>())
+        {
+            if (hit_)
+            {
+                hit_->Deactivate();
+            }
+        }
         if (object_->transform)
-            for (const auto& child_ : object_->transform->children) if (child_) self_(self_, child_->gameObject.lock());
+        {
+            for (const auto& child_ : object_->transform->children)
+            {
+                if (child_)
+                {
+                    self_(self_, child_->gameObject.lock());
+                }
+            }
+        }
     };
     deactivate_(deactivate_, actor_);
     // 耐性の元の値と上書きの有無を別々に保存し、拘束終了後の設定を復元できるようにする。
@@ -59,7 +90,10 @@ bool PlayerControllerComponent::BeginEnemyExecution(const std::shared_ptr<GameOb
     enemyExecutionElapsed = 0.0f;
     enemyExecutionHoldTime = std::clamp(holdTime_, 0.1f, 10.0f);
     enemyExecutionDistance = std::clamp(forwardDistance_, 0.8f, 4.0f);
-    if (blackboard) blackboard->SetBool("Anim", "EnemyExecutionActive", true);
+    if (blackboard)
+    {
+        blackboard->SetBool("Anim", "EnemyExecutionActive", true);
+    }
     graph_->ClearTrigger("EnemyExecutionAbort");
     if (showRecoil_)
     {
@@ -85,7 +119,10 @@ bool PlayerControllerComponent::BeginEnemyExecution(const std::shared_ptr<GameOb
 void PlayerControllerComponent::ReleaseEnemyExecution(const std::shared_ptr<GameObject>& attacker_)
 {
     BS_PROFILE_SCOPE("PlayerControllerComponent::ReleaseEnemyExecution");
-    if (!enemyExecutionCaptured || enemyExecutionAttacker.lock() != attacker_) return;
+    if (!enemyExecutionCaptured || enemyExecutionAttacker.lock() != attacker_)
+    {
+        return;
+    }
     if (enemyExecutionRecoilActive)
     {
         // 本拘束前の中断では、未実行の叩きつけに対応するロール・起き上がりを再生しない。
@@ -129,7 +166,10 @@ void PlayerControllerComponent::ReleaseEnemyExecution(const std::shared_ptr<Game
 // 拘束位置と復帰再生を管理し、専用処理中はtrueを返して通常Stateの更新を止める。
 bool PlayerControllerComponent::UpdateEnemyExecution(float deltaTime_)
 {
-    if (!enemyExecutionCaptured && !enemyExecutionRecovering) return false;
+    if (!enemyExecutionCaptured && !enemyExecutionRecovering)
+    {
+        return false;
+    }
     BS_PROFILE_SCOPE("PlayerControllerComponent::UpdateEnemyExecution");
     const auto actor_ = GetGameObject();
     const auto attacker_ = enemyExecutionAttacker.lock();
@@ -152,8 +192,14 @@ bool PlayerControllerComponent::UpdateEnemyExecution(float deltaTime_)
         if (!attacker_ || !attacker_->transform || attacker_->IsPendingDestroy() ||
             (attackerHealth_ && attackerHealth_->IsDead()) || enemyExecutionElapsed >= enemyExecutionHoldTime)
         {
-            if (enemyExecutionRecoilActive) CancelEnemyExecution();
-            else ReleaseEnemyExecution(attacker_);
+            if (enemyExecutionRecoilActive)
+            {
+                CancelEnemyExecution();
+            }
+            else
+            {
+                ReleaseEnemyExecution(attacker_);
+            }
             return true;
         }
         if (movement)
@@ -162,7 +208,10 @@ bool PlayerControllerComponent::UpdateEnemyExecution(float deltaTime_)
             movement->SetVerticalMovementLocked(true);
         }
         // ひるみ中はその場で姿勢を見せ、本拘束に入るまでは敵の正面へ固定しない。
-        if (enemyExecutionRecoilActive) return true;
+        if (enemyExecutionRecoilActive)
+        {
+            return true;
+        }
         // 固定位置は敵の正面から求め、PhysXの外部Transform同期で判定も同じ位置へ戻す。
         const auto center_ = attacker_->transform->GetWorldPosition();
         const auto scale_ = actor_->transform->GetWorldScale();
@@ -176,7 +225,10 @@ bool PlayerControllerComponent::UpdateEnemyExecution(float deltaTime_)
     {
         // 復帰Stateへの進入後の離脱を終了とし、遷移しなかった場合も上限時間で操作を返す。
         const auto state_ = graph_->GetActiveState();
-        if (state_ && state_->name == enemyExecutionRecoveryState) enemyExecutionRecoveryStarted = true;
+        if (state_ && state_->name == enemyExecutionRecoveryState)
+        {
+            enemyExecutionRecoveryStarted = true;
+        }
         if ((enemyExecutionRecoveryStarted && (!state_ || state_->name != enemyExecutionRecoveryState)) ||
             (!enemyExecutionRecoveryStarted && enemyExecutionElapsed > 0.5f) || enemyExecutionElapsed > 10.0f)
         {
@@ -190,7 +242,10 @@ bool PlayerControllerComponent::UpdateEnemyExecution(float deltaTime_)
 // 正常復帰・死亡・演出ロック・破棄に共通する、移動制限と耐性の解除を行う。
 void PlayerControllerComponent::CancelEnemyExecution(bool returnToIdle_)
 {
-    if (!enemyExecutionCaptured && !enemyExecutionRecovering) return;
+    if (!enemyExecutionCaptured && !enemyExecutionRecovering)
+    {
+        return;
+    }
     BS_PROFILE_SCOPE("PlayerControllerComponent::CancelEnemyExecution");
     enemyExecutionCaptured = false;
     enemyExecutionRecovering = false;
@@ -202,9 +257,18 @@ void PlayerControllerComponent::CancelEnemyExecution(bool returnToIdle_)
         movement->ResetMovementRequests();
         movement->SetVerticalMovementLocked(false);
     }
-    if (enemyExecutionPreviousArmorOverride) SetRuntimeArmor(enemyExecutionPreviousArmor);
-    else ResetRuntimeArmor();
-    if (blackboard) blackboard->SetBool("Anim", "EnemyExecutionActive", false);
+    if (enemyExecutionPreviousArmorOverride)
+    {
+        SetRuntimeArmor(enemyExecutionPreviousArmor);
+    }
+    else
+    {
+        ResetRuntimeArmor();
+    }
+    if (blackboard)
+    {
+        blackboard->SetBool("Anim", "EnemyExecutionActive", false);
+    }
     const auto actor_ = GetGameObject();
     const auto graph_ = actor_ && !actor_->IsPendingDestroy() ? AnimationGraphBridgeComponent::Acquire(actor_) : nullptr;
     if (graph_)
@@ -217,12 +281,17 @@ void PlayerControllerComponent::CancelEnemyExecution(bool returnToIdle_)
         const auto state_ = graph_->GetActiveState();
         const auto health_ = actor_->GetComponent<HealthComponent>();
         if ((!state_ || state_->name != "SS_Idle") && (!health_ || !health_->IsDead()))
+        {
             graph_->RequestTrigger("EnemyExecutionAbort");
+        }
     }
     if (returnToIdle_)
     {
         stateMachine.ChangeState(PLAYER_ACTION::IDLE);
-        if (graph_) graph_->RequestEvaluation();
+        if (graph_)
+        {
+            graph_->RequestEvaluation();
+        }
     }
 }
 

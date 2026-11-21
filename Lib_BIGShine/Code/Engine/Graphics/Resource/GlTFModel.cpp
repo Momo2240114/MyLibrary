@@ -277,7 +277,10 @@ void GltfModelCommponennt::LoadModel(ID3D11Device* device, const char* filename,
 		BS_PROFILE_SCOPE("GltfModel::GetOrCreateResource");
 		resource = ModelResourceManager::Instance().GetOrCreateResource(device, filename);
 	}
-	if (!resource) return;
+	if (!resource)
+	{
+		return;
+	}
 
 	// 3. データを引き写す（アニメーション再生などで個別に書き換えるためコピーする）
 	this->materials = resource->materials;
@@ -329,9 +332,12 @@ void GltfModelCommponennt::RequestLoadModelAsync(const char* filename_, int prio
 void GltfModelCommponennt::ApplyLoadedResource(const std::shared_ptr<ModelResource>& resource_)
 {
     BS_PROFILE_SCOPE("GltfModelCommponennt::ApplyLoadedResource");
-    if (!resource_) return;
+    if (!resource_)
+	{
+		return;
+	}
 
-    {
+	{
         BS_PROFILE_SCOPE("GltfModel::CopyLoadedResource");
         materials = resource_->materials;
         nodes = resource_->nodes;
@@ -371,10 +377,16 @@ void GltfModelCommponennt::ApplyLoadedResource(const std::shared_ptr<ModelResour
             const int id_ = item_.value("id", -1);
             for (auto& mat_ : materials)
             {
-                if (mat_.id != id_) continue;
+                if (mat_.id != id_)
+				{
+					continue;
+				}
 
-                if (item_.contains("shaderId")) mat_.shaderId = static_cast<ModelShaderID>(item_["shaderId"].get<int>());
-                if (item_.contains("baseColor"))
+				if (item_.contains("shaderId"))
+				{
+					mat_.shaderId = static_cast<ModelShaderID>(item_["shaderId"].get<int>());
+				}
+				if (item_.contains("baseColor"))
                 {
                     const auto& color_ = item_["baseColor"];
                     mat_.baseColor.x = color_.at(0).get<float>();
@@ -389,12 +401,27 @@ void GltfModelCommponennt::ApplyLoadedResource(const std::shared_ptr<ModelResour
                     mat_.emissiveColor.y = color_.at(1).get<float>();
                     mat_.emissiveColor.z = color_.at(2).get<float>();
                 }
-                if (item_.contains("metalness")) mat_.metalness = item_["metalness"].get<float>();
-                if (item_.contains("roughness")) mat_.roughness = item_["roughness"].get<float>();
-                if (item_.contains("occlusionStrength")) mat_.occlusionStrength = item_["occlusionStrength"].get<float>();
-                if (item_.contains("alphaCutoff")) mat_.alphaCutoff = item_["alphaCutoff"].get<float>();
-                if (item_.contains("normalScale")) mat_.normalScale = item_["normalScale"].get<float>();
-                mat_.DeserializeStyleSettings(item_);
+                if (item_.contains("metalness"))
+				{
+					mat_.metalness = item_["metalness"].get<float>();
+				}
+				if (item_.contains("roughness"))
+				{
+					mat_.roughness = item_["roughness"].get<float>();
+				}
+				if (item_.contains("occlusionStrength"))
+				{
+					mat_.occlusionStrength = item_["occlusionStrength"].get<float>();
+				}
+				if (item_.contains("alphaCutoff"))
+				{
+					mat_.alphaCutoff = item_["alphaCutoff"].get<float>();
+				}
+				if (item_.contains("normalScale"))
+				{
+					mat_.normalScale = item_["normalScale"].get<float>();
+				}
+				mat_.DeserializeStyleSettings(item_);
                 if (item_.contains("uvScale"))
                 {
                     const auto& uvScale_ = item_["uvScale"];
@@ -407,13 +434,31 @@ void GltfModelCommponennt::ApplyLoadedResource(const std::shared_ptr<ModelResour
                     mat_.uvOffset.x = uvOffset_.at(0).get<float>();
                     mat_.uvOffset.y = uvOffset_.at(1).get<float>();
                 }
-                if (item_.contains("uvRotation")) mat_.uvRotation = item_["uvRotation"].get<float>();
-                if (item_.contains("uvAddressMode")) mat_.uvAddressMode = static_cast<UV_ADDRESS_MODE>(item_["uvAddressMode"].get<int>());
-                if (item_.contains("alphaMode")) mat_.alphaMode = static_cast<AlphaMode>(item_["alphaMode"].get<int>());
-                if (item_.contains("toonPbrBlend")) mat_.toonPbrBlend = item_["toonPbrBlend"].get<float>();
-                if (item_.contains("disableOutline")) mat_.disableOutline = item_["disableOutline"].get<bool>();
-                if (item_.contains("outlineThicknessOffset")) mat_.outlineThicknessOffset = item_["outlineThicknessOffset"].get<float>();
-            }
+                if (item_.contains("uvRotation"))
+				{
+					mat_.uvRotation = item_["uvRotation"].get<float>();
+				}
+				if (item_.contains("uvAddressMode"))
+				{
+					mat_.uvAddressMode = static_cast<UV_ADDRESS_MODE>(item_["uvAddressMode"].get<int>());
+				}
+				if (item_.contains("alphaMode"))
+				{
+					mat_.alphaMode = static_cast<AlphaMode>(item_["alphaMode"].get<int>());
+				}
+				if (item_.contains("toonPbrBlend"))
+				{
+					mat_.toonPbrBlend = item_["toonPbrBlend"].get<float>();
+				}
+				if (item_.contains("disableOutline"))
+				{
+					mat_.disableOutline = item_["disableOutline"].get<bool>();
+				}
+				if (item_.contains("outlineThicknessOffset"))
+				{
+					mat_.outlineThicknessOffset = item_["outlineThicknessOffset"].get<float>();
+				}
+			}
         }
     }
 
@@ -426,21 +471,36 @@ void GltfModelCommponennt::ApplyLoadedResource(const std::shared_ptr<ModelResour
 
 void GltfModelCommponennt::UpdateLoadState()
 {
-	if (!asyncLoadRequested || asyncLoadApplied) return;
-	if (!modelLoadHandle.IsReady()) return;
+	if (!asyncLoadRequested || asyncLoadApplied)
+	{
+		return;
+	}
+	if (!modelLoadHandle.IsReady())
+	{
+		return;
+	}
 	ApplyLoadedResource(modelLoadHandle.GetResource());
 }
 
 bool GltfModelCommponennt::IsLoadReady() const
 {
-	if (!asyncLoadRequested) return true;
+	if (!asyncLoadRequested)
+	{
+		return true;
+	}
 	return asyncLoadApplied || modelLoadHandle.IsFailed();
 }
 
 bool GltfModelCommponennt::IsRuntimeReady() const
 {
-	if (modelFullPass.empty()) return true;
-	if (!asyncLoadRequested) return !nodes.empty() && !meshes.empty();
+	if (modelFullPass.empty())
+	{
+		return true;
+	}
+	if (!asyncLoadRequested)
+	{
+		return !nodes.empty() && !meshes.empty();
+	}
 	return asyncLoadApplied && !nodes.empty() && !meshes.empty();
 }
 
@@ -461,17 +521,28 @@ bool GltfModelCommponennt::IsModelLoading() const
 
 void GltfModelCommponennt::SetPresentationMaterials(std::vector<Material> materials_)
 {
-    if (materials_.size() != meshes.size()) return;
-    presentationMaterials = std::move(materials_);
+    if (materials_.size() != meshes.size())
+	{
+		return;
+	}
+	presentationMaterials = std::move(materials_);
     for (std::size_t index_ = 0; index_ < meshes.size(); ++index_)
-        meshes[index_].material = &presentationMaterials[index_];
+	{
+		meshes[index_].material = &presentationMaterials[index_];
+	}
 }
 
 void GltfModelCommponennt::ClearPresentationMaterials()
 {
-    if (presentationMaterials.empty()) return;
-    for (auto& mesh_ : meshes) mesh_.material = &materials.at(mesh_.materialIndex);
-    presentationMaterials.clear();
+    if (presentationMaterials.empty())
+	{
+		return;
+	}
+	for (auto& mesh_ : meshes)
+	{
+		mesh_.material = &materials.at(mesh_.materialIndex);
+	}
+	presentationMaterials.clear();
 }
 
 void GltfModelCommponennt::RebindInternalPointers()
@@ -792,11 +863,17 @@ void GltfModelCommponennt::UpdateNodeRecursive(
 	DirectX::XMStoreFloat4x4(&node_.globalTransform, globalTransform_);
 	DirectX::XMStoreFloat4x4(&node_.worldTransform, worldTransform_);
 
-	if (!updateChildren_) return;
+	if (!updateChildren_)
+	{
+		return;
+	}
 
 	for (Node* child_ : node_.children)
 	{
-		if (!child_) continue;
+		if (!child_)
+		{
+			continue;
+		}
 
 		UpdateNodeRecursive(
 			*child_,
@@ -809,10 +886,16 @@ void GltfModelCommponennt::UpdateNodeRecursive(
 
 void GltfModelCommponennt::UpdateNodeTransformOnly(int nodeIndex_)
 {
-	if (nodeIndex_ < 0 || nodeIndex_ >= static_cast<int>(nodes.size())) return;
+	if (nodeIndex_ < 0 || nodeIndex_ >= static_cast<int>(nodes.size()))
+	{
+		return;
+	}
 
 	const std::shared_ptr<GameObject> owner_ = GetGameObject();
-	if (!owner_ || !owner_->transform) return;
+	if (!owner_ || !owner_->transform)
+	{
+		return;
+	}
 
 	Node& node_ = nodes[nodeIndex_];
 	const bool isRoot_ = node_.parent == nullptr;
@@ -860,7 +943,10 @@ void GltfModelCommponennt::MarkSkinningTransformsDirty()
 
 void GltfModelCommponennt::SetLocalRoll(float degrees_)
 {
-	if (localRoll == degrees_) return;
+	if (localRoll == degrees_)
+	{
+		return;
+	}
 	localRoll = degrees_;
 	MarkTransformDirty();
 }
@@ -1044,10 +1130,16 @@ void GltfModelCommponennt::CollectWorldVertexSamples(std::vector<DirectX::XMFLOA
 {
     BS_PROFILE_SCOPE("GltfModel::CollectWorldVertexSamples");
     positions_.clear();
-    if (!IsModelReady() || maximumCount_ == 0) return;
-    std::size_t count_ = 0;
-    for (const auto& mesh_ : meshes) count_ += mesh_.vertices.size();
-    const auto stride_ = (std::max)(std::size_t{1}, (count_ + maximumCount_ - 1) / maximumCount_);
+    if (!IsModelReady() || maximumCount_ == 0)
+	{
+		return;
+	}
+	std::size_t count_ = 0;
+    for (const auto& mesh_ : meshes)
+	{
+		count_ += mesh_.vertices.size();
+	}
+	const auto stride_ = (std::max)(std::size_t{1}, (count_ + maximumCount_ - 1) / maximumCount_);
     std::size_t index_ = 0;
     for (int meshIndex_ = 0; meshIndex_ < static_cast<int>(meshes.size()); ++meshIndex_)
     {
@@ -1055,24 +1147,37 @@ void GltfModelCommponennt::CollectWorldVertexSamples(std::vector<DirectX::XMFLOA
         const auto& matrices_ = GetSkinningTransforms(meshIndex_);
         for (const auto& vertex_ : mesh_.vertices)
         {
-            if (index_++ % stride_ != 0) continue;
-            const auto local_ = DirectX::XMLoadFloat3(&vertex_.position);
+            if (index_++ % stride_ != 0)
+			{
+				continue;
+			}
+			const auto local_ = DirectX::XMLoadFloat3(&vertex_.position);
             auto world_ = DirectX::XMVectorZero();
             if (!mesh_.bones.empty())
             {
                 const float weights_[] = {vertex_.boneWeight.x, vertex_.boneWeight.y, vertex_.boneWeight.z, vertex_.boneWeight.w};
                 const uint32_t indices_[] = {vertex_.boneIndex.x, vertex_.boneIndex.y, vertex_.boneIndex.z, vertex_.boneIndex.w};
                 for (int influence_ = 0; influence_ < 4; ++influence_)
-                    if (weights_[influence_] > 0.0f && indices_[influence_] < matrices_.size())
-                        world_ = DirectX::XMVectorAdd(world_, DirectX::XMVectorScale(
+				{
+					if (weights_[influence_] > 0.0f && indices_[influence_] < matrices_.size())
+					{
+						world_ = DirectX::XMVectorAdd(world_, DirectX::XMVectorScale(
                             DirectX::XMVector3TransformCoord(local_, DirectX::XMLoadFloat4x4(&matrices_[indices_[influence_]])), weights_[influence_]));
-            }
-            else world_ = matrices_.empty() ? local_ : DirectX::XMVector3TransformCoord(local_, DirectX::XMLoadFloat4x4(&matrices_[0]));
-            DirectX::XMFLOAT3 position_;
+					}
+				}
+			}
+            else
+			{
+				world_ = matrices_.empty() ? local_ : DirectX::XMVector3TransformCoord(local_, DirectX::XMLoadFloat4x4(&matrices_[0]));
+			}
+			DirectX::XMFLOAT3 position_;
             DirectX::XMStoreFloat3(&position_, world_);
             positions_.push_back(position_);
-            if (positions_.size() >= maximumCount_) return;
-        }
+            if (positions_.size() >= maximumCount_)
+			{
+				return;
+			}
+		}
     }
 }
 
@@ -1100,7 +1205,10 @@ void GltfModelCommponennt::UpdateSkinningTransforms(int meshIndex_)
 		for (size_t boneIndex_ = 0; boneIndex_ < transformCount_; ++boneIndex_)
 		{
 			const Bone& bone_ = mesh_.bones[boneIndex_];
-			if (!bone_.node) continue;
+			if (!bone_.node)
+			{
+				continue;
+			}
 
 			const DirectX::XMMATRIX worldTransform_ =
 				DirectX::XMLoadFloat4x4(&bone_.node->worldTransform);
@@ -1514,7 +1622,10 @@ void GltfModelCommponennt::Deserialize(const nlohmann::json& j)
 		std::string name = j["ModelName"];
 		if (!name.empty()) {
 			// パス正規化（重要）
-			if (name.substr(0, 2) == "./") name = name.substr(2);
+			if (name.substr(0, 2) == "./")
+			{
+				name = name.substr(2);
+			}
 			std::replace(name.begin(), name.end(), '/', '\\');
 
 
@@ -1677,6 +1788,7 @@ void GltfModelCommponennt::Deserialize(const nlohmann::json& j)
 	UpdateTransform();
 
 }
+
 void GltfModelCommponennt::ShowMeshDetailsUI()
 {
 	if (!ImGui::Begin("Mesh & Material Editor"))
@@ -1821,8 +1933,10 @@ void GltfModelCommponennt::ShowMeshDetailsUI()
 			{
 				ImGui::SeparatorText("Outline");
 
-				ImGui::Checkbox("Disable Outline", &material.disableOutline);
-				ImGui::DragFloat("Outline Thickness Offset", &material.outlineThicknessOffset, 0.001f, 0.0f, 2.0f);
+				ImGui::Checkbox("Enable Outline", &material.disableOutline);
+				ImGui::DragFloat("Outline Thickness", &material.outlineThicknessOffset,
+					0.001f, 0.0f, 2.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+				ImGui::SetItemTooltip("Line thickness at the scene reference distance and 60-degree vertical FOV.");
 
 				material.outlineThicknessOffset =
 					std::clamp(material.outlineThicknessOffset, 0.0f, 2.0f);
@@ -1867,6 +1981,7 @@ void GltfModelCommponennt::ShowNodeTransformEditor()
 	}
 	ImGui::End();
 }
+
 // シリアライズ
 void GltfModelCommponennt::Serialize(const char* filename)
 {

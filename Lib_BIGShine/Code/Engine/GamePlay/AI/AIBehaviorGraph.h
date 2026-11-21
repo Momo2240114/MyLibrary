@@ -223,9 +223,21 @@ public:
     void RestoreEditorLayout(const nlohmann::json& json_);
     // 登録済みノードが収まる大きさへ領域を合わせる。
     void FitArea(AIBehaviorArea& area_);
-    std::vector<AIBehaviorArea>& GetAreas() { return areas; }
-    const std::vector<AIBehaviorArea>& GetAreas() const { return areas; }
-    bool& GetPriorityFromPositions() { return priorityFromPositions; }
+
+    std::vector<AIBehaviorArea>& GetAreas()
+    {
+        return areas;
+    }
+
+    const std::vector<AIBehaviorArea>& GetAreas() const
+    {
+        return areas;
+    }
+
+    bool& GetPriorityFromPositions()
+    {
+        return priorityFromPositions;
+    }
 
     uintptr_t GenerateId();
     void SetIdCounterFloor(uintptr_t minValue_);
@@ -235,12 +247,35 @@ public:
     bool SaveToFile(const std::string& path_) const;
     bool LoadFromFile(const std::string& path_);
 
-    std::vector<AIBehaviorNode>& GetNodes() { return nodes; }
-    const std::vector<AIBehaviorNode>& GetNodes() const { return nodes; }
-    std::vector<AIBehaviorLink>& GetLinks() { return links; }
-    const std::vector<AIBehaviorLink>& GetLinks() const { return links; }
-    const std::vector<uintptr_t>& GetRuntimeActiveNodeIds() const { return runtimeActiveNodeIds; }
-    AI_BEHAVIOR_STATUS GetLastTickStatus() const { return lastTickStatus; }
+    std::vector<AIBehaviorNode>& GetNodes()
+    {
+        return nodes;
+    }
+
+    const std::vector<AIBehaviorNode>& GetNodes() const
+    {
+        return nodes;
+    }
+
+    std::vector<AIBehaviorLink>& GetLinks()
+    {
+        return links;
+    }
+
+    const std::vector<AIBehaviorLink>& GetLinks() const
+    {
+        return links;
+    }
+
+    const std::vector<uintptr_t>& GetRuntimeActiveNodeIds() const
+    {
+        return runtimeActiveNodeIds;
+    }
+
+    AI_BEHAVIOR_STATUS GetLastTickStatus() const
+    {
+        return lastTickStatus;
+    }
 
 private:
     // 重複所属のない既存Boxを再配置し、共有行動の接続と説明を維持する。

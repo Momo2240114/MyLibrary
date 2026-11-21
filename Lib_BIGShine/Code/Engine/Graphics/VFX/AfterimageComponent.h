@@ -25,9 +25,21 @@ public:
     void Deserialize(const nlohmann::json& json_) override;
 
     // 所有 GameObject のモデル姿勢をコピーして MeshVFX として描くコンポーネント。
-    bool UsesOwnerModel() const override { return true; }
-    bool UsesModelPoses() const override { return true; }
-    bool HasModelPoses() const override { return !snapshots.empty(); }
+    bool UsesOwnerModel() const override
+    {
+        return true;
+    }
+
+    bool UsesModelPoses() const override
+    {
+        return true;
+    }
+
+    bool HasModelPoses() const override
+    {
+        return !snapshots.empty();
+    }
+
     size_t GetMaxRenderParts() const override;
     bool GetModelPoseViews(std::vector<MeshVFXModelPoseView>& poses_) const override;
 

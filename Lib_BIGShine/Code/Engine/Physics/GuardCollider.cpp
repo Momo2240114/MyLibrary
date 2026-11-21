@@ -55,7 +55,10 @@ void GuardCollider::Deactivate()
 
 bool GuardCollider::CanGuardAttack(const HitBox& hitBox_) const
 {
-    if (!IsEnabled() || !hitBox_.canBeGuarded) return false;
+    if (!IsEnabled() || !hitBox_.canBeGuarded)
+    {
+        return false;
+    }
     // Guard/JustGuardのSystemへ渡す前に、所有者攻撃、Team、同一activationの重複Guardを除外する。
     const std::shared_ptr<GameObject> owner_ = GetGuardOwner();
     const std::shared_ptr<GameObject> attackOwner_ =
@@ -77,16 +80,29 @@ bool GuardCollider::CanGuardAttack(const HitBox& hitBox_) const
     // GuardBreakには回避かJustGuardで対処でき、通常Guardだけでは防げない。
     bool handlesBreak_ = reactToGuardBreak;
     if (guardBodyContact && owner_)
+    {
         if (const auto blackboard_ = owner_->GetComponent<BlackboardComponent>())
         {
             bool normalGuard_ = false;
             // Skillの防御Phaseは従来の被弾経路を維持し、通常Guardだけを専用反応へ渡す。
-            if (blackboard_->GetBool("Guard", "Active", normalGuard_)) handlesBreak_ = handlesBreak_ && normalGuard_;
+            if (blackboard_->GetBool("Guard", "Active", normalGuard_))
+            {
+                handlesBreak_ = handlesBreak_ && normalGuard_;
+            }
         }
-    if (hitBox_.guardBreak && !justGuardEnabled && !handlesBreak_) return false;
+    }
+    if (hitBox_.guardBreak && !justGuardEnabled && !handlesBreak_)
+    {
+        return false;
+    }
     auto directionSource_ = attackOwner_;
     if (hitBox_.attackSourceType != ATTACK_SOURCE_TYPE::MELEE)
-        if (const auto projectile_ = const_cast<HitBox&>(hitBox_).GetGameObject()) directionSource_ = projectile_;
+    {
+        if (const auto projectile_ = const_cast<HitBox&>(hitBox_).GetGameObject())
+        {
+            directionSource_ = projectile_;
+        }
+    }
     if (guardAngle < 360.0f && owner_ && owner_->transform && directionSource_ && directionSource_->transform)
     {
         // 近接は攻撃者、飛翔体は現在位置を使い、剣の軌道で変わる接触法線に依存しない。
@@ -97,7 +113,10 @@ bool GuardCollider::CanGuardAttack(const HitBox& hitBox_) const
         const float z_ = attackPosition_.z - position_.z;
         const float length_ = std::sqrt((x_ * x_ + z_ * z_) * (forward_.x * forward_.x + forward_.z * forward_.z));
         if (length_ > 0.0001f && (forward_.x * x_ + forward_.z * z_) / length_ <
-            std::cos(guardAngle * 0.5f * DirectX::XM_PI / 180.0f)) return false;
+            std::cos(guardAngle * 0.5f * DirectX::XM_PI / 180.0f))
+        {
+            return false;
+        }
     }
 
     const auto iterator_ = guardedAttackActivationIds.find(&hitBox_);
@@ -171,12 +190,24 @@ void GuardCollider::Gui()
         enabled ? "GuardCollider: ACTIVE" : "GuardCollider: INACTIVE");
     ImGui::Text("Just Guard: %s", justGuardEnabled ? "ON" : "OFF");
 
-    if (ImGui::Button("Activate GuardCollider")) Activate();
+    if (ImGui::Button("Activate GuardCollider"))
+    {
+        Activate();
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Deactivate GuardCollider")) Deactivate();
-    if (ImGui::Button("Enable JustGuard")) SetJustGuardEnabled(true);
+    if (ImGui::Button("Deactivate GuardCollider"))
+    {
+        Deactivate();
+    }
+    if (ImGui::Button("Enable JustGuard"))
+    {
+        SetJustGuardEnabled(true);
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Disable JustGuard")) SetJustGuardEnabled(false);
+    if (ImGui::Button("Disable JustGuard"))
+    {
+        SetJustGuardEnabled(false);
+    }
 
     ImGui::Checkbox("Can Guard Owner Attack", &canGuardOwnerAttack);
     ImGui::Checkbox("Once Per Attack Activation", &oncePerAttackActivation);
@@ -278,7 +309,10 @@ std::string GuardCollider::GetActivateActionName() const
 {
     // Prefix付きのAction名を作り、ActionSequenceから個別のGuard受付を開けるようにする。
     const std::string prefix_ = GetActionPrefix();
-    if (prefix_.empty()) return activateActionName;
+    if (prefix_.empty())
+    {
+        return activateActionName;
+    }
     return prefix_ + "_" + activateActionName;
 }
 
@@ -286,7 +320,10 @@ std::string GuardCollider::GetDeactivateActionName() const
 {
     // Guard受付終了用Action名も同じPrefix規則で生成する。
     const std::string prefix_ = GetActionPrefix();
-    if (prefix_.empty()) return deactivateActionName;
+    if (prefix_.empty())
+    {
+        return deactivateActionName;
+    }
     return prefix_ + "_" + deactivateActionName;
 }
 
@@ -294,7 +331,10 @@ std::string GuardCollider::GetEnableJustGuardActionName() const
 {
     // JustGuard受付開始は通常Guard受付とは別Actionにし、短い受付窓を作れるようにする。
     const std::string prefix_ = GetActionPrefix();
-    if (prefix_.empty()) return enableJustGuardActionName;
+    if (prefix_.empty())
+    {
+        return enableJustGuardActionName;
+    }
     return prefix_ + "_" + enableJustGuardActionName;
 }
 
@@ -302,7 +342,10 @@ std::string GuardCollider::GetDisableJustGuardActionName() const
 {
     // JustGuard受付終了Action名。GuardCollider自体は開いたまま通常Guardへ戻す用途に使う。
     const std::string prefix_ = GetActionPrefix();
-    if (prefix_.empty()) return disableJustGuardActionName;
+    if (prefix_.empty())
+    {
+        return disableJustGuardActionName;
+    }
     return prefix_ + "_" + disableJustGuardActionName;
 }
 
@@ -321,7 +364,10 @@ void GuardCollider::RegisterActions()
     // colliderComponents内から自分のshared_ptrを探し、Action lambdaへweak_ptrで渡す。
     // Guard受付、受付終了、JustGuard開始/終了をActionSequenceから制御できるようにする。
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     std::weak_ptr<GuardCollider> weakCollider_;
     for (const std::shared_ptr<Component>& component_ : owner_->colliderComponents)
@@ -386,15 +432,24 @@ std::shared_ptr<GameObject> GuardCollider::ResolveGuardOwnerFromHierarchy() cons
             return object_;
         }
 
-        if (!object_->transform) break;
+        if (!object_->transform)
+        {
+            break;
+        }
 
         const std::shared_ptr<Transform> parentTransform_ =
             object_->transform->parent.lock();
-        if (!parentTransform_) break;
+        if (!parentTransform_)
+        {
+            break;
+        }
 
         const std::shared_ptr<GameObject> parentObject_ =
             parentTransform_->gameObject.lock();
-        if (!parentObject_) break;
+        if (!parentObject_)
+        {
+            break;
+        }
 
         rootObject_ = parentObject_;
         object_ = parentObject_;

@@ -13,7 +13,10 @@ void DebugHitHistoryResetComponent::Start()
 {
     ResolveHitBox();
     ApplySettings();
-    if (autoActivate) Rearm();
+    if (autoActivate)
+    {
+        Rearm();
+    }
 }
 
 // HitBox設定を更新し、自動有効化が有効なら一定間隔でヒット履歴をリセットする。
@@ -21,7 +24,10 @@ void DebugHitHistoryResetComponent::Update(float elapsedTime_)
 {
     ResolveHitBox();
     const std::shared_ptr<HitBox> hitBox_ = hitBox.lock();
-    if (!hitBox_) return;
+    if (!hitBox_)
+    {
+        return;
+    }
 
     ApplySettings();
     if (!autoActivate)
@@ -33,22 +39,34 @@ void DebugHitHistoryResetComponent::Update(float elapsedTime_)
     }
 
     rearmTimer += (std::max)(elapsedTime_, 0.0f);
-    if (rearmTimer >= (std::max)(rearmInterval, 0.01f)) Rearm();
+    if (rearmTimer >= (std::max)(rearmInterval, 0.01f))
+    {
+        Rearm();
+    }
 }
 
 void DebugHitHistoryResetComponent::ResolveHitBox()
 {
     // 既に有効な参照がある場合は、毎フレーム検索し直さない。
-    if (!hitBox.expired()) return;
+    if (!hitBox.expired())
+    {
+        return;
+    }
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (owner_) hitBox = owner_->GetOrAddComponent<HitBox>();
+    if (owner_)
+    {
+        hitBox = owner_->GetOrAddComponent<HitBox>();
+    }
 }
 
 // GUIまたはJSONから設定された値を安全な範囲へ補正し、HitBoxへ直接反映する。
 void DebugHitHistoryResetComponent::ApplySettings()
 {
     const std::shared_ptr<HitBox> hitBox_ = hitBox.lock();
-    if (!hitBox_) return;
+    if (!hitBox_)
+    {
+        return;
+    }
 
     hitBox_->damage = (std::max)(damage, 0.0f);
     hitBox_->impactPower = (std::max)(impactPower, 0.0f);
@@ -65,7 +83,10 @@ void DebugHitHistoryResetComponent::ApplySettings()
 void DebugHitHistoryResetComponent::Rearm()
 {
     const std::shared_ptr<HitBox> hitBox_ = hitBox.lock();
-    if (!hitBox_) return;
+    if (!hitBox_)
+    {
+        return;
+    }
     hitBox_->Deactivate();
     hitBox_->Activate();
     rearmTimer = 0.0f;
@@ -81,7 +102,10 @@ void DebugHitHistoryResetComponent::Gui()
     ImGui::DragFloat("Hit Stop Scale", &hitStopScale, 0.01f, 0.0f, 1.0f);
     ImGui::DragFloat("Knock Back Power", &knockBackPower, 0.1f, 0.0f, 99999.0f);
     ImGui::DragFloat("Rearm Interval", &rearmInterval, 0.01f, 0.01f, 30.0f);
-    if (ImGui::Button("Rearm Now")) Rearm();
+    if (ImGui::Button("Rearm Now"))
+    {
+        Rearm();
+    }
 }
 
 // デバッグ確認に必要なHitBox設定をJSONへ保存する。

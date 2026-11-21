@@ -12,9 +12,20 @@ public:
     void Serialize(nlohmann::json& json_) const override;
     void Deserialize(const nlohmann::json& json_) override;
 
-    float GetAttackPower() const { return attackPower; }
-    float GetDamageRateModifier() const { return damageRateModifier; }
-    float GetFixedDamageModifier() const { return fixedDamageModifier; }
+    float GetAttackPower() const
+    {
+        return attackPower;
+    }
+
+    float GetDamageRateModifier() const
+    {
+        return damageRateModifier;
+    }
+
+    float GetFixedDamageModifier() const
+    {
+        return fixedDamageModifier;
+    }
 
 private:
     // 現在の攻撃力をBlackboardへ公開し、AIやDebug表示から参照できるようにする。

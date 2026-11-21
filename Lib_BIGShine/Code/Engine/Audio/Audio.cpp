@@ -9,7 +9,10 @@
 void Audio::Initialize()
 {
     // 多重初期化によって既存Systemを上書きしないよう、初期化済みなら処理を終了する。
-    if (initialized) return;
+    if (initialized)
+    {
+        return;
+    }
 
     // FMODの中核となるSystemオブジェクトを生成する。
     FMOD_RESULT result_ = FMOD::System_Create(&system);
@@ -49,7 +52,13 @@ void Audio::Update()
 AudioSource* Audio::LoadAudioSource(const char* filename_)
 {
     // 明示的な初期化前に呼ばれた場合でも、ここで利用可能な状態へ遷移させる。
-    if (!initialized) Initialize();
-    if (system == nullptr) return nullptr;
+    if (!initialized)
+    {
+        Initialize();
+    }
+    if (system == nullptr)
+    {
+        return nullptr;
+    }
     return new AudioSource(system, filename_);
 }

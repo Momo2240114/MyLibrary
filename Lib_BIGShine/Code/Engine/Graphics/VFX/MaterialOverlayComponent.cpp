@@ -58,7 +58,10 @@ void MaterialOverlayComponent::ResetOverlay()
 void MaterialOverlayComponent::Update(float deltaTime_)
 {
     // 対象モデルがロード中の間は、Overlayの時間だけ進んで見た目がずれないよう止める。
-    if (!IsLoadReady()) return;
+    if (!IsLoadReady())
+    {
+        return;
+    }
 
     MeshVFXComponent::Update(deltaTime_);
 
@@ -95,7 +98,10 @@ bool MaterialOverlayComponent::IsLoadReady() const
         const_cast<MaterialOverlayComponent*>(this)->GetGameObject();
     const std::shared_ptr<GltfModelCommponennt> model_ =
         owner_ ? owner_->GetComponent<GltfModelCommponennt>() : nullptr;
-    if (!model_) return true;
+    if (!model_)
+    {
+        return true;
+    }
 
     model_->UpdateLoadState();
     return !model_->IsModelLoading();
@@ -111,7 +117,10 @@ float MaterialOverlayComponent::GetOverlayWeight() const
 void MaterialOverlayComponent::RegisterActions()
 {
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     // ActionSequenceから、攻撃中だけ発光/縁取りなどを重ねられるようにする。
     owner_->RegisterAction("MaterialOverlay", "MaterialOverlay_Start", [this]()

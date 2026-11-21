@@ -24,14 +24,18 @@ void AnimationEventTrack::DeleteEvent(int index_)
 {
     // UIから渡された選択値が無効な場合は、既存イベントを変更しない。
     if (index_ >= 0 && index_ < static_cast<int>(events.size()))
+    {
         events.erase(events.begin() + index_);
+    }
 }
 
 void AnimationEventTrack::DuplicateEvent(int index_)
 {
     // 複製後の位置調整は Editor 側のドラッグで行う想定。
     if (index_ >= 0 && index_ < static_cast<int>(events.size()))
+    {
         events.push_back(events[index_]);
+    }
 }
 
 void AnimationEventTrack::BeginEdit(int index_)
@@ -56,14 +60,18 @@ void AnimationEventTrack::Copy()
 {
     // 編集対象が無い時は clipboard を変更しない。
     if (editingEntry >= 0)
+    {
         clipboard = events[editingEntry];
+    }
 }
 
 void AnimationEventTrack::Paste()
 {
     // 既存イベントへ上書きする形の Paste。新規追加ではない点に注意。
     if (editingEntry >= 0)
+    {
         events[editingEntry] = clipboard;
+    }
 }
 
 bool AnimationEventTrack::DrawSequencer(
@@ -138,7 +146,9 @@ bool AnimationEventTrack::DrawSequencer(
             ImGui::InvisibleButton(("ev_full_" + std::to_string(index_)).c_str(),
                 ImVec2((endX_ - startX_) - 10, rowHeight_));
             if (ImGui::IsItemClicked())
+            {
                 *selectedEntry_ = index_;
+            }
         }
     }
 

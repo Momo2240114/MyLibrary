@@ -50,7 +50,10 @@ void GameModeManager::UpdateBattleMusic(GameObjectManager& manager_)
     // 死亡・形態移行・撃破演出では、Sequenceと専用Directorの音声制御を優先する。
     if (cinematicPreview || presentationPlaying || gameplayLocked || battlePaused ||
         (currentGameState != GameProgressState::PHASE_1_BATTLE &&
-            currentGameState != GameProgressState::PHASE_2_BATTLE)) return;
+            currentGameState != GameProgressState::PHASE_2_BATTLE))
+    {
+        return;
+    }
 
     size_t musicIndex_ = currentGameState == GameProgressState::PHASE_1_BATTLE
         ? BGM_GAME : BGM_HUMAN_BOSS;
@@ -61,14 +64,23 @@ void GameModeManager::UpdateBattleMusic(GameObjectManager& manager_)
         for (const auto& boss_ : manager_.FindComponents<HumanBossAIComponent>())
         {
             const auto owner_ = boss_ ? boss_->GetGameObject() : nullptr;
-            if (!boss_ || !boss_->IsEnabled() || !owner_ || owner_->IsPendingDestroy()) continue;
+            if (!boss_ || !boss_->IsEnabled() || !owner_ || owner_->IsPendingDestroy())
+            {
+                continue;
+            }
             berserk_ = berserk_ || boss_->IsBerserkActive();
             const auto action_ = owner_->GetComponent<HumanBossActionComponent>();
             special_ = special_ || (action_ && action_->IsEnabled() && action_->IsSpecialMusicActive());
         }
         // 大技を最優先にし、終了後は暴走が続いていれば暴走曲へ戻す。
-        if (special_) musicIndex_ = BGM_SPECIAL_ATTACK;
-        else if (berserk_) musicIndex_ = BGM_BERSERK;
+        if (special_)
+        {
+            musicIndex_ = BGM_SPECIAL_ATTACK;
+        }
+        else if (berserk_)
+        {
+            musicIndex_ = BGM_BERSERK;
+        }
     }
     AudioManager::Instance().SwitchBGM(musicIndex_);
 }
@@ -345,25 +357,63 @@ const char* GameModeManager::GetCurrentGameStateName() const
 
 void GameModeManager::RegisterGlobalActions()
 {
-    if (globalActionsRegistered) UnregisterGlobalActions();
+    if (globalActionsRegistered)
+    {
+        UnregisterGlobalActions();
+    }
 
     ActionRegistry& registry_ = ActionRegistry::Instance();
-    registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, ACTION_SEQUENCE_FINISHED, [this]() { NotifySequenceFinished(); });
-    registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, ACTION_NOTIFY_PHASE_1_BOSS_DEFEATED, [this]() { NotifyPhase1BossDefeated(); });
-    registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, ACTION_NOTIFY_PHASE_2_BOSS_DEFEATED, [this]() { NotifyPhase2BossDefeated(); });
-    registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, ACTION_BEGIN_BOSS_INTRO, [this]() { BeginBossIntro(); });
-    registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, ACTION_BEGIN_PHASE_1_DEFEAT, [this]() { BeginPhase1Defeat(); });
-    registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, ACTION_BEGIN_PHASE_2_INTRO, [this]() { BeginPhase2Intro(); });
-    registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, ACTION_BEGIN_BOSS_DEFEATED, [this]() { BeginBossDefeated(); });
+    registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, ACTION_SEQUENCE_FINISHED, [this]()
+    {
+        NotifySequenceFinished();
+    });
+    registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, ACTION_NOTIFY_PHASE_1_BOSS_DEFEATED, [this]()
+    {
+        NotifyPhase1BossDefeated();
+    });
+    registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, ACTION_NOTIFY_PHASE_2_BOSS_DEFEATED, [this]()
+    {
+        NotifyPhase2BossDefeated();
+    });
+    registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, ACTION_BEGIN_BOSS_INTRO, [this]()
+    {
+        BeginBossIntro();
+    });
+    registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, ACTION_BEGIN_PHASE_1_DEFEAT, [this]()
+    {
+        BeginPhase1Defeat();
+    });
+    registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, ACTION_BEGIN_PHASE_2_INTRO, [this]()
+    {
+        BeginPhase2Intro();
+    });
+    registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, ACTION_BEGIN_BOSS_DEFEATED, [this]()
+    {
+        BeginBossDefeated();
+    });
     registry_.RemoveAction("Sequence", SEQUENCE_BOSS_DEFEATED);
     // BossIntroはScene上のActionSequenceから登録されるまで待ち、仮Actionで戦闘へ進めない。
-    registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, "DisablePlayerControl", [this]() { SetPlayerControlLocked(true); });
-    registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, "EnablePlayerControl", [this]() { SetPlayerControlLocked(false); });
-    registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, "DisableEnemyAI", [this]() { SetEnemyAILocked(true); });
-    registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, "EnableEnemyAI", [this]() { SetEnemyAILocked(false); });
+    registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, "DisablePlayerControl", [this]()
+    {
+        SetPlayerControlLocked(true);
+    });
+    registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, "EnablePlayerControl", [this]()
+    {
+        SetPlayerControlLocked(false);
+    });
+    registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, "DisableEnemyAI", [this]()
+    {
+        SetEnemyAILocked(true);
+    });
+    registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, "EnableEnemyAI", [this]()
+    {
+        SetEnemyAILocked(false);
+    });
     // 形態移行はSceneのSequence登録を待ち、演出を飛ばして戦闘を再開しない。
     // 決着はGameObjectManagerの専用Directorが生の時間で更新する。
-    registry_.RegisterAction("Sequence", SEQUENCE_BOSS_DEFEATED, []() {});
+    registry_.RegisterAction("Sequence", SEQUENCE_BOSS_DEFEATED, []()
+    {
+    });
     // 単体再生もSequenceへ委ね、Managerはプレビューのロックと終了状態だけを管理する。
     const char* PREVIEW_PHASES[] = { "DragonDeath", "DragonDissolve", "StageCorruption", "MudAttack",
         "PlayerCounter", "HumanFormation", "SwordClash", "PlayerKnockdown" };
@@ -372,8 +422,14 @@ void GameModeManager::RegisterGlobalActions()
         const std::string sequence_ = std::string("Preview") + phase_;
         registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, std::string("GameMode.") + sequence_, [this, sequence_]()
         {
-            if (currentGameState != GameProgressState::PHASE_1_BATTLE && !phaseTransitionPreview) return;
-            if (!ActionRegistry::Instance().HasAction(sequence_)) return;
+            if (currentGameState != GameProgressState::PHASE_1_BATTLE && !phaseTransitionPreview)
+            {
+                return;
+            }
+            if (!ActionRegistry::Instance().HasAction(sequence_))
+            {
+                return;
+            }
             phaseTransitionPreview = true;
             SetGameState(GameProgressState::PHASE_1_DEFEAT);
             RequestSequence(sequence_);
@@ -381,11 +437,17 @@ void GameModeManager::RegisterGlobalActions()
     }
     registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, "GameMode.CancelPhaseTransitionPreview", [this]()
     {
-        if (phaseTransitionPreview) RequestSequence("PhaseTransitionRestore");
+        if (phaseTransitionPreview)
+        {
+            RequestSequence("PhaseTransitionRestore");
+        }
     });
     registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, "GameMode.EndPhaseTransitionPreview", [this]()
     {
-        if (!phaseTransitionPreview) return;
+        if (!phaseTransitionPreview)
+        {
+            return;
+        }
         phaseTransitionPreview = false;
         TransitionToPhase1Battle();
     });
@@ -396,7 +458,10 @@ void GameModeManager::RegisterGlobalActions()
             RequestSequence("PhaseTransitionRestore");
             return;
         }
-        if (currentGameState != GameProgressState::PHASE_1_DEFEAT && currentGameState != GameProgressState::PHASE_2_INTRO) return;
+        if (currentGameState != GameProgressState::PHASE_1_DEFEAT && currentGameState != GameProgressState::PHASE_2_INTRO)
+        {
+            return;
+        }
         SetGameState(GameProgressState::PHASE_2_INTRO);
         RequestSequence("PhaseTransitionBattleResume");
     });
@@ -405,7 +470,10 @@ void GameModeManager::RegisterGlobalActions()
 
 void GameModeManager::UnregisterGlobalActions()
 {
-    if (!globalActionsRegistered) return;
+    if (!globalActionsRegistered)
+    {
+        return;
+    }
 
     ActionRegistry& registry_ = ActionRegistry::Instance();
     registry_.RemoveAction(ACTION_CATEGORY_GAME_MODE, "GameMode.SkipPhaseTransition");
@@ -423,7 +491,9 @@ void GameModeManager::UnregisterGlobalActions()
     const char* PREVIEW_PHASES[] = { "DragonDeath", "DragonDissolve", "StageCorruption", "MudAttack",
         "PlayerCounter", "HumanFormation", "SwordClash", "PlayerKnockdown" };
     for (const char* phase_ : PREVIEW_PHASES)
+    {
         registry_.RemoveAction(ACTION_CATEGORY_GAME_MODE, std::string("GameMode.Preview") + phase_);
+    }
     registry_.RemoveAction(ACTION_CATEGORY_GAME_MODE, "GameMode.CancelPhaseTransitionPreview");
     registry_.RemoveAction(ACTION_CATEGORY_GAME_MODE, "GameMode.EndPhaseTransitionPreview");
     registry_.RemoveAction("Sequence", SEQUENCE_BOSS_INTRO);
@@ -478,7 +548,10 @@ void GameModeManager::BeginBossIntro()
 {
     BS_PROFILE_SCOPE("GameModeManager::BeginBossIntro");
     // ゲーム開始時だけ開幕演出を予約し、戦闘中の再呼び出しを無効にする。
-    if (currentGameState != GameProgressState::GAME_SCENE_START) return;
+    if (currentGameState != GameProgressState::GAME_SCENE_START)
+    {
+        return;
+    }
 
     SetGameState(GameProgressState::BOSS_INTRO);
     RequestSequence(SEQUENCE_BOSS_INTRO);
@@ -488,7 +561,10 @@ void GameModeManager::BeginPhase1Defeat()
 {
     BS_PROFILE_SCOPE("GameModeManager::BeginPhase1Defeat");
     // 第一形態の戦闘中だけ撃破演出へ進め、重複通知による再開始を防ぐ。
-    if (currentGameState != GameProgressState::PHASE_1_BATTLE) return;
+    if (currentGameState != GameProgressState::PHASE_1_BATTLE)
+    {
+        return;
+    }
 
     SetGameState(GameProgressState::PHASE_1_DEFEAT);
     RequestSequence(SEQUENCE_PHASE_1_DEFEAT);
@@ -498,7 +574,10 @@ void GameModeManager::BeginPhase2Intro()
 {
     BS_PROFILE_SCOPE("GameModeManager::BeginPhase2Intro");
     // 第一形態の撃破演出から第二形態への移行演出を開始する。
-    if (currentGameState != GameProgressState::PHASE_1_DEFEAT) return;
+    if (currentGameState != GameProgressState::PHASE_1_DEFEAT)
+    {
+        return;
+    }
 
     SetGameState(GameProgressState::PHASE_2_INTRO);
     RequestSequence(SEQUENCE_PHASE_2_INTRO);
@@ -508,7 +587,10 @@ void GameModeManager::BeginBossDefeated()
 {
     BS_PROFILE_SCOPE("GameModeManager::BeginBossDefeated");
     // 第二形態の戦闘中だけ最終撃破演出を開始する。
-    if (currentGameState != GameProgressState::PHASE_2_BATTLE) return;
+    if (currentGameState != GameProgressState::PHASE_2_BATTLE)
+    {
+        return;
+    }
 
     SetGameState(GameProgressState::BOSS_DEFEATED);
     RequestSequence(SEQUENCE_BOSS_DEFEATED);

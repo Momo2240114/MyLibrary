@@ -1,10 +1,18 @@
 #include "PrecompiledHeader.h"
 #include "RadialTransition.h"
 #include <imgui.h>
+
 namespace {
-const bool REGISTERED = TransitionEffectFactory::Register("RADIAL", []() { return std::make_unique<RadialTransition>(); });
+const bool REGISTERED = TransitionEffectFactory::Register("RADIAL", []()
+    {
+        return std::make_unique<RadialTransition>();
+    });
 }
-RadialTransition::RadialTransition() : ShaderTransitionEffect("Data/Shader/RadialTransitionPS.cso") {}
+
+RadialTransition::RadialTransition() : ShaderTransitionEffect("Data/Shader/RadialTransitionPS.cso")
+{
+}
+
 // 固有パラメータだけを編集し、共通の時間と色はComponent側で管理する。
 void RadialTransition::Gui(TransitionParameters& parameters_)
 {

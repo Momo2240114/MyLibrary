@@ -2,6 +2,7 @@
 #include "TransitionParameters.h"
 enum class TransitionPlayback { COVER, REVEAL, PLAY };
 enum class TransitionCancelMode { CLEAR, KEEP_CURRENT, KEEP_COVERED };
+
 // 描画やSceneを所有せず、Cover・待機・Revealと通知の状態だけを進める。
 class TransitionSequence
 {
@@ -16,12 +17,34 @@ public:
     void Reveal();
     void CompleteWork();
     void Cancel(TransitionCancelMode mode_ = TransitionCancelMode::CLEAR);
-    TransitionState GetState() const { return state; }
-    float GetProgress() const { return progress; }
-    float GetEffectTime() const { return effectTime; }
-    bool IsCovered() const { return progress >= 1 && coveredRendered && state != TransitionState::TRANSITION_IN; }
-    bool IsActive() const { return state != TransitionState::IDLE; }
+
+    TransitionState GetState() const
+    {
+        return state;
+    }
+
+    float GetProgress() const
+    {
+        return progress;
+    }
+
+    float GetEffectTime() const
+    {
+        return effectTime;
+    }
+
+    bool IsCovered() const
+    {
+        return progress >= 1 && coveredRendered && state != TransitionState::TRANSITION_IN;
+    }
+
+    bool IsActive() const
+    {
+        return state != TransitionState::IDLE;
+    }
+
     static float Evaluate(float ratio_, TransitionEasing easing_);
+
 private:
     TransitionParameters parameters;
     TransitionState state = TransitionState::IDLE;

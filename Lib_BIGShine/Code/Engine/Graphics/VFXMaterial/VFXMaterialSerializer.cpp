@@ -37,7 +37,10 @@ namespace
     {
         // 指定キーが無い/配列長が足りない場合は既存値を維持する。
         const nlohmann::json value_ = json_.value(key_, nlohmann::json::array());
-        if (!value_.is_array() || value_.size() < 2u) return fallback_;
+        if (!value_.is_array() || value_.size() < 2u)
+        {
+            return fallback_;
+        }
         return { value_[0].get<float>(), value_[1].get<float>() };
     }
 
@@ -47,7 +50,10 @@ namespace
         const DirectX::XMFLOAT3& fallback_)
     {
         const nlohmann::json value_ = json_.value(key_, nlohmann::json::array());
-        if (!value_.is_array() || value_.size() < 3u) return fallback_;
+        if (!value_.is_array() || value_.size() < 3u)
+        {
+            return fallback_;
+        }
         return { value_[0].get<float>(), value_[1].get<float>(), value_[2].get<float>() };
     }
 
@@ -57,7 +63,10 @@ namespace
         const DirectX::XMFLOAT4& fallback_)
     {
         const nlohmann::json value_ = json_.value(key_, nlohmann::json::array());
-        if (!value_.is_array() || value_.size() < 4u) return fallback_;
+        if (!value_.is_array() || value_.size() < 4u)
+        {
+            return fallback_;
+        }
         return {
             value_[0].get<float>(),
             value_[1].get<float>(),
@@ -149,8 +158,14 @@ namespace
             return static_cast<VFX_MATERIAL_CULL_MODE>(std::clamp(json_.get<int>(), 0, 2));
         }
         const std::string value_ = json_.is_string() ? json_.get<std::string>() : "NONE";
-        if (value_ == "BACK") return VFX_MATERIAL_CULL_MODE::BACK;
-        if (value_ == "FRONT") return VFX_MATERIAL_CULL_MODE::FRONT;
+        if (value_ == "BACK")
+        {
+            return VFX_MATERIAL_CULL_MODE::BACK;
+        }
+        if (value_ == "FRONT")
+        {
+            return VFX_MATERIAL_CULL_MODE::FRONT;
+        }
         return VFX_MATERIAL_CULL_MODE::NONE;
     }
 
@@ -161,8 +176,14 @@ namespace
             return static_cast<VFX_MATERIAL_COLOR_RAMP_SAMPLE_SOURCE>(std::clamp(json_.get<int>(), 0, 2));
         }
         const std::string value_ = json_.is_string() ? json_.get<std::string>() : "LIFE";
-        if (value_ == "TIME") return VFX_MATERIAL_COLOR_RAMP_SAMPLE_SOURCE::TIME;
-        if (value_ == "FIXED") return VFX_MATERIAL_COLOR_RAMP_SAMPLE_SOURCE::FIXED;
+        if (value_ == "TIME")
+        {
+            return VFX_MATERIAL_COLOR_RAMP_SAMPLE_SOURCE::TIME;
+        }
+        if (value_ == "FIXED")
+        {
+            return VFX_MATERIAL_COLOR_RAMP_SAMPLE_SOURCE::FIXED;
+        }
         return VFX_MATERIAL_COLOR_RAMP_SAMPLE_SOURCE::LIFE;
     }
 
@@ -173,8 +194,14 @@ namespace
             return static_cast<VFX_MATERIAL_COLOR_RAMP_BLEND_MODE>(std::clamp(json_.get<int>(), 0, 2));
         }
         const std::string value_ = json_.is_string() ? json_.get<std::string>() : "MULTIPLY";
-        if (value_ == "OVERRIDE") return VFX_MATERIAL_COLOR_RAMP_BLEND_MODE::OVERRIDE;
-        if (value_ == "ADD") return VFX_MATERIAL_COLOR_RAMP_BLEND_MODE::ADD;
+        if (value_ == "OVERRIDE")
+        {
+            return VFX_MATERIAL_COLOR_RAMP_BLEND_MODE::OVERRIDE;
+        }
+        if (value_ == "ADD")
+        {
+            return VFX_MATERIAL_COLOR_RAMP_BLEND_MODE::ADD;
+        }
         return VFX_MATERIAL_COLOR_RAMP_BLEND_MODE::MULTIPLY;
     }
 
@@ -185,8 +212,14 @@ namespace
             return static_cast<VFX_MATERIAL_COLOR_RAMP_INTERPOLATION>(std::clamp(json_.get<int>(), 0, 2));
         }
         const std::string value_ = json_.is_string() ? json_.get<std::string>() : "LINEAR";
-        if (value_ == "CONSTANT") return VFX_MATERIAL_COLOR_RAMP_INTERPOLATION::CONSTANT;
-        if (value_ == "SMOOTH") return VFX_MATERIAL_COLOR_RAMP_INTERPOLATION::SMOOTH;
+        if (value_ == "CONSTANT")
+        {
+            return VFX_MATERIAL_COLOR_RAMP_INTERPOLATION::CONSTANT;
+        }
+        if (value_ == "SMOOTH")
+        {
+            return VFX_MATERIAL_COLOR_RAMP_INTERPOLATION::SMOOTH;
+        }
         return VFX_MATERIAL_COLOR_RAMP_INTERPOLATION::LINEAR;
     }
 
@@ -197,8 +230,14 @@ namespace
             return static_cast<VFX_MATERIAL_COLOR_RAMP_WRAP_MODE>(std::clamp(json_.get<int>(), 0, 2));
         }
         const std::string value_ = json_.is_string() ? json_.get<std::string>() : "CLAMP";
-        if (value_ == "REPEAT") return VFX_MATERIAL_COLOR_RAMP_WRAP_MODE::REPEAT;
-        if (value_ == "MIRROR") return VFX_MATERIAL_COLOR_RAMP_WRAP_MODE::MIRROR;
+        if (value_ == "REPEAT")
+        {
+            return VFX_MATERIAL_COLOR_RAMP_WRAP_MODE::REPEAT;
+        }
+        if (value_ == "MIRROR")
+        {
+            return VFX_MATERIAL_COLOR_RAMP_WRAP_MODE::MIRROR;
+        }
         return VFX_MATERIAL_COLOR_RAMP_WRAP_MODE::CLAMP;
     }
 
@@ -209,8 +248,14 @@ namespace
             return static_cast<VFX_MATERIAL_RANDOM_COLOR_MODE>(std::clamp(json_.get<int>(), 0, 2));
         }
         const std::string value_ = json_.is_string() ? json_.get<std::string>() : "MULTIPLY";
-        if (value_ == "OVERRIDE") return VFX_MATERIAL_RANDOM_COLOR_MODE::OVERRIDE;
-        if (value_ == "ADD") return VFX_MATERIAL_RANDOM_COLOR_MODE::ADD;
+        if (value_ == "OVERRIDE")
+        {
+            return VFX_MATERIAL_RANDOM_COLOR_MODE::OVERRIDE;
+        }
+        if (value_ == "ADD")
+        {
+            return VFX_MATERIAL_RANDOM_COLOR_MODE::ADD;
+        }
         return VFX_MATERIAL_RANDOM_COLOR_MODE::MULTIPLY;
     }
 
@@ -359,9 +404,15 @@ bool VFXMaterialSerializer::Load(
     VFXMaterialData& materialData_)
 {
     BS_PROFILE_SCOPE("VFXMaterialSerializer::Load");
-    if (filePath_.empty()) return false;
+    if (filePath_.empty())
+    {
+        return false;
+    }
     std::ifstream file_(filePath_);
-    if (!file_.is_open()) return false;
+    if (!file_.is_open())
+    {
+        return false;
+    }
 
     try
     {
@@ -387,10 +438,22 @@ bool VFXMaterialSerializer::Load(
         materialData_.emissiveIntensity = color_.value("EmissiveIntensity", color_.value("emissiveIntensity", materialData_.emissiveIntensity));
         materialData_.alpha = color_.value("Alpha", color_.value("alpha", materialData_.alpha));
 
-        if (json_.contains("MainUV")) ReadUv(json_["MainUV"], materialData_.mainUV);
-        else if (json_.contains("mainUV")) ReadUv(json_["mainUV"], materialData_.mainUV);
-        if (json_.contains("NoiseUV")) ReadUv(json_["NoiseUV"], materialData_.noiseUV);
-        else if (json_.contains("noiseUV")) ReadUv(json_["noiseUV"], materialData_.noiseUV);
+        if (json_.contains("MainUV"))
+        {
+            ReadUv(json_["MainUV"], materialData_.mainUV);
+        }
+        else if (json_.contains("mainUV"))
+        {
+            ReadUv(json_["mainUV"], materialData_.mainUV);
+        }
+        if (json_.contains("NoiseUV"))
+        {
+            ReadUv(json_["NoiseUV"], materialData_.noiseUV);
+        }
+        else if (json_.contains("noiseUV"))
+        {
+            ReadUv(json_["noiseUV"], materialData_.noiseUV);
+        }
 
         const nlohmann::json dissolve_ = json_.value("Dissolve", json_.value("dissolve", nlohmann::json::object()));
         materialData_.dissolve.enabled = dissolve_.value("Enabled", dissolve_.value("enabled", materialData_.dissolve.enabled));
@@ -402,10 +465,22 @@ bool VFXMaterialSerializer::Load(
         materialData_.distortion.enabled = distortion_.value("Enabled", distortion_.value("enabled", materialData_.distortion.enabled));
         materialData_.distortion.strength = distortion_.value("Strength", distortion_.value("strength", materialData_.distortion.strength));
 
-        if (json_.contains("ColorRamp")) ReadColorRamp(json_["ColorRamp"], materialData_.colorRamp);
-        else if (json_.contains("colorRamp")) ReadColorRamp(json_["colorRamp"], materialData_.colorRamp);
-        if (json_.contains("RandomColor")) ReadRandomColor(json_["RandomColor"], materialData_.randomColor);
-        else if (json_.contains("randomColor")) ReadRandomColor(json_["randomColor"], materialData_.randomColor);
+        if (json_.contains("ColorRamp"))
+        {
+            ReadColorRamp(json_["ColorRamp"], materialData_.colorRamp);
+        }
+        else if (json_.contains("colorRamp"))
+        {
+            ReadColorRamp(json_["colorRamp"], materialData_.colorRamp);
+        }
+        if (json_.contains("RandomColor"))
+        {
+            ReadRandomColor(json_["RandomColor"], materialData_.randomColor);
+        }
+        else if (json_.contains("randomColor"))
+        {
+            ReadRandomColor(json_["randomColor"], materialData_.randomColor);
+        }
 
         const nlohmann::json renderState_ = json_.value("RenderState", json_.value("renderState", nlohmann::json::object()));
         const nlohmann::json blendMode_ = renderState_.contains("BlendMode")
@@ -432,7 +507,10 @@ bool VFXMaterialSerializer::Save(
     const VFXMaterialData& materialData_)
 {
     BS_PROFILE_SCOPE("VFXMaterialSerializer::Save");
-    if (filePath_.empty()) return false;
+    if (filePath_.empty())
+    {
+        return false;
+    }
     const std::filesystem::path outputPath_(filePath_);
     if (outputPath_.has_parent_path())
     {
@@ -485,7 +563,10 @@ bool VFXMaterialSerializer::Save(
     };
 
     std::ofstream file_(outputPath_, std::ios::out | std::ios::trunc);
-    if (!file_.is_open()) return false;
+    if (!file_.is_open())
+    {
+        return false;
+    }
     file_ << json_.dump(4);
     return file_.good();
 }

@@ -39,6 +39,7 @@ public:
 private:
     // 選択変更時だけ効果音を鳴らし、拡縮の時計を戻す。
     void Select(int index_);
+
     // 表示専用Objectの寿命をメニューに限定し、シーン保存へ混入させない。
     struct MenuVisual
     {
@@ -46,6 +47,7 @@ private:
         std::string text;
         std::shared_ptr<GameObject> object;
     };
+
     // 同名の表示要素を再利用し、文字が変わった時だけTextureを再生成する。
     void SubmitVisual(SpriteRenderSystem& sprites_, const char* name_, float x_, float y_, float width_, float height_,
         const DirectX::XMFLOAT4& color_, const char* text_ = nullptr, float fontSize_ = 26.0f, const char* preset_ = nullptr, float strength_ = 1.0f);

@@ -140,7 +140,10 @@ BodyPartDamageResult DragonBodyPartManagerComponent::ApplyDamage(
     result_.bodyPart = bodyPart_;
 
     DragonBodyPartStatus* status_ = FindBodyPartStatus(bodyPart_);
-    if (!status_) return result_;
+    if (!status_)
+    {
+        return result_;
+    }
 
     result_.alreadyBroken = status_->broken;
     float damageReductionRate_ = 1.0f;
@@ -224,7 +227,10 @@ void DragonBodyPartManagerComponent::HandleAttackHit(
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     const std::shared_ptr<GameObject> target_ = event_.target.lock();
     // このManagerのOwnerがHit対象ではない場合は無視する。
-    if (!owner_ || target_ != owner_) return;
+    if (!owner_ || target_ != owner_)
+    {
+        return;
+    }
 
     DamageContext damageContext_;
     damageContext_.attackInstanceId = event_.attackInstanceId;
@@ -253,7 +259,10 @@ const DragonBodyPartStatus* DragonBodyPartManagerComponent::GetBodyPartStatus(
 {
     for (const DragonBodyPartStatus& status_ : bodyParts)
     {
-        if (status_.bodyPart == bodyPart_) return &status_;
+        if (status_.bodyPart == bodyPart_)
+        {
+            return &status_;
+        }
     }
     return nullptr;
 }
@@ -305,7 +314,10 @@ DragonBodyPartStatus* DragonBodyPartManagerComponent::FindBodyPartStatus(
 {
     for (DragonBodyPartStatus& status_ : bodyParts)
     {
-        if (status_.bodyPart == bodyPart_) return &status_;
+        if (status_.bodyPart == bodyPart_)
+        {
+            return &status_;
+        }
     }
     return nullptr;
 }
@@ -313,10 +325,16 @@ DragonBodyPartStatus* DragonBodyPartManagerComponent::FindBodyPartStatus(
 // OwnerにHealthComponentがなければ追加し、以降の部位ダメージ反映先にする。
 void DragonBodyPartManagerComponent::ResolveHealthComponent()
 {
-    if (health) return;
+    if (health)
+    {
+        return;
+    }
 
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     health = owner_->GetOrAddComponent<HealthComponent>().get();
 }
@@ -338,10 +356,16 @@ void DragonBodyPartManagerComponent::UpdateBossHpRate()
     }
 
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     GameModeManager* gameModeManager_ = owner_->GetManager().GetGameModeManager();
-    if (!gameModeManager_) return;
+    if (!gameModeManager_)
+    {
+        return;
+    }
 
     gameModeManager_->SetBossHpRate(bossHpRate_);
 }
@@ -349,10 +373,16 @@ void DragonBodyPartManagerComponent::UpdateBossHpRate()
 // AttackSystemのHit通知を購読し、DragonBodyPartHurtBoxComponentが付いたHurtBoxだけ処理する。
 void DragonBodyPartManagerComponent::RegisterAttackHitCallback()
 {
-    if (callbackRegistered) return;
+    if (callbackRegistered)
+    {
+        return;
+    }
 
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     std::weak_ptr<DragonBodyPartManagerComponent> weakManager_;
     for (const std::shared_ptr<Component>& component_ : owner_->components)
@@ -371,17 +401,26 @@ void DragonBodyPartManagerComponent::RegisterAttackHitCallback()
         {
             const std::shared_ptr<DragonBodyPartManagerComponent> manager_ =
                 weakManager_.lock();
-            if (!manager_ || !event_.hurtBox) return;
+            if (!manager_ || !event_.hurtBox)
+        {
+            return;
+        }
 
-            const std::shared_ptr<GameObject> hurtBoxObject_ =
+        const std::shared_ptr<GameObject> hurtBoxObject_ =
                 event_.hurtBox->GetGameObject();
-            if (!hurtBoxObject_) return;
+            if (!hurtBoxObject_)
+        {
+            return;
+        }
 
-            const std::shared_ptr<DragonBodyPartHurtBoxComponent> hurtBoxComponent_ =
+        const std::shared_ptr<DragonBodyPartHurtBoxComponent> hurtBoxComponent_ =
                 hurtBoxObject_->GetComponent<DragonBodyPartHurtBoxComponent>();
-            if (!hurtBoxComponent_) return;
+            if (!hurtBoxComponent_)
+        {
+            return;
+        }
 
-            // HurtBox側に設定された部位情報を使って、本体ManagerへHit処理を戻す。
+        // HurtBox側に設定された部位情報を使って、本体ManagerへHit処理を戻す。
             manager_->HandleAttackHit(event_, *hurtBoxComponent_);
         });
     callbackRegistered = true;
@@ -391,11 +430,17 @@ void DragonBodyPartManagerComponent::RegisterAttackHitCallback()
 void DragonBodyPartManagerComponent::PublishLastDamageToBlackboard()
 {
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     const std::shared_ptr<BlackboardComponent> blackboard_ =
         owner_->GetOrAddComponent<BlackboardComponent>();
-    if (!blackboard_) return;
+    if (!blackboard_)
+    {
+        return;
+    }
 
     blackboard_->SetInt(
         "DragonBodyPart",
@@ -449,7 +494,10 @@ void DragonBodyPartManagerComponent::ExecuteBodyPartBrokenActions(
     BS_PROFILE_SCOPE("DragonBodyPartManagerComponent::ExecuteBodyPartBrokenActions");
 
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     if (!commonBrokenActionName.empty())
     {
@@ -507,7 +555,10 @@ void DragonBodyPartManagerComponent::Gui()
     {
         commonBrokenActionName = commonBrokenActionBuffer_;
     }
-    if (ImGui::Button("Reset Body Parts")) ResetBodyParts();
+    if (ImGui::Button("Reset Body Parts"))
+    {
+        ResetBodyParts();
+    }
 
     ImGui::SeparatorText("Last Hit");
     ImGui::Text("Attack ID: %llu", static_cast<unsigned long long>(lastAttackInstanceId));

@@ -18,7 +18,10 @@ namespace
     {
         // 拡張子やPriority文字列の比較用に小文字化する。
         std::transform(text_.begin(), text_.end(), text_.begin(),
-            [](unsigned char character_) { return static_cast<char>(std::tolower(character_)); });
+            [](unsigned char character_)
+        {
+            return static_cast<char>(std::tolower(character_));
+        });
         return text_;
     }
 }
@@ -44,14 +47,20 @@ bool StartupResourceConfig::Load(const std::string& filePath_)
             [this](const nlohmann::json& array_, STARTUP_RESOURCE_PRIORITY priority_)
             {
                 // criticalModels/highPriorityModelsの各配列を共通処理で読む。
-                if (!array_.is_array()) return;
-                for (const nlohmann::json& item_ : array_)
+                if (!array_.is_array())
+            {
+                return;
+            }
+            for (const nlohmann::json& item_ : array_)
                 {
                     std::string filePath_ = item_.value("filePath", std::string());
                     // 古いKey名のPathにも対応して、既存データを読み続けられるようにする。
-                    if (filePath_.empty()) filePath_ = item_.value("Path", std::string());
+                    if (filePath_.empty())
+                {
+                    filePath_ = item_.value("Path", std::string());
+                }
 
-                    const std::string normalizedPath_ = NormalizeResourcePath(filePath_);
+                const std::string normalizedPath_ = NormalizeResourcePath(filePath_);
                     if (normalizedPath_.empty())
                     {
                         BS_LOG_WARNING(LOG_CATEGORY::GAME, "[StartupResourceConfig] Skipped empty startup model path.");
@@ -66,10 +75,16 @@ bool StartupResourceConfig::Load(const std::string& filePath_)
 
                     std::string resourceName_ = item_.value("resourceName", std::string());
                     // ResourceNameの旧Keyにも対応し、無ければPathのstemから自動生成する。
-                    if (resourceName_.empty()) resourceName_ = item_.value("ResourceName", std::string());
-                    if (resourceName_.empty()) resourceName_ = MakeDefaultResourceName(normalizedPath_);
+                    if (resourceName_.empty())
+                {
+                    resourceName_ = item_.value("ResourceName", std::string());
+                }
+                if (resourceName_.empty())
+                {
+                    resourceName_ = MakeDefaultResourceName(normalizedPath_);
+                }
 
-                    StartupModelEntry entry_ = MakeEntry(resourceName_, normalizedPath_, priority_);
+                StartupModelEntry entry_ = MakeEntry(resourceName_, normalizedPath_, priority_);
                     if (priority_ == STARTUP_RESOURCE_PRIORITY::CRITICAL)
                     {
                         criticalModels.push_back(entry_);
@@ -158,7 +173,10 @@ void StartupResourceConfig::Clear()
 
 std::string StartupResourceConfig::NormalizeResourcePath(const std::string& filePath_)
 {
-    if (filePath_.empty()) return {};
+    if (filePath_.empty())
+    {
+        return {};
+    }
 
     std::filesystem::path path_(filePath_);
     std::error_code errorCode_;
@@ -166,9 +184,15 @@ std::string StartupResourceConfig::NormalizeResourcePath(const std::string& file
     {
         // 絶対PathはProject基準の相対Pathへ変換し、JSONを環境依存にしない。
         const std::filesystem::path basePath_ = std::filesystem::current_path(errorCode_);
-        if (errorCode_) return {};
+        if (errorCode_)
+        {
+            return {};
+        }
         const std::filesystem::path relativePath_ = std::filesystem::relative(path_, basePath_, errorCode_);
-        if (errorCode_ || relativePath_.empty()) return {};
+        if (errorCode_ || relativePath_.empty())
+        {
+            return {};
+        }
         path_ = relativePath_;
     }
 
@@ -247,16 +271,25 @@ bool StartupResourceConfig::SaveJsonAtomically(const std::string& filePath_, con
         // まず.tmpへ書き出し、書き込み成功後に本来のPathへ置き換える。
         const std::filesystem::path outputPath_(filePath_);
         const std::filesystem::path parentPath_ = outputPath_.parent_path();
-        if (!parentPath_.empty()) std::filesystem::create_directories(parentPath_);
+        if (!parentPath_.empty())
+        {
+            std::filesystem::create_directories(parentPath_);
+        }
 
         std::filesystem::path temporaryPath_ = outputPath_;
         temporaryPath_ += ".tmp";
 
         {
             std::ofstream file_(temporaryPath_);
-            if (!file_.is_open()) return false;
+            if (!file_.is_open())
+            {
+                return false;
+            }
             file_ << json_.dump(4);
-            if (!file_.good()) return false;
+            if (!file_.good())
+            {
+                return false;
+            }
         }
 
         std::error_code errorCode_;

@@ -13,9 +13,15 @@ float SampleShapeDistance(float2 point_, float radius_)
     float4 sample_ = effectTexture.SampleLevel(shapeSampler,sampleUV_,0);
     int channel_ = (int)maskParameters.w;
     float value_ = channel_ < 4 ? sample_[channel_] : dot(sample_.rgb,float3(0.2126,0.7152,0.0722));
-    if (maskParameters.x > 0.5) value_ = 1 - value_;
+    if (maskParameters.x > 0.5)
+    {
+        value_ = 1 - value_;
+    }
     // 反転指定でも画像の外側は常に形状外として扱う。
-    if (any(sampleUV_ < 0) || any(sampleUV_ > 1)) value_ = 0;
+    if (any(sampleUV_ < 0) || any(sampleUV_ > 1))
+    {
+        value_ = 0;
+    }
     return value_ - maskAnimation.x;
 }
 

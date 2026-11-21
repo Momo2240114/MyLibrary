@@ -70,15 +70,25 @@ public:
             externalForce = { 0, 0, 0 };
         }
     }dynamics;
+
 public:
     void SetParentOverride(bool enable, DirectX::XMMATRIX matrix);
 
     void Gui()
     {
         // 値が変わったらバージョンを上げる
-        if (ImGui::DragFloat3("Position", &localPosition.x, 0.1f)) { MarkDirty(); }
-        if (ImGui::DragFloat3("Rotation", &localRotation.x, 0.5f)) { MarkDirty(); }
-        if (ImGui::DragFloat3("Scale", &localScale.x, 0.01f)) { MarkDirty(); }
+        if (ImGui::DragFloat3("Position", &localPosition.x, 0.1f))
+        {
+            MarkDirty();
+        }
+        if (ImGui::DragFloat3("Rotation", &localRotation.x, 0.5f))
+        {
+            MarkDirty();
+        }
+        if (ImGui::DragFloat3("Scale", &localScale.x, 0.01f))
+        {
+            MarkDirty();
+        }
     }
 
     //前方向ベクトルを取得する
@@ -102,7 +112,9 @@ public:
     {
         isDirty = true;
         for (auto& c : children)
+        {
             c->MarkDirty();
+        }
     }
 
     // ======================

@@ -78,7 +78,10 @@ public:
     void StartSweepRight(float duration_);
     void StartSpinSweep(float duration_);
 
-    bool IsAttackActive() const { return attackActive; }
+    bool IsAttackActive() const
+    {
+        return attackActive;
+    }
 
     // Tail先端のWorld位置/方向を取得する。HitBoxやVFX発生位置に使う。
     bool GetTailTipWorldPosition(DirectX::XMFLOAT3& position_) const;

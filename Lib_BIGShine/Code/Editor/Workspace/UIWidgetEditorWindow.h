@@ -19,8 +19,12 @@ public:
 
     // UI専用Workspace全体を描画する。
     void Draw() override;
+
     // Pause中でもUI Previewを見たいのでScene描画を許可する。
-    bool ShouldRenderSceneWhenPaused() const override { return true; }
+    bool ShouldRenderSceneWhenPaused() const override
+    {
+        return true;
+    }
 
 private:
     struct WidgetEntry

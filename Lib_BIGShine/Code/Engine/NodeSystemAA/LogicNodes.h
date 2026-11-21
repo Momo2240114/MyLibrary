@@ -30,10 +30,16 @@ namespace NodeSystem {
 
         void Evaluate() override {
             bool valueA_ = false;
-            if (auto boolValue_ = std::get_if<bool>(&inputs[0].value)) valueA_ = *boolValue_;
+            if (auto boolValue_ = std::get_if<bool>(&inputs[0].value))
+            {
+                valueA_ = *boolValue_;
+            }
 
             bool valueB_ = false;
-            if (auto boolValue_ = std::get_if<bool>(&inputs[1].value)) valueB_ = *boolValue_;
+            if (auto boolValue_ = std::get_if<bool>(&inputs[1].value))
+            {
+                valueB_ = *boolValue_;
+            }
 
             outputs[0].value = valueA_ && valueB_;
         }
@@ -51,7 +57,10 @@ namespace NodeSystem {
 
         void Evaluate() override {
             bool condition_ = false;
-            if (auto boolValue_ = std::get_if<bool>(&inputs[0].value)) condition_ = *boolValue_;
+            if (auto boolValue_ = std::get_if<bool>(&inputs[0].value))
+            {
+                condition_ = *boolValue_;
+            }
 
             outputs[0].value = condition_ ? inputs[1].value : inputs[2].value;
         }

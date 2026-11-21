@@ -99,7 +99,10 @@ void AttackTemplateEditorWindow::Draw()
                 selectedTemplateId = attackTemplate_.id;
                 duplicateTemplateIdBuffer = selectedTemplateId + "_Copy";
             }
-            if (selected_) ImGui::SetItemDefaultFocus();
+            if (selected_)
+            {
+                ImGui::SetItemDefaultFocus();
+            }
         }
         ImGui::EndCombo();
     }

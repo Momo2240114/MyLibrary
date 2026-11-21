@@ -17,8 +17,13 @@ public:
     void Serialize(nlohmann::json& json_) const override;
     // Scene JSONのメニュー設定を復元する。
     void Deserialize(const nlohmann::json& json_) override;
+
     // 設定Windowなどを操作している間はメニュー入力を受け付けない。
-    void SetInputSuppressed(bool suppressed_) { inputSuppressed = suppressed_; }
+    void SetInputSuppressed(bool suppressed_)
+    {
+        inputSuppressed = suppressed_;
+    }
+
 private:
     // 文字や装飾の構成はSceneに置き、Componentは参照と操作状態だけを保持する。
     struct MenuItem
@@ -32,6 +37,7 @@ private:
         bool enabled = true;
         float selection = 0.0f;
     };
+
     // UIとActionが利用できる項目だけを選択可能にする。
     bool IsSelectable(int index_) const;
     // 選択を変更し、設定された移動音を再生する。

@@ -105,9 +105,15 @@ void JustDodgeCollider::Gui()
         enabled ? ImVec4(0.2f, 1.0f, 0.3f, 1.0f) : ImVec4(1.0f, 0.3f, 0.2f, 1.0f),
         enabled ? "JustDodgeCollider: ACTIVE" : "JustDodgeCollider: INACTIVE");
 
-    if (ImGui::Button("Activate JustDodgeCollider")) Activate();
+    if (ImGui::Button("Activate JustDodgeCollider"))
+    {
+        Activate();
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Deactivate JustDodgeCollider")) Deactivate();
+    if (ImGui::Button("Deactivate JustDodgeCollider"))
+    {
+        Deactivate();
+    }
 
     ImGui::Checkbox("Can React To Owner Attack", &canReactToOwnerAttack);
     ImGui::Checkbox("Once Per Attack Activation", &oncePerAttackActivation);
@@ -188,7 +194,10 @@ std::string JustDodgeCollider::GetActivateActionName() const
 {
     // Object名/Prefix付きのAction名を作り、ActionSequenceから個別Colliderを開けるようにする。
     const std::string prefix_ = GetActionPrefix();
-    if (prefix_.empty()) return activateActionName;
+    if (prefix_.empty())
+    {
+        return activateActionName;
+    }
     return prefix_ + "_" + activateActionName;
 }
 
@@ -196,7 +205,10 @@ std::string JustDodgeCollider::GetDeactivateActionName() const
 {
     // 有効化と同じ命名規則で、受付終了用Action名を作る。
     const std::string prefix_ = GetActionPrefix();
-    if (prefix_.empty()) return deactivateActionName;
+    if (prefix_.empty())
+    {
+        return deactivateActionName;
+    }
     return prefix_ + "_" + deactivateActionName;
 }
 
@@ -215,7 +227,10 @@ void JustDodgeCollider::RegisterActions()
     // colliderComponents内から自分のshared_ptrを探し、Action lambdaへweak_ptrで渡す。
     // これによりActionSequenceからEnable/Disableを呼んでも、削除済みColliderを触らない。
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     std::weak_ptr<JustDodgeCollider> weakCollider_;
     for (const std::shared_ptr<Component>& component_ : owner_->colliderComponents)

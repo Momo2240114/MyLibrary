@@ -61,7 +61,10 @@ void CameraShakeComponent::LateUpdate(float deltaTime_)
 {
     BS_PROFILE_SCOPE("CameraShakeComponent::LateUpdate");
     ResolveCamera();
-    if (!playing) return;
+    if (!playing)
+    {
+        return;
+    }
 
     const std::shared_ptr<CameraComponent> camera_ = camera.lock();
     if (!camera_ || !camera_->CanPlayEventAction())
@@ -107,12 +110,21 @@ void CameraShakeComponent::LateUpdate(float deltaTime_)
 void CameraShakeComponent::PlayShakeByIndex(int index_)
 {
     BS_PROFILE_SCOPE("CameraShakeComponent::PlayShakeByIndex");
-    if (index_ < 0 || index_ >= static_cast<int>(presets.size())) return;
+    if (index_ < 0 || index_ >= static_cast<int>(presets.size()))
+    {
+        return;
+    }
     ResolveCamera();
     const auto camera_ = camera.lock();
-    if (!camera_ || !camera_->CanPlayEventAction()) return;
+    if (!camera_ || !camera_->CanPlayEventAction())
+    {
+        return;
+    }
     // 再生中ShakeよりPriorityが低い場合は、強い演出を弱い演出で潰さない。
-    if (playing && presets[index_].priority < activePriority) return;
+    if (playing && presets[index_].priority < activePriority)
+    {
+        return;
+    }
 
     activePreset = presets[index_];
     activePriority = activePreset.priority;
@@ -135,9 +147,15 @@ void CameraShakeComponent::PlayShake(
     BS_PROFILE_SCOPE("CameraShakeComponent::PlayShake");
     ResolveCamera();
     const auto camera_ = camera.lock();
-    if (!camera_ || !camera_->CanPlayEventAction()) return;
+    if (!camera_ || !camera_->CanPlayEventAction())
+    {
+        return;
+    }
     // Runtime再生でもPresetと同じPriority規則を適用する。
-    if (playing && priority_ < activePriority) return;
+    if (playing && priority_ < activePriority)
+    {
+        return;
+    }
 
     CameraShakePreset preset_;
     preset_.actionName = "Runtime";
@@ -185,23 +203,35 @@ void CameraShakeComponent::RegisterActions()
 
 void CameraShakeComponent::ResolveCamera()
 {
-    if (!camera.expired()) return;
+    if (!camera.expired())
+    {
+        return;
+    }
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (owner_) camera = owner_->GetComponent<CameraComponent>();
+    if (owner_)
+    {
+        camera = owner_->GetComponent<CameraComponent>();
+    }
 }
 
 int CameraShakeComponent::FindPresetIndex(const std::string& actionName_) const
 {
     for (int index_ = 0; index_ < static_cast<int>(presets.size()); ++index_)
     {
-        if (presets[index_].actionName == actionName_) return index_;
+        if (presets[index_].actionName == actionName_)
+        {
+            return index_;
+        }
     }
     return -1;
 }
 
 float CameraShakeComponent::CalculateEnvelope() const
 {
-    if (activePreset.duration <= 0.0001f) return 0.0f;
+    if (activePreset.duration <= 0.0001f)
+    {
+        return 0.0f;
+    }
 
     const float rate_ = std::clamp(elapsed / activePreset.duration, 0.0f, 1.0f);
     float envelope_ = 1.0f;
@@ -337,7 +367,10 @@ void CameraShakeComponent::Deserialize(const nlohmann::json& json_)
 {
     // 保存されたPresetを復元する。Action登録はStart側でまとめて行う。
     presets.clear();
-    if (!json_.contains("presets") || !json_["presets"].is_array()) return;
+    if (!json_.contains("presets") || !json_["presets"].is_array())
+    {
+        return;
+    }
 
     for (const nlohmann::json& presetJson_ : json_["presets"])
     {

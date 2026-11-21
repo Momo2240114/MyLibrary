@@ -12,7 +12,10 @@ namespace
     std::string ToLower(std::string text_)
     {
         std::transform(text_.begin(), text_.end(), text_.begin(),
-            [](unsigned char char_) { return static_cast<char>(std::tolower(char_)); });
+            [](unsigned char char_)
+        {
+            return static_cast<char>(std::tolower(char_));
+        });
         return text_;
     }
 }
@@ -28,7 +31,10 @@ DebugLogWindow::DebugLogWindow(GameObjectManager* manager_)
 
 void DebugLogWindow::Draw()
 {
-    if (!isVisible) return;
+    if (!isVisible)
+    {
+        return;
+    }
 
     // ツールバー、詳細設定、ログ表の順に描画し、通常はログ確認だけをすぐ見られる構成にする。
     if (BeginEditorWindow())
@@ -88,7 +94,10 @@ void DebugLogWindow::DrawFilters()
         {
             LOG_CATEGORY category_ = static_cast<LOG_CATEGORY>(index_);
             ImGui::Checkbox(DebugLog::GetCategoryName(category_), &categoryFilters[index_]);
-            if ((index_ + 1) % 4 != 0) ImGui::SameLine();
+            if ((index_ + 1) % 4 != 0)
+            {
+                ImGui::SameLine();
+            }
         }
         ImGui::TreePop();
     }
@@ -99,7 +108,10 @@ void DebugLogWindow::DrawFilters()
         {
             LOG_LEVEL level_ = static_cast<LOG_LEVEL>(index_);
             ImGui::Checkbox(DebugLog::GetLevelName(level_), &levelFilters[index_]);
-            if (index_ + 1 < levelFilters.size()) ImGui::SameLine();
+            if (index_ + 1 < levelFilters.size())
+            {
+                ImGui::SameLine();
+            }
         }
         ImGui::TreePop();
     }
@@ -214,8 +226,14 @@ void DebugLogWindow::DrawLogTable()
 
     for (const LogMessage& message_ : messages_)
     {
-        if (!PassesFilter(message_)) continue;
-        if (static_cast<size_t>(lastVisibleCount) >= safeMaxRows_) break;
+        if (!PassesFilter(message_))
+        {
+            continue;
+        }
+        if (static_cast<size_t>(lastVisibleCount) >= safeMaxRows_)
+        {
+            break;
+        }
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
@@ -246,10 +264,19 @@ bool DebugLogWindow::PassesFilter(const LogMessage& message_) const
     // カテゴリ、レベル、検索文字列の順に落とし、不要なログ行をテーブル描画前に除外する。
     const size_t categoryIndex_ = static_cast<size_t>(message_.category);
     const size_t levelIndex_ = static_cast<size_t>(message_.level);
-    if (categoryIndex_ >= categoryFilters.size() || !categoryFilters[categoryIndex_]) return false;
-    if (levelIndex_ >= levelFilters.size() || !levelFilters[levelIndex_]) return false;
+    if (categoryIndex_ >= categoryFilters.size() || !categoryFilters[categoryIndex_])
+    {
+        return false;
+    }
+    if (levelIndex_ >= levelFilters.size() || !levelFilters[levelIndex_])
+    {
+        return false;
+    }
 
-    if (searchText[0] == '\0') return true;
+    if (searchText[0] == '\0')
+    {
+        return true;
+    }
 
     const std::string needle_ = ToLower(searchText);
     const std::string text_ = ToLower(message_.text);

@@ -25,7 +25,11 @@ public:
         return name;
     }
 
-    ColliderType GetColliderType() const override { return ColliderType::Mesh; }
+    ColliderType GetColliderType() const override
+    {
+        return ColliderType::Mesh;
+    }
+
     void Start() override;
     void Gui() override;
     void Update(float dt_) override;
@@ -46,7 +50,10 @@ public:
         // 非Convexの場合はPhysX制約に合わせ、Static Colliderへ戻す。
         ColliderComponent::Deserialize(j_);
         convex = j_.value("Convex", false);
-        if (!convex) isStatic = true;
+        if (!convex)
+        {
+            isStatic = true;
+        }
         waitingForModel = true;
     }
 

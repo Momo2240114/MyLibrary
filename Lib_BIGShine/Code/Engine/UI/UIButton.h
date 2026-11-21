@@ -14,12 +14,20 @@ public:
     void Update(float deltaTime) override;
 
     // クリックされた時に実行したい関数をセットする
-    void SetOnClick(ClickEvent callback) { onClickCallback = callback; }
+    void SetOnClick(ClickEvent callback)
+    {
+        onClickCallback = callback;
+    }
 
-    const std::string& GetName() const override { static std::string name = "UIButton"; return name; }
+    const std::string& GetName() const override
+    {
+        static std::string name = "UIButton";
+        return name;
+    }
 
     void Serialize(nlohmann::json& j) const override;
     void Deserialize(const nlohmann::json& j) override;
+
 private:
     bool IsMouseOver(); // マウスがボタンの上にあるか判定
 

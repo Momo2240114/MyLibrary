@@ -49,8 +49,11 @@ float Length(const XMFLOAT3& value_)
 XMFLOAT3 Normalize(const XMFLOAT3& value_)
 {
     const float length_ = Length(value_);
-    if (length_ <= 0.00001f) return { 0.0f, 0.0f, 0.0f };
-    return Scale(value_, 1.0f / length_);
+    if (length_ <= 0.00001f)
+        {
+            return { 0.0f, 0.0f, 0.0f };
+        }
+        return Scale(value_, 1.0f / length_);
 }
 
 XMFLOAT3 ApplyRootMotion(
@@ -88,9 +91,12 @@ XMFLOAT3 ApplyRootMotion(
 float GetStiffnessScale(const IKMapComponent::IKChain& chain_, size_t pointIndex_)
 {
     // 根元はアニメーション姿勢へ強く戻し、先端ほど揺れを残せるように剛性を段階的に落とす。
-    if (chain_.simulatedPositions.size() <= 1) return 1.0f;
+    if (chain_.simulatedPositions.size() <= 1)
+        {
+            return 1.0f;
+        }
 
-    const float normalizedPosition_ = static_cast<float>(pointIndex_)
+        const float normalizedPosition_ = static_cast<float>(pointIndex_)
         / static_cast<float>(chain_.simulatedPositions.size() - 1);
     const float smoothPosition_ = normalizedPosition_ * normalizedPosition_ * (3.0f - 2.0f * normalizedPosition_);
     const float tipScale_ = std::clamp(chain_.tipStiffnessScale, 0.0f, 1.0f);
@@ -104,9 +110,12 @@ void SolveDistanceConstraint(
     // Verlet風の点列が伸び縮みしすぎないよう、隣接点や曲げ点の距離を目標長へ近づける。
     XMFLOAT3 difference_ = Subtract(positions_[indexB_], positions_[indexA_]);
     const float distance_ = Length(difference_);
-    if (distance_ <= 0.00001f) return;
+    if (distance_ <= 0.00001f)
+        {
+            return;
+        }
 
-    const XMFLOAT3 correction_ = Scale(
+        const XMFLOAT3 correction_ = Scale(
         difference_, ((distance_ - targetLength_) / distance_) * stiffness_);
     if (indexA_ == 0)
     {
@@ -142,7 +151,10 @@ bool IKMapComponent::IsLoadReady() const
 {
     const auto owner_ = const_cast<IKMapComponent*>(this)->GetGameObject();
     const auto model_ = owner_ ? owner_->GetComponent<GltfModelCommponennt>() : nullptr;
-    if (!model_) return true;
+    if (!model_)
+    {
+        return true;
+    }
 
     model_->UpdateLoadState();
     return !model_->IsModelLoading();
@@ -163,12 +175,21 @@ bool IKMapComponent::ConsumeSimulationWarmupRequest()
 bool IKMapComponent::ResolveChain(IKChain& chain_)
 {
     // 名前で指定されたroot/tipノードを親方向へたどり、実際に解くボーンindex列へ変換する。
-    if (!model || chain_.rootNodeName.empty() || chain_.tipNodeName.empty()) return false;
-    if (!chain_.nodeIndices.empty()) return chain_.nodeIndices.size() >= 2;
+    if (!model || chain_.rootNodeName.empty() || chain_.tipNodeName.empty())
+    {
+        return false;
+    }
+    if (!chain_.nodeIndices.empty())
+    {
+        return chain_.nodeIndices.size() >= 2;
+    }
 
     const int rootIndex_ = model->GetNodeIndex(chain_.rootNodeName.c_str());
     const int tipIndex_ = model->GetNodeIndex(chain_.tipNodeName.c_str());
-    if (rootIndex_ < 0 || tipIndex_ < 0) return false;
+    if (rootIndex_ < 0 || tipIndex_ < 0)
+    {
+        return false;
+    }
 
     std::vector<int> reverseIndices_;
     int currentIndex_ = tipIndex_;
@@ -176,10 +197,16 @@ bool IKMapComponent::ResolveChain(IKChain& chain_)
     while (currentIndex_ >= 0)
     {
         reverseIndices_.push_back(currentIndex_);
-        if (currentIndex_ == rootIndex_) break;
+        if (currentIndex_ == rootIndex_)
+        {
+            break;
+        }
         currentIndex_ = nodes_.at(currentIndex_).parentIndex;
     }
-    if (reverseIndices_.empty() || reverseIndices_.back() != rootIndex_) return false;
+    if (reverseIndices_.empty() || reverseIndices_.back() != rootIndex_)
+    {
+        return false;
+    }
 
     chain_.nodeIndices.assign(reverseIndices_.rbegin(), reverseIndices_.rend());
     chain_.initialized = false;
@@ -343,7 +370,10 @@ void IKMapComponent::BuildClothConstraints()
     for (size_t chainIndex_ = 0; chainIndex_ < chains.size(); ++chainIndex_)
     {
         const auto& chain_ = chains[chainIndex_];
-        if (!chain_.enabled || chain_.type != IK_TYPE::CLOTH_BONE || !chain_.initialized) continue;
+        if (!chain_.enabled || chain_.type != IK_TYPE::CLOTH_BONE || !chain_.initialized)
+        {
+            continue;
+        }
         groupChainIndices_[chain_.clothGroup].push_back(chainIndex_);
     }
 
@@ -364,7 +394,10 @@ void IKMapComponent::BuildClothConstraints()
             const auto& positionsA_ = chains[chainIndexA_].simulatedPositions;
             const auto& positionsB_ = chains[chainIndexB_].simulatedPositions;
             const size_t pointCount_ = (std::min)(positionsA_.size(), positionsB_.size());
-            if (pointCount_ < 2) continue;
+            if (pointCount_ < 2)
+            {
+                continue;
+            }
 
             // Match normalized layers so chains with different bone counts still connect at their tips.
             for (size_t layerIndex_ = 1; layerIndex_ < pointCount_; ++layerIndex_)
@@ -384,7 +417,10 @@ void IKMapComponent::BuildClothConstraints()
                 lateralConstraint_.targetLength = Length(Subtract(positionsB_[pointIndexB_], positionsA_[pointIndexA_]));
                 clothConstraints.push_back(lateralConstraint_);
 
-                if (layerIndex_ + 1 >= pointCount_) continue;
+                if (layerIndex_ + 1 >= pointCount_)
+                {
+                    continue;
+                }
 
                 const float nextNormalizedLayer_ = static_cast<float>(layerIndex_ + 1)
                     / static_cast<float>(pointCount_ - 1);
@@ -426,7 +462,10 @@ void IKMapComponent::SolveClothConstraints()
     int maximumIterations_ = 1;
     for (const auto& chain_ : chains)
     {
-        if (!chain_.enabled || chain_.type != IK_TYPE::CLOTH_BONE) continue;
+        if (!chain_.enabled || chain_.type != IK_TYPE::CLOTH_BONE)
+        {
+            continue;
+        }
         maximumIterations_ = (std::max)(maximumIterations_, std::clamp(chain_.solverIterations, 1, 16));
     }
 
@@ -442,20 +481,32 @@ void IKMapComponent::SolveClothConstraints()
 void IKMapComponent::SolveClothConstraint(const ClothConstraint& constraint_)
 {
     // 横/斜め制約ごとの剛性を使い、2本のチェーン上の対応点を目標距離へ近づける。
-    if (constraint_.chainIndexA >= chains.size() || constraint_.chainIndexB >= chains.size()) return;
+    if (constraint_.chainIndexA >= chains.size() || constraint_.chainIndexB >= chains.size())
+    {
+        return;
+    }
 
     auto& chainA_ = chains[constraint_.chainIndexA];
     auto& chainB_ = chains[constraint_.chainIndexB];
     if (!chainA_.enabled || !chainB_.enabled
-        || chainA_.type != IK_TYPE::CLOTH_BONE || chainB_.type != IK_TYPE::CLOTH_BONE) return;
+        || chainA_.type != IK_TYPE::CLOTH_BONE || chainB_.type != IK_TYPE::CLOTH_BONE)
+    {
+        return;
+    }
     if (constraint_.pointIndexA >= chainA_.simulatedPositions.size()
-        || constraint_.pointIndexB >= chainB_.simulatedPositions.size()) return;
+        || constraint_.pointIndexB >= chainB_.simulatedPositions.size())
+    {
+        return;
+    }
 
     auto& positionA_ = chainA_.simulatedPositions[constraint_.pointIndexA];
     auto& positionB_ = chainB_.simulatedPositions[constraint_.pointIndexB];
     const XMFLOAT3 difference_ = Subtract(positionB_, positionA_);
     const float distance_ = Length(difference_);
-    if (distance_ <= 0.00001f) return;
+    if (distance_ <= 0.00001f)
+    {
+        return;
+    }
 
     const float stiffnessScaleA_ = GetStiffnessScale(chainA_, constraint_.pointIndexA);
     const float stiffnessScaleB_ = GetStiffnessScale(chainB_, constraint_.pointIndexB);
@@ -469,8 +520,14 @@ void IKMapComponent::SolveClothConstraint(const ClothConstraint& constraint_)
     positionA_ = Add(positionA_, correction_);
     positionB_ = Subtract(positionB_, correction_);
 
-    if (chainA_.collideWithBodyColliders) ResolveBodyCollision(chainA_, constraint_.pointIndexA);
-    if (chainB_.collideWithBodyColliders) ResolveBodyCollision(chainB_, constraint_.pointIndexB);
+    if (chainA_.collideWithBodyColliders)
+    {
+        ResolveBodyCollision(chainA_, constraint_.pointIndexA);
+    }
+    if (chainB_.collideWithBodyColliders)
+    {
+        ResolveBodyCollision(chainB_, constraint_.pointIndexB);
+    }
 }
 
 void IKMapComponent::ResolveBodyCollision(IKChain& chain_, size_t pointIndex_)
@@ -480,15 +537,24 @@ void IKMapComponent::ResolveBodyCollision(IKChain& chain_, size_t pointIndex_)
     for (auto& sphere_ : bodyCollisionSpheres)
     {
         XMFLOAT3 center_;
-        if (!sphere_.enabled || !GetBodyCollisionSphereCenter(sphere_, center_)) continue;
+        if (!sphere_.enabled || !GetBodyCollisionSphereCenter(sphere_, center_))
+        {
+            continue;
+        }
 
         const XMFLOAT3 difference_ = Subtract(position_, center_);
         const float distance_ = Length(difference_);
         const float minimumDistance_ = sphere_.radius + chain_.collisionRadius;
-        if (distance_ >= minimumDistance_) continue;
+        if (distance_ >= minimumDistance_)
+        {
+            continue;
+        }
 
         XMFLOAT3 direction_ = Normalize(difference_);
-        if (distance_ <= 0.00001f) direction_ = { 0.0f, 1.0f, 0.0f };
+        if (distance_ <= 0.00001f)
+        {
+            direction_ = { 0.0f, 1.0f, 0.0f };
+        }
         position_ = Add(center_, Scale(direction_, minimumDistance_));
         chain_.previousPositions[pointIndex_] = position_;
     }
@@ -497,17 +563,26 @@ void IKMapComponent::ResolveBodyCollision(IKChain& chain_, size_t pointIndex_)
     {
         auto& sphereA_ = bodyCollisionSpheres[sphereIndex_];
         auto& sphereB_ = bodyCollisionSpheres[sphereIndex_ + 1];
-        if (!sphereA_.connectToNext || !sphereA_.enabled || !sphereB_.enabled) continue;
+        if (!sphereA_.connectToNext || !sphereA_.enabled || !sphereB_.enabled)
+        {
+            continue;
+        }
 
         XMFLOAT3 centerA_;
         XMFLOAT3 centerB_;
         if (!GetBodyCollisionSphereCenter(sphereA_, centerA_)
-            || !GetBodyCollisionSphereCenter(sphereB_, centerB_)) continue;
+            || !GetBodyCollisionSphereCenter(sphereB_, centerB_))
+        {
+            continue;
+        }
 
         const XMFLOAT3 segment_ = Subtract(centerB_, centerA_);
         const float segmentLengthSquared_ =
             segment_.x * segment_.x + segment_.y * segment_.y + segment_.z * segment_.z;
-        if (segmentLengthSquared_ <= 0.00001f) continue;
+        if (segmentLengthSquared_ <= 0.00001f)
+        {
+            continue;
+        }
 
         const XMFLOAT3 fromA_ = Subtract(position_, centerA_);
         const float interpolation_ = std::clamp(
@@ -521,10 +596,16 @@ void IKMapComponent::ResolveBodyCollision(IKChain& chain_, size_t pointIndex_)
         const float minimumDistance_ = interpolatedRadius_ + chain_.collisionRadius;
         const XMFLOAT3 difference_ = Subtract(position_, closestPoint_);
         const float distance_ = Length(difference_);
-        if (distance_ >= minimumDistance_) continue;
+        if (distance_ >= minimumDistance_)
+        {
+            continue;
+        }
 
         XMFLOAT3 direction_ = Normalize(difference_);
-        if (distance_ <= 0.00001f) direction_ = { 0.0f, 0.0f, 1.0f };
+        if (distance_ <= 0.00001f)
+        {
+            direction_ = { 0.0f, 0.0f, 1.0f };
+        }
         position_ = Add(closestPoint_, Scale(direction_, minimumDistance_));
         chain_.previousPositions[pointIndex_] = position_;
     }
@@ -533,12 +614,18 @@ void IKMapComponent::ResolveBodyCollision(IKChain& chain_, size_t pointIndex_)
 bool IKMapComponent::GetBodyCollisionSphereCenter(BodyCollisionSphere& sphere_, XMFLOAT3& center_)
 {
     // コライダーはノード名とローカルオフセットで指定し、初回だけノードindexを解決して再利用する。
-    if (!model || sphere_.nodeName.empty()) return false;
+    if (!model || sphere_.nodeName.empty())
+    {
+        return false;
+    }
     if (sphere_.nodeIndex < 0)
     {
         sphere_.nodeIndex = model->GetNodeIndex(sphere_.nodeName.c_str());
     }
-    if (sphere_.nodeIndex < 0) return false;
+    if (sphere_.nodeIndex < 0)
+    {
+        return false;
+    }
 
     const auto& nodes_ = model->GetNodes();
     const XMMATRIX nodeWorld_ = XMLoadFloat4x4(&nodes_.at(sphere_.nodeIndex).worldTransform);
@@ -564,14 +651,20 @@ void IKMapComponent::ApplySpringChain(IKChain& chain_)
         const XMFLOAT3 childPosition_ = GetTranslation(child_.worldTransform);
         const XMFLOAT3 currentDirection_ = Normalize(Subtract(childPosition_, currentPosition_));
         const XMFLOAT3 targetDirection_ = Normalize(Subtract(chain_.simulatedPositions[nodeIndex_ + 1], currentPosition_));
-        if (Length(currentDirection_) <= 0.00001f || Length(targetDirection_) <= 0.00001f) continue;
+        if (Length(currentDirection_) <= 0.00001f || Length(targetDirection_) <= 0.00001f)
+        {
+            continue;
+        }
 
         const XMVECTOR currentDirectionVector_ = XMLoadFloat3(&currentDirection_);
         const XMVECTOR targetDirectionVector_ = XMLoadFloat3(&targetDirection_);
         const XMVECTOR axis_ = XMVector3Cross(currentDirectionVector_, targetDirectionVector_);
         const float axisLength_ = XMVectorGetX(XMVector3Length(axis_));
         const float dot_ = std::clamp(XMVectorGetX(XMVector3Dot(currentDirectionVector_, targetDirectionVector_)), -1.0f, 1.0f);
-        if (axisLength_ <= 0.00001f) continue;
+        if (axisLength_ <= 0.00001f)
+        {
+            continue;
+        }
 
         const float angle_ = std::acos(dot_) * std::clamp(chain_.influence, 0.0f, 1.0f);
         const XMMATRIX deltaWorldRotation_ = XMMatrixRotationAxis(axis_, angle_);
@@ -587,7 +680,10 @@ void IKMapComponent::ApplySpringChain(IKChain& chain_)
         else
         {
             auto owner_ = GetGameObject();
-            if (!owner_ || !owner_->transform) continue;
+            if (!owner_ || !owner_->transform)
+            {
+                continue;
+            }
 
             parentWorldRotation_ = owner_->transform->GetWorldMatrix();
             parentWorldRotation_.r[3] = XMVectorSet(0, 0, 0, 1);
@@ -684,7 +780,10 @@ void IKMapComponent::Gui()
             ImGui::Checkbox("Enabled", &sphere_.enabled);
             char sphereNameBuffer_[64];
             strncpy_s(sphereNameBuffer_, sphere_.name.c_str(), sizeof(sphereNameBuffer_));
-            if (ImGui::InputText("Name", sphereNameBuffer_, sizeof(sphereNameBuffer_))) sphere_.name = sphereNameBuffer_;
+            if (ImGui::InputText("Name", sphereNameBuffer_, sizeof(sphereNameBuffer_)))
+            {
+                sphere_.name = sphereNameBuffer_;
+            }
 
             const char* nodePreview_ = sphere_.nodeName.empty() ? "Select Node" : sphere_.nodeName.c_str();
             if (ImGui::BeginCombo("Node", nodePreview_))
@@ -706,7 +805,10 @@ void IKMapComponent::Gui()
                 ImGui::Checkbox("Connect To Next", &sphere_.connectToNext);
                 ImGui::TextDisabled("Fills the gap to the next sphere with a tapered capsule.");
             }
-            if (ImGui::Button("Remove Sphere")) removeSphereIndex_ = static_cast<int>(sphereIndex_);
+            if (ImGui::Button("Remove Sphere"))
+            {
+                removeSphereIndex_ = static_cast<int>(sphereIndex_);
+            }
             ImGui::TreePop();
         }
         ImGui::PopID();
@@ -724,28 +826,73 @@ void IKMapComponent::Gui()
         auto& chain_ = chains[chainIndex_];
         ImGui::PushID(static_cast<int>(chainIndex_));
         const char* chainTreeLabel_ = "Spring Bone Chain";
-        if (chain_.type == IK_TYPE::CLOTH_BONE) chainTreeLabel_ = "Cloth Bone Chain";
-        if (chain_.type == IK_TYPE::FOOT) chainTreeLabel_ = "Foot IK Chain";
-        if (chain_.type == IK_TYPE::LOOK_AT) chainTreeLabel_ = "Look At IK Chain";
-        if (chain_.type == IK_TYPE::DRAGON_NECK) chainTreeLabel_ = "Dragon Neck IK Chain";
-        if (chain_.type == IK_TYPE::DRAGON_TAIL) chainTreeLabel_ = "Dragon Tail IK Chain";
-        if (chain_.type == IK_TYPE::SHIELD_BLOCK) chainTreeLabel_ = "Shield Block IK Chain";
-        if (chain_.type == IK_TYPE::UPPER_BODY_LEAN) chainTreeLabel_ = "Upper Body Lean IK Chain";
+        if (chain_.type == IK_TYPE::CLOTH_BONE)
+        {
+            chainTreeLabel_ = "Cloth Bone Chain";
+        }
+        if (chain_.type == IK_TYPE::FOOT)
+        {
+            chainTreeLabel_ = "Foot IK Chain";
+        }
+        if (chain_.type == IK_TYPE::LOOK_AT)
+        {
+            chainTreeLabel_ = "Look At IK Chain";
+        }
+        if (chain_.type == IK_TYPE::DRAGON_NECK)
+        {
+            chainTreeLabel_ = "Dragon Neck IK Chain";
+        }
+        if (chain_.type == IK_TYPE::DRAGON_TAIL)
+        {
+            chainTreeLabel_ = "Dragon Tail IK Chain";
+        }
+        if (chain_.type == IK_TYPE::SHIELD_BLOCK)
+        {
+            chainTreeLabel_ = "Shield Block IK Chain";
+        }
+        if (chain_.type == IK_TYPE::UPPER_BODY_LEAN)
+        {
+            chainTreeLabel_ = "Upper Body Lean IK Chain";
+        }
         if (ImGui::TreeNode(chainTreeLabel_))
         {
             ImGui::Checkbox("Enabled", &chain_.enabled);
             char nameBuffer_[64];
             strncpy_s(nameBuffer_, chain_.name.c_str(), sizeof(nameBuffer_));
-            if (ImGui::InputText("Name", nameBuffer_, sizeof(nameBuffer_))) chain_.name = nameBuffer_;
+            if (ImGui::InputText("Name", nameBuffer_, sizeof(nameBuffer_)))
+            {
+                chain_.name = nameBuffer_;
+            }
 
             int typeIndex_ = 0;
-            if (chain_.type == IK_TYPE::FOOT) typeIndex_ = 1;
-            if (chain_.type == IK_TYPE::CLOTH_BONE) typeIndex_ = 2;
-            if (chain_.type == IK_TYPE::LOOK_AT) typeIndex_ = 3;
-            if (chain_.type == IK_TYPE::UPPER_BODY_LEAN) typeIndex_ = 4;
-            if (chain_.type == IK_TYPE::DRAGON_NECK) typeIndex_ = 5;
-            if (chain_.type == IK_TYPE::DRAGON_TAIL) typeIndex_ = 6;
-            if (chain_.type == IK_TYPE::SHIELD_BLOCK) typeIndex_ = 7;
+            if (chain_.type == IK_TYPE::FOOT)
+            {
+                typeIndex_ = 1;
+            }
+            if (chain_.type == IK_TYPE::CLOTH_BONE)
+            {
+                typeIndex_ = 2;
+            }
+            if (chain_.type == IK_TYPE::LOOK_AT)
+            {
+                typeIndex_ = 3;
+            }
+            if (chain_.type == IK_TYPE::UPPER_BODY_LEAN)
+            {
+                typeIndex_ = 4;
+            }
+            if (chain_.type == IK_TYPE::DRAGON_NECK)
+            {
+                typeIndex_ = 5;
+            }
+            if (chain_.type == IK_TYPE::DRAGON_TAIL)
+            {
+                typeIndex_ = 6;
+            }
+            if (chain_.type == IK_TYPE::SHIELD_BLOCK)
+            {
+                typeIndex_ = 7;
+            }
             const char* typeNames_[] = {
                 "Spring Bone",
                 "Foot IK",
@@ -957,12 +1104,18 @@ void IKMapComponent::Gui()
             }
             ImGui::SliderFloat("Influence", &chain_.influence, 0.0f, 1.0f);
             ImGui::Text("Resolved Bones: %d", static_cast<int>(chain_.nodeIndices.size()));
-            if (ImGui::Button("Remove Chain")) removeIndex_ = static_cast<int>(chainIndex_);
+            if (ImGui::Button("Remove Chain"))
+            {
+                removeIndex_ = static_cast<int>(chainIndex_);
+            }
             ImGui::TreePop();
         }
         ImGui::PopID();
     }
-    if (removeIndex_ >= 0) chains.erase(chains.begin() + removeIndex_);
+    if (removeIndex_ >= 0)
+    {
+        chains.erase(chains.begin() + removeIndex_);
+    }
 }
 
 void IKMapComponent::Serialize(nlohmann::json& j_) const
@@ -1079,7 +1232,10 @@ void IKMapComponent::Deserialize(const nlohmann::json& j_)
             bodyCollisionSpheres.push_back(sphere_);
         }
     }
-    if (!j_.contains("Chains")) return;
+    if (!j_.contains("Chains"))
+    {
+        return;
+    }
     for (const auto& chainJson_ : j_["Chains"])
     {
         IKChain chain_;
@@ -1167,7 +1323,10 @@ IKMapComponent::IKChain& IKMapComponent::AddFootChain(
         {
             return chain_.type == IK_TYPE::FOOT && chain_.name == name_;
         });
-    if (existingChain_ != chains.end()) return *existingChain_;
+    if (existingChain_ != chains.end())
+    {
+        return *existingChain_;
+    }
 
     IKChain chain_;
     chain_.name = name_;
@@ -1192,7 +1351,10 @@ IKMapComponent::IKChain& IKMapComponent::AddLookAtChain(
         {
             return chain_.type == IK_TYPE::LOOK_AT && chain_.name == name_;
         });
-    if (existingChain_ != chains.end()) return *existingChain_;
+    if (existingChain_ != chains.end())
+    {
+        return *existingChain_;
+    }
 
     IKChain chain_;
     chain_.name = name_;
@@ -1216,7 +1378,10 @@ IKMapComponent::IKChain& IKMapComponent::AddShieldBlockChain(
         {
             return chain_.type == IK_TYPE::SHIELD_BLOCK && chain_.name == name_;
         });
-    if (existingChain_ != chains.end()) return *existingChain_;
+    if (existingChain_ != chains.end())
+    {
+        return *existingChain_;
+    }
 
     IKChain chain_;
     chain_.name = name_;
@@ -1245,7 +1410,10 @@ IKMapComponent::IKChain& IKMapComponent::AddUpperBodyLeanChain(
         {
             return chain_.type == IK_TYPE::UPPER_BODY_LEAN && chain_.name == name_;
         });
-    if (existingChain_ != chains.end()) return *existingChain_;
+    if (existingChain_ != chains.end())
+    {
+        return *existingChain_;
+    }
 
     IKChain chain_;
     chain_.name = name_;
@@ -1271,7 +1439,10 @@ IKMapComponent::IKChain& IKMapComponent::AddDragonNeckChain(
             return chain_.type == IK_TYPE::DRAGON_NECK && chain_.name == name_;
         });
 
-    if (existingChain_ != chains.end()) return *existingChain_;
+    if (existingChain_ != chains.end())
+    {
+        return *existingChain_;
+    }
 
     IKChain chain_;
     chain_.name = name_;
@@ -1303,7 +1474,10 @@ IKMapComponent::IKChain& IKMapComponent::AddDragonTailChain(
             return chain_.type == IK_TYPE::DRAGON_TAIL && chain_.name == name_;
         });
 
-    if (existingChain_ != chains.end()) return *existingChain_;
+    if (existingChain_ != chains.end())
+    {
+        return *existingChain_;
+    }
 
     IKChain chain_;
     chain_.name = name_;
@@ -1327,7 +1501,10 @@ IKMapComponent::IKChain* IKMapComponent::FindChain(const std::string& name_)
             return chain_.name == name_;
         });
 
-    if (chainIterator_ == chains.end()) return nullptr;
+    if (chainIterator_ == chains.end())
+    {
+        return nullptr;
+    }
     return &(*chainIterator_);
 }
 
@@ -1341,14 +1518,20 @@ const IKMapComponent::IKChain* IKMapComponent::FindChain(const std::string& name
             return chain_.name == name_;
         });
 
-    if (chainIterator_ == chains.end()) return nullptr;
+    if (chainIterator_ == chains.end())
+    {
+        return nullptr;
+    }
     return &(*chainIterator_);
 }
 
 bool IKMapComponent::ResolveChainByName(const std::string& name_)
 {
     IKChain* chain_ = FindChain(name_);
-    if (!chain_) return false;
+    if (!chain_)
+    {
+        return false;
+    }
 
     return ResolveChain(*chain_);
 }

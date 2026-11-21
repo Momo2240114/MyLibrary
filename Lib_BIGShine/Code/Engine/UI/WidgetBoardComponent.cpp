@@ -92,8 +92,14 @@ void WidgetBoardComponent::Gui()
         MarkLayoutDirty();
     }
 
-    if (ImGui::InputInt("Board Layer", &boardLayer)) MarkLayoutDirty();
-    if (ImGui::InputInt("Z Order", &zOrder)) MarkLayoutDirty();
+    if (ImGui::InputInt("Board Layer", &boardLayer))
+    {
+        MarkLayoutDirty();
+    }
+    if (ImGui::InputInt("Z Order", &zOrder))
+    {
+        MarkLayoutDirty();
+    }
     ImGui::Checkbox("Visible", &visible);
     ImGui::Checkbox("Input Enabled", &inputEnabled);
 

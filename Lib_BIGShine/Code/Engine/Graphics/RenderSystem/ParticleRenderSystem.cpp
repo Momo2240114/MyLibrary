@@ -24,7 +24,10 @@ void ParticleRenderSystem::Initialize(ID3D11Device* device)
 void ParticleRenderSystem::PushSubmit(ParticleComponent* component)
 {
     // 無効ComponentはQueueに積まず、このFrameの描画対象から外す。
-    if (!component || !component->IsEnabled()) return;
+    if (!component || !component->IsEnabled())
+    {
+        return;
+    }
     drawInfos.push_back({ component });
 }
 
@@ -35,7 +38,10 @@ void ParticleRenderSystem::UpdateAll(ID3D11DeviceContext*, float, const DirectX:
     for (auto& wp : components)
     {
         auto comp = wp.lock();
-        if (!comp || !comp->IsEnabled()) continue;
+        if (!comp || !comp->IsEnabled())
+        {
+            continue;
+        }
         drawInfos.push_back({ comp.get() });
     }
 }
@@ -43,7 +49,10 @@ void ParticleRenderSystem::UpdateAll(ID3D11DeviceContext*, float, const DirectX:
 void ParticleRenderSystem::ApplySceneConstants(const RenderContext& rc)
 {
     ID3D11DeviceContext* dc = rc.deviceContext;
-    if (!dc || !rc.camera || !sceneConstantBuffer) return;
+    if (!dc || !rc.camera || !sceneConstantBuffer)
+    {
+        return;
+    }
 
     // Camera行列と逆行列を作り、Particle ShaderでBillboardやDepth復元に使えるようにする。
     CbScene cbScene{};
@@ -88,7 +97,14 @@ void ParticleRenderSystem::RenderAll(const RenderContext& rc, bool isEditorWindo
         BS_PROFILE_SCOPE("ParticleRender::SetupPipeline");
 
         // Particleは半透明描画が中心なので、DepthはTestだけ行い書き込みはしない。
-        dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestOnly), 0);
+        if (rc.layerDepthTarget)
+        {
+            auto* colorTarget_ = rc.layerColorTarget;
+            dc->OMSetRenderTargets(colorTarget_ ? 1 : 0, colorTarget_ ? &colorTarget_ : nullptr, rc.layerDepthTarget);
+        }
+        dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(
+            rc.layerDepthTarget && rc.layerCaptureMode != LayerCaptureMode::BLOOM_COLOR
+            ? DepthState::TestAndWrite : DepthState::TestOnly), 0);
         dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
 
         // ParticleEmitterはPointListからGeometry Shader等でQuadへ展開する。
@@ -112,13 +128,19 @@ void ParticleRenderSystem::RenderAll(const RenderContext& rc, bool isEditorWindo
 
         for (auto& info : drawInfos)
         {
-            if (!info.component) continue;
+            if (!info.component)
+            {
+                continue;
+            }
 
             BS_PROFILE_SCOPE("ParticleRender::Component");
 
             for (auto& track : info.component->GetTracks())
             {
-                if (!track.isStarted || !track.emitter) continue;
+                if (!track.isStarted || !track.emitter)
+                {
+                    continue;
+                }
 
                 BS_PROFILE_SCOPE("ParticleRender::Track");
 

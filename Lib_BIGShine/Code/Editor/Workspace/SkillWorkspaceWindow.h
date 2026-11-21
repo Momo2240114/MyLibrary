@@ -22,13 +22,23 @@ public:
     void Draw() override;
     // Scene側の選択対象を編集パネルへ同期する。
     void Update(float deltaTime_) override;
-    bool ShouldPauseScene() const override { return !simulateScene; }
-    bool ShouldRenderSceneWhenPaused() const override { return false; }
+
+    bool ShouldPauseScene() const override
+    {
+        return !simulateScene;
+    }
+
+    bool ShouldRenderSceneWhenPaused() const override
+    {
+        return false;
+    }
+
     // Workspaceを閉じたら編集時のScene停止へ戻す。
     void OnVisibilityChanged(bool visible_) override;
 
 private:
     struct PhaseTimelineAdapter;
+
     // ImSequencerへ渡す表示区間と編集開始前の尺。
     struct PhaseFrame
     {

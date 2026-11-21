@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <array>
+#include <bit>
 #include <cmath>
 #include <cstring>
 #include <vector>
@@ -39,7 +40,10 @@ ParticleEmitter::ParticleEmitter(ID3D11Device* device, const ParticleSystemConst
 void ParticleEmitter::InitializeSharedShaders(ID3D11Device* device)
 {
     // Shaderは全Emitterで同じものを使うため、初回だけ読み込む。
-    if (!device || initShader) return;
+    if (!device || initShader)
+    {
+        return;
+    }
 
     CPUResourceLoader::LoadComputeShader(device, "Data/Shader/ParticleInit_CS.cso", initShader.GetAddressOf());
     CPUResourceLoader::LoadComputeShader(device, "Data/Shader/ParticleBeginFrame_CS.cso", beginFrameShader.GetAddressOf());
@@ -79,7 +83,10 @@ void ParticleEmitter::BindSharedRenderShaders(ID3D11DeviceContext* context)
 
 void ParticleEmitter::CreateGPUResources(ID3D11Device* device)
 {
-    if (!device) return;
+    if (!device)
+    {
+        return;
+    }
 
     // 各Compute Shader / Draw Shaderへ渡すConstantBufferを作る。
     D3D11_BUFFER_DESC cbDesc{};
@@ -178,13 +185,19 @@ void ParticleEmitter::ApplySettings(const ParticleSystemConstants& nextSettings)
 
 void ParticleEmitter::Emit(const EmitParticleData& data)
 {
-    if (emitParticles.size() >= numEmitParticles) return;
+    if (emitParticles.size() >= numEmitParticles)
+    {
+        return;
+    }
     emitParticles.emplace_back(data);
 }
 
 void ParticleEmitter::Update(ID3D11DeviceContext* context, float dt)
 {
-    if (!context) return;
+    if (!context)
+    {
+        return;
+    }
     auto tracyGpuContext_ = GraphicsDeviceManager::Instance().GetTracyGpuContext();
     BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::Particle Update CS");
 
@@ -325,7 +338,10 @@ bool ParticleEmitter::HasGPUResources() const
 
 void ParticleEmitter::Render(ID3D11DeviceContext* context)
 {
-    if (!context) return;
+    if (!context)
+    {
+        return;
+    }
     auto tracyGpuContext_ = GraphicsDeviceManager::Instance().GetTracyGpuContext();
     BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::Particle Draw");
 
@@ -355,7 +371,10 @@ void ParticleEmitter::PrepareRender(ID3D11DeviceContext* context)
 
 void ParticleEmitter::BuildEmitList(float dt)
 {
-    if (!emissionEnabled) return;
+    if (!emissionEnabled)
+    {
+        return;
+    }
 
     if (settings.emissionMode == 1)
     {
@@ -364,7 +383,10 @@ void ParticleEmitter::BuildEmitList(float dt)
         {
             UINT count = settings.burstCount > 0 ? settings.burstCount : numEmitParticles;
             count = (std::min)(count, numEmitParticles);
-            for (UINT i = 0; i < count; ++i) Emit(MakeEmitData(i));
+            for (UINT i = 0; i < count; ++i)
+            {
+                Emit(MakeEmitData(i));
+            }
         }
         return;
     }
@@ -373,11 +395,17 @@ void ParticleEmitter::BuildEmitList(float dt)
     float rate = settings.burstCount > 0 ? static_cast<float>(settings.burstCount) : 60.0f;
     continuousAccumulator += rate * dt;
     UINT count = static_cast<UINT>(continuousAccumulator);
-    if (count == 0) return;
+    if (count == 0)
+    {
+        return;
+    }
 
     continuousAccumulator -= static_cast<float>(count);
     count = (std::min)(count, numEmitParticles);
-    for (UINT i = 0; i < count; ++i) Emit(MakeEmitData(static_cast<UINT>(settings.time * 1000.0f) + i));
+    for (UINT i = 0; i < count; ++i)
+    {
+        Emit(MakeEmitData(static_cast<UINT>(settings.time * 1000.0f) + i));
+    }
 }
 
 EmitParticleData ParticleEmitter::MakeEmitData(UINT seed) const
@@ -590,8 +618,11 @@ EmitParticleData ParticleEmitter::MakeEmitData(UINT seed) const
     // 基本加速度。追加加速度XYZはUpdate_CS側で windVelocity.xyz として加算される。
     data.acceleration = { 0.0f, settings.gravity, 0.0f, 0.0f };
 
-    data.rotation.z = r6 * pi * 2.0f;
-    data.rotation.w = Lerp(settings.emissionAngularSpeed.x, settings.emissionAngularSpeed.y, r7);
+    // 発生時刻も混ぜ、同じ粒子数のBurstを繰り返した場合も色の並びを変える。
+    const UINT colorSeed_ = std::bit_cast<UINT>(settings.time) + seed * 17u;
+    data.colorRandomRates = { Random01(colorSeed_ + 12u), Random01(colorSeed_ + 13u) };
+    data.rotation = r6 * pi * 2.0f;
+    data.angularSpeed = Lerp(settings.emissionAngularSpeed.x, settings.emissionAngularSpeed.y, r7);
 
     float startSize_ = settings.emissionSize.x;
     float endSize_ = settings.emissionSize.y;

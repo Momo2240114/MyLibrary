@@ -14,7 +14,10 @@
 bool MeshVFXShader::Initialize(ID3D11Device* device_)
 {
     // MeshVFXで使用するShaderとConstantBufferをまとめて作成する。
-    if (!device_) return false;
+    if (!device_)
+    {
+        return false;
+    }
 
     HRESULT result_ = CPUResourceLoader::LoadVertexShader(
         device_,
@@ -23,7 +26,10 @@ bool MeshVFXShader::Initialize(ID3D11Device* device_)
         static_cast<UINT>(GltfModelCommponennt::InputElementDescs.size()),
         inputLayout.GetAddressOf(),
         vertexShader.GetAddressOf());
-    if (FAILED(result_)) return false;
+    if (FAILED(result_))
+    {
+        return false;
+    }
 
     result_ = CPUResourceLoader::LoadVertexShader(
         device_,
@@ -32,7 +38,10 @@ bool MeshVFXShader::Initialize(ID3D11Device* device_)
         static_cast<UINT>(GltfModelCommponennt::InputElementDescs.size()),
         nullptr,
         materialOverlayVertexShader.GetAddressOf());
-    if (FAILED(result_)) return false;
+    if (FAILED(result_))
+    {
+        return false;
+    }
 
     result_ = CPUResourceLoader::LoadVertexShader(
         device_,
@@ -41,23 +50,38 @@ bool MeshVFXShader::Initialize(ID3D11Device* device_)
         static_cast<UINT>(GltfModelCommponennt::InputElementDescs.size()),
         nullptr,
         afterimageInstancedVertexShader.GetAddressOf());
-    if (FAILED(result_)) return false;
+    if (FAILED(result_))
+    {
+        return false;
+    }
 
     result_ = CPUResourceLoader::LoadPixelShader(
         device_, "Data/Shader/MeshVFXPS.cso", pixelShader.GetAddressOf());
-    if (FAILED(result_)) return false;
+    if (FAILED(result_))
+    {
+        return false;
+    }
 
     result_ = CPUResourceLoader::LoadPixelShader(
         device_, "Data/Shader/MeshVFXDistortionPS.cso", distortionPixelShader.GetAddressOf());
-    if (FAILED(result_)) return false;
+    if (FAILED(result_))
+    {
+        return false;
+    }
 
     result_ = CPUResourceLoader::CreateConstantBuffer(
         device_, sizeof(CbScene), sceneConstantBuffer.GetAddressOf());
-    if (FAILED(result_)) return false;
+    if (FAILED(result_))
+    {
+        return false;
+    }
 
     result_ = CPUResourceLoader::CreateConstantBuffer(
         device_, sizeof(CbMeshVFX), partConstantBuffer.GetAddressOf());
-    if (FAILED(result_)) return false;
+    if (FAILED(result_))
+    {
+        return false;
+    }
     return SUCCEEDED(CPUResourceLoader::CreateConstantBuffer(
         device_, sizeof(DirectX::XMFLOAT4X4) * 256, skeletonConstantBuffer.GetAddressOf()));
 }
@@ -132,6 +156,7 @@ void MeshVFXShader::BeginDistortion(
     deviceContext_->VSSetConstantBuffers(0, 1, &partBuffer_);
     deviceContext_->PSSetConstantBuffers(0, 1, &partBuffer_);
 }
+
 void MeshVFXShader::UpdateSkeleton(
     const RenderContext& renderContext_,
     const GltfModelCommponennt::Mesh& mesh_)
@@ -178,7 +203,10 @@ void MeshVFXShader::UpdateSkeleton(
 void MeshVFXShader::UpdateScene(const RenderContext& renderContext_)
 {
     // CameraとDepth復元用の情報をHLSLのScene定数へ合わせて更新する。
-    if (!renderContext_.camera) return;
+    if (!renderContext_.camera)
+    {
+        return;
+    }
 
     const DirectX::XMMATRIX view_ = DirectX::XMLoadFloat4x4(&renderContext_.camera->GetView());
     const DirectX::XMMATRIX projection_ = DirectX::XMLoadFloat4x4(&renderContext_.camera->GetProjection());
@@ -318,6 +346,8 @@ void MeshVFXShader::UpdatePart(
     constants_.useDissolveEdge = part_.useDissolveEdge ? 1u : 0u;
     constants_.useFresnelNoise = part_.useFresnelNoise ? 1u : 0u;
     constants_.useBackFaceBoost = part_.useBackFaceBoost ? 1u : 0u;
+    constants_.layerMaskPass = renderContext_.layerDepthTarget &&
+        renderContext_.layerCaptureMode != LayerCaptureMode::BLOOM_COLOR ? 1u : 0u;
     constants_.baseSamplerMode = static_cast<uint32_t>(part_.baseSamplerMode);
     constants_.maskSamplerMode = static_cast<uint32_t>(part_.maskSamplerMode);
     constants_.noiseSamplerMode = static_cast<uint32_t>(part_.noiseSamplerMode);

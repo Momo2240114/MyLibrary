@@ -23,16 +23,19 @@ public:
         // HitBox/HurtBox の重なりを攻撃イベントへ変換する通知先。
         attackSystem = attackSystem_;
     }
+
     void SetJustDodgeSystem(JustDodgeSystem* justDodgeSystem_)
     {
         // HitBox/JustDodgeCollider の重なりをジャスト回避イベントへ変換する通知先。
         justDodgeSystem = justDodgeSystem_;
     }
+
     void SetJustGuardSystem(JustGuardSystem* justGuardSystem_)
     {
         // HitBox/GuardCollider の重なりをジャストガードイベントへ変換する通知先。
         justGuardSystem = justGuardSystem_;
     }
+
     void SetGuardSystem(GuardSystem* guardSystem_)
     {
         // HitBox/GuardCollider の重なりをガードイベントへ変換する通知先。

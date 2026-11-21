@@ -1,5 +1,6 @@
 #pragma once
 #include "ShaderTransitionEffect.h"
+
 // 渦の境界で画面を覆うトランジション。
 class SpiralTransition final : public ShaderTransitionEffect
 {

@@ -11,7 +11,10 @@ cbuffer UIEffects : register(b1)
     float4 maskUV, maskOptions;
 };
 
-float Hash(float2 point_) { return frac(sin(dot(point_,float2(127.1,311.7)))*43758.5453); }
+float Hash(float2 point_)
+{
+    return frac(sin(dot(point_,float2(127.1,311.7)))*43758.5453);
+}
 
 float Noise(float2 point_)
 {
@@ -22,27 +25,43 @@ float Noise(float2 point_)
 
 float4 ReadSource(float2 uv_)
 {
-    if (any(uv_ < uvRect.xy) || any(uv_ > uvRect.zw)) return 0;
+    if (any(uv_ < uvRect.xy) || any(uv_ > uvRect.zw))
+    {
+        return 0;
+    }
     float2 local_ = (uv_-uvRect.xy)/max(uvRect.zw-uvRect.xy,0.00001);
-    if (any(abs(detail.xy) > 0)) local_ = frac(local_+animation.x*detail.xy);
+    if (any(abs(detail.xy) > 0))
+    {
+        local_ = frac(local_+animation.x*detail.xy);
+    }
     float2 pixelStep_ = abs(sampling.xy)*tone.w;
     uv_ = uvRect.xy+local_*(uvRect.zw-uvRect.xy);
-    if (tone.w > 1.01) uv_ = uvRect.xy+(floor((uv_-uvRect.xy)/max(pixelStep_,0.000001))+0.5)*pixelStep_;
-    uint width_,height_; sourceTexture.GetDimensions(width_,height_);
+    if (tone.w > 1.01)
+    {
+        uv_ = uvRect.xy+(floor((uv_-uvRect.xy)/max(pixelStep_,0.000001))+0.5)*pixelStep_;
+    }
+    uint width_,height_;
+    sourceTexture.GetDimensions(width_,height_);
     float2 halfTexel_ = 0.5/float2(max(width_,1),max(height_,1));
     float4 value_ = sourceTexture.Sample(sourceSampler,clamp(uv_,uvRect.xy+halfTexel_,uvRect.zw-halfTexel_));
     if (style.w > 0)
     {
         float2 maskPoint_ = local_*maskUV.xy+maskUV.zw;
         float noise_ = maskOptions.x > 0 ? maskTexture.Sample(sourceSampler,frac(maskPoint_)).r : Noise(local_*sweep.w);
-        if (maskOptions.y > 0.5) noise_ = 1-noise_;
+        if (maskOptions.y > 0.5)
+        {
+            noise_ = 1-noise_;
+        }
         value_.a *= style.w >= 1 ? 0 : smoothstep(style.w-sweep.z,style.w,noise_);
         value_.rgb += burnColor.rgb*burnColor.a*(1-smoothstep(style.w,style.w+sweep.z,noise_));
     }
     return value_;
 }
 
-float AlphaAt(float2 uv_) { return ReadSource(uv_).a; }
+float AlphaAt(float2 uv_)
+{
+    return ReadSource(uv_).a;
+}
 
 float Ring(float2 uv_,float radius_)
 {
@@ -91,12 +110,24 @@ float4 main(VS_OUT input_) : SV_TARGET
     float highlight_ = 1-smoothstep(0,max(.001,sweep.y),abs(coordinate_-(frac(animation.x*animation.w)*2-1)));
     base_.rgb += sweepColor.rgb*sweepColor.a*highlight_;
     float4 result_ = 0;
-    if (shadowColor.a > 0) Over(result_,shadowColor.rgb,lerp(AlphaAt(uv_-shadow.xy*abs(sampling.xy)),Ring(uv_-shadow.xy*abs(sampling.xy),sampling.z),step(.01,sampling.z))*shadowColor.a);
-    if (glowColor.a > 0) Over(result_,glowColor.rgb,Ring(uv_,style.x)*glowColor.a);
-    if (style.y > 0) Over(result_,outlineColor.rgb,saturate(Ring(uv_,style.y)*4)*outlineColor.a);
+    if (shadowColor.a > 0)
+    {
+        Over(result_,shadowColor.rgb,lerp(AlphaAt(uv_-shadow.xy*abs(sampling.xy)),Ring(uv_-shadow.xy*abs(sampling.xy),sampling.z),step(.01,sampling.z))*shadowColor.a);
+    }
+    if (glowColor.a > 0)
+    {
+        Over(result_,glowColor.rgb,Ring(uv_,style.x)*glowColor.a);
+    }
+    if (style.y > 0)
+    {
+        Over(result_,outlineColor.rgb,saturate(Ring(uv_,style.y)*4)*outlineColor.a);
+    }
     Over(result_,base_.rgb,base_.a);
     result_.rgb /= max(result_.a,0.00001);
     result_.a *= input_.color.a;
-    if (result_.a <= .00001) discard;
+    if (result_.a <= .00001)
+    {
+        discard;
+    }
     return result_;
 }

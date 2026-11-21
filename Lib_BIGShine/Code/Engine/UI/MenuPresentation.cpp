@@ -36,7 +36,10 @@ namespace
     {
         const char* path_ = confirm_ ? "Data/Audio/SE/Sword-Fight-1.wav" : "Data/Audio/SE/Sword-Practice-2.wav";
         std::error_code error_;
-        if (std::filesystem::is_regular_file(path_, error_)) AudioManager::Instance().PlaySEByPath(path_);
+        if (std::filesystem::is_regular_file(path_, error_))
+        {
+            AudioManager::Instance().PlaySEByPath(path_);
+        }
     }
 
 
@@ -81,12 +84,20 @@ void MenuPresentation::Reset()
     selection = {};
     previousMouse = MouseInput::Instance().GetScreenPos();
     for (auto& visual_ : visuals)
-        if (const auto effect_ = visual_.object->GetComponent<UIVisualEffectComponent>()) effect_->Play();
+    {
+        if (const auto effect_ = visual_.object->GetComponent<UIVisualEffectComponent>())
+        {
+            effect_->Play();
+        }
+    }
 }
 
 void MenuPresentation::Select(int index_)
 {
-    if (selectedIndex == index_ || confirmedIndex >= 0) return;
+    if (selectedIndex == index_ || confirmedIndex >= 0)
+    {
+        return;
+    }
     selectedIndex = index_;
     selectionTime = 0.0f;
     PlayMenuSound(false);
@@ -94,8 +105,14 @@ void MenuPresentation::Select(int index_)
 
 void MenuPresentation::Confirm(int index_)
 {
-    if (ScreenTransitionManager::Instance().IsInputBlocked()) return;
-    if (index_ < 0 || index_ > 1 || confirmedIndex >= 0 || !armed || elapsed < 0.2f) return;
+    if (ScreenTransitionManager::Instance().IsInputBlocked())
+    {
+        return;
+    }
+    if (index_ < 0 || index_ > 1 || confirmedIndex >= 0 || !armed || elapsed < 0.2f)
+    {
+        return;
+    }
     selectedIndex = confirmedIndex = index_;
     confirmTime = 0.0f;
     PlayMenuSound(true);
@@ -107,42 +124,83 @@ void MenuPresentation::Update(float deltaTime_)
     const float step_ = std::isfinite(deltaTime_) ? (std::max)(0.0f, deltaTime_) : 0.0f;
     elapsed += step_;
     selectionTime += step_;
-    if (confirmedIndex >= 0) confirmTime += step_;
+    if (confirmedIndex >= 0)
+    {
+        confirmTime += step_;
+    }
     for (int index_ = 0; index_ < 2; ++index_)
+    {
         selection[index_] += ((index_ == selectedIndex ? 1.0f : 0.0f) - selection[index_]) * (1.0f - std::exp(-18.0f * step_));
+    }
     for (auto& visual_ : visuals)
-        if (const auto effect_ = visual_.object->GetComponent<UIVisualEffectComponent>()) effect_->UpdateUnscaled(step_);
-    if (GetForegroundWindow() != GraphicsDeviceManager::Instance().GetWindowHandle()) return;
+    {
+        if (const auto effect_ = visual_.object->GetComponent<UIVisualEffectComponent>())
+        {
+            effect_->UpdateUnscaled(step_);
+        }
+    }
+    if (GetForegroundWindow() != GraphicsDeviceManager::Instance().GetWindowHandle())
+    {
+        return;
+    }
     const auto& keys_ = KeyConfig::Instance();
     const bool confirm_ = keys_.ActionPressed("UI.MenuConfirm");
-    if (!confirm_ && !MouseInput::Instance().LeftDown()) armed = true;
-    if (confirmedIndex >= 0 || !armed || elapsed < 0.2f) return;
+    if (!confirm_ && !MouseInput::Instance().LeftDown())
+    {
+        armed = true;
+    }
+    if (confirmedIndex >= 0 || !armed || elapsed < 0.2f)
+    {
+        return;
+    }
     const bool up_ = keys_.ActionPressed("UI.MenuPrevious");
     const bool down_ = keys_.ActionPressed("UI.MenuNext");
     const int direction_ = up_ == down_ ? 0 : up_ ? -1 : 1;
-    if (!direction_) { heldDirection = 0; repeatTime = 0.0f; }
+    if (!direction_)
+    {
+        heldDirection = 0;
+        repeatTime = 0.0f;
+    }
     else if (direction_ != heldDirection)
     {
-        Select(1 - selectedIndex); heldDirection = direction_; repeatTime = 0.35f;
+        Select(1 - selectedIndex);
+        heldDirection = direction_;
+        repeatTime = 0.35f;
     }
-    else if ((repeatTime -= step_) <= 0.0f) { Select(1 - selectedIndex); repeatTime = 0.14f; }
-    if (keys_.ActionPressedIn("UI.MenuConfirm") && !KeyInput::KeyPressed(VK_MENU)) Confirm(selectedIndex);
+    else if ((repeatTime -= step_) <= 0.0f)
+    {
+        Select(1 - selectedIndex);
+        repeatTime = 0.14f;
+    }
+    if (keys_.ActionPressedIn("UI.MenuConfirm") && !KeyInput::KeyPressed(VK_MENU))
+    {
+        Confirm(selectedIndex);
+    }
 }
 
 int MenuPresentation::TakeResult()
 {
-    if (GetForegroundWindow() != GraphicsDeviceManager::Instance().GetWindowHandle()) return -1;
+    if (GetForegroundWindow() != GraphicsDeviceManager::Instance().GetWindowHandle())
+    {
+        return -1;
+    }
     // 決定ボタンの保持をゲームへ持ち越し、再開直後に攻撃することを防ぐ。
     if (delivered || confirmedIndex < 0 || confirmTime < 0.28f ||
         KeyConfig::Instance().ActionPressed("UI.MenuConfirm") || MouseInput::Instance().LeftDown() ||
-        KeyInput::KeyPressed(VK_ESCAPE) || ControllerInput::Instance().ButtonPressed(PadCode::BACK)) return -1;
+        KeyInput::KeyPressed(VK_ESCAPE) || ControllerInput::Instance().ButtonPressed(PadCode::BACK))
+    {
+        return -1;
+    }
     delivered = true;
     return confirmedIndex;
 }
 
 void MenuPresentation::DrawFeedback(const ImVec2& minimum_, const ImVec2& maximum_, float progress_, float alpha_, bool death_)
 {
-    if (progress_ < 0.0f || progress_ >= 1.0f) return;
+    if (progress_ < 0.0f || progress_ >= 1.0f)
+    {
+        return;
+    }
     BS_PROFILE_SCOPE("MenuPresentation::DrawFeedback");
     const auto drawList_ = ImGui::GetForegroundDrawList();
     const float height_ = maximum_.y - minimum_.y;
@@ -171,8 +229,14 @@ void MenuPresentation::SubmitVisual(SpriteRenderSystem& sprites_, const char* na
     const DirectX::XMFLOAT4& color_, const char* text_, float fontSize_, const char* preset_, float strength_)
 {
     BS_PROFILE_SCOPE("MenuPresentation::SubmitVisual");
-    if (!manager) return;
-    auto found_ = std::find_if(visuals.begin(), visuals.end(), [name_](const MenuVisual& visual_) { return visual_.name == name_; });
+    if (!manager)
+    {
+        return;
+    }
+    auto found_ = std::find_if(visuals.begin(), visuals.end(), [name_](const MenuVisual& visual_)
+    {
+        return visual_.name == name_;
+    });
     if (found_ == visuals.end())
     {
         MenuVisual visual_;
@@ -212,15 +276,20 @@ void MenuPresentation::SubmitVisual(SpriteRenderSystem& sprites_, const char* na
     const auto sprite_ = object_->GetComponent<SpriteRenderer>();
     sprite_->SetRuntimeColor(color_);
     sprite_->SetRuntimeVisible(color_.w > 0.001f);
-    if (const auto effect_ = object_->GetComponent<UIVisualEffectComponent>()) effect_->SetRuntimeStrength(strength_);
+    if (const auto effect_ = object_->GetComponent<UIVisualEffectComponent>())
+    {
+        effect_->SetRuntimeStrength(strength_);
+    }
     const auto widget_ = object_->GetComponent<UIWidgetComponent>();
     auto& rect_ = widget_->GetRectTransform();
     rect_.anchorMin = rect_.anchorMax = rect_.pivot = {0,0};
-    rect_.anchoredPosition = {x_,y_}; rect_.sizeDelta = {width_,height_};
+    rect_.anchoredPosition = {x_,y_};
+    rect_.sizeDelta = {width_,height_};
     if (text_)
     {
         // 文字画像を枠いっぱいに引き伸ばさず、字形の縦横比と解像度倍率を保って中央へ配置する。
-        D3D11_VIEWPORT viewport_{}; UINT count_ = 1;
+        D3D11_VIEWPORT viewport_{};
+        UINT count_ = 1;
         GraphicsDeviceManager::Instance().GetContext()->RSGetViewports(&count_, &viewport_);
         const float scale_ = (std::min)(viewport_.Width/1280.0f,viewport_.Height/720.0f);
         const auto size_ = sprite_->GetTextureSize();
@@ -230,7 +299,8 @@ void MenuPresentation::SubmitVisual(SpriteRenderSystem& sprites_, const char* na
     }
     widget_->MarkLayoutDirty();
     SpriteRenderSystem::SpriteRenderCommand command_;
-    command_.sprite = sprite_; command_.widget = widget_.get();
+    command_.sprite = sprite_;
+    command_.widget = widget_.get();
     // Submit順を保ち、暗幕、装飾、文字の順で合成する。
     sprites_.Submit(command_);
 }
@@ -238,7 +308,8 @@ void MenuPresentation::SubmitVisual(SpriteRenderSystem& sprites_, const char* na
 void MenuPresentation::DrawBackdrop(SpriteRenderSystem& sprites_, float alpha_)
 {
     BS_PROFILE_SCOPE("MenuPresentation::DrawBackdrop");
-    D3D11_VIEWPORT viewport_{}; UINT count_ = 1;
+    D3D11_VIEWPORT viewport_{};
+    UINT count_ = 1;
     auto* context_ = GraphicsDeviceManager::Instance().GetContext();
     context_->RSGetViewports(&count_, &viewport_);
     SubmitVisual(sprites_, "MenuBackdrop", 0, 0, viewport_.Width, viewport_.Height, {0,0,0,std::clamp(alpha_,0.0f,1.0f)});
@@ -248,10 +319,14 @@ void MenuPresentation::DrawBackdrop(SpriteRenderSystem& sprites_, float alpha_)
 void MenuPresentation::Draw(SpriteRenderSystem& sprites_, const char* title_, const char* firstLabel_, bool death_, const char* secondLabel_)
 {
     BS_PROFILE_SCOPE("MenuPresentation::Draw");
-    D3D11_VIEWPORT viewport_{}; UINT count_ = 1;
+    D3D11_VIEWPORT viewport_{};
+    UINT count_ = 1;
     auto* context_ = GraphicsDeviceManager::Instance().GetContext();
     context_->RSGetViewports(&count_, &viewport_);
-    if (viewport_.Width <= 0 || viewport_.Height <= 0) return;
+    if (viewport_.Width <= 0 || viewport_.Height <= 0)
+    {
+        return;
+    }
     const float scale_ = (std::min)(viewport_.Width / 1280.0f, viewport_.Height / 720.0f);
     const float centerX_ = viewport_.Width * 0.5f;
     const float reveal_ = Reveal(elapsed / 0.32f);
@@ -264,7 +339,10 @@ void MenuPresentation::Draw(SpriteRenderSystem& sprites_, const char* title_, co
     {
         SubmitVisual(sprites_,name_,centerX_+x_*scale_,top_+y_*scale_,width_*scale_,height_*scale_,color_,text_,fontSize_,preset_,strength_);
     };
-    if (!death_) DrawBackdrop(sprites_,0.74f*reveal_*(confirmedIndex == 0 ? 1.0f-transition_ : 1.0f));
+    if (!death_)
+    {
+        DrawBackdrop(sprites_,0.74f*reveal_*(confirmedIndex == 0 ? 1.0f-transition_ : 1.0f));
+    }
     draw_("MenuPanel",-302,-26,604,418,{0.018f,0.028f,0.045f,alpha_*0.94f});
     draw_("MenuHeading",-290,0,580,100,accent_,title_,death_ ? 76.0f : 62.0f,"MenuHeading");
     draw_("MenuDivider",-246,108,492,2,{accent_.x,accent_.y,accent_.z,alpha_*0.55f},nullptr,26,"MenuAccent");
@@ -284,7 +362,10 @@ void MenuPresentation::Draw(SpriteRenderSystem& sprites_, const char* title_, co
             mouse_.x >= left_ && mouse_.x <= right_ && mouse_.y >= upper_ && mouse_.y <= lower_)
         {
             Select(index_);
-            if (MouseInput::Instance().LeftPressed()) Confirm(index_);
+            if (MouseInput::Instance().LeftPressed())
+            {
+                Confirm(index_);
+            }
         }
         const std::string prefix_ = "MenuButton"+std::to_string(index_);
         draw_((prefix_+"Frame").c_str(),-half_-1,y_-1,half_*2+2,62,
@@ -298,12 +379,20 @@ void MenuPresentation::Draw(SpriteRenderSystem& sprites_, const char* title_, co
         draw_((prefix_+"Shine").c_str(),-half_+(half_*2-48)*sweep_,y_+58,48,2,
             {accent_.x,accent_.y,accent_.z,alpha_*focus_*0.65f},nullptr,26,"MenuAccent");
         if (confirmedIndex == index_)
+        {
             draw_((prefix_+"Confirm").c_str(),-half_,y_+57,half_*2*Reveal(transition_),3,
                 {1,1,0.9f,reveal_*(1.0f-transition_)},nullptr,26,"MenuAccent");
+        }
     }
     draw_("MenuGuide",-285,316,570,32,{0.75f,0.85f,0.83f,alpha_*0.95f},
         ControllerInput::Instance().IsPlayStation() ? "方向キー / 左スティック：選択    ×：決定" : "↑ ↓ / 左スティック：選択    Enter / A：決定",18,"HudReadable");
-    if (!death_) draw_("MenuCancelGuide",-240,350,480,28,{0.65f,0.78f,0.76f,alpha_},"ESC / Select：再開",17,"HudReadable");
+    if (!death_)
+    {
+        draw_("MenuCancelGuide",-240,350,480,28,{0.65f,0.78f,0.76f,alpha_},"ESC / Select：再開",17,"HudReadable");
+    }
     sprites_.RenderAll(context_);
-    if (confirmedIndex == 1) DrawBackdrop(sprites_,transition_);
+    if (confirmedIndex == 1)
+    {
+        DrawBackdrop(sprites_,transition_);
+    }
 }

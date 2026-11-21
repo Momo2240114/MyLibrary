@@ -20,10 +20,16 @@ public:
     void Serialize(nlohmann::json& json_) const override;
     void Deserialize(const nlohmann::json& json_) override;
 
-    bool UsesOwnerModel() const override { return false; }
+    bool UsesOwnerModel() const override
+    {
+        return false;
+    }
 
     // フェードアウト中も描画が必要なので、activeまたはweight残りで判定する。
-    bool IsOverlayActive() const { return overlayActive || overlayWeight > 0.0f; }
+    bool IsOverlayActive() const
+    {
+        return overlayActive || overlayWeight > 0.0f;
+    }
 
     // MeshVFXRenderSystemへ渡す最終的な重み。
     float GetOverlayWeight() const;

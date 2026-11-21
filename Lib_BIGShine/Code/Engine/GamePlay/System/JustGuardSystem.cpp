@@ -27,7 +27,10 @@ namespace
     {
         while (object_)
         {
-            if (object_->GetLayer() == LayerType::Player) return object_;
+            if (object_->GetLayer() == LayerType::Player)
+            {
+                return object_;
+            }
             const auto parent_ = object_->transform ? object_->transform->parent.lock() : nullptr;
             object_ = parent_ ? parent_->gameObject.lock() : nullptr;
         }
@@ -38,22 +41,37 @@ namespace
     {
         // ジャストガード成立位置を実カメラのCameraActionへ渡し、演出側の設定で再生する。
         const std::shared_ptr<GameObject> defender_ = event_.defender.lock();
-        if (!defender_ || !defender_->manager) return;
+        if (!defender_ || !defender_->manager)
+        {
+            return;
+        }
 
         CameraManager* cameraManager_ = defender_->manager->GetCameraManager();
-        if (!cameraManager_) return;
+        if (!cameraManager_)
+        {
+            return;
+        }
 
         const std::shared_ptr<CameraComponent> camera_ =
             cameraManager_->GetSourceCamera();
-        if (!camera_) return;
+        if (!camera_)
+        {
+            return;
+        }
 
         const std::shared_ptr<GameObject> cameraObject_ =
             camera_->GetGameObject();
-        if (!cameraObject_) return;
+        if (!cameraObject_)
+        {
+            return;
+        }
 
         const std::shared_ptr<CameraActionDirectorComponent> cameraAction_ =
             cameraObject_->GetComponent<CameraActionDirectorComponent>();
-        if (!cameraAction_) return;
+        if (!cameraAction_)
+        {
+            return;
+        }
 
         DirectX::XMFLOAT3 focusPosition_ = event_.guardPosition;
         if (!event_.hasContact && defender_->transform)
@@ -71,7 +89,10 @@ namespace
     {
         // ジャストガード成功位置に専用ImpactEffectを出し、通常Hitと別の成功演出にする。
         const std::shared_ptr<GameObject> defender_ = event_.defender.lock();
-        if (!defender_ || !defender_->manager) return;
+        if (!defender_ || !defender_->manager)
+        {
+            return;
+        }
 
         DirectX::XMFLOAT3 position_ = event_.guardPosition;
         if (!event_.hasContact && defender_->transform)
@@ -99,7 +120,10 @@ void JustGuardSystem::Clear()
 
 void JustGuardSystem::ClearAttackInstance(uint32_t attackInstanceId_)
 {
-    if (attackInstanceId_ == 0u) return;
+    if (attackInstanceId_ == 0u)
+    {
+        return;
+    }
 
     // 攻撃IDが終わったら、その攻撃で成立済みのジャストガード履歴をまとめて消す。
     for (auto iterator_ = registeredGuardTargets.begin();
@@ -120,7 +144,10 @@ void JustGuardSystem::ClearAttackHitGroup(
     uint32_t attackInstanceId_,
     uint32_t hitGroupId_)
 {
-    if (attackInstanceId_ == 0u) return;
+    if (attackInstanceId_ == 0u)
+    {
+        return;
+    }
 
     const uint64_t guardKey_ =
         (static_cast<uint64_t>(attackInstanceId_) << 32u) |
@@ -180,7 +207,10 @@ bool JustGuardSystem::HandleJustGuard(
         return false;
     }
     // 格子の帯から外れた対象では、広域判定だけでJustGuardを成立させない。
-    if (!hitBox_.IsWithinAttackSector(defender_.get())) return false;
+    if (!hitBox_.IsWithinAttackSector(defender_.get()))
+    {
+        return false;
+    }
     if (!RegisterJustGuard(
         hitBox_.attackInstanceId,
         hitBox_.hitGroupId,
@@ -192,7 +222,10 @@ bool JustGuardSystem::HandleJustGuard(
     }
 
     guardCollider_.RecordGuardedAttack(hitBox_);
-    if (guardCollider_.GuardsBodyContact()) hitBox_.RegisterHit(defender_.get());
+    if (guardCollider_.GuardsBodyContact())
+    {
+        hitBox_.RegisterHit(defender_.get());
+    }
 
     JustGuardEvent event_{};
     event_.defender = defender_;
@@ -210,9 +243,13 @@ bool JustGuardSystem::HandleJustGuard(
 
     frameJustGuardEvents.push_back(event_);
     if (const auto player_ = FindPlayerOwner(defender_))
+    {
         player_->ExecuteAction("Controller.RumbleJustGuard");
+    }
     else if (const auto attackingPlayer_ = FindPlayerOwner(attacker_))
+    {
         attackingPlayer_->ExecuteAction("Controller.RumbleJustGuarded");
+    }
     // ジャストガード成立時だけ成功音を鳴らし、共通DSPでBGMより軽いこもりを重ねる。
     const auto soundPosition_ = event_.hasContact || !defender_->transform
         ? event_.guardPosition : defender_->transform->GetWorldPosition();
@@ -226,7 +263,10 @@ bool JustGuardSystem::HandleJustGuard(
 
     for (const JustGuardCallback& callback_ : justGuardCallbacks)
     {
-        if (callback_) callback_(event_);
+        if (callback_)
+        {
+            callback_(event_);
+        }
     }
 
     return true;
@@ -234,7 +274,10 @@ bool JustGuardSystem::HandleJustGuard(
 
 void JustGuardSystem::AddJustGuardCallback(JustGuardCallback callback_)
 {
-    if (callback_) justGuardCallbacks.push_back(std::move(callback_));
+    if (callback_)
+    {
+        justGuardCallbacks.push_back(std::move(callback_));
+    }
 }
 
 bool JustGuardSystem::RegisterJustGuard(
@@ -270,11 +313,17 @@ std::shared_ptr<GameObject> JustGuardSystem::GetHierarchyRoot(
     {
         const std::shared_ptr<Transform> parentTransform_ =
             object_->transform->parent.lock();
-        if (!parentTransform_) break;
+        if (!parentTransform_)
+        {
+            break;
+        }
 
         const std::shared_ptr<GameObject> parentObject_ =
             parentTransform_->gameObject.lock();
-        if (!parentObject_) break;
+        if (!parentObject_)
+        {
+            break;
+        }
 
         object_ = parentObject_;
     }
@@ -289,11 +338,17 @@ void JustGuardSystem::PublishJustGuardToBlackboard(
 
     const std::shared_ptr<GameObject> defender_ = event_.defender.lock();
     const std::shared_ptr<GameObject> receiver_ = FindBlackboardReceiver(defender_);
-    if (!receiver_) return;
+    if (!receiver_)
+    {
+        return;
+    }
 
     const std::shared_ptr<BlackboardComponent> blackboard_ =
         receiver_->GetOrAddComponent<BlackboardComponent>();
-    if (!blackboard_) return;
+    if (!blackboard_)
+    {
+        return;
+    }
 
     blackboard_->SetBool("Guard", "JustGuardSucceeded", true);
     blackboard_->SetTrigger("Guard", "JustGuardTrigger");
@@ -322,11 +377,17 @@ void JustGuardSystem::PublishJustGuardToBlackboard(
             break;
         }
 
-        if (!actionReceiver_->transform) break;
+        if (!actionReceiver_->transform)
+        {
+            break;
+        }
 
         const std::shared_ptr<Transform> parentTransform_ =
             actionReceiver_->transform->parent.lock();
-        if (!parentTransform_) break;
+        if (!parentTransform_)
+        {
+            break;
+        }
 
         actionReceiver_ = parentTransform_->gameObject.lock();
     }
@@ -357,7 +418,10 @@ void JustGuardSystem::PublishJustGuardToAttacker(const JustGuardEvent& event_)
             reaction_->RequestAttackerReaction(event_.attackInstanceId, event_.hitGroupId);
             return;
         }
-        if (!receiver_->transform) break;
+        if (!receiver_->transform)
+        {
+            break;
+        }
         const auto parent_ = receiver_->transform->parent.lock();
         receiver_ = parent_ ? parent_->gameObject.lock() : nullptr;
     }
@@ -368,13 +432,18 @@ void JustGuardSystem::PublishJustGuardToAttackHitBox(const JustGuardEvent& event
     // 独立生成した突進・範囲攻撃は親階層にBossがいないため、攻撃Ownerへ直接通知する。
     // 通常のProjectile反射やジャスト回避の経路は変更しない。
     if (const auto attacker_ = event_.attacker.lock())
+    {
         if (const auto bossAI_ = attacker_->GetComponent<HumanBossAIComponent>(); bossAI_ && bossAI_->IsBerserkActive())
         {
             bossAI_->NotifyBerserkJustGuard();
             return;
         }
+    }
 
-    if (!event_.hitBox || event_.hitBox->justGuardedActionName.empty()) return;
+    if (!event_.hitBox || event_.hitBox->justGuardedActionName.empty())
+    {
+        return;
+    }
 
     std::shared_ptr<GameObject> actionReceiver_ = event_.hitBox->GetGameObject();
     const std::shared_ptr<GameObject> attacker_ = event_.attacker.lock();
@@ -415,10 +484,16 @@ void JustGuardSystem::PublishJustGuardToAttackHitBox(const JustGuardEvent& event
             return;
         }
 
-        if (!actionReceiver_->transform) break;
+        if (!actionReceiver_->transform)
+        {
+            break;
+        }
         const std::shared_ptr<Transform> parentTransform_ =
             actionReceiver_->transform->parent.lock();
-        if (!parentTransform_) break;
+        if (!parentTransform_)
+        {
+            break;
+        }
         actionReceiver_ = parentTransform_->gameObject.lock();
     }
 }
@@ -426,7 +501,10 @@ void JustGuardSystem::PublishJustGuardToAttackHitBox(const JustGuardEvent& event
 std::shared_ptr<GameObject> JustGuardSystem::FindBlackboardReceiver(
     std::shared_ptr<GameObject> object_) const
 {
-    if (!object_) return nullptr;
+    if (!object_)
+    {
+        return nullptr;
+    }
 
     // Colliderが子Objectに付いていても、親側のBlackboardを優先して結果を届ける。
     std::shared_ptr<GameObject> fallback_ = object_;
@@ -437,15 +515,24 @@ std::shared_ptr<GameObject> JustGuardSystem::FindBlackboardReceiver(
             return object_;
         }
 
-        if (!object_->transform) break;
+        if (!object_->transform)
+        {
+            break;
+        }
 
         const std::shared_ptr<Transform> parentTransform_ =
             object_->transform->parent.lock();
-        if (!parentTransform_) break;
+        if (!parentTransform_)
+        {
+            break;
+        }
 
         const std::shared_ptr<GameObject> parentObject_ =
             parentTransform_->gameObject.lock();
-        if (!parentObject_) break;
+        if (!parentObject_)
+        {
+            break;
+        }
 
         fallback_ = parentObject_;
         object_ = parentObject_;

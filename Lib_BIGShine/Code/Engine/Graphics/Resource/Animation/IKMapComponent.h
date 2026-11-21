@@ -138,22 +138,40 @@ public:
 
     bool ResolveChainByName(const std::string& name_);
 
-    std::vector<IKChain>& GetChains() { return chains; }
-    const std::vector<IKChain>& GetChains() const { return chains; }
-    std::vector<BodyCollisionSphere>& GetBodyCollisionSpheres() { return bodyCollisionSpheres; }
-    const std::vector<BodyCollisionSphere>& GetBodyCollisionSpheres() const { return bodyCollisionSpheres; }
+    std::vector<IKChain>& GetChains()
+    {
+        return chains;
+    }
+
+    const std::vector<IKChain>& GetChains() const
+    {
+        return chains;
+    }
+
+    std::vector<BodyCollisionSphere>& GetBodyCollisionSpheres()
+    {
+        return bodyCollisionSpheres;
+    }
+
+    const std::vector<BodyCollisionSphere>& GetBodyCollisionSpheres() const
+    {
+        return bodyCollisionSpheres;
+    }
 
     void ResetSimulation();
+
     void RequestSimulationWarmup()
     {
         simulationWarmupRequested = true;
     }
+
     bool ConsumeSimulationWarmupRequest();
 
     // テスト用グローバル風パラメータ（全インスタンス共通）
     static DirectX::XMFLOAT3 windDirection;   // 正規化済み風向き
     static float              windStrength;    // 風の強さ (m/s^2 スケール)
     static bool               windEnabled;
+
 private:
     bool simulationWarmupRequested = false;
     GltfModelCommponennt* model = nullptr;

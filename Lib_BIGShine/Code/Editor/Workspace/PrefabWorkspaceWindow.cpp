@@ -70,7 +70,10 @@ void PrefabWorkspaceWindow::Draw()
 
     ImGui::SameLine();
     ImGui::InvisibleButton("##PrefabWorkspaceHierarchySplitter", ImVec2(splitterSize_, mainHeight_));
-    if (ImGui::IsItemActive()) hierarchyPanelWidth += ImGui::GetIO().MouseDelta.x;
+    if (ImGui::IsItemActive())
+    {
+        hierarchyPanelWidth += ImGui::GetIO().MouseDelta.x;
+    }
     ImGui::SameLine();
 
     ImGui::BeginChild("PrefabWorkspacePreviewPanel", ImVec2(previewWidth_, mainHeight_), true);
@@ -79,7 +82,10 @@ void PrefabWorkspaceWindow::Draw()
 
     ImGui::SameLine();
     ImGui::InvisibleButton("##PrefabWorkspaceInspectorSplitter", ImVec2(splitterSize_, mainHeight_));
-    if (ImGui::IsItemActive()) inspectorPanelWidth -= ImGui::GetIO().MouseDelta.x;
+    if (ImGui::IsItemActive())
+    {
+        inspectorPanelWidth -= ImGui::GetIO().MouseDelta.x;
+    }
     ImGui::SameLine();
 
     ImGui::BeginChild("PrefabWorkspaceInspectorPanel", ImVec2(0.0f, mainHeight_), true);
@@ -89,7 +95,10 @@ void PrefabWorkspaceWindow::Draw()
     if (showAssetBrowser)
     {
         ImGui::InvisibleButton("##PrefabWorkspaceAssetSplitter", ImVec2(-1.0f, splitterSize_));
-        if (ImGui::IsItemActive()) assetBrowserHeight -= ImGui::GetIO().MouseDelta.y;
+        if (ImGui::IsItemActive())
+        {
+            assetBrowserHeight -= ImGui::GetIO().MouseDelta.y;
+        }
         assetBrowserHeight = std::clamp(assetBrowserHeight, 160.0f, (std::max)(160.0f, available_.y - 120.0f));
 
         ImGui::BeginChild("PrefabWorkspaceAssetBrowserPanel", ImVec2(0.0f, 0.0f), true);
@@ -104,7 +113,10 @@ void PrefabWorkspaceWindow::DrawToolbar()
 {
     BS_PROFILE_SCOPE("PrefabWorkspaceWindow::DrawToolbar");
 
-    if (!ImGui::BeginMenuBar()) return;
+    if (!ImGui::BeginMenuBar())
+    {
+        return;
+    }
 
     const std::vector<std::string>& prefabFiles_ = gameObjectManager->GetPrefabFiles();
     if (prefabFiles_.empty())
@@ -145,12 +157,18 @@ void PrefabWorkspaceWindow::DrawToolbar()
     }
     ImGui::SameLine();
     const bool canSave_ = !editingPrefabName.empty() && !editingRootObject.expired();
-    if (!canSave_) ImGui::BeginDisabled();
+    if (!canSave_)
+    {
+        ImGui::BeginDisabled();
+    }
     if (ImGui::Button("Save"))
     {
         SaveCurrentPrefab();
     }
-    if (!canSave_) ImGui::EndDisabled();
+    if (!canSave_)
+    {
+        ImGui::EndDisabled();
+    }
 
     ImGui::SameLine();
     ImGui::SetNextItemWidth(160.0f);
@@ -287,16 +305,25 @@ void PrefabWorkspaceWindow::RenderPreview(const ImVec2& previewSize_)
 {
     BS_PROFILE_SCOPE("PrefabWorkspaceWindow::RenderPreview");
 
-    if (!previewGameObjectManager) return;
+    if (!previewGameObjectManager)
+    {
+        return;
+    }
 
     auto& graphics_ = GraphicsDeviceManager::Instance();
     ID3D11Device* device_ = graphics_.GetDevice();
     ID3D11DeviceContext* context_ = graphics_.GetContext();
-    if (!device_ || !context_) return;
+    if (!device_ || !context_)
+    {
+        return;
+    }
 
     const int width_ = (std::max)(1, static_cast<int>(previewSize_.x));
     const int height_ = (std::max)(1, static_cast<int>(previewSize_.y));
-    if (!previewTarget.Resize(device_, width_, height_)) return;
+    if (!previewTarget.Resize(device_, width_, height_))
+    {
+        return;
+    }
 
     previewCamera.SetPerspectiveFov(45.0f, static_cast<float>(width_) / static_cast<float>(height_), 0.01f, 1000.0f);
 
@@ -347,7 +374,10 @@ void PrefabWorkspaceWindow::RenderPreview(const ImVec2& previewSize_)
 
     for (auto& object_ : previewGameObjectManager->GetObjects())
     {
-        if (!object_) continue;
+        if (!object_)
+        {
+            continue;
+        }
 
         // Inspectorで変更された親子Transformを、Prefab専用Previewへ反映する。
         object_->UpdateTransform();
@@ -398,7 +428,10 @@ void PrefabWorkspaceWindow::EnsurePreviewScene()
 {
     BS_PROFILE_SCOPE("PrefabWorkspaceWindow::EnsurePreviewScene");
 
-    if (isPreviewSceneInitialized) return;
+    if (isPreviewSceneInitialized)
+    {
+        return;
+    }
 
     if (!previewGameObjectManager)
     {
@@ -409,7 +442,10 @@ void PrefabWorkspaceWindow::EnsurePreviewScene()
 
     auto& graphics_ = GraphicsDeviceManager::Instance();
     ID3D11Device* device_ = graphics_.GetDevice();
-    if (!device_) return;
+    if (!device_)
+    {
+        return;
+    }
 
     previewGameObjectManager->SetModelRenderSystem(&previewModelRenderSystem);
     editorPrimitiveRenderer.Initialize(device_);
@@ -429,7 +465,10 @@ void PrefabWorkspaceWindow::LoadSelectedPrefab()
     BS_PROFILE_SCOPE("PrefabWorkspaceWindow::LoadSelectedPrefab");
 
     const std::vector<std::string>& prefabFiles_ = gameObjectManager->GetPrefabFiles();
-    if (prefabFiles_.empty()) return;
+    if (prefabFiles_.empty())
+    {
+        return;
+    }
 
     const int selectedIndex_ = std::clamp(
         gameObjectManager->GetSelectedPrefabIndex(),
@@ -442,7 +481,10 @@ void PrefabWorkspaceWindow::LoadPrefabForEdit(const std::string& prefabName_)
 {
     BS_PROFILE_SCOPE("PrefabWorkspaceWindow::LoadPrefabForEdit");
 
-    if (!previewGameObjectManager || prefabName_.empty()) return;
+    if (!previewGameObjectManager || prefabName_.empty())
+    {
+        return;
+    }
 
     editingPrefabName = prefabName_;
     // 読み込み先をPreview専用Managerに限定し、現在のSceneへPrefabを増やさない。
@@ -460,17 +502,26 @@ void PrefabWorkspaceWindow::SaveCurrentPrefab()
 {
     BS_PROFILE_SCOPE("PrefabWorkspaceWindow::SaveCurrentPrefab");
 
-    if (!previewGameObjectManager) return;
+    if (!previewGameObjectManager)
+    {
+        return;
+    }
 
     std::shared_ptr<GameObject> rootObject_ = editingRootObject.lock();
-    if (!rootObject_ || editingPrefabName.empty()) return;
+    if (!rootObject_ || editingPrefabName.empty())
+    {
+        return;
+    }
 
     previewGameObjectManager->SaveAsPrefab(rootObject_, editingPrefabName);
 }
 
 void PrefabWorkspaceWindow::AcceptPrefabDrop()
 {
-    if (!ImGui::BeginDragDropTarget()) return;
+    if (!ImGui::BeginDragDropTarget())
+    {
+        return;
+    }
 
     const ImGuiPayload* payload_ = ImGui::AcceptDragDropPayload(AssetBrowserPayload::PREFAB);
     if (payload_ && payload_->Data && previewGameObjectManager)

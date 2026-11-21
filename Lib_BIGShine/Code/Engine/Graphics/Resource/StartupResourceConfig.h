@@ -35,10 +35,25 @@ public:
     // Critical/Highの登録を全て空にする。
     void Clear();
 
-    std::vector<StartupModelEntry>& GetCriticalModels() { return criticalModels; }
-    std::vector<StartupModelEntry>& GetHighPriorityModels() { return highPriorityModels; }
-    const std::vector<StartupModelEntry>& GetCriticalModels() const { return criticalModels; }
-    const std::vector<StartupModelEntry>& GetHighPriorityModels() const { return highPriorityModels; }
+    std::vector<StartupModelEntry>& GetCriticalModels()
+    {
+        return criticalModels;
+    }
+
+    std::vector<StartupModelEntry>& GetHighPriorityModels()
+    {
+        return highPriorityModels;
+    }
+
+    const std::vector<StartupModelEntry>& GetCriticalModels() const
+    {
+        return criticalModels;
+    }
+
+    const std::vector<StartupModelEntry>& GetHighPriorityModels() const
+    {
+        return highPriorityModels;
+    }
 
     // Path表記をData相対/スラッシュ表記へ揃える。
     static std::string NormalizeResourcePath(const std::string& filePath_);

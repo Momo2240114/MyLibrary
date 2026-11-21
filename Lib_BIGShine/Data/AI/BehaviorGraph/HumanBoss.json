@@ -1444,9 +1444,23 @@
             "Id": 249,
             "ToNodeId": 246,
             "ToPinId": 247
+        },
+        {
+            "FromNodeId": 206,
+            "FromPinId": 208,
+            "Id": 297,
+            "ToNodeId": 294,
+            "ToPinId": 295
+        },
+        {
+            "FromNodeId": 206,
+            "FromPinId": 208,
+            "Id": 301,
+            "ToNodeId": 298,
+            "ToPinId": 299
         }
     ],
-    "NextId": 294,
+    "NextId": 302,
     "Nodes": [
         {
             "ActionEndCategory": "HumanBossAI",
@@ -3605,6 +3619,84 @@
                 800.0
             ],
             "Priority": 1,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "PlayAction",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "HumanBossAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "HumanBoss_NORMAL_ATTACK_A",
+            "BlackboardCategory": "HumanBossAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": true,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 294,
+            "InputPinId": 295,
+            "IntValue": 0,
+            "Name": "Combo approach A",
+            "OutputPinId": 296,
+            "Position": [
+                1480,
+                600
+            ],
+            "Priority": 4,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "PlayAction",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "HumanBossAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "HumanBoss_NORMAL_ATTACK_B",
+            "BlackboardCategory": "HumanBossAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": true,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 298,
+            "InputPinId": 299,
+            "IntValue": 0,
+            "Name": "Combo approach B",
+            "OutputPinId": 300,
+            "Position": [
+                1780,
+                600
+            ],
+            "Priority": 5,
             "ScopeId": "Root",
             "StringValue": "",
             "SubGraphName": "",

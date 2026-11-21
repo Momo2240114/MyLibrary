@@ -62,7 +62,10 @@ namespace
     {
         // 不明なプロパティは安全側として位置Xに倒し、読み込み自体は継続する。
         const auto iterator_ = PROPERTY_MAP.find(name_);
-        if (iterator_ == PROPERTY_MAP.end()) return UI_ANIMATION_PROPERTY::ANCHORED_POSITION_X;
+        if (iterator_ == PROPERTY_MAP.end())
+        {
+            return UI_ANIMATION_PROPERTY::ANCHORED_POSITION_X;
+        }
         return iterator_->second;
     }
 
@@ -79,24 +82,48 @@ namespace
 
     UI_ANIMATION_STOP_MODE StopModeFromString(const std::string& name_)
     {
-        if (name_ == "RESTORE_INITIAL") return UI_ANIMATION_STOP_MODE::RESTORE_INITIAL;
-        if (name_ == "MOVE_TO_END") return UI_ANIMATION_STOP_MODE::MOVE_TO_END;
+        if (name_ == "RESTORE_INITIAL")
+        {
+            return UI_ANIMATION_STOP_MODE::RESTORE_INITIAL;
+        }
+        if (name_ == "MOVE_TO_END")
+        {
+            return UI_ANIMATION_STOP_MODE::MOVE_TO_END;
+        }
         return UI_ANIMATION_STOP_MODE::KEEP_CURRENT;
     }
 
     UI_ANIMATION_VALUE_MODE ValueModeFromString(const std::string& name_)
     {
-        if (name_ == "RELATIVE_TO_INITIAL") return UI_ANIMATION_VALUE_MODE::VALUE_RELATIVE_TO_INITIAL;
-        if (name_ == "ADDITIVE") return UI_ANIMATION_VALUE_MODE::VALUE_ADDITIVE;
+        if (name_ == "RELATIVE_TO_INITIAL")
+        {
+            return UI_ANIMATION_VALUE_MODE::VALUE_RELATIVE_TO_INITIAL;
+        }
+        if (name_ == "ADDITIVE")
+        {
+            return UI_ANIMATION_VALUE_MODE::VALUE_ADDITIVE;
+        }
         return UI_ANIMATION_VALUE_MODE::VALUE_ABSOLUTE;
     }
 
     UI_ANIMATION_EASING EasingFromString(const std::string& name_)
     {
-        if (name_ == "EASE_IN_CUBIC") return UI_ANIMATION_EASING::EASE_IN_CUBIC;
-        if (name_ == "EASE_OUT_CUBIC") return UI_ANIMATION_EASING::EASE_OUT_CUBIC;
-        if (name_ == "EASE_IN_OUT_CUBIC") return UI_ANIMATION_EASING::EASE_IN_OUT_CUBIC;
-        if (name_ == "EASE_OUT_BACK") return UI_ANIMATION_EASING::EASE_OUT_BACK;
+        if (name_ == "EASE_IN_CUBIC")
+        {
+            return UI_ANIMATION_EASING::EASE_IN_CUBIC;
+        }
+        if (name_ == "EASE_OUT_CUBIC")
+        {
+            return UI_ANIMATION_EASING::EASE_OUT_CUBIC;
+        }
+        if (name_ == "EASE_IN_OUT_CUBIC")
+        {
+            return UI_ANIMATION_EASING::EASE_IN_OUT_CUBIC;
+        }
+        if (name_ == "EASE_OUT_BACK")
+        {
+            return UI_ANIMATION_EASING::EASE_OUT_BACK;
+        }
         return UI_ANIMATION_EASING::LINEAR;
     }
 
@@ -173,7 +200,10 @@ void UIAnimationPlayerComponent::Update(float deltaTime_)
 {
     BS_PROFILE_SCOPE("UIAnimationPlayerComponent::Update");
 
-    if (!playing || paused) return;
+    if (!playing || paused)
+    {
+        return;
+    }
 
     // 再生時間を進め、終端ではLoop/Stop設定に応じて時間を丸める。
     currentTime += deltaTime_ * playbackSpeed;
@@ -193,7 +223,10 @@ void UIAnimationPlayerComponent::Update(float deltaTime_)
     // 各トラックを現在時刻で評価し、ValueModeを通してWidget/Spriteへ反映する。
     for (const UIAnimationTrack& track_ : tracks)
     {
-        if (!track_.enabled) continue;
+        if (!track_.enabled)
+        {
+            continue;
+        }
         ApplyTrackValue(track_, ApplyValueMode(track_, EvaluateTrack(track_)));
     }
 }
@@ -213,11 +246,20 @@ void UIAnimationPlayerComponent::Gui()
     ImGui::DragFloat("Playback Speed", &playbackSpeed, 0.01f, 0.0f, 8.0f);
     ImGui::Checkbox("Register Actions", &registerGlobalActions);
 
-    if (ImGui::Button("Load")) LoadAnimation(animationAssetPath);
+    if (ImGui::Button("Load"))
+    {
+        LoadAnimation(animationAssetPath);
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Play")) Play(true);
+    if (ImGui::Button("Play"))
+    {
+        Play(true);
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Stop")) Stop(stopMode);
+    if (ImGui::Button("Stop"))
+    {
+        Stop(stopMode);
+    }
 
     ImGui::Text("Animation: %s", animationName.c_str());
     ImGui::Text("Time: %.3f / %.3f", currentTime, duration);
@@ -256,7 +298,10 @@ bool UIAnimationPlayerComponent::LoadAnimation(const std::string& assetPath_)
 
     // UIアニメーションアセットを読み込み、各トラックの対象Widgetとキーフレームを復元する。
     std::ifstream file_(assetPath_);
-    if (!file_.is_open()) return false;
+    if (!file_.is_open())
+    {
+        return false;
+    }
 
     nlohmann::json json_;
     try
@@ -326,8 +371,14 @@ void UIAnimationPlayerComponent::Play(bool restart_, float playbackSpeed_)
     BS_PROFILE_SCOPE("UIAnimationPlayerComponent::Play");
 
     // 再生開始時に現在値を保存し、相対/復元系のStopModeで基準として使う。
-    if (restart_) currentTime = 0.0f;
-    if (playbackSpeed_ >= 0.0f) playbackSpeed = playbackSpeed_;
+    if (restart_)
+    {
+        currentTime = 0.0f;
+    }
+    if (playbackSpeed_ >= 0.0f)
+    {
+        playbackSpeed = playbackSpeed_;
+    }
     paused = false;
     playing = true;
     ResolveTrackTargets();
@@ -373,7 +424,10 @@ void UIAnimationPlayerComponent::Seek(float time_)
     currentTime = std::clamp(time_, 0.0f, (std::max)(0.0f, duration));
     for (const UIAnimationTrack& track_ : tracks)
     {
-        if (!track_.enabled) continue;
+        if (!track_.enabled)
+        {
+            continue;
+        }
         ApplyTrackValue(track_, ApplyValueMode(track_, EvaluateTrack(track_)));
     }
 }
@@ -382,17 +436,35 @@ void UIAnimationPlayerComponent::RegisterActions()
 {
     BS_PROFILE_SCOPE("UIAnimationPlayerComponent::RegisterActions");
 
-    if (!registerGlobalActions) return;
+    if (!registerGlobalActions)
+    {
+        return;
+    }
 
     auto owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     const std::string prefix_ = actionPrefix.empty() ? animationName : actionPrefix;
     // 外部イベントからUI演出を操作できるよう、アニメーション名またはPrefixでGlobalActionを登録する。
-    owner_->RegisterGlobalAction("UIAnimation", prefix_ + "_Play", [this]() { Play(true); });
-    owner_->RegisterGlobalAction("UIAnimation", prefix_ + "_Stop", [this]() { Stop(stopMode); });
-    owner_->RegisterGlobalAction("UIAnimation", prefix_ + "_Pause", [this]() { Pause(); });
-    owner_->RegisterGlobalAction("UIAnimation", prefix_ + "_Resume", [this]() { Resume(); });
+    owner_->RegisterGlobalAction("UIAnimation", prefix_ + "_Play", [this]()
+    {
+        Play(true);
+    });
+    owner_->RegisterGlobalAction("UIAnimation", prefix_ + "_Stop", [this]()
+    {
+        Stop(stopMode);
+    });
+    owner_->RegisterGlobalAction("UIAnimation", prefix_ + "_Pause", [this]()
+    {
+        Pause();
+    });
+    owner_->RegisterGlobalAction("UIAnimation", prefix_ + "_Resume", [this]()
+    {
+        Resume();
+    });
 }
 
 void UIAnimationPlayerComponent::ResolveTrackTargets()
@@ -400,7 +472,10 @@ void UIAnimationPlayerComponent::ResolveTrackTargets()
     BS_PROFILE_SCOPE("UIAnimationPlayerComponent::ResolveTrackTargets");
 
     auto owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     // TrackにはWidgetIdだけを保存しているため、現在のシーン内GameObjectから実コンポーネントを探す。
     for (UIAnimationTrack& track_ : tracks)
@@ -411,10 +486,16 @@ void UIAnimationPlayerComponent::ResolveTrackTargets()
 
         for (const std::shared_ptr<GameObject>& object_ : owner_->GetManager().GetObjects())
         {
-            if (!object_) continue;
+            if (!object_)
+            {
+                continue;
+            }
 
             auto widget_ = object_->GetComponent<UIWidgetComponent>();
-            if (!widget_ || widget_->GetWidgetId() != track_.targetWidgetId) continue;
+            if (!widget_ || widget_->GetWidgetId() != track_.targetWidgetId)
+            {
+                continue;
+            }
 
             track_.targetWidget = widget_;
             track_.targetSprite = object_->GetComponent<SpriteRenderer>();
@@ -441,16 +522,28 @@ void UIAnimationPlayerComponent::CaptureInitialValues()
 
 float UIAnimationPlayerComponent::EvaluateTrack(const UIAnimationTrack& track_) const
 {
-    if (track_.keyframes.empty()) return 0.0f;
-    if (currentTime <= track_.keyframes.front().time) return track_.keyframes.front().value;
-    if (currentTime >= track_.keyframes.back().time) return track_.keyframes.back().value;
+    if (track_.keyframes.empty())
+    {
+        return 0.0f;
+    }
+    if (currentTime <= track_.keyframes.front().time)
+    {
+        return track_.keyframes.front().value;
+    }
+    if (currentTime >= track_.keyframes.back().time)
+    {
+        return track_.keyframes.back().value;
+    }
 
     // 現在時刻を挟む2つのキーフレームを探し、右側キーのEasingで補間する。
     for (size_t index_ = 0; index_ + 1 < track_.keyframes.size(); ++index_)
     {
         const UIAnimationKeyframe& left_ = track_.keyframes[index_];
         const UIAnimationKeyframe& right_ = track_.keyframes[index_ + 1];
-        if (currentTime < left_.time || currentTime > right_.time) continue;
+        if (currentTime < left_.time || currentTime > right_.time)
+        {
+            continue;
+        }
 
         const float span_ = (std::max)(0.0001f, right_.time - left_.time);
         const float ratio_ = Ease((currentTime - left_.time) / span_, right_.easingType);
@@ -470,7 +563,10 @@ float UIAnimationPlayerComponent::ApplyValueMode(const UIAnimationTrack& track_,
     case UI_ANIMATION_VALUE_MODE::VALUE_ADDITIVE:
     {
         float currentValue_ = 0.0f;
-        if (TryGetCurrentValue(track_, currentValue_)) return currentValue_ + sampledValue_;
+        if (TryGetCurrentValue(track_, currentValue_))
+        {
+            return currentValue_ + sampledValue_;
+        }
         return sampledValue_;
     }
     case UI_ANIMATION_VALUE_MODE::VALUE_ABSOLUTE:
@@ -483,7 +579,10 @@ void UIAnimationPlayerComponent::ApplyTrackValue(const UIAnimationTrack& track_,
 {
     std::shared_ptr<UIWidgetComponent> widgetShared_ = track_.targetWidget.lock();
     UIWidgetComponent* widget_ = widgetShared_.get();
-    if (!widget_) return;
+    if (!widget_)
+    {
+        return;
+    }
     SpriteRenderer* sprite_ = track_.targetSprite.lock().get();
     UIVertexModifierComponent* vertexModifier_ = track_.targetVertexModifier.lock().get();
 
@@ -526,10 +625,22 @@ void UIAnimationPlayerComponent::ApplyTrackValue(const UIAnimationTrack& track_,
         if (sprite_)
         {
             DirectX::XMFLOAT4 color_ = sprite_->GetColor();
-            if (track_.property == UI_ANIMATION_PROPERTY::COLOR_R) color_.x = value_;
-            if (track_.property == UI_ANIMATION_PROPERTY::COLOR_G) color_.y = value_;
-            if (track_.property == UI_ANIMATION_PROPERTY::COLOR_B) color_.z = value_;
-            if (track_.property == UI_ANIMATION_PROPERTY::COLOR_A) color_.w = value_;
+            if (track_.property == UI_ANIMATION_PROPERTY::COLOR_R)
+            {
+                color_.x = value_;
+            }
+            if (track_.property == UI_ANIMATION_PROPERTY::COLOR_G)
+            {
+                color_.y = value_;
+            }
+            if (track_.property == UI_ANIMATION_PROPERTY::COLOR_B)
+            {
+                color_.z = value_;
+            }
+            if (track_.property == UI_ANIMATION_PROPERTY::COLOR_A)
+            {
+                color_.w = value_;
+            }
             sprite_->SetColor(color_);
         }
         break;
@@ -589,7 +700,10 @@ void UIAnimationPlayerComponent::ApplyTrackValue(const UIAnimationTrack& track_,
 bool UIAnimationPlayerComponent::TryGetCurrentValue(const UIAnimationTrack& track_, float& value_) const
 {
     std::shared_ptr<UIWidgetComponent> widget_ = track_.targetWidget.lock();
-    if (!widget_) return false;
+    if (!widget_)
+    {
+        return false;
+    }
 
     // 現在値を読み取れるプロパティだけ、相対再生や停止時復元の基準値として返す。
     const UIRectTransform& rectTransform_ = widget_->GetRectTransform();
@@ -622,13 +736,28 @@ bool UIAnimationPlayerComponent::TryGetCurrentValue(const UIAnimationTrack& trac
         case UI_ANIMATION_PROPERTY::COLOR_A:
         {
             auto sprite_ = track_.targetSprite.lock();
-            if (!sprite_) return false;
-            const DirectX::XMFLOAT4 color_ = sprite_->GetColor();
-            if (track_.property == UI_ANIMATION_PROPERTY::COLOR_R) value_ = color_.x;
-            if (track_.property == UI_ANIMATION_PROPERTY::COLOR_G) value_ = color_.y;
-            if (track_.property == UI_ANIMATION_PROPERTY::COLOR_B) value_ = color_.z;
-            if (track_.property == UI_ANIMATION_PROPERTY::COLOR_A) value_ = color_.w;
-            return true;
+            if (!sprite_)
+        {
+            return false;
+        }
+        const DirectX::XMFLOAT4 color_ = sprite_->GetColor();
+            if (track_.property == UI_ANIMATION_PROPERTY::COLOR_R)
+        {
+            value_ = color_.x;
+        }
+        if (track_.property == UI_ANIMATION_PROPERTY::COLOR_G)
+        {
+            value_ = color_.y;
+        }
+        if (track_.property == UI_ANIMATION_PROPERTY::COLOR_B)
+        {
+            value_ = color_.z;
+        }
+        if (track_.property == UI_ANIMATION_PROPERTY::COLOR_A)
+        {
+            value_ = color_.w;
+        }
+        return true;
         }
         case UI_ANIMATION_PROPERTY::VISIBLE:
             value_ = widget_->IsEnabled() ? 1.0f : 0.0f;
@@ -636,8 +765,11 @@ bool UIAnimationPlayerComponent::TryGetCurrentValue(const UIAnimationTrack& trac
         default:
         {
             auto vertexModifier_ = track_.targetVertexModifier.lock();
-            if (!vertexModifier_) return false;
-            const UIVertexModification& modification_ =
+            if (!vertexModifier_)
+        {
+            return false;
+        }
+        const UIVertexModification& modification_ =
                 vertexModifier_->GetVertexModification(GetVertexIndex(track_.property));
             if (track_.property == UI_ANIMATION_PROPERTY::VERTEX_LEFT_TOP_POSITION_X ||
                 track_.property == UI_ANIMATION_PROPERTY::VERTEX_RIGHT_TOP_POSITION_X ||

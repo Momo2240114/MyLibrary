@@ -32,6 +32,7 @@ public:
         // 再生時間を進め、Curve/Blackboardによる速度補正も反映する。
         void Update(float et, float duration, CurveComponent* curvecomp, std::shared_ptr<GameObject> owner, AttackTelegraphRuntime* telegraphs_ = nullptr, const BlackboardCategory* blackboard_ = nullptr, float* advancedTime_ = nullptr);
     };
+
     struct RootMotionDelta {
         // このフレームにRoot Motionから発生した移動差分。
         DirectX::SimpleMath::Vector3 deltaPosition = { 0, 0, 0 };
@@ -40,7 +41,10 @@ public:
         DirectX::SimpleMath::Quaternion deltaRotation = DirectX::SimpleMath::Quaternion::Identity;
     };
 
-    const RootMotionDelta& GetRootMotionDelta() const { return currentRootMotionDelta; }
+    const RootMotionDelta& GetRootMotionDelta() const
+    {
+        return currentRootMotionDelta;
+    }
 
     void Update(
         float deltaTime_,
@@ -60,19 +64,44 @@ public:
     // 同じAnimationを続けるPhaseではrestart_で終了処理とEvent初期化をやり直す。
     void CrossFadeTo(const AnimState* newState, float duration, std::shared_ptr<GameObject> owner = nullptr, bool restart_ = false, float startTime_ = 0.0f);
 
-    const std::vector<GltfModelCommponennt::NodePose>& GetCurrentPose() const { return finalPose; }
-    float GetCurrentFadeTime() const { return current.time; }
-    float GetCurrentSampleDuration() const { return current.sampleDuration; }
+    const std::vector<GltfModelCommponennt::NodePose>& GetCurrentPose() const
+    {
+        return finalPose;
+    }
+
+    float GetCurrentFadeTime() const
+    {
+        return current.time;
+    }
+
+    float GetCurrentSampleDuration() const
+    {
+        return current.sampleDuration;
+    }
 
     // AnimationEventやEditorのシークから、現在Stateの再生時間を直接設定する。
     void SetCurrentTime(float time_);
-    const AnimState* GetCurrentState() const { return current.state; }
+
+    const AnimState* GetCurrentState() const
+    {
+        return current.state;
+    }
+
     // Controllerが最新のブレンド姿勢をModelへ反映してから予兆を発生させる。
     // 判定窓をまたいだフレームも、途中の武器姿勢をサンプリングして判定へ渡す。
     void SampleWeaponHitBoxes(const std::shared_ptr<GameObject>& owner_, GltfModelCommponennt* model_);
-    void FlushAttackTelegraphs(const std::shared_ptr<GameObject>& owner_) { attackTelegraphs.Flush(owner_); }
+
+    void FlushAttackTelegraphs(const std::shared_ptr<GameObject>& owner_)
+    {
+        attackTelegraphs.Flush(owner_);
+    }
+
     // グラフの再生を維持した中断では、現在区間の予兆予約だけを停止する。
-    void CancelAttackTelegraphs() { attackTelegraphs.Cancel(current.state); }
+    void CancelAttackTelegraphs()
+    {
+        attackTelegraphs.Cancel(current.state);
+    }
+
 private:
     // Animatorごとに保持し、同じState資産を使う別の敵との発生履歴共有を避ける。
     AttackTelegraphRuntime attackTelegraphs;

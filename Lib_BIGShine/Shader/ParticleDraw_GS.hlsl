@@ -8,7 +8,10 @@ void main(point VS_OUT input[1], inout TriangleStream<GS_OUT> outStream)
 {
     uint headerIndex = input[0].vertexID;
     ParticleHeader header = particleHeaderBuffer[headerIndex];
-    if (header.alive == 0) return;
+    if (header.alive == 0)
+    {
+        return;
+    }
 
     Particle p = particleDataBuffer[header.particleIndex];
 
@@ -36,8 +39,8 @@ void main(point VS_OUT input[1], inout TriangleStream<GS_OUT> outStream)
         up = normalize(cross(cameraForward, right));
     }
 
-    float s = sin(p.rotation.z);
-    float c = cos(p.rotation.z);
+    float s = sin(p.rotation);
+    float c = cos(p.rotation);
 
     float2 offsets[4] = {
         float2(-0.5f, -0.5f),

@@ -57,7 +57,9 @@ void EditorCameraData::CaptureFromCamera(const CameraComponent& camera_)
         focus_.y - previewCameraPosition.y, focus_.z - previewCameraPosition.z };
     DirectX::XMFLOAT3 front_ = camera_.GetFront();
     if (DirectX::XMVectorGetX(DirectX::XMVector3LengthSq(DirectX::XMLoadFloat3(&direction_))) > 0.000001f)
+    {
         DirectX::XMStoreFloat3(&front_, DirectX::XMVector3Normalize(DirectX::XMLoadFloat3(&direction_)));
+    }
     previewCameraYaw = atan2f(front_.x, front_.z);
     previewCameraPitch = asinf(std::clamp(front_.y, -1.0f, 1.0f));
     previewCameraSpeedMultiplier = 1.0f;
@@ -69,8 +71,14 @@ void EditorCameraData::UpdatePreviewFreeCamera(
     bool previewHovered_)
 {
     // プレビュー領域にマウスが乗っている時だけ、右ドラッグ+WASDの自由カメラ操作を受け付ける。
-    if (!enablePreviewFreeCamera) return;
-    if (!previewHovered_) return;
+    if (!enablePreviewFreeCamera)
+    {
+        return;
+    }
+    if (!previewHovered_)
+    {
+        return;
+    }
 
     auto& mouse_ = MouseInput::Instance();
 

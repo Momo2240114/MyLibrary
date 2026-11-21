@@ -52,7 +52,10 @@ namespace
     XMFLOAT3 Normalize(const XMFLOAT3& value_)
     {
         const float length_ = Length(value_);
-        if (length_ <= 0.00001f) return { 0.0f, 0.0f, 0.0f };
+        if (length_ <= 0.00001f)
+        {
+            return { 0.0f, 0.0f, 0.0f };
+        }
         return Scale(value_, 1.0f / length_);
     }
 
@@ -64,7 +67,10 @@ namespace
     {
         const XMFLOAT3 difference_ = Subtract(endPosition_, startPosition_);
         const float length_ = Length(difference_);
-        if (length_ <= 0.00001f) return;
+        if (length_ <= 0.00001f)
+        {
+            return;
+        }
 
         const XMVECTOR forward_ = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
         const XMVECTOR direction_ = XMVector3Normalize(XMLoadFloat3(&difference_));
@@ -97,7 +103,10 @@ namespace
     float GetStiffnessScale(const IKMapComponent::IKChain& chain_, size_t pointIndex_)
     {
         // 根元側はアニメーション追従を強く、先端側はtipStiffnessScaleで揺れを残す。
-        if (chain_.simulatedPositions.size() <= 1) return 1.0f;
+        if (chain_.simulatedPositions.size() <= 1)
+        {
+            return 1.0f;
+        }
 
         const float normalizedPosition_ = static_cast<float>(pointIndex_)
             / static_cast<float>(chain_.simulatedPositions.size() - 1);
@@ -108,7 +117,10 @@ namespace
 
     float GetNormalizedPointPosition(const IKMapComponent::IKChain& chain_, size_t pointIndex_)
     {
-        if (chain_.simulatedPositions.size() <= 1) return 0.0f;
+        if (chain_.simulatedPositions.size() <= 1)
+        {
+            return 0.0f;
+        }
         return static_cast<float>(pointIndex_)
             / static_cast<float>(chain_.simulatedPositions.size() - 1);
     }
@@ -129,7 +141,10 @@ namespace
     XMFLOAT3 ClampLength(const XMFLOAT3& value_, float maxLength_)
     {
         const float length_ = Length(value_);
-        if (length_ <= maxLength_ || length_ <= 0.00001f) return value_;
+        if (length_ <= maxLength_ || length_ <= 0.00001f)
+        {
+            return value_;
+        }
         return Scale(value_, maxLength_ / length_);
     }
 
@@ -140,11 +155,17 @@ namespace
         // 点同士の距離を元のボーン長へ戻し、髪や布が伸び縮みしすぎないようにする。
         XMFLOAT3 difference_ = Subtract(positions_[indexB_], positions_[indexA_]);
         const float distance_ = Length(difference_);
-        if (distance_ <= 0.00001f) return;
+        if (distance_ <= 0.00001f)
+        {
+            return;
+        }
 
         const XMFLOAT3 correction_ = Scale(
             difference_, ((distance_ - targetLength_) / distance_) * stiffness_);
-        if (indexB_ <= 1) return;
+        if (indexB_ <= 1)
+        {
+            return;
+        }
         if (indexA_ <= 1)
         {
             positions_[indexB_] = Subtract(positions_[indexB_], correction_);
@@ -174,7 +195,10 @@ bool SpringBoneSimulationComponent::IsLoadReady() const
 {
     const auto owner_ = const_cast<SpringBoneSimulationComponent*>(this)->GetGameObject();
     const auto model_ = owner_ ? owner_->GetComponent<GltfModelCommponennt>() : nullptr;
-    if (!model_) return true;
+    if (!model_)
+    {
+        return true;
+    }
 
     model_->UpdateLoadState();
     return !model_->IsModelLoading();
@@ -184,7 +208,10 @@ bool SpringBoneSimulationComponent::ResolveDependencies()
 {
     // IKMapに定義されたチェーンを、このコンポーネントが毎フレーム解くための参照を取得する。
     auto owner_ = GetGameObject();
-    if (!owner_) return false;
+    if (!owner_)
+    {
+        return false;
+    }
 
     if (!ikMap)
     {
@@ -203,9 +230,18 @@ void SpringBoneSimulationComponent::LateUpdate(float deltaTime_)
     BS_PROFILE_SCOPE("SpringBoneSimulationComponent::LateUpdate");
 
     // アニメーション姿勢が更新された後に、Spring BoneとCloth Boneを解いてモデル姿勢へ反映する。
-    if (!ResolveDependencies()) return;
-    if (model) model->UpdateLoadState();
-    if (!model || !model->IsModelReady()) return;
+    if (!ResolveDependencies())
+    {
+        return;
+    }
+    if (model)
+    {
+        model->UpdateLoadState();
+    }
+    if (!model || !model->IsModelReady())
+    {
+        return;
+    }
 
     const float safeDeltaTime_ = std::clamp(deltaTime_, 0.0f, 1.0f / 20.0f);
 
@@ -214,8 +250,14 @@ void SpringBoneSimulationComponent::LateUpdate(float deltaTime_)
 
         for (auto& chain_ : ikMap->GetChains())
         {
-            if (!chain_.enabled || chain_.type != IKMapComponent::IK_TYPE::SPRING_BONE) continue;
-            if (!ResolveChain(chain_)) continue;
+            if (!chain_.enabled || chain_.type != IKMapComponent::IK_TYPE::SPRING_BONE)
+            {
+                continue;
+            }
+            if (!ResolveChain(chain_))
+            {
+                continue;
+            }
 
             // 通常の髪/尻尾チェーンは、点列シミュレーション後すぐにボーン回転へ戻す。
             {
@@ -237,8 +279,14 @@ void SpringBoneSimulationComponent::LateUpdate(float deltaTime_)
 
         for (auto& chain_ : ikMap->GetChains())
         {
-            if (!chain_.enabled || chain_.type != IKMapComponent::IK_TYPE::CLOTH_BONE) continue;
-            if (!ResolveChain(chain_)) continue;
+            if (!chain_.enabled || chain_.type != IKMapComponent::IK_TYPE::CLOTH_BONE)
+            {
+                continue;
+            }
+            if (!ResolveChain(chain_))
+            {
+                continue;
+            }
 
             // Cloth Boneは複数チェーン間の横/斜め制約を後でまとめて解くため、ここでは点列だけ先に更新する。
             SimulateSpringChain(chain_, safeDeltaTime_);
@@ -258,7 +306,10 @@ void SpringBoneSimulationComponent::LateUpdate(float deltaTime_)
 
             for (auto& chain_ : ikMap->GetChains())
             {
-                if (!chain_.enabled || chain_.type != IKMapComponent::IK_TYPE::CLOTH_BONE || !chain_.initialized) continue;
+                if (!chain_.enabled || chain_.type != IKMapComponent::IK_TYPE::CLOTH_BONE || !chain_.initialized)
+                {
+                    continue;
+                }
                 ApplySpringChain(chain_);
             }
         }
@@ -288,12 +339,21 @@ void SpringBoneSimulationComponent::LateUpdate(float deltaTime_)
 bool SpringBoneSimulationComponent::ResolveChain(IKMapComponent::IKChain& chain_)
 {
     // root/tip名を親方向へたどり、解決対象のボーンindex列をキャッシュする。
-    if (!model || chain_.rootNodeName.empty() || chain_.tipNodeName.empty()) return false;
-    if (!chain_.nodeIndices.empty()) return chain_.nodeIndices.size() >= 2;
+    if (!model || chain_.rootNodeName.empty() || chain_.tipNodeName.empty())
+    {
+        return false;
+    }
+    if (!chain_.nodeIndices.empty())
+    {
+        return chain_.nodeIndices.size() >= 2;
+    }
 
     const int rootIndex_ = model->GetNodeIndex(chain_.rootNodeName.c_str());
     const int tipIndex_ = model->GetNodeIndex(chain_.tipNodeName.c_str());
-    if (rootIndex_ < 0 || tipIndex_ < 0) return false;
+    if (rootIndex_ < 0 || tipIndex_ < 0)
+    {
+        return false;
+    }
 
     std::vector<int> reverseIndices_;
     int currentIndex_ = tipIndex_;
@@ -301,10 +361,16 @@ bool SpringBoneSimulationComponent::ResolveChain(IKMapComponent::IKChain& chain_
     while (currentIndex_ >= 0)
     {
         reverseIndices_.push_back(currentIndex_);
-        if (currentIndex_ == rootIndex_) break;
+        if (currentIndex_ == rootIndex_)
+        {
+            break;
+        }
         currentIndex_ = nodes_.at(currentIndex_).parentIndex;
     }
-    if (reverseIndices_.empty() || reverseIndices_.back() != rootIndex_) return false;
+    if (reverseIndices_.empty() || reverseIndices_.back() != rootIndex_)
+    {
+        return false;
+    }
 
     chain_.nodeIndices.assign(reverseIndices_.rbegin(), reverseIndices_.rend());
     chain_.initialized = false;
@@ -517,7 +583,10 @@ void SpringBoneSimulationComponent::SimulateSpringChain(IKMapComponent::IKChain&
 
     for (size_t pointIndex_ = 0; pointIndex_ < chain_.simulatedPositions.size(); ++pointIndex_)
     {
-        if (pointIndex_ > 1 && GetNormalizedPointPosition(chain_, pointIndex_) > 0.35f) break;
+        if (pointIndex_ > 1 && GetNormalizedPointPosition(chain_, pointIndex_) > 0.35f)
+        {
+            break;
+        }
         chain_.simulatedPositions[pointIndex_] = currentWorldPositions_[pointIndex_];
         chain_.previousPositions[pointIndex_] = currentWorldPositions_[pointIndex_];
     }
@@ -533,7 +602,10 @@ void SpringBoneSimulationComponent::BuildClothConstraints()
     for (size_t chainIndex_ = 0; chainIndex_ < ikMap->GetChains().size(); ++chainIndex_)
     {
         const auto& chain_ = ikMap->GetChains()[chainIndex_];
-        if (!chain_.enabled || chain_.type != IKMapComponent::IK_TYPE::CLOTH_BONE || !chain_.initialized) continue;
+        if (!chain_.enabled || chain_.type != IKMapComponent::IK_TYPE::CLOTH_BONE || !chain_.initialized)
+        {
+            continue;
+        }
         groupChainIndices_[chain_.clothGroup].push_back(chainIndex_);
     }
 
@@ -554,7 +626,10 @@ void SpringBoneSimulationComponent::BuildClothConstraints()
             const auto& positionsA_ = ikMap->GetChains()[chainIndexA_].simulatedPositions;
             const auto& positionsB_ = ikMap->GetChains()[chainIndexB_].simulatedPositions;
             const size_t pointCount_ = (std::min)(positionsA_.size(), positionsB_.size());
-            if (pointCount_ < 2) continue;
+            if (pointCount_ < 2)
+            {
+                continue;
+            }
 
             // ボーン数が違うチェーン同士でも先端まで自然につながるよう、正規化した段で対応点を取る。
             for (size_t layerIndex_ = 1; layerIndex_ < pointCount_; ++layerIndex_)
@@ -574,7 +649,10 @@ void SpringBoneSimulationComponent::BuildClothConstraints()
                 lateralConstraint_.targetLength = Length(Subtract(positionsB_[pointIndexB_], positionsA_[pointIndexA_]));
                 clothConstraints.push_back(lateralConstraint_);
 
-                if (layerIndex_ + 1 >= pointCount_) continue;
+                if (layerIndex_ + 1 >= pointCount_)
+                {
+                    continue;
+                }
 
                 const float nextNormalizedLayer_ = static_cast<float>(layerIndex_ + 1)
                     / static_cast<float>(pointCount_ - 1);
@@ -616,7 +694,10 @@ void SpringBoneSimulationComponent::SolveClothConstraints()
     int maximumIterations_ = 1;
     for (const auto& chain_ : ikMap->GetChains())
     {
-        if (!chain_.enabled || chain_.type != IKMapComponent::IK_TYPE::CLOTH_BONE) continue;
+        if (!chain_.enabled || chain_.type != IKMapComponent::IK_TYPE::CLOTH_BONE)
+        {
+            continue;
+        }
         maximumIterations_ = (std::max)(maximumIterations_, std::clamp(chain_.solverIterations, 1, 16));
     }
 
@@ -632,20 +713,32 @@ void SpringBoneSimulationComponent::SolveClothConstraints()
 void SpringBoneSimulationComponent::SolveClothConstraint(const ClothConstraint& constraint_)
 {
     // 横/斜め制約ごとの剛性を使い、2本のチェーンの対応点を目標距離へ戻す。
-    if (constraint_.chainIndexA >= ikMap->GetChains().size() || constraint_.chainIndexB >= ikMap->GetChains().size()) return;
+    if (constraint_.chainIndexA >= ikMap->GetChains().size() || constraint_.chainIndexB >= ikMap->GetChains().size())
+    {
+        return;
+    }
 
     auto& chainA_ = ikMap->GetChains()[constraint_.chainIndexA];
     auto& chainB_ = ikMap->GetChains()[constraint_.chainIndexB];
     if (!chainA_.enabled || !chainB_.enabled
-        || chainA_.type != IKMapComponent::IK_TYPE::CLOTH_BONE || chainB_.type != IKMapComponent::IK_TYPE::CLOTH_BONE) return;
+        || chainA_.type != IKMapComponent::IK_TYPE::CLOTH_BONE || chainB_.type != IKMapComponent::IK_TYPE::CLOTH_BONE)
+    {
+        return;
+    }
     if (constraint_.pointIndexA >= chainA_.simulatedPositions.size()
-        || constraint_.pointIndexB >= chainB_.simulatedPositions.size()) return;
+        || constraint_.pointIndexB >= chainB_.simulatedPositions.size())
+    {
+        return;
+    }
 
     auto& positionA_ = chainA_.simulatedPositions[constraint_.pointIndexA];
     auto& positionB_ = chainB_.simulatedPositions[constraint_.pointIndexB];
     const XMFLOAT3 difference_ = Subtract(positionB_, positionA_);
     const float distance_ = Length(difference_);
-    if (distance_ <= 0.00001f) return;
+    if (distance_ <= 0.00001f)
+    {
+        return;
+    }
 
     const float stiffnessScaleA_ = GetStiffnessScale(chainA_, constraint_.pointIndexA);
     const float stiffnessScaleB_ = GetStiffnessScale(chainB_, constraint_.pointIndexB);
@@ -659,14 +752,23 @@ void SpringBoneSimulationComponent::SolveClothConstraint(const ClothConstraint& 
     positionA_ = Add(positionA_, correction_);
     positionB_ = Subtract(positionB_, correction_);
 
-    if (chainA_.collideWithBodyColliders) ResolveBodyCollision(chainA_, constraint_.pointIndexA);
-    if (chainB_.collideWithBodyColliders) ResolveBodyCollision(chainB_, constraint_.pointIndexB);
+    if (chainA_.collideWithBodyColliders)
+    {
+        ResolveBodyCollision(chainA_, constraint_.pointIndexA);
+    }
+    if (chainB_.collideWithBodyColliders)
+    {
+        ResolveBodyCollision(chainB_, constraint_.pointIndexB);
+    }
 }
 
 void SpringBoneSimulationComponent::ResolveBodyCollision(IKMapComponent::IKChain& chain_, size_t pointIndex_)
 {
     // 先端側のシミュレーション点だけを体コライダー外へ押し戻し、根元のアニメーション追従は保つ。
-    if (pointIndex_ <= 1 || GetNormalizedPointPosition(chain_, pointIndex_) <= 0.35f) return;
+    if (pointIndex_ <= 1 || GetNormalizedPointPosition(chain_, pointIndex_) <= 0.35f)
+    {
+        return;
+    }
 
     auto& position_ = chain_.simulatedPositions[pointIndex_];
     const auto& nodes_ = model->GetNodes();
@@ -676,12 +778,18 @@ void SpringBoneSimulationComponent::ResolveBodyCollision(IKMapComponent::IKChain
     for (auto& sphere_ : ikMap->GetBodyCollisionSpheres())
     {
         XMFLOAT3 center_;
-        if (!sphere_.enabled || !GetBodyCollisionSphereCenter(sphere_, center_)) continue;
+        if (!sphere_.enabled || !GetBodyCollisionSphereCenter(sphere_, center_))
+        {
+            continue;
+        }
 
         const XMFLOAT3 difference_ = Subtract(position_, center_);
         const float distance_ = Length(difference_);
         const float minimumDistance_ = sphere_.radius + chain_.collisionRadius;
-        if (distance_ >= minimumDistance_) continue;
+        if (distance_ >= minimumDistance_)
+        {
+            continue;
+        }
 
         XMFLOAT3 direction_ = Normalize(difference_);
         if (distance_ <= 0.00001f)
@@ -691,7 +799,10 @@ void SpringBoneSimulationComponent::ResolveBodyCollision(IKMapComponent::IKChain
             {
                 direction_ = Normalize(Subtract(chain_.previousPositions[pointIndex_], center_));
             }
-            if (Length(direction_) <= 0.00001f) direction_ = { 0.0f, 0.0f, 1.0f };
+            if (Length(direction_) <= 0.00001f)
+            {
+                direction_ = { 0.0f, 0.0f, 1.0f };
+            }
         }
         position_ = Add(center_, Scale(direction_, minimumDistance_));
         chain_.previousPositions[pointIndex_] = position_;
@@ -701,17 +812,26 @@ void SpringBoneSimulationComponent::ResolveBodyCollision(IKMapComponent::IKChain
     {
         auto& sphereA_ = ikMap->GetBodyCollisionSpheres()[sphereIndex_];
         auto& sphereB_ = ikMap->GetBodyCollisionSpheres()[sphereIndex_ + 1];
-        if (!sphereA_.connectToNext || !sphereA_.enabled || !sphereB_.enabled) continue;
+        if (!sphereA_.connectToNext || !sphereA_.enabled || !sphereB_.enabled)
+        {
+            continue;
+        }
 
         XMFLOAT3 centerA_;
         XMFLOAT3 centerB_;
         if (!GetBodyCollisionSphereCenter(sphereA_, centerA_)
-            || !GetBodyCollisionSphereCenter(sphereB_, centerB_)) continue;
+            || !GetBodyCollisionSphereCenter(sphereB_, centerB_))
+        {
+            continue;
+        }
 
         const XMFLOAT3 segment_ = Subtract(centerB_, centerA_);
         const float segmentLengthSquared_ =
             segment_.x * segment_.x + segment_.y * segment_.y + segment_.z * segment_.z;
-        if (segmentLengthSquared_ <= 0.00001f) continue;
+        if (segmentLengthSquared_ <= 0.00001f)
+        {
+            continue;
+        }
 
         const XMFLOAT3 fromA_ = Subtract(position_, centerA_);
         const float interpolation_ = std::clamp(
@@ -725,7 +845,10 @@ void SpringBoneSimulationComponent::ResolveBodyCollision(IKMapComponent::IKChain
         const float minimumDistance_ = interpolatedRadius_ + chain_.collisionRadius;
         const XMFLOAT3 difference_ = Subtract(position_, closestPoint_);
         const float distance_ = Length(difference_);
-        if (distance_ >= minimumDistance_) continue;
+        if (distance_ >= minimumDistance_)
+        {
+            continue;
+        }
 
         XMFLOAT3 direction_ = Normalize(difference_);
         if (distance_ <= 0.00001f)
@@ -735,7 +858,10 @@ void SpringBoneSimulationComponent::ResolveBodyCollision(IKMapComponent::IKChain
             {
                 direction_ = Normalize(Subtract(chain_.previousPositions[pointIndex_], closestPoint_));
             }
-            if (Length(direction_) <= 0.00001f) direction_ = { 0.0f, 0.0f, 1.0f };
+            if (Length(direction_) <= 0.00001f)
+            {
+                direction_ = { 0.0f, 0.0f, 1.0f };
+            }
         }
         position_ = Add(closestPoint_, Scale(direction_, minimumDistance_));
         chain_.previousPositions[pointIndex_] = position_;
@@ -745,12 +871,18 @@ void SpringBoneSimulationComponent::ResolveBodyCollision(IKMapComponent::IKChain
 bool SpringBoneSimulationComponent::GetBodyCollisionSphereCenter(IKMapComponent::BodyCollisionSphere& sphere_, XMFLOAT3& center_)
 {
     // IKMapのコライダー設定はノード名とローカルオフセットで持つため、初回だけノードindexを解決して使う。
-    if (!model || sphere_.nodeName.empty()) return false;
+    if (!model || sphere_.nodeName.empty())
+    {
+        return false;
+    }
     if (sphere_.nodeIndex < 0)
     {
         sphere_.nodeIndex = model->GetNodeIndex(sphere_.nodeName.c_str());
     }
-    if (sphere_.nodeIndex < 0) return false;
+    if (sphere_.nodeIndex < 0)
+    {
+        return false;
+    }
 
     const auto& nodes_ = model->GetNodes();
     const XMMATRIX nodeWorld_ = XMLoadFloat4x4(&nodes_.at(sphere_.nodeIndex).worldTransform);
@@ -763,16 +895,25 @@ bool SpringBoneSimulationComponent::GetBodyCollisionSphereCenter(IKMapComponent:
 void SpringBoneSimulationComponent::DrawBodyCollisionShapes()
 {
     // 調整用に体コライダーを可視化する。連結指定がある球同士は途中のサンプル球も描く。
-    if (!ikMap || !showBodyCollisionShapes) return;
+    if (!ikMap || !showBodyCollisionShapes)
+    {
+        return;
+    }
 
     auto& renderer_ = GraphicsDeviceManager::Instance().GetShapeRendererSystem();
     for (auto& sphere_ : ikMap->GetBodyCollisionSpheres())
     {
         XMFLOAT3 center_;
-        if (!GetBodyCollisionSphereCenter(sphere_, center_)) continue;
+        if (!GetBodyCollisionSphereCenter(sphere_, center_))
+        {
+            continue;
+        }
 
         XMFLOAT4 color_ = bodyCollisionShapeColor;
-        if (!sphere_.enabled) color_.w *= 0.25f;
+        if (!sphere_.enabled)
+        {
+            color_.w *= 0.25f;
+        }
         renderer_.DrawSphere(center_, sphere_.radius, color_);
     }
 
@@ -781,12 +922,18 @@ void SpringBoneSimulationComponent::DrawBodyCollisionShapes()
     {
         auto& sphereA_ = ikMap->GetBodyCollisionSpheres()[sphereIndex_];
         auto& sphereB_ = ikMap->GetBodyCollisionSpheres()[sphereIndex_ + 1];
-        if (!sphereA_.connectToNext || !sphereA_.enabled || !sphereB_.enabled) continue;
+        if (!sphereA_.connectToNext || !sphereA_.enabled || !sphereB_.enabled)
+        {
+            continue;
+        }
 
         XMFLOAT3 centerA_;
         XMFLOAT3 centerB_;
         if (!GetBodyCollisionSphereCenter(sphereA_, centerA_)
-            || !GetBodyCollisionSphereCenter(sphereB_, centerB_)) continue;
+            || !GetBodyCollisionSphereCenter(sphereB_, centerB_))
+        {
+            continue;
+        }
 
         for (int sampleIndex_ = 1; sampleIndex_ < connectionSamples_; ++sampleIndex_)
         {
@@ -802,17 +949,32 @@ void SpringBoneSimulationComponent::DrawBodyCollisionShapes()
 void SpringBoneSimulationComponent::DrawHairCollisionShapes()
 {
     // シミュレーション済み点列を線として描き、髪/布がどの形に解けているか確認する。
-    if (!showHairCollisionShapes) return;
-    if (!model) return;
+    if (!showHairCollisionShapes)
+    {
+        return;
+    }
+    if (!model)
+    {
+        return;
+    }
 
     auto& renderer_ = GraphicsDeviceManager::Instance().GetShapeRendererSystem();
 
     for (const auto& chain_ : ikMap->GetChains())
     {
         if (!chain_.enabled
-            || (chain_.type != IKMapComponent::IK_TYPE::SPRING_BONE && chain_.type != IKMapComponent::IK_TYPE::CLOTH_BONE)) continue;
-        if (!chain_.initialized) continue;
-        if (chain_.simulatedPositions.empty()) continue;
+            || (chain_.type != IKMapComponent::IK_TYPE::SPRING_BONE && chain_.type != IKMapComponent::IK_TYPE::CLOTH_BONE))
+        {
+            continue;
+        }
+        if (!chain_.initialized)
+        {
+            continue;
+        }
+        if (chain_.simulatedPositions.empty())
+        {
+            continue;
+        }
 
         for (size_t pointIndex_ = 1; pointIndex_ < chain_.simulatedPositions.size(); ++pointIndex_)
         {
@@ -828,10 +990,16 @@ void SpringBoneSimulationComponent::DrawHairCollisionShapes()
 void SpringBoneSimulationComponent::ConstrainHairBehindBody(IKMapComponent::IKChain& chain_)
 {
     // 髪や布がキャラクター前方へ出すぎないよう、根元から見た前方向距離を制限する。
-    if (!model || chain_.simulatedPositions.size() < 2) return;
+    if (!model || chain_.simulatedPositions.size() < 2)
+    {
+        return;
+    }
 
     auto owner_ = GetGameObject();
-    if (!owner_ || !owner_->transform) return;
+    if (!owner_ || !owner_->transform)
+    {
+        return;
+    }
 
     const XMMATRIX ownerWorld_ = owner_->transform->GetWorldMatrix();
 
@@ -848,7 +1016,10 @@ void SpringBoneSimulationComponent::ConstrainHairBehindBody(IKMapComponent::IKCh
     for (size_t pointIndex_ = 2; pointIndex_ < chain_.simulatedPositions.size(); ++pointIndex_)
     {
         const float normalizedPoint_ = GetNormalizedPointPosition(chain_, pointIndex_);
-        if (normalizedPoint_ <= 0.35f) continue;
+        if (normalizedPoint_ <= 0.35f)
+        {
+            continue;
+        }
 
         XMFLOAT3& position_ = chain_.simulatedPositions[pointIndex_];
 
@@ -858,7 +1029,10 @@ void SpringBoneSimulationComponent::ConstrainHairBehindBody(IKMapComponent::IKCh
             rootToPoint_.y * ownerForward_.y +
             rootToPoint_.z * ownerForward_.z;
 
-        if (forwardDistance_ <= allowedForwardDistance_) continue;
+        if (forwardDistance_ <= allowedForwardDistance_)
+        {
+            continue;
+        }
 
         const float pushBackDistance_ = forwardDistance_ - allowedForwardDistance_;
         position_ = Subtract(position_, Scale(ownerForward_, pushBackDistance_ * correctionRate_));
@@ -894,19 +1068,28 @@ void SpringBoneSimulationComponent::ApplySpringChain(IKMapComponent::IKChain& ch
         const XMFLOAT3 childPosition_ = GetTranslation(child_.worldTransform);
         const XMFLOAT3 currentDirection_ = Normalize(Subtract(childPosition_, currentPosition_));
         const XMFLOAT3 targetDirection_ = targetDirections_[nodeIndex_];
-        if (Length(currentDirection_) <= 0.00001f || Length(targetDirection_) <= 0.00001f) continue;
+        if (Length(currentDirection_) <= 0.00001f || Length(targetDirection_) <= 0.00001f)
+        {
+            continue;
+        }
 
         const XMVECTOR currentDirectionVector_ = XMLoadFloat3(&currentDirection_);
         const XMVECTOR targetDirectionVector_ = XMLoadFloat3(&targetDirection_);
         const XMVECTOR axis_ = XMVector3Cross(currentDirectionVector_, targetDirectionVector_);
         const float axisLength_ = XMVectorGetX(XMVector3Length(axis_));
         const float dot_ = std::clamp(XMVectorGetX(XMVector3Dot(currentDirectionVector_, targetDirectionVector_)), -1.0f, 1.0f);
-        if (axisLength_ <= 0.00001f) continue;
+        if (axisLength_ <= 0.00001f)
+        {
+            continue;
+        }
 
         const float normalizedNodePosition_ = static_cast<float>(nodeIndex_)
             / static_cast<float>(chain_.nodeIndices.size() - 1);
         const float simulationWeight_ = SmoothStep(normalizedNodePosition_);
-        if (simulationWeight_ <= 0.00001f) continue;
+        if (simulationWeight_ <= 0.00001f)
+        {
+            continue;
+        }
 
         const float angle_ = std::acos(dot_)
             * std::clamp(chain_.influence, 0.0f, 1.0f)
@@ -924,7 +1107,10 @@ void SpringBoneSimulationComponent::ApplySpringChain(IKMapComponent::IKChain& ch
         else
         {
             auto owner_ = GetGameObject();
-            if (!owner_ || !owner_->transform) continue;
+            if (!owner_ || !owner_->transform)
+            {
+                continue;
+            }
 
             parentWorldRotation_ = owner_->transform->GetWorldMatrix();
             parentWorldRotation_.r[3] = XMVectorSet(0, 0, 0, 1);
@@ -987,7 +1173,10 @@ void SpringBoneSimulationComponent::Gui()
                 windDirection.z /= length_;
             }
         }
-        if (ImGui::Button("Stop Wind")) windStrength = 0.0f;
+        if (ImGui::Button("Stop Wind"))
+        {
+            windStrength = 0.0f;
+        }
     }
 
     if (ImGui::Button("Reset Simulation"))
@@ -1045,7 +1234,10 @@ void SpringBoneSimulationComponent::ResetSimulation()
     // 布制約、コライダーindex、各チェーンの点列履歴を破棄し、次回更新で現在姿勢から初期化する。
     clothConstraints.clear();
     clothConstraintsInitialized = false;
-    if (!ResolveDependencies()) return;
+    if (!ResolveDependencies())
+    {
+        return;
+    }
 
     for (auto& sphere_ : ikMap->GetBodyCollisionSpheres())
     {

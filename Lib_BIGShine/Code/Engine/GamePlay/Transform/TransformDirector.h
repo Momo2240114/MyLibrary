@@ -34,7 +34,11 @@ struct TransformPath {
 
 class TransformDirector : public Component , public IActionProvider {
 public:
-    const std::string& GetName() const override { static std::string n = "TransformDirector"; return n; }
+    const std::string& GetName() const override
+    {
+        static std::string n = "TransformDirector";
+        return n;
+    }
 
     void Start() override;
 
@@ -53,7 +57,11 @@ public:
 
     // 現在の Transform を WayPoint として EditorWaypoints へ追加する。
     void CaptureCurrentState();
-    int GetCount() const { return (int)EditorWaypoints.size(); }
+
+    int GetCount() const
+    {
+        return (int)EditorWaypoints.size();
+    }
 
     // ActionSequence などから番号指定で単体 WayPoint を再生する。
     void PlayMoveByIndex(int idx);
@@ -77,6 +85,7 @@ private:
 
     // 現在の Transform を指定 Path の末尾 WayPoint として取り込む。
     void CaptureToPath(int pathIdx);
+
 private:
     // 戻るための地点（直前の座標）を保持
     bool shouldReturn = false;    // 戻るかどうかのフラグ
@@ -100,7 +109,10 @@ private:
     int m_currentPointIdx = -1;            // 現在何番目の経由地に移動中か
 
     // Transform の各成分を同じ ratio で補間するための小さな補助。
-    Vector3 LerpVector(Vector3 a, Vector3 b, float t) { return { a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, a.z + (b.z - a.z) * t }; }
+    Vector3 LerpVector(Vector3 a, Vector3 b, float t)
+    {
+        return { a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, a.z + (b.z - a.z) * t };
+    }
 
     //加算用
     bool m_AddFlag = false;

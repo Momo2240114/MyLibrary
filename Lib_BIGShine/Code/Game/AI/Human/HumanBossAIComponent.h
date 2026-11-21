@@ -84,15 +84,40 @@ public:
     bool TryBeginFinalFinish(const std::shared_ptr<GameObject>& attacker_);
     // リトライ・HPリセット・形態終了時に、保存しない戦闘履歴を破棄する。
     void ResetBerserk();
-    bool IsBerserkActive() const { return berserkStage >= 0; }
+
+    bool IsBerserkActive() const
+    {
+        return berserkStage >= 0;
+    }
+
     // 連撃と攻撃間の隙間は完全無敵とし、反撃用スタンでのみ解除する。
-    bool IsBerserkInvulnerable() const { return berserkStage >= 0 && !berserkStunned && !finishRequested; }
+    bool IsBerserkInvulnerable() const
+    {
+        return berserkStage >= 0 && !berserkStunned && !finishRequested;
+    }
+
     // Owner階層を持たない独立範囲攻撃のジャストガードも同じ受付へ接続する。
-    void NotifyBerserkJustGuard() { OnBerserkJustGuarded(); }
-    void NotifyReflectedOrb() { reflectedOrbTimer = 5.0f; }
+    void NotifyBerserkJustGuard()
+    {
+        OnBerserkJustGuarded();
+    }
+
+    void NotifyReflectedOrb()
+    {
+        reflectedOrbTimer = 5.0f;
+    }
+
     // 既存BehaviorTree Editorへ、実行中の判断グラフと保存先を公開する。
-    AIBehaviorGraph& GetBehaviorGraph() { return behaviorGraph; }
-    std::string& GetBehaviorGraphAssetPath() { return behaviorGraphAssetPath; }
+    AIBehaviorGraph& GetBehaviorGraph()
+    {
+        return behaviorGraph;
+    }
+
+    std::string& GetBehaviorGraphAssetPath()
+    {
+        return behaviorGraphAssetPath;
+    }
+
     // 実行中Actionを止め、Editorの実行状態を初期化する。
     void ResetBehaviorGraphRuntime();
     // 編集した判断グラフを既存のAsset形式で保存する。
@@ -101,6 +126,7 @@ public:
     bool LoadBehaviorGraphAsset(const std::string& path_);
     // 実行中Actionに対応するノードをEditorで強調表示する。
     std::string GetCurrentGraphActionName() const;
+
 private:
     // 追跡専用Componentは状態を読み取るだけで、AIの選択や実行を変更しない。
     friend class HumanBossAITraceComponent;

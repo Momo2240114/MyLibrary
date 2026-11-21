@@ -24,19 +24,25 @@ namespace
     class FootContactGroundFilter : public physx::PxQueryFilterCallback
     {
     public:
-        explicit FootContactGroundFilter(std::uint32_t ownerId_) : ownerId(ownerId_) {}
+        explicit FootContactGroundFilter(std::uint32_t ownerId_) : ownerId(ownerId_)
+        {
+        }
 
         physx::PxQueryHitType::Enum preFilter(const physx::PxFilterData&, const physx::PxShape* shape_,
             const physx::PxRigidActor*, physx::PxHitFlags&) override
         {
             if (!shape_ || shape_->getFlags().isSet(physx::PxShapeFlag::eTRIGGER_SHAPE))
+            {
                 return physx::PxQueryHitType::eNONE;
+            }
 
             constexpr std::uint32_t COLLISION_OWNER_MASK = 0x7FFFFFFFu;
             const auto data_ = shape_->getSimulationFilterData();
             if ((ownerId != 0 && (data_.word3 & COLLISION_OWNER_MASK) == ownerId) ||
                 data_.word2 != static_cast<physx::PxU32>(ColliderComponent::CollisionRole::PHYSICAL))
+            {
                 return physx::PxQueryHitType::eNONE;
+            }
 
             return physx::PxQueryHitType::eBLOCK;
         }
@@ -139,12 +145,17 @@ void FootContactComponent::LateUpdate(float deltaTime_)
         const bool wasGrounded_ = foot_.grounded;
         const float threshold_ = canMeasure_ && wasGrounded_ ? release_ : contactDistance;
         foot_.grounded = hasGround_ && position_.y - hit_.block.position.y <= threshold_;
-        if (!canMeasure_ || wasGrounded_ || !foot_.grounded) continue;
+        if (!canMeasure_ || wasGrounded_ || !foot_.grounded)
+        {
+            continue;
+        }
 
         foot_.lastImpactSpeed = (std::max)(0.0f, -foot_.velocityY);
         if (foot_.lastImpactSpeed <= 0.0f || foot_.lastImpactSpeed < minimumImpactSpeed ||
             foot_.cooldownRemaining > 0.0f || foot_.particleEffect.empty())
+        {
             continue;
+        }
 
         ParticleSpawnRequest request_;
         request_.assetPath = foot_.particleEffect;
@@ -152,9 +163,14 @@ void FootContactComponent::LateUpdate(float deltaTime_)
         request_.normal = { hit_.block.normal.x, hit_.block.normal.y, hit_.block.normal.z };
         request_.normalOffset = 0.025f;
         const auto effect_ = owner_->GetManager().GetEffectManager().SpawnParticle(request_);
-        if (!effect_) continue;
+        if (!effect_)
+        {
+            continue;
+        }
         if (const auto particle_ = effect_->GetComponent<ParticleComponent>())
+        {
             particle_->SetRuntimeVisualScale(foot_.effectScale);
+        }
         foot_.cooldownRemaining = effectCooldown;
         ++foot_.effectCount;
     }
@@ -163,14 +179,22 @@ void FootContactComponent::LateUpdate(float deltaTime_)
 void FootContactComponent::Gui()
 {
     if (ImGui::Checkbox("Foot Contact Enabled", &contactEnabled))
-        for (auto& foot_ : feet) foot_.hasSample = false;
+    {
+        for (auto& foot_ : feet)
+        {
+            foot_.hasSample = false;
+        }
+    }
     ImGui::DragFloat("Contact Distance", &contactDistance, 0.01f, 0.0f, 5.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
     ImGui::DragFloat("Release Distance", &releaseDistance, 0.01f, 0.0f, 5.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
     releaseDistance = (std::max)(contactDistance, releaseDistance);
     ImGui::DragFloat("Minimum Impact Speed", &minimumImpactSpeed, 0.05f, 0.0f, 100.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
     ImGui::DragFloat("Effect Cooldown (s)", &effectCooldown, 0.01f, 0.0f, 5.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
 
-    if (ImGui::Button("Add Foot")) feet.emplace_back();
+    if (ImGui::Button("Add Foot"))
+    {
+        feet.emplace_back();
+    }
     for (std::size_t index_ = 0; index_ < feet.size();)
     {
         ImGui::PushID(static_cast<int>(index_));
@@ -179,8 +203,14 @@ void FootContactComponent::Gui()
         bool remove_ = false;
         if (ImGui::TreeNode("Foot", "%s", label_))
         {
-            if (ImGui::Checkbox("Enabled", &foot_.enabled)) foot_.hasSample = false;
-            if (ImGui::InputText("Bone Name", &foot_.boneName)) foot_.hasSample = false;
+            if (ImGui::Checkbox("Enabled", &foot_.enabled))
+            {
+                foot_.hasSample = false;
+            }
+            if (ImGui::InputText("Bone Name", &foot_.boneName))
+            {
+                foot_.hasSample = false;
+            }
             ImGui::InputText("Particle Effect", &foot_.particleEffect);
             ImGui::DragFloat("Effect Scale", &foot_.effectScale, 0.05f, 0.01f, 20.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
             ImGui::Text("Bone: %s | Contact: %s", foot_.boneFound ? "Found" : "Unavailable", foot_.grounded ? "Grounded" : "Airborne");
@@ -189,8 +219,14 @@ void FootContactComponent::Gui()
             ImGui::TreePop();
         }
         ImGui::PopID();
-        if (remove_) feet.erase(feet.begin() + index_);
-        else ++index_;
+        if (remove_)
+        {
+            feet.erase(feet.begin() + index_);
+        }
+        else
+        {
+            ++index_;
+        }
     }
 }
 
@@ -203,10 +239,12 @@ void FootContactComponent::Serialize(nlohmann::json& json_) const
     json_["EffectCooldown"] = effectCooldown;
     json_["Feet"] = nlohmann::json::array();
     for (const auto& foot_ : feet)
+    {
         json_["Feet"].push_back({
             { "BoneName", foot_.boneName }, { "ParticleEffect", foot_.particleEffect },
             { "EffectScale", foot_.effectScale }, { "Enabled", foot_.enabled }
         });
+    }
 }
 
 void FootContactComponent::Deserialize(const nlohmann::json& json_)
@@ -219,10 +257,16 @@ void FootContactComponent::Deserialize(const nlohmann::json& json_)
     previousSampleTime = 0;
     feet.clear();
     const auto list_ = json_.find("Feet");
-    if (list_ == json_.end() || !list_->is_array()) return;
+    if (list_ == json_.end() || !list_->is_array())
+    {
+        return;
+    }
     for (const auto& item_ : *list_)
     {
-        if (!item_.is_object()) continue;
+        if (!item_.is_object())
+        {
+            continue;
+        }
         auto& foot_ = feet.emplace_back();
         foot_.boneName = item_.value("BoneName", std::string{});
         foot_.particleEffect = item_.value("ParticleEffect", std::string{});

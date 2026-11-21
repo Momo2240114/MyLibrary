@@ -146,7 +146,11 @@ struct AttackEmitterTemplate
 class AttackEmitterComponent : public Component, public IActionProvider
 {
 public:
-    const std::string& GetName() const override { return componentName; }
+    const std::string& GetName() const override
+    {
+        return componentName;
+    }
+
     void Start() override;
     // 発生元の破棄時に、所有する判定と独立した見た目のEffectも停止する。
     void OnDestroy() override;
@@ -178,8 +182,15 @@ public:
     // 現在のTemplate設定をAttackEmitter Asset JSONとして保存する。
     bool SaveAsset(const std::string& path_) const;
 
-    std::vector<AttackEmitterTemplate>& GetTemplates() { return templates; }
-    const std::vector<AttackEmitterTemplate>& GetTemplates() const { return templates; }
+    std::vector<AttackEmitterTemplate>& GetTemplates()
+    {
+        return templates;
+    }
+
+    const std::vector<AttackEmitterTemplate>& GetTemplates() const
+    {
+        return templates;
+    }
 
 private:
     struct EmitFrame

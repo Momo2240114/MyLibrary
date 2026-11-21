@@ -38,6 +38,7 @@ public:
     float GetPlaybackTime();
     float GetPlaybackDuration();
     bool IsSkillOwned();
+
 private:
     // Actorごとに接続を保持し、再取得時に古い実行要求を引き継がない。
     std::shared_ptr<AnimationControllerComponent> ResolveController();

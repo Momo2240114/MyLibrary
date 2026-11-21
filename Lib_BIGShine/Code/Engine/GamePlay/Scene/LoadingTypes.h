@@ -12,6 +12,14 @@ struct LoadingStatus
     float progress = 0.0f;
     std::string operation;
     std::string error;
-    bool IsCompleted() const { return state == LOADING_STATE::COMPLETED; }
-    bool HasFailed() const { return state == LOADING_STATE::FAILED; }
+
+    bool IsCompleted() const
+    {
+        return state == LOADING_STATE::COMPLETED;
+    }
+
+    bool HasFailed() const
+    {
+        return state == LOADING_STATE::FAILED;
+    }
 };

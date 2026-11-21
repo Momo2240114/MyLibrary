@@ -31,7 +31,10 @@ namespace
         const std::string& text_,
         const std::string& query_)
     {
-        if (query_.empty()) return true;
+        if (query_.empty())
+        {
+            return true;
+        }
 
         return std::search(
             text_.begin(),
@@ -61,7 +64,10 @@ void AttackWorkspaceWindow::Update(float deltaTime_)
 {
     BS_PROFILE_SCOPE("AttackWorkspaceWindow::Update");
 
-    if (!autoSelectSceneSelection || !gameObjectManager) return;
+    if (!autoSelectSceneSelection || !gameObjectManager)
+    {
+        return;
+    }
 
     const std::shared_ptr<GameObject> selectedObject_ = gameObjectManager->GetSelectedObject();
     if (HasAttackWorkspaceComponents(selectedObject_))
@@ -115,7 +121,10 @@ void AttackWorkspaceWindow::Draw()
 
     ImGui::SameLine();
     ImGui::InvisibleButton("##AttackWorkspaceInspectorSplitter", ImVec2(splitterSize_, topHeight_));
-    if (ImGui::IsItemActive()) inspectorPanelWidth -= ImGui::GetIO().MouseDelta.x;
+    if (ImGui::IsItemActive())
+    {
+        inspectorPanelWidth -= ImGui::GetIO().MouseDelta.x;
+    }
     ImGui::SameLine();
 
     ImGui::BeginChild("AttackWorkspaceInspectorPanel", ImVec2(0.0f, topHeight_), true);
@@ -132,7 +141,10 @@ void AttackWorkspaceWindow::Draw()
             horizontalHovered_ || horizontalActive_
             ? ImGuiCol_SeparatorHovered
             : ImGuiCol_Separator));
-    if (ImGui::IsItemActive()) bottomPanelHeight -= ImGui::GetIO().MouseDelta.y;
+    if (ImGui::IsItemActive())
+    {
+        bottomPanelHeight -= ImGui::GetIO().MouseDelta.y;
+    }
 
     ImGui::BeginChild("AttackWorkspaceBottomPanel", ImVec2(0.0f, 0.0f), true);
     DrawBottomPanel();
@@ -145,10 +157,16 @@ void AttackWorkspaceWindow::EnsurePreviewResources()
 {
     BS_PROFILE_SCOPE("AttackWorkspaceWindow::EnsurePreviewResources");
 
-    if (isPreviewResourceInitialized) return;
+    if (isPreviewResourceInitialized)
+    {
+        return;
+    }
 
     ID3D11Device* device_ = GraphicsDeviceManager::Instance().GetDevice();
-    if (!device_) return;
+    if (!device_)
+    {
+        return;
+    }
 
     // Attack Workspaceは実Sceneを停止し、専用RTへ現在の攻撃調整対象を描画する。
     editorPrimitiveRenderer.Initialize(device_);
@@ -165,7 +183,10 @@ void AttackWorkspaceWindow::DrawToolbar()
 {
     BS_PROFILE_SCOPE("AttackWorkspaceWindow::DrawToolbar");
 
-    if (!ImGui::BeginMenuBar()) return;
+    if (!ImGui::BeginMenuBar())
+    {
+        return;
+    }
 
     ImGui::MenuItem("Attack Objects Only", nullptr, &showOnlyAttackObjects);
     ImGui::SameLine();
@@ -240,9 +261,18 @@ void AttackWorkspaceWindow::DrawTargetListPanel()
     const std::shared_ptr<GameObject> currentTarget_ = ResolveTarget();
     for (const std::shared_ptr<GameObject>& object_ : gameObjectManager->GetObjects())
     {
-        if (!object_) continue;
-        if (showOnlyAttackObjects && !HasAttackWorkspaceComponents(object_)) continue;
-        if (!ContainsCaseInsensitive(object_->GetName(), targetFilterText)) continue;
+        if (!object_)
+        {
+            continue;
+        }
+        if (showOnlyAttackObjects && !HasAttackWorkspaceComponents(object_))
+        {
+            continue;
+        }
+        if (!ContainsCaseInsensitive(object_->GetName(), targetFilterText))
+        {
+            continue;
+        }
 
         const bool selected_ = object_ == currentTarget_;
         if (ImGui::Selectable(object_->GetName().c_str(), selected_))
@@ -297,7 +327,10 @@ void AttackWorkspaceWindow::DrawActionPanel()
             {
                 ExecuteTargetAction(ACTIONS[index_].actionName);
             }
-            if (index_ % 2 == 0) ImGui::SameLine();
+            if (index_ % 2 == 0)
+            {
+                ImGui::SameLine();
+            }
         }
     }
 
@@ -424,16 +457,25 @@ void AttackWorkspaceWindow::RenderPreview(const ImVec2& previewSize_)
 {
     BS_PROFILE_SCOPE("AttackWorkspaceWindow::RenderPreview");
 
-    if (!gameObjectManager) return;
+    if (!gameObjectManager)
+    {
+        return;
+    }
 
     auto& graphics_ = GraphicsDeviceManager::Instance();
     ID3D11Device* device_ = graphics_.GetDevice();
     ID3D11DeviceContext* context_ = graphics_.GetContext();
-    if (!device_ || !context_) return;
+    if (!device_ || !context_)
+    {
+        return;
+    }
 
     const int width_ = (std::max)(1, static_cast<int>(previewSize_.x));
     const int height_ = (std::max)(1, static_cast<int>(previewSize_.y));
-    if (!previewTarget.Resize(device_, width_, height_)) return;
+    if (!previewTarget.Resize(device_, width_, height_))
+    {
+        return;
+    }
 
     previewCamera.SetPerspectiveFov(
         45.0f,
@@ -488,7 +530,10 @@ void AttackWorkspaceWindow::RenderPreview(const ImVec2& previewSize_)
 
     for (const std::shared_ptr<GameObject>& object_ : gameObjectManager->GetObjects())
     {
-        if (!object_) continue;
+        if (!object_)
+        {
+            continue;
+        }
 
         // 停止中のSceneでもInspector変更後の位置関係をPreviewへ反映する。
         object_->UpdateTransform();
@@ -548,14 +593,20 @@ void AttackWorkspaceWindow::RenderPreview(const ImVec2& previewSize_)
 std::shared_ptr<GameObject> AttackWorkspaceWindow::ResolveTarget() const
 {
     std::shared_ptr<GameObject> target_ = targetObject.lock();
-    if (target_) return target_;
+    if (target_)
+    {
+        return target_;
+    }
     return gameObjectManager ? gameObjectManager->GetSelectedObject() : nullptr;
 }
 
 bool AttackWorkspaceWindow::HasAttackWorkspaceComponents(
     const std::shared_ptr<GameObject>& object_) const
 {
-    if (!object_) return false;
+    if (!object_)
+    {
+        return false;
+    }
 
     return object_->GetComponent<DragonAIComponent>() ||
         object_->GetComponent<DragonAttackControllerComponent>() ||
@@ -576,7 +627,10 @@ void AttackWorkspaceWindow::SelectTarget(const std::shared_ptr<GameObject>& obje
 void AttackWorkspaceWindow::ExecuteTargetAction(const std::string& actionName_)
 {
     const std::shared_ptr<GameObject> target_ = ResolveTarget();
-    if (!target_) return;
+    if (!target_)
+    {
+        return;
+    }
 
     // Workspaceからのテスト発火はGameObjectのAction探索経路へ通し、Sequencerと同じ呼び出し条件に揃える。
     target_->ExecuteAction(actionName_);
@@ -587,7 +641,10 @@ void AttackWorkspaceWindow::DrawDragonAIActionCombo(
 {
     BS_PROFILE_SCOPE("AttackWorkspaceWindow::DrawDragonAIActionCombo");
 
-    if (!dragonAI_) return;
+    if (!dragonAI_)
+    {
+        return;
+    }
 
     ImGui::SeparatorText("Dragon AI");
     constexpr int DRAGON_ACTION_COUNT_ =
@@ -611,7 +668,10 @@ void AttackWorkspaceWindow::DrawDragonAIActionCombo(
             {
                 selectedDragonActionIndex = actionIndex_;
             }
-            if (selected_) ImGui::SetItemDefaultFocus();
+            if (selected_)
+            {
+                ImGui::SetItemDefaultFocus();
+            }
         }
         ImGui::EndCombo();
     }

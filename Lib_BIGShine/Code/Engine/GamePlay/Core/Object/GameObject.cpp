@@ -34,8 +34,11 @@ namespace
                     ? right_.component->GetLateUpdatePriority()
                     : right_.component->GetUpdatePriority();
 
-                if (leftPriority_ != rightPriority_) return leftPriority_ < rightPriority_;
-                return left_.order < right_.order;
+                if (leftPriority_ != rightPriority_)
+            {
+                return leftPriority_ < rightPriority_;
+            }
+            return left_.order < right_.order;
             });
     }
 
@@ -69,10 +72,18 @@ namespace
 void GameObject::SetManager(GameObjectManager* manager_)
 {
     // Managerが変わる時は、CollisionSystemへの登録先も付け替える。
-    if (manager == manager_) return;
+    if (manager == manager_)
+    {
+        return;
+    }
 
     if (manager)
-        if (const auto observation_ = manager->GetCombatObservationSystem()) observation_->UnregisterObject(this);
+    {
+        if (const auto observation_ = manager->GetCombatObservationSystem())
+        {
+            observation_->UnregisterObject(this);
+        }
+    }
     UnregisterAllColliderComponents();
     manager = manager_;
     for (const std::shared_ptr<Component>& component_ : colliderComponents)
@@ -85,28 +96,43 @@ void GameObject::SetManager(GameObjectManager* manager_)
 
 void GameObject::NotifyComponentCompositionChanged()
 {
-    if (!manager) return;
+    if (!manager)
+    {
+        return;
+    }
     const auto owner_ = weak_from_this().lock();
     const auto observation_ = manager->GetCombatObservationSystem();
-    if (owner_ && observation_) observation_->RegisterObject(owner_);
+    if (owner_ && observation_)
+    {
+        observation_->RegisterObject(owner_);
+    }
 }
 
 void GameObject::RegisterColliderComponent(
     const std::shared_ptr<ColliderComponent>& collider_)
 {
-    if (!manager || !collider_) return;
+    if (!manager || !collider_)
+    {
+        return;
+    }
     manager->GetCollisionStepSystem().RegisterCollider(collider_);
 }
 
 void GameObject::UnregisterColliderComponent(ColliderComponent* collider_)
 {
-    if (!manager || !collider_) return;
+    if (!manager || !collider_)
+    {
+        return;
+    }
     manager->GetCollisionStepSystem().UnregisterCollider(collider_);
 }
 
 void GameObject::UnregisterAllColliderComponents()
 {
-    if (!manager) return;
+    if (!manager)
+    {
+        return;
+    }
     for (const std::shared_ptr<Component>& component_ : colliderComponents)
     {
         const std::shared_ptr<ColliderComponent> collider_ =
@@ -125,16 +151,25 @@ void GameObject::RegisterAction(
     localRegistry.RegisterAction(category_, BuildActionName(name_), [weakOwner_, func_]()
     {
         const auto owner_ = weakOwner_.lock();
-        if (owner_ && owner_->manager && !owner_->IsPendingDestroy() && func_) func_();
+        if (owner_ && owner_->manager && !owner_->IsPendingDestroy() && func_)
+        {
+            func_();
+        }
     });
 }
 
 void GameObject::SetName(const std::string& newName_)
 {
-    if (!nameComponent) return;
+    if (!nameComponent)
+    {
+        return;
+    }
 
     const std::string oldName_ = nameComponent->name;
-    if (oldName_ == newName_) return;
+    if (oldName_ == newName_)
+    {
+        return;
+    }
 
     nameComponent->name = newName_;
     if (manager)
@@ -146,11 +181,20 @@ void GameObject::SetName(const std::string& newName_)
 std::string GameObject::BuildActionName(const std::string& actionName_) const
 {
     // 既にObject名Prefixが付いている場合は二重に付けない。
-    if (actionName_.empty()) return {};
+    if (actionName_.empty())
+    {
+        return {};
+    }
     const std::string& objectName_ = GetName();
-    if (objectName_.empty()) return actionName_;
+    if (objectName_.empty())
+    {
+        return actionName_;
+    }
     const std::string prefix_ = objectName_ + "_";
-    if (actionName_.starts_with(prefix_)) return actionName_;
+    if (actionName_.starts_with(prefix_))
+    {
+        return actionName_;
+    }
     return prefix_ + actionName_;
 }
 
@@ -171,41 +215,82 @@ void GameObject::RegisterNamedGlobalAction(const std::string& category_, const s
 {
     const std::weak_ptr<GameObject> weakOwner_ = shared_from_this();
     const auto entry_ = std::make_pair(category_, name_);
-    if (std::find(globalActions.begin(), globalActions.end(), entry_) == globalActions.end()) globalActions.push_back(entry_);
+    if (std::find(globalActions.begin(), globalActions.end(), entry_) == globalActions.end())
+    {
+        globalActions.push_back(entry_);
+    }
     ActionRegistry::Instance().RegisterAction(category_, name_, [weakOwner_, function_]()
     {
         const auto owner_ = weakOwner_.lock();
-        if (owner_ && owner_->manager && !owner_->IsPendingDestroy() && function_) function_();
+        if (owner_ && owner_->manager && !owner_->IsPendingDestroy() && function_)
+        {
+            function_();
+        }
     });
 }
 
 bool GameObject::IsHierarchyReady()
 {
-    if (pendingDestroy || HasRuntimeFailure() || !IsReadyToStart()) return false;
-    for (const auto& component_ : components) if (component_ && !component_->IsStarted()) return false;
-    for (const auto& component_ : colliderComponents) if (component_ && !component_->IsStarted()) return false;
+    if (pendingDestroy || HasRuntimeFailure() || !IsReadyToStart())
+    {
+        return false;
+    }
+    for (const auto& component_ : components)
+    {
+        if (component_ && !component_->IsStarted())
+        {
+            return false;
+        }
+    }
+    for (const auto& component_ : colliderComponents)
+    {
+        if (component_ && !component_->IsStarted())
+        {
+            return false;
+        }
+    }
     for (const auto& child_ : transform->children)
-        if (child_) if (const auto actor_ = child_->gameObject.lock()) if (!actor_->IsHierarchyReady()) return false;
+    {
+        if (child_)
+        {
+            if (const auto actor_ = child_->gameObject.lock())
+            {
+                if (!actor_->IsHierarchyReady())
+                {
+                    return false;
+                }
+            }
+        }
+    }
     return IsRuntimeReady();
 }
 
 void GameObject::PrepareForDestroy()
 {
     BS_PROFILE_SCOPE("GameObject::PrepareForDestroy");
-    if (pendingDestroy) return;
+    if (pendingDestroy)
+    {
+        return;
+    }
     pendingDestroy = true;
     combatReady = false;
     // コールバックが別Objectの削除を予約しても、走査中のComponent配列を壊さない。
     const auto components_ = components;
     for (const auto& component_ : components_)
     {
-        if (!component_) continue;
+        if (!component_)
+        {
+            continue;
+        }
         component_->OnDestroy();
         component_->SetRuntimeSuppressed(true);
     }
     for (const auto& component_ : colliderComponents)
     {
-        if (!component_) continue;
+        if (!component_)
+        {
+            continue;
+        }
         component_->OnDestroy();
         component_->SetRuntimeSuppressed(true);
         if (const auto collider_ = std::dynamic_pointer_cast<ColliderComponent>(component_))
@@ -215,7 +300,10 @@ void GameObject::PrepareForDestroy()
             collider_->ReleasePhysXActor();
         }
     }
-    for (const auto& entry_ : globalActions) ActionRegistry::Instance().RemoveAction(entry_.first, entry_.second);
+    for (const auto& entry_ : globalActions)
+    {
+        ActionRegistry::Instance().RemoveAction(entry_.first, entry_.second);
+    }
     globalActions.clear();
     localRegistry.Clear();
 }
@@ -294,7 +382,12 @@ void GameObject::CallAllComponentStart()
             collider_->SetStarted(true);
             // 戦闘禁止で生成されたColliderは、Start後にも物理から除外する。
             if (!collider_->IsEnabled())
-                if (const auto physics_ = std::dynamic_pointer_cast<ColliderComponent>(collider_)) physics_->ReleasePhysXActor();
+            {
+                if (const auto physics_ = std::dynamic_pointer_cast<ColliderComponent>(collider_))
+                {
+                    physics_->ReleasePhysXActor();
+                }
+            }
         }
     }
 
@@ -304,7 +397,10 @@ void GameObject::CallAllComponentStart()
     for (auto& comp : tempComponents)
     {
         // 1. まず NULL チェック
-        if (!comp) continue;
+        if (!comp)
+        {
+            continue;
+        }
 
         // 2. メモリが有効かどうかの簡易チェック (MSVCデバッグ時)
         // 本来は shared_ptr なので起きにくいはずですが、
@@ -337,28 +433,40 @@ bool GameObject::IsReadyToStart()
     // Scene開始前に、必要なAssetやRuntime準備が終わっているかComponent単位で確認する。
     for (const std::shared_ptr<Component>& collider_ : colliderComponents)
     {
-        if (!collider_ || !collider_->IsEnabled()) continue;
+        if (!collider_ || !collider_->IsEnabled())
+        {
+            continue;
+        }
         {
             BS_PROFILE_SCOPE("GameObject::CheckColliderLoadReady");
             const std::string profileName_ = collider_->GetName();
             {
                 BS_PROFILE_SCOPE_DYNAMIC(profileName_.c_str());
                 collider_->UpdateLoadState();
-                if (!collider_->IsLoadReady()) return false;
+                if (!collider_->IsLoadReady())
+                {
+                    return false;
+                }
             }
         }
     }
 
     for (const std::shared_ptr<Component>& comp_ : components)
     {
-        if (!comp_ || !comp_->IsEnabled()) continue;
+        if (!comp_ || !comp_->IsEnabled())
+        {
+            continue;
+        }
         {
             BS_PROFILE_SCOPE("GameObject::CheckComponentLoadReady");
             const std::string profileName_ = comp_->GetName();
             {
                 BS_PROFILE_SCOPE_DYNAMIC(profileName_.c_str());
                 comp_->UpdateLoadState();
-                if (!comp_->IsLoadReady()) return false;
+                if (!comp_->IsLoadReady())
+                {
+                    return false;
+                }
             }
         }
     }
@@ -370,16 +478,28 @@ bool GameObject::IsRuntimeReady() const
 {
     for (const std::shared_ptr<Component>& collider_ : colliderComponents)
     {
-        if (!collider_ || !collider_->IsEnabled()) continue;
+        if (!collider_ || !collider_->IsEnabled())
+        {
+            continue;
+        }
         collider_->UpdateLoadState();
-        if (!collider_->IsLoadReady() || !collider_->IsRuntimeReady()) return false;
+        if (!collider_->IsLoadReady() || !collider_->IsRuntimeReady())
+        {
+            return false;
+        }
     }
 
     for (const std::shared_ptr<Component>& comp_ : components)
     {
-        if (!comp_ || !comp_->IsEnabled()) continue;
+        if (!comp_ || !comp_->IsEnabled())
+        {
+            continue;
+        }
         comp_->UpdateLoadState();
-        if (!comp_->IsLoadReady() || !comp_->IsRuntimeReady()) return false;
+        if (!comp_->IsLoadReady() || !comp_->IsRuntimeReady())
+        {
+            return false;
+        }
     }
 
     return true;
@@ -389,12 +509,18 @@ bool GameObject::HasRuntimeFailure() const
 {
     for (const std::shared_ptr<Component>& collider_ : colliderComponents)
     {
-        if (collider_ && collider_->IsEnabled() && collider_->HasRuntimeFailure()) return true;
+        if (collider_ && collider_->IsEnabled() && collider_->HasRuntimeFailure())
+        {
+            return true;
+        }
     }
 
     for (const std::shared_ptr<Component>& comp_ : components)
     {
-        if (comp_ && comp_->IsEnabled() && comp_->HasRuntimeFailure()) return true;
+        if (comp_ && comp_->IsEnabled() && comp_->HasRuntimeFailure())
+        {
+            return true;
+        }
     }
 
     return false;
@@ -402,16 +528,25 @@ bool GameObject::HasRuntimeFailure() const
 
 bool GameObject::IsRequiredForSceneStart() const
 {
-    if (requiredForSceneStart) return true;
+    if (requiredForSceneStart)
+    {
+        return true;
+    }
 
     for (const std::shared_ptr<Component>& collider_ : colliderComponents)
     {
-        if (collider_ && collider_->IsEnabled() && collider_->IsRequiredForSceneStart()) return true;
+        if (collider_ && collider_->IsEnabled() && collider_->IsRequiredForSceneStart())
+        {
+            return true;
+        }
     }
 
     for (const std::shared_ptr<Component>& comp_ : components)
     {
-        if (comp_ && comp_->IsEnabled() && comp_->IsRequiredForSceneStart()) return true;
+        if (comp_ && comp_->IsEnabled() && comp_->IsRequiredForSceneStart())
+        {
+            return true;
+        }
     }
 
     return false;
@@ -422,7 +557,9 @@ std::shared_ptr<Component> GameObject::GetComponentByName(const std::string& com
     for (auto& comp : components)
     {
         if (comp->GetName() == compName_)
+        {
             return comp;
+        }
     }
     //コリジョンは複数のものをもてるようにしたのであわせて無効化
     //for (auto& collider_ : colliderComponents)
@@ -463,8 +600,14 @@ void GameObject::Update(float et)
         for (int order_ = 0; order_ < static_cast<int>(components.size()); ++order_)
         {
             auto& comp_ = components[order_];
-            if (!comp_ || !comp_->IsEnabled() || !comp_->IsStarted()) continue;
-            if (!comp_->ShouldUpdate()) continue;
+            if (!comp_ || !comp_->IsEnabled() || !comp_->IsStarted())
+            {
+                continue;
+            }
+            if (!comp_->ShouldUpdate())
+            {
+                continue;
+            }
 
             const std::string& name_ = comp_->GetName();
 
@@ -496,8 +639,14 @@ void GameObject::Update(float et)
         for (int order_ = 0; order_ < static_cast<int>(components.size()); ++order_)
         {
             auto& comp_ = components[order_];
-            if (!comp_ || !comp_->IsEnabled() || !comp_->IsStarted()) continue;
-            if (!comp_->ShouldUpdate()) continue;
+            if (!comp_ || !comp_->IsEnabled() || !comp_->IsStarted())
+            {
+                continue;
+            }
+            if (!comp_->ShouldUpdate())
+            {
+                continue;
+            }
 
             const std::string& name_ = comp_->GetName();
 
@@ -528,8 +677,14 @@ void GameObject::Update(float et)
         for (int order_ = 0; order_ < static_cast<int>(colliderComponents.size()); ++order_)
         {
             auto& collider_ = colliderComponents[order_];
-            if (!collider_ || !collider_->IsEnabled() || !collider_->IsStarted()) continue;
-            if (!collider_->ShouldUpdate()) continue;
+            if (!collider_ || !collider_->IsEnabled() || !collider_->IsStarted())
+            {
+                continue;
+            }
+            if (!collider_->ShouldUpdate())
+            {
+                continue;
+            }
 
             entries_.push_back({ collider_, order_ });
         }
@@ -565,8 +720,14 @@ void GameObject::LateUpdate(float et)
         for (int order_ = 0; order_ < static_cast<int>(components.size()); ++order_)
         {
             auto& comp_ = components[order_];
-            if (!comp_ || !comp_->IsEnabled() || !comp_->IsStarted()) continue;
-            if (!comp_->ShouldLateUpdate()) continue;
+            if (!comp_ || !comp_->IsEnabled() || !comp_->IsStarted())
+            {
+                continue;
+            }
+            if (!comp_->ShouldLateUpdate())
+            {
+                continue;
+            }
 
             const std::string& name_ = comp_->GetName();
 
@@ -597,8 +758,14 @@ void GameObject::LateUpdate(float et)
         for (int order_ = 0; order_ < static_cast<int>(components.size()); ++order_)
         {
             auto& comp_ = components[order_];
-            if (!comp_ || !comp_->IsEnabled() || !comp_->IsStarted()) continue;
-            if (!comp_->ShouldLateUpdate()) continue;
+            if (!comp_ || !comp_->IsEnabled() || !comp_->IsStarted())
+            {
+                continue;
+            }
+            if (!comp_->ShouldLateUpdate())
+            {
+                continue;
+            }
 
             const std::string& name_ = comp_->GetName();
 
@@ -631,11 +798,17 @@ void GameObject::ExecuteAction(
     // 対象Object、親、子、Globalの順でActionを探し、Animation通知を適切なObjectへ届ける。
     const std::shared_ptr<GameObject> startObject_ =
         target_ ? target_ : shared_from_this();
-    if (!startObject_ || actionName_.empty()) return;
+    if (!startObject_ || actionName_.empty())
+    {
+        return;
+    }
 
     auto callLocal_ = [&actionName_](const std::shared_ptr<GameObject>& object_)
     {
-        if (!object_) return false;
+        if (!object_)
+        {
+            return false;
+        }
 
         const std::string resolvedActionName_ = object_->BuildActionName(actionName_);
         if (object_->localRegistry.HasAction(resolvedActionName_))
@@ -643,12 +816,18 @@ void GameObject::ExecuteAction(
             object_->localRegistry.Call(resolvedActionName_);
             return true;
         }
-        if (!object_->localRegistry.HasAction(actionName_)) return false;
+        if (!object_->localRegistry.HasAction(actionName_))
+        {
+            return false;
+        }
         object_->localRegistry.Call(actionName_);
         return true;
     };
 
-    if (callLocal_(startObject_)) return;
+    if (callLocal_(startObject_))
+    {
+        return;
+    }
 
     std::shared_ptr<Transform> parentTransform_ =
         startObject_->transform ? startObject_->transform->parent.lock() : nullptr;
@@ -656,8 +835,14 @@ void GameObject::ExecuteAction(
     {
         const std::shared_ptr<GameObject> parentObject_ =
             parentTransform_->gameObject.lock();
-        if (!parentObject_) break;
-        if (callLocal_(parentObject_)) return;
+        if (!parentObject_)
+        {
+            break;
+        }
+        if (callLocal_(parentObject_))
+        {
+            return;
+        }
         parentTransform_ = parentObject_->transform
             ? parentObject_->transform->parent.lock()
             : nullptr;
@@ -665,17 +850,29 @@ void GameObject::ExecuteAction(
 
     auto callChildren_ = [&](auto&& self_, const std::shared_ptr<GameObject>& object_) -> bool
     {
-        if (!object_ || !object_->transform) return false;
+        if (!object_ || !object_->transform)
+        {
+            return false;
+        }
         for (const std::shared_ptr<Transform>& childTransform_ : object_->transform->children)
         {
-            if (!childTransform_) continue;
+            if (!childTransform_)
+            {
+                continue;
+            }
             const std::shared_ptr<GameObject> childObject_ =
                 childTransform_->gameObject.lock();
-            if (callLocal_(childObject_) || self_(self_, childObject_)) return true;
+            if (callLocal_(childObject_) || self_(self_, childObject_))
+            {
+                return true;
+            }
         }
         return false;
     };
-    if (callChildren_(callChildren_, startObject_)) return;
+    if (callChildren_(callChildren_, startObject_))
+    {
+        return;
+    }
 
     ActionRegistry::Instance().Call(actionName_);
 }
@@ -732,7 +929,9 @@ void GameObject::Gui()
     // Add Component
     // -----------------------------
     if (ImGui::Button(IM_U8("コンポーネント追加##GameObject_AddComponentButton"), ImVec2(-1, 0))) // 横幅いっぱいのボタン
+    {
         ImGui::OpenPopup("AddComponentPopup");
+    }
 
     if (ImGui::BeginPopup("AddComponentPopup"))
     {
@@ -780,13 +979,13 @@ void GameObject::Gui()
     // 表示用ラベル
     const char* layerNames[] = {
         IM_U8("デフォルト"), IM_U8("プレイヤー"), IM_U8("敵"), IM_U8("プレイヤー弾"),
-        IM_U8("敵弾"), IM_U8("UI"), IM_U8("環境"), IM_U8("スニーク対象"), IM_U8("地形"), IM_U8("壁"), IM_U8("アイテム")
+        IM_U8("敵弾"), IM_U8("UI"), IM_U8("環境"), IM_U8("スニーク対象"), IM_U8("地形"), IM_U8("壁"), IM_U8("アイテム"), IM_U8("エフェクト")
     };
 
     // 対応するEnum値を配列化しておく
     const LayerType layerValues[] = {
         LayerType::Default, LayerType::Player, LayerType::Enemy, LayerType::PlayerBullet,
-        LayerType::EnemyBullet, LayerType::UI, LayerType::Environment, LayerType::SneakObject, LayerType::Terrain, LayerType::Wall,LayerType::Item,
+        LayerType::EnemyBullet, LayerType::UI, LayerType::Environment, LayerType::SneakObject, LayerType::Terrain, LayerType::Wall, LayerType::Item, LayerType::EFFECT,
     };
 
     // 現在の値がどのインデックスに該当するか探す
@@ -837,7 +1036,10 @@ void GameObject::Gui()
         for (auto& obj : allObjects)
         {
             // 自分自身には親子付けできない
-            if (obj->shared_from_this() == shared_from_this()) continue;
+            if (obj->shared_from_this() == shared_from_this())
+            {
+                continue;
+            }
 
             bool isSelected = (currentParentName == obj->GetName());
             if (ImGui::Selectable(obj->GetName().c_str(), isSelected))
@@ -866,11 +1068,17 @@ void GameObject::Gui()
 
         // ON / OFF チェックボックス
         bool enabled = comp->IsEnabled();
-        if (ImGui::Checkbox("##GameObject_ComponentEnabledCheckbox", &enabled)) comp->SetEnabled(enabled);
+        if (ImGui::Checkbox("##GameObject_ComponentEnabledCheckbox", &enabled))
+        {
+            comp->SetEnabled(enabled);
+        }
 
         ImGui::SameLine();
 
-        if (!enabled) ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.4f);
+        if (!enabled)
+        {
+            ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.4f);
+        }
 
         // ヘッダー表示
         bool open = ImGui::CollapsingHeader(comp->GetName().c_str());
@@ -885,9 +1093,15 @@ void GameObject::Gui()
             ImGui::EndPopup();
         }
 
-        if (!enabled) ImGui::PopStyleVar();
+        if (!enabled)
+        {
+            ImGui::PopStyleVar();
+        }
 
-        if (open) comp->DrawGuiProfiled();
+        if (open)
+        {
+            comp->DrawGuiProfiled();
+        }
 
         ImGui::PopID();
     }
@@ -900,11 +1114,17 @@ void GameObject::Gui()
         ImGui::PushID(collider_.get());
 
         bool enabled = collider_->IsEnabled();
-        if (ImGui::Checkbox("##GameObject_ColliderEnabledCheckbox", &enabled)) collider_->SetEnabled(enabled);
+        if (ImGui::Checkbox("##GameObject_ColliderEnabledCheckbox", &enabled))
+        {
+            collider_->SetEnabled(enabled);
+        }
 
         ImGui::SameLine();
 
-        if (!enabled) ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.4f);
+        if (!enabled)
+        {
+            ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.4f);
+        }
 
         std::string colliderHeader_ = collider_->GetName();
         const auto colliderComponent_ = std::dynamic_pointer_cast<ColliderComponent>(collider_);
@@ -925,9 +1145,15 @@ void GameObject::Gui()
             ImGui::EndPopup();
         }
 
-        if (!enabled) ImGui::PopStyleVar();
+        if (!enabled)
+        {
+            ImGui::PopStyleVar();
+        }
 
-        if (open) collider_->DrawGuiProfiled();
+        if (open)
+        {
+            collider_->DrawGuiProfiled();
+        }
 
         ImGui::PopID();
     }
@@ -938,7 +1164,10 @@ void GameObject::Gui()
     if (componentToRemove)
     {
         components.erase(std::remove_if(components.begin(), components.end(),
-            [&](const auto& comp) { return comp.get() == componentToRemove; }),
+            [&](const auto& comp)
+        {
+            return comp.get() == componentToRemove;
+        }),
             components.end());
     }
 
@@ -949,10 +1178,16 @@ void GameObject::Gui()
             dynamic_cast<ColliderComponent*>(colliderToRemove));
         colliderComponents.erase(
             std::remove_if(colliderComponents.begin(), colliderComponents.end(),
-                [&](const auto& collider_) { return collider_.get() == colliderToRemove; }),
+                [&](const auto& collider_)
+        {
+            return collider_.get() == colliderToRemove;
+        }),
             colliderComponents.end());
     }
-    if (componentToRemove || colliderToRemove) NotifyComponentCompositionChanged();
+    if (componentToRemove || colliderToRemove)
+    {
+        NotifyComponentCompositionChanged();
+    }
 }
 
 nlohmann::json GameObject::Save() const
@@ -1031,7 +1266,7 @@ void GameObject::Load(const nlohmann::json& j)
     // JSONからObject基本情報とComponent構成を復元する。
     // 1. 基本情報の復元
     SetName(j.value("Name", "GameObject"));
-    layer = static_cast<LayerType>(j.value("Layer", 0));
+    layer = static_cast<LayerType>(j.value("Layer", 0u));
     mask = j.value("CollisionMask", static_cast<uint32_t>(LayerType::Default));
     requiredForSceneStart = j.value("RequiredForSceneStart", false);
 
@@ -1060,7 +1295,10 @@ void GameObject::Load(const nlohmann::json& j)
         auto comp = ComponentRegistry::Instance().Create(typeName, shared_from_this(), false, allowDuplicate_);
 
         printf("Loading component: %s\n", typeName.c_str());
-        if (comp) printf("Instance created successfully.\n");
+        if (comp)
+        {
+            printf("Instance created successfully.\n");
+        }
 
         if (comp) {
             // 2. 基本設定とデータの復元
@@ -1079,7 +1317,10 @@ void GameObject::Load(const nlohmann::json& j)
             auto col = std::dynamic_pointer_cast<ColliderComponent>(comp);
             if (col) {
                 const auto exists_ = std::find(colliderComponents.begin(), colliderComponents.end(), comp);
-                if (exists_ == colliderComponents.end()) colliderComponents.push_back(col);
+                if (exists_ == colliderComponents.end())
+                {
+                    colliderComponents.push_back(col);
+                }
             }
         }
         };

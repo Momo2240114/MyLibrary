@@ -67,7 +67,10 @@ void TimeManager::SetTargetScale(uint32_t layerMask_, float scale_, float speed_
         defaultState.targetScale = scale_;
         defaultState.lerpSpeed = speed_;
         defaultState.phase = TimeState::PHASE::IDLE;
-        if (layerMask_ == 0u) return;
+        if (layerMask_ == 0u)
+        {
+            return;
+        }
     }
 
     for (uint32_t i_ = 0; i_ < 32; ++i_)
@@ -92,7 +95,10 @@ void TimeManager::TriggerHitStop(uint32_t layerMask_, float duration_, float sca
     {
         defaultState.hitStopTimer = duration_;
         defaultState.hitStopScale = (std::clamp)(scale_, 0.0f, 1.0f);
-        if (layerMask_ == 0u) return;
+        if (layerMask_ == 0u)
+        {
+            return;
+        }
     }
 
     for (uint32_t i_ = 0; i_ < 32; ++i_)
@@ -182,7 +188,10 @@ void TimeManager::PlayTimedScale(
     if (layerMask_ == 0u || layerMask_ == static_cast<uint32_t>(TarGetLayerType::All))
     {
         defaultState.Play(targetScale_, transitionDuration_, holdDuration_, returnDuration_, defaultScale_);
-        if (layerMask_ == 0u) return;
+        if (layerMask_ == 0u)
+        {
+            return;
+        }
     }
 
     for (uint32_t index_ = 0; index_ < 32; ++index_)
@@ -203,7 +212,10 @@ void TimeManager::ResetToDefaults(uint32_t layerMask_, bool resetConfiguredDefau
     if (layerMask_ == 0u || layerMask_ == static_cast<uint32_t>(TarGetLayerType::All))
     {
         defaultState.Reset(resetConfiguredDefaults_);
-        if (layerMask_ == 0u) return;
+        if (layerMask_ == 0u)
+        {
+            return;
+        }
     }
 
     for (uint32_t index_ = 0; index_ < 32; ++index_)

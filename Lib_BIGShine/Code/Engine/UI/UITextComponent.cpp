@@ -36,7 +36,12 @@ namespace
         static std::unordered_map<std::wstring, std::weak_ptr<UITextFontResource>> fontResources_;
         const auto iterator_ = fontResources_.find(fontPath_);
         if (!forceReload_ && iterator_ != fontResources_.end())
-            if (const auto resource_ = iterator_->second.lock()) return resource_;
+        {
+            if (const auto resource_ = iterator_->second.lock())
+            {
+                return resource_;
+            }
+        }
 
         BS_PROFILE_SCOPE("UITextComponent::LoadSharedFont");
         auto resource_ = std::make_shared<UITextFontResource>();
@@ -162,8 +167,14 @@ namespace
         static bool started_ = false;
         static bool failed_ = false;
 
-        if (started_) return true;
-        if (failed_) return false;
+        if (started_)
+        {
+            return true;
+        }
+        if (failed_)
+        {
+            return false;
+        }
 
         Gdiplus::GdiplusStartupInput startupInput_{};
         if (Gdiplus::GdiplusStartup(&gdiplusToken_, &startupInput_, nullptr) != Gdiplus::Ok)
@@ -251,7 +262,10 @@ void UITextComponent::Gui()
     if (ImGui::Button("Rebuild Text Texture"))
     {
         // Editorからの明示的な再生成では、差し替えたフォントファイルも読み直せるようにする。
-        if (EnsureGdiplusStarted()) fontResource = AcquireTextFontResource(ResolveFontPath(),true);
+        if (EnsureGdiplusStarted())
+        {
+            fontResource = AcquireTextFontResource(ResolveFontPath(),true);
+        }
         MarkDirty();
         RebuildTextTexture();
     }
@@ -301,7 +315,10 @@ void UITextComponent::Deserialize(const nlohmann::json& json_)
 
 void UITextComponent::SetText(const std::string& text_)
 {
-    if (text == text_) return;
+    if (text == text_)
+    {
+        return;
+    }
     text = text_;
     MarkDirty();
 }
@@ -331,7 +348,10 @@ void UITextComponent::RebuildTextTexture()
     ResolveTargets();
 
     const std::shared_ptr<SpriteRenderer> spriteRenderer_ = spriteRenderer.lock();
-    if (!spriteRenderer_) return;
+    if (!spriteRenderer_)
+    {
+        return;
+    }
 
     if (!EnsureGdiplusStarted())
     {
@@ -423,20 +443,26 @@ void UITextComponent::RebuildTextTexture()
         const auto originalPixels_ = pixels_;
         const float strength_ = fontStrokeWidth * 0.5f;
         for (int row_ = 0; row_ < textureHeight_; ++row_)
+        {
             for (int column_ = 0; column_ < textureWidth_; ++column_)
             {
                 const auto offset_ = (static_cast<std::size_t>(row_) * textureWidth_ + column_) * 4;
                 auto expandedAlpha_ = originalPixels_[offset_ + 3];
                 for (int offsetY_ = -1; offsetY_ <= 1; ++offsetY_)
+                {
                     for (int offsetX_ = -1; offsetX_ <= 1; ++offsetX_)
                     {
                         const int sourceY_ = row_ + offsetY_;
                         const int sourceX_ = column_ + offsetX_;
-                        if (sourceY_ < 0 || sourceY_ >= textureHeight_ || sourceX_ < 0 || sourceX_ >= textureWidth_) continue;
+                        if (sourceY_ < 0 || sourceY_ >= textureHeight_ || sourceX_ < 0 || sourceX_ >= textureWidth_)
+                        {
+                            continue;
+                        }
                         const auto sourceOffset_ = (static_cast<std::size_t>(sourceY_) * textureWidth_ + sourceX_) * 4;
                         const auto neighborAlpha_ = static_cast<unsigned char>(std::round(originalPixels_[sourceOffset_ + 3] * strength_));
                         expandedAlpha_ = (std::max)(expandedAlpha_, neighborAlpha_);
                     }
+                }
                 if (expandedAlpha_ > originalPixels_[offset_ + 3])
                 {
                     pixels_[offset_] = blue_;
@@ -445,6 +471,7 @@ void UITextComponent::RebuildTextTexture()
                     pixels_[offset_ + 3] = expandedAlpha_;
                 }
             }
+        }
     }
 
     if (CreateTextureFromPixels(pixels_, textureWidth_, textureHeight_) && autoSizeWidget)
@@ -469,7 +496,10 @@ bool UITextComponent::CreateTextureFromPixels(
     BS_PROFILE_SCOPE("UITextComponent::CreateTextureFromPixels");
 
     ID3D11Device* device_ = GraphicsDeviceManager::Instance().GetDevice();
-    if (!device_ || pixels_.empty() || width_ <= 0 || height_ <= 0) return false;
+    if (!device_ || pixels_.empty() || width_ <= 0 || height_ <= 0)
+    {
+        return false;
+    }
 
     D3D11_TEXTURE2D_DESC textureDesc_{};
     // Text Textureは生成後にCPUから更新しないためImmutableで作る。
@@ -510,7 +540,10 @@ bool UITextComponent::CreateTextureFromPixels(
 
 std::wstring UITextComponent::ConvertUtf8ToWide(const std::string& text_) const
 {
-    if (text_.empty()) return {};
+    if (text_.empty())
+    {
+        return {};
+    }
 
     const int length_ = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, text_.c_str(), -1, nullptr, 0);
     if (length_ <= 0)
@@ -527,7 +560,10 @@ std::wstring UITextComponent::ConvertUtf8ToWide(const std::string& text_) const
 
 std::wstring UITextComponent::ResolveFontPath() const
 {
-    if (fontPath.empty()) return {};
+    if (fontPath.empty())
+    {
+        return {};
+    }
     return WindowsDialogHelper::Utf8ToPath(fontPath).wstring();
 }
 

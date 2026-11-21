@@ -80,7 +80,10 @@ namespace
         const char* key_,
         DirectX::XMFLOAT4& value_)
     {
-        if (!json_.contains(key_) || !json_[key_].is_array() || json_[key_].size() < 4) return;
+        if (!json_.contains(key_) || !json_[key_].is_array() || json_[key_].size() < 4)
+        {
+            return;
+        }
 
         value_.x = json_[key_][0].get<float>();
         value_.y = json_[key_][1].get<float>();
@@ -138,7 +141,10 @@ void UIProgressBarComponent::Update(float deltaTime_)
     const float targetDelta_ = targetRate - previousTargetRate_;
     const float safeDeltaTime_ = (std::max)(0.0f, deltaTime_);
     // 被弾が続いた場合は待機時間を取り直し、最後の被弾から遅延表示を開始する。
-    if (targetDelta_ < -0.0001f) damageDelayTimer = damageDelayDuration;
+    if (targetDelta_ < -0.0001f)
+    {
+        damageDelayTimer = damageDelayDuration;
+    }
     const float damageFollowTime_ = (std::max)(0.0f, safeDeltaTime_ - damageDelayTimer);
     damageDelayTimer = (std::max)(0.0f, damageDelayTimer - safeDeltaTime_);
     if (std::fabs(targetDelta_) > 0.0001f)
@@ -312,10 +318,16 @@ void UIProgressBarComponent::ResolveWidgets()
     // GameObjectManager内を走査し、設定IDに一致するUIWidgetを各役割へ割り当てる。
     for (const std::shared_ptr<GameObject>& object_ : GetManager().GetObjects())
     {
-        if (!object_) continue;
+        if (!object_)
+        {
+            continue;
+        }
 
         const std::shared_ptr<UIWidgetComponent> widget_ = object_->GetComponent<UIWidgetComponent>();
-        if (!widget_) continue;
+        if (!widget_)
+        {
+            continue;
+        }
 
         const std::string& widgetId_ = widget_->GetWidgetId();
         if (!backgroundWidgetId.empty() && widgetId_ == backgroundWidgetId)
@@ -362,7 +374,10 @@ void UIProgressBarComponent::ApplyLayoutRates()
 
 void UIProgressBarComponent::ApplyRateToWidget(UIWidgetComponent* widget_, float rate_)
 {
-    if (!widget_) return;
+    if (!widget_)
+    {
+        return;
+    }
 
     // 横方向AnchorMaxをrateへ合わせることで、親Rect内の表示幅を割合で表現する。
     UIRectTransform& rectTransform_ = widget_->GetRectTransform();
@@ -391,7 +406,10 @@ void UIProgressBarComponent::ApplyFlashLayout()
     BS_PROFILE_SCOPE("UIProgressBarComponent::ApplyFlashLayout");
 
     UIWidgetComponent* widget_ = flashWidget.lock().get();
-    if (!widget_) return;
+    if (!widget_)
+    {
+        return;
+    }
 
     UIRectTransform& rectTransform_ = widget_->GetRectTransform();
     // FlashはBar全体を覆うOverlayとして配置する。
@@ -411,7 +429,10 @@ void UIProgressBarComponent::ApplyEdgeHighlightLayout()
     BS_PROFILE_SCOPE("UIProgressBarComponent::ApplyEdgeHighlightLayout");
 
     UIWidgetComponent* widget_ = edgeHighlightWidget.lock().get();
-    if (!widget_) return;
+    if (!widget_)
+    {
+        return;
+    }
 
     const float rate_ = ClampRate(currentRate);
     UIRectTransform& rectTransform_ = widget_->GetRectTransform();
@@ -433,7 +454,10 @@ void UIProgressBarComponent::ApplyBackgroundLayout()
     BS_PROFILE_SCOPE("UIProgressBarComponent::ApplyBackgroundLayout");
 
     UIWidgetComponent* widget_ = backgroundWidget.lock().get();
-    if (!widget_) return;
+    if (!widget_)
+    {
+        return;
+    }
 
     UIRectTransform& rectTransform_ = widget_->GetRectTransform();
     // Backgroundは親の横幅全体へStretchさせる。

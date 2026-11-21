@@ -40,6 +40,8 @@ public:
     float CalculateReturnBlendRate() const;
     // 演出カメラがTPSと同じ追従対象を基準にできるよう、参照を解決して返す。
     std::shared_ptr<GameObject> GetFollowTarget();
+    float GetBaseDistance() const { return baseDistance; }
+    DirectX::XMFLOAT3 GetTargetOffset() const { return targetOffset; }
 
 private:
     // Camera入力Axisが未登録ならDefault設定を追加する。

@@ -10,7 +10,9 @@
 class StateMachine
 {
 public:
-	StateMachine(){}
+	StateMachine()
+	{
+	}
 
 	// 登録済みStateを破棄する。
 	~StateMachine();
@@ -28,8 +30,15 @@ public:
 	void RegisterState(State* state);
 
 	// 現在実行中のState名を返す。
-	const char* GetStateName()const { return currentState->GetName(); }
-	State* GetState()const { return currentState; }
+	const char* GetStateName()const
+	{
+		return currentState->GetName();
+	}
+
+	State* GetState()const
+	{
+		return currentState;
+	}
 
 private:
 	// 現在実行中のState。

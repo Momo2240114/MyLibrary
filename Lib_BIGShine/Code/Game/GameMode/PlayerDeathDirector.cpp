@@ -70,9 +70,14 @@ void PlayerDeathDirector::NormalizeSettings()
     const auto text_ = [&](const char* key_, const char* fallback_)
     {
         if (!settings.contains(key_) || !settings[key_].is_string() || settings[key_].get<std::string>().empty())
+        {
             settings[key_] = fallback_;
+        }
     };
-    if (!settings.is_object()) settings = nlohmann::json::object();
+    if (!settings.is_object())
+    {
+        settings = nlohmann::json::object();
+    }
     text_("StageCenterObject", "Stage");
     number_("CameraRise", 5.0f, 0.0f, 30.0f);
     number_("CenterPull", 0.18f, 0.0f, 0.8f);
@@ -93,7 +98,10 @@ void PlayerDeathDirector::LoadSettings()
     try
     {
         std::ifstream file_(SETTINGS_PATH);
-        if (file_) file_ >> settings;
+        if (file_)
+        {
+            file_ >> settings;
+        }
         status = "Settings loaded.";
     }
     catch (const std::exception& error_)
@@ -110,7 +118,10 @@ void PlayerDeathDirector::SaveSettings()
     std::ofstream file_(SETTINGS_PATH, std::ios::binary);
     for (const char character_ : settings.dump(4))
     {
-        if (character_ == '\n') file_.put('\r');
+        if (character_ == '\n')
+        {
+            file_.put('\r');
+        }
         file_.put(character_);
     }
     file_ << "\r\n";
@@ -120,19 +131,36 @@ void PlayerDeathDirector::SaveSettings()
 
 void PlayerDeathDirector::RequestDeath(const std::shared_ptr<GameObject>& player_)
 {
-    if (!IsActive() && player_ && player_->GetComponent<PlayerControllerComponent>()) requestedPlayer = player_;
+    if (!IsActive() && player_ && player_->GetComponent<PlayerControllerComponent>())
+    {
+        requestedPlayer = player_;
+    }
 }
 
 void PlayerDeathDirector::UpdatePlayerPresentation(float deltaTime_)
 {
     BS_PROFILE_SCOPE("PlayerDeathDirector::UpdatePlayerPresentation");
-    if (!player) return;
-    if (const auto controller_ = player->GetComponent<PlayerControllerComponent>()) controller_->Update(deltaTime_);
+    if (!player)
+    {
+        return;
+    }
+    if (const auto controller_ = player->GetComponent<PlayerControllerComponent>())
+    {
+        controller_->Update(deltaTime_);
+    }
     // 通常のAnimationControllerを通すため、クリップ、遷移、終了条件はグラフ上の設定がそのまま反映される。
-    if (const auto animation_ = player->GetComponent<AnimationControllerComponent>()) animation_->Update(deltaTime_);
+    if (const auto animation_ = player->GetComponent<AnimationControllerComponent>())
+    {
+        animation_->Update(deltaTime_);
+    }
     player->UpdateTransform();
     for (const auto& attachment_ : manager.FindComponents<ModelAttachmentComponent>())
-        if (attachment_ && attachment_->IsEnabled()) attachment_->SyncAttachment();
+    {
+        if (attachment_ && attachment_->IsEnabled())
+        {
+            attachment_->SyncAttachment();
+        }
+    }
 }
 
 void PlayerDeathDirector::PrepareFlashbackShot()
@@ -146,10 +174,15 @@ void PlayerDeathDirector::PrepareFlashbackShot()
         for (const auto name_ : FRAME_NODES)
         {
             const int index_ = model_->GetNodeIndex(name_);
-            if (index_ < 0) continue;
+            if (index_ < 0)
+            {
+                continue;
+            }
             const auto& world_ = model_->GetNodes()[index_].worldTransform;
             if (std::isfinite(world_._41) && std::isfinite(world_._42) && std::isfinite(world_._43))
+            {
                 points_[pointCount_++] = {world_._41, world_._42, world_._43};
+            }
         }
     }
 
@@ -174,10 +207,19 @@ void PlayerDeathDirector::PrepareFlashbackShot()
     {
         const auto bodyAxis_ = points_[pointCount_ - 1] - points_[0];
         side_ = Vector3{bodyAxis_.z, 0.0f, -bodyAxis_.x};
-        if (side_.Dot(inside_) < 0.0f) side_ = -side_;
-        if (side_.LengthSquared() < 0.01f) side_ = inside_;
+        if (side_.Dot(inside_) < 0.0f)
+        {
+            side_ = -side_;
+        }
+        if (side_.LengthSquared() < 0.01f)
+        {
+            side_ = inside_;
+        }
     }
-    if (side_.LengthSquared() < 0.01f) side_ = {0.0f, 0.0f, -1.0f};
+    if (side_.LengthSquared() < 0.01f)
+    {
+        side_ = {0.0f, 0.0f, -1.0f};
+    }
     side_.Normalize();
     auto viewFrom_ = Vector3::Up + side_ * 0.42f;
     viewFrom_.Normalize();
@@ -220,23 +262,37 @@ void PlayerDeathDirector::Begin(const std::shared_ptr<GameObject>& player_)
     previousInputCapture = manager.IsPlayInputCaptured();
     if (const auto mode_ = manager.GetGameModeManager())
     {
-        previousPlayerLock = mode_->IsPlayerControlLocked(); previousAILock = mode_->IsEnemyAILocked();
-        previousGameplayLock = mode_->IsGameplayLocked(); previousPresentation = mode_->IsPresentationPlaying();
+        previousPlayerLock = mode_->IsPlayerControlLocked();
+        previousAILock = mode_->IsEnemyAILocked();
+        previousGameplayLock = mode_->IsGameplayLocked();
+        previousPresentation = mode_->IsPresentationPlaying();
         previousBattlePause = mode_->IsBattlePaused();
-        mode_->SetPlayerControlLocked(true); mode_->SetEnemyAILocked(true);
-        mode_->SetGameplayLocked(true); mode_->SetPresentationPlaying(true); mode_->SetBattlePaused(true);
+        mode_->SetPlayerControlLocked(true);
+        mode_->SetEnemyAILocked(true);
+        mode_->SetGameplayLocked(true);
+        mode_->SetPresentationPlaying(true);
+        mode_->SetBattlePaused(true);
     }
-    if (const auto controller_ = player->GetComponent<PlayerControllerComponent>()) controller_->BeginDeathState();
+    if (const auto controller_ = player->GetComponent<PlayerControllerComponent>())
+    {
+        controller_->BeginDeathState();
+    }
     // 判断だけを止めても進行中の攻撃が残るため、Sceneの通常更新と全Colliderを演出中だけ停止する。
     colliderStates.clear();
     for (const auto& object_ : manager.GetObjects())
+    {
         if (object_ && !object_->IsPendingDestroy())
+        {
             for (const auto& collider_ : object_->colliderComponents)
+            {
                 if (collider_)
                 {
                     colliderStates.emplace_back(collider_, collider_->IsRuntimeSuppressed());
                     collider_->SetRuntimeSuppressed(true);
                 }
+            }
+        }
+    }
     const auto cameraManager_ = manager.GetCameraManager();
     const auto source_ = cameraManager_ ? cameraManager_->GetActiveCamera() : nullptr;
     camera = std::make_shared<CameraComponent>();
@@ -265,13 +321,22 @@ bool PlayerDeathDirector::Update(float deltaTime_)
     {
         auto actor_ = requestedPlayer.lock();
         if (!actor_)
+        {
             for (const auto& controller_ : manager.FindComponents<PlayerControllerComponent>())
             {
                 const auto candidate_ = controller_ && controller_->IsEnabled() ? controller_->GetGameObject() : nullptr;
                 const auto health_ = candidate_ ? candidate_->GetComponent<HealthComponent>() : nullptr;
-                if (candidate_ && !candidate_->IsPendingDestroy() && health_ && health_->IsDead()) { actor_ = candidate_; break; }
+                if (candidate_ && !candidate_->IsPendingDestroy() && health_ && health_->IsDead())
+                {
+                    actor_ = candidate_;
+                    break;
+                }
             }
-        if (!actor_) return false;
+        }
+        if (!actor_)
+        {
+            return false;
+        }
         const auto health_ = actor_->GetComponent<HealthComponent>();
         if (!actor_->transform || actor_->IsPendingDestroy() || !health_ || !health_->IsDead())
         {
@@ -288,14 +353,26 @@ bool PlayerDeathDirector::Update(float deltaTime_)
             // HUDが遅延ゲージを描き終えるまで、Sceneの通常更新を続ける。
             if (bar_->HasRemainingFill())
             {
-                if (bar_->ShouldUpdate()) return false;
+                if (bar_->ShouldUpdate())
+                {
+                    return false;
+                }
                 for (const auto& hud_ : manager.FindComponents<BattleHudComponent>())
-                    if (hud_->UpdatesPlayerHealthBar(bar_.get())) return false;
+                {
+                    if (hud_->UpdatesPlayerHealthBar(bar_.get()))
+                    {
+                        return false;
+                    }
+                }
             }
         }
         Begin(actor_);
     }
-    if (!player || player->IsPendingDestroy()) { Stop(); return true; }
+    if (!player || player->IsPendingDestroy())
+    {
+        Stop();
+        return true;
+    }
     // 死亡演出は戦闘のHitStopやTimeScaleから独立させ、起き上がりの実際の尺まで待つ。
     const float presentationDeltaTime_ = std::isfinite(deltaTime_) ? (std::max)(deltaTime_, 0.0f) : 0.0f;
     elapsed += presentationDeltaTime_;
@@ -309,7 +386,10 @@ bool PlayerDeathDirector::Update(float deltaTime_)
         if (deathFinishedTime < 0.0f && controller_ && controller_->IsDeathAnimationFinished())
         {
             deathFinishedTime = elapsed;
-            if (frameFlashback) PrepareFlashbackShot();
+            if (frameFlashback)
+            {
+                PrepareFlashbackShot();
+            }
         }
         const float ratio_ = SmoothRatio(elapsed, settings["CameraMoveTime"].get<float>());
         const float shotRatio_ = frameFlashback && deathFinishedTime >= 0.0f ?
@@ -341,7 +421,10 @@ bool PlayerDeathDirector::Update(float deltaTime_)
         {
             continueMenu.Update(deltaTime_);
             const int result_ = continueMenu.TakeResult();
-            if (result_ == 0) BeginRecovery();
+            if (result_ == 0)
+            {
+                BeginRecovery();
+            }
             else if (result_ == 1 && !returningToTitle)
             {
                 // 死亡時の抑制はシーン破棄まで維持し、遷移直前に戦闘を再開しない。
@@ -359,7 +442,11 @@ bool PlayerDeathDirector::Update(float deltaTime_)
         camera->SetLookAt(LerpPosition(endEye, startEye, ratio_), LerpPosition(endFocus, startFocus, ratio_),
             frameFlashback ? LerpPosition(Vector3::Up, cameraUp, ratio_) : cameraUp);
 
-        if (!recoveryEffect || recoveryEffect->IsPendingDestroy()) { Stop(); return true; }
+        if (!recoveryEffect || recoveryEffect->IsPendingDestroy())
+        {
+            Stop();
+            return true;
+        }
         recoveryEffect->transform->localPosition = player->transform->GetWorldPosition();
         recoveryEffect->transform->MarkDirty();
         recoveryEffect->UpdateTransform();
@@ -383,8 +470,14 @@ bool PlayerDeathDirector::Update(float deltaTime_)
                 (1.0f - SmoothRatio(disperseTime_, REVIVE_DISPERSE_TIME));
             light_->Update(presentationDeltaTime_);
         }
-        if (particles_ && particles_->IsEnabled()) particles_->Update(presentationDeltaTime_);
-        if (reviveFinishedTime >= 0.0f && disperseTime_ >= REVIVE_DISPERSE_TIME && elapsed >= duration_) Stop();
+        if (particles_ && particles_->IsEnabled())
+        {
+            particles_->Update(presentationDeltaTime_);
+        }
+        if (reviveFinishedTime >= 0.0f && disperseTime_ >= REVIVE_DISPERSE_TIME && elapsed >= duration_)
+        {
+            Stop();
+        }
     }
     // 終了フレームも通常のAI更新へ戻さず、起き上がり中に次の行動を開始させない。
     return true;
@@ -394,7 +487,10 @@ void PlayerDeathDirector::BeginRecovery()
 {
     BS_PROFILE_SCOPE("PlayerDeathDirector::BeginRecovery");
     const auto controller_ = player->GetComponent<PlayerControllerComponent>();
-    if (!controller_ || !controller_->IsDeathAnimationFinished()) return;
+    if (!controller_ || !controller_->IsDeathAnimationFinished())
+    {
+        return;
+    }
     controller_->BeginReviveState();
     phase = Phase::RECOVERING;
     elapsed = 0.0f;
@@ -431,7 +527,10 @@ void PlayerDeathDirector::Stop()
 {
     BS_PROFILE_SCOPE("PlayerDeathDirector::Stop");
     requestedPlayer.reset();
-    if (!active) return;
+    if (!active)
+    {
+        return;
+    }
     flashbackCaptureAvailable = false;
     if (recoveryEffect)
     {
@@ -440,14 +539,26 @@ void PlayerDeathDirector::Stop()
     }
     AudioManager::Instance().ResetPresentationAudio();
     if (player && !player->IsPendingDestroy())
-        if (const auto controller_ = player->GetComponent<PlayerControllerComponent>()) controller_->ResetDeathPresentationState();
+    {
+        if (const auto controller_ = player->GetComponent<PlayerControllerComponent>())
+        {
+            controller_->ResetDeathPresentationState();
+        }
+    }
     for (const auto& state_ : colliderStates)
-        if (const auto collider_ = state_.first.lock()) collider_->SetRuntimeSuppressed(state_.second);
+    {
+        if (const auto collider_ = state_.first.lock())
+        {
+            collider_->SetRuntimeSuppressed(state_.second);
+        }
+    }
     colliderStates.clear();
     if (const auto mode_ = manager.GetGameModeManager())
     {
-        mode_->SetPlayerControlLocked(previousPlayerLock); mode_->SetEnemyAILocked(previousAILock);
-        mode_->SetGameplayLocked(previousGameplayLock); mode_->SetPresentationPlaying(previousPresentation);
+        mode_->SetPlayerControlLocked(previousPlayerLock);
+        mode_->SetEnemyAILocked(previousAILock);
+        mode_->SetGameplayLocked(previousGameplayLock);
+        mode_->SetPresentationPlaying(previousPresentation);
         mode_->SetBattlePaused(previousBattlePause);
     }
     manager.SetPlayInputCaptured(previousInputCapture);
@@ -460,17 +571,29 @@ void PlayerDeathDirector::Stop()
 
 void PlayerDeathDirector::RenderOutput(SpriteRenderSystem& sprites_)
 {
-    if (!active) return;
+    if (!active)
+    {
+        return;
+    }
     BS_PROFILE_SCOPE("PlayerDeathDirector::RenderOutput");
     continueMenu.DrawBackdrop(sprites_,fadeAlpha);
-    if (phase != Phase::CONTINUE || elapsed < settings["ContinueDelay"].get<float>()) return;
+    if (phase != Phase::CONTINUE || elapsed < settings["ContinueDelay"].get<float>())
+    {
+        return;
+    }
     continueMenu.Draw(sprites_,"YOU DIED","コンテニュー",true);
 }
 
 void PlayerDeathDirector::CaptureFlashback(ID3D11RenderTargetView* target_)
 {
-    if (!target_ || !active || phase == Phase::RECOVERING || deathFinishedTime < 0.0f || !flashbackCaptureAvailable) return;
-    if (phase == Phase::DYING && elapsed - deathFinishedTime < FLASHBACK_CAMERA_BLEND_TIME) return;
+    if (!target_ || !active || phase == Phase::RECOVERING || deathFinishedTime < 0.0f || !flashbackCaptureAvailable)
+    {
+        return;
+    }
+    if (phase == Phase::DYING && elapsed - deathFinishedTime < FLASHBACK_CAMERA_BLEND_TIME)
+    {
+        return;
+    }
     BS_PROFILE_SCOPE("PlayerDeathDirector::CaptureFlashback");
     flashbackCaptureAvailable = false;
 
@@ -480,18 +603,27 @@ void PlayerDeathDirector::CaptureFlashback(ID3D11RenderTargetView* target_)
     Microsoft::WRL::ComPtr<ID3D11Resource> resource_;
     target_->GetResource(resource_.GetAddressOf());
     Microsoft::WRL::ComPtr<ID3D11Texture2D> source_;
-    if (FAILED(resource_.As(&source_))) return;
+    if (FAILED(resource_.As(&source_)))
+    {
+        return;
+    }
 
     D3D11_TEXTURE2D_DESC desc_{};
     source_->GetDesc(&desc_);
     // 通常画面とドッキング表示はいずれもRGBA8の最終出力を使う。
-    if (desc_.Format != DXGI_FORMAT_R8G8B8A8_UNORM || desc_.SampleDesc.Count != 1) return;
+    if (desc_.Format != DXGI_FORMAT_R8G8B8A8_UNORM || desc_.SampleDesc.Count != 1)
+    {
+        return;
+    }
     desc_.Usage = D3D11_USAGE_STAGING;
     desc_.BindFlags = 0;
     desc_.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
     desc_.MiscFlags = 0;
     Microsoft::WRL::ComPtr<ID3D11Texture2D> staging_;
-    if (FAILED(device_->CreateTexture2D(&desc_, nullptr, staging_.GetAddressOf()))) return;
+    if (FAILED(device_->CreateTexture2D(&desc_, nullptr, staging_.GetAddressOf())))
+    {
+        return;
+    }
 
     const UINT rowBytes_ = desc_.Width * 4;
     std::vector<std::uint8_t> pixels_(static_cast<std::size_t>(rowBytes_) * desc_.Height);
@@ -501,7 +633,10 @@ void PlayerDeathDirector::CaptureFlashback(ID3D11RenderTargetView* target_)
     context_->CopyResource(staging_.Get(), source_.Get());
     context_->OMSetRenderTargets(1, &target_, depth_.Get());
     D3D11_MAPPED_SUBRESOURCE mapped_{};
-    if (FAILED(context_->Map(staging_.Get(), 0, D3D11_MAP_READ, 0, &mapped_))) return;
+    if (FAILED(context_->Map(staging_.Get(), 0, D3D11_MAP_READ, 0, &mapped_)))
+    {
+        return;
+    }
     for (UINT y_ = 0; y_ < desc_.Height; ++y_)
     {
         const auto* sourceRow_ = static_cast<const std::uint8_t*>(mapped_.pData) + static_cast<std::size_t>(y_) * mapped_.RowPitch;
@@ -524,7 +659,9 @@ void PlayerDeathDirector::CaptureFlashback(ID3D11RenderTargetView* target_)
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> view_;
     if (SUCCEEDED(device_->CreateTexture2D(&desc_, &data_, texture_.GetAddressOf())) &&
         SUCCEEDED(device_->CreateShaderResourceView(texture_.Get(), nullptr, view_.GetAddressOf())))
+    {
         flashbackTexture = std::move(view_);
+    }
 }
 
 void PlayerDeathDirector::ClearDeathHistory()
@@ -536,13 +673,19 @@ void PlayerDeathDirector::ClearDeathHistory()
 
 void PlayerDeathDirector::DrawSettingsGUI()
 {
-    if (!ImGui::CollapsingHeader("Player Death / Continue")) return;
+    if (!ImGui::CollapsingHeader("Player Death / Continue"))
+    {
+        return;
+    }
     ImGui::TextWrapped("%s", status.c_str());
     ImGui::BeginDisabled(IsActive());
     const auto number_ = [&](const char* label_, const char* key_, float minimum_, float maximum_)
     {
         float value_ = settings[key_].get<float>();
-        if (ImGui::DragFloat(label_, &value_, 0.01f, minimum_, maximum_)) settings[key_] = value_;
+        if (ImGui::DragFloat(label_, &value_, 0.01f, minimum_, maximum_))
+        {
+            settings[key_] = value_;
+        }
     };
     const auto text_ = [&](const char* label_, const char* key_)
     {
@@ -550,19 +693,31 @@ void PlayerDeathDirector::DrawSettingsGUI()
         const auto current_ = settings[key_].get<std::string>();
         const auto length_ = (std::min)(current_.size(), sizeof(value_) - 1);
         std::copy_n(current_.data(), length_, value_);
-        if (ImGui::InputText(label_, value_, sizeof(value_))) settings[key_] = value_;
+        if (ImGui::InputText(label_, value_, sizeof(value_)))
+        {
+            settings[key_] = value_;
+        }
     };
     ImGui::TextUnformatted("Player graph: PlayerDeath -> PlayerRevive -> SS_Idle");
     ImGui::TextWrapped("Edit animation clips and transitions in the Player animation graph.");
     text_("Stage center object", "StageCenterObject");
-    number_("Camera rise", "CameraRise", 0.0f, 30.0f); number_("Center pull", "CenterPull", 0.0f, 0.8f);
-    number_("Camera move time", "CameraMoveTime", 0.1f, 10.0f); number_("Death hold", "DeathHold", 0.0f, 5.0f);
-    number_("Fade out time", "FadeOutTime", 0.1f, 5.0f); number_("Continue delay", "ContinueDelay", 0.0f, 3.0f);
+    number_("Camera rise", "CameraRise", 0.0f, 30.0f);
+    number_("Center pull", "CenterPull", 0.0f, 0.8f);
+    number_("Camera move time", "CameraMoveTime", 0.1f, 10.0f);
+    number_("Death hold", "DeathHold", 0.0f, 5.0f);
+    number_("Fade out time", "FadeOutTime", 0.1f, 5.0f);
+    number_("Continue delay", "ContinueDelay", 0.0f, 3.0f);
     number_("BGM fade out time", "BgmFadeOutTime", 0.1f, 10.0f);
     number_("Fade in time", "FadeInTime", 0.1f, 5.0f);
     number_("Camera return time", "CameraReturnTime", 0.1f, 10.0f);
-    if (ImGui::Button("Save death settings")) SaveSettings();
+    if (ImGui::Button("Save death settings"))
+    {
+        SaveSettings();
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Reload death settings")) LoadSettings();
+    if (ImGui::Button("Reload death settings"))
+    {
+        LoadSettings();
+    }
     ImGui::EndDisabled();
 }

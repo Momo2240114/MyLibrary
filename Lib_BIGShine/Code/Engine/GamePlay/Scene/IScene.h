@@ -16,24 +16,43 @@ public:
 	virtual void  Finalize() {};
 
 	// 更新処理
-	virtual void Update(float elapsedTime) {}
+	virtual void Update(float elapsedTime)
+	{
+	}
 
 	// 描画処理
-	virtual void Render(float elapsedTime) {}
+	virtual void Render(float elapsedTime)
+	{
+	}
 
 	// GUI描画処理
-	virtual void DrawGUI() {}
+	virtual void DrawGUI()
+	{
+	}
 
     // タイトルなどマウスで操作するSceneは、ゲーム専用起動でもカーソルを解放する。
-    virtual bool RequiresFreeCursor() const { return false; }
+    virtual bool RequiresFreeCursor() const
+	{
+		return false;
+	}
 
 	//準備完了しているか
-	bool IsReady()const { return ready; }
+	bool IsReady()const
+	{
+		return ready;
+	}
 
 	//準備完了設定
-	void SetReady() { ready = true; }
+	void SetReady()
+	{
+		ready = true;
+	}
 
-	std::string GetSceneName() {return sceneName;}
+	std::string GetSceneName()
+	{
+		return sceneName;
+	}
+
 protected:
 	template<class T>
 	void ChangeScene()

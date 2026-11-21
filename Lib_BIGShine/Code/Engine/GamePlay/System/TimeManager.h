@@ -61,7 +61,10 @@ struct TimeState
         {
             hitStopTimer -= rawDt_;
             currentScale = hitStopScale;
-            if (hitStopTimer <= 0.0f) hitStopTimer = 0.0f;
+            if (hitStopTimer <= 0.0f)
+            {
+                hitStopTimer = 0.0f;
+            }
         }
         else if (phase != PHASE::IDLE)
         {
@@ -131,7 +134,10 @@ struct TimeState
     void Reset(bool resetConfiguredDefault_ = false)
     {
         // Scale状態をdefaultへ戻す。resetConfiguredDefaultがtrueなら設定済みdefault自体も1へ戻す。
-        if (resetConfiguredDefault_) defaultScale = 1.0f;
+        if (resetConfiguredDefault_)
+        {
+            defaultScale = 1.0f;
+        }
         currentScale = defaultScale;
         targetScale = defaultScale;
         hitStopTimer = 0.0f;
@@ -164,11 +170,32 @@ public:
     void SetPaused(bool paused_);
     void TogglePaused();
     void RequestFrameStep();
-    bool IsPaused() const { return paused; }
-    bool IsFrameStepActive() const { return frameStepActive; }
-    void SetCameraUnscaledWhilePaused(bool enabled_) { cameraUnscaledWhilePaused = enabled_; }
-    bool IsCameraUnscaledWhilePaused() const { return cameraUnscaledWhilePaused; }
-    bool ShouldUseUnscaledCameraDelta() const { return paused && cameraUnscaledWhilePaused && !frameStepActive; }
+
+    bool IsPaused() const
+    {
+        return paused;
+    }
+
+    bool IsFrameStepActive() const
+    {
+        return frameStepActive;
+    }
+
+    void SetCameraUnscaledWhilePaused(bool enabled_)
+    {
+        cameraUnscaledWhilePaused = enabled_;
+    }
+
+    bool IsCameraUnscaledWhilePaused() const
+    {
+        return cameraUnscaledWhilePaused;
+    }
+
+    bool ShouldUseUnscaledCameraDelta() const
+    {
+        return paused && cameraUnscaledWhilePaused && !frameStepActive;
+    }
+
     // 指定LayerのtargetScaleを設定する。Allなら全体と各Layerへ適用する。
     void SetTargetScale(uint32_t layerMask, float scale, float speed = 10.0f);
     // targetへ遷移、維持、defaultへ復帰する一時的なTimeScale演出を再生する。
@@ -181,5 +208,9 @@ public:
     // GameObjectManagerがFrame中に高速参照できるよう、LayerごとのScaleを配列へ確定する。
     void PrepareCache();
     float GetCachedScale(uint32_t layerMask) const;
-    float GetLastRawDeltaTime() const { return lastRawDeltaTime; }
+
+    float GetLastRawDeltaTime() const
+    {
+        return lastRawDeltaTime;
+    }
 };

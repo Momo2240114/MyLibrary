@@ -15,6 +15,7 @@ public:
 		base_time = this_time;
 		last_time = this_time;
 	}
+
 	~high_resolution_timer() = default;
 	high_resolution_timer(const high_resolution_timer&) = delete;
 	high_resolution_timer& operator=(const high_resolution_timer&) = delete;

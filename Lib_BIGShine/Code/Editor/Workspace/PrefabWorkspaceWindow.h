@@ -22,8 +22,16 @@ class PrefabWorkspaceWindow : public EditorWorkspaceWindow
 public:
     explicit PrefabWorkspaceWindow(GameObjectManager* manager_);
 
-    bool ShouldPauseScene() const override { return true; }
-    bool ShouldRenderSceneWhenPaused() const override { return false; }
+    bool ShouldPauseScene() const override
+    {
+        return true;
+    }
+
+    bool ShouldRenderSceneWhenPaused() const override
+    {
+        return false;
+    }
+
     void Draw() override;
 
 private:

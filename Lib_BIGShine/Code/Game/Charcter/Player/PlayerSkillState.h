@@ -14,7 +14,12 @@ public:
     PlayerSkillState(const std::shared_ptr<GameObject>& owner_,
         PlayerControllerComponent& playerController_, PLAYER_ACTION action_);
     ~PlayerSkillState() override;
-    const char* GetName() const override { return "PlayerSkillState"; }
+
+    const char* GetName() const override
+    {
+        return "PlayerSkillState";
+    }
+
     // Playerの開始状態を初期化し、共通Definitionを実行する。
     void Enter() override;
     // 共通Phase更新後にPlayer入力を受け付け、終了だけをStateMachineへ通知する。
@@ -25,11 +30,28 @@ public:
     void NotifyPhaseEnd();
     // 編集プレビューを中断し、通常のAction終了経路へ戻す。
     void StopSkill();
-    bool IsActive() const { return active; }
-    bool IsFinishing() const { return finishing; }
+
+    bool IsActive() const
+    {
+        return active;
+    }
+
+    bool IsFinishing() const
+    {
+        return finishing;
+    }
+
     bool PreventsHitReaction() const;
-    int GetPhaseIndex() const { return execution.GetPhaseIndex(); }
-    const std::string& GetSkillName() const { return execution.GetSkillName(); }
+
+    int GetPhaseIndex() const
+    {
+        return execution.GetPhaseIndex();
+    }
+
+    const std::string& GetSkillName() const
+    {
+        return execution.GetSkillName();
+    }
 
 private:
     // Phaseのプリセットを使い、対象までの不足分だけを既存MotionWarpへ渡す。
@@ -44,6 +66,7 @@ private:
     void ApplyPhaseDefence(const SkillPhase& phase_);
     // 防御を使わないPhaseとして処理し、保存したガードと耐性の設定へ戻す。
     void RestoreDefence();
+
     // 子オブジェクトを含む各ガード判定の、スキル適用前の状態を保存する。
     struct GuardSnapshot
     {
@@ -51,6 +74,7 @@ private:
         bool enabled = false;
         bool justGuard = false;
     };
+
     std::vector<GuardSnapshot> guardSnapshots;
     bool guardApplied = false;
     bool armorApplied = false;

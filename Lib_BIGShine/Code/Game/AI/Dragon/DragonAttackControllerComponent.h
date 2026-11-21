@@ -17,8 +17,10 @@ class AttackEmitterComponent;
 class GameObject;
 class MeshVFXComponent;
 class ColliderComponent;
+class HitBox;
 class HurtBox;
 class CameraActionDirectorComponent;
+class SpecialAttackCameraComponent;
 
 // Dragonのブレスや尻尾攻撃の判定・VFX発生を、首/尻尾IKの位置に合わせて制御するComponent。
 class DragonAttackControllerComponent : public Component
@@ -51,9 +53,22 @@ public:
     void PlayStamp();
     void PlaySpecialImpact(const DirectX::XMFLOAT3& position_, float radius_, float damage_, const std::string& effectPath_);
     bool BeginSpecialAction(bool dive_);
-    bool IsSpecialActionActive() const { return specialPhase >= 0; }
-    bool IsSpecialDive() const { return specialDive; }
-    int GetSpecialPhase() const { return specialPhase; }
+
+    bool IsSpecialActionActive() const
+    {
+        return specialPhase >= 0;
+    }
+
+    bool IsSpecialDive() const
+    {
+        return specialDive;
+    }
+
+    int GetSpecialPhase() const
+    {
+        return specialPhase;
+    }
+
     void StopSpecialAction();
     void BeginSpecialCameraReturn();
     // 現在このComponentが生成した攻撃判定を停止する。
@@ -90,7 +105,6 @@ private:
         DirectX::XMFLOAT3 ground{};
         std::shared_ptr<GameObject> body;
         std::shared_ptr<GameObject> warning;
-        std::shared_ptr<GameObject> obstacle;
         float radius = 1.0f;
         float coverRadius = 1.0f;
         float height = 1.0f;
@@ -98,6 +112,7 @@ private:
         bool landed = false;
         bool final = false;
     };
+
     int specialPhase = -1;
     bool specialDive = false;
     float specialTimer = 0.0f;
@@ -112,6 +127,7 @@ private:
     std::vector<std::pair<std::weak_ptr<Component>, bool>> specialPlayerSuppression;
     std::vector<std::pair<std::weak_ptr<HurtBox>, bool>> specialPlayerInvincibility;
     std::weak_ptr<CameraActionDirectorComponent> specialCamera;
+    std::weak_ptr<SpecialAttackCameraComponent> specialTrackingCamera;
     std::weak_ptr<ColliderComponent> specialCollider;
     DirectX::XMFLOAT3 specialRotation{};
     DirectX::XMFLOAT3 specialWorldScale{1.0f,1.0f,1.0f};
@@ -141,6 +157,7 @@ private:
         std::shared_ptr<GameObject> dangerAreaObject;
         std::weak_ptr<AttackEffectHitComponent> hitComponent;
         std::weak_ptr<MeshVFXComponent> dangerAreaVFX;
+        std::weak_ptr<HitBox> biteDangerHitBox;
         // 回転攻撃の各節が残す軌跡。攻撃の中断・終了時にまとめて破棄する。
         std::vector<std::shared_ptr<GameObject>> spinTailTrailObjects;
         DirectX::XMFLOAT3 sourceLocalOffset = { 0.0f, 0.0f, 0.0f };
@@ -162,6 +179,7 @@ private:
         DirectX::XMFLOAT3 dangerAreaGroundForward = { 0.0f, 0.0f, 1.0f };
         DirectX::XMFLOAT3 dangerAreaGroundNormal = { 0.0f, 1.0f, 0.0f };
         float lifeTimer = 0.0f;
+        bool fixedHitPosition = false;
         bool followMouth = false;
         bool followBreathSource = false;
         bool followStampSource = false;

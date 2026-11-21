@@ -9,7 +9,13 @@
 namespace
 {
     // セル内の透明な余白も保ち、全アイコンを正方形で描画する。
-    struct IconCell { int code; int column; int row; };
+    struct IconCell
+    {
+        int code;
+        int column;
+        int row;
+    };
+
     constexpr IconCell KEY_CELLS[] = {
         {'A',5,14},{'B',4,12},{'C',3,11},{'D',2,10},{'E',6,10},{'F',1,9},
         {'G',12,8},{'H',14,8},{'I',1,7},{'J',5,7},{'K',7,7},{'L',9,7},
@@ -30,7 +36,16 @@ namespace
         {VK_OEM_5,13,4},{VK_OEM_7,14,5},
         {VK_ADD,4,6},{VK_SUBTRACT,13,7},{VK_MULTIPLY,2,12},{VK_DIVIDE,15,4}
     };
-    struct PadCell { PadCode code; int xboxColumn; int xboxRow; int psColumn; int psRow; };
+
+    struct PadCell
+    {
+        PadCode code;
+        int xboxColumn;
+        int xboxRow;
+        int psColumn;
+        int psRow;
+    };
+
     constexpr PadCell PAD_CELLS[] = {
         {PadCode::A,3,8,0,10},{PadCode::B,5,8,10,11},{PadCode::X,7,8,2,10},{PadCode::Y,9,8,4,10},
         {PadCode::L1,8,3,4,6},{PadCode::R1,4,2,1,5},{PadCode::L2,2,2,8,6},{PadCode::R2,8,2,5,5},
@@ -57,16 +72,24 @@ namespace
 void InputIconAtlas::Initialize()
 {
     BS_PROFILE_SCOPE("InputIconAtlas::Initialize");
-    if (initialized) return;
+    if (initialized)
+    {
+        return;
+    }
     initialized = true;
     for (std::size_t index_ = 0; index_ < sheets.size(); ++index_)
+    {
         CPUResourceLoader::LoadTextureFromFile(GraphicsDeviceManager::Instance().GetDevice(),SHEET_PATHS[index_],
             sheets[index_].texture.GetAddressOf(),&sheets[index_].description,TextureType::Data);
+    }
 }
 
 InputIconAtlas::Region InputIconAtlas::Resolve(InputDisplayDevice device_, int code_)
 {
-    if (device_ == InputDisplayDevice::KEYBOARD_MOUSE && code_ >= VK_NUMPAD0 && code_ <= VK_NUMPAD9) code_ = '0' + code_ - VK_NUMPAD0;
+    if (device_ == InputDisplayDevice::KEYBOARD_MOUSE && code_ >= VK_NUMPAD0 && code_ <= VK_NUMPAD9)
+    {
+        code_ = '0' + code_ - VK_NUMPAD0;
+    }
     int column_ = -1;
     int row_ = -1;
     const bool keyboard_ = device_ == InputDisplayDevice::KEYBOARD_MOUSE;
@@ -82,20 +105,39 @@ InputIconAtlas::Region InputIconAtlas::Resolve(InputDisplayDevice device_, int c
         {
             constexpr int COLUMNS[] = {3,11,13,15,0,2,4,6,8,5,7,9};
             constexpr int ROWS[] = {9,9,9,9,8,8,8,8,8,9,9,9};
-            column_ = COLUMNS[code_ - VK_F1]; row_ = ROWS[code_ - VK_F1];
+            column_ = COLUMNS[code_ - VK_F1];
+            row_ = ROWS[code_ - VK_F1];
         }
-        else for (const auto& cell_ : KEY_CELLS)
-            if (cell_.code == code_) { column_ = cell_.column; row_ = cell_.row; break; }
+        else
+        {
+            for (const auto& cell_ : KEY_CELLS)
+            {
+                if (cell_.code == code_)
+                {
+                    column_ = cell_.column;
+                    row_ = cell_.row;
+                    break;
+                }
+            }
+        }
     }
-    else for (const auto& cell_ : PAD_CELLS)
-        if (static_cast<int>(cell_.code) == code_)
+    else
+    {
+        for (const auto& cell_ : PAD_CELLS)
+        {
+            if (static_cast<int>(cell_.code) == code_)
         {
             const bool ps_ = device_ == InputDisplayDevice::PLAYSTATION_PAD;
             column_ = ps_ ? cell_.psColumn : cell_.xboxColumn;
             row_ = ps_ ? cell_.psRow : cell_.xboxRow;
             break;
         }
-    if (column_ < 0 || row_ < 0) return {};
+        }
+    }
+    if (column_ < 0 || row_ < 0)
+    {
+        return {};
+    }
     const float cellSize_ = device_ == InputDisplayDevice::PLAYSTATION_PAD ? 128.0f : 64.0f;
     // 半テクセル内側で隣のセルの補間混入を避け、縦横比は1:1を維持する。
     return {{column_ * cellSize_ + 0.5f,row_ * cellSize_ + 0.5f,cellSize_ - 1.0f,cellSize_ - 1.0f},true};
@@ -105,11 +147,22 @@ InputCombo InputIconAtlas::FindBinding(const std::string& action_, InputDisplayD
 {
     const auto& map_ = KeyConfig::Instance().GetActionMap();
     const auto iterator_ = map_.find(action_);
-    if (iterator_ == map_.end()) return {};
+    if (iterator_ == map_.end())
+    {
+        return {};
+    }
     const auto inputDevice_ = device_ == InputDisplayDevice::KEYBOARD_MOUSE ? DeviceType::KBM : DeviceType::Gamepad;
     // OR候補から表示デバイスだけで成立する最初のAND入力を選ぶ。
     for (const auto& combo_ : iterator_->second)
-        if (!combo_.empty() && std::all_of(combo_.begin(),combo_.end(),[inputDevice_](const InputUnit& unit_) { return unit_.device == inputDevice_; })) return combo_;
+    {
+        if (!combo_.empty() && std::all_of(combo_.begin(),combo_.end(),[inputDevice_](const InputUnit& unit_)
+        {
+            return unit_.device == inputDevice_;
+        }))
+        {
+            return combo_;
+        }
+    }
     return {};
 }
 
@@ -119,8 +172,11 @@ std::string InputIconAtlas::GetKeyLabel(InputDisplayDevice device_, int code_)
     {
         switch (code_)
         {
-        case VK_LBUTTON: return "LMB"; case VK_RBUTTON: return "RMB"; case VK_MBUTTON: return "MMB";
-        case VK_XBUTTON1: return "Mouse4"; case VK_XBUTTON2: return "Mouse5";
+        case VK_LBUTTON: return "LMB";
+        case VK_RBUTTON: return "RMB";
+        case VK_MBUTTON: return "MMB";
+        case VK_XBUTTON1: return "Mouse4";
+        case VK_XBUTTON2: return "Mouse5";
         default: break;
         }
         wchar_t name_[128]{};
@@ -139,19 +195,32 @@ std::string InputIconAtlas::GetKeyLabel(InputDisplayDevice device_, int code_)
     const bool ps_ = device_ == InputDisplayDevice::PLAYSTATION_PAD;
     switch (static_cast<PadCode>(code_))
     {
-    case PadCode::A: return ps_ ? "×" : "A"; case PadCode::B: return ps_ ? "○" : "B";
-    case PadCode::X: return ps_ ? "□" : "X"; case PadCode::Y: return ps_ ? "△" : "Y";
-    case PadCode::L1: return ps_ ? "L1" : "LB"; case PadCode::R1: return ps_ ? "R1" : "RB";
-    case PadCode::L2: return ps_ ? "L2" : "LT"; case PadCode::R2: return ps_ ? "R2" : "RT";
-    case PadCode::L3: return ps_ ? "L3" : "LS"; case PadCode::R3: return ps_ ? "R3" : "RS";
-    case PadCode::TOUCHPAD: return "Touchpad"; case PadCode::GUIDE: return "Guide";
-    case PadCode::START: return ps_ ? "Options" : "Menu"; case PadCode::BACK: return ps_ ? "Share" : "View";
-    case PadCode::UP: return "DPad Up"; case PadCode::DOWN: return "DPad Down";
-    case PadCode::LEFT: return "DPad Left"; case PadCode::RIGHT: return "DPad Right";
-    case PadCode::STICK_L_UP: return "LS Up"; case PadCode::STICK_L_DOWN: return "LS Down";
-    case PadCode::STICK_L_LEFT: return "LS Left"; case PadCode::STICK_L_RIGHT: return "LS Right";
-    case PadCode::STICK_R_UP: return "RS Up"; case PadCode::STICK_R_DOWN: return "RS Down";
-    case PadCode::STICK_R_LEFT: return "RS Left"; case PadCode::STICK_R_RIGHT: return "RS Right";
+    case PadCode::A: return ps_ ? "×" : "A";
+    case PadCode::B: return ps_ ? "○" : "B";
+    case PadCode::X: return ps_ ? "□" : "X";
+    case PadCode::Y: return ps_ ? "△" : "Y";
+    case PadCode::L1: return ps_ ? "L1" : "LB";
+    case PadCode::R1: return ps_ ? "R1" : "RB";
+    case PadCode::L2: return ps_ ? "L2" : "LT";
+    case PadCode::R2: return ps_ ? "R2" : "RT";
+    case PadCode::L3: return ps_ ? "L3" : "LS";
+    case PadCode::R3: return ps_ ? "R3" : "RS";
+    case PadCode::TOUCHPAD: return "Touchpad";
+    case PadCode::GUIDE: return "Guide";
+    case PadCode::START: return ps_ ? "Options" : "Menu";
+    case PadCode::BACK: return ps_ ? "Share" : "View";
+    case PadCode::UP: return "DPad Up";
+    case PadCode::DOWN: return "DPad Down";
+    case PadCode::LEFT: return "DPad Left";
+    case PadCode::RIGHT: return "DPad Right";
+    case PadCode::STICK_L_UP: return "LS Up";
+    case PadCode::STICK_L_DOWN: return "LS Down";
+    case PadCode::STICK_L_LEFT: return "LS Left";
+    case PadCode::STICK_L_RIGHT: return "LS Right";
+    case PadCode::STICK_R_UP: return "RS Up";
+    case PadCode::STICK_R_DOWN: return "RS Down";
+    case PadCode::STICK_R_LEFT: return "RS Left";
+    case PadCode::STICK_R_RIGHT: return "RS Right";
     default: return "Pad " + std::to_string(code_);
     }
 }
@@ -166,7 +235,10 @@ bool InputIconAtlas::Apply(SpriteRenderer& sprite_, InputDisplayDevice device_, 
 {
     const auto region_ = Resolve(device_,code_);
     const auto& sheet_ = sheets[static_cast<int>(device_)];
-    if (!region_.valid || !sheet_.texture) return false;
+    if (!region_.valid || !sheet_.texture)
+    {
+        return false;
+    }
     sprite_.SetTextureResource(sheet_.texture,sheet_.description,SPRITE_PATHS[static_cast<int>(device_)]);
     sprite_.SetUVRect(region_.source.x,region_.source.y,region_.source.z,region_.source.w);
     return true;
@@ -175,7 +247,10 @@ bool InputIconAtlas::Apply(SpriteRenderer& sprite_, InputDisplayDevice device_, 
 void InputIconAtlas::Gui(InputDisplayDevice device_) const
 {
     BS_PROFILE_SCOPE("InputIconAtlas::Gui");
-    if (!ImGui::TreeNode("Input SpriteSheet / SourceRect")) return;
+    if (!ImGui::TreeNode("Input SpriteSheet / SourceRect"))
+    {
+        return;
+    }
     const auto& sheet_ = sheets[static_cast<int>(device_)];
     if (sheet_.texture)
     {
@@ -192,8 +267,14 @@ void InputIconAtlas::Gui(InputDisplayDevice device_) const
                 ImVec2(source_.x / sheet_.description.Width,source_.y / sheet_.description.Height),
                 ImVec2((source_.x + source_.z) / sheet_.description.Width,(source_.y + source_.w) / sheet_.description.Height));
         }
-        else ImGui::TextUnformatted("Text fallback (icon unavailable)");
+        else
+        {
+            ImGui::TextUnformatted("Text fallback (icon unavailable)");
+        }
     }
-    else ImGui::TextUnformatted("SpriteSheet load failed");
+    else
+    {
+        ImGui::TextUnformatted("SpriteSheet load failed");
+    }
     ImGui::TreePop();
 }

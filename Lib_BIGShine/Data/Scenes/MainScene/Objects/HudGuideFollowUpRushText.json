@@ -1,0 +1,167 @@
+{
+    "CollisionMask": 0,
+    "Components": [
+        {
+            "Data": {
+                "InputEnabled": false,
+                "ParentWidgetId": "BattleHudRoot",
+                "RaycastTarget": false,
+                "RectTransform": {
+                    "AnchorMax": [
+                        0.5,
+                        0.5
+                    ],
+                    "AnchorMin": [
+                        0.5,
+                        0.5
+                    ],
+                    "AnchoredPosition": [
+                        299.0,
+                        108.0
+                    ],
+                    "LocalRotation": 0.0,
+                    "LocalScale": [
+                        1.0,
+                        1.0
+                    ],
+                    "Pivot": [
+                        0.5,
+                        0.5
+                    ],
+                    "SizeDelta": [
+                        260.0,
+                        32.0
+                    ]
+                },
+                "Version": 1,
+                "Visible": true,
+                "WidgetId": "HudGuideFollowUpRushText",
+                "ZOrder": 83
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "UIWidgetComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "CatPos": [
+                    0.0,
+                    0.0
+                ],
+                "CatSize": [
+                    260.0,
+                    42.0
+                ],
+                "Color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "LinearSampling": true,
+                "LocalSize": [
+                    260.0,
+                    42.0
+                ],
+                "SdrTexture": true,
+                "ShaderID": 0,
+                "TexturePath": "",
+                "Visible": false,
+                "pivotType": 0
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "SpriteRenderer",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "AutoSizeWidget": false,
+                "Color": [
+                    0.9100000262260437,
+                    0.9700000286102295,
+                    1.0,
+                    1.0
+                ],
+                "FontPath": "Data/Font/NotoSansJP-Bold.otf",
+                "FontSize": 22.0,
+                "FontStrokeWidth": 0.0,
+                "HorizontalAlign": "LEFT",
+                "MaxWidth": 254.0,
+                "Padding": 3.0,
+                "Text": "ラッシュ",
+                "Version": 1,
+                "VerticalAlign": "CENTER"
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "UITextComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "PlayOnStart": false,
+                "Preset": "Outline",
+                "Settings": {
+                    "OutlineColor": [
+                        0.015,
+                        0.024,
+                        0.04,
+                        0.9
+                    ],
+                    "OutlineWidth": 1.15,
+                    "ShadowColor": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.68
+                    ],
+                    "ShadowOffset": [
+                        0.0,
+                        2.0
+                    ],
+                    "ShadowOpacity": 0.8,
+                    "ShadowSoftness": 1.5
+                }
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "UIVisualEffectComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        }
+    ],
+    "Layer": 16,
+    "Name": "HudGuideFollowUpRushText",
+    "ParentName": "UIRoot",
+    "RequiredForSceneStart": false,
+    "Transform": {
+        "Pos": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

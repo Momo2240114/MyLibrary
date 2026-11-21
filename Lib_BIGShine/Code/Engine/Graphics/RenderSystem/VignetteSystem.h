@@ -65,6 +65,7 @@ private:
         DirectX::XMFLOAT4 textureParams;
         DirectX::XMFLOAT4 hatchParams;
     };
+
     static_assert(sizeof(CbVignette) == 96);
 
     // CPU側ParametersをShader用ConstantBufferへ詰める。

@@ -21,8 +21,11 @@ public:
             int height_,
             const DirectX::XMFLOAT4X4& currentViewProjection_,
             const DirectX::XMFLOAT4X4& previousViewProjection_) = 0;
+
         // Velocity描画後に、各Objectの現在Transformを次Frame履歴へ確定する。
-        virtual void CommitHistory() {}
+        virtual void CommitHistory()
+        {
+        }
     };
 
     struct Parameters
@@ -58,12 +61,35 @@ public:
         ID3D11RenderTargetView* outputRTV_,
         const Parameters& parameters_);
 
-    ID3D11RenderTargetView* GetVelocityRTV() const { return velocityBuffer.rtv.Get(); }
-    ID3D11ShaderResourceView* GetVelocitySRV() const { return velocityBuffer.srv.Get(); }
-    ID3D11ShaderResourceView* GetTileMaxSRV() const { return tileMaxBuffer.srv.Get(); }
-    ID3D11ShaderResourceView* GetNeighborMaxSRV() const { return neighborMaxBuffer.srv.Get(); }
-    int GetVelocityWidth() const { return width; }
-    int GetVelocityHeight() const { return height; }
+    ID3D11RenderTargetView* GetVelocityRTV() const
+    {
+        return velocityBuffer.rtv.Get();
+    }
+
+    ID3D11ShaderResourceView* GetVelocitySRV() const
+    {
+        return velocityBuffer.srv.Get();
+    }
+
+    ID3D11ShaderResourceView* GetTileMaxSRV() const
+    {
+        return tileMaxBuffer.srv.Get();
+    }
+
+    ID3D11ShaderResourceView* GetNeighborMaxSRV() const
+    {
+        return neighborMaxBuffer.srv.Get();
+    }
+
+    int GetVelocityWidth() const
+    {
+        return width;
+    }
+
+    int GetVelocityHeight() const
+    {
+        return height;
+    }
 
     // Velocity生成からBlur合成、履歴更新までをまとめて実行する。
     void Execute(

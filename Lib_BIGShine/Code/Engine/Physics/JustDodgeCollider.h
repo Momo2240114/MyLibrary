@@ -16,8 +16,16 @@ public:
     JustDodgeCollider();
 
     const std::string& GetName() const override;
-    bool HasFixedCollisionRole() const override { return true; }
-    bool HasFixedPhysicsBehavior() const override { return true; }
+
+    bool HasFixedCollisionRole() const override
+    {
+        return true;
+    }
+
+    bool HasFixedPhysicsBehavior() const override
+    {
+        return true;
+    }
 
     void Start() override;
     void Gui() override;

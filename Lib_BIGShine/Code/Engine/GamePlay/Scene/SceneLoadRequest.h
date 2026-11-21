@@ -30,6 +30,7 @@ private:
         nlohmann::json document;
         std::string error;
     };
+
     static void ReadScene(std::stop_token stop_, std::shared_ptr<SharedState> state_, std::string sceneName_);
     std::shared_ptr<SharedState> shared;
     // 破棄時は次のファイル境界で中断してjoinする。ワーカーへthisを渡さない。

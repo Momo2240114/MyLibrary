@@ -220,11 +220,25 @@ public:
     bool SetSkillForAction(DRAGON_ACTION_TYPE action_, const std::string& skillName_, const std::string& path_);
     bool ReloadSkillDefinitions(const std::string& path_);
     void StopSkill();
-    const std::vector<DragonActionDefinition>& GetActionDefinitions() const { return actionDefinitions; }
-    const SkillExecution& GetSkillExecution() const { return skillExecution; }
+
+    const std::vector<DragonActionDefinition>& GetActionDefinitions() const
+    {
+        return actionDefinitions;
+    }
+
+    const SkillExecution& GetSkillExecution() const
+    {
+        return skillExecution;
+    }
+
     void RequestDamageReaction();
     bool RequestSpecialAction(bool dive_);
-    bool IsUltimateDamageReductionActive() const { return ultimateDamageReductionActive; }
+
+    bool IsUltimateDamageReductionActive() const
+    {
+        return ultimateDamageReductionActive;
+    }
+
     void ForceAction(DRAGON_ACTION_TYPE action_);
     void SetCanCancel(bool enabled_);
     void SetCanBufferAction(bool enabled_);
@@ -236,16 +250,49 @@ public:
     void ResetBehaviorGraphRuntime();
     bool SaveBehaviorGraphAsset(const std::string& path_) const;
     bool LoadBehaviorGraphAsset(const std::string& path_);
-    AIBehaviorGraph& GetBehaviorGraph() { return behaviorGraph; }
-    const AIBehaviorGraph& GetBehaviorGraph() const { return behaviorGraph; }
-    std::string& GetBehaviorGraphAssetPath() { return behaviorGraphAssetPath; }
-    const std::string& GetBehaviorGraphAssetPath() const { return behaviorGraphAssetPath; }
-    void SetBehaviorGraphAssetPath(const std::string& path_) { behaviorGraphAssetPath = path_; }
-    DRAGON_ACTION_TYPE GetCurrentAction() const { return runtime.currentAction; }
+
+    AIBehaviorGraph& GetBehaviorGraph()
+    {
+        return behaviorGraph;
+    }
+
+    const AIBehaviorGraph& GetBehaviorGraph() const
+    {
+        return behaviorGraph;
+    }
+
+    std::string& GetBehaviorGraphAssetPath()
+    {
+        return behaviorGraphAssetPath;
+    }
+
+    const std::string& GetBehaviorGraphAssetPath() const
+    {
+        return behaviorGraphAssetPath;
+    }
+
+    void SetBehaviorGraphAssetPath(const std::string& path_)
+    {
+        behaviorGraphAssetPath = path_;
+    }
+
+    DRAGON_ACTION_TYPE GetCurrentAction() const
+    {
+        return runtime.currentAction;
+    }
+
     float GetSpinTailSweepProgress() const;
+
     // 回転攻撃の予兆を、AIが確定した本体の回転角度と方向へ合わせる。
-    float GetSpinTailRotationDegrees() const { return spinTailRotationDegrees; }
-    float GetSpinTailRotationDirection() const { return spinTailRotationDirection; }
+    float GetSpinTailRotationDegrees() const
+    {
+        return spinTailRotationDegrees;
+    }
+
+    float GetSpinTailRotationDirection() const
+    {
+        return spinTailRotationDirection;
+    }
 
     DRAGON_ACTION_TYPE SelectNextAction(const DragonAIContext& context_);
     void AddActionCandidates(

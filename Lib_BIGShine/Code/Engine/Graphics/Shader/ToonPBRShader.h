@@ -26,9 +26,22 @@ public:
     void Gui() override;
     // MeshがSkinnedかStaticかでVertex Shaderを切り替える。
     void BindVertexShader(const RenderContext& rc_, bool isSkinnedMesh_);
-    const DirectX::XMFLOAT4& GetShadeSteps() const { return shadeSteps; }
-    DirectX::XMFLOAT4 GetShadeFeather() const { return shadeFeathers; }
-    void SetShadeFeather(DirectX::XMFLOAT4 shadeFeather_) { shadeFeathers = shadeFeather_; }
+
+    const DirectX::XMFLOAT4& GetShadeSteps() const
+    {
+        return shadeSteps;
+    }
+
+    DirectX::XMFLOAT4 GetShadeFeather() const
+    {
+        return shadeFeathers;
+    }
+
+    void SetShadeFeather(DirectX::XMFLOAT4 shadeFeather_)
+    {
+        shadeFeathers = shadeFeather_;
+    }
+
     void SetShadeSettings(const DirectX::XMFLOAT4& shadeSteps_, const DirectX::XMFLOAT4& shadeFeather_);
 
 private:

@@ -5,6 +5,7 @@
 #include <vector>
 #include <d3d11.h>
 #include <wrl/client.h>
+
 // UI演出のJSONとプリセット選択を共有し、欠損値や不正値を既定値へ戻す。
 class UIPresentationPresets
 {

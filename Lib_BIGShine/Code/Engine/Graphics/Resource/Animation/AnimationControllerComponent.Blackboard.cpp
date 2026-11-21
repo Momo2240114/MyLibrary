@@ -13,8 +13,14 @@ void AnimationControllerComponent::PublishGraphFeedback()
 {
     const auto owner_ = GetGameObject();
     const auto board_ = owner_ ? owner_->GetComponent<BlackboardComponent>() : nullptr;
-    if (!board_) return;
-    if (!owner_->GetComponent<AnimationGraphBridgeComponent>() && board_->GetCategory(Keys::REQUEST).empty()) return;
+    if (!board_)
+    {
+        return;
+    }
+    if (!owner_->GetComponent<AnimationGraphBridgeComponent>() && board_->GetCategory(Keys::REQUEST).empty())
+    {
+        return;
+    }
     board_->SetString(Keys::FEEDBACK, Keys::CURRENT_STATE, currentState ? currentState->name : "");
     board_->SetFloat(Keys::FEEDBACK, Keys::PLAYBACK_TIME, GetAnimatorTime());
     board_->SetFloat(Keys::FEEDBACK, Keys::PLAYBACK_DURATION, GetCurrentSampleDuration());
@@ -26,8 +32,14 @@ void AnimationControllerComponent::ProcessBlackboardGraphRequests(bool transitio
     BS_PROFILE_SCOPE("AnimationControllerComponent::ProcessBlackboardGraphRequests");
     const auto owner_ = GetGameObject();
     const auto board_ = owner_ ? owner_->GetComponent<BlackboardComponent>() : nullptr;
-    if (!board_) return;
-    if (!owner_->GetComponent<AnimationGraphBridgeComponent>() && board_->GetCategory(Keys::REQUEST).empty()) return;
+    if (!board_)
+    {
+        return;
+    }
+    if (!owner_->GetComponent<AnimationGraphBridgeComponent>() && board_->GetCategory(Keys::REQUEST).empty())
+    {
+        return;
+    }
     // Event処理中の中断要求も、そのフレームのFlushより先に予約を破棄する。
     // 予兆停止は遷移を評価しないため、再帰防止中でも安全に受け付けられる。
     bool cancelTelegraphs_ = false;
@@ -36,27 +48,45 @@ void AnimationControllerComponent::ProcessBlackboardGraphRequests(bool transitio
         board_->SetBool(Keys::REQUEST, Keys::TELEGRAPH_CANCEL_PENDING, false);
         animator.CancelAttackTelegraphs();
     }
-    if (processingBlackboardGraphRequests) return;
+    if (processingBlackboardGraphRequests)
+    {
+        return;
+    }
     blackboardComponent = board_.get();
+
     // StateExitのActionが次の要求を発行しても、遷移評価を再帰呼び出ししない。
     struct ProcessingGuard
     {
         bool& processing;
-        explicit ProcessingGuard(bool& processing_) : processing(processing_) { processing = true; }
-        ~ProcessingGuard() { processing = false; }
+
+        explicit ProcessingGuard(bool& processing_) : processing(processing_)
+        {
+            processing = true;
+        }
+
+        ~ProcessingGuard()
+        {
+            processing = false;
+        }
     } guard_(processingBlackboardGraphRequests);
+
     const auto consume_ = [&](const char* key_)
     {
         bool pending_ = false;
         board_->GetBool(Keys::REQUEST, key_, pending_);
-        if (pending_) board_->SetBool(Keys::REQUEST, key_, false);
+        if (pending_)
+        {
+            board_->SetBool(Keys::REQUEST, key_, false);
+        }
         return pending_;
     };
     if (consume_(Keys::INPUT_CATEGORY_PENDING))
     {
         std::string category_;
         if (board_->GetString(Keys::REQUEST, Keys::INPUT_CATEGORY, category_) && !category_.empty())
+        {
             SetBlackboardCategory(category_);
+        }
     }
     if (consume_(Keys::ASSET_PENDING))
     {
@@ -84,8 +114,14 @@ void AnimationControllerComponent::ProcessBlackboardGraphRequests(bool transitio
         float degrees_ = 0.0f;
         board_->GetBool(Keys::REQUEST, Keys::YAW_ENABLED, enabled_);
         board_->GetFloat(Keys::REQUEST, Keys::YAW_LIMIT, degrees_);
-        if (enabled_ && std::isfinite(degrees_)) SetRootMotionYawLimit(degrees_);
-        else ClearRootMotionYawLimit();
+        if (enabled_ && std::isfinite(degrees_))
+        {
+            SetRootMotionYawLimit(degrees_);
+        }
+        else
+        {
+            ClearRootMotionYawLimit();
+        }
     }
     const bool stateRequest_ = transitions_ && consume_(Keys::STATE_PENDING);
     if (stateRequest_)
@@ -108,7 +144,9 @@ void AnimationControllerComponent::ProcessBlackboardGraphRequests(bool transitio
             EnsureGraphNodeForState(state_);
             const std::string trigger_ = std::string(Keys::TRANSITION_PREFIX) + state_;
             auto route_ = std::find_if(graphTransitions.begin(), graphTransitions.end(), [&](const AnimTransition& transition_)
-            { return transition_.blackboardRequestRoute && transition_.toStateName == state_; });
+            {
+                return transition_.blackboardRequestRoute && transition_.toStateName == state_;
+            });
             if (route_ == graphTransitions.end())
             {
                 // 古いグラフに要求遷移がなければ追加し、Editorから条件を調整可能にする。
@@ -134,16 +172,34 @@ void AnimationControllerComponent::ProcessBlackboardGraphRequests(bool transitio
                 for (const auto& condition_ : route_->conditions)
                 {
                     const bool met_ = EvaluateCondition(condition_);
-                    if (route_->logic == TransitionLogic::And && !met_) { accepted_ = false; break; }
-                    if (route_->logic == TransitionLogic::Or && met_) { accepted_ = true; break; }
+                    if (route_->logic == TransitionLogic::And && !met_)
+                    {
+                        accepted_ = false;
+                        break;
+                    }
+                    if (route_->logic == TransitionLogic::Or && met_)
+                    {
+                        accepted_ = true;
+                        break;
+                    }
                 }
             }
             // 消費した要求を通常評価へ残さず、同じStateの再起動も一度だけ処理する。
             if (accepted_)
+            {
                 for (const auto& condition_ : route_->conditions)
-                    if (condition_.type == ConditionType::Trigger) board_->ResetTrigger(category_, condition_.parameterName);
+                {
+                    if (condition_.type == ConditionType::Trigger)
+                    {
+                        board_->ResetTrigger(category_, condition_.parameterName);
+                    }
+                }
+            }
             board_->ResetTrigger(category_, trigger_);
-            if (accepted_) ChangeState(state_, (std::max)(0.0f, blend_), restart_, (std::max)(0.0f, startTime_));
+            if (accepted_)
+            {
+                ChangeState(state_, (std::max)(0.0f, blend_), restart_, (std::max)(0.0f, startTime_));
+            }
             SetBlackboardCategory(previousCategory_);
             board_->SetBool(Keys::REQUEST, Keys::ACCEPTED, accepted_ && currentState && currentState->name == state_);
         }

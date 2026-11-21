@@ -28,7 +28,10 @@ namespace
     {
         // JSONのVector3は配列で保存し、壊れた形式なら既定値を維持する。
         const nlohmann::json value_ = json_.value(key_, nlohmann::json::array());
-        if (!value_.is_array() || value_.size() < 3u) return fallback_;
+        if (!value_.is_array() || value_.size() < 3u)
+        {
+            return fallback_;
+        }
         return { value_[0].get<float>(), value_[1].get<float>(), value_[2].get<float>() };
     }
 
@@ -129,8 +132,11 @@ void DangerAreaComponent::Update(float deltaTime_)
             instances.end(),
             [this](DangerAreaInstance& instance_)
             {
-                if (instance_.lifeTimer > 0.0f) return false;
-                StopInstance(instance_);
+                if (instance_.lifeTimer > 0.0f)
+        {
+            return false;
+        }
+        StopInstance(instance_);
                 return true;
             }),
         instances.end());
@@ -141,21 +147,33 @@ void DangerAreaComponent::RegisterActions()
     BS_PROFILE_SCOPE("DangerAreaComponent::RegisterActions");
 
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     // Index、ActionName、Nameの3種類を公開し、ActionSequenceから呼び出しやすくする。
     for (size_t index_ = 0; index_ < templates.size(); ++index_)
     {
         const std::string indexActionName_ = "DangerArea_" + std::to_string(index_);
-        owner_->RegisterAction("DangerArea", indexActionName_, [this, index_]() { Show(index_); });
+        owner_->RegisterAction("DangerArea", indexActionName_, [this, index_]()
+        {
+            Show(index_);
+        });
 
         if (!templates[index_].actionName.empty())
         {
-            owner_->RegisterAction("DangerArea", templates[index_].actionName, [this, index_]() { Show(index_); });
+            owner_->RegisterAction("DangerArea", templates[index_].actionName, [this, index_]()
+            {
+                Show(index_);
+            });
         }
         if (!templates[index_].name.empty())
         {
-            owner_->RegisterAction("DangerArea", templates[index_].name, [this, index_]() { Show(index_); });
+            owner_->RegisterAction("DangerArea", templates[index_].name, [this, index_]()
+            {
+                Show(index_);
+            });
         }
     }
 }
@@ -164,13 +182,22 @@ void DangerAreaComponent::Show(size_t templateIndex_)
 {
     BS_PROFILE_SCOPE("DangerAreaComponent::Show");
 
-    if (templateIndex_ >= templates.size()) return;
+    if (templateIndex_ >= templates.size())
+    {
+        return;
+    }
     const DangerAreaTemplate& template_ = templates[templateIndex_];
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     std::shared_ptr<GameObject> object_ = GetManager().Create("RuntimeDangerArea");
-    if (!object_) return;
+    if (!object_)
+    {
+        return;
+    }
     object_->SetNoSaveObject();
 
     std::shared_ptr<MeshVFXComponent> meshVFX_ = object_->AddComponent<MeshVFXComponent>();
@@ -198,15 +225,29 @@ std::shared_ptr<GameObject> DangerAreaComponent::ShowAt(const DangerAreaTemplate
 {
     BS_PROFILE_SCOPE("DangerAreaComponent::ShowAt");
     const auto owner_ = GetGameObject();
-    if (!owner_) return nullptr;
+    if (!owner_)
+    {
+        return nullptr;
+    }
     const auto object_ = GetManager().Create("RuntimeDangerArea");
-    if (!object_) return nullptr;
+    if (!object_)
+    {
+        return nullptr;
+    }
     object_->SetNoSaveObject();
     const auto mesh_ = object_->AddComponent<MeshVFXComponent>();
-    if (!mesh_) { GetManager().Destroy(object_); return nullptr; }
+    if (!mesh_)
+    {
+        GetManager().Destroy(object_);
+        return nullptr;
+    }
     auto asset_ = BuildDangerAreaAsset(template_);
     // 確定地点の予兆では残り時間で色を変え、所有者が消えても表示を終了する。
-    for (auto& part_ : asset_.parts) { part_.duration = template_.lifeTime; part_.loop = false; }
+    for (auto& part_ : asset_.parts)
+    {
+        part_.duration = template_.lifeTime;
+        part_.loop = false;
+    }
     mesh_->SetAsset(asset_);
     mesh_->SetPlaybackSpeed(template_.playbackSpeed);
     mesh_->Reset();
@@ -231,8 +272,14 @@ void DangerAreaComponent::UpdateAt(const std::shared_ptr<GameObject>& object_,
 {
     BS_PROFILE_SCOPE("DangerAreaComponent::UpdateAt");
     const auto found_ = std::find_if(instances.begin(), instances.end(),
-        [&object_](const DangerAreaInstance& instance_) { return instance_.object == object_; });
-    if (found_ == instances.end() || !object_ || !object_->transform) return;
+        [&object_](const DangerAreaInstance& instance_)
+    {
+        return instance_.object == object_;
+    });
+    if (found_ == instances.end() || !object_ || !object_->transform)
+    {
+        return;
+    }
     object_->transform->ApplyWorldMatrix(DirectX::XMMatrixScaling(1.0f, 1.0f, (std::max)(0.001f, lengthScale_)) *
         DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(yawDegrees_)) *
         DirectX::XMMatrixTranslation(position_.x, position_.y + found_->groundOffset, position_.z));
@@ -242,7 +289,10 @@ void DangerAreaComponent::UpdateAt(const std::shared_ptr<GameObject>& object_,
 void DangerAreaComponent::StopAll()
 {
     BS_PROFILE_SCOPE("DangerAreaComponent::StopAll");
-    for (auto& instance_ : instances) StopInstance(instance_);
+    for (auto& instance_ : instances)
+    {
+        StopInstance(instance_);
+    }
     instances.clear();
 }
 
@@ -263,7 +313,10 @@ DangerAreaComponent::EmitFrame DangerAreaComponent::BuildEmitFrame(
     const DangerAreaTemplate& template_) const
 {
     const std::shared_ptr<GameObject> owner_ = gameObject.lock();
-    if (!owner_ || !owner_->transform) return {};
+    if (!owner_ || !owner_->transform)
+    {
+        return {};
+    }
 
     DirectX::XMMATRIX sourceMatrix_ = owner_->transform->GetWorldMatrix();
     if (!template_.sourceNodeName.empty())
@@ -344,7 +397,10 @@ void DangerAreaComponent::ApplyInstanceTransform(
     const EmitFrame& frame_,
     const std::shared_ptr<GameObject>& object_) const
 {
-    if (!object_ || !object_->transform) return;
+    if (!object_ || !object_->transform)
+    {
+        return;
+    }
 
     object_->transform->ApplyWorldMatrix(frame_.sourceMatrix);
     if (template_.projectToOwnerGround)
@@ -383,7 +439,10 @@ void DangerAreaComponent::Gui()
 {
     BS_PROFILE_SCOPE("DangerAreaComponent::Gui");
 
-    if (ImGui::Button("Register Actions")) RegisterActions();
+    if (ImGui::Button("Register Actions"))
+    {
+        RegisterActions();
+    }
     ImGui::SameLine();
     if (ImGui::Button("Add Template"))
     {
@@ -403,12 +462,21 @@ void DangerAreaComponent::Gui()
         ImGui::PushID(templateIndex_);
         if (ImGui::TreeNode("Danger Area", "%d: %s [%s]", templateIndex_, template_.name.c_str(), GetShapeTypeName(template_.shapeType)))
         {
-            if (ImGui::Button("Preview")) Show(static_cast<size_t>(templateIndex_));
+            if (ImGui::Button("Preview"))
+            {
+                Show(static_cast<size_t>(templateIndex_));
+            }
             ImGui::SameLine();
-            if (ImGui::Button("Remove")) removeTemplateIndex_ = templateIndex_;
+            if (ImGui::Button("Remove"))
+            {
+                removeTemplateIndex_ = templateIndex_;
+            }
 
             ImGui::InputText("Name", &template_.name);
-            if (ImGui::InputText("Action Name", &template_.actionName)) RegisterActions();
+            if (ImGui::InputText("Action Name", &template_.actionName))
+            {
+                RegisterActions();
+            }
             int shapeType_ = static_cast<int>(template_.shapeType);
             if (ImGui::Combo("Shape Type", &shapeType_, shapeNames_, IM_ARRAYSIZE(shapeNames_)))
             {

@@ -29,7 +29,10 @@ namespace
 {
     bool ContainsCaseInsensitive(const std::string& text_, const std::string& query_)
     {
-        if (query_.empty()) return true;
+        if (query_.empty())
+        {
+            return true;
+        }
 
         return std::search(
             text_.begin(), text_.end(),
@@ -102,7 +105,10 @@ void AnimationControllerComponent::RefreshActionCategoryCache()
         cachedActionOwner = owner_;
         actionCategoryCacheDirty = true;
     }
-    if (!actionCategoryCacheDirty) return;
+    if (!actionCategoryCacheDirty)
+    {
+        return;
+    }
 
     cachedActionCategories.clear();
 
@@ -129,7 +135,10 @@ void AnimationControllerComponent::RefreshActionCategoryCache()
         while (parentTransform_)
         {
             auto parentObject_ = parentTransform_->gameObject.lock();
-            if (!parentObject_) break;
+            if (!parentObject_)
+            {
+                break;
+            }
 
             addRegistryCategories_(parentObject_->localRegistry, "[Parent:" + parentObject_->GetName() + "]");
             parentTransform_ = parentObject_->transform ? parentObject_->transform->parent.lock() : nullptr;
@@ -137,14 +146,23 @@ void AnimationControllerComponent::RefreshActionCategoryCache()
 
         auto collectChildActions_ = [&](auto&& self_, const std::shared_ptr<GameObject>& object_) -> void
         {
-            if (!object_ || !object_->transform) return;
+            if (!object_ || !object_->transform)
+            {
+                return;
+            }
 
             for (const auto& childTransform_ : object_->transform->children)
             {
-                if (!childTransform_) continue;
+                if (!childTransform_)
+                {
+                    continue;
+                }
 
                 auto childObject_ = childTransform_->gameObject.lock();
-                if (!childObject_) continue;
+                if (!childObject_)
+                {
+                    continue;
+                }
 
                 addRegistryCategories_(childObject_->localRegistry, "[Child:" + childObject_->GetName() + "]");
                 self_(self_, childObject_);
@@ -165,7 +183,10 @@ void AnimationControllerComponent::MarkStateGuiCacheDirty()
 void AnimationControllerComponent::RefreshStateGuiCache()
 {
     // ステート数が増えてもGUIが重くならないよう、名前フィルタ後のindexだけをキャッシュしてリスト表示に使う。
-    if (!stateGuiCacheDirty) return;
+    if (!stateGuiCacheDirty)
+    {
+        return;
+    }
 
     cachedStateGuiEntries.clear();
     cachedStateGuiEntries.reserve(states.size());
@@ -191,7 +212,10 @@ void AnimationControllerComponent::MarkBlackboardGuiCacheDirty()
 void AnimationControllerComponent::RefreshBlackboardGuiCache()
 {
     // Blackboardのキー一覧は追加削除時だけ更新し、描画中は安定した順序で参照できるようにする。
-    if (!blackboardGuiCacheDirty) return;
+    if (!blackboardGuiCacheDirty)
+    {
+        return;
+    }
 
     const BlackboardCategory& blackboard_ = GetEditableBlackboard();
     cachedBlackboardKeys.clear();
@@ -219,7 +243,10 @@ void AnimationControllerComponent::RefreshAnimationMaskCache()
         animationMaskCacheState = editingState;
         animationMaskCacheDirty = true;
     }
-    if (!animationMaskCacheDirty) return;
+    if (!animationMaskCacheDirty)
+    {
+        return;
+    }
 
     cachedNodeDepths.clear();
     cachedMaskInheritedFlags.clear();
@@ -274,7 +301,10 @@ void AnimationControllerComponent::RefreshEffectAssetCache()
         cachedEffectAssetOwner = owner_.get();
         effectAssetCacheDirty = true;
     }
-    if (!effectAssetCacheDirty) return;
+    if (!effectAssetCacheDirty)
+    {
+        return;
+    }
 
     cachedParticleAssetKeys.clear();
     cachedMeshEffectAssetKeys.clear();
@@ -306,7 +336,10 @@ void AnimationControllerComponent::PreviewStateAtTime(AnimState* state_, float t
     BS_PROFILE_SCOPE("ScrubAnimationPreview");
 
     // Sequencer上のフレーム移動は再生状態を変えず、選択ステートの指定時刻だけをモデルへプレビュー反映する。
-    if (!state_) return;
+    if (!state_)
+    {
+        return;
+    }
     if (animator.GetCurrentState() != state_)
     {
         ChangeState(state_->name, 0.0f);
@@ -318,7 +351,10 @@ void AnimationControllerComponent::Gui()
 {
     BS_PROFILE_SCOPE("AnimationControllerComponent::Gui");
 
-    if (!modelComponent) return;
+    if (!modelComponent)
+    {
+        return;
+    }
 
     {
         BS_PROFILE_SCOPE("Animation GUI::Runtime Playback");
@@ -454,7 +490,10 @@ void AnimationControllerComponent::Gui()
         {
             const std::string& name_ = entry_.name;
             AnimState* state_ = entry_.state;
-            if (!state_) return;
+            if (!state_)
+            {
+                return;
+            }
 
             ImGui::PushID(name_.c_str());
 
@@ -474,7 +513,10 @@ void AnimationControllerComponent::Gui()
                 MarkAnimationMaskCacheDirty();
             }
 
-            if (isCurrent_) ImGui::PopStyleColor();
+            if (isCurrent_)
+            {
+                ImGui::PopStyleColor();
+            }
 
 
             ImGui::SameLine(ImGui::GetWindowContentRegionMax().x - 150.0f);
@@ -496,7 +538,10 @@ void AnimationControllerComponent::Gui()
             }
             ImGui::SameLine();
             ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.4f, 0.1f, 0.1f, 1.0f));
-            if (ImGui::SmallButton("X")) { targetToDelete = name_; }
+            if (ImGui::SmallButton("X"))
+            {
+                targetToDelete = name_;
+            }
             ImGui::PopStyleColor();
 
             ImGui::PopID();
@@ -520,13 +565,19 @@ void AnimationControllerComponent::Gui()
         {
             for (const StateGuiEntry& entry_ : cachedStateGuiEntries)
             {
-                if (!ContainsCaseInsensitive(entry_.name, stateSearchText)) continue;
+                if (!ContainsCaseInsensitive(entry_.name, stateSearchText))
+                {
+                    continue;
+                }
                 DrawStateRow_(entry_);
             }
         }
 
         if (!targetToDelete.empty()) {
-            if (editingState && editingState->name == targetToDelete) editingState = nullptr;
+            if (editingState && editingState->name == targetToDelete)
+            {
+                editingState = nullptr;
+            }
             RemoveState(targetToDelete);
         }
     }
@@ -686,9 +737,12 @@ void AnimationControllerComponent::Gui()
                     {
                         for (int index_ = 0; index_ < static_cast<int>(animations_.size()); ++index_)
                         {
-                            if (!ContainsCaseInsensitive(animations_[index_].name, animationClipSearchText)) continue;
+                            if (!ContainsCaseInsensitive(animations_[index_].name, animationClipSearchText))
+                        {
+                            continue;
+                        }
 
-                            if (ImGui::Selectable(
+                        if (ImGui::Selectable(
                                 animations_[index_].name.c_str(),
                                 targetIndex_ == index_))
                             {
@@ -1173,7 +1227,10 @@ void AnimationControllerComponent::Gui()
                         ImGui::Separator();
                         for (const StateGuiEntry& entry_ : cachedStateGuiEntries)
                         {
-                            if (!entry_.state || entry_.state == editingState) continue;
+                            if (!entry_.state || entry_.state == editingState)
+                            {
+                                continue;
+                            }
 
                             const bool selected_ = clip_.stateName == entry_.name;
                             if (ImGui::Selectable(entry_.name.c_str(), selected_))
@@ -1182,7 +1239,10 @@ void AnimationControllerComponent::Gui()
                                 clip_.animationIndex = entry_.state->animationIndex;
                                 MarkSequenceAdapterDirty();
                             }
-                            if (selected_) ImGui::SetItemDefaultFocus();
+                            if (selected_)
+                            {
+                                ImGui::SetItemDefaultFocus();
+                            }
                         }
                         ImGui::EndCombo();
                     }
@@ -1302,13 +1362,17 @@ void AnimationControllerComponent::Gui()
                 ImGui::TextDisabled("Position cuts also work with Root Motion disabled when visual cutting is enabled.");
 
                 ImGui::Text("Apply Position to GameObject:");
-                ImGui::Checkbox("X##Pos", &editingState->rootMotion.applyPositionX); ImGui::SameLine();
-                ImGui::Checkbox("Y##Pos", &editingState->rootMotion.applyPositionY); ImGui::SameLine();
+                ImGui::Checkbox("X##Pos", &editingState->rootMotion.applyPositionX);
+                ImGui::SameLine();
+                ImGui::Checkbox("Y##Pos", &editingState->rootMotion.applyPositionY);
+                ImGui::SameLine();
                 ImGui::Checkbox("Z##Pos", &editingState->rootMotion.applyPositionZ);
 
                 ImGui::Text("Extra Cut Visual Position from Source Node:");
-                ImGui::Checkbox("X##CutVisualPos", &editingState->rootMotion.cutVisualPositionX); ImGui::SameLine();
-                ImGui::Checkbox("Y##CutVisualPos", &editingState->rootMotion.cutVisualPositionY); ImGui::SameLine();
+                ImGui::Checkbox("X##CutVisualPos", &editingState->rootMotion.cutVisualPositionX);
+                ImGui::SameLine();
+                ImGui::Checkbox("Y##CutVisualPos", &editingState->rootMotion.cutVisualPositionY);
+                ImGui::SameLine();
                 ImGui::Checkbox("Z##CutVisualPos", &editingState->rootMotion.cutVisualPositionZ);
 
 
@@ -1350,10 +1414,14 @@ void AnimationControllerComponent::Gui()
             {
                 switch (selectedType)
                 {
-                case 0: GetEditableBlackboard()[name] = 0.0f;                                   break;
-                case 1: GetEditableBlackboard()[name] = 0;                                      break;
-                case 2: GetEditableBlackboard()[name] = false;                                  break;
-                case 3: GetEditableBlackboard()[name] = DirectX::SimpleMath::Vector2(0.0f, 0.0f); break;
+                case 0: GetEditableBlackboard()[name] = 0.0f;
+                    break;
+                case 1: GetEditableBlackboard()[name] = 0;
+                    break;
+                case 2: GetEditableBlackboard()[name] = false;
+                    break;
+                case 3: GetEditableBlackboard()[name] = DirectX::SimpleMath::Vector2(0.0f, 0.0f);
+                    break;
                 }
                 MarkBlackboardGuiCacheDirty();
                 newVarName[0] = '\0';
@@ -1399,7 +1467,10 @@ void AnimationControllerComponent::Gui()
 
                 ImGui::SameLine();
                 ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.4f, 0.1f, 0.1f, 1.0f));
-                if (ImGui::Button("X##del")) { toDelete = key_; }
+                if (ImGui::Button("X##del"))
+                {
+                    toDelete = key_;
+                }
                 ImGui::PopStyleColor();
 
                 ImGui::PopID();
@@ -1415,7 +1486,10 @@ void AnimationControllerComponent::Gui()
                 {
                     const std::string& key_ = cachedBlackboardKeys[index_];
                     auto iterator_ = editableBlackboard_.find(key_);
-                    if (iterator_ == editableBlackboard_.end()) continue;
+                    if (iterator_ == editableBlackboard_.end())
+                    {
+                        continue;
+                    }
                     DrawBlackboardRow_(iterator_->first, iterator_->second);
                 }
             }
@@ -1536,7 +1610,10 @@ void AnimationControllerComponent::ShowSequencerEditor()
                 ImGui::PopStyleColor(2);
 
                 ImGui::SameLine(ImGui::GetWindowWidth() - 100);
-                if (ImGui::Button("Deselect")) { sequencerSelectedEntry = -1; }
+                if (ImGui::Button("Deselect"))
+                {
+                    sequencerSelectedEntry = -1;
+                }
 
                 RefreshStateGuiCache();
                 const char* selectedStateName_ = clip_.stateName.empty()
@@ -1552,7 +1629,10 @@ void AnimationControllerComponent::ShowSequencerEditor()
                     ImGui::Separator();
                     for (const StateGuiEntry& entry_ : cachedStateGuiEntries)
                     {
-                        if (!entry_.state || entry_.state == editingState) continue;
+                        if (!entry_.state || entry_.state == editingState)
+                        {
+                            continue;
+                        }
 
                         const bool selected_ = clip_.stateName == entry_.name;
                         if (ImGui::Selectable(entry_.name.c_str(), selected_))
@@ -1561,7 +1641,10 @@ void AnimationControllerComponent::ShowSequencerEditor()
                             clip_.animationIndex = entry_.state->animationIndex;
                             MarkSequenceAdapterDirty();
                         }
-                        if (selected_) ImGui::SetItemDefaultFocus();
+                        if (selected_)
+                        {
+                            ImGui::SetItemDefaultFocus();
+                        }
                     }
                     ImGui::EndCombo();
                 }
@@ -1639,7 +1722,10 @@ void AnimationControllerComponent::ShowSequencerEditor()
                 ImGui::PopStyleColor(2);
 
                 ImGui::SameLine(ImGui::GetWindowWidth() - 100);
-                if (ImGui::Button("Deselect")) { sequencerSelectedEntry = -1; }
+                if (ImGui::Button("Deselect"))
+                {
+                    sequencerSelectedEntry = -1;
+                }
 
 
                 ImGui::SetNextItemWidth(200.0f);
@@ -1735,12 +1821,21 @@ void AnimationControllerComponent::ShowSequencerEditor()
                                 const std::vector<std::string>& assets_ = isParticleAsset_
                                     ? cachedParticleAssetKeys
                                     : cachedMeshEffectAssetKeys;
-                                if (ImGui::Selectable("(None)", write_.stringValue.empty())) write_.stringValue.clear();
+                                if (ImGui::Selectable("(None)", write_.stringValue.empty()))
+                                {
+                                    write_.stringValue.clear();
+                                }
                                 for (const std::string& assetKey_ : assets_)
                                 {
                                     const bool selected_ = previewValue_ == assetKey_;
-                                    if (ImGui::Selectable(assetKey_.c_str(), selected_)) write_.stringValue = assetKey_;
-                                    if (selected_) ImGui::SetItemDefaultFocus();
+                                    if (ImGui::Selectable(assetKey_.c_str(), selected_))
+                                    {
+                                        write_.stringValue = assetKey_;
+                                    }
+                                    if (selected_)
+                                    {
+                                        ImGui::SetItemDefaultFocus();
+                                    }
                                 }
                                 ImGui::EndCombo();
                             }
@@ -1752,7 +1847,10 @@ void AnimationControllerComponent::ShowSequencerEditor()
                         break;
                     }
                     }
-                    if (ImGui::Button("Remove Write")) removeWriteIndex_ = writeIndex_;
+                    if (ImGui::Button("Remove Write"))
+                    {
+                        removeWriteIndex_ = writeIndex_;
+                    }
                     ImGui::Separator();
                     ImGui::PopID();
                 }
@@ -1768,19 +1866,40 @@ void AnimationControllerComponent::ShowSequencerEditor()
                     write_.type = type_;
                     ev.blackboardWrites.push_back(write_);
                 };
-                if (ImGui::Button("+ Damage")) addAttackWrite_("Damage", ANIM_BLACKBOARD_VALUE_TYPE::FLOAT);
+                if (ImGui::Button("+ Damage"))
+                {
+                    addAttackWrite_("Damage", ANIM_BLACKBOARD_VALUE_TYPE::FLOAT);
+                }
                 ImGui::SameLine();
-                if (ImGui::Button("+ HitStopDuration")) addAttackWrite_("HitStopDuration", ANIM_BLACKBOARD_VALUE_TYPE::FLOAT);
+                if (ImGui::Button("+ HitStopDuration"))
+                {
+                    addAttackWrite_("HitStopDuration", ANIM_BLACKBOARD_VALUE_TYPE::FLOAT);
+                }
                 ImGui::SameLine();
-                if (ImGui::Button("+ HitStopScale")) addAttackWrite_("HitStopScale", ANIM_BLACKBOARD_VALUE_TYPE::FLOAT);
+                if (ImGui::Button("+ HitStopScale"))
+                {
+                    addAttackWrite_("HitStopScale", ANIM_BLACKBOARD_VALUE_TYPE::FLOAT);
+                }
                 ImGui::SameLine();
-                if (ImGui::Button("+ HitStopLayer")) addAttackWrite_("HitStopLayerMask", ANIM_BLACKBOARD_VALUE_TYPE::INT);
+                if (ImGui::Button("+ HitStopLayer"))
+                {
+                    addAttackWrite_("HitStopLayerMask", ANIM_BLACKBOARD_VALUE_TYPE::INT);
+                }
                 ImGui::SameLine();
-                if (ImGui::Button("+ KnockBack")) addAttackWrite_("KnockBackPower", ANIM_BLACKBOARD_VALUE_TYPE::FLOAT);
+                if (ImGui::Button("+ KnockBack"))
+                {
+                    addAttackWrite_("KnockBackPower", ANIM_BLACKBOARD_VALUE_TYPE::FLOAT);
+                }
                 ImGui::SameLine();
-                if (ImGui::Button("+ HitParticle")) addAttackWrite_("HitParticleAssetPath", ANIM_BLACKBOARD_VALUE_TYPE::STRING);
+                if (ImGui::Button("+ HitParticle"))
+                {
+                    addAttackWrite_("HitParticleAssetPath", ANIM_BLACKBOARD_VALUE_TYPE::STRING);
+                }
                 ImGui::SameLine();
-                if (ImGui::Button("+ HitMeshVFX")) addAttackWrite_("HitMeshVFXAssetPath", ANIM_BLACKBOARD_VALUE_TYPE::STRING);
+                if (ImGui::Button("+ HitMeshVFX"))
+                {
+                    addAttackWrite_("HitMeshVFXAssetPath", ANIM_BLACKBOARD_VALUE_TYPE::STRING);
+                }
                 if (ImGui::Button("Add Blackboard Write"))
                 {
                     ev.blackboardWrites.push_back(AnimBlackboardWrite{});

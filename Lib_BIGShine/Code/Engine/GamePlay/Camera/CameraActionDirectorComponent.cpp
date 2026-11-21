@@ -28,9 +28,15 @@ namespace
     // 対象の拡大率を除外し、Z+を正面とする位置・回転だけの座標系を作る。
     bool BuildFollowFrame(const std::shared_ptr<GameObject>& target_, DirectX::XMFLOAT4X4& frame_)
     {
-        if (!target_ || !target_->transform) return false;
+        if (!target_ || !target_->transform)
+        {
+            return false;
+        }
         DirectX::XMVECTOR scale_, rotation_, position_;
-        if (!DirectX::XMMatrixDecompose(&scale_, &rotation_, &position_, target_->transform->GetWorldMatrix())) return false;
+        if (!DirectX::XMMatrixDecompose(&scale_, &rotation_, &position_, target_->transform->GetWorldMatrix()))
+        {
+            return false;
+        }
         DirectX::XMStoreFloat4x4(&frame_, DirectX::XMMatrixRotationQuaternion(rotation_) *
             DirectX::XMMatrixTranslationFromVector(position_));
         return true;
@@ -42,7 +48,10 @@ namespace
     {
         BS_PROFILE_SCOPE("CameraAction::ResolveFollowPose");
         DirectX::XMFLOAT4X4 frame_;
-        if (!BuildFollowFrame(target_, frame_)) return false;
+        if (!BuildFollowFrame(target_, frame_))
+        {
+            return false;
+        }
         const auto matrix_ = DirectX::XMLoadFloat4x4(&frame_);
         DirectX::XMStoreFloat3(&eye_, DirectX::XMVector3TransformCoord(DirectX::XMLoadFloat3(&preset_.cameraOffset), matrix_));
         DirectX::XMStoreFloat3(&focus_, DirectX::XMVector3TransformCoord(DirectX::XMLoadFloat3(&preset_.focusOffset), matrix_));
@@ -95,21 +104,51 @@ namespace
 
     CAMERA_ACTION_TARGET_MODE TargetModeFromString(const std::string& value_)
     {
-        if (value_ == "GAME_OBJECT") return CAMERA_ACTION_TARGET_MODE::GAME_OBJECT;
-        if (value_ == "GAME_OBJECT_OFFSET") return CAMERA_ACTION_TARGET_MODE::GAME_OBJECT_OFFSET;
-        if (value_ == "HIT_POSITION") return CAMERA_ACTION_TARGET_MODE::HIT_POSITION;
-        if (value_ == "PLAYER") return CAMERA_ACTION_TARGET_MODE::PLAYER;
-        if (value_ == "LOCK_ON_TARGET") return CAMERA_ACTION_TARGET_MODE::LOCK_ON_TARGET;
+        if (value_ == "GAME_OBJECT")
+        {
+            return CAMERA_ACTION_TARGET_MODE::GAME_OBJECT;
+        }
+        if (value_ == "GAME_OBJECT_OFFSET")
+        {
+            return CAMERA_ACTION_TARGET_MODE::GAME_OBJECT_OFFSET;
+        }
+        if (value_ == "HIT_POSITION")
+        {
+            return CAMERA_ACTION_TARGET_MODE::HIT_POSITION;
+        }
+        if (value_ == "PLAYER")
+        {
+            return CAMERA_ACTION_TARGET_MODE::PLAYER;
+        }
+        if (value_ == "LOCK_ON_TARGET")
+        {
+            return CAMERA_ACTION_TARGET_MODE::LOCK_ON_TARGET;
+        }
         return CAMERA_ACTION_TARGET_MODE::WORLD_POSITION;
     }
 
     CAMERA_ACTION_POSITION_MODE PositionModeFromString(const std::string& value_)
     {
-        if (value_ == "TARGET_LOCAL_RELATIVE") return CAMERA_ACTION_POSITION_MODE::TARGET_LOCAL_RELATIVE;
-        if (value_ == "PLAYER_FORWARD_RELATIVE") return CAMERA_ACTION_POSITION_MODE::PLAYER_FORWARD_RELATIVE;
-        if (value_ == "TPS_VIEW_RELATIVE") return CAMERA_ACTION_POSITION_MODE::TPS_VIEW_RELATIVE;
-        if (value_ == "WORLD_POSITION") return CAMERA_ACTION_POSITION_MODE::WORLD_POSITION;
-        if (value_ == "TPS_TARGET_RELATIVE") return CAMERA_ACTION_POSITION_MODE::TPS_TARGET_RELATIVE;
+        if (value_ == "TARGET_LOCAL_RELATIVE")
+        {
+            return CAMERA_ACTION_POSITION_MODE::TARGET_LOCAL_RELATIVE;
+        }
+        if (value_ == "PLAYER_FORWARD_RELATIVE")
+        {
+            return CAMERA_ACTION_POSITION_MODE::PLAYER_FORWARD_RELATIVE;
+        }
+        if (value_ == "TPS_VIEW_RELATIVE")
+        {
+            return CAMERA_ACTION_POSITION_MODE::TPS_VIEW_RELATIVE;
+        }
+        if (value_ == "WORLD_POSITION")
+        {
+            return CAMERA_ACTION_POSITION_MODE::WORLD_POSITION;
+        }
+        if (value_ == "TPS_TARGET_RELATIVE")
+        {
+            return CAMERA_ACTION_POSITION_MODE::TPS_TARGET_RELATIVE;
+        }
         return CAMERA_ACTION_POSITION_MODE::CURRENT_CAMERA_RELATIVE;
     }
 
@@ -171,7 +210,10 @@ namespace
             value_.x * value_.x +
             value_.y * value_.y +
             value_.z * value_.z);
-        if (length_ <= 0.0001f) return fallback_;
+        if (length_ <= 0.0001f)
+        {
+            return fallback_;
+        }
         return { value_.x / length_, value_.y / length_, value_.z / length_ };
     }
 
@@ -221,15 +263,26 @@ bool CameraActionDirectorComponent::UpdateFraming(const CameraActionPreset& pres
     BS_PROFILE_SCOPE("CameraActionDirector::UpdateFraming");
     const auto owner_ = GetGameObject();
     const auto camera_ = camera.lock();
-    if (!owner_ || !camera_) return false;
+    if (!owner_ || !camera_)
+    {
+        return false;
+    }
     DirectX::XMFLOAT3 minimum_{FLT_MAX, FLT_MAX, FLT_MAX}, maximum_{-FLT_MAX, -FLT_MAX, -FLT_MAX};
     const auto include_ = [&](const std::string& name_, float radius_) -> bool
     {
         const auto actor_ = owner_->GetManager().Find(name_);
-        if (!actor_ || !actor_->transform) return false;
+        if (!actor_ || !actor_->transform)
+        {
+            return false;
+        }
         std::vector<DirectX::XMFLOAT3> points_;
         if (preset_.useModelBounds)
-            if (const auto model_ = actor_->GetComponent<GltfModelCommponennt>()) model_->CollectWorldVertexSamples(points_, 1024);
+        {
+            if (const auto model_ = actor_->GetComponent<GltfModelCommponennt>())
+            {
+                model_->CollectWorldVertexSamples(points_, 1024);
+            }
+        }
         if (points_.empty())
         {
             const auto point_ = actor_->transform->GetWorldPosition();
@@ -237,13 +290,23 @@ bool CameraActionDirectorComponent::UpdateFraming(const CameraActionPreset& pres
         }
         for (const auto& point_ : points_)
         {
-            minimum_.x = (std::min)(minimum_.x, point_.x); minimum_.y = (std::min)(minimum_.y, point_.y); minimum_.z = (std::min)(minimum_.z, point_.z);
-            maximum_.x = (std::max)(maximum_.x, point_.x); maximum_.y = (std::max)(maximum_.y, point_.y); maximum_.z = (std::max)(maximum_.z, point_.z);
+            minimum_.x = (std::min)(minimum_.x, point_.x);
+            minimum_.y = (std::min)(minimum_.y, point_.y);
+            minimum_.z = (std::min)(minimum_.z, point_.z);
+            maximum_.x = (std::max)(maximum_.x, point_.x);
+            maximum_.y = (std::max)(maximum_.y, point_.y);
+            maximum_.z = (std::max)(maximum_.z, point_.z);
         }
         return true;
     };
-    if (!include_(preset_.targetObjectName, preset_.framingRadius)) return false;
-    if (!preset_.secondaryTargetName.empty()) include_(preset_.secondaryTargetName, preset_.secondaryRadius);
+    if (!include_(preset_.targetObjectName, preset_.framingRadius))
+    {
+        return false;
+    }
+    if (!preset_.secondaryTargetName.empty())
+    {
+        include_(preset_.secondaryTargetName, preset_.secondaryRadius);
+    }
     actionFocusPosition = { (minimum_.x+maximum_.x)*0.5f+preset_.focusOffset.x, (minimum_.y+maximum_.y)*0.5f+preset_.focusOffset.y, (minimum_.z+maximum_.z)*0.5f+preset_.focusOffset.z };
     const DirectX::XMFLOAT3 half_{(maximum_.x-minimum_.x)*0.5f,(maximum_.y-minimum_.y)*0.5f,(maximum_.z-minimum_.z)*0.5f};
     const float radius_ = std::sqrt(half_.x*half_.x+half_.y*half_.y+half_.z*half_.z);
@@ -316,7 +379,10 @@ void CameraActionDirectorComponent::LateUpdate(float deltaTime_)
 {
     BS_PROFILE_SCOPE("CameraActionDirectorComponent::LateUpdate");
     ResolveReferences();
-    if (phase == CAMERA_ACTION_PHASE::IDLE) return;
+    if (phase == CAMERA_ACTION_PHASE::IDLE)
+    {
+        return;
+    }
 
     // ENTER/HOLD/RETURNの3段階で通常カメラへ上書きし、終了時に自然に元の制御へ戻す。
     const std::shared_ptr<CameraComponent> camera_ = camera.lock();
@@ -340,16 +406,24 @@ void CameraActionDirectorComponent::LateUpdate(float deltaTime_)
          activePreset.targetMode == CAMERA_ACTION_TARGET_MODE::GAME_OBJECT_OFFSET))
     {
         if (const auto target_ = activeTarget.lock(); target_ && target_->transform)
+        {
             actionFocusPosition = AddFloat3(target_->transform->GetWorldPosition(), activePreset.focusOffset);
+        }
     }
-    if (activePreset.autoFrameTargets && phase != CAMERA_ACTION_PHASE::RETURN) UpdateFraming(activePreset);
+    if (activePreset.autoFrameTargets && phase != CAMERA_ACTION_PHASE::RETURN)
+    {
+        UpdateFraming(activePreset);
+    }
     float phaseDelta_ = deltaTime_;
     if (activePreset.useUnscaledTime)
     {
         // カメラObjectがPlayerレイヤーでも、拘束時のスローで構図の切替まで遅くしない。
         const auto owner_ = GetGameObject();
         const auto time_ = owner_ && owner_->manager ? owner_->GetManager().GetTimeManager() : nullptr;
-        if (time_) phaseDelta_ = time_->GetLastRawDeltaTime();
+        if (time_)
+        {
+            phaseDelta_ = time_->GetLastRawDeltaTime();
+        }
     }
     phaseTimer += (std::max)(phaseDelta_, 0.0f);
     float duration_ = GetPhaseDuration();
@@ -361,7 +435,9 @@ void CameraActionDirectorComponent::LateUpdate(float deltaTime_)
     DirectX::XMFLOAT3 focusPosition_ = actionFocusPosition;
     float fov_ = activeFov;
     if (activePreset.useExternalFov && phase == CAMERA_ACTION_PHASE::HOLD)
+    {
         fov_ = camera_->GetFovY();
+    }
     DirectX::XMFLOAT3 up_ = actionCameraUp;
     const auto followTarget_ = activeFollowTarget.lock();
     const bool useOrbit_ = activePreset.positionMode == CAMERA_ACTION_POSITION_MODE::TPS_TARGET_RELATIVE &&
@@ -371,11 +447,16 @@ void CameraActionDirectorComponent::LateUpdate(float deltaTime_)
     if (phase == CAMERA_ACTION_PHASE::ENTER)
     {
         cameraPosition_ = LerpFloat3(startCameraPosition, actionCameraPosition, rate_);
-        if (useOrbit_) cameraPosition_ = OrbitAroundTarget(startCameraPosition, actionCameraPosition, orbitCenter_, rate_);
+        if (useOrbit_)
+        {
+            cameraPosition_ = OrbitAroundTarget(startCameraPosition, actionCameraPosition, orbitCenter_, rate_);
+        }
         focusPosition_ = LerpFloat3(startFocusPosition, actionFocusPosition, rate_);
         fov_ = startFov + (activeFov - startFov) * rate_;
         if (activePreset.positionMode == CAMERA_ACTION_POSITION_MODE::TPS_TARGET_RELATIVE)
+        {
             up_ = NormalizeOr(LerpFloat3(startCameraUp, actionCameraUp, rate_), actionCameraUp);
+        }
     }
     else if (phase == CAMERA_ACTION_PHASE::RETURN)
     {
@@ -383,11 +464,16 @@ void CameraActionDirectorComponent::LateUpdate(float deltaTime_)
         const DirectX::XMFLOAT3 normalFocus_ = camera_->GetFocus();
         const float normalFov_ = camera_->GetFovY();
         cameraPosition_ = LerpFloat3(returnStartCameraPosition, normalCamera_, rate_);
-        if (useOrbit_) cameraPosition_ = OrbitAroundTarget(returnStartCameraPosition, normalCamera_, orbitCenter_, rate_);
+        if (useOrbit_)
+        {
+            cameraPosition_ = OrbitAroundTarget(returnStartCameraPosition, normalCamera_, orbitCenter_, rate_);
+        }
         focusPosition_ = LerpFloat3(returnStartFocusPosition, normalFocus_, rate_);
         fov_ = returnStartFov + (normalFov_ - returnStartFov) * rate_;
         if (activePreset.positionMode == CAMERA_ACTION_POSITION_MODE::TPS_TARGET_RELATIVE)
+        {
             up_ = NormalizeOr(LerpFloat3(returnStartCameraUp, camera_->GetUp(), rate_), camera_->GetUp());
+        }
     }
 
     if (activePreset.shakeStrength > 0.0001f)
@@ -402,7 +488,10 @@ void CameraActionDirectorComponent::LateUpdate(float deltaTime_)
 
     ApplyCameraPose(cameraPosition_, focusPosition_, fov_, up_);
 
-    if (phaseTimer < duration_) return;
+    if (phaseTimer < duration_)
+    {
+        return;
+    }
 
     if (phase == CAMERA_ACTION_PHASE::ENTER)
     {
@@ -428,7 +517,10 @@ void CameraActionDirectorComponent::LateUpdate(float deltaTime_)
 
 void CameraActionDirectorComponent::PlayActionByIndex(int index_)
 {
-    if (index_ < 0 || index_ >= static_cast<int>(presets.size())) return;
+    if (index_ < 0 || index_ >= static_cast<int>(presets.size()))
+    {
+        return;
+    }
 
     DirectX::XMFLOAT3 focusPosition_{};
     DirectX::XMFLOAT3 attackDirection_{ 0.0f, 0.0f, 0.0f };
@@ -461,7 +553,10 @@ void CameraActionDirectorComponent::PlayActionAtPosition(
     const DirectX::XMFLOAT3& attackDirection_)
 {
     const int index_ = FindPresetIndex(actionName_);
-    if (index_ < 0) return;
+    if (index_ < 0)
+    {
+        return;
+    }
     BeginAction(presets[index_], focusPosition_, attackDirection_, nullptr);
 }
 
@@ -470,7 +565,10 @@ void CameraActionDirectorComponent::PlayActionForTarget(
     const std::shared_ptr<GameObject>& target_)
 {
     const int index_ = FindPresetIndex(actionName_);
-    if (index_ < 0 || !target_ || !target_->transform) return;
+    if (index_ < 0 || !target_ || !target_->transform)
+    {
+        return;
+    }
     BeginAction(
         presets[index_],
         target_->transform->GetWorldPosition(),
@@ -480,7 +578,10 @@ void CameraActionDirectorComponent::PlayActionForTarget(
 
 bool CameraActionDirectorComponent::PlayPresetForTarget(const CameraActionPreset& preset_, const std::shared_ptr<GameObject>& target_)
 {
-    if (!target_ || !target_->transform) return false;
+    if (!target_ || !target_->transform)
+    {
+        return false;
+    }
     BeginAction(preset_, target_->transform->GetWorldPosition(), { 0.0f, 0.0f, 1.0f }, target_);
     return IsPlayingAction(preset_.actionName);
 }
@@ -504,7 +605,10 @@ void CameraActionDirectorComponent::StopAction(bool immediate_)
         return;
     }
 
-    if (phase == CAMERA_ACTION_PHASE::IDLE) return;
+    if (phase == CAMERA_ACTION_PHASE::IDLE)
+    {
+        return;
+    }
 
     const std::shared_ptr<CameraComponent> camera_ = camera.lock();
     returnStartCameraPosition = camera_ ? camera_->GetEye() : actionCameraPosition;
@@ -518,21 +622,30 @@ void CameraActionDirectorComponent::StopAction(bool immediate_)
 
 void CameraActionDirectorComponent::StopActionByName(const std::string& actionName_, bool immediate_)
 {
-    if (phase != CAMERA_ACTION_PHASE::IDLE && activePreset.actionName == actionName_) StopAction(immediate_);
+    if (phase != CAMERA_ACTION_PHASE::IDLE && activePreset.actionName == actionName_)
+    {
+        StopAction(immediate_);
+    }
 }
 
 void CameraActionDirectorComponent::RegisterActions()
 {
     ActionRegistry& registry_ = ActionRegistry::Instance();
     const auto owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
     const std::weak_ptr<GameObject> weakOwner_ = owner_;
     // 最終カットの復帰時間を使い、通常カメラへ補間してから制御を返す。
     owner_->RegisterGlobalAction("CameraAction", "ReturnToGameplay", [weakOwner_]()
     {
         const auto owner_ = weakOwner_.lock();
         const auto director_ = owner_ ? owner_->GetComponent<CameraActionDirectorComponent>() : nullptr;
-        if (director_) director_->StopAction(false);
+        if (director_)
+        {
+            director_->StopAction(false);
+        }
     });
     for (const CameraActionPreset& preset_ : presets)
     {
@@ -547,9 +660,15 @@ void CameraActionDirectorComponent::RegisterActions()
 void CameraActionDirectorComponent::ResolveReferences()
 {
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
-    if (camera.expired()) camera = owner_->GetComponent<CameraComponent>();
+    if (camera.expired())
+    {
+        camera = owner_->GetComponent<CameraComponent>();
+    }
     if (thirdPersonCamera.expired())
     {
         thirdPersonCamera = owner_->GetComponent<ThirdPersonCameraComponent>();
@@ -576,7 +695,10 @@ void CameraActionDirectorComponent::BeginAction(
 {
     ResolveReferences();
     const std::shared_ptr<CameraComponent> camera_ = camera.lock();
-    if (!camera_ || !camera_->CanPlayEventAction()) return;
+    if (!camera_ || !camera_->CanPlayEventAction())
+    {
+        return;
+    }
 
     // 低優先度の演出で、再生中の重要なカメラ演出を上書きしないようにする。
     if (phase != CAMERA_ACTION_PHASE::IDLE &&
@@ -592,7 +714,10 @@ void CameraActionDirectorComponent::BeginAction(
     {
         const auto thirdPerson_ = thirdPersonCamera.lock();
         followTarget_ = thirdPerson_ ? thirdPerson_->GetFollowTarget() : nullptr;
-        if (!ResolveFollowPose(preset_, followTarget_, relativeEye_, relativeFocus_, relativeUp_)) return;
+        if (!ResolveFollowPose(preset_, followTarget_, relativeEye_, relativeFocus_, relativeUp_))
+        {
+            return;
+        }
     }
 
     if (phase != CAMERA_ACTION_PHASE::IDLE)
@@ -615,7 +740,10 @@ void CameraActionDirectorComponent::BeginAction(
         attackDirection_);
     activeFov = ClampFov(preset_.targetFov);
     framingEnvelope = 0.0f;
-    if (preset_.autoFrameTargets) UpdateFraming(preset_);
+    if (preset_.autoFrameTargets)
+    {
+        UpdateFraming(preset_);
+    }
     actionCameraUp = { 0.0f, 1.0f, 0.0f };
     if (preset_.positionMode == CAMERA_ACTION_POSITION_MODE::TPS_TARGET_RELATIVE)
     {
@@ -667,7 +795,10 @@ bool CameraActionDirectorComponent::ResolvePresetFocus(
     {
         const auto owner_ = GetGameObject();
         const auto target_ = owner_ ? owner_->GetManager().Find(preset_.targetObjectName) : nullptr;
-        if (!target_ || !target_->transform) return false;
+        if (!target_ || !target_->transform)
+        {
+            return false;
+        }
         focusPosition_ = target_->transform->GetWorldPosition();
         return true;
     }
@@ -696,10 +827,16 @@ bool CameraActionDirectorComponent::TryReadBlackboardVector3(
     DirectX::XMFLOAT3& value_) const
 {
     const std::shared_ptr<BlackboardComponent> blackboard_ = blackboard.lock();
-    if (!blackboard_) return false;
+    if (!blackboard_)
+    {
+        return false;
+    }
 
     DirectX::SimpleMath::Vector3 simpleValue_{};
-    if (!blackboard_->GetVector3(category_, key_, simpleValue_)) return false;
+    if (!blackboard_->GetVector3(category_, key_, simpleValue_))
+    {
+        return false;
+    }
 
     value_ = { simpleValue_.x, simpleValue_.y, simpleValue_.z };
     return true;
@@ -831,13 +968,18 @@ void CameraActionDirectorComponent::ApplyCameraPose(
     const DirectX::XMFLOAT3& up_)
 {
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_ || !owner_->transform) return;
+    if (!owner_ || !owner_->transform)
+    {
+        return;
+    }
 
     // 補間中に上方向と視線が平行になっても、特異なView行列を生成しない。
     const auto forward_ = NormalizeOr(SubtractFloat3(lookAtPosition_, cameraPosition_), { 0.0f, 0.0f, 1.0f });
     auto safeUp_ = NormalizeOr(up_, { 0.0f, 1.0f, 0.0f });
     if (LengthFloat3(CrossFloat3(safeUp_, forward_)) < 0.0001f)
+    {
         safeUp_ = std::abs(forward_.y) < 0.99f ? DirectX::XMFLOAT3{ 0.0f, 1.0f, 0.0f } : DirectX::XMFLOAT3{ 1.0f, 0.0f, 0.0f };
+    }
     const auto safeFocus_ = LengthFloat3(SubtractFloat3(lookAtPosition_, cameraPosition_)) > 0.0001f
         ? lookAtPosition_ : AddFloat3(cameraPosition_, forward_);
     const DirectX::XMMATRIX viewMatrix_ = DirectX::XMMatrixLookAtLH(
@@ -899,12 +1041,18 @@ void CameraActionDirectorComponent::CaptureCurrentCameraAsPreset(
 {
     BS_PROFILE_SCOPE("CameraActionDirectorComponent::CaptureCurrentCameraAsPreset");
     const std::shared_ptr<CameraComponent> camera_ = camera.lock();
-    if (!camera_) return;
+    if (!camera_)
+    {
+        return;
+    }
 
     const auto thirdPerson_ = thirdPersonCamera.lock();
     const auto target_ = thirdPerson_ ? thirdPerson_->GetFollowTarget() : nullptr;
     DirectX::XMFLOAT4X4 frame_;
-    if (!BuildFollowFrame(target_, frame_)) return;
+    if (!BuildFollowFrame(target_, frame_))
+    {
+        return;
+    }
 
     // ワールド位置・姿勢を対象の逆変換で保存し、別の位置や向きでも同じ構図を再現する。
     const auto inverse_ = DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&frame_));
@@ -920,16 +1068,28 @@ int CameraActionDirectorComponent::FindPresetIndex(
 {
     for (int index_ = 0; index_ < static_cast<int>(presets.size()); ++index_)
     {
-        if (presets[index_].actionName == actionName_) return index_;
+        if (presets[index_].actionName == actionName_)
+        {
+            return index_;
+        }
     }
     return -1;
 }
 
 float CameraActionDirectorComponent::GetPhaseDuration() const
 {
-    if (phase == CAMERA_ACTION_PHASE::ENTER) return activePreset.enterDuration;
-    if (phase == CAMERA_ACTION_PHASE::HOLD) return activePreset.holdDuration;
-    if (phase == CAMERA_ACTION_PHASE::RETURN) return activePreset.returnDuration;
+    if (phase == CAMERA_ACTION_PHASE::ENTER)
+    {
+        return activePreset.enterDuration;
+    }
+    if (phase == CAMERA_ACTION_PHASE::HOLD)
+    {
+        return activePreset.holdDuration;
+    }
+    if (phase == CAMERA_ACTION_PHASE::RETURN)
+    {
+        return activePreset.returnDuration;
+    }
     return 0.0f;
 }
 
@@ -1036,7 +1196,9 @@ void CameraActionDirectorComponent::Gui()
             char targetNameBuffer_[256]{};
             strncpy_s(targetNameBuffer_, preset_.targetObjectName.c_str(), _TRUNCATE);
             if (ImGui::InputText("Target Object Name", targetNameBuffer_, sizeof(targetNameBuffer_)))
+            {
                 preset_.targetObjectName = targetNameBuffer_;
+            }
             ImGui::DragFloat("Shake Strength", &preset_.shakeStrength, 0.005f, 0.0f, 2.0f);
             ImGui::DragFloat("Shake Frequency", &preset_.shakeFrequency, 0.1f, 0.0f, 120.0f);
             ImGui::DragInt("Priority", &preset_.priority);

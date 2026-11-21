@@ -18,7 +18,10 @@ void EasingComponent::Update(float et_)
 		if (owner_)
 		{
 			const std::shared_ptr<TimeManager> timeManager_ = owner_->GetManager().GetTimeManager();
-			if (timeManager_) updateTime_ = timeManager_->GetLastRawDeltaTime();
+			if (timeManager_)
+			{
+				updateTime_ = timeManager_->GetLastRawDeltaTime();
+			}
 		}
 	}
 	for (size_t index_ = 0; index_ < m_Easings.size(); ++index_)
@@ -99,7 +102,10 @@ void EasingComponent::Gui()
 void Easing::Update(float et)
 {
 	//イージングが終了したのならば
-	if (m_EasingEndFlag)return;
+	if (m_EasingEndFlag)
+	{
+		return;
+	}
 
 	switch (m_EasingType)
 	{
@@ -167,8 +173,14 @@ void Easing::GetLerpTime()
 void Easing::EaseOutQuint(float t)
 {
 	// t を 0.0 ～ 1.0 の範囲にクランプ（安全のため）
-	if (t < 0.0f) t = 0.0f;
-	if (t > 1.0f) t = 1.0f;
+	if (t < 0.0f)
+	{
+		t = 0.0f;
+	}
+	if (t > 1.0f)
+	{
+		t = 1.0f;
+	}
 
 	// 数式: 1 - (1 - t)^5
 	float invT = 1.0f - t;

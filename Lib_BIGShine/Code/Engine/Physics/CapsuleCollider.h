@@ -25,7 +25,10 @@ public:
     std::string startNodeName; // Capsule始点に使うNode名。
     std::string endNodeName; // Capsule終点に使うNode名。
 
-    ColliderType GetColliderType() const override { return ColliderType::Capsule; }
+    ColliderType GetColliderType() const override
+    {
+        return ColliderType::Capsule;
+    }
 
     void Gui() override;
     void Update(float deltaTime_) override;

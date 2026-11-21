@@ -123,19 +123,28 @@ void CollisionShapeManagerWindow::DrawObjectPicker()
     const char* preview_ = targetObjectName[0] != '\0'
         ? targetObjectName
         : "(none)";
-    if (!ImGui::BeginCombo("Pick Object", preview_)) return;
+    if (!ImGui::BeginCombo("Pick Object", preview_))
+    {
+        return;
+    }
 
     for (const std::shared_ptr<GameObject>& object_ :
         gameObjectManager->GetObjects())
     {
-        if (!object_) continue;
+        if (!object_)
+        {
+            continue;
+        }
         const std::string& objectName_ = object_->GetName();
         const bool selected_ = objectName_ == targetObjectName;
         if (ImGui::Selectable(objectName_.c_str(), selected_))
         {
             SetTargetObjectName(objectName_);
         }
-        if (selected_) ImGui::SetItemDefaultFocus();
+        if (selected_)
+        {
+            ImGui::SetItemDefaultFocus();
+        }
     }
 
     ImGui::EndCombo();
@@ -172,12 +181,18 @@ void CollisionShapeManagerWindow::DrawColliderList()
 
     for (const std::shared_ptr<GameObject>& object_ : objects_)
     {
-        if (!object_) continue;
+        if (!object_)
+        {
+            continue;
+        }
         int colliderIndex_ = 0;
         for (const std::shared_ptr<ColliderComponent>& collider_ :
             object_->GetComponents<ColliderComponent>())
         {
-            if (!collider_) continue;
+            if (!collider_)
+            {
+                continue;
+            }
 
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
@@ -214,7 +229,10 @@ CollisionShapeManagerWindow::BuildListedObjects() const
 {
     // Target Onlyなら対象階層だけ、そうでなければManagerが持つ全GameObjectを一覧対象にする。
     std::vector<std::shared_ptr<GameObject>> objects_;
-    if (!gameObjectManager) return objects_;
+    if (!gameObjectManager)
+    {
+        return objects_;
+    }
 
     if (listTargetOnly && targetObjectName[0] != '\0')
     {
@@ -232,16 +250,25 @@ void CollisionShapeManagerWindow::CollectHierarchyObjects(
     const std::shared_ptr<GameObject>& rootObject_,
     std::vector<std::shared_ptr<GameObject>>& objects_) const
 {
-    if (!rootObject_) return;
+    if (!rootObject_)
+    {
+        return;
+    }
 
     // includeChildrenが有効な時はTransform階層を再帰的にたどり、子Colliderも表に出す。
     objects_.push_back(rootObject_);
-    if (!includeChildren || !rootObject_->transform) return;
+    if (!includeChildren || !rootObject_->transform)
+    {
+        return;
+    }
 
     for (const std::shared_ptr<Transform>& childTransform_ :
         rootObject_->transform->children)
     {
-        if (!childTransform_) continue;
+        if (!childTransform_)
+        {
+            continue;
+        }
         CollectHierarchyObjects(childTransform_->gameObject.lock(), objects_);
     }
 }

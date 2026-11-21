@@ -7,6 +7,7 @@
 #include <string>
 class Component;
 using TransitionHandle = std::uint64_t;
+
 // Sceneに依存せず、最前面の演出要求とSceneをまたぐマスクの寿命を管理する。
 class ScreenTransitionManager
 {
@@ -33,14 +34,44 @@ public:
     TransitionParameters GetPreset(const std::string& name_) const;
     bool LoadSettings();
     bool SavePreset(const std::string& name_,const TransitionParameters& parameters_);
-    bool IsActive() const { return sequence.IsActive(); }
-    bool IsPreview() const { return preview; }
-    bool IsCovered(TransitionHandle handle_) const { return handle_ && handle_ == handle && sequence.IsCovered(); }
-    bool Owns(TransitionHandle handle_) const { return handle_ && handle_ == handle; }
-    bool IsInputBlocked() const { return IsActive() && !preview && parameters.blockInput; }
-    TransitionHandle GetHandle() const { return handle; }
-    TransitionState GetState() const { return sequence.GetState(); }
+
+    bool IsActive() const
+    {
+        return sequence.IsActive();
+    }
+
+    bool IsPreview() const
+    {
+        return preview;
+    }
+
+    bool IsCovered(TransitionHandle handle_) const
+    {
+        return handle_ && handle_ == handle && sequence.IsCovered();
+    }
+
+    bool Owns(TransitionHandle handle_) const
+    {
+        return handle_ && handle_ == handle;
+    }
+
+    bool IsInputBlocked() const
+    {
+        return IsActive() && !preview && parameters.blockInput;
+    }
+
+    TransitionHandle GetHandle() const
+    {
+        return handle;
+    }
+
+    TransitionState GetState() const
+    {
+        return sequence.GetState();
+    }
+
     static void DrawParameters(TransitionParameters& parameters_);
+
 private:
     bool IsOwnerAlive() const;
     TransitionSequence sequence;

@@ -17,7 +17,10 @@ void PlayerHitState::Enter()
     airHitKnockdown = false;
 
     PlayerControllerComponent* player_ = GetPlayerController();
-    if (!player_) return;
+    if (!player_)
+    {
+        return;
+    }
 
     player_->EnterAction(PLAYER_ACTION::HIT);
 
@@ -30,7 +33,10 @@ void PlayerHitState::Enter()
 
     const std::shared_ptr<BlackboardComponent> blackboard_ =
         GetComponent<BlackboardComponent>();
-    if (!blackboard_) return;
+    if (!blackboard_)
+    {
+        return;
+    }
 
     DirectX::SimpleMath::Vector2 hitDirection_{ 0.0f, 0.0f };
     float impactPower_ = 0.0f;
@@ -139,7 +145,10 @@ void PlayerHitState::Execute(float elapsedTime_)
     elapsedTime += (std::max)(elapsedTime_, 0.0f);
 
     PlayerControllerComponent* player_ = GetPlayerController();
-    if (!player_) return;
+    if (!player_)
+    {
+        return;
+    }
 
     if (airHitKnockdown && !player_->IsGrounded())
     {
@@ -153,7 +162,10 @@ void PlayerHitState::Execute(float elapsedTime_)
         return;
     }
 
-    if (elapsedTime < fallbackDuration) return;
+    if (elapsedTime < fallbackDuration)
+    {
+        return;
+    }
 
     player_->NotifyActionEnd();
 }

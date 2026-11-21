@@ -48,9 +48,20 @@ public:
 
 	// データアクセス
 	// EditorWindow 側がイベント数と各イベントを参照・編集するためのアクセサ。
-	int GetItemCount() const { return static_cast<int>(events.size()); }
-	const AnimationEvent& GetEvent(int index) const { return events[index]; }
-	AnimationEvent& GetEvent(int index) { return events[index]; }
+	int GetItemCount() const
+	{
+		return static_cast<int>(events.size());
+	}
+
+	const AnimationEvent& GetEvent(int index) const
+	{
+		return events[index];
+	}
+
+	AnimationEvent& GetEvent(int index)
+	{
+		return events[index];
+	}
 
 private:
 	// Sequencer に表示するイベント一覧。
@@ -63,6 +74,10 @@ private:
 	// コピー用
 	// Copy/Paste で一時保持するイベント。
 	AnimationEvent clipboard;
+
 	// 内部ユーティリティ
-	int GetCustomHeight(int index) const { return 0; } // 拡張用
+	int GetCustomHeight(int index) const
+	{
+		return 0;
+	} // 拡張用
 };

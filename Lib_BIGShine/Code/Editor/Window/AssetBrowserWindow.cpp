@@ -25,7 +25,10 @@ namespace
     {
         // 検索と拡張子判定を大文字小文字に左右されないよう小文字へそろえる。
         std::transform(text_.begin(), text_.end(), text_.begin(),
-            [](unsigned char character_) { return static_cast<char>(std::tolower(character_)); });
+            [](unsigned char character_)
+        {
+            return static_cast<char>(std::tolower(character_));
+        });
         return text_;
     }
 
@@ -48,7 +51,10 @@ namespace
     void RetainDrawTexture(ID3D11ShaderResourceView* texture_)
     {
         // ImGuiの描画コマンドが実行されるまでSRVを保持し、描画前に解放される事故を避ける。
-        if (texture_) texture_->AddRef();
+        if (texture_)
+        {
+            texture_->AddRef();
+        }
     }
 
     void ReleaseAssetBrowserDrawTexture(const ImDrawList* parentList_, const ImDrawCmd* command_)
@@ -56,7 +62,10 @@ namespace
         (void)parentList_;
         ID3D11ShaderResourceView* texture_ =
             static_cast<ID3D11ShaderResourceView*>(command_->UserCallbackData);
-        if (texture_) texture_->Release();
+        if (texture_)
+        {
+            texture_->Release();
+        }
     }
 
     bool DrawRetainedImageButton(
@@ -119,7 +128,10 @@ void AssetBrowserWindow::DrawContent()
     ImGui::PushID(this);
     ImGui::InputTextWithHint("##AssetSearch", "Search current folder...", searchText, sizeof(searchText));
     ImGui::SameLine();
-    if (ImGui::Button("Refresh")) Refresh();
+    if (ImGui::Button("Refresh"))
+    {
+        Refresh();
+    }
     ImGui::SameLine();
     ImGui::SliderFloat("Icon Size", &iconSize, 40.0f, 128.0f, "%.0f");
 
@@ -182,35 +194,53 @@ void AssetBrowserWindow::LoadDirectory(const std::filesystem::path& path_, Asset
 
     // 実ファイル階層を再帰的にAssetNodeへ変換し、ファイルは拡張子やjson内容から種類を分類する。
     std::error_code error_;
-    if (!std::filesystem::is_directory(path_, error_)) return;
+    if (!std::filesystem::is_directory(path_, error_))
+    {
+        return;
+    }
 
     for (const auto& entry_ : std::filesystem::directory_iterator(path_, error_))
     {
-        if (error_) break;
+        if (error_)
+        {
+            break;
+        }
         AssetNode child_;
         child_.name = WindowsDialogHelper::PathToUtf8(entry_.path().filename());
         child_.path = WindowsDialogHelper::PathToUtf8(entry_.path().lexically_normal());
         child_.isDirectory = entry_.is_directory(error_);
         child_.type = child_.isDirectory ? AssetType::FILE : ClassifyAsset(entry_.path());
-        if (child_.isDirectory) LoadDirectory(entry_.path(), child_);
+        if (child_.isDirectory)
+        {
+            LoadDirectory(entry_.path(), child_);
+        }
         node_.children.push_back(std::move(child_));
     }
 
     std::sort(node_.children.begin(), node_.children.end(),
         [](const AssetNode& left_, const AssetNode& right_)
         {
-            if (left_.isDirectory != right_.isDirectory) return left_.isDirectory > right_.isDirectory;
-            return left_.name < right_.name;
+            if (left_.isDirectory != right_.isDirectory)
+        {
+            return left_.isDirectory > right_.isDirectory;
+        }
+        return left_.name < right_.name;
         });
 }
 
 void AssetBrowserWindow::DrawFolderTree(AssetNode& node_)
 {
     // ディレクトリだけをツリー表示し、クリックされたフォルダを右側グリッドの表示対象にする。
-    if (!node_.isDirectory) return;
+    if (!node_.isDirectory)
+    {
+        return;
+    }
     ImGui::PushID(node_.path.c_str());
     ImGuiTreeNodeFlags flags_ = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
-    if (selectedFolder == &node_) flags_ |= ImGuiTreeNodeFlags_Selected;
+    if (selectedFolder == &node_)
+    {
+        flags_ |= ImGuiTreeNodeFlags_Selected;
+    }
     const bool open_ = ImGui::TreeNodeEx("##Folder", flags_, "%s", node_.name.c_str());
     if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
     {
@@ -219,7 +249,10 @@ void AssetBrowserWindow::DrawFolderTree(AssetNode& node_)
     }
     if (open_)
     {
-        for (AssetNode& child_ : node_.children) DrawFolderTree(child_);
+        for (AssetNode& child_ : node_.children)
+        {
+            DrawFolderTree(child_);
+        }
         ImGui::TreePop();
     }
     ImGui::PopID();
@@ -235,10 +268,16 @@ void AssetBrowserWindow::DrawGrid()
     ImGui::Separator();
     const float cellWidth_ = iconSize + 24.0f;
     const int columnCount_ = (std::max)(1, static_cast<int>(ImGui::GetContentRegionAvail().x / cellWidth_));
-    if (!ImGui::BeginTable("AssetGridTable", columnCount_, ImGuiTableFlags_SizingStretchSame)) return;
+    if (!ImGui::BeginTable("AssetGridTable", columnCount_, ImGuiTableFlags_SizingStretchSame))
+    {
+        return;
+    }
     for (AssetNode& child_ : folder_->children)
     {
-        if (!MatchesSearch(child_)) continue;
+        if (!MatchesSearch(child_))
+        {
+            continue;
+        }
         ImGui::TableNextColumn();
         DrawAssetCard(child_);
     }
@@ -292,7 +331,10 @@ void AssetBrowserWindow::DrawAssetCard(AssetNode& node_)
             selectedFilePath = node_.path;
         }
     }
-    if (!node_.isDirectory) BeginAssetDrag(node_);
+    if (!node_.isDirectory)
+    {
+        BeginAssetDrag(node_);
+    }
     if (!node_.isDirectory && node_.type == AssetType::PREFAB)
     {
         if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
@@ -327,7 +369,10 @@ void AssetBrowserWindow::DrawAssetCard(AssetNode& node_)
             ImGui::EndPopup();
         }
     }
-    if (ImGui::IsItemHovered()) ImGui::SetTooltip("%s", node_.path.c_str());
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::SetTooltip("%s", node_.path.c_str());
+    }
     ImGui::TextWrapped("%s", node_.name.c_str());
     ImGui::PopID();
 }
@@ -335,7 +380,10 @@ void AssetBrowserWindow::DrawAssetCard(AssetNode& node_)
 void AssetBrowserWindow::BeginAssetDrag(AssetNode& node_)
 {
     // 他のEditor UIへ渡せるよう、種類別のPayload名とパス文字列をDragDropへ積む。
-    if (!ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) return;
+    if (!ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+    {
+        return;
+    }
     BS_PROFILE_SCOPE("AssetBrowserWindow::BeginAssetDrag");
 
     const char* payloadType_ = GetPayloadType(node_);
@@ -397,7 +445,10 @@ ID3D11ShaderResourceView* AssetBrowserWindow::GetAssetIcon(const AssetNode& node
 
 ID3D11ShaderResourceView* AssetBrowserWindow::GetIconTexture(const std::string& path_) const
 {
-    if (path_.empty()) return nullptr;
+    if (path_.empty())
+    {
+        return nullptr;
+    }
     TextureResourceManager& manager_ = TextureResourceManager::Instance();
     if (ID3D11ShaderResourceView* texture_ = manager_.GetTexture(path_))
     {
@@ -418,10 +469,22 @@ ID3D11ShaderResourceView* AssetBrowserWindow::GetTextureThumbnail(const AssetNod
 
 const std::string& AssetBrowserWindow::GetFallbackIconPath(const std::string& preferredPath_) const
 {
-    if (!preferredPath_.empty()) return preferredPath_;
-    if (!assetBrowserIcons.jsonPath.empty()) return assetBrowserIcons.jsonPath;
-    if (!assetBrowserIcons.filePath.empty()) return assetBrowserIcons.filePath;
-    if (!assetBrowserIcons.missingPath.empty()) return assetBrowserIcons.missingPath;
+    if (!preferredPath_.empty())
+    {
+        return preferredPath_;
+    }
+    if (!assetBrowserIcons.jsonPath.empty())
+    {
+        return assetBrowserIcons.jsonPath;
+    }
+    if (!assetBrowserIcons.filePath.empty())
+    {
+        return assetBrowserIcons.filePath;
+    }
+    if (!assetBrowserIcons.missingPath.empty())
+    {
+        return assetBrowserIcons.missingPath;
+    }
     return assetBrowserIcons.texturePath;
 }
 
@@ -451,10 +514,16 @@ const char* AssetBrowserWindow::GetPayloadType(const AssetNode& node_) const
 AssetBrowserWindow::AssetNode* AssetBrowserWindow::FindNode(const std::string& path_, AssetNode& node_)
 {
     // Refresh後も選択フォルダを保てるよう、保存していたパスから新しいツリー内のノードを探す。
-    if (node_.path == path_) return &node_;
+    if (node_.path == path_)
+    {
+        return &node_;
+    }
     for (AssetNode& child_ : node_.children)
     {
-        if (AssetNode* found_ = FindNode(path_, child_)) return found_;
+        if (AssetNode* found_ = FindNode(path_, child_))
+        {
+            return found_;
+        }
     }
     return nullptr;
 }
@@ -462,7 +531,10 @@ AssetBrowserWindow::AssetNode* AssetBrowserWindow::FindNode(const std::string& p
 bool AssetBrowserWindow::MatchesSearch(const AssetNode& node_) const
 {
     // 検索は現在フォルダ内の名前だけを対象にし、フォルダ移動なしで一覧を素早く絞る。
-    if (searchText[0] == '\0') return true;
+    if (searchText[0] == '\0')
+    {
+        return true;
+    }
     std::string name_ = ToLowerString(node_.name);
     std::string search_ = ToLowerString(searchText);
     return name_.find(search_) != std::string::npos;
@@ -523,8 +595,14 @@ AssetBrowserWindow::AssetType AssetBrowserWindow::ClassifyAsset(const std::files
             {
                 nlohmann::json json_;
                 file_ >> json_;
-                if (json_.value("AssetType", "") == "CurveTrack") return AssetType::CURVE;
-                if (json_.value("AssetType", "") == "VFXMaterial") return AssetType::MATERIAL;
+                if (json_.value("AssetType", "") == "CurveTrack")
+                {
+                    return AssetType::CURVE;
+                }
+                if (json_.value("AssetType", "") == "VFXMaterial")
+                {
+                    return AssetType::MATERIAL;
+                }
             }
             catch (const nlohmann::json::exception&)
             {

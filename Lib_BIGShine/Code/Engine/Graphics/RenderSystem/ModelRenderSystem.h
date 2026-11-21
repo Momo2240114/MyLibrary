@@ -4,6 +4,7 @@
 #include <vector>
 #include <memory>
 #include <cstdint>
+#include <cstddef>
 #include <wrl.h>
 #include <map>
 #include "Engine/Graphics/Resource/ModelResource.h"
@@ -25,17 +26,34 @@ class MaterialOverlayComponent;
 class ModelRenderSystem
 {
 public:
-	ModelRenderSystem() {}
-	~ModelRenderSystem() {}
+	ModelRenderSystem()
+	{
+	}
+
+	~ModelRenderSystem()
+	{
+	}
 
 	void Initialize(ID3D11Device* device);
 	/// モデルを当該フレームの描画キューへ登録する。
-	void PushSubmit(ModelShaderID shaderId, std::shared_ptr<GltfModelCommponennt> model);
+	void PushSubmit(ModelShaderID shaderId_, std::shared_ptr<GltfModelCommponennt> model_,
+		const DirectX::XMFLOAT4X4* previousWorld_ = nullptr);
 
 	/// 登録済みモデルを描画パスごとに処理し、完了後に描画キューを破棄する。
 	void RenderAll(const RenderContext& rc);
 	void RenderDecals(const RenderContext& rc);
-	const auto& GetShaders() const { return shaders; }
+	void RenderLayerDepthMask(const RenderContext& rc_);
+
+	const DirectX::XMFLOAT4& GetOutlineColor() const
+	{
+		return outlineColor;
+	}
+
+	const auto& GetShaders() const
+	{
+		return shaders;
+	}
+
 	void ShaderSettingGui();
 	void RenderInvestigationSettingGui();
 	void ShadowSettingGui();
@@ -170,6 +188,8 @@ private:
 		DirectX::XMFLOAT4X4		boneTransforms[256];
 	};
 
+	size_t UploadSkeletonConstants(ID3D11DeviceContext* dc_, GltfModelCommponennt& model_, int meshIndex_);
+
 	struct CbStaticMesh
 	{
 		DirectX::XMFLOAT4X4 world;
@@ -180,8 +200,20 @@ private:
 	{
 		DirectX::XMFLOAT4 outlineColor;
 		float outlineThickness;
-		DirectX::XMFLOAT3 padding;
+		float depthScale;
+		float maxDistanceScale;
+		float padding;
 	};
+	static_assert(sizeof(CbOutline) == 32);
+
+	struct CbLayerModel
+	{
+		DirectX::XMFLOAT4X4 previousObjectProjection;
+		DirectX::XMFLOAT2 pixelSize;
+		uint32_t mode;
+		uint32_t hasObjectHistory;
+	};
+	static_assert(sizeof(CbLayerModel) == 80);
 
 	struct CbGBufferMaterial
 	{
@@ -206,7 +238,15 @@ private:
 		DirectX::XMFLOAT4 dissolveDirection;
 		DirectX::XMFLOAT4 dissolveOrigin;
 	};
+
 	static_assert(sizeof(CbGBufferMaterial) == 160);
+	// LayerModelMaskPS は GBuffer の色・UVと同じレイアウトを参照する。
+	static_assert(offsetof(CbGBufferMaterial, baseColor) == 0 &&
+		offsetof(CbGBufferMaterial, emissiveColor) == 16 &&
+		offsetof(CbGBufferMaterial, uvScale) == 48 &&
+		offsetof(CbGBufferMaterial, uvOffset) == 56 &&
+		offsetof(CbGBufferMaterial, uvRotation) == 64);
+
 	// 単独物性マップの有無を描画ごとに通知し、前のメッシュの設定が残ることを防ぐ。
 	struct CbSeparateMaterialMaps
 	{
@@ -218,7 +258,9 @@ private:
 		uint32_t roughnessChannel = 0;
 		uint32_t padding[2] = {};
 	};
+
 	static_assert(sizeof(CbSeparateMaterialMaps) == 32);
+
 	// 半透明ToonPBRにも同じDissolve設定を渡すための描画単位の定数。
 	struct CbModelDissolve
 	{
@@ -227,6 +269,7 @@ private:
 		DirectX::XMFLOAT4 direction;
 		DirectX::XMFLOAT4 origin;
 	};
+
 	static_assert(sizeof(CbModelDissolve) == 64);
 
 	struct CbMaterialOverlay
@@ -246,6 +289,7 @@ private:
 		float emissivePulseAmount;
 		DirectX::XMFLOAT2 padding;
 	};
+
 	static_assert(sizeof(CbMaterialOverlay) % 16 == 0);
 
 	struct DrawInfo
@@ -253,6 +297,7 @@ private:
 		ModelShaderID				shaderId;
 		std::shared_ptr<GltfModelCommponennt>	model;
 		std::shared_ptr<MaterialOverlayComponent> materialOverlay;
+		const DirectX::XMFLOAT4X4* previousWorld = nullptr;
 	};
 
 	// 半透明メッシュはカメラから遠い順に描画するため、距離を併せて保持する。
@@ -290,6 +335,11 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> outlineConstantBuffer;
 	DirectX::XMFLOAT4 outlineColor = { 0.02f, 0.02f, 0.025f, 1.0f };
 	float outlineThickness = 0.00f;
+	static constexpr float DEFAULT_OUTLINE_REFERENCE_DISTANCE = 10.0f;
+	static constexpr float DEFAULT_OUTLINE_MAX_DISTANCE_SCALE = 4.0f;
+	bool outlineDistanceScalingEnabled = true;
+	float outlineReferenceDistance = DEFAULT_OUTLINE_REFERENCE_DISTANCE;
+	float outlineMaxDistanceScale = DEFAULT_OUTLINE_MAX_DISTANCE_SCALE;
 
 	Microsoft::WRL::ComPtr<ID3D11VertexShader> gBufferStaticVertexShader;
 	Microsoft::WRL::ComPtr<ID3D11VertexShader> gBufferSkinnedVertexShader;
@@ -297,6 +347,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> gBufferSimplePixelShader;
 	Microsoft::WRL::ComPtr<ID3D11InputLayout> gBufferInputLayout;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> gBufferMaterialConstantBuffer;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> layerModelConstantBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> separateMaterialMapsConstantBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> modelDissolveConstantBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> materialOverlayConstantBuffer;
@@ -321,9 +372,11 @@ private:
 	// デカール描画に必要なシェーダー、定数バッファ、当該フレームの描画要求。
 	std::shared_ptr<DecalShader> decalShader;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> decalConstantBuffer;
+
 	struct DecalDrawInfo {
 		std::shared_ptr<DecalComponent> component;
 	};
+
 	std::vector<DecalDrawInfo> decalDrawInfos;
 
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> whiteTextureSRV;
@@ -356,6 +409,7 @@ private:
 	// カスケードごとの深度マップを生成し、後段のライティングパスで参照できる状態にする。
 	void RenderCascadeShadowMaps(RenderContext& rc, const DirectX::XMFLOAT3& lightDirection);
 	void RenderShadowCasters(const RenderContext& rc, int cascadeIndex);
+
 public:
 	void PushDecalSubmit(std::shared_ptr<DecalComponent> decal) {
 		decalDrawInfos.push_back({ decal });

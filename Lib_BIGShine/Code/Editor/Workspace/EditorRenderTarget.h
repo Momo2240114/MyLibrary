@@ -11,27 +11,62 @@ public:
     void Begin(ID3D11DeviceContext* context_, const float clearColor_[4]);
     void End(ID3D11DeviceContext* context_);
 
-    ID3D11ShaderResourceView* GetShaderResourceView() const { return shaderResourceView.Get(); }
-    ID3D11DepthStencilView* GetDepthStencilView() const { return depthStencilView.Get(); }
-    ID3D11ShaderResourceView* GetDepthShaderResourceView() const { return depthShaderResourceView.Get(); }
+    ID3D11ShaderResourceView* GetShaderResourceView() const
+    {
+        return shaderResourceView.Get();
+    }
 
-    int GetWidth() const { return width; }
-    int GetHeight() const { return height; }
+    ID3D11DepthStencilView* GetDepthStencilView() const
+    {
+        return depthStencilView.Get();
+    }
+
+    ID3D11ShaderResourceView* GetDepthShaderResourceView() const
+    {
+        return depthShaderResourceView.Get();
+    }
+
+    int GetWidth() const
+    {
+        return width;
+    }
+
+    int GetHeight() const
+    {
+        return height;
+    }
+
     bool IsValid() const 
     {
         return renderTargetView && normalRenderTargetView && shaderResourceView && depthStencilView;
     }
 
-    ID3D11RenderTargetView* GetRenderTargetView() const { return renderTargetView.Get(); }
-    ID3D11RenderTargetView* GetNormalRenderTargetView() const { return normalRenderTargetView.Get(); }
-    ID3D11ShaderResourceView* GetNormalShaderResourceView() const { return normalShaderResourceView.Get(); }
+    ID3D11RenderTargetView* GetRenderTargetView() const
+    {
+        return renderTargetView.Get();
+    }
+
+    ID3D11RenderTargetView* GetNormalRenderTargetView() const
+    {
+        return normalRenderTargetView.Get();
+    }
+
+    ID3D11ShaderResourceView* GetNormalShaderResourceView() const
+    {
+        return normalShaderResourceView.Get();
+    }
+
     void ResetRenderTarget(ID3D11DeviceContext* context_) const
     {
-        if (!context_ || !IsValid()) return;
+        if (!context_ || !IsValid())
+        {
+            return;
+        }
         // パーティクル用は1枚でOK
         ID3D11RenderTargetView* rtv_ = renderTargetView.Get();
         context_->OMSetRenderTargets(1, &rtv_, depthStencilView.Get());
     }
+
 private:
     bool CreateNormalTarget(ID3D11Device* device_);
 

@@ -1,5 +1,6 @@
 #pragma once
 #include "ShaderTransitionEffect.h"
+
 // 菱形の開口部を閉じるトランジション。
 class DiamondTransition final : public ShaderTransitionEffect
 {

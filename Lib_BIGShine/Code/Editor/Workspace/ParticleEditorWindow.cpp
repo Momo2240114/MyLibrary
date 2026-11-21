@@ -137,7 +137,10 @@ void ParticleEditorWindow::Draw()
 
 void ParticleEditorWindow::EnsurePreviewObjects()
 {
-    if (isInitialized) return;
+    if (isInitialized)
+    {
+        return;
+    }
 
     // エディタ内プレビュー専用のレンダーシステムとコンポーネントを生成し、実シーンを汚さず確認できるようにする。
     auto& graphics_ = GraphicsDeviceManager::Instance();
@@ -154,7 +157,10 @@ void ParticleEditorWindow::EnsurePreviewObjects()
     previewMeshVFX = previewObject->AddComponent<MeshVFXComponent>();
     previewAttackHit = previewObject->AddComponent<AttackEffectHitComponent>();
     previewImpactEffect = previewObject->AddComponent<ImpactEffectComponent>();
-    if (previewAttackHit) previewAttackHit->SetDestroyOnLifeEnd(false);
+    if (previewAttackHit)
+    {
+        previewAttackHit->SetDestroyOnLifeEnd(false);
+    }
     if (previewParticle)
     {
         previewParticle->RefreshTextureList();
@@ -185,7 +191,10 @@ void ParticleEditorWindow::EnsurePreviewObjects()
     previewDecalObject->SetManager(gameObjectManager);
     previewDecalObject->transform->gameObject = previewDecalObject;
     previewDecal = previewDecalObject->AddComponent<DecalComponent>();
-    if (previewDecal) previewDecal->SetDestroyOnLifeEnd(false);
+    if (previewDecal)
+    {
+        previewDecal->SetDestroyOnLifeEnd(false);
+    }
 
     editorCamera.ResetPreviewCamera(previewCamera);
     previewCamera.SetPerspectiveFov(45.0f, 16.0f / 9.0f, 0.01f, 100.0f);
@@ -212,7 +221,10 @@ void ParticleEditorWindow::DrawToolbar()
     if (ImGui::MenuItem(sequencePlaying ? "Pause" : "Play"))
     {
         sequencePlaying = !sequencePlaying;
-        if (sequencePlaying && previewAttackHit) previewAttackHit->Play();
+        if (sequencePlaying && previewAttackHit)
+        {
+            previewAttackHit->Play();
+        }
     }
     if (ImGui::MenuItem("Stop"))
     {
@@ -226,7 +238,10 @@ void ParticleEditorWindow::DrawToolbar()
     ImGui::MenuItem("Loop", nullptr, &sequenceLoop);
     ImGui::MenuItem("Grid", nullptr, &showGrid);
     ImGui::MenuItem("Impact Preview", nullptr, &impactPreviewMode);
-    if (impactPreviewMode && ImGui::MenuItem("Drop Impact")) StartImpactPreview();
+    if (impactPreviewMode && ImGui::MenuItem("Drop Impact"))
+    {
+        StartImpactPreview();
+    }
     if (ImGui::MenuItem("Reset Layout"))
     {
         inspectorWidth = 360.0f;
@@ -397,23 +412,51 @@ void ParticleEditorWindow::DrawTimelinePanel()
         ParticleComponent* particle = nullptr;
         float duration = 0.0f;
 
-        int ToFrame(float time_) const { return static_cast<int>(time_ * TIMELINE_FPS); }
-        float ToTime(int frame_) const { return static_cast<float>(frame_) / TIMELINE_FPS; }
+        int ToFrame(float time_) const
+        {
+            return static_cast<int>(time_ * TIMELINE_FPS);
+        }
 
-        int GetFrameMin() const override { return 0; }
-        int GetFrameMax() const override { return (std::max)(1, ToFrame(duration)); }
-        int GetItemCount() const override { return tracks ? static_cast<int>(tracks->size()) : 0; }
-        int GetItemTypeCount() const override { return 2; }
+        float ToTime(int frame_) const
+        {
+            return static_cast<float>(frame_) / TIMELINE_FPS;
+        }
+
+        int GetFrameMin() const override
+        {
+            return 0;
+        }
+
+        int GetFrameMax() const override
+        {
+            return (std::max)(1, ToFrame(duration));
+        }
+
+        int GetItemCount() const override
+        {
+            return tracks ? static_cast<int>(tracks->size()) : 0;
+        }
+
+        int GetItemTypeCount() const override
+        {
+            return 2;
+        }
+
         const char* GetItemTypeName(int typeIndex_) const override
         {
             return typeIndex_ == 0 ? "Particle Emitter" : "Mesh VFX";
         }
 
-        void BeginEdit(int index_) override {}
+        void BeginEdit(int index_) override
+        {
+        }
 
         void EndEdit() override
         {
-            if (!tracks) return;
+            if (!tracks)
+            {
+                return;
+            }
 
             // バー編集後はフレーム範囲を秒へ戻し、1フレーム未満の長さにならないように丸める。
             for (TimelineTrack& track_ : *tracks)
@@ -427,15 +470,27 @@ void ParticleEditorWindow::DrawTimelinePanel()
 
         void Get(int index_, int** start_, int** end_, int* type_, unsigned int* color_) override
         {
-            if (!tracks || index_ < 0 || index_ >= static_cast<int>(tracks->size())) return;
+            if (!tracks || index_ < 0 || index_ >= static_cast<int>(tracks->size()))
+            {
+                return;
+            }
 
             TimelineTrack& track_ = (*tracks)[index_];
             // Trackの秒情報から現在フレームを作り、バー色はParticleとMesh VFXで分ける。
             track_.frameStart = ToFrame(track_.startTime);
             track_.frameEnd = ToFrame(track_.startTime + track_.duration);
-            if (start_) *start_ = &track_.frameStart;
-            if (end_) *end_ = &track_.frameEnd;
-            if (type_) *type_ = static_cast<int>(track_.type);
+            if (start_)
+            {
+                *start_ = &track_.frameStart;
+            }
+            if (end_)
+            {
+                *end_ = &track_.frameEnd;
+            }
+            if (type_)
+            {
+                *type_ = static_cast<int>(track_.type);
+            }
             if (color_)
             {
                 *color_ = track_.type == TimelineTrackType::PARTICLE_EMITTER
@@ -446,7 +501,10 @@ void ParticleEditorWindow::DrawTimelinePanel()
 
         const char* GetItemLabel(int index_) const override
         {
-            if (!tracks || index_ < 0 || index_ >= static_cast<int>(tracks->size())) return "";
+            if (!tracks || index_ < 0 || index_ >= static_cast<int>(tracks->size()))
+            {
+                return "";
+            }
             const TimelineTrack& track_ = (*tracks)[index_];
             return track_.targetName.empty()
                 ? (track_.type == TimelineTrackType::PARTICLE_EMITTER ? "Particle Emitter" : "Mesh VFX")
@@ -471,7 +529,10 @@ void ParticleEditorWindow::DrawTimelinePanel()
 
         void Add(int type_) override
         {
-            if (!tracks) return;
+            if (!tracks)
+            {
+                return;
+            }
 
             // 追加されたTrackは選択中Particleの先頭Emitter、またはMesh VFX全体を初期ターゲットにする。
             TimelineTrack track_{};
@@ -497,7 +558,10 @@ void ParticleEditorWindow::DrawTimelinePanel()
 
         void Del(int index_) override
         {
-            if (!tracks || index_ < 0 || index_ >= static_cast<int>(tracks->size())) return;
+            if (!tracks || index_ < 0 || index_ >= static_cast<int>(tracks->size()))
+            {
+                return;
+            }
             tracks->erase(tracks->begin() + index_);
         }
     };
@@ -648,25 +712,40 @@ void ParticleEditorWindow::DrawInspectorPanel()
         }
         if (ImGui::BeginTabItem("Attack Hit"))
         {
-            if (previewAttackHit) previewAttackHit->Gui();
+            if (previewAttackHit)
+            {
+                previewAttackHit->Gui();
+            }
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("Impact Effect"))
         {
             // Impactタブを開いた時点で床への落下プレビューを使う前提に切り替える。
             impactPreviewMode = true;
-            if (ImGui::Button("Drop Preview")) StartImpactPreview();
+            if (ImGui::Button("Drop Preview"))
+            {
+                StartImpactPreview();
+            }
             ImGui::SameLine();
             ImGui::DragFloat("Height", &impactPreviewHeight, 0.1f, 0.1f, 20.0f);
             ImGui::DragFloat("Fall Speed", &impactPreviewFallSpeed, 0.1f, 0.1f, 50.0f);
-            if (previewImpactEffect) previewImpactEffect->Gui();
+            if (previewImpactEffect)
+            {
+                previewImpactEffect->Gui();
+            }
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("Source Model"))
         {
-            if (previewObject->transform) previewObject->transform->Gui();
+            if (previewObject->transform)
+            {
+                previewObject->transform->Gui();
+            }
             ImGui::Separator();
-            if (previewModel) previewModel->Gui();
+            if (previewModel)
+            {
+                previewModel->Gui();
+            }
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("Camera"))
@@ -706,11 +785,17 @@ void ParticleEditorWindow::RenderPreview(const ImVec2& previewSize_)
     auto& graphics_ = GraphicsDeviceManager::Instance();
     ID3D11Device* device_ = graphics_.GetDevice();
     ID3D11DeviceContext* context_ = graphics_.GetContext();
-    if (!device_ || !context_ || !previewParticle || !previewMeshVFX) return;
+    if (!device_ || !context_ || !previewParticle || !previewMeshVFX)
+    {
+        return;
+    }
 
     const int width_ = (std::max)(1, static_cast<int>(previewSize_.x));
     const int height_ = (std::max)(1, static_cast<int>(previewSize_.y));
-    if (!previewTarget.Resize(device_, width_, height_)) return;
+    if (!previewTarget.Resize(device_, width_, height_))
+    {
+        return;
+    }
 
     previewCamera.SetPerspectiveFov(45.0f, static_cast<float>(width_) / static_cast<float>(height_), 0.01f, 100.0f);
 
@@ -739,7 +824,10 @@ void ParticleEditorWindow::RenderPreview(const ImVec2& previewSize_)
     // 各プレビュー用コンポーネントを通常のゲーム更新と同じ順に進める。
     previewParticle->Update(deltaTime_);
     previewMeshVFX->Update(deltaTime_);
-    if (previewDecal) previewDecal->Update(deltaTime_);
+    if (previewDecal)
+    {
+        previewDecal->Update(deltaTime_);
+    }
 
     RenderContext renderContext_{};
     DecalManager decalManager_;
@@ -774,7 +862,10 @@ void ParticleEditorWindow::RenderPreview(const ImVec2& previewSize_)
     }
 
     auto& shapeRenderer_ = graphics_.GetShapeRendererSystem();
-    if (previewAttackHit) previewAttackHit->SubmitDebugShapes();
+    if (previewAttackHit)
+    {
+        previewAttackHit->SubmitDebugShapes();
+    }
     if (impactPreviewMode)
     {
         // Impact落下中は接触前の仮想弾をデバッグ球で表示する。
@@ -846,11 +937,17 @@ void ParticleEditorWindow::RenderPreview(const ImVec2& previewSize_)
 
 void ParticleEditorWindow::UpdateSequence(float deltaTime_)
 {
-    if (!sequencePlaying) return;
+    if (!sequencePlaying)
+    {
+        return;
+    }
 
     // 再生ヘッドの位置に応じてTrackを開始/停止し、タイムライン上の有効区間だけを鳴らす。
     sequenceTime += deltaTime_;
-    if (previewAttackHit) previewAttackHit->Update(deltaTime_);
+    if (previewAttackHit)
+    {
+        previewAttackHit->Update(deltaTime_);
+    }
     for (TimelineTrack& track_ : timelineTracks)
     {
         const bool shouldBeActive_ =
@@ -892,7 +989,10 @@ void ParticleEditorWindow::UpdateSequence(float deltaTime_)
         const bool shouldContinue_ = sequenceLoop;
         ResetSequence();
         sequencePlaying = shouldContinue_;
-        if (sequencePlaying && previewAttackHit) previewAttackHit->Play();
+        if (sequencePlaying && previewAttackHit)
+        {
+            previewAttackHit->Play();
+        }
     }
 }
 
@@ -900,7 +1000,10 @@ void ParticleEditorWindow::ResetSequence()
 {
     // タイムライン再生状態と各プレビューコンポーネントを初期状態へ戻す。
     sequenceTime = 0.0f;
-    if (previewParticle) previewParticle->Stop();
+    if (previewParticle)
+    {
+        previewParticle->Stop();
+    }
     if (previewMeshVFX)
     {
         previewMeshVFX->Stop();
@@ -919,7 +1022,10 @@ void ParticleEditorWindow::ResetSequence()
 
 bool ParticleEditorWindow::SaveSequence(const std::string& path_)
 {
-    if (path_.empty()) return false;
+    if (path_.empty())
+    {
+        return false;
+    }
 
     // タイムライン、Particle、MeshVFX、AttackHit設定を1つのVFXSequence JSONへまとめて保存する。
     nlohmann::json sequenceJson_;
@@ -957,7 +1063,10 @@ bool ParticleEditorWindow::SaveSequence(const std::string& path_)
     const std::filesystem::path sequencePath_(path_);
     std::filesystem::create_directories(sequencePath_.parent_path());
     std::ofstream file_(sequencePath_, std::ios::out | std::ios::trunc);
-    if (!file_.is_open()) return false;
+    if (!file_.is_open())
+    {
+        return false;
+    }
 
     file_ << sequenceJson_.dump(4);
     return true;
@@ -965,14 +1074,23 @@ bool ParticleEditorWindow::SaveSequence(const std::string& path_)
 
 bool ParticleEditorWindow::LoadSequence(const std::string& path_)
 {
-    if (path_.empty() || !std::filesystem::exists(path_)) return false;
+    if (path_.empty() || !std::filesystem::exists(path_))
+    {
+        return false;
+    }
 
     std::ifstream file_(path_);
-    if (!file_.is_open()) return false;
+    if (!file_.is_open())
+    {
+        return false;
+    }
 
     nlohmann::json sequenceJson_;
     file_ >> sequenceJson_;
-    if (sequenceJson_.value("AssetType", "") != "VFXSequence") return false;
+    if (sequenceJson_.value("AssetType", "") != "VFXSequence")
+    {
+        return false;
+    }
 
     // 読み込み前に再生を止め、保存されていたTrackと各コンポーネント設定を復元する。
     sequencePlaying = false;
@@ -1022,11 +1140,17 @@ void ParticleEditorWindow::RefreshParticleAssets()
     // Particle単体アセットはData/Particle直下のJSONだけを対象にする。
     particleAssetPaths.clear();
     const std::filesystem::path particleDir_("Data/Particle");
-    if (!std::filesystem::exists(particleDir_)) return;
+    if (!std::filesystem::exists(particleDir_))
+    {
+        return;
+    }
 
     for (const auto& entry_ : std::filesystem::directory_iterator(particleDir_))
     {
-        if (!entry_.is_regular_file()) continue;
+        if (!entry_.is_regular_file())
+        {
+            continue;
+        }
         if (entry_.path().extension() == ".json")
         {
             particleAssetPaths.push_back(entry_.path().generic_string());
@@ -1039,11 +1163,17 @@ void ParticleEditorWindow::RefreshSequenceAssets()
     // VFXSequenceはタイムライン付きの複合アセットとしてData/VFXSequenceから列挙する。
     sequenceAssetPaths.clear();
     const std::filesystem::path sequenceDirectory_("Data/VFXSequence");
-    if (!std::filesystem::exists(sequenceDirectory_)) return;
+    if (!std::filesystem::exists(sequenceDirectory_))
+    {
+        return;
+    }
 
     for (const auto& entry_ : std::filesystem::directory_iterator(sequenceDirectory_))
     {
-        if (!entry_.is_regular_file() || entry_.path().extension() != ".json") continue;
+        if (!entry_.is_regular_file() || entry_.path().extension() != ".json")
+        {
+            continue;
+        }
         sequenceAssetPaths.push_back(entry_.path().generic_string());
     }
 }
@@ -1053,7 +1183,10 @@ void ParticleEditorWindow::RefreshImpactEffectAssets()
     // ImpactEffectはサブフォルダ運用も想定し、再帰的にJSONを集めて表示順を安定させる。
     impactEffectAssetPaths.clear();
     const std::filesystem::path directory_("Data/ImpactEffect");
-    if (!std::filesystem::exists(directory_)) return;
+    if (!std::filesystem::exists(directory_))
+    {
+        return;
+    }
     for (const auto& entry_ : std::filesystem::recursive_directory_iterator(directory_))
     {
         if (entry_.is_regular_file() && entry_.path().extension() == ".json")
@@ -1069,22 +1202,34 @@ void ParticleEditorWindow::StartImpactPreview()
     // 落下プレビュー開始時は既存VFXを止め、接触時にImpactEffectだけが発火する状態にする。
     impactPreviewPositionY = (std::max)(impactPreviewHeight, 0.1f);
     impactPreviewPlaying = true;
-    if (previewParticle) previewParticle->Stop();
+    if (previewParticle)
+    {
+        previewParticle->Stop();
+    }
     if (previewMeshVFX)
     {
         previewMeshVFX->Stop();
         previewMeshVFX->Reset();
     }
-    if (previewDecal) previewDecal->SetEnabled(false);
+    if (previewDecal)
+    {
+        previewDecal->SetEnabled(false);
+    }
 }
 
 void ParticleEditorWindow::UpdateImpactPreview(float deltaTime_)
 {
-    if (!impactPreviewMode || !impactPreviewPlaying) return;
+    if (!impactPreviewMode || !impactPreviewPlaying)
+    {
+        return;
+    }
     // 指定高さから仮想的に落下させ、地面に触れた瞬間にImpactEffectを再生する。
     impactPreviewPositionY -= (std::max)(impactPreviewFallSpeed, 0.1f) *
         (std::max)(deltaTime_, 0.0f);
-    if (impactPreviewPositionY > 0.0f) return;
+    if (impactPreviewPositionY > 0.0f)
+    {
+        return;
+    }
     impactPreviewPositionY = 0.0f;
     impactPreviewPlaying = false;
     PlayImpactPreviewAtContact();
@@ -1092,18 +1237,30 @@ void ParticleEditorWindow::UpdateImpactPreview(float deltaTime_)
 
 void ParticleEditorWindow::PlayImpactPreviewAtContact()
 {
-    if (!previewImpactEffect) return;
+    if (!previewImpactEffect)
+    {
+        return;
+    }
     // ImpactEffect内の各Entryを種類ごとにプレビュー用コンポーネントへ流し込む。
     const ImpactEffectAsset& asset_ = previewImpactEffect->GetAsset();
     for (const ImpactEffectEntry& entry_ : asset_.entries)
     {
-        if (!entry_.enabled || entry_.assetPath.empty()) continue;
+        if (!entry_.enabled || entry_.assetPath.empty())
+        {
+            continue;
+        }
         if (entry_.type == IMPACT_EFFECT_ENTRY_TYPE::PARTICLE && previewParticle)
         {
             if (previewParticle->LoadAsset(entry_.assetPath))
             {
-                if (entry_.emitterName.empty()) previewParticle->Play();
-                else previewParticle->TriggerEmitter(entry_.emitterName);
+                if (entry_.emitterName.empty())
+                {
+                    previewParticle->Play();
+                }
+                else
+                {
+                    previewParticle->TriggerEmitter(entry_.emitterName);
+                }
             }
         }
         else if (entry_.type == IMPACT_EFFECT_ENTRY_TYPE::MESH_VFX && previewMeshVFX)

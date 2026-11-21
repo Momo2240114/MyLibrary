@@ -27,9 +27,15 @@ namespace
         while (object_ && object_->transform)
         {
             const std::shared_ptr<Transform> parentTransform_ = object_->transform->parent.lock();
-            if (!parentTransform_) break;
+            if (!parentTransform_)
+            {
+                break;
+            }
             const std::shared_ptr<GameObject> parentObject_ = parentTransform_->gameObject.lock();
-            if (!parentObject_) break;
+            if (!parentObject_)
+            {
+                break;
+            }
             object_ = parentObject_;
         }
         return object_;
@@ -39,23 +45,37 @@ namespace
         const std::shared_ptr<GameObject>& object_,
         const std::string& hitBoxName_)
     {
-        if (!object_) return nullptr;
+        if (!object_)
+        {
+            return nullptr;
+        }
 
         // 現在の GameObject に付いている ColliderComponent 群から、名前または ActionPrefix で探す。
         for (const std::shared_ptr<Component>& component_ : object_->colliderComponents)
         {
             const std::shared_ptr<HitBox> hitBox_ = std::dynamic_pointer_cast<HitBox>(component_);
             if (hitBox_ && (hitBox_->GetActionPrefix() == hitBoxName_ || hitBox_->GetName() == hitBoxName_))
+            {
                 return hitBox_;
+            }
         }
-        if (!object_->transform) return nullptr;
+        if (!object_->transform)
+        {
+            return nullptr;
+        }
 
         // 見つからない場合は子階層も再帰的に探し、武器やエフェクト用の HitBox を拾う。
         for (const std::shared_ptr<Transform>& childTransform_ : object_->transform->children)
         {
-            if (!childTransform_) continue;
+            if (!childTransform_)
+            {
+                continue;
+            }
             if (const std::shared_ptr<HitBox> hitBox_ = FindHitBox(
-                childTransform_->gameObject.lock(), hitBoxName_)) return hitBox_;
+                childTransform_->gameObject.lock(), hitBoxName_))
+            {
+                return hitBox_;
+            }
         }
         return nullptr;
     }
@@ -65,7 +85,10 @@ namespace
         AttackTemplateManager& manager_ = AttackTemplateManager::Instance();
 
         // AnimationEvent から直接呼ばれても使えるよう、未ロードならここでテンプレートを読み込む。
-        if (manager_.GetTemplates().empty()) manager_.LoadAll();
+        if (manager_.GetTemplates().empty())
+        {
+            manager_.LoadAll();
+        }
         return manager_.FindTemplate(event_.attackTemplateId);
     }
 
@@ -74,7 +97,10 @@ namespace
         const AttackTemplate& attackTemplate_,
         uint32_t attackInstanceId_)
     {
-        if (!attackTemplate_.weaponHitBox.enabled) return;
+        if (!attackTemplate_.weaponHitBox.enabled)
+        {
+            return;
+        }
 
         // AttackTemplateの数値と演出設定を、実際に衝突判定を出すHitBoxへ流し込む。
         const std::shared_ptr<HitBox> hitBox_ = FindHitBox(
@@ -153,16 +179,24 @@ void AttackTemplateRuntime::Start(
     const std::shared_ptr<GameObject>& owner_,
     AnimEvent& event_)
 {
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
     const AttackTemplate* attackTemplate_ = GetTemplate(event_);
-    if (!attackTemplate_) return;
+    if (!attackTemplate_)
+    {
+        return;
+    }
 
     BS_PROFILE_SCOPE("AttackTemplateRuntime::StartFeedback");
     const auto actor_ = GetRoot(owner_);
     // 敵の空振りでPadを揺らさず、プレイヤー自身の攻撃開始だけを通知する。
     if (actor_ && actor_->GetLayer() == LayerType::Player && attackTemplate_->feedback.rumbleEnabled)
+    {
         ControllerInput::Instance().PlayRumble(attackTemplate_->feedback.startStrength,
             attackTemplate_->feedback.startStrength * 0.5f, attackTemplate_->feedback.duration);
+    }
     if (actor_ && actor_->GetLayer() == LayerType::Player && !attackTemplate_->feedback.startSoundPath.empty())
     {
         static std::mt19937 randomEngine_{ std::random_device{}() };
@@ -173,15 +207,21 @@ void AttackTemplateRuntime::Start(
         AudioManager::Instance().PlayOneShotByPath(attackTemplate_->feedback.startSoundPath, settings_);
     }
     else if (owner_->transform)
+    {
         AudioManager::Instance().PlaySpatialAttackSound(attackTemplate_->feedback.startSoundPath,
             owner_->transform->GetWorldPosition(), attackTemplate_->feedback.volume,
             attackTemplate_->feedback.minDistance, attackTemplate_->feedback.maxDistance);
+    }
 
     // AnimEvent側にRuntime状態を持たせ、Update/Endで同じ攻撃インスタンスを追跡する。
     event_.attackTemplateRuntimeActive = true;
     if (attackTemplate_->weaponHitBox.enabled)
+    {
         if (const auto hitBox_ = FindHitBox(GetRoot(owner_), attackTemplate_->weaponHitBox.hitBoxName))
+        {
             event_.previousCanBeGuarded = hitBox_->canBeGuarded;
+        }
+    }
     event_.attackTemplateInstanceId = owner_->GetManager().GetAttackSystem().CreateAttackInstance();
     event_.spawnedAttackEffects.assign(attackTemplate_->attackEffects.size(), false);
     ConfigureWeaponHitBox(owner_, *attackTemplate_, event_.attackTemplateInstanceId);
@@ -200,7 +240,10 @@ void AttackTemplateRuntime::Start(
 
     for (const SlashEffectTemplate& slash_ : attackTemplate_->slashEffects)
     {
-        if (!slash_.enabled || slash_.vfxPath.empty()) continue;
+        if (!slash_.enabled || slash_.vfxPath.empty())
+        {
+            continue;
+        }
 
         // SlashEffectは攻撃開始時にまとめて生成し、必要ならVFX側にもHitBox情報を持たせる。
         AttackEffectSpawnRequest request_{};
@@ -259,9 +302,15 @@ void AttackTemplateRuntime::Update(
     AnimEvent& event_,
     float elapsedTime_)
 {
-    if (!owner_ || !event_.attackTemplateRuntimeActive) return;
+    if (!owner_ || !event_.attackTemplateRuntimeActive)
+    {
+        return;
+    }
     const AttackTemplate* attackTemplate_ = GetTemplate(event_);
-    if (!attackTemplate_) return;
+    if (!attackTemplate_)
+    {
+        return;
+    }
 
     // アニメーション内の経過時間に合わせて、武器HitBoxと派生攻撃エフェクトを切り替える。
     if (attackTemplate_->weaponHitBox.enabled)
@@ -272,12 +321,20 @@ void AttackTemplateRuntime::Update(
         {
             const bool active_ = elapsedTime_ >= attackTemplate_->weaponHitBox.activeStartTime &&
                 elapsedTime_ <= attackTemplate_->weaponHitBox.activeEndTime;
-            if (active_ && !hitBox_->IsEnabled()) hitBox_->Activate();
-            if (!active_ && hitBox_->IsEnabled()) hitBox_->Deactivate();
+            if (active_ && !hitBox_->IsEnabled())
+            {
+                hitBox_->Activate();
+            }
+            if (!active_ && hitBox_->IsEnabled())
+            {
+                hitBox_->Deactivate();
+            }
         }
     }
     if (event_.spawnedAttackEffects.size() != attackTemplate_->attackEffects.size())
+    {
         event_.spawnedAttackEffects.assign(attackTemplate_->attackEffects.size(), false);
+    }
 
     // 通常の攻撃エフェクトは spawnTimeOffset を越えた瞬間に一度だけ生成する。
     for (size_t effectIndex_ = 0; effectIndex_ < attackTemplate_->attackEffects.size(); ++effectIndex_)
@@ -296,7 +353,10 @@ void AttackTemplateRuntime::End(
     const std::shared_ptr<GameObject>& owner_,
     AnimEvent& event_)
 {
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
     const AttackTemplate* attackTemplate_ = GetTemplate(event_);
     if (attackTemplate_ && attackTemplate_->weaponHitBox.enabled)
     {
@@ -323,12 +383,21 @@ void AttackTemplateRuntime::SampleWeaponInterval(const std::shared_ptr<GameObjec
 {
     const auto template_ = GetTemplate(event_);
     if (!owner_ || !model_ || !template_ || !template_->weaponHitBox.enabled || event_.attackTemplateInstanceId == 0 ||
-        state_.animationIndex < 0 || state_.animationIndex >= static_cast<int>(model_->GetAnimations().size())) return;
+        state_.animationIndex < 0 || state_.animationIndex >= static_cast<int>(model_->GetAnimations().size()))
+    {
+        return;
+    }
     const float start_ = (std::max)(previousTime_, event_.startTime + template_->weaponHitBox.activeStartTime);
     const float end_ = (std::min)(currentTime_, (std::min)(event_.endTime, event_.startTime + template_->weaponHitBox.activeEndTime));
-    if (end_ < start_ || currentTime_ <= previousTime_) return;
+    if (end_ < start_ || currentTime_ <= previousTime_)
+    {
+        return;
+    }
     const auto hitBox_ = FindHitBox(GetRoot(owner_), template_->weaponHitBox.hitBoxName);
-    if (!hitBox_ || hitBox_->attackInstanceId != event_.attackTemplateInstanceId) return;
+    if (!hitBox_ || hitBox_->attackInstanceId != event_.attackTemplateInstanceId)
+    {
+        return;
+    }
     BS_PROFILE_SCOPE("AttackTemplateRuntime::SampleWeaponInterval");
     std::vector<GltfModelCommponennt::NodePose> savedPose_;
     std::vector<GltfModelCommponennt::NodePose> sampledPose_;
@@ -346,9 +415,18 @@ void AttackTemplateRuntime::SampleWeaponInterval(const std::shared_ptr<GameObjec
             // 通常描画と同じroot抽出を行い、元移動が武器位置へ二重適用されないようにする。
             auto& position_ = sampledPose_[rootIndex_].position;
             const auto& base_ = savedPose_[rootIndex_].position;
-            if (state_.rootMotion.applyPositionX || state_.rootMotion.cutVisualPositionX) position_.x = base_.x;
-            if (state_.rootMotion.applyPositionY || state_.rootMotion.cutVisualPositionY) position_.y = base_.y;
-            if (state_.rootMotion.applyPositionZ || state_.rootMotion.cutVisualPositionZ) position_.z = base_.z;
+            if (state_.rootMotion.applyPositionX || state_.rootMotion.cutVisualPositionX)
+            {
+                position_.x = base_.x;
+            }
+            if (state_.rootMotion.applyPositionY || state_.rootMotion.cutVisualPositionY)
+            {
+                position_.y = base_.y;
+            }
+            if (state_.rootMotion.applyPositionZ || state_.rootMotion.cutVisualPositionZ)
+            {
+                position_.z = base_.z;
+            }
         }
         model_->SetNodePoses(sampledPose_);
         model_->UpdateTransformIfDirty();

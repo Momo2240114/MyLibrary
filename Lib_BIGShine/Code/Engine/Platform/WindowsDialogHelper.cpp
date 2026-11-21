@@ -15,7 +15,10 @@ namespace
     std::wstring Utf8ToWide(const std::string& text_)
     {
         // Project内のパスはUTF-8で持つため、Windows API用にUTF-16へ変換する。
-        if (text_.empty()) return {};
+        if (text_.empty())
+        {
+            return {};
+        }
 
         const int length_ = MultiByteToWideChar(
             CP_UTF8, MB_ERR_INVALID_CHARS, text_.c_str(), -1, nullptr, 0);
@@ -34,11 +37,17 @@ namespace
     std::string WideToUtf8(const std::wstring& text_)
     {
         // Windows Dialogから返るUTF-16パスを、Project内で扱うUTF-8文字列へ戻す。
-        if (text_.empty()) return {};
+        if (text_.empty())
+        {
+            return {};
+        }
 
         const int length_ = WideCharToMultiByte(
             CP_UTF8, 0, text_.c_str(), -1, nullptr, 0, nullptr, nullptr);
-        if (length_ <= 0) return {};
+        if (length_ <= 0)
+        {
+            return {};
+        }
 
         std::string result_(static_cast<size_t>(length_), '\0');
         WideCharToMultiByte(CP_UTF8, 0, text_.c_str(), -1, result_.data(), length_, nullptr, nullptr);
@@ -52,7 +61,10 @@ namespace
         std::wstring filterString_;
         for (const auto& filter_ : filters_)
         {
-            if (!filter_.name || !filter_.pattern) continue;
+            if (!filter_.name || !filter_.pattern)
+            {
+                continue;
+            }
             filterString_.append(filter_.name);
             filterString_.push_back(L'\0');
             filterString_.append(filter_.pattern);
@@ -138,7 +150,10 @@ std::string WindowsDialogHelper::OpenFileDialog(
         OFN_NOCHANGEDIR |
         OFN_DONTADDTORECENT;
 
-    if (!GetOpenFileNameW(&dialog_)) return {};
+    if (!GetOpenFileNameW(&dialog_))
+    {
+        return {};
+    }
 
     return MakeProjectRelativePath(std::filesystem::path(fileBuffer_.data()));
 }
@@ -180,7 +195,10 @@ std::string WindowsDialogHelper::SaveFileDialog(
     dialog_.lpstrTitle = title_;
     dialog_.lpstrDefExt = defaultExtension_;
     dialog_.Flags = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT | OFN_NOCHANGEDIR;
-    if (!GetSaveFileNameW(&dialog_)) return {};
+    if (!GetSaveFileNameW(&dialog_))
+    {
+        return {};
+    }
     return MakeProjectRelativePath(std::filesystem::path(fileBuffer_.data()));
 }
 

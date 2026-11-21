@@ -75,7 +75,10 @@ namespace
     {
         const XMFLOAT3 difference_ = Subtract(endPosition_, startPosition_);
         const float length_ = Length(difference_);
-        if (length_ <= EPSILON) return;
+        if (length_ <= EPSILON)
+        {
+            return;
+        }
 
         // Z軸向きのボーンを2点間の方向へ回転させる。
         const XMVECTOR forward_ = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
@@ -121,10 +124,16 @@ const std::string& HumanLookAtIKComponent::GetName() const
 // 必要Componentを取得し、LookAtチェーンとターゲットを初期化する。
 void HumanLookAtIKComponent::Start()
 {
-    if (!ResolveDependencies()) return;
+    if (!ResolveDependencies())
+    {
+        return;
+    }
 
     const std::shared_ptr<IKMapComponent> ikMap_ = ikMap.lock();
-    if (!ikMap_) return;
+    if (!ikMap_)
+    {
+        return;
+    }
 
     ikMap_->AddLookAtChain("LookAt");
     ResolveTarget();
@@ -134,7 +143,10 @@ bool HumanLookAtIKComponent::IsLoadReady() const
 {
     const auto owner_ = const_cast<HumanLookAtIKComponent*>(this)->GetGameObject();
     const auto model_ = owner_ ? owner_->GetComponent<GltfModelCommponennt>() : nullptr;
-    if (!model_) return true;
+    if (!model_)
+    {
+        return true;
+    }
 
     model_->UpdateLoadState();
     return !model_->IsModelLoading();
@@ -151,10 +163,19 @@ void HumanLookAtIKComponent::SetTargetName(const std::string& targetName_)
 bool HumanLookAtIKComponent::ResolveDependencies()
 {
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return false;
+    if (!owner_)
+    {
+        return false;
+    }
 
-    if (ikMap.expired()) ikMap = owner_->GetComponent<IKMapComponent>();
-    if (model.expired()) model = owner_->GetComponent<GltfModelCommponennt>();
+    if (ikMap.expired())
+    {
+        ikMap = owner_->GetComponent<IKMapComponent>();
+    }
+    if (model.expired())
+    {
+        model = owner_->GetComponent<GltfModelCommponennt>();
+    }
 
     if (animationController.expired())
     {
@@ -175,11 +196,17 @@ HumanLookAtIKComponent::ResolveCameraLockOnComponent()
     }
 
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_ || !owner_->manager) return nullptr;
+    if (!owner_ || !owner_->manager)
+    {
+        return nullptr;
+    }
 
     for (const std::shared_ptr<GameObject>& object_ : owner_->manager->GetObjects())
     {
-        if (!object_) continue;
+        if (!object_)
+        {
+            continue;
+        }
         if (const std::shared_ptr<CameraLockOnComponent> lockOn_ =
             object_->GetComponent<CameraLockOnComponent>())
         {
@@ -208,10 +235,16 @@ std::shared_ptr<GameObject> HumanLookAtIKComponent::ResolveTarget()
         }
     }
 
-    if (const std::shared_ptr<GameObject> currentTarget_ = target.lock()) return currentTarget_;
+    if (const std::shared_ptr<GameObject> currentTarget_ = target.lock())
+    {
+        return currentTarget_;
+    }
 
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_ || !owner_->manager || targetName.empty()) return nullptr;
+    if (!owner_ || !owner_->manager || targetName.empty())
+    {
+        return nullptr;
+    }
 
     const std::shared_ptr<GameObject> resolvedTarget_ = owner_->manager->Find(targetName);
     target = resolvedTarget_;
@@ -240,10 +273,16 @@ bool HumanLookAtIKComponent::TryResolveLockOnTargetPosition(XMFLOAT3& targetPosi
 {
     const std::shared_ptr<CameraLockOnComponent> lockOn_ =
         ResolveCameraLockOnComponent();
-    if (!lockOn_ || !lockOn_->IsLockOnEnabled()) return false;
+    if (!lockOn_ || !lockOn_->IsLockOnEnabled())
+    {
+        return false;
+    }
 
     const std::shared_ptr<GameObject> lockOnTarget_ = lockOn_->GetLockOnTarget();
-    if (!lockOnTarget_ || !lockOnTarget_->transform) return false;
+    if (!lockOnTarget_ || !lockOnTarget_->transform)
+    {
+        return false;
+    }
 
     XMFLOAT4X4 targetWorld_;
     XMStoreFloat4x4(&targetWorld_, lockOnTarget_->transform->GetWorldMatrix());
@@ -254,7 +293,10 @@ bool HumanLookAtIKComponent::TryResolveLockOnTargetPosition(XMFLOAT3& targetPosi
 bool HumanLookAtIKComponent::TryResolveObjectTargetPosition(XMFLOAT3& targetPosition_)
 {
     const std::shared_ptr<GameObject> target_ = ResolveTarget();
-    if (!target_ || !target_->transform) return false;
+    if (!target_ || !target_->transform)
+    {
+        return false;
+    }
 
     XMFLOAT4X4 targetWorld_;
     XMStoreFloat4x4(&targetWorld_, target_->transform->GetWorldMatrix());
@@ -265,17 +307,29 @@ bool HumanLookAtIKComponent::TryResolveObjectTargetPosition(XMFLOAT3& targetPosi
 bool HumanLookAtIKComponent::TryResolveCameraForwardTargetPosition(XMFLOAT3& targetPosition_)
 {
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_ || !owner_->manager) return false;
+    if (!owner_ || !owner_->manager)
+    {
+        return false;
+    }
 
     CameraManager* cameraManager_ = owner_->manager->GetCameraManager();
-    if (!cameraManager_) return false;
+    if (!cameraManager_)
+    {
+        return false;
+    }
 
     const std::shared_ptr<CameraComponent> camera_ = cameraManager_->GetActiveCamera();
-    if (!camera_) return false;
+    if (!camera_)
+    {
+        return false;
+    }
 
     const XMFLOAT3 eye_ = camera_->GetEye();
     const XMFLOAT3 front_ = Normalize(camera_->GetFront());
-    if (Length(front_) <= EPSILON) return false;
+    if (Length(front_) <= EPSILON)
+    {
+        return false;
+    }
 
     targetPosition_ = Add(eye_, Scale(front_, (std::max)(cameraForwardLookDistance, 0.0f)));
     return true;
@@ -284,10 +338,16 @@ bool HumanLookAtIKComponent::TryResolveCameraForwardTargetPosition(XMFLOAT3& tar
 // 現在のAnimationStateでLookAtを許可するか判定する。
 bool HumanLookAtIKComponent::IsAllowedAnimationState() const
 {
-    if (!idleOnly) return true;
+    if (!idleOnly)
+    {
+        return true;
+    }
 
     const std::shared_ptr<AnimationControllerComponent> animationController_ = animationController.lock();
-    if (!animationController_) return false;
+    if (!animationController_)
+    {
+        return false;
+    }
 
     const AnimState* currentState_ = animationController_->GetCurrentState();
     return currentState_ && currentState_->name == idleStateName;
@@ -297,10 +357,16 @@ bool HumanLookAtIKComponent::IsAllowedAnimationState() const
 HumanLookAtIKComponent::LOOK_MODE HumanLookAtIKComponent::GetCurrentLookMode() const
 {
     const std::shared_ptr<AnimationControllerComponent> animationController_ = animationController.lock();
-    if (!animationController_) return LOOK_MODE::HEAD_ONLY;
+    if (!animationController_)
+    {
+        return LOOK_MODE::HEAD_ONLY;
+    }
 
     const AnimState* currentState_ = animationController_->GetCurrentState();
-    if (!currentState_) return LOOK_MODE::HEAD_ONLY;
+    if (!currentState_)
+    {
+        return LOOK_MODE::HEAD_ONLY;
+    }
 
     const auto modeIterator_ = stateLookModes.find(currentState_->name);
     return modeIterator_ != stateLookModes.end() ? modeIterator_->second : LOOK_MODE::HEAD_ONLY;
@@ -311,16 +377,31 @@ void HumanLookAtIKComponent::LateUpdate(float deltaTime_)
 {
     BS_PROFILE_SCOPE("HumanLookAtIKComponent::LateUpdate");
 
-    if (!ResolveDependencies()) return;
+    if (!ResolveDependencies())
+    {
+        return;
+    }
     const std::shared_ptr<GltfModelCommponennt> modelReady_ = model.lock();
-    if (modelReady_) modelReady_->UpdateLoadState();
-    if (!modelReady_ || !modelReady_->IsModelReady()) return;
+    if (modelReady_)
+    {
+        modelReady_->UpdateLoadState();
+    }
+    if (!modelReady_ || !modelReady_->IsModelReady())
+    {
+        return;
+    }
 
     const std::shared_ptr<IKMapComponent> ikMap_ = ikMap.lock();
-    if (!ikMap_) return;
+    if (!ikMap_)
+    {
+        return;
+    }
 
     std::vector<IKMapComponent::IKChain>& chains_ = ikMap_->GetChains();
-    if (lookStates.size() != chains_.size()) lookStates.resize(chains_.size());
+    if (lookStates.size() != chains_.size())
+    {
+        lookStates.resize(chains_.size());
+    }
 
     XMFLOAT3 targetPosition_{};
 
@@ -334,8 +415,14 @@ void HumanLookAtIKComponent::LateUpdate(float deltaTime_)
         IKMapComponent::IKChain& chain_ = chains_[chainIndex_];
 
         // LOOK_AT以外のチェーンは処理しない。
-        if (!chain_.enabled || chain_.type != IKMapComponent::IK_TYPE::LOOK_AT) continue;
-        if (!ResolveChain(chain_)) continue;
+        if (!chain_.enabled || chain_.type != IKMapComponent::IK_TYPE::LOOK_AT)
+        {
+            continue;
+        }
+        if (!ResolveChain(chain_))
+        {
+            continue;
+        }
 
         LookRuntimeState& state_ = lookStates[chainIndex_];
 
@@ -349,7 +436,10 @@ void HumanLookAtIKComponent::LateUpdate(float deltaTime_)
         const float desiredWeight_ = shouldLook_ ? 1.0f : 0.0f;
         state_.activeWeight += (desiredWeight_ - state_.activeWeight) * blend_;
 
-        if (state_.activeWeight <= EPSILON || !hasTargetPosition_) continue;
+        if (state_.activeWeight <= EPSILON || !hasTargetPosition_)
+        {
+            continue;
+        }
 
         ApplyLookChain(chain_, state_, targetPosition_, safeDeltaTime_, lookMode_);
         DrawDebugShapes(chain_, targetPosition_);
@@ -359,17 +449,29 @@ void HumanLookAtIKComponent::LateUpdate(float deltaTime_)
 // IKチェーンのRootからTipまでのNodeIndex列を作成する。
 bool HumanLookAtIKComponent::ResolveChain(IKMapComponent::IKChain& chain_)
 {
-    if (chain_.rootNodeName.empty() || chain_.tipNodeName.empty()) return false;
+    if (chain_.rootNodeName.empty() || chain_.tipNodeName.empty())
+    {
+        return false;
+    }
 
     // すでに解決済みの場合はNode数だけ確認する。
-    if (!chain_.nodeIndices.empty()) return chain_.nodeIndices.size() >= 2;
+    if (!chain_.nodeIndices.empty())
+    {
+        return chain_.nodeIndices.size() >= 2;
+    }
 
     const std::shared_ptr<GltfModelCommponennt> model_ = model.lock();
-    if (!model_) return false;
+    if (!model_)
+    {
+        return false;
+    }
 
     const int rootIndex_ = model_->GetNodeIndex(chain_.rootNodeName.c_str());
     const int tipIndex_ = model_->GetNodeIndex(chain_.tipNodeName.c_str());
-    if (rootIndex_ < 0 || tipIndex_ < 0) return false;
+    if (rootIndex_ < 0 || tipIndex_ < 0)
+    {
+        return false;
+    }
 
     const std::vector<GltfModelCommponennt::Node>& nodes_ = model_->GetNodes();
 
@@ -380,10 +482,16 @@ bool HumanLookAtIKComponent::ResolveChain(IKMapComponent::IKChain& chain_)
         currentIndex_ = nodes_.at(currentIndex_).parentIndex)
     {
         reverseIndices_.push_back(currentIndex_);
-        if (currentIndex_ == rootIndex_) break;
+        if (currentIndex_ == rootIndex_)
+        {
+            break;
+        }
     }
 
-    if (reverseIndices_.empty() || reverseIndices_.back() != rootIndex_) return false;
+    if (reverseIndices_.empty() || reverseIndices_.back() != rootIndex_)
+    {
+        return false;
+    }
 
     // RootからTipの順番になるように格納する。
     chain_.nodeIndices.assign(reverseIndices_.rbegin(), reverseIndices_.rend());
@@ -401,10 +509,16 @@ void HumanLookAtIKComponent::ApplyLookChain(
     (void)deltaTime_;
 
     const std::shared_ptr<GltfModelCommponennt> model_ = model.lock();
-    if (!model_) return;
+    if (!model_)
+    {
+        return;
+    }
 
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_ || !owner_->transform) return;
+    if (!owner_ || !owner_->transform)
+    {
+        return;
+    }
 
     // キャラクター基準のRight/Up/Forwardを取得する。
     const XMMATRIX ownerWorld_ = owner_->transform->GetWorldMatrix();
@@ -449,7 +563,10 @@ void HumanLookAtIKComponent::ApplyLookChain(
 
         const XMFLOAT3 nodePosition_ = GetTranslation(node_.worldTransform);
         const XMFLOAT3 targetDifference_ = Normalize(Subtract(targetPosition_, nodePosition_));
-        if (Length(targetDifference_) <= EPSILON) continue;
+        if (Length(targetDifference_) <= EPSILON)
+        {
+            continue;
+        }
 
         const XMVECTOR targetDirection_ = XMLoadFloat3(&targetDifference_);
 
@@ -524,7 +641,10 @@ void HumanLookAtIKComponent::ApplyLookChain(
 
         // 現在正面から目標方向へ回すための回転軸を求める。
         XMVECTOR axis_ = XMVector3Cross(currentForward_, desiredDirection_);
-        if (XMVectorGetX(XMVector3LengthSq(axis_)) <= EPSILON) continue;
+        if (XMVectorGetX(XMVector3LengthSq(axis_)) <= EPSILON)
+        {
+            continue;
+        }
         axis_ = XMVector3Normalize(axis_);
 
         const float dot_ = std::clamp(
@@ -595,15 +715,22 @@ void HumanLookAtIKComponent::ApplyLookChain(
         model_->UpdateNodeTransformFrom(chain_.nodeIndices.front());
     }
 }
+
 // LookAtチェーンとターゲット方向をデバッグ描画する。
 void HumanLookAtIKComponent::DrawDebugShapes(
     const IKMapComponent::IKChain& chain_,
     const XMFLOAT3& targetPosition_) const
 {
-    if (!showDebugShapes || chain_.nodeIndices.size() < 2) return;
+    if (!showDebugShapes || chain_.nodeIndices.size() < 2)
+    {
+        return;
+    }
 
     const std::shared_ptr<GltfModelCommponennt> model_ = model.lock();
-    if (!model_) return;
+    if (!model_)
+    {
+        return;
+    }
 
     ShapeRenderSystem& renderer_ = GraphicsDeviceManager::Instance().GetShapeRendererSystem();
     const std::vector<GltfModelCommponennt::Node>& nodes_ = model_->GetNodes();
@@ -676,7 +803,10 @@ void HumanLookAtIKComponent::Gui()
 
         for (const auto& [stateName_, state_] : animationController_->GetStates())
         {
-            if (state_) stateNames_.push_back(stateName_);
+            if (state_)
+            {
+                stateNames_.push_back(stateName_);
+            }
         }
 
         std::sort(stateNames_.begin(), stateNames_.end());

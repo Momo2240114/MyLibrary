@@ -35,7 +35,10 @@ struct DecalData {
 class DecalManager {
 public:
     // フレーム開始時に、前フレームのデカール描画要求を消す。
-    void Clear() { decals.clear(); }
+    void Clear()
+    {
+        decals.clear();
+    }
 
     // DecalComponentから送られてきた描画要求をキューへ積む。
     void AddDecal(const DecalData& data) {
@@ -43,7 +46,10 @@ public:
     }
 
     // RenderSystemがこのフレーム描画するデカール一覧を読む。
-    const std::vector<DecalData>& GetDecals() const { return decals; }
+    const std::vector<DecalData>& GetDecals() const
+    {
+        return decals;
+    }
 
 private:
     // 1フレーム分のデカール描画キュー。

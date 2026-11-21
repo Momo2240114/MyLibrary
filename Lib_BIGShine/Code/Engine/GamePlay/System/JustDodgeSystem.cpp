@@ -21,22 +21,37 @@ namespace
     {
         // ジャスト回避成立位置を実カメラ側へ渡し、CameraActionの短い回避演出を再生する。
         const std::shared_ptr<GameObject> dodger_ = event_.dodger.lock();
-        if (!dodger_ || !dodger_->manager) return;
+        if (!dodger_ || !dodger_->manager)
+        {
+            return;
+        }
 
         CameraManager* cameraManager_ = dodger_->manager->GetCameraManager();
-        if (!cameraManager_) return;
+        if (!cameraManager_)
+        {
+            return;
+        }
 
         const std::shared_ptr<CameraComponent> camera_ =
             cameraManager_->GetSourceCamera();
-        if (!camera_) return;
+        if (!camera_)
+        {
+            return;
+        }
 
         const std::shared_ptr<GameObject> cameraObject_ =
             camera_->GetGameObject();
-        if (!cameraObject_) return;
+        if (!cameraObject_)
+        {
+            return;
+        }
 
         const std::shared_ptr<CameraActionDirectorComponent> cameraAction_ =
             cameraObject_->GetComponent<CameraActionDirectorComponent>();
-        if (!cameraAction_) return;
+        if (!cameraAction_)
+        {
+            return;
+        }
 
         DirectX::XMFLOAT3 focusPosition_ = event_.dodgePosition;
         if (!event_.hasContact && dodger_->transform)
@@ -66,7 +81,10 @@ void JustDodgeSystem::Clear()
 
 void JustDodgeSystem::ClearAttackInstance(uint32_t attackInstanceId_)
 {
-    if (attackInstanceId_ == 0u) return;
+    if (attackInstanceId_ == 0u)
+    {
+        return;
+    }
 
     // 攻撃IDが終わったら、その攻撃で成立済みのジャスト回避履歴をまとめて消す。
     for (auto iterator_ = registeredDodgeTargets.begin();
@@ -87,7 +105,10 @@ void JustDodgeSystem::ClearAttackHitGroup(
     uint32_t attackInstanceId_,
     uint32_t hitGroupId_)
 {
-    if (attackInstanceId_ == 0u) return;
+    if (attackInstanceId_ == 0u)
+    {
+        return;
+    }
 
     const uint64_t dodgeKey_ =
         (static_cast<uint64_t>(attackInstanceId_) << 32u) |
@@ -127,7 +148,10 @@ void JustDodgeSystem::HandleJustDodge(
         return;
     }
     // 扇形の安全側では広域判定だけを理由にJustDodgeを成立させない。
-    if (!hitBox_.IsWithinAttackSector(dodger_.get())) return;
+    if (!hitBox_.IsWithinAttackSector(dodger_.get()))
+    {
+        return;
+    }
     if (!hitBox_.IsEnabled() || !justDodgeCollider_.IsEnabled())
     {
         BS_LOG_WARNING(LOG_CATEGORY::GAME, "[JustDodge] Rejected: HitBox or JustDodgeCollider disabled.");
@@ -186,7 +210,10 @@ void JustDodgeSystem::HandleJustDodge(
 
     for (const JustDodgeCallback& callback_ : justDodgeCallbacks)
     {
-        if (callback_) callback_(event_);
+        if (callback_)
+        {
+            callback_(event_);
+        }
     }
 }
 
@@ -211,7 +238,10 @@ bool JustDodgeSystem::RegisterJustDodge(
 
 void JustDodgeSystem::AddJustDodgeCallback(JustDodgeCallback callback_)
 {
-    if (callback_) justDodgeCallbacks.push_back(std::move(callback_));
+    if (callback_)
+    {
+        justDodgeCallbacks.push_back(std::move(callback_));
+    }
 }
 
 bool JustDodgeSystem::IsSameHierarchy(
@@ -230,12 +260,18 @@ std::shared_ptr<GameObject> JustDodgeSystem::GetHierarchyRoot(
         const std::shared_ptr<Transform> parentTransform_ =
             object_->transform->parent.lock();
 
-        if (!parentTransform_) break;
+        if (!parentTransform_)
+        {
+            break;
+        }
 
         const std::shared_ptr<GameObject> parentObject_ =
             parentTransform_->gameObject.lock();
 
-        if (!parentObject_) break;
+        if (!parentObject_)
+        {
+            break;
+        }
 
         object_ = parentObject_;
     }
@@ -247,7 +283,10 @@ void JustDodgeSystem::PublishJustDodgeToBlackboard(
     const JustDodgeEvent& event_)
 {
     const std::shared_ptr<GameObject> dodger_ = event_.dodger.lock();
-    if (!dodger_) return;
+    if (!dodger_)
+    {
+        return;
+    }
 
     // Colliderが子Objectにあっても、親のBlackboardへ成功情報を届けられるよう上へたどる。
     std::shared_ptr<GameObject> receiver_ = dodger_;
@@ -256,24 +295,36 @@ void JustDodgeSystem::PublishJustDodgeToBlackboard(
     while (receiver_)
     {
         blackboard_ = receiver_->GetComponent<BlackboardComponent>();
-        if (blackboard_ || !receiver_->transform) break;
+        if (blackboard_ || !receiver_->transform)
+        {
+            break;
+        }
 
         const std::shared_ptr<Transform> parentTransform_ =
             receiver_->transform->parent.lock();
 
-        if (!parentTransform_) break;
+        if (!parentTransform_)
+        {
+            break;
+        }
 
         receiver_ = parentTransform_->gameObject.lock();
     }
 
-    if (!receiver_) return;
+    if (!receiver_)
+    {
+        return;
+    }
 
     if (!blackboard_)
     {
         blackboard_ = receiver_->GetOrAddComponent<BlackboardComponent>();
     }
 
-    if (!blackboard_) return;
+    if (!blackboard_)
+    {
+        return;
+    }
 
     blackboard_->SetBool("Dodge", "JustDodgeSucceeded", true);
     blackboard_->SetTrigger("Dodge", "JustDodgeTrigger");
@@ -303,12 +354,18 @@ void JustDodgeSystem::PublishJustDodgeToBlackboard(
             break;
         }
 
-        if (!actionReceiver_->transform) break;
+        if (!actionReceiver_->transform)
+        {
+            break;
+        }
 
         const std::shared_ptr<Transform> parentTransform_ =
             actionReceiver_->transform->parent.lock();
 
-        if (!parentTransform_) break;
+        if (!parentTransform_)
+        {
+            break;
+        }
 
         actionReceiver_ = parentTransform_->gameObject.lock();
     }

@@ -24,8 +24,16 @@ public:
     ~AIBehaviorEditorWindow() override;
 
     void Draw() override;
-    bool ShouldPauseScene() const override { return true; }
-    bool ShouldRenderSceneWhenPaused() const override { return true; }
+
+    bool ShouldPauseScene() const override
+    {
+        return true;
+    }
+
+    bool ShouldRenderSceneWhenPaused() const override
+    {
+        return true;
+    }
 
 private:
     struct BehaviorGraphTarget
@@ -36,7 +44,10 @@ private:
         HumanBossAIComponent* humanBossAI = nullptr;
         GameObject* owner = nullptr;
 
-        bool IsValid() const { return aiController != nullptr || dragonAI != nullptr || humanBossAI != nullptr; }
+        bool IsValid() const
+        {
+            return aiController != nullptr || dragonAI != nullptr || humanBossAI != nullptr;
+        }
     };
 
     BehaviorGraphTarget ResolveTarget();

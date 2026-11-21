@@ -12,9 +12,16 @@ public:
     {
     }
 
-    bool IsEditorWorkspace() const override { return true; }
+    bool IsEditorWorkspace() const override
+    {
+        return true;
+    }
+
     // Workspaceは上部Selectorから切り替えるため、通常のWindowメニューには出さない。
-    bool ShouldShowInWindowMenu() const override { return false; }
+    bool ShouldShowInWindowMenu() const override
+    {
+        return false;
+    }
 
 protected:
     bool BeginWorkspaceWindow(ImGuiWindowFlags flags_ = 0)

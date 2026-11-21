@@ -167,8 +167,13 @@ public:
     // 判定再生を開始する。
     void Play();
     void Stop();
+
     // 反射で所有者が変わった攻撃を、元の攻撃者の中断対象から除外する。
-    bool IsOwnedBy(const GameObject* owner_) const { return ownerObject == owner_; }
+    bool IsOwnedBy(const GameObject* owner_) const
+    {
+        return ownerObject == owner_;
+    }
+
     void ResetRuntime();
 
     // Editor/Debug描画用に、現在のHitShape情報を提出する。
@@ -177,6 +182,7 @@ public:
 
     // 継続攻撃や再生し直し時に、HitBox側の重複Hit履歴を消す。
     void ClearHitHistory();
+
 private:
     struct RuntimeHitShape
     {
@@ -248,6 +254,7 @@ private:
     float elapsedTime = 0.0f;
     float hitIntervalTimer = 0.0f;
     bool playing = false;
+    bool playbackStarted = false;
     bool destroyOnLifeEnd = true;
     bool canHitOwner = false;
     bool canBeGuarded = true;

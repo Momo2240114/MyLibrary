@@ -16,8 +16,12 @@ public:
 
     // カメラの演出用優先度を切り替えるActionを登録する。
     void Start() override;
+
     // 指定した優先度の間だけ、このカメラの演出Actionを許可する。
-    bool CanPlayEventAction() const { return !useEventPriority || GetPriority() == eventPriority; }
+    bool CanPlayEventAction() const
+    {
+        return !useEventPriority || GetPriority() == eventPriority;
+    }
 
     void ScreenToWorld(const Vector2& screen, Vector3& world);
 
@@ -102,7 +106,10 @@ public:
 
         ImGui::DragInt("Priority", &priority);
         ImGui::Checkbox("Use Event Priority", &useEventPriority);
-        if (useEventPriority) ImGui::DragInt("Event Priority", &eventPriority);
+        if (useEventPriority)
+        {
+            ImGui::DragInt("Event Priority", &eventPriority);
+        }
         ImGui::Text("Effective Priority: %d", GetPriority());
 
         ImGui::Separator();
@@ -111,11 +118,17 @@ public:
         ImGui::Text("Front: (%.2f, %.2f, %.2f)", front.x, front.y, front.z);
         ImGui::Text("Right: (%.2f, %.2f, %.2f)", right.x, right.y, right.z);
 
-        if (projChanged)UpdateProjection();
-
+        if (projChanged)
+        {
+            UpdateProjection();
+        }
     }
 
-    void SetFov(float fov) { fovY = fov; UpdateProjection(); }
+    void SetFov(float fov)
+    {
+        fovY = fov;
+        UpdateProjection();
+    }
 
     void Serialize(nlohmann::json& j) const override;
     void Deserialize(const nlohmann::json& j) override;
@@ -124,28 +137,79 @@ public:
     // =====================
     // ビュー／プロジェクション取得
     // =====================
-    const DirectX::XMFLOAT4X4& GetView() const { return view; }
-    const DirectX::XMFLOAT4X4& GetProjection() const { return projection; }
-    const DirectX::XMFLOAT3& GetEye() const { return eye; }
-    const DirectX::XMFLOAT3& GetFocus() const { return focus; }
-    const DirectX::XMFLOAT3& GetUp() const { return up; }
-    const DirectX::XMFLOAT3& GetFront() const { return front; }
-    const DirectX::XMFLOAT3& GetRight() const { return right; }
+    const DirectX::XMFLOAT4X4& GetView() const
+    {
+        return view;
+    }
+
+    const DirectX::XMFLOAT4X4& GetProjection() const
+    {
+        return projection;
+    }
+
+    const DirectX::XMFLOAT3& GetEye() const
+    {
+        return eye;
+    }
+
+    const DirectX::XMFLOAT3& GetFocus() const
+    {
+        return focus;
+    }
+
+    const DirectX::XMFLOAT3& GetUp() const
+    {
+        return up;
+    }
+
+    const DirectX::XMFLOAT3& GetFront() const
+    {
+        return front;
+    }
+
+    const DirectX::XMFLOAT3& GetRight() const
+    {
+        return right;
+    }
 
 
-    float GetNear() const { return nearZ; }
-    float GetFar()  const { return farZ; }
-    float GetFovY() const { return fovY; }
-    float GetAspect() const { return aspect; }
+    float GetNear() const
+    {
+        return nearZ;
+    }
+
+    float GetFar()  const
+    {
+        return farZ;
+    }
+
+    float GetFovY() const
+    {
+        return fovY;
+    }
+
+    float GetAspect() const
+    {
+        return aspect;
+    }
+
     // ビュー行列とプロジェクション行列を掛け合わせた行列を取得
     DirectX::XMMATRIX GetViewProjection() const
     {
         return DirectX::XMLoadFloat4x4(&view) * DirectX::XMLoadFloat4x4(&projection);
     }
+
     // 保存用の通常優先度を保ったまま、演出中だけ選択用の優先度を上書きする。
-    int GetPriority() const { return useEventPriority && eventPriorityActive ? eventPriority : priority; }
+    int GetPriority() const
+    {
+        return useEventPriority && eventPriorityActive ? eventPriority : priority;
+    }
+
     // 現在の状態
-    bool IsTransitioning() const { return _isMoving; }
+    bool IsTransitioning() const
+    {
+        return _isMoving;
+    }
 
     // --- 行列を直接上書きするセッター ---
     // これにより、Managerが計算した「補間中の行列」をレンダラーへ渡せる
@@ -160,7 +224,10 @@ public:
     // --- 他のカメラの全状態をコピーする機能 ---
     // 通常時に「最高優先度のカメラ」の値をまるごとクローンする際に便利
     void CopyFrom(const CameraComponent* other) {
-        if (!other) return;
+        if (!other)
+        {
+            return;
+        }
         eye = other->eye;
         focus = other->focus;
         up = other->up;
@@ -173,6 +240,7 @@ public:
         view = other->view;
         projection = other->projection;
     }
+
 private:
     void UpdateView()
     {
@@ -191,6 +259,7 @@ private:
         );
         DirectX::XMStoreFloat4x4(&projection, mat);
     }
+
 private:
     // ビュー／プロジェクション
     DirectX::XMFLOAT4X4 view{};

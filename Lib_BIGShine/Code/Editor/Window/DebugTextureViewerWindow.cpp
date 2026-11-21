@@ -10,12 +10,34 @@
 #include "Engine/Graphics/RenderSystem/XeGtaoSystem.h"
 
 #include <algorithm>
+#include <d3dcompiler.h>
+#include <utility>
 #include <wrl/client.h>
+
+namespace
+{
+    void SetChannelPreviewShader(const ImDrawList* parentList_, const ImDrawCmd* command_)
+    {
+        (void)parentList_;
+        auto* shader_ = static_cast<ID3D11PixelShader*>(command_->UserCallbackData);
+        GraphicsDeviceManager::Instance().GetContext()->PSSetShader(shader_, nullptr, 0);
+        shader_->Release();
+    }
+
+    void ReleasePreviewTexture(const ImDrawList* parentList_, const ImDrawCmd* command_)
+    {
+        (void)parentList_;
+        static_cast<ID3D11ShaderResourceView*>(command_->UserCallbackData)->Release();
+    }
+}
 
 void DebugTextureViewerWindow::Draw()
 {
     GraphicsDeviceManager::Instance().GetPostRenderSystem().SetDebugCaptureEnabled(false);
-    if (!isVisible) return;
+    if (!isVisible)
+    {
+        return;
+    }
 
     BS_PROFILE_SCOPE("DebugTextureViewerWindow::Draw");
 
@@ -92,7 +114,38 @@ void DebugTextureViewerWindow::DrawTexture(const TextureEntry& texture_)
     const ImVec2 imageSize_ = GetTextureImageSize(texture_.srv);
     if (texture_.srv)
     {
+        const bool singleChannel_ = texture_.channel >= 0 && texture_.channel < static_cast<int>(channelShaders.size());
+        if (singleChannel_ && !EnsureChannelShaders())
+        {
+            ImGui::TextWrapped("Channel preview shader unavailable. See debug output.");
+            return;
+        }
+        auto* drawList_ = ImGui::GetWindowDrawList();
+        if (singleChannel_)
+        {
+            auto* shader_ = channelShaders[texture_.channel].Get();
+            shader_->AddRef();
+            drawList_->AddCallback(SetChannelPreviewShader, shader_);
+        }
+        // ImGuiの遅延描画が終わるまで、リサイズ前のSRVも保持する。
+        texture_.srv->AddRef();
         ImGui::Image(reinterpret_cast<void*>(texture_.srv), imageSize_);
+        if (singleChannel_ && ImGui::IsItemHovered())
+        {
+            constexpr const char* CHANNEL_DESCRIPTIONS[] =
+            {
+                "Black: Occluded / White: Unoccluded",
+                "Black: Smooth / White: Rough",
+                "Black: Non-metal / White: Metal",
+                "Black: PBR / White: Toon"
+            };
+            ImGui::SetTooltip("%s", CHANNEL_DESCRIPTIONS[texture_.channel]);
+        }
+        drawList_->AddCallback(ReleasePreviewTexture, texture_.srv);
+        if (singleChannel_)
+        {
+            drawList_->AddCallback(ImDrawCallback_ResetRenderState, nullptr);
+        }
     }
     else
     {
@@ -100,6 +153,63 @@ void DebugTextureViewerWindow::DrawTexture(const TextureEntry& texture_)
         ImGui::Button("No Texture", imageSize_);
         ImGui::EndDisabled();
     }
+}
+
+bool DebugTextureViewerWindow::EnsureChannelShaders()
+{
+    if (channelShaderInitializationAttempted)
+    {
+        return channelShaders[0] != nullptr;
+    }
+    auto* device_ = GraphicsDeviceManager::Instance().GetDevice();
+    if (!device_)
+    {
+        return false;
+    }
+    channelShaderInitializationAttempted = true;
+
+    // ImGuiの頂点出力をそのまま受け取り、選択成分を不透明な白黒へ変換する。
+    constexpr char SHADER_SOURCE[] = R"(
+        Texture2D sourceTexture : register(t0);
+        SamplerState sourceSampler : register(s0);
+        struct PixelInput
+        {
+            float4 position : SV_POSITION;
+            float4 color : COLOR0;
+            float2 uv : TEXCOORD0;
+        };
+        float4 main(PixelInput input_) : SV_Target
+        {
+            float value_ = sourceTexture.Sample(sourceSampler, input_.uv).CHANNEL;
+            return float4(value_, value_, value_, 1.0f) * input_.color;
+        }
+    )";
+    constexpr const char* CHANNEL_NAMES[] = { "r", "g", "b", "a" };
+    std::array<Microsoft::WRL::ComPtr<ID3D11PixelShader>, 4> shaders_;
+    for (std::size_t index_ = 0; index_ < shaders_.size(); ++index_)
+    {
+        const D3D_SHADER_MACRO macros_[] = { { "CHANNEL", CHANNEL_NAMES[index_] }, { nullptr, nullptr } };
+        Microsoft::WRL::ComPtr<ID3DBlob> bytecode_;
+        Microsoft::WRL::ComPtr<ID3DBlob> errors_;
+        if (FAILED(D3DCompile(SHADER_SOURCE, sizeof(SHADER_SOURCE) - 1, "DebugTextureChannel", macros_, nullptr,
+            "main", "ps_4_0", 0, 0, bytecode_.GetAddressOf(), errors_.GetAddressOf())))
+        {
+            OutputDebugStringA("Debug Texture Viewer: channel shader compilation failed.\n");
+            if (errors_)
+            {
+                OutputDebugStringA(static_cast<const char*>(errors_->GetBufferPointer()));
+            }
+            return false;
+        }
+        if (FAILED(device_->CreatePixelShader(bytecode_->GetBufferPointer(), bytecode_->GetBufferSize(),
+            nullptr, shaders_[index_].GetAddressOf())))
+        {
+            OutputDebugStringA("Debug Texture Viewer: channel shader creation failed.\n");
+            return false;
+        }
+    }
+    channelShaders = std::move(shaders_);
+    return true;
 }
 
 ImVec2 DebugTextureViewerWindow::GetTextureImageSize(ID3D11ShaderResourceView* srv_) const
@@ -158,7 +268,12 @@ void DebugTextureViewerWindow::AddGBufferTextures(std::vector<TextureEntry>& tex
 
     textures_.push_back({ "GBuffer Base Color", graphicsDeviceManager_.GetGBufferBaseColorSRV() });
     textures_.push_back({ "GBuffer Normal", graphicsDeviceManager_.GetGBufferNormalSRV() });
-    textures_.push_back({ "GBuffer Material", graphicsDeviceManager_.GetGBufferMaterialSRV() });
+    auto* material_ = graphicsDeviceManager_.GetGBufferMaterialSRV();
+    textures_.push_back({ "Ambient Occlusion (AO)", material_, 0 });
+    textures_.push_back({ "Roughness", material_, 1 });
+    textures_.push_back({ "Metalness", material_, 2 });
+    textures_.push_back({ "Toon / PBR Blend", material_, 3 });
+    textures_.push_back({ "GBuffer Material (Packed)", material_ });
     textures_.push_back({ "GBuffer Emissive", graphicsDeviceManager_.GetGBufferEmissiveSRV() });
 }
 

@@ -1,6 +1,7 @@
 #include "PrecompiledHeader.h"
 #include "SkillExecution.h"
 #include "Engine/Debug/TracyProfiler.h"
+#include "Engine/GamePlay/Combat/HealthComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
 #include "Engine/GamePlay/EventSystem/ActionSequence.h"
@@ -17,6 +18,7 @@
 namespace
 {
     constexpr float GROUND_CONTACT_CONFIRM_TIME = 0.05f;
+
     // 未設定の既存Skillには移動予約を追加せず、既存AIなどの制御を維持する。
     bool HasSkillMovement(const SkillPhase& phase_)
     {
@@ -30,7 +32,10 @@ SkillExecution::~SkillExecution()
     // 所有State/Componentの破棄中は、その所有側を参照するActionを呼ばない。
     phaseStarted = false;
     definition.cleanupAction.clear();
-    if (active) Stop();
+    if (active)
+    {
+        Stop();
+    }
 }
 
 bool SkillExecution::CanExecute(const std::shared_ptr<GameObject>& owner_,
@@ -115,7 +120,10 @@ bool SkillExecution::Start(const std::shared_ptr<GameObject>& owner_, const Skil
         error = "A skill is already running.";
         return false;
     }
-    if (!CanExecute(owner_, definition_, error)) return false;
+    if (!CanExecute(owner_, definition_, error))
+    {
+        return false;
+    }
     // Sceneへ保存された表示用BB値ではなく、ランタイムの制御権で多重開始を防ぐ。
     if (owner_->GetComponent<AnimationControllerComponent>()->IsSkillControlled())
     {
@@ -145,7 +153,10 @@ bool SkillExecution::Start(const std::shared_ptr<GameObject>& owner_, const Skil
     ++generation;
     owner_->GetComponent<AnimationControllerComponent>()->SetSkillControlled(true);
     SyncBlackboard();
-    if (!BeginPhase() && active) Stop(SkillExecutionResult::PHASE_START_FAILED);
+    if (!BeginPhase() && active)
+    {
+        Stop(SkillExecutionResult::PHASE_START_FAILED);
+    }
     // 開始済みの場合は、時刻0のActionによる即時終了も開始成功として扱う。
     return true;
 }
@@ -153,7 +164,10 @@ bool SkillExecution::Start(const std::shared_ptr<GameObject>& owner_, const Skil
 void SkillExecution::Update(float deltaTime_)
 {
     BS_PROFILE_SCOPE("SkillExecution::Update");
-    if (!active || stopping) return;
+    if (!active || stopping)
+    {
+        return;
+    }
     const auto owner_ = owner.lock();
     const auto animation_ = owner_ ? owner_->GetComponent<AnimationControllerComponent>() : nullptr;
     const auto* current_ = animation_ ? animation_->GetCurrentState() : nullptr;
@@ -174,7 +188,10 @@ void SkillExecution::Update(float deltaTime_)
         ended_ = duration_ > 0.0001f && (animationTime_ >= duration_ || animationTime_ < previousAnimationTime);
         previousAnimationTime = animationTime_;
     }
-    else if (phase_.endCondition == SkillPhaseEnd::DURATION) ended_ = phaseTime >= phase_.duration;
+    else if (phase_.endCondition == SkillPhaseEnd::DURATION)
+    {
+        ended_ = phaseTime >= phase_.duration;
+    }
     else if (phase_.endCondition == SkillPhaseEnd::GROUND_CONTACT)
     {
         const auto movement_ = owner_->GetComponent<CharacterMovementComponent>();
@@ -184,7 +201,10 @@ void SkillExecution::Update(float deltaTime_)
             ? groundedTime + (std::max)(deltaTime_, 0.0f) : 0.0f;
         ended_ = phaseTime >= phase_.duration && groundedTime >= GROUND_CONTACT_CONFIRM_TIME;
     }
-    else ended_ = phaseEndRequested;
+    else
+    {
+        ended_ = phaseEndRequested;
+    }
     if (ended_ && phase_.endCondition == SkillPhaseEnd::ACTION_END && phase_.waitForAnimationEnd)
     {
         // Sequenceが短く編集されても、クリップ終了前にAIへ制御を返さない。
@@ -208,21 +228,34 @@ void SkillExecution::Update(float deltaTime_)
             if (check_)
             {
                 const bool allowed_ = check_(definition.phases[phaseIndex + 1]);
-                if (!active || generation_ != generation) return;
-                if (!allowed_) { Stop(SkillExecutionResult::FOLLOW_UP_REJECTED); return; }
+                if (!active || generation_ != generation)
+                {
+                    return;
+                }
+                if (!allowed_)
+                {
+                    Stop(SkillExecutionResult::FOLLOW_UP_REJECTED);
+                    return;
+                }
             }
         }
         const bool continueSequence_ = phaseIndex + 1 < static_cast<int>(definition.phases.size()) &&
             definition.phases[phaseIndex + 1].continueSequence;
         EndPhase(continueSequence_);
-        if (!active || generation_ != generation) return;
+        if (!active || generation_ != generation)
+        {
+            return;
+        }
         ++phaseIndex;
         if (phaseIndex >= static_cast<int>(definition.phases.size()))
         {
             Stop(SkillExecutionResult::COMPLETED);
             return;
         }
-        if (!BeginPhase() && active) Stop(SkillExecutionResult::PHASE_START_FAILED);
+        if (!BeginPhase() && active)
+        {
+            Stop(SkillExecutionResult::PHASE_START_FAILED);
+        }
     }
     if (active)
     {
@@ -239,6 +272,7 @@ bool SkillExecution::BeginPhase()
     phaseTime = 0.0f;
     groundedTime = 0.0f;
     previousAnimationTime = 0.0f;
+    forwardTarget.reset();
     const auto owner_ = owner.lock();
     const auto animation_ = owner_ ? owner_->GetComponent<AnimationControllerComponent>() : nullptr;
     const auto& phase_ = definition.phases[phaseIndex];
@@ -259,17 +293,35 @@ bool SkillExecution::BeginPhase()
             const auto graph_ = AnimationGraphBridgeComponent::Acquire(owner_);
             if (!graph_ || !graph_->RequestStateTransition(phase_.animationState, phase_.blendDuration, true,
                 phase_.animationStartTime, true))
-            { error = "Animation graph rejected phase: " + phase_.animationState; return false; }
+            {
+                error = "Animation graph rejected phase: " + phase_.animationState;
+                return false;
+            }
         }
-        else animation_->ChangeState(phase_.animationState, phase_.blendDuration, true, phase_.animationStartTime);
+        else
+        {
+            animation_->ChangeState(phase_.animationState, phase_.blendDuration, true, phase_.animationStartTime);
+        }
     }
-    if (!active || generation_ != generation) return false;
+    if (!active || generation_ != generation)
+    {
+        return false;
+    }
     phaseStarted = true;
     const PhaseCallback callback_ = phaseCallback;
-    if (callback_) callback_(phase_);
-    if (!active || generation_ != generation) return false;
+    if (callback_)
+    {
+        callback_(phase_);
+    }
+    if (!active || generation_ != generation)
+    {
+        return false;
+    }
     CallAction(phase_.enterAction);
-    if (!active || generation_ != generation) return false;
+    if (!active || generation_ != generation)
+    {
+        return false;
+    }
     if (!phase_.sequence.empty())
     {
         const auto sequence_ = owner_->GetComponent<ActionSequence>();
@@ -284,14 +336,25 @@ bool SkillExecution::BeginPhase()
             return true;
         }
         const auto action_ = owner_->GetLocalRegistry().GetAction(phase_.sequence);
-        if (!sequence_ || !action_) { error = "Phase Sequence not found: " + phase_.sequence; return false; }
+        if (!sequence_ || !action_)
+        {
+            error = "Phase Sequence not found: " + phase_.sequence;
+            return false;
+        }
         // 時刻0のActionで中断される場合も、開始直後の予約をExitから停止できるようにする。
         sequenceGeneration = sequence_->GetPlaybackGeneration() + 1;
         ownsSequence = true;
         action_();
-        if (!active || generation_ != generation) return false;
+        if (!active || generation_ != generation)
+        {
+            return false;
+        }
         ownsSequence = sequenceGeneration == sequence_->GetPlaybackGeneration();
-        if (!ownsSequence) { error = "Phase Sequence did not start: " + phase_.sequence; return false; }
+        if (!ownsSequence)
+        {
+            error = "Phase Sequence did not start: " + phase_.sequence;
+            return false;
+        }
     }
     if (phase_.playAnimationFromSequence &&
         (!animation_->GetCurrentState() || animation_->GetCurrentState()->name != phase_.animationState))
@@ -310,7 +373,10 @@ void SkillExecution::EndPhase(bool continueSequence_)
     {
         const auto owner_ = owner.lock();
         const auto sequence_ = owner_ ? owner_->GetComponent<ActionSequence>() : nullptr;
-        if (sequence_) sequence_->StopPlayback(sequenceGeneration);
+        if (sequence_)
+        {
+            sequence_->StopPlayback(sequenceGeneration);
+        }
         ownsSequence = false;
     }
     const std::string exitAction_ = phaseStarted && phaseIndex >= 0 && phaseIndex < static_cast<int>(definition.phases.size())
@@ -322,7 +388,10 @@ void SkillExecution::EndPhase(bool continueSequence_)
 void SkillExecution::Stop(SkillExecutionResult result_)
 {
     BS_PROFILE_SCOPE("SkillExecution::Stop");
-    if (!active || stopping) return;
+    if (!active || stopping)
+    {
+        return;
+    }
     stopping = true;
     ++generation;
     EndPhase();
@@ -330,12 +399,16 @@ void SkillExecution::Stop(SkillExecutionResult result_)
     const auto owner_ = owner.lock();
     const auto animation_ = owner_ ? owner_->GetComponent<AnimationControllerComponent>() : nullptr;
     RestoreMovement();
-    if (animation_) animation_->SetSkillControlled(false);
+    if (animation_)
+    {
+        animation_->SetSkillControlled(false);
+    }
     active = false;
     stopping = false;
     result = result_;
     phaseCallback = {};
     phaseTransitionCheck = {};
+    forwardTarget.reset();
     SyncBlackboard();
 }
 
@@ -343,26 +416,47 @@ void SkillExecution::NotifyPhaseEnd()
 {
     // 旧PhaseのStateExitイベントを新Phaseの終了通知として扱わない。
     if (active && !stopping && phaseStarted && phaseIndex >= 0 && phaseIndex < static_cast<int>(definition.phases.size()) &&
-        definition.phases[phaseIndex].endCondition == SkillPhaseEnd::ACTION_END) phaseEndRequested = true;
+        definition.phases[phaseIndex].endCondition == SkillPhaseEnd::ACTION_END)
+    {
+        phaseEndRequested = true;
+    }
 }
 
 void SkillExecution::CallAction(const std::string& name_)
 {
-    if (name_.empty()) return;
+    if (name_.empty())
+    {
+        return;
+    }
     const auto owner_ = owner.lock();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
     // Animation Eventと同じく、Owner名付きの登録と素のローカル名の両方を解決する。
     auto action_ = owner_->GetLocalRegistry().GetAction(owner_->BuildActionName(name_));
-    if (!action_) action_ = owner_->GetLocalRegistry().GetAction(name_);
-    if (!action_) action_ = ActionRegistry::Instance().GetAction(name_);
-    if (action_) action_();
+    if (!action_)
+    {
+        action_ = owner_->GetLocalRegistry().GetAction(name_);
+    }
+    if (!action_)
+    {
+        action_ = ActionRegistry::Instance().GetAction(name_);
+    }
+    if (action_)
+    {
+        action_();
+    }
 }
 
 void SkillExecution::SyncBlackboard()
 {
     const auto owner_ = owner.lock();
     const auto blackboard_ = owner_ ? owner_->GetComponent<BlackboardComponent>() : nullptr;
-    if (!blackboard_) return;
+    if (!blackboard_)
+    {
+        return;
+    }
     blackboard_->SetString("Skill", "Name", definition.name);
     blackboard_->SetBool("Skill", "Active", active);
     blackboard_->SetBool("Skill", "Ended", !active);
@@ -374,12 +468,21 @@ void SkillExecution::SyncBlackboard()
 // Phaseの切替時だけ重力設定を変更し、踏み切りImpulseは次の有効な更新へ予約する。
 void SkillExecution::BeginPhaseMovement(const SkillPhase& phase_)
 {
-    if (!ownsMovement) return;
+    if (!ownsMovement)
+    {
+        return;
+    }
     const auto collider_ = movementCollider.lock();
-    if (!collider_) return;
+    if (!collider_)
+    {
+        return;
+    }
     if (gravitySuspended && !phase_.suspendGravity)
     {
-        if (const auto movement_ = movement.lock()) movement_->ResetVerticalVelocity();
+        if (const auto movement_ = movement.lock())
+        {
+            movement_->ResetVerticalVelocity();
+        }
     }
     gravitySuspended = phase_.suspendGravity;
     // CharacterColliderはUseGravity=falseで縦速度を消すため、重力係数を0にして制御する。
@@ -395,7 +498,10 @@ void SkillExecution::BeginPhaseMovement(const SkillPhase& phase_)
             actor_->transform->localPosition.y += phase_.warpHeight;
             actor_->transform->MarkDirty();
             collider_->isGrounded = false;
-            if (const auto movement_ = movement.lock()) movement_->ResetVerticalVelocity();
+            if (const auto movement_ = movement.lock())
+            {
+                movement_->ResetVerticalVelocity();
+            }
         }
     }
 }
@@ -403,14 +509,19 @@ void SkillExecution::BeginPhaseMovement(const SkillPhase& phase_)
 // 専用の物理更新を作らず、通常のCharacterMovement更新へ速度を予約する。
 void SkillExecution::UpdateMovement(float deltaTime_)
 {
-    if (!ownsMovement || deltaTime_ <= 0.0f) return;
+    if (!ownsMovement || deltaTime_ <= 0.0f)
+    {
+        return;
+    }
     BS_PROFILE_SCOPE("SkillExecution::UpdateMovement");
     const auto owner_ = owner.lock();
     const auto movement_ = movement.lock();
-    if (!owner_ || !owner_->transform || !movement_) return;
+    if (!owner_ || !owner_->transform || !movement_)
+    {
+        return;
+    }
     const auto& phase_ = definition.phases[phaseIndex];
-    const auto forward_ = owner_->transform->GetFront();
-    const float length_ = std::sqrt(forward_.x * forward_.x + forward_.z * forward_.z);
+    auto forward_ = owner_->transform->GetFront();
     float speed_ = phase_.forwardSpeed;
     const auto curve_ = owner_->GetComponent<CurveComponent>();
     if (curve_ && !phase_.forwardSpeedCurveName.empty() && curve_->HasTrack(phase_.forwardSpeedCurveName))
@@ -418,15 +529,44 @@ void SkillExecution::UpdateMovement(float deltaTime_)
         // 時間指定LoopはPhase秒数、その他はAnimationの進行率で加速・制動を評価する。
         float progress_ = 0.0f;
         if (phase_.endCondition == SkillPhaseEnd::DURATION && phase_.duration > 0.0001f)
+        {
             progress_ = phaseTime / phase_.duration;
+        }
         else if (const auto animation_ = owner_->GetComponent<AnimationControllerComponent>())
         {
             const float duration_ = animation_->GetCurrentSampleDuration();
-            if (duration_ > 0.0001f) progress_ = animation_->GetAnimatorTime() / duration_;
+            if (duration_ > 0.0001f)
+            {
+                progress_ = animation_->GetAnimatorTime() / duration_;
+            }
         }
         const float factor_ = curve_->GetValue(phase_.forwardSpeedCurveName, (std::clamp)(progress_, 0.0f, 1.0f));
-        if (std::isfinite(factor_)) speed_ *= (std::max)(0.0f, factor_);
+        if (std::isfinite(factor_))
+        {
+            speed_ *= (std::max)(0.0f, factor_);
+        }
     }
+    if (speed_ > 0.0f)
+    {
+        const auto target_ = forwardTarget.lock();
+        if (target_ && target_->transform && target_->IsCombatReady())
+        {
+            const auto health_ = target_->GetComponent<HealthComponent>();
+            if (!health_ || !health_->IsDead())
+            {
+                constexpr float ASSISTED_FORWARD_SPEED_SCALE = 1.5f;
+                const auto position_ = owner_->transform->GetWorldPosition();
+                const auto targetPosition_ = target_->transform->GetWorldPosition();
+                forward_ = { targetPosition_.x - position_.x, 0.0f, targetPosition_.z - position_.z };
+                const float distance_ = std::sqrt(forward_.x * forward_.x + forward_.z * forward_.z);
+                // 残り距離より先に進まないよう、曲線で決まった突進速度を接触手前で制限する。
+                speed_ = (std::min)(speed_ * ASSISTED_FORWARD_SPEED_SCALE,
+                    (std::max)(0.0f, distance_ - forwardStopDistance) / deltaTime_);
+                owner_->transform->SetForwardYawOnly(forward_, 1.0f, 1.0f);
+            }
+        }
+    }
+    const float length_ = std::sqrt(forward_.x * forward_.x + forward_.z * forward_.z);
     const float scale_ = length_ > 0.0001f ? speed_ / length_ : 0.0f;
     movement_->SetHorizontalVelocity({ forward_.x * scale_, 0.0f, forward_.z * scale_ });
     if (gravitySuspended)
@@ -437,7 +577,10 @@ void SkillExecution::UpdateMovement(float deltaTime_)
         {
             // Loopの再生時間が折り返しても、溜めが繰り返されないようPhase経過秒を使う。
             const float factor_ = curve_->GetValue(phase_.verticalSpeedCurveName, phaseTime);
-            if (std::isfinite(factor_)) verticalSpeed_ *= (std::max)(factor_, 0.0f);
+            if (std::isfinite(factor_))
+            {
+                verticalSpeed_ *= (std::max)(factor_, 0.0f);
+            }
         }
         movement_->AddImpulse({ 0.0f, verticalSpeed_, 0.0f });
     }
@@ -452,12 +595,18 @@ void SkillExecution::UpdateMovement(float deltaTime_)
 // 通常終了・被弾・キャンセル・破棄のすべてで、移動と重力の一時設定を解除する。
 void SkillExecution::RestoreMovement()
 {
-    if (!ownsMovement) return;
+    if (!ownsMovement)
+    {
+        return;
+    }
     const auto movement_ = movement.lock();
     if (movement_)
     {
         movement_->StopHorizontalMovementImmediately();
-        if (gravitySuspended) movement_->ResetVerticalVelocity();
+        if (gravitySuspended)
+        {
+            movement_->ResetVerticalVelocity();
+        }
     }
     if (const auto collider_ = movementCollider.lock())
     {
@@ -471,12 +620,21 @@ void SkillExecution::RestoreMovement()
 
 bool SkillExecution::ExtendCurrentDuration(float extension_, float maximum_)
 {
-    if (!active || stopping || phaseIndex < 0 || phaseIndex >= static_cast<int>(definition.phases.size()) || !std::isfinite(extension_) || !std::isfinite(maximum_)) return false;
+    if (!active || stopping || phaseIndex < 0 || phaseIndex >= static_cast<int>(definition.phases.size()) || !std::isfinite(extension_) || !std::isfinite(maximum_))
+    {
+        return false;
+    }
     auto& phase_ = definition.phases[phaseIndex];
-    if (phase_.endCondition != SkillPhaseEnd::DURATION || extension_ <= 0.0f) return false;
+    if (phase_.endCondition != SkillPhaseEnd::DURATION || extension_ <= 0.0f)
+    {
+        return false;
+    }
     const float cap_ = (std::min)(maximum_, phase_.maximumDuration);
     const float duration_ = (std::min)(phase_.duration + extension_, cap_);
-    if (duration_ <= phase_.duration) return false;
+    if (duration_ <= phase_.duration)
+    {
+        return false;
+    }
     phase_.duration = duration_;
     return true;
 }

@@ -7,6 +7,8 @@
 #include <vector>
 #include <wrl.h>
 
+#include "Engine/Graphics/VFXMaterial/VFXMaterialData.h"
+
 class ModelResource;
 class GltfModelCommponennt;
 class VFXMaterialResource;
@@ -253,6 +255,7 @@ struct MeshVFXPart
     MESH_VFX_GRADIENT_SAMPLE_MODE gradientSampleMode = MESH_VFX_GRADIENT_SAMPLE_MODE::HORIZONTAL;
     MESH_VFX_GRADIENT_DIRECTION gradientDirection = MESH_VFX_GRADIENT_DIRECTION::FORWARD;
     MeshVFXBlendMode blendMode = MeshVFXBlendMode::ALPHA;
+    VFX_MATERIAL_CULL_MODE cullMode = VFX_MATERIAL_CULL_MODE::NONE;
 };
 
 // Runtime cache generated from MeshVFXPart data.

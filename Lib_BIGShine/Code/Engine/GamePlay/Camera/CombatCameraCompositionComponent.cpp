@@ -34,7 +34,10 @@ namespace
         {
             const float fallbackLength_ =
                 std::sqrt(fallback_.x * fallback_.x + fallback_.z * fallback_.z);
-            if (fallbackLength_ <= 0.0001f) return { 0.0f, 0.0f, 1.0f };
+            if (fallbackLength_ <= 0.0001f)
+            {
+                return { 0.0f, 0.0f, 1.0f };
+            }
             return
             {
                 fallback_.x / fallbackLength_,
@@ -108,7 +111,10 @@ void CombatCameraCompositionComponent::LateUpdate(float deltaTime_)
 
     for (CameraCompositionLayerState& layer_ : layers)
     {
-        if (layer_.phase == CAMERA_COMPOSITION_PHASE::IDLE) continue;
+        if (layer_.phase == CAMERA_COMPOSITION_PHASE::IDLE)
+        {
+            continue;
+        }
 
         // 各レイヤーはENTER -> HOLD -> RETURNの順に進み、RETURN終了で空になる。
         layer_.phaseTimer += (std::max)(deltaTime_, 0.0f);
@@ -117,7 +123,10 @@ void CombatCameraCompositionComponent::LateUpdate(float deltaTime_)
             ? true
             : layer_.phaseTimer >= duration_;
 
-        if (!phaseFinished_) continue;
+        if (!phaseFinished_)
+        {
+            continue;
+        }
 
         if (layer_.phase == CAMERA_COMPOSITION_PHASE::ENTER)
         {
@@ -128,7 +137,10 @@ void CombatCameraCompositionComponent::LateUpdate(float deltaTime_)
 
         if (layer_.phase == CAMERA_COMPOSITION_PHASE::HOLD)
         {
-            if (layer_.activePreset.continueUntilStop) continue;
+            if (layer_.activePreset.continueUntilStop)
+            {
+                continue;
+            }
             layer_.phase = CAMERA_COMPOSITION_PHASE::RETURN;
             layer_.phaseTimer = 0.0f;
             continue;
@@ -146,7 +158,10 @@ void CombatCameraCompositionComponent::PlayPresetByName(
     const std::string& presetName_)
 {
     const int index_ = FindPresetIndex(presetName_);
-    if (index_ < 0) return;
+    if (index_ < 0)
+    {
+        return;
+    }
 
     PlayPresetByName(presetName_, presets[index_].source);
 }
@@ -157,7 +172,10 @@ void CombatCameraCompositionComponent::PlayPresetByName(
 {
     BS_PROFILE_SCOPE("CombatCameraCompositionComponent::PlayPresetByName");
     const int index_ = FindPresetIndex(presetName_, source_);
-    if (index_ < 0) return;
+    if (index_ < 0)
+    {
+        return;
+    }
 
     BeginPreset(presets[index_], source_);
 }
@@ -168,8 +186,14 @@ void CombatCameraCompositionComponent::StopPreset(
     // 名前指定が空なら全レイヤー、名前があれば一致するプリセットだけをRETURNへ移行する。
     for (CameraCompositionLayerState& layer_ : layers)
     {
-        if (layer_.phase == CAMERA_COMPOSITION_PHASE::IDLE) continue;
-        if (!presetName_.empty() && presetName_ != layer_.activePresetName) continue;
+        if (layer_.phase == CAMERA_COMPOSITION_PHASE::IDLE)
+        {
+            continue;
+        }
+        if (!presetName_.empty() && presetName_ != layer_.activePresetName)
+        {
+            continue;
+        }
 
         layer_.phase = CAMERA_COMPOSITION_PHASE::RETURN;
         layer_.phaseTimer = 0.0f;
@@ -182,8 +206,14 @@ void CombatCameraCompositionComponent::StopPreset(
 {
     const int layerIndex_ = GetSourceLayerIndex(source_);
     CameraCompositionLayerState& layer_ = layers[layerIndex_];
-    if (layer_.phase == CAMERA_COMPOSITION_PHASE::IDLE) return;
-    if (!presetName_.empty() && presetName_ != layer_.activePresetName) return;
+    if (layer_.phase == CAMERA_COMPOSITION_PHASE::IDLE)
+    {
+        return;
+    }
+    if (!presetName_.empty() && presetName_ != layer_.activePresetName)
+    {
+        return;
+    }
 
     layer_.phase = CAMERA_COMPOSITION_PHASE::RETURN;
     layer_.phaseTimer = 0.0f;
@@ -259,14 +289,20 @@ void CombatCameraCompositionComponent::RegisterActions()
 void CombatCameraCompositionComponent::ResolveReferences()
 {
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     // 基本は同じGameObject上のBlackboard/LockOnCameraを使い、必要なら指定名のカメラObjectも探す。
     if (blackboard.expired())
     {
         blackboard = owner_->GetComponent<BlackboardComponent>();
     }
-    if (!lockOnCamera.expired()) return;
+    if (!lockOnCamera.expired())
+    {
+        return;
+    }
 
     lockOnCamera = owner_->GetComponent<CameraLockOnComponent>();
     if (!lockOnCamera.expired() || targetCameraObjectName.empty() || !owner_->manager)
@@ -394,7 +430,10 @@ void CombatCameraCompositionComponent::LoadDefaultPresets()
 void CombatCameraCompositionComponent::ReadBlackboardRequests()
 {
     const std::shared_ptr<BlackboardComponent> blackboard_ = blackboard.lock();
-    if (!blackboard_) return;
+    if (!blackboard_)
+    {
+        return;
+    }
 
     // BlackboardのTriggerを消費して、AI/戦闘側からカメラ構図のPlay/Stop/Clearを指示する。
     if (blackboard_->ConsumeTrigger(blackboardCategory, clearTriggerKey))
@@ -462,7 +501,10 @@ int CombatCameraCompositionComponent::FindPresetIndex(
 {
     for (int index_ = 0; index_ < static_cast<int>(presets.size()); ++index_)
     {
-        if (presets[index_].presetName == presetName_) return index_;
+        if (presets[index_].presetName == presetName_)
+        {
+            return index_;
+        }
     }
     return -1;
 }
@@ -487,7 +529,10 @@ int CombatCameraCompositionComponent::GetSourceLayerIndex(
     CAMERA_COMPOSITION_SOURCE source_) const
 {
     // System/Stage、Player、Enemyでレイヤーを分け、同時発生した補正を後で合成する。
-    if (source_ == CAMERA_COMPOSITION_SOURCE::ENEMY) return 2;
+    if (source_ == CAMERA_COMPOSITION_SOURCE::ENEMY)
+    {
+        return 2;
+    }
     if (source_ == CAMERA_COMPOSITION_SOURCE::STAGE ||
         source_ == CAMERA_COMPOSITION_SOURCE::SYSTEM)
     {
@@ -522,9 +567,18 @@ float CombatCameraCompositionComponent::CalculatePhaseWeight(
     const float rate_ = duration_ <= 0.0001f
         ? 1.0f
         : SmoothStep(layer_.phaseTimer / duration_);
-    if (layer_.phase == CAMERA_COMPOSITION_PHASE::ENTER) return rate_;
-    if (layer_.phase == CAMERA_COMPOSITION_PHASE::HOLD) return 1.0f;
-    if (layer_.phase == CAMERA_COMPOSITION_PHASE::RETURN) return 1.0f - rate_;
+    if (layer_.phase == CAMERA_COMPOSITION_PHASE::ENTER)
+    {
+        return rate_;
+    }
+    if (layer_.phase == CAMERA_COMPOSITION_PHASE::HOLD)
+    {
+        return 1.0f;
+    }
+    if (layer_.phase == CAMERA_COMPOSITION_PHASE::RETURN)
+    {
+        return 1.0f - rate_;
+    }
     return 0.0f;
 }
 
@@ -538,13 +592,19 @@ float CombatCameraCompositionComponent::ResolveDirectionalSide(
     float sideOffset_,
     bool useAttackDirectionSide_) const
 {
-    if (!useAttackDirectionSide_) return sideOffset_ >= 0.0f ? 1.0f : -1.0f;
+    if (!useAttackDirectionSide_)
+    {
+        return sideOffset_ >= 0.0f ? 1.0f : -1.0f;
+    }
 
     // 攻撃方向が画面右へ向いているかで、構図の横ずらし方向を決める。
     // これにより、攻撃の流れが画面内へ入る方向へカメラを寄せられる。
     const std::shared_ptr<BlackboardComponent> blackboard_ = blackboard.lock();
     const std::shared_ptr<CameraLockOnComponent> lockOn_ = lockOnCamera.lock();
-    if (!blackboard_ || !lockOn_) return sideOffset_ >= 0.0f ? 1.0f : -1.0f;
+    if (!blackboard_ || !lockOn_)
+    {
+        return sideOffset_ >= 0.0f ? 1.0f : -1.0f;
+    }
 
     DirectX::SimpleMath::Vector3 attackDirection_{};
     if (!blackboard_->GetVector3(blackboardCategory, attackDirectionKey, attackDirection_))
@@ -615,7 +675,10 @@ CombatCameraCompositionComponent::BuildLayeredCorrection() const
     LockOnCameraCompositionCorrection result_ = BuildCloseRangePlayerCorrection();
     for (const CameraCompositionLayerState& layer_ : layers)
     {
-        if (layer_.phase == CAMERA_COMPOSITION_PHASE::IDLE) continue;
+        if (layer_.phase == CAMERA_COMPOSITION_PHASE::IDLE)
+        {
+            continue;
+        }
 
         const LockOnCameraCompositionCorrection layerCorrection_ =
             BuildCorrection(layer_);
@@ -638,7 +701,10 @@ float CombatCameraCompositionComponent::CalculateCloseRangeAssistWeight(
     float targetDistance_) const
 {
     // 近距離補正は指定距離帯の中だけ有効にし、境界では自然にフェードさせる。
-    if (!enableCloseRangePlayerAssist) return 0.0f;
+    if (!enableCloseRangePlayerAssist)
+    {
+        return 0.0f;
+    }
     if (closeRangeAssistMaximumDistance <= closeRangeAssistMinimumDistance)
     {
         return 0.0f;
@@ -651,7 +717,10 @@ float CombatCameraCompositionComponent::CalculateCloseRangeAssistWeight(
 
     const float blendDistance_ =
         (std::max)(closeRangeAssistBlendDistance, 0.0f);
-    if (blendDistance_ <= 0.0001f) return 1.0f;
+    if (blendDistance_ <= 0.0001f)
+    {
+        return 1.0f;
+    }
 
     const float inWeight_ = closeRangeAssistMinimumDistance > 0.0001f
         ? std::clamp(
@@ -681,7 +750,10 @@ CombatCameraCompositionComponent::BuildCloseRangePlayerCorrection() const
     const float weight_ =
         CalculateCloseRangeAssistWeight(lockOn_->GetCurrentTargetDistance());
     debugCloseRangeAssistWeight = weight_;
-    if (weight_ <= 0.0001f) return correction_;
+    if (weight_ <= 0.0001f)
+    {
+        return correction_;
+    }
 
     // 敵に近い時は少し距離/高さを調整し、プレイヤーと敵の見切れを防ぐ。
     correction_.distanceOffset = closeRangeAssistDistanceOffset;
@@ -784,18 +856,36 @@ const char* CombatCameraCompositionComponent::ToString(
 CAMERA_COMPOSITION_WALL_POLICY CombatCameraCompositionComponent::WallPolicyFromString(
     const std::string& value_) const
 {
-    if (value_ == "ALLOW") return CAMERA_COMPOSITION_WALL_POLICY::ALLOW;
-    if (value_ == "TANGENT_ONLY") return CAMERA_COMPOSITION_WALL_POLICY::TANGENT_ONLY;
-    if (value_ == "DISABLE") return CAMERA_COMPOSITION_WALL_POLICY::DISABLE;
+    if (value_ == "ALLOW")
+    {
+        return CAMERA_COMPOSITION_WALL_POLICY::ALLOW;
+    }
+    if (value_ == "TANGENT_ONLY")
+    {
+        return CAMERA_COMPOSITION_WALL_POLICY::TANGENT_ONLY;
+    }
+    if (value_ == "DISABLE")
+    {
+        return CAMERA_COMPOSITION_WALL_POLICY::DISABLE;
+    }
     return CAMERA_COMPOSITION_WALL_POLICY::REDUCE;
 }
 
 CAMERA_COMPOSITION_SOURCE CombatCameraCompositionComponent::SourceFromString(
     const std::string& value_) const
 {
-    if (value_ == "SYSTEM") return CAMERA_COMPOSITION_SOURCE::SYSTEM;
-    if (value_ == "ENEMY") return CAMERA_COMPOSITION_SOURCE::ENEMY;
-    if (value_ == "STAGE") return CAMERA_COMPOSITION_SOURCE::STAGE;
+    if (value_ == "SYSTEM")
+    {
+        return CAMERA_COMPOSITION_SOURCE::SYSTEM;
+    }
+    if (value_ == "ENEMY")
+    {
+        return CAMERA_COMPOSITION_SOURCE::ENEMY;
+    }
+    if (value_ == "STAGE")
+    {
+        return CAMERA_COMPOSITION_SOURCE::STAGE;
+    }
     return CAMERA_COMPOSITION_SOURCE::PLAYER;
 }
 

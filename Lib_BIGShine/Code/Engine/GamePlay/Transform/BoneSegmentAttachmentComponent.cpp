@@ -72,10 +72,16 @@ void BoneSegmentAttachmentComponent::LateUpdate(float deltaTime_)
 std::shared_ptr<GltfModelCommponennt> BoneSegmentAttachmentComponent::ResolveTargetModel()
 {
     // 既に解決済みならキャッシュを使う。
-    if (auto model_ = targetModel.lock()) return model_;
+    if (auto model_ = targetModel.lock())
+    {
+        return model_;
+    }
 
     auto owner_ = GetGameObject();
-    if (!owner_) return nullptr;
+    if (!owner_)
+    {
+        return nullptr;
+    }
 
     if (!targetGameObjectName.empty() && owner_->manager)
     {
@@ -120,9 +126,15 @@ std::shared_ptr<GltfModelCommponennt> BoneSegmentAttachmentComponent::ResolveTar
 bool BoneSegmentAttachmentComponent::ResolveNodeIndices(
     const std::shared_ptr<GltfModelCommponennt>& model_)
 {
-    if (!model_ || startNodeName.empty() || endNodeName.empty()) return false;
+    if (!model_ || startNodeName.empty() || endNodeName.empty())
+    {
+        return false;
+    }
     model_->UpdateLoadState();
-    if (!model_->IsModelReady()) return false;
+    if (!model_->IsModelReady())
+    {
+        return false;
+    }
 
     const auto& nodes_ = model_->GetNodes();
     const bool validStart_ = startNodeIndex >= 0 &&
@@ -132,8 +144,14 @@ bool BoneSegmentAttachmentComponent::ResolveNodeIndices(
         endNodeIndex < static_cast<int>(nodes_.size()) &&
         nodes_[endNodeIndex].name == endNodeName;
 
-    if (!validStart_) startNodeIndex = model_->GetNodeIndex(startNodeName.c_str());
-    if (!validEnd_) endNodeIndex = model_->GetNodeIndex(endNodeName.c_str());
+    if (!validStart_)
+    {
+        startNodeIndex = model_->GetNodeIndex(startNodeName.c_str());
+    }
+    if (!validEnd_)
+    {
+        endNodeIndex = model_->GetNodeIndex(endNodeName.c_str());
+    }
     // Node名が変わっていなければキャッシュを使い、変わった時だけ再検索する。
     return startNodeIndex >= 0 && endNodeIndex >= 0;
 }
@@ -141,7 +159,10 @@ bool BoneSegmentAttachmentComponent::ResolveNodeIndices(
 bool BoneSegmentAttachmentComponent::IsLoadReady() const
 {
     auto model_ = const_cast<BoneSegmentAttachmentComponent*>(this)->ResolveTargetModel();
-    if (!model_) return true;
+    if (!model_)
+    {
+        return true;
+    }
 
     model_->UpdateLoadState();
     return !model_->IsModelLoading();
@@ -152,9 +173,15 @@ bool BoneSegmentAttachmentComponent::GetSegment(
     XMFLOAT3& endPosition_) const
 {
     auto model_ = targetModel.lock();
-    if (!model_) return false;
+    if (!model_)
+    {
+        return false;
+    }
     model_->UpdateLoadState();
-    if (!model_->IsModelReady()) return false;
+    if (!model_->IsModelReady())
+    {
+        return false;
+    }
 
     const auto& nodes_ = model_->GetNodes();
     if (startNodeIndex < 0 || endNodeIndex < 0 ||
@@ -174,16 +201,25 @@ void BoneSegmentAttachmentComponent::SyncTargets()
     // Node間線分を求め、Transform/Particle/Capsuleへ同じ結果を同期する。
     auto owner_ = GetGameObject();
     auto model_ = ResolveTargetModel();
-    if (!owner_ || !ResolveNodeIndices(model_)) return;
+    if (!owner_ || !ResolveNodeIndices(model_))
+    {
+        return;
+    }
 
     XMFLOAT3 startPosition_;
     XMFLOAT3 endPosition_;
-    if (!GetSegment(startPosition_, endPosition_)) return;
+    if (!GetSegment(startPosition_, endPosition_))
+    {
+        return;
+    }
 
     const XMVECTOR difference_ = XMVectorSubtract(
         XMLoadFloat3(&endPosition_), XMLoadFloat3(&startPosition_));
     const float length_ = XMVectorGetX(XMVector3Length(difference_));
-    if (length_ <= 0.00001f) return;
+    if (length_ <= 0.00001f)
+    {
+        return;
+    }
 
     const XMMATRIX segmentTransform_ =
         CreateSegmentTransform(startPosition_, endPosition_, (std::max)(meshVFXThickness, 0.0001f));
@@ -221,8 +257,14 @@ void BoneSegmentAttachmentComponent::Gui()
         startNodeIndex = -1;
         endNodeIndex = -1;
     }
-    if (ImGui::InputText("Start Node", &startNodeName)) startNodeIndex = -1;
-    if (ImGui::InputText("End Node", &endNodeName)) endNodeIndex = -1;
+    if (ImGui::InputText("Start Node", &startNodeName))
+    {
+        startNodeIndex = -1;
+    }
+    if (ImGui::InputText("End Node", &endNodeName))
+    {
+        endNodeIndex = -1;
+    }
     ImGui::DragFloat3("Start Offset", &startOffset.x, 0.01f);
     ImGui::DragFloat3("End Offset", &endOffset.x, 0.01f);
 

@@ -74,11 +74,17 @@ void AIControllerComponent::Start()
 // 毎フレーム判断材料を更新し、Blackboardへ反映した後にBehaviorGraphを1Tick進める。
 void AIControllerComponent::Update(float deltaTime_)
 {
-    if (!isRunning) return;
+    if (!isRunning)
+    {
+        return;
+    }
 
     // Graphの条件ノードが読む値を先にそろえてから、RootからAI判断を進める。
     EnsureBlackboard();
-    if (!blackboardComponent) return;
+    if (!blackboardComponent)
+    {
+        return;
+    }
 
     // Object参照を解決してから、距離・方向などの判断材料を計算する。
     ResolveTarget();
@@ -107,7 +113,10 @@ void AIControllerComponent::Gui()
 
     ImGui::Checkbox("Run AI##AIControllerComponent_RunAiCheckbox", &isRunning);
     ImGui::SameLine();
-    if (ImGui::Button("Reset Tree##AIControllerComponent_ResetTreeButton")) ResetTree();
+    if (ImGui::Button("Reset Tree##AIControllerComponent_ResetTreeButton"))
+    {
+        ResetTree();
+    }
 
     ImGui::InputText("Graph Asset##AIControllerComponent_GraphAssetInput", &graphAssetPath);
     if (ImGui::BeginDragDropTarget())
@@ -145,7 +154,10 @@ void AIControllerComponent::Gui()
                 : "Load failed: " + selectedPath_;
         }
     }
-    if (!statusText.empty()) ImGui::Text("%s", statusText.c_str());
+    if (!statusText.empty())
+    {
+        ImGui::Text("%s", statusText.c_str());
+    }
 
     ImGui::SeparatorText("Enemy AI");
     ImGui::InputText("Target Name", &targetName);
@@ -198,9 +210,18 @@ void AIControllerComponent::Deserialize(const nlohmann::json& json_)
     if (json_.contains("SpawnPosition") && json_["SpawnPosition"].is_array())
     {
         hasSerializedSpawnPosition = true;
-        if (json_["SpawnPosition"].size() > 0) spawnPosition.x = json_["SpawnPosition"][0].get<float>();
-        if (json_["SpawnPosition"].size() > 1) spawnPosition.y = json_["SpawnPosition"][1].get<float>();
-        if (json_["SpawnPosition"].size() > 2) spawnPosition.z = json_["SpawnPosition"][2].get<float>();
+        if (json_["SpawnPosition"].size() > 0)
+        {
+            spawnPosition.x = json_["SpawnPosition"][0].get<float>();
+        }
+        if (json_["SpawnPosition"].size() > 1)
+        {
+            spawnPosition.y = json_["SpawnPosition"][1].get<float>();
+        }
+        if (json_["SpawnPosition"].size() > 2)
+        {
+            spawnPosition.z = json_["SpawnPosition"][2].get<float>();
+        }
     }
     else
     {
@@ -211,7 +232,10 @@ void AIControllerComponent::Deserialize(const nlohmann::json& json_)
     {
         BS_PROFILE_SCOPE("AIController::LoadGraphAssetOnDeserialize");
         graph.LoadFromFile(graphAssetPath);
-        if (json_.contains("Graph")) graph.RestoreEditorLayout(json_["Graph"]);
+        if (json_.contains("Graph"))
+        {
+            graph.RestoreEditorLayout(json_["Graph"]);
+        }
     }
     else if (json_.contains("Graph"))
     {
@@ -262,7 +286,10 @@ bool AIControllerComponent::LoadGraphAsset(const std::string& path_)
 void AIControllerComponent::EnsureBlackboard()
 {
     std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     auto blackboard_ = owner_->GetComponent<BlackboardComponent>();
     if (!blackboard_)
@@ -319,9 +346,15 @@ void AIControllerComponent::ResolveTarget()
 {
     context.target = nullptr;
     const auto owner_ = GetGameObject();
-    if (!owner_ || !owner_->manager) return;
+    if (!owner_ || !owner_->manager)
+    {
+        return;
+    }
     const auto observation_ = owner_->GetManager().GetCombatObservationSystem();
-    if (!observation_) return;
+    if (!observation_)
+    {
+        return;
+    }
     const auto cached_ = cachedTarget.lock();
     const bool namedValid_ = cachedTargetIsNamed && cached_ && cached_->GetName() == targetName;
     const bool fallbackValid_ = !cachedTargetIsNamed && cached_ && cached_ != owner_ && cached_->GetLayer() == LayerType::Player &&
@@ -343,7 +376,10 @@ void AIControllerComponent::ResolveTarget()
 // 距離や範囲判定などのContext情報を、Conditionノードから読めるBlackboard値へ変換する。
 void AIControllerComponent::WriteContextBlackboard()
 {
-    if (!blackboardComponent || !writeDebugBlackboard) return;
+    if (!blackboardComponent || !writeDebugBlackboard)
+    {
+        return;
+    }
 
     // EditorやBehaviorGraphから同じキーを読めるよう、AIの判断材料をBlackboardへ集約する。
     // 生の距離値から、Graphで直接利用しやすいBool条件をまとめて生成する。
@@ -370,7 +406,10 @@ void AIControllerComponent::WriteContextBlackboard()
 void AIControllerComponent::RegisterDefaultAIActions()
 {
     std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     UnregisterDefaultAIActions();
 
@@ -382,18 +421,36 @@ void AIControllerComponent::RegisterDefaultAIActions()
             registeredDefaultActionNames.push_back(owner_->BuildActionName(actionName_));
         };
 
-    registerAction_("AI.ChaseTarget", [this]() { ActionChaseTarget(); });
-    registerAction_("AI.ReturnToSpawn", [this]() { ActionReturnToSpawn(); });
-    registerAction_("AI.StopMove", [this]() { ActionStopMove(); });
-    registerAction_("AI.Attack", [this]() { ActionAttack(); });
-    registerAction_("AI.NotifyActionEnd", [this]() { ActionNotifyActionEnd(); });
+    registerAction_("AI.ChaseTarget", [this]()
+    {
+        ActionChaseTarget();
+    });
+    registerAction_("AI.ReturnToSpawn", [this]()
+    {
+        ActionReturnToSpawn();
+    });
+    registerAction_("AI.StopMove", [this]()
+    {
+        ActionStopMove();
+    });
+    registerAction_("AI.Attack", [this]()
+    {
+        ActionAttack();
+    });
+    registerAction_("AI.NotifyActionEnd", [this]()
+    {
+        ActionNotifyActionEnd();
+    });
 }
 
 // このコンポーネントが以前登録した標準AI ActionをOwnerのLocal Registryから解除する。
 void AIControllerComponent::UnregisterDefaultAIActions()
 {
     std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     for (const std::string& actionName_ : registeredDefaultActionNames)
     {
@@ -405,7 +462,10 @@ void AIControllerComponent::UnregisterDefaultAIActions()
 // Target方向へ追跡速度で移動を要求する。
 void AIControllerComponent::ActionChaseTarget()
 {
-    if (!context.hasTarget) return;
+    if (!context.hasTarget)
+    {
+        return;
+    }
     RequestMove(context.toTargetDirection, chaseSpeed);
 }
 
@@ -425,7 +485,10 @@ void AIControllerComponent::ActionReturnToSpawn()
 void AIControllerComponent::ActionStopMove()
 {
     std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     if (std::shared_ptr<CharacterMovementComponent> movement_ = owner_->GetComponent<CharacterMovementComponent>())
     {
@@ -437,7 +500,10 @@ void AIControllerComponent::ActionStopMove()
 void AIControllerComponent::ActionAttack()
 {
     EnsureBlackboard();
-    if (!blackboardComponent) return;
+    if (!blackboardComponent)
+    {
+        return;
+    }
 
     blackboardComponent->SetString(AIBlackboardKeys::CATEGORY_AI, AIBlackboardKeys::CURRENT_ACTION, "AI.Attack");
     blackboardComponent->SetBool(AIBlackboardKeys::CATEGORY_AI, AIBlackboardKeys::ACTION_ENDED, false);
@@ -448,7 +514,10 @@ void AIControllerComponent::ActionAttack()
 void AIControllerComponent::ActionNotifyActionEnd()
 {
     EnsureBlackboard();
-    if (!blackboardComponent) return;
+    if (!blackboardComponent)
+    {
+        return;
+    }
 
     blackboardComponent->SetBool(AIBlackboardKeys::CATEGORY_AI, AIBlackboardKeys::ACTION_ENDED, true);
     blackboardComponent->SetBool(AIBlackboardKeys::CATEGORY_AI, AIBlackboardKeys::IS_ACTING, false);
@@ -458,7 +527,10 @@ void AIControllerComponent::ActionNotifyActionEnd()
 void AIControllerComponent::RequestMove(const DirectX::XMFLOAT3& direction_, float speed_)
 {
     std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     if (std::shared_ptr<CharacterMovementComponent> movement_ = owner_->GetComponent<CharacterMovementComponent>())
     {

@@ -31,9 +31,18 @@ public:
 	bool IsLoadReady() const override;
 	bool IsRuntimeReady() const override;
 	bool HasRuntimeFailure() const override;
+
     // 影渡りなどの一時的な非表示を、アニメーション更新と保存設定から分離する。
-    void SetRuntimeVisible(bool visible_) { runtimeVisible = visible_; }
-    bool IsRuntimeVisible() const { return runtimeVisible; }
+    void SetRuntimeVisible(bool visible_)
+	{
+		runtimeVisible = visible_;
+	}
+
+    bool IsRuntimeVisible() const
+	{
+		return runtimeVisible;
+	}
+
 	bool IsModelReady() const;
 	bool IsModelLoading() const;
 
@@ -50,8 +59,14 @@ public:
 	{
 		(void)elapsedTime_;
 		UpdateLoadState();
-		if (!IsLoadReady()) return;
-		if (transformUpdateDrivenExternally) return;
+		if (!IsLoadReady())
+		{
+			return;
+		}
+		if (transformUpdateDrivenExternally)
+		{
+			return;
+		}
 
 		if (isStaticModel)
 		{
@@ -146,8 +161,8 @@ public:
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>	metalnessRoughnessMap;
 
 		// ★追加するトゥーン・アウトライン用パラメータ
-		bool disableOutline = false;    // 目などでアウトラインを消すためのフラグ
-		float outlineThicknessOffset = 1.0f; // マテリアルごとの太さ倍率
+		bool disableOutline = false;    // 既存の保存形式では true のときアウトラインを描画する。
+		float outlineThicknessOffset = 1.0f; // 距離補正を掛ける前の押し出し幅。
 
 		template<class Archive>
 		void serialize(Archive& archive);
@@ -243,30 +258,49 @@ public:
 	void AppendAnimations(const char* filename);
 
 	// マテリアルデータ取得
-	const std::vector<Material>& GetMaterials() const { return materials; }
+	const std::vector<Material>& GetMaterials() const
+	{
+		return materials;
+	}
+
     // 演出中の差し替えはメッシュ単位で保持し、元の材質や保存データには反映しない。
     void SetPresentationMaterials(std::vector<Material> materials_);
     void ClearPresentationMaterials();
 
 	// メッシュデータ取得
-	const std::vector<Mesh>& GetMeshes() const { return meshes; }
+	const std::vector<Mesh>& GetMeshes() const
+	{
+		return meshes;
+	}
 
 	// アニメーションデータ取得
-	const std::vector<Animation>& GetAnimations() const { return animations; }
+	const std::vector<Animation>& GetAnimations() const
+	{
+		return animations;
+	}
 
 	// アニメーションインデックス取得
 	int GetAnimationIndex(const char* name) const;
 
 	// ノードデータ取得
-	const std::vector<Node>& GetNodes() const { return nodes; }
+	const std::vector<Node>& GetNodes() const
+	{
+		return nodes;
+	}
 
 
-	std::vector<Node>& GetNodes() { return nodes; }
+	std::vector<Node>& GetNodes()
+	{
+		return nodes;
+	}
 
 	Node& GetNodes(std::string nodeName);
 
 	// ルートノード取得
-	Node* GetRootNode() { return nodes.data(); }
+	Node* GetRootNode()
+	{
+		return nodes.data();
+	}
 
 	// ノードインデックス取得
 	int GetNodeIndex(const char* name) const;
@@ -323,6 +357,7 @@ public:
 			* XMMatrixRotationQuaternion(rotation)
 			* XMMatrixTranslationFromVector(translation);
 	}
+
 	// 既存のモデルデータをすべて解放する
 	void Clear() {
 		materials.clear();
@@ -350,46 +385,93 @@ public:
 	void ShowNodeDetailsUI(const Node* node);
 
     // ロード画面の実行時上書き。共有Materialや保存設定には反映しない。
-    void SetRuntimeSilhouette(bool enabled_, const DirectX::XMFLOAT4& color_) { runtimeSilhouette = enabled_; runtimeSilhouetteColor = color_; }
-    bool HasRuntimeSilhouette() const { return runtimeSilhouette; }
-    const DirectX::XMFLOAT4& GetRuntimeSilhouetteColor() const { return runtimeSilhouetteColor; }
-	bool HasOutlineColorOverride() const { return overrideOutlineColor; }
-	const DirectX::XMFLOAT4& GetOutlineColor() const { return outlineColor; }
-	ModelShaderID  GetShaderID() { return shaderId; };
-	void SetShaderID(ModelShaderID id_) { shaderId = id_; }
+    void SetRuntimeSilhouette(bool enabled_, const DirectX::XMFLOAT4& color_)
+	{
+		runtimeSilhouette = enabled_;
+		runtimeSilhouetteColor = color_;
+	}
+
+    bool HasRuntimeSilhouette() const
+	{
+		return runtimeSilhouette;
+	}
+
+    const DirectX::XMFLOAT4& GetRuntimeSilhouetteColor() const
+	{
+		return runtimeSilhouetteColor;
+	}
+
+	bool HasOutlineColorOverride() const
+	{
+		return overrideOutlineColor;
+	}
+
+	const DirectX::XMFLOAT4& GetOutlineColor() const
+	{
+		return outlineColor;
+	}
+
+	ModelShaderID  GetShaderID()
+	{
+		return shaderId;
+	};
+
+	void SetShaderID(ModelShaderID id_)
+	{
+		shaderId = id_;
+	}
 
 	void Serialize(nlohmann::json& j) const override;
 
 	void Deserialize(const nlohmann::json& j) override;
 
-	bool GetUsedNaviMeshSystemFlg() { return usedNaviMeshSystemFlg; }
+	bool GetUsedNaviMeshSystemFlg()
+	{
+		return usedNaviMeshSystemFlg;
+	}
 
 	void SetLocalScale(float scale_)
 	{
 		if (localScale == scale_ &&
 			localScaleXYZ.x == scale_ &&
 			localScaleXYZ.y == scale_ &&
-			localScaleXYZ.z == scale_) return;
+			localScaleXYZ.z == scale_)
+		{
+			return;
+		}
 		localScale = scale_;
 		localScaleXYZ = { scale_, scale_, scale_ };
 		MarkTransformDirty();
 	}
+
 	void SetLocalScale(const DirectX::XMFLOAT3& scale_)
 	{
 		if (localScaleXYZ.x == scale_.x &&
 			localScaleXYZ.y == scale_.y &&
-			localScaleXYZ.z == scale_.z) return;
+			localScaleXYZ.z == scale_.z)
+		{
+			return;
+		}
 		localScaleXYZ = scale_;
 		localScale = scale_.x;
 		MarkTransformDirty();
 	}
-	bool IsStaticModel() const { return isStaticModel; }
+
+	bool IsStaticModel() const
+	{
+		return isStaticModel;
+	}
+
 	void SetStaticModel(bool isStaticModel_)
 	{
-		if (isStaticModel == isStaticModel_) return;
+		if (isStaticModel == isStaticModel_)
+		{
+			return;
+		}
 		isStaticModel = isStaticModel_;
 		MarkTransformDirty();
 	}
+
 	void SetTransformUpdateDrivenExternally(bool drivenExternally_)
 	{
 		transformUpdateDrivenExternally = drivenExternally_;
@@ -397,9 +479,22 @@ public:
 
 	void ShowMeshDetailsUI();
 	void ShowNodeTransformEditor();
-	float GetLocalScale() {return localScale;}
-	const DirectX::XMFLOAT3& GetLocalScaleXYZ() const { return localScaleXYZ; }
-	DirectX::SimpleMath::Quaternion GetRootRotationOffset() { return _RootRotationOffset; }
+
+	float GetLocalScale()
+	{
+		return localScale;
+	}
+
+	const DirectX::XMFLOAT3& GetLocalScaleXYZ() const
+	{
+		return localScaleXYZ;
+	}
+
+	DirectX::SimpleMath::Quaternion GetRootRotationOffset()
+	{
+		return _RootRotationOffset;
+	}
+
 private:
 	// シリアライズ
 	void Serialize(const char* filename);

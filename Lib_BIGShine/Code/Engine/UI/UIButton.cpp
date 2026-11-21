@@ -28,7 +28,10 @@ void UIButton::Update(float deltaTime)
         onClickCallback = ActionRegistry::Instance().GetAction(selectedActionName);
     }
 
-    if (!sprite || !sprite->IsVisible()) return;
+    if (!sprite || !sprite->IsVisible())
+    {
+        return;
+    }
 
     bool currentlyHovered = IsMouseOver();
 
@@ -70,6 +73,7 @@ void UIButton::Update(float deltaTime)
         }
     }
 }
+
 void UIButton::Gui()
 {
     auto& reg = ActionRegistry::Instance();
@@ -106,7 +110,10 @@ void UIButton::Gui()
         ImGui::EndCombo();
     }
 
-    if (!canSelectAction) ImGui::PopStyleColor();
+    if (!canSelectAction)
+    {
+        ImGui::PopStyleColor();
+    }
 
     // 3. テスト実行ボタン
     bool isValid = reg.HasAction(selectedActionName);
@@ -132,7 +139,10 @@ void UIButton::Gui()
 
 bool UIButton::IsMouseOver() {
     auto sprite = spriteRenderer.lock();
-    if (!sprite) return false;
+    if (!sprite)
+    {
+        return false;
+    }
 
     // マウスのスクリーン座標
     DirectX::XMFLOAT2 mousePos = MouseInput::Instance().GetScreenPos();

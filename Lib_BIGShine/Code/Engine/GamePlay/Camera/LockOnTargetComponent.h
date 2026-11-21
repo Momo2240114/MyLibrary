@@ -20,11 +20,25 @@ public:
     DirectX::XMFLOAT3 GetFocusPosition() const;
     // 攻撃/HPなどCombat情報を持つOwnerを返す。
     std::shared_ptr<GameObject> GetCombatOwner() const;
-    bool IsLockOnEnabled() const { return lockOnEnabled; }
+
+    bool IsLockOnEnabled() const
+    {
+        return lockOnEnabled;
+    }
+
     // 生存・戦闘許可・削除予約・物理の状態を合わせて候補資格を判定する。
     bool IsAvailable() const;
-    bool IsDefaultTarget() const { return defaultTarget; }
-    float GetPriority() const { return priority; }
+
+    bool IsDefaultTarget() const
+    {
+        return defaultTarget;
+    }
+
+    float GetPriority() const
+    {
+        return priority;
+    }
+
     void Gui() override;
     void Serialize(nlohmann::json& json_) const override;
     void Deserialize(const nlohmann::json& json_) override;

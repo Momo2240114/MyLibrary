@@ -76,22 +76,34 @@ ModelMaterial::TextureChannel ModelMaterialComponent::ResolveChannel(
 const ModelMaterial* ModelMaterialComponent::FindTextureOverride(
     int materialIndex_, ModelMaterial::TextureSlot slot_, int meshIndex_) const
 {
-    if (!IsEnabled()) return nullptr;
+    if (!IsEnabled())
+    {
+        return nullptr;
+    }
     // パーツで未設定またはロード失敗のスロットは、既存の共通設定へ引き継ぐ。
     const auto meshMaterial_ = meshMaterials.find(meshIndex_);
     if (meshMaterial_ != meshMaterials.end())
     {
-        if (meshMaterial_->second.GetTexture(slot_)) return &meshMaterial_->second;
+        if (meshMaterial_->second.GetTexture(slot_))
+        {
+            return &meshMaterial_->second;
+        }
     }
     const auto material_ = materials.find(materialIndex_);
     if (material_ != materials.end())
     {
-        if (material_->second.GetTexture(slot_)) return &material_->second;
+        if (material_->second.GetTexture(slot_))
+        {
+            return &material_->second;
+        }
     }
     const auto fallback_ = materials.find(-1);
     if (fallback_ != materials.end())
     {
-        if (fallback_->second.GetTexture(slot_)) return &fallback_->second;
+        if (fallback_->second.GetTexture(slot_))
+        {
+            return &fallback_->second;
+        }
     }
     return nullptr;
 }
@@ -109,35 +121,53 @@ void ModelMaterialComponent::Gui()
     {
         std::string label_ = "Mesh " + std::to_string(meshIndex_);
         if (!model_ || meshIndex_ < 0 || meshIndex_ >= static_cast<int>(model_->GetMeshes().size()))
+        {
             return label_ + ": Saved Override";
+        }
         const auto& mesh_ = model_->GetMeshes()[meshIndex_];
         const auto& nodes_ = model_->GetNodes();
         if (mesh_.nodeIndex >= 0 && mesh_.nodeIndex < static_cast<int>(nodes_.size()))
+        {
             label_ += ": " + nodes_[mesh_.nodeIndex].name;
+        }
         label_ += " (Material " + std::to_string(mesh_.materialIndex);
         const auto& modelMaterials_ = model_->GetMaterials();
         if (mesh_.materialIndex >= 0 && mesh_.materialIndex < static_cast<int>(modelMaterials_.size()))
+        {
             label_ += ": " + modelMaterials_[mesh_.materialIndex].name;
+        }
         return label_ + ")";
     };
     const std::string partPreview_ = selectedMeshIndex < 0 ? "Material / All Parts" : getPartLabel_(selectedMeshIndex);
     if (ImGui::BeginCombo("Target Part", partPreview_.c_str()))
     {
-        if (ImGui::Selectable("Material / All Parts", selectedMeshIndex == -1)) selectedMeshIndex = -1;
+        if (ImGui::Selectable("Material / All Parts", selectedMeshIndex == -1))
+        {
+            selectedMeshIndex = -1;
+        }
         if (model_)
         {
             for (int index_ = 0; index_ < static_cast<int>(model_->GetMeshes().size()); ++index_)
             {
                 const std::string label_ = getPartLabel_(index_);
-                if (ImGui::Selectable(label_.c_str(), selectedMeshIndex == index_)) selectedMeshIndex = index_;
+                if (ImGui::Selectable(label_.c_str(), selectedMeshIndex == index_))
+                {
+                    selectedMeshIndex = index_;
+                }
             }
         }
         // 非同期ロード前でも保存済みのパーツ設定を編集できるようにする。
         for (const auto& entry_ : meshMaterials)
         {
-            if (model_ && entry_.first < static_cast<int>(model_->GetMeshes().size())) continue;
+            if (model_ && entry_.first < static_cast<int>(model_->GetMeshes().size()))
+            {
+                continue;
+            }
             const std::string label_ = getPartLabel_(entry_.first);
-            if (ImGui::Selectable(label_.c_str(), selectedMeshIndex == entry_.first)) selectedMeshIndex = entry_.first;
+            if (ImGui::Selectable(label_.c_str(), selectedMeshIndex == entry_.first))
+            {
+                selectedMeshIndex = entry_.first;
+            }
         }
         ImGui::EndCombo();
     }
@@ -145,28 +175,43 @@ void ModelMaterialComponent::Gui()
     std::string preview_ = selectedMaterialIndex < 0 ? "All Materials" : std::to_string(selectedMaterialIndex);
     if (ImGui::BeginCombo("Target Material", preview_.c_str()))
     {
-        if (ImGui::Selectable("All Materials", selectedMaterialIndex == -1)) selectedMaterialIndex = -1;
+        if (ImGui::Selectable("All Materials", selectedMaterialIndex == -1))
+        {
+            selectedMaterialIndex = -1;
+        }
         if (model_)
         {
             const auto& modelMaterials_ = model_->GetMaterials();
             for (int index_ = 0; index_ < static_cast<int>(modelMaterials_.size()); ++index_)
             {
                 const std::string label_ = std::to_string(index_) + ": " + modelMaterials_[index_].name;
-                if (ImGui::Selectable(label_.c_str(), selectedMaterialIndex == index_)) selectedMaterialIndex = index_;
+                if (ImGui::Selectable(label_.c_str(), selectedMaterialIndex == index_))
+                {
+                    selectedMaterialIndex = index_;
+                }
             }
         }
         // モデルが未ロードでも、保存済みの個別設定を編集できるようにする。
         for (const auto& entry_ : materials)
         {
             if (entry_.first < 0 ||
-                (model_ && entry_.first < static_cast<int>(model_->GetMaterials().size()))) continue;
+                (model_ && entry_.first < static_cast<int>(model_->GetMaterials().size())))
+            {
+                continue;
+            }
             const std::string label_ = std::to_string(entry_.first) + ": Saved Override";
-            if (ImGui::Selectable(label_.c_str(), selectedMaterialIndex == entry_.first)) selectedMaterialIndex = entry_.first;
+            if (ImGui::Selectable(label_.c_str(), selectedMaterialIndex == entry_.first))
+            {
+                selectedMaterialIndex = entry_.first;
+            }
         }
         ImGui::EndCombo();
     }
     ImGui::EndDisabled();
-    if (!model_ || !model_->IsModelReady()) ImGui::TextDisabled("Owner model is not ready.");
+    if (!model_ || !model_->IsModelReady())
+    {
+        ImGui::TextDisabled("Owner model is not ready.");
+    }
 
     ModelMaterial& material_ = selectedMeshIndex >= 0
         ? GetMeshMaterial(selectedMeshIndex) : GetMaterial(selectedMaterialIndex);
@@ -179,7 +224,9 @@ void ModelMaterialComponent::Gui()
     {
         int channel_ = static_cast<int>(material_.GetChannel(value_));
         if (ImGui::Combo(label_, &channel_, "R\0G\0B\0A\0"))
+        {
             material_.SetChannel(value_, static_cast<ModelMaterial::TextureChannel>(channel_));
+        }
     };
     for (std::size_t index_ = 0; index_ < ModelMaterial::TEXTURE_SLOT_COUNT; ++index_)
     {
@@ -196,25 +243,44 @@ void ModelMaterialComponent::Gui()
             drawChannel_("Packed Roughness Channel", ModelMaterial::MaterialValue::PACKED_ROUGHNESS);
         }
         else if (slot_ == ModelMaterial::TextureSlot::METALLIC)
+        {
             drawChannel_("Metallic Channel", ModelMaterial::MaterialValue::METALLIC);
+        }
         else if (slot_ == ModelMaterial::TextureSlot::ROUGHNESS)
+        {
             drawChannel_("Roughness Channel", ModelMaterial::MaterialValue::ROUGHNESS);
+        }
         if (material_.HasTextureFailure(slot_))
         {
             ImGui::TextDisabled("Texture load failed. Using fallback texture.");
         }
     }
-    if (ImGui::Button("Reload Textures")) material_.ReloadTextures();
+    if (ImGui::Button("Reload Textures"))
+    {
+        material_.ReloadTextures();
+    }
     ImGui::SameLine();
     if (ImGui::Button("Clear Material Override"))
     {
-        if (selectedMeshIndex >= 0) RemoveMeshMaterial(selectedMeshIndex);
-        else RemoveMaterial(selectedMaterialIndex);
+        if (selectedMeshIndex >= 0)
+        {
+            RemoveMeshMaterial(selectedMeshIndex);
+        }
+        else
+        {
+            RemoveMaterial(selectedMaterialIndex);
+        }
     }
     if (ImGui::Button("Reload All Overrides"))
     {
-        for (auto& entry_ : materials) entry_.second.ReloadTextures();
-        for (auto& entry_ : meshMaterials) entry_.second.ReloadTextures();
+        for (auto& entry_ : materials)
+        {
+            entry_.second.ReloadTextures();
+        }
+        for (auto& entry_ : meshMaterials)
+        {
+            entry_.second.ReloadTextures();
+        }
     }
     ImGui::SameLine();
     if (ImGui::Button("Clear All Overrides"))
@@ -257,10 +323,16 @@ void ModelMaterialComponent::Deserialize(const nlohmann::json& json_)
     {
         for (const auto& materialJson_ : json_["Materials"])
         {
-            if (!materialJson_.is_object()) continue;
+            if (!materialJson_.is_object())
+            {
+                continue;
+            }
             const int materialIndex_ = materialJson_.value("MaterialIndex", -1);
             if (materialIndex_ < -1 || !materialJson_.contains("Textures") ||
-                !materialJson_["Textures"].is_object()) continue;
+                !materialJson_["Textures"].is_object())
+            {
+                continue;
+            }
             GetMaterial(materialIndex_).Deserialize(materialJson_["Textures"]);
         }
     }
@@ -269,10 +341,16 @@ void ModelMaterialComponent::Deserialize(const nlohmann::json& json_)
     {
         for (const auto& materialJson_ : json_["MeshMaterials"])
         {
-            if (!materialJson_.is_object()) continue;
+            if (!materialJson_.is_object())
+            {
+                continue;
+            }
             const int meshIndex_ = materialJson_.value("MeshIndex", -1);
             if (meshIndex_ < 0 || !materialJson_.contains("Textures") ||
-                !materialJson_["Textures"].is_object()) continue;
+                !materialJson_["Textures"].is_object())
+            {
+                continue;
+            }
             GetMeshMaterial(meshIndex_).Deserialize(materialJson_["Textures"]);
         }
     }

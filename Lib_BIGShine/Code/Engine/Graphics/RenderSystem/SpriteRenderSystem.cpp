@@ -71,7 +71,8 @@ void SpriteRenderSystem::Finalize()
     vertexBuffer.Reset();
     indexBuffer.Reset();
     constantBuffer.Reset();
-    uiEffectShader.Reset(); uiEffectBuffer.Reset();
+    uiEffectShader.Reset();
+    uiEffectBuffer.Reset();
     samplerState.Reset();
     linearSamplerState.Reset();
     for (auto& shader_ : shaders)
@@ -111,7 +112,10 @@ void SpriteRenderSystem::Initialize(ID3D11Device* device_, ID3D11DeviceContext* 
     // 新規CSOが未生成でも、従来のSprite描画へ安全に戻す。
     std::ifstream effectFile_("Data/Shader/UIVisualEffectPS.cso",std::ios::binary);
     const std::vector<char> effectBytes_{std::istreambuf_iterator<char>(effectFile_),std::istreambuf_iterator<char>()};
-    if (!effectBytes_.empty()) device_->CreatePixelShader(effectBytes_.data(),effectBytes_.size(),nullptr,uiEffectShader.GetAddressOf());
+    if (!effectBytes_.empty())
+    {
+        device_->CreatePixelShader(effectBytes_.data(),effectBytes_.size(),nullptr,uiEffectShader.GetAddressOf());
+    }
     static_assert(sizeof(UIEffectConstants) % 16 == 0);
     cbd_.ByteWidth = sizeof(UIEffectConstants);
     device_->CreateBuffer(&cbd_,nullptr,uiEffectBuffer.GetAddressOf());
@@ -213,11 +217,23 @@ void SpriteRenderSystem::SortDrawList()
         drawList.end(),
         [](const SpriteRenderCommand& left_, const SpriteRenderCommand& right_)
         {
-            if (left_.boardLayer != right_.boardLayer) return left_.boardLayer < right_.boardLayer;
-            if (left_.boardZOrder != right_.boardZOrder) return left_.boardZOrder < right_.boardZOrder;
-            if (left_.widgetZOrder != right_.widgetZOrder) return left_.widgetZOrder < right_.widgetZOrder;
-            if (left_.hierarchyOrder != right_.hierarchyOrder) return left_.hierarchyOrder < right_.hierarchyOrder;
-            return left_.submitOrder < right_.submitOrder;
+            if (left_.boardLayer != right_.boardLayer)
+        {
+            return left_.boardLayer < right_.boardLayer;
+        }
+        if (left_.boardZOrder != right_.boardZOrder)
+        {
+            return left_.boardZOrder < right_.boardZOrder;
+        }
+        if (left_.widgetZOrder != right_.widgetZOrder)
+        {
+            return left_.widgetZOrder < right_.widgetZOrder;
+        }
+        if (left_.hierarchyOrder != right_.hierarchyOrder)
+        {
+            return left_.hierarchyOrder < right_.hierarchyOrder;
+        }
+        return left_.submitOrder < right_.submitOrder;
         });
 }
 
@@ -247,10 +263,16 @@ void SpriteRenderSystem::BuildLegacySpriteVertices(
     BS_PROFILE_SCOPE("SpriteRenderSystem::BuildLegacySpriteVertices");
 
     auto sprite_ = renderCommand_.sprite;
-    if (!sprite_) return;
+    if (!sprite_)
+    {
+        return;
+    }
 
     auto transform_ = sprite_->GetTransform();
-    if (!transform_) return;
+    if (!transform_)
+    {
+        return;
+    }
 
     const DirectX::XMFLOAT3 transformPosition_ = transform_->GetWorldPosition();
     const DirectX::XMFLOAT2 drawSize_ = sprite_->GetSize();
@@ -330,7 +352,10 @@ void SpriteRenderSystem::ApplyWidgetLayout(
 {
     BS_PROFILE_SCOPE("SpriteRenderSystem::ApplyWidgetLayout");
 
-    if (!renderCommand_.widget || !renderCommand_.sprite) return;
+    if (!renderCommand_.widget || !renderCommand_.sprite)
+    {
+        return;
+    }
 
     // 親WidgetのLayoutが必要なため、対象Widgetまでの親階層を先に再計算する。
     CalculateWidgetLayoutRecursive(renderCommand_.widget, renderCommand_.widgetBoard, screenSize_, 0);
@@ -378,7 +403,10 @@ void SpriteRenderSystem::CalculateWidgetLayoutRecursive(
 {
     BS_PROFILE_SCOPE("SpriteRenderSystem::CalculateWidgetLayoutRecursive");
 
-    if (!widget_ || depth_ > 32) return;
+    if (!widget_ || depth_ > 32)
+    {
+        return;
+    }
 
     // 保存された親IDだけがある場合は、描画直前に実体への参照を解決する。
     if (!widget_->GetParentWidgetId().empty() && !widget_->GetParentWidget())
@@ -403,7 +431,10 @@ void SpriteRenderSystem::ApplyVertexModification(
 {
     BS_PROFILE_SCOPE("SpriteRenderSystem::ApplyVertexModification");
 
-    if (!renderCommand_.vertexModifier) return;
+    if (!renderCommand_.vertexModifier)
+    {
+        return;
+    }
 
     // 左下、左上、右上、右下の順をUIVertexModifier側の頂点指定へ対応させる。
     const std::array<UI_VERTEX_INDEX, 4> vertexIndexMap_ =
@@ -435,7 +466,10 @@ void SpriteRenderSystem::RenderSprite(
     BS_PROFILE_SCOPE("SpriteRenderSystem::RenderSprite");
 
     auto sprite_ = renderCommand_.sprite;
-    if (!sprite_ || !sprite_->IsVisible()) return;
+    if (!sprite_ || !sprite_->IsVisible())
+    {
+        return;
+    }
     // BoardやWidgetが非表示/無効の場合は、その配下のSpriteだけ描画を止める。
     if (renderCommand_.widgetBoard &&
         (!renderCommand_.widgetBoard->IsVisible() || !renderCommand_.widgetBoard->IsEnabled()))
@@ -457,7 +491,11 @@ void SpriteRenderSystem::RenderSprite(
     {
         const auto& sample_ = motion_->GetSample();
         DirectX::XMFLOAT2 center_{0,0};
-        for (const auto& vertex_ : vertices_) { center_.x += vertex_.pos.x * 0.25f; center_.y += vertex_.pos.y * 0.25f; }
+        for (const auto& vertex_ : vertices_)
+        {
+            center_.x += vertex_.pos.x * 0.25f;
+            center_.y += vertex_.pos.y * 0.25f;
+        }
         for (auto& vertex_ : vertices_)
         {
             // Widgetの移動・拡縮はLayout側で適用済み。旧式Spriteだけ頂点を補正する。
@@ -473,8 +511,14 @@ void SpriteRenderSystem::RenderSprite(
         }
     }
     auto shaderIterator_ = shaders.find(renderCommand_.shaderID);
-    if (shaderIterator_ == shaders.end()) shaderIterator_ = shaders.find(SpriteShaderID::Default);
-    if (shaderIterator_ == shaders.end()) return;
+    if (shaderIterator_ == shaders.end())
+    {
+        shaderIterator_ = shaders.find(SpriteShaderID::Default);
+    }
+    if (shaderIterator_ == shaders.end())
+    {
+        return;
+    }
     auto& shader_ = shaderIterator_->second;
     context_->IASetInputLayout(shader_.inputLayout.Get());
     context_->VSSetShader(shader_.vertexShader.Get(),nullptr,0);
@@ -484,7 +528,10 @@ void SpriteRenderSystem::RenderSprite(
     const auto draw_ = [&](const std::array<SpriteVertex,4>& quad_,ID3D11ShaderResourceView* texture_,ID3D11PixelShader* pixelShader_)
     {
         D3D11_MAPPED_SUBRESOURCE mapped_{};
-        if (FAILED(context_->Map(vertexBuffer.Get(),0,D3D11_MAP_WRITE_DISCARD,0,&mapped_))) return;
+        if (FAILED(context_->Map(vertexBuffer.Get(),0,D3D11_MAP_WRITE_DISCARD,0,&mapped_)))
+        {
+            return;
+        }
         std::memcpy(mapped_.pData,quad_.data(),sizeof(SpriteVertex)*quad_.size());
         context_->Unmap(vertexBuffer.Get(),0);
         context_->PSSetShaderResources(0,1,&texture_);
@@ -503,7 +550,11 @@ void SpriteRenderSystem::RenderSprite(
         {
             std::array<SpriteVertex,4> ghost_{};
             float centerX_ = 0, centerY_ = 0;
-            for (const auto& point_ : trail_.positions) { centerX_ += point_.x*0.25f; centerY_ += point_.y*0.25f; }
+            for (const auto& point_ : trail_.positions)
+            {
+                centerX_ += point_.x*0.25f;
+                centerY_ += point_.y*0.25f;
+            }
             const float age_ = std::clamp((effect_->GetTrailTime()-trail_.time)/settings_.trailLifetime,0.0f,1.0f);
             for (std::size_t index_ = 0; index_ < ghost_.size(); ++index_)
             {
@@ -518,16 +569,25 @@ void SpriteRenderSystem::RenderSprite(
         {
             const float strength_ = effect_->GetStrength();
             UIEffectConstants cb_{};
-            cb_.glowColor = settings_.glowColor; cb_.glowColor.w *= settings_.glowIntensity*strength_;
-            cb_.outlineColor = settings_.outlineColor; cb_.outlineColor.w *= strength_;
-            cb_.shadowColor = settings_.shadowColor; cb_.shadowColor.w *= settings_.shadowOpacity*strength_;
-            cb_.sweepColor = settings_.sweepColor; cb_.sweepColor.w *= settings_.sweepIntensity*strength_;
-            cb_.gradientTop = settings_.gradientTop; cb_.gradientBottom = settings_.gradientBottom;
+            cb_.glowColor = settings_.glowColor;
+            cb_.glowColor.w *= settings_.glowIntensity*strength_;
+            cb_.outlineColor = settings_.outlineColor;
+            cb_.outlineColor.w *= strength_;
+            cb_.shadowColor = settings_.shadowColor;
+            cb_.shadowColor.w *= settings_.shadowOpacity*strength_;
+            cb_.sweepColor = settings_.sweepColor;
+            cb_.sweepColor.w *= settings_.sweepIntensity*strength_;
+            cb_.gradientTop = settings_.gradientTop;
+            cb_.gradientBottom = settings_.gradientBottom;
             cb_.tone = {settings_.grayscale*strength_,settings_.sepia*strength_,settings_.invert*strength_,std::lerp(1.0f,settings_.pixelSize,strength_)};
-            cb_.style = {settings_.glowRadius,settings_.outlineWidth,settings_.blurRadius*strength_,settings_.dissolve*strength_};
+            const float dissolve_ = (std::max)(settings_.dissolve * strength_, effect_->GetRuntimeDissolve());
+            cb_.style = {settings_.glowRadius,settings_.outlineWidth,settings_.blurRadius*strength_,dissolve_};
             cb_.animation = {effect_->GetTime(),settings_.pulseAmount*strength_,settings_.pulseSpeed,settings_.sweepSpeed};
             cb_.sweep = {DirectX::XMConvertToRadians(settings_.sweepAngle),settings_.sweepWidth,settings_.edgeWidth,settings_.noiseScale};
-            const auto length_ = [&](std::size_t first_,std::size_t second_) { return (std::max)(1.0f,std::hypot((vertices_[first_].pos.x-vertices_[second_].pos.x)*screenSize_.x*0.5f,(vertices_[first_].pos.y-vertices_[second_].pos.y)*screenSize_.y*0.5f)); };
+            const auto length_ = [&](std::size_t first_,std::size_t second_)
+            {
+                return (std::max)(1.0f,std::hypot((vertices_[first_].pos.x-vertices_[second_].pos.x)*screenSize_.x*0.5f,(vertices_[first_].pos.y-vertices_[second_].pos.y)*screenSize_.y*0.5f));
+            };
             const float width_ = length_(1,2), height_ = length_(1,0);
             const float u0_ = vertices_[1].texcoord.x, v0_ = vertices_[1].texcoord.y;
             const float u1_ = vertices_[3].texcoord.x, v1_ = vertices_[3].texcoord.y;
@@ -535,8 +595,11 @@ void SpriteRenderSystem::RenderSprite(
             cb_.shadow = {settings_.shadowOffset.x,settings_.shadowOffset.y,0,0};
             cb_.maskUV = {settings_.maskScale.x,settings_.maskScale.y,settings_.maskOffset.x,settings_.maskOffset.y};
             cb_.maskOptions = {effect_->GetMaskTexture() ? 1.0f : 0.0f,settings_.maskInvert ? 1.0f : 0.0f,0,0};
-            auto* mask_ = effect_->GetMaskTexture(); context_->PSSetShaderResources(1,1,&mask_);
-            cb_.uvRect = {u0_,v0_,u1_,v1_}; cb_.detail = {settings_.uvScroll.x,settings_.uvScroll.y,0,0}; cb_.burnColor = settings_.burnColor;
+            auto* mask_ = effect_->GetMaskTexture();
+            context_->PSSetShaderResources(1,1,&mask_);
+            cb_.uvRect = {u0_,v0_,u1_,v1_};
+            cb_.detail = {settings_.uvScroll.x,settings_.uvScroll.y,0,0};
+            cb_.burnColor = settings_.burnColor;
             // 光と影の余白を確保し、字形や画像の矩形境界で切れないようにする。
             const float padding_ = (std::max)({settings_.glowIntensity > 0 ? settings_.glowRadius : 0,settings_.outlineWidth,
                 settings_.shadowOpacity > 0 ? (std::max)(std::abs(settings_.shadowOffset.x),std::abs(settings_.shadowOffset.y))+settings_.shadowSoftness : 0,settings_.blurRadius})+1;
@@ -553,12 +616,24 @@ void SpriteRenderSystem::RenderSprite(
             context_->PSSetConstantBuffers(1,1,uiEffectBuffer.GetAddressOf());
             draw_(vertices_,sprite_->GetTexture().Get(),uiEffectShader.Get());
         }
-        else draw_(vertices_,sprite_->GetTexture().Get(),shader_.pixelShader.Get());
+        else
+        {
+            draw_(vertices_,sprite_->GetTexture().Get(),shader_.pixelShader.Get());
+        }
         UIEffectTrailSample sample_;
-        for (std::size_t index_ = 0; index_ < vertices_.size(); ++index_) { sample_.positions[index_] = baseVertices_[index_].pos; sample_.texcoords[index_] = baseVertices_[index_].texcoord; sample_.colors[index_] = baseVertices_[index_].color; }
-        sample_.texture = sprite_->GetTexture(); effect_->CaptureTrail(std::move(sample_),screenSize_);
+        for (std::size_t index_ = 0; index_ < vertices_.size(); ++index_)
+        {
+            sample_.positions[index_] = baseVertices_[index_].pos;
+            sample_.texcoords[index_] = baseVertices_[index_].texcoord;
+            sample_.colors[index_] = baseVertices_[index_].color;
+        }
+        sample_.texture = sprite_->GetTexture();
+        effect_->CaptureTrail(std::move(sample_),screenSize_);
     }
-    else draw_(vertices_,sprite_->GetTexture().Get(),shader_.pixelShader.Get());
+    else
+    {
+        draw_(vertices_,sprite_->GetTexture().Get(),shader_.pixelShader.Get());
+    }
 }
 
 void SpriteRenderSystem::CreateShader(

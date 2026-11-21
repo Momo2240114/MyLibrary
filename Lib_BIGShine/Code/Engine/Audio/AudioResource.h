@@ -13,13 +13,22 @@ public:
 	~AudioResource();
 
 	// データ取得
-	UINT8* GetAudioData() { return data.data(); }
+	UINT8* GetAudioData()
+	{
+		return data.data();
+	}
 
 	// データサイズ取得
-	UINT32 GetAudioBytes() const { return static_cast<UINT32>(data.size()); }
+	UINT32 GetAudioBytes() const
+	{
+		return static_cast<UINT32>(data.size());
+	}
 
 	// WAVEフォーマット取得
-	const WAVEFORMATEX& GetWaveFormat() const { return wfx; }
+	const WAVEFORMATEX& GetWaveFormat() const
+	{
+		return wfx;
+	}
 
 private:
 	// RIFFヘッダ

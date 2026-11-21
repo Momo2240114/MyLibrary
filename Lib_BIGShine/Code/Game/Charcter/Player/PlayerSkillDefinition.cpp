@@ -8,10 +8,22 @@ namespace
     // Player固有のAction番号は変更せず、共通データの任意項目から解決する。
     PLAYER_ACTION ParseSkillAction(const std::string& name_)
     {
-        if (name_ == "SkillA") return PLAYER_ACTION::SKILL_A;
-        if (name_ == "SkillB") return PLAYER_ACTION::SKILL_B;
-        if (name_ == "SkillC") return PLAYER_ACTION::SKILL_C;
-        if (name_ == "SkillD") return PLAYER_ACTION::SKILL_D;
+        if (name_ == "SkillA")
+        {
+            return PLAYER_ACTION::SKILL_A;
+        }
+        if (name_ == "SkillB")
+        {
+            return PLAYER_ACTION::SKILL_B;
+        }
+        if (name_ == "SkillC")
+        {
+            return PLAYER_ACTION::SKILL_C;
+        }
+        if (name_ == "SkillD")
+        {
+            return PLAYER_ACTION::SKILL_D;
+        }
         return PLAYER_ACTION::NONE;
     }
 }
@@ -24,15 +36,24 @@ bool LoadPlayerSkillDefinitions(const std::string& path_,
     std::vector<SkillDefinition> commonDefinitions_;
     nlohmann::json document_;
     std::string error_;
-    if (!LoadSkillDefinitions(path_, commonDefinitions_, document_, error_)) return false;
+    if (!LoadSkillDefinitions(path_, commonDefinitions_, document_, error_))
+    {
+        return false;
+    }
     try
     {
-        if (!document_.contains("Inputs") || !document_["Inputs"].is_array()) return false;
+        if (!document_.contains("Inputs") || !document_["Inputs"].is_array())
+        {
+            return false;
+        }
         std::vector<PlayerSkillInputBinding> loadedInputs_;
         std::vector<PlayerSkillDefinition> loadedDefinitions_;
         for (const auto& inputJson_ : document_["Inputs"])
         {
-            if (inputJson_.contains("Slot") && !inputJson_.at("Slot").is_number_integer()) return false;
+            if (inputJson_.contains("Slot") && !inputJson_.at("Slot").is_number_integer())
+            {
+                return false;
+            }
             PlayerSkillInputBinding input_;
             input_.slotIndex = inputJson_.contains("Slot") ? inputJson_.at("Slot").get<int>()
                 : PlayerSkillLoadout::GetSlotIndex(ParseSkillAction(inputJson_.at("Action").get<std::string>()));
@@ -40,7 +61,10 @@ bool LoadPlayerSkillDefinitions(const std::string& path_,
             input_.triggerAction = inputJson_.at("TriggerAction").get<std::string>();
             input_.priority = inputJson_.value("Priority", 100);
             if (input_.slotIndex < 0 || input_.slotIndex >= static_cast<int>(PlayerSkillLoadout::SLOT_COUNT) ||
-                input_.modifierAction.empty() || input_.triggerAction.empty()) return false;
+                input_.modifierAction.empty() || input_.triggerAction.empty())
+            {
+                return false;
+            }
             loadedInputs_.push_back(input_);
         }
         for (std::size_t index_ = 0; index_ < commonDefinitions_.size(); ++index_)
@@ -77,7 +101,12 @@ PLAYER_ACTION PlayerSkillLoadout::GetSlotAction(std::size_t slotIndex_)
 int PlayerSkillLoadout::GetSlotIndex(PLAYER_ACTION action_)
 {
     for (std::size_t slotIndex_ = 0; slotIndex_ < SLOT_COUNT; ++slotIndex_)
-        if (GetSlotAction(slotIndex_) == action_) return static_cast<int>(slotIndex_);
+    {
+        if (GetSlotAction(slotIndex_) == action_)
+        {
+            return static_cast<int>(slotIndex_);
+        }
+    }
     return -1;
 }
 
@@ -89,7 +118,10 @@ const std::string& PlayerSkillLoadout::GetSkillName(std::size_t slotIndex_) cons
 
 bool PlayerSkillLoadout::SetSkillName(std::size_t slotIndex_, const std::string& skillName_)
 {
-    if (slotIndex_ >= SLOT_COUNT) return false;
+    if (slotIndex_ >= SLOT_COUNT)
+    {
+        return false;
+    }
     skillNames[slotIndex_] = skillName_;
     return true;
 }
@@ -99,19 +131,30 @@ void PlayerSkillLoadout::Serialize(nlohmann::json& json_) const
 {
     json_ = nlohmann::json::object();
     for (std::size_t slotIndex_ = 0; slotIndex_ < SLOT_COUNT; ++slotIndex_)
+    {
         json_["Slot" + std::to_string(slotIndex_)] = skillNames[slotIndex_];
+    }
 }
 
 // 省略された枠は現在値を維持し、不正な型があれば装備全体の更新を取り消す。
 bool PlayerSkillLoadout::Deserialize(const nlohmann::json& json_)
 {
-    if (!json_.is_object()) return false;
+    if (!json_.is_object())
+    {
+        return false;
+    }
     auto loadedNames_ = skillNames;
     for (std::size_t slotIndex_ = 0; slotIndex_ < SLOT_COUNT; ++slotIndex_)
     {
         const std::string key_ = "Slot" + std::to_string(slotIndex_);
-        if (!json_.contains(key_)) continue;
-        if (!json_.at(key_).is_string()) return false;
+        if (!json_.contains(key_))
+        {
+            continue;
+        }
+        if (!json_.at(key_).is_string())
+        {
+            return false;
+        }
         loadedNames_[slotIndex_] = json_.at(key_).get<std::string>();
     }
     skillNames = std::move(loadedNames_);

@@ -28,7 +28,11 @@ VFXMaterialPreviewWindow::VFXMaterialPreviewWindow(GameObjectManager* manager_)
 void VFXMaterialPreviewWindow::Draw()
 {
     BS_PROFILE_SCOPE("VFXMaterialPreviewWindow::Draw");
-    if (!BeginEditorWindow()) { EndEditorWindow(); return; }
+    if (!BeginEditorWindow())
+    {
+        EndEditorWindow();
+        return;
+    }
 
     // Materialを選んで球体MeshVFXへ適用し、オフスクリーンで即プレビューする。
     EnsurePreviewObject();
@@ -51,11 +55,17 @@ void VFXMaterialPreviewWindow::Draw()
 void VFXMaterialPreviewWindow::EnsurePreviewObject()
 {
     BS_PROFILE_SCOPE("VFXMaterialPreviewWindow::EnsurePreviewObject");
-    if (isInitialized) return;
+    if (isInitialized)
+    {
+        return;
+    }
 
     // Scene内の実オブジェクトを使わず、プレビュー専用GameObjectとMeshVFXComponentを作る。
     ID3D11Device* device_ = GraphicsDeviceManager::Instance().GetDevice();
-    if (!device_) return;
+    if (!device_)
+    {
+        return;
+    }
 
     meshVFXRenderSystem.Initialize(device_);
 
@@ -165,11 +175,17 @@ void VFXMaterialPreviewWindow::RenderPreview(const ImVec2& previewSize_)
     auto& graphics_ = GraphicsDeviceManager::Instance();
     ID3D11Device* device_ = graphics_.GetDevice();
     ID3D11DeviceContext* context_ = graphics_.GetContext();
-    if (!device_ || !context_ || !previewMeshVFX || !previewObject) return;
+    if (!device_ || !context_ || !previewMeshVFX || !previewObject)
+    {
+        return;
+    }
 
     const int width_ = (std::max)(1, static_cast<int>(previewSize_.x));
     const int height_ = (std::max)(1, static_cast<int>(previewSize_.y));
-    if (!previewTarget.Resize(device_, width_, height_)) return;
+    if (!previewTarget.Resize(device_, width_, height_))
+    {
+        return;
+    }
 
     const float clearColor_[4] = { 0.025f, 0.028f, 0.032f, 1.0f };
     previewTarget.Begin(context_, clearColor_);
@@ -210,7 +226,10 @@ void VFXMaterialPreviewWindow::RenderPreview(const ImVec2& previewSize_)
 void VFXMaterialPreviewWindow::ApplyPreviewMaterial()
 {
     BS_PROFILE_SCOPE("VFXMaterialPreviewWindow::ApplyPreviewMaterial");
-    if (!previewMeshVFX) return;
+    if (!previewMeshVFX)
+    {
+        return;
+    }
 
     // Material変更時はプレビュー専用Assetを作り直し、Runtimeリソースへ即反映する。
     previewMeshVFX->SetAsset(CreatePreviewAsset());

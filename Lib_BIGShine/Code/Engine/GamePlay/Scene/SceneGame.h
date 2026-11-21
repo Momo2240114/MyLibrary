@@ -24,7 +24,12 @@ public:
 	void Render(float elapsedTime);
 
 	void DrawGUI();
-    bool IsEditorDestination() const override { return !startImmediately && !SceneManager::IsEditorPlaySessionActive(); }
+
+    bool IsEditorDestination() const override
+	{
+		return !startImmediately && !SceneManager::IsEditorPlaySessionActive();
+	}
+
     bool RequiresFreeCursor() const override;
 
 private:

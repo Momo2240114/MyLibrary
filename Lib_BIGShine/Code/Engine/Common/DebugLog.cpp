@@ -62,7 +62,10 @@ std::vector<LogMessage> DebugLog::GetMessages() const
 std::vector<LogMessage> DebugLog::GetMessagesRange(size_t startIndex_, size_t count_) const
 {
     std::lock_guard<std::mutex> lock_(mutex);
-    if (startIndex_ >= messages.size() || count_ == 0u) return {};
+    if (startIndex_ >= messages.size() || count_ == 0u)
+    {
+        return {};
+    }
 
     // DebugLogWindowの仮想リスト表示用に、必要な範囲だけコピーする。
     const size_t endIndex_ = (std::min)(messages.size(), startIndex_ + count_);
@@ -72,7 +75,10 @@ std::vector<LogMessage> DebugLog::GetMessagesRange(size_t startIndex_, size_t co
 std::vector<LogMessage> DebugLog::GetMessagesSince(double minElapsedSeconds_, size_t maxCount_) const
 {
     std::lock_guard<std::mutex> lock_(mutex);
-    if (messages.empty() || maxCount_ == 0u) return {};
+    if (messages.empty() || maxCount_ == 0u)
+    {
+        return {};
+    }
 
     size_t firstIndex_ = messages.size();
     size_t collectedCount_ = 0u;
@@ -80,13 +86,22 @@ std::vector<LogMessage> DebugLog::GetMessagesSince(double minElapsedSeconds_, si
     for (size_t index_ = messages.size(); index_ > 0u; --index_)
     {
         const LogMessage& message_ = messages[index_ - 1u];
-        if (message_.elapsedSeconds < minElapsedSeconds_) break;
+        if (message_.elapsedSeconds < minElapsedSeconds_)
+        {
+            break;
+        }
         firstIndex_ = index_ - 1u;
         ++collectedCount_;
-        if (collectedCount_ >= maxCount_) break;
+        if (collectedCount_ >= maxCount_)
+        {
+            break;
+        }
     }
 
-    if (firstIndex_ >= messages.size()) return {};
+    if (firstIndex_ >= messages.size())
+    {
+        return {};
+    }
 
     return std::vector<LogMessage>(messages.begin() + firstIndex_, messages.end());
 }
@@ -114,7 +129,10 @@ bool DebugLog::SaveText(const std::string& path_) const
     }
 
     std::ofstream file_(outputPath_, std::ios::out | std::ios::trunc);
-    if (!file_.is_open()) return false;
+    if (!file_.is_open())
+    {
+        return false;
+    }
 
     const std::vector<LogMessage> copy_ = GetMessages();
     for (const LogMessage& message_ : copy_)
@@ -139,7 +157,10 @@ bool DebugLog::SaveJson(const std::string& path_) const
     }
 
     std::ofstream file_(outputPath_, std::ios::out | std::ios::trunc);
-    if (!file_.is_open()) return false;
+    if (!file_.is_open())
+    {
+        return false;
+    }
 
     const std::vector<LogMessage> copy_ = GetMessages();
     // nlohmannを使わず、ログ専用の軽量JSONとして手書きで出力する。
@@ -158,7 +179,10 @@ bool DebugLog::SaveJson(const std::string& path_) const
         file_ << "      \"Line\": " << message_.line << ",\n";
         file_ << "      \"Text\": \"" << EscapeJsonString(message_.text) << "\"\n";
         file_ << "    }";
-        if (index_ + 1 < copy_.size()) file_ << ",";
+        if (index_ + 1 < copy_.size())
+        {
+            file_ << ",";
+        }
         file_ << "\n";
     }
     file_ << "  ]\n";
@@ -220,11 +244,16 @@ std::string DebugLog::EscapeJsonString(const std::string& text_)
     {
         switch (char_)
         {
-        case '\\': stream_ << "\\\\"; break;
-        case '"': stream_ << "\\\""; break;
-        case '\n': stream_ << "\\n"; break;
-        case '\r': stream_ << "\\r"; break;
-        case '\t': stream_ << "\\t"; break;
+        case '\\': stream_ << "\\\\";
+            break;
+        case '"': stream_ << "\\\"";
+            break;
+        case '\n': stream_ << "\\n";
+            break;
+        case '\r': stream_ << "\\r";
+            break;
+        case '\t': stream_ << "\\t";
+            break;
         default:
             stream_ << char_;
             break;

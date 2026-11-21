@@ -60,14 +60,35 @@ public:
     void StopRumble();
 
     bool SelectGamepad(SDL_JoystickID id_);
-    SDL_JoystickID GetGamepadId() const { return gamepad ? SDL_GetGamepadID(gamepad) : 0; }
-    bool SupportsRumble() const;
-    const std::string& GetRumbleStatus() const { return rumbleStatus; }
 
-    bool IsConnected() const { return connected; }
-    const std::string& GetName() const { return gamepadName; }
+    SDL_JoystickID GetGamepadId() const
+    {
+        return gamepad ? SDL_GetGamepadID(gamepad) : 0;
+    }
+
+    bool SupportsRumble() const;
+
+    const std::string& GetRumbleStatus() const
+    {
+        return rumbleStatus;
+    }
+
+    bool IsConnected() const
+    {
+        return connected;
+    }
+
+    const std::string& GetName() const
+    {
+        return gamepadName;
+    }
+
     // SDLの機種情報は表示形式の選択にだけ使用する。
-    bool IsPlayStation() const { return gamepadType == SDL_GAMEPAD_TYPE_PS3 || gamepadType == SDL_GAMEPAD_TYPE_PS4 || gamepadType == SDL_GAMEPAD_TYPE_PS5; }
+    bool IsPlayStation() const
+    {
+        return gamepadType == SDL_GAMEPAD_TYPE_PS3 || gamepadType == SDL_GAMEPAD_TYPE_PS4 || gamepadType == SDL_GAMEPAD_TYPE_PS5;
+    }
+
     // 取得済みの状態を比較し、ドリフトや保持されたボタンを新規操作として扱わない。
     bool HasMeaningfulInput() const;
 

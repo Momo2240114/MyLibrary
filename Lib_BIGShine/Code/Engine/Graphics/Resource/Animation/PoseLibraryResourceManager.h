@@ -22,7 +22,10 @@ public:
     void Clear()
     {
         for (auto& pair : m_resources) {
-            if (pair.second) pair.second->Clear();
+            if (pair.second)
+            {
+                pair.second->Clear();
+            }
         }
         m_resources.clear();
     }
@@ -33,7 +36,12 @@ public:
 
 private:
     PoseLibraryResourceManager() = default;
-    ~PoseLibraryResourceManager() { Clear(); }
+
+    ~PoseLibraryResourceManager()
+    {
+        Clear();
+    }
+
     PoseLibraryResourceManager(const PoseLibraryResourceManager&) = delete;
     PoseLibraryResourceManager& operator=(const PoseLibraryResourceManager&) = delete;
 

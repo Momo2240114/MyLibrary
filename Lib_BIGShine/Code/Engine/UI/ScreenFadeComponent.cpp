@@ -29,7 +29,10 @@ void ScreenFadeComponent::ApplyAlpha(float alpha_)
 {
     const auto owner_ = GetGameObject();
     const auto sprite_ = owner_ ? owner_->GetComponent<SpriteRenderer>() : nullptr;
-    if (!sprite_) return;
+    if (!sprite_)
+    {
+        return;
+    }
     auto color_ = sprite_->GetConfiguredColor();
     color_.w *= std::clamp(alpha_, 0.0f, 1.0f);
     sprite_->SetRuntimeColor(color_);
@@ -38,7 +41,10 @@ void ScreenFadeComponent::ApplyAlpha(float alpha_)
 
 bool ScreenFadeComponent::BeginFadeOut(const std::string& action_)
 {
-    if (fadingOut || (!action_.empty() && !ActionRegistry::Instance().HasAction(action_))) return false;
+    if (fadingOut || (!action_.empty() && !ActionRegistry::Instance().HasAction(action_)))
+    {
+        return false;
+    }
     fadingOut = true;
     elapsedTime = 0.0f;
     completionDispatched = false;
@@ -50,7 +56,10 @@ void ScreenFadeComponent::Update(float deltaTime_)
 {
     BS_PROFILE_SCOPE("ScreenFadeComponent::Update");
     if (GetManager().GetSceneRuntimeState() != SCENE_RUNTIME_STATE::RUNNING ||
-        GetManager().GetEditorPlayMode() != EditorPlayMode::PLAY) return;
+        GetManager().GetEditorPlayMode() != EditorPlayMode::PLAY)
+    {
+        return;
+    }
     elapsedTime += (std::max)(0.0f, deltaTime_);
     if (!fadingOut)
     {
@@ -75,7 +84,10 @@ void ScreenFadeComponent::Update(float deltaTime_)
     {
         // Actionから次Sceneが予約されても、同じ暗転で二度実行しない。
         completionDispatched = true;
-        if (!completionAction.empty()) ActionRegistry::Instance().Call(completionAction);
+        if (!completionAction.empty())
+        {
+            ActionRegistry::Instance().Call(completionAction);
+        }
     }
 }
 

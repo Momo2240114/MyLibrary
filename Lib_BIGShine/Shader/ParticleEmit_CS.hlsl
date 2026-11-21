@@ -28,7 +28,9 @@ void main(uint3 dispatchThreadID : SV_DispatchThreadID)
     p.parameter = emitData.parameter;
     p.parameter.z = max(emitData.parameter.y, 0.0001f);
     p.position = emitData.position;
+    p.colorRandomRates = emitData.colorRandomRates;
     p.rotation = emitData.rotation;
+    p.angularSpeed = emitData.angularSpeed;
     p.scale = emitData.scale;
     p.velocity = emitData.velocity;
     p.acceleration = emitData.acceleration;

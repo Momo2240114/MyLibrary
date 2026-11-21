@@ -26,7 +26,10 @@ void AIDirectorComponent::Update(float deltaTime_)
 {
     (void)deltaTime_;
 
-    if (!isRunning) return;
+    if (!isRunning)
+    {
+        return;
+    }
 
     UpdateRates();
     UpdatePolicy();
@@ -248,7 +251,10 @@ void AIDirectorComponent::NotifyPlayerDamaged(float damage_)
 GameModeManager* AIDirectorComponent::ResolveGameModeManager()
 {
     std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return nullptr;
+    if (!owner_)
+    {
+        return nullptr;
+    }
 
     return owner_->GetManager().GetGameModeManager();
 }
@@ -326,7 +332,10 @@ void AIDirectorComponent::UpdatePolicy()
 void AIDirectorComponent::ApplyPolicyToGameMode()
 {
     GameModeManager* gameModeManager_ = ResolveGameModeManager();
-    if (!gameModeManager_) return;
+    if (!gameModeManager_)
+    {
+        return;
+    }
 
     gameModeManager_->SetAIDirectorPreferDelayedAttack(policy.preferDelayedAttack);
     gameModeManager_->SetAIDirectorPreferFeintAttack(policy.preferFeintAttack);
@@ -342,7 +351,10 @@ void AIDirectorComponent::ApplyPolicyToGameMode()
 // 分母が0の場合は0を返し、統計がない状態でNaNや除算エラーを出さないようにする。
 float AIDirectorComponent::SafeRate(int value_, int total_) const
 {
-    if (total_ <= 0) return 0.0f;
+    if (total_ <= 0)
+    {
+        return 0.0f;
+    }
     return static_cast<float>(value_) / static_cast<float>(total_);
 }
 

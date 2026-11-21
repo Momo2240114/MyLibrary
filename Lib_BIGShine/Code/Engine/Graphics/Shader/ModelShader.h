@@ -9,8 +9,13 @@
 class ModelShader
 {
 public:
-	ModelShader() {}
-	virtual ~ModelShader() {}
+	ModelShader()
+	{
+	}
+
+	virtual ~ModelShader()
+	{
+	}
 
 	// シェーダーの名前を返す（派生クラスでの実装を強制）
 	virtual const std::string& GetName() const = 0;

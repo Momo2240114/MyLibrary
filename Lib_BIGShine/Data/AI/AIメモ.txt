@@ -1,0 +1,50 @@
+各アニメに置くもの
+
+PlainsDragon_BiteAttack
+- 攻撃判定ON
+- 攻撃判定OFF
+- DragonAI_NotifyActionEnd
+
+PlainsDragon_SpitFireBall
+- 口元VFX / FireBall生成
+- CameraShakeなど任意
+- DragonAI_NotifyActionEnd
+
+PlainsDragon_SpreadFire
+- Breath VFX ON
+- Breath HitBox ON
+- Breath HitBox OFF
+- Breath VFX OFF
+- DragonAI_NotifyActionEnd
+
+PlainsDragon_Turn90L_RM
+- TailSweepなら尻尾HitBox ON
+- TailSweepなら尻尾HitBox OFF
+- DragonAI_NotifyActionEnd
+
+PlainsDragon_TakeOff
+- 離陸VFX / 風圧など任意
+- DragonAI_NotifyActionEnd
+
+PlainsDragon_FlyStationarySpitFireBall
+- 空中FireBall生成
+- DragonAI_NotifyActionEnd
+
+PlainsDragon_FlyStationarySpreadFire
+- 空中Breath VFX/HitBox ON
+- 空中Breath VFX/HitBox OFF
+- DragonAI_NotifyActionEnd
+
+PlainsDragon_FlyStationaryToLanding
+- 着地HitBox ON
+- 着地HitBox OFF
+- 着地VFX / CameraShake
+- DragonAI_NotifyActionEnd
+
+PlainsDragon_Death
+- 死亡VFXなど
+- 最後に DragonAI_NotifyActionEnd
+
+
+
+

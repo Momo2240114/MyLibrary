@@ -34,28 +34,46 @@ void ExitComponent::Update(float et)
 	{
 		// 10の位
 		auto obj10 = GameObjectManager::Instance().Find("NumberUI");
-		if (obj10) m_pDigit10 = obj10->GetComponent<NumberSwitcher>();
+		if (obj10)
+		{
+			m_pDigit10 = obj10->GetComponent<NumberSwitcher>();
+		}
 	}
 	if (!m_pDigit01.lock())
 	{
 		// 1の位
 		auto obj01 = GameObjectManager::Instance().Find("NumberUI_01");
-		if (obj01) m_pDigit01 = obj01->GetComponent<NumberSwitcher>();
+		if (obj01)
+		{
+			m_pDigit01 = obj01->GetComponent<NumberSwitcher>();
+		}
 	}
 	// Max表示用
 	if (!m_pDigitMax10.lock()) {
 		auto obj = GameObjectManager::Instance().Find("NumberUI_02");
-		if (obj) m_pDigitMax10 = obj->GetComponent<NumberSwitcher>();
+		if (obj)
+		{
+			m_pDigitMax10 = obj->GetComponent<NumberSwitcher>();
+		}
 	}
 	if (!m_pDigitMax01.lock()) {
 		auto obj = GameObjectManager::Instance().Find("NumberUI_03");
-		if (obj) m_pDigitMax01 = obj->GetComponent<NumberSwitcher>();
+		if (obj)
+		{
+			m_pDigitMax01 = obj->GetComponent<NumberSwitcher>();
+		}
 	}
 	// 目標数(Max)の表示を更新
 	int maxD10 = (m_GoalConditions / 10) % 10;
 	int maxD01 = m_GoalConditions % 10;
-	if (auto sM10 = m_pDigitMax10.lock()) sM10->SetDigit(maxD10);
-	if (auto sM01 = m_pDigitMax01.lock()) sM01->SetDigit(maxD01);
+	if (auto sM10 = m_pDigitMax10.lock())
+	{
+		sM10->SetDigit(maxD10);
+	}
+	if (auto sM01 = m_pDigitMax01.lock())
+	{
+		sM01->SetDigit(maxD01);
+	}
 
 	auto player = m_pPlayerComponent.lock();
 	if (player)
@@ -67,8 +85,14 @@ void ExitComponent::Update(float et)
 		int d10 = (currentItemCount / 10) % 10; // 10の位
 		int d01 = currentItemCount % 10;        // 1の位
 
-		if (auto s10 = m_pDigit10.lock()) s10->SetDigit(d10);
-		if (auto s01 = m_pDigit01.lock()) s01->SetDigit(d01);
+		if (auto s10 = m_pDigit10.lock())
+		{
+			s10->SetDigit(d10);
+		}
+		if (auto s01 = m_pDigit01.lock())
+		{
+			s01->SetDigit(d01);
+		}
 
 		// プレイヤーが目標個数達成したとき
 		if (currentItemCount >= m_GoalConditions)
@@ -86,7 +110,8 @@ void ExitComponent::Update(float et)
 				}
 			}
 		}
-	}	float Count = 3.0;
+	}
+	float Count = 3.0;
 	if (m_GoalFlag)
 	{
 		GoalTime += et;

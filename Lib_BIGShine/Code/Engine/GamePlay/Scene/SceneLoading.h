@@ -13,13 +13,32 @@ public:
     void Update(float deltaTime_) override;
     void Render(float deltaTime_) override;
     void DrawGUI() override;
-    bool IsEnginePresentation() const { return enginePresentation; }
-    LoadingStatus GetLoadingStatus() const { return loadingStatus; }
+
+    bool IsEnginePresentation() const
+    {
+        return enginePresentation;
+    }
+
+    LoadingStatus GetLoadingStatus() const
+    {
+        return loadingStatus;
+    }
+
     // 完了後の演出が終了した時に呼ぶ。自動遷移を止めた用途にも対応する。
     void RequestTransition();
-    void SetAutomaticTransition(bool enabled_) { automaticTransition = enabled_; }
+
+    void SetAutomaticTransition(bool enabled_)
+    {
+        automaticTransition = enabled_;
+    }
+
     void SetCompletionHoldDuration(float duration_);
-    void SetSilhouetteMode(LOADING_SILHOUETTE_MODE mode_) { silhouetteMode = mode_; silhouetteModeOverridden = true; }
+
+    void SetSilhouetteMode(LOADING_SILHOUETTE_MODE mode_)
+    {
+        silhouetteMode = mode_;
+        silhouetteModeOverridden = true;
+    }
 
 private:
     void FailLoading(const std::string& error_);

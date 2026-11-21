@@ -10,7 +10,10 @@
 AudioSource::AudioSource(FMOD::System* system_, const char* filename_)
     : system(system_), filename(filename_ ? filename_ : "")
 {
-    if (system == nullptr || filename.empty()) return;
+    if (system == nullptr || filename.empty())
+    {
+        return;
+    }
 
     FMOD_RESULT result_ = system->createSound(filename.c_str(), FMOD_DEFAULT, nullptr, &sound);
     _ASSERT_EXPR_A(result_ == FMOD_OK, FMOD_ErrorString(result_));
@@ -31,7 +34,10 @@ AudioSource::~AudioSource()
 void AudioSource::Play(bool loop_)
 {
     Stop();
-    if (system == nullptr || sound == nullptr) return;
+    if (system == nullptr || sound == nullptr)
+    {
+        return;
+    }
 
     AudioPlaybackSettings settings_;
     settings_.loop = loop_;
@@ -53,7 +59,10 @@ void AudioSource::Play(bool loop_)
 void AudioSource::PlayOneShot(const AudioPlaybackSettings& settings_)
 {
     CleanupStoppedChannels();
-    if (system == nullptr || sound == nullptr) return;
+    if (system == nullptr || sound == nullptr)
+    {
+        return;
+    }
 
     // Loop設定と2D／3D設定を組み合わせ、Soundの再生モードを決定する。
     FMOD_MODE mode_ = settings_.loop ? FMOD_LOOP_NORMAL : FMOD_LOOP_OFF;
@@ -87,14 +96,23 @@ void AudioSource::Stop()
 
     for (FMOD::Channel* channel_ : oneShotChannels)
     {
-        if (channel_) channel_->stop();
+        if (channel_)
+        {
+            channel_->stop();
+        }
     }
     oneShotChannels.clear();
 
     for (OneShotDsp& dsp_ : oneShotDsps)
     {
-        if (dsp_.channel && dsp_.dsp) dsp_.channel->removeDSP(dsp_.dsp);
-        if (dsp_.dsp) dsp_.dsp->release();
+        if (dsp_.channel && dsp_.dsp)
+        {
+            dsp_.channel->removeDSP(dsp_.dsp);
+        }
+        if (dsp_.dsp)
+        {
+            dsp_.dsp->release();
+        }
     }
     oneShotDsps.clear();
 }
@@ -109,10 +127,16 @@ void AudioSource::SetVolume(float volume_)
 {
     CleanupStoppedChannels();
     volume = std::clamp(volume_, 0.0f, 1.0f);
-    if (channel != nullptr) channel->setVolume(volume);
+    if (channel != nullptr)
+    {
+        channel->setVolume(volume);
+    }
     for (FMOD::Channel* channel_ : oneShotChannels)
     {
-        if (channel_) channel_->setVolume(volume);
+        if (channel_)
+        {
+            channel_->setVolume(volume);
+        }
     }
 }
 
@@ -121,10 +145,16 @@ void AudioSource::SetPitch(float pitch_)
 {
     CleanupStoppedChannels();
     pitch = std::clamp(pitch_, 0.01f, 4.0f);
-    if (channel != nullptr) channel->setPitch(pitch);
+    if (channel != nullptr)
+    {
+        channel->setPitch(pitch);
+    }
     for (FMOD::Channel* channel_ : oneShotChannels)
     {
-        if (channel_) channel_->setPitch(pitch);
+        if (channel_)
+        {
+            channel_->setPitch(pitch);
+        }
     }
 }
 
@@ -133,10 +163,16 @@ void AudioSource::SetPan(float pan_)
 {
     CleanupStoppedChannels();
     pan = std::clamp(pan_, -1.0f, 1.0f);
-    if (channel != nullptr) channel->setPan(pan);
+    if (channel != nullptr)
+    {
+        channel->setPan(pan);
+    }
     for (FMOD::Channel* channel_ : oneShotChannels)
     {
-        if (channel_) channel_->setPan(pan);
+        if (channel_)
+        {
+            channel_->setPan(pan);
+        }
     }
 }
 
@@ -157,12 +193,18 @@ void AudioSource::SetLowPassCutoff(float cutoff_)
 // OneShotチャンネル専用のローパスDSPを生成し、指定周波数でこもり効果を付ける。
 void AudioSource::ApplyMuffle(FMOD::Channel* channel_, bool muffled_, float cutoff_)
 {
-    if (channel_ == nullptr || system == nullptr || !muffled_) return;
+    if (channel_ == nullptr || system == nullptr || !muffled_)
+    {
+        return;
+    }
 
     FMOD::DSP* lowPassDsp_ = nullptr;
     FMOD_RESULT result_ = system->createDSPByType(FMOD_DSP_TYPE_LOWPASS, &lowPassDsp_);
     _ASSERT_EXPR_A(result_ == FMOD_OK, FMOD_ErrorString(result_));
-    if (lowPassDsp_ == nullptr) return;
+    if (lowPassDsp_ == nullptr)
+    {
+        return;
+    }
 
     lowPassDsp_->setParameterFloat(FMOD_DSP_LOWPASS_CUTOFF, std::clamp(cutoff_, 10.0f, 22000.0f));
     lowPassDsp_->setActive(true);
@@ -173,7 +215,10 @@ void AudioSource::ApplyMuffle(FMOD::Channel* channel_, bool muffled_, float cuto
 // 主チャンネルのこもり設定に応じてローパスDSPを生成・更新・解除する。
 void AudioSource::ApplyPrimaryMuffle()
 {
-    if (channel == nullptr || system == nullptr) return;
+    if (channel == nullptr || system == nullptr)
+    {
+        return;
+    }
 
     if (!muffled)
     {
@@ -208,7 +253,10 @@ void AudioSource::ApplyPrimaryMuffle()
 // 共通再生設定と3D音響設定を指定チャンネルへまとめて適用する。
 void AudioSource::ApplySettings(FMOD::Channel* channel_, const AudioPlaybackSettings& settings_)
 {
-    if (channel_ == nullptr) return;
+    if (channel_ == nullptr)
+    {
+        return;
+    }
 
     channel_->setVolume(std::clamp(settings_.volume, 0.0f, 1.0f));
     channel_->setPitch(std::clamp(settings_.pitch, 0.01f, 4.0f));
@@ -254,16 +302,22 @@ void AudioSource::CleanupStoppedChannels()
             oneShotDsps.end(),
             [](OneShotDsp& dsp_)
             {
-                if (dsp_.dsp == nullptr) return true;
+                if (dsp_.dsp == nullptr)
+        {
+            return true;
+        }
 
-                bool isPlaying_ = false;
+        bool isPlaying_ = false;
                 if (dsp_.channel != nullptr)
                 {
                     dsp_.channel->isPlaying(&isPlaying_);
                 }
-                if (isPlaying_) return false;
+                if (isPlaying_)
+        {
+            return false;
+        }
 
-                // 再生終了済みのOneShotへ接続したDSPを解放し、FMOD側の保持を残さない。
+        // 再生終了済みのOneShotへ接続したDSPを解放し、FMOD側の保持を残さない。
                 if (dsp_.channel != nullptr)
                 {
                     dsp_.channel->removeDSP(dsp_.dsp);
@@ -281,8 +335,11 @@ void AudioSource::CleanupStoppedChannels()
             oneShotChannels.end(),
             [](FMOD::Channel* channel_)
             {
-                if (channel_ == nullptr) return true;
-                bool isPlaying_ = false;
+                if (channel_ == nullptr)
+        {
+            return true;
+        }
+        bool isPlaying_ = false;
                 channel_->isPlaying(&isPlaying_);
                 return !isPlaying_;
             }),

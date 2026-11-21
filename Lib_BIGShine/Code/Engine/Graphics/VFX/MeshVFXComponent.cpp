@@ -66,7 +66,10 @@ namespace
         ID3D11Device* device_,
         GltfModelCommponennt::Mesh& mesh_)
     {
-        if (!device_ || mesh_.vertices.empty() || mesh_.indices.empty()) return false;
+        if (!device_ || mesh_.vertices.empty() || mesh_.indices.empty())
+        {
+            return false;
+        }
 
         // 内部生成メッシュは編集後に形状が変わらないため、IMMUTABLEなVB/IBとしてGPUへ渡す。
         D3D11_BUFFER_DESC vertexDesc_{};
@@ -211,7 +214,10 @@ namespace
         const std::vector<DirectX::XMFLOAT3>& outerPoints_)
     {
         const size_t pointCount_ = (std::min)(innerPoints_.size(), outerPoints_.size());
-        if (pointCount_ < 2) return;
+        if (pointCount_ < 2)
+        {
+            return;
+        }
 
         // 内側と外側の点列を交互に頂点化し、隣り合う区間を四角形リボンとしてつなぐ。
         const uint32_t baseIndex_ = static_cast<uint32_t>(mesh_.vertices.size());
@@ -313,7 +319,10 @@ namespace
         float innerRadius_,
         float outerRadius_)
     {
-        if (!device_) return nullptr;
+        if (!device_)
+        {
+            return nullptr;
+        }
 
         // 指定角度の円弧を、内外2本の点列からリボン状の斬撃メッシュとして生成する。
         auto resource_ = CreateGeneratedModelResource(modelPath_);
@@ -399,7 +408,10 @@ namespace
 
     std::shared_ptr<ModelResource> CreateInternalMeshSlashCrescentModelResource(ID3D11Device* device_)
     {
-        if (!device_) return nullptr;
+        if (!device_)
+        {
+            return nullptr;
+        }
 
         // 標準の三日月斬撃。複数プリセットの基準になる一枚リボン形状。
         auto resource_ = CreateGeneratedModelResource(INTERNAL_MESH_SLASH_CRESCENT_MODEL_PATH);
@@ -553,7 +565,10 @@ namespace
 
     std::shared_ptr<ModelResource> CreateInternalMeshSlashVerticalCrescentModelResource(ID3D11Device* device_)
     {
-        if (!device_) return nullptr;
+        if (!device_)
+        {
+            return nullptr;
+        }
 
         auto resource_ = CreateGeneratedModelResource(INTERNAL_MESH_SLASH_VERTICAL_CRESCENT_MODEL_PATH);
         auto& mesh_ = resource_->meshes[0];
@@ -590,7 +605,10 @@ namespace
         ID3D11Device* device_,
         const MeshVFXInternalMeshSettings& settings_)
     {
-        if (!device_) return nullptr;
+        if (!device_)
+        {
+            return nullptr;
+        }
 
         auto resource_ = CreateGeneratedModelResource(INTERNAL_MESH_SLASH_RAISED_CRESCENT_MODEL_PATH);
         auto& mesh_ = resource_->meshes[0];
@@ -818,7 +836,10 @@ namespace
 
     std::shared_ptr<ModelResource> CreateInternalMeshSlashCrossModelResource(ID3D11Device* device_)
     {
-        if (!device_) return nullptr;
+        if (!device_)
+        {
+            return nullptr;
+        }
 
         auto resource_ = CreateGeneratedModelResource(INTERNAL_MESH_SLASH_CROSS_MODEL_PATH);
         auto& mesh_ = resource_->meshes[0];
@@ -831,7 +852,10 @@ namespace
 
     std::shared_ptr<ModelResource> CreateInternalMeshSlashGroundModelResource(ID3D11Device* device_)
     {
-        if (!device_) return nullptr;
+        if (!device_)
+        {
+            return nullptr;
+        }
 
         auto resource_ = CreateGeneratedModelResource(INTERNAL_MESH_SLASH_GROUND_MODEL_PATH);
         auto& mesh_ = resource_->meshes[0];
@@ -862,7 +886,10 @@ namespace
     std::shared_ptr<ModelResource> CreateInternalMeshDangerBoxModelResource(ID3D11Device* device_, float halfWidth_, float length_)
     {
         BS_PROFILE_SCOPE("CreateInternalMeshDangerBoxModelResource");
-        if (!device_) return nullptr;
+        if (!device_)
+        {
+            return nullptr;
+        }
         auto resource_ = CreateGeneratedModelResource(INTERNAL_MESH_DANGER_BOX_MODEL_PATH);
         auto& mesh_ = resource_->meshes[0];
         const float width_ = (std::max)(halfWidth_, 0.01f);
@@ -882,7 +909,10 @@ namespace
         float capsuleLength_)
     {
         BS_PROFILE_SCOPE("CreateInternalMeshDangerAreaModelResource");
-        if (!device_) return nullptr;
+        if (!device_)
+        {
+            return nullptr;
+        }
 
         const float safeRadius_ = (std::max)(radius_, 0.0001f);
         const float safeCapsuleLength_ = (std::max)(capsuleLength_, 0.0f);
@@ -974,7 +1004,10 @@ namespace
         float angleDegrees_,
         int segments_)
     {
-        if (!device_) return nullptr;
+        if (!device_)
+        {
+            return nullptr;
+        }
 
         const float safeRadius_ = (std::max)(radius_, 0.0001f);
         const float halfAngle_ = DirectX::XMConvertToRadians(
@@ -1014,7 +1047,10 @@ namespace
         ID3D11Device* device_,
         float radius_)
     {
-        if (!device_) return nullptr;
+        if (!device_)
+        {
+            return nullptr;
+        }
         const float safeRadius_ = (std::max)(radius_, 0.0001f);
 
         auto resource_ = std::make_shared<ModelResource>();
@@ -1080,7 +1116,10 @@ namespace
         float radius_,
         const MeshVFXInternalMeshSettings& settings_)
     {
-        if (!device_) return nullptr;
+        if (!device_)
+        {
+            return nullptr;
+        }
 
         const float baseRadius_ = (std::max)(radius_, 0.0001f);
         const float tipRadius_ = baseRadius_ *
@@ -1139,7 +1178,10 @@ namespace
         const MeshVFXInternalMeshSettings& settings_)
     {
         BS_PROFILE_SCOPE("CreateInternalMeshCapsuleModelResource");
-        if (!device_) return nullptr;
+        if (!device_)
+        {
+            return nullptr;
+        }
 
         const float safeRadius_ = (std::max)(radius_, 0.0001f);
         const float capsuleLength_ = (std::max)(settings_.capsuleLength, safeRadius_ * 2.0f);
@@ -1228,7 +1270,10 @@ namespace
         const MeshVFXInternalMeshSettings& settings_)
     {
         BS_PROFILE_SCOPE("CreateInternalMeshBreathBeamModelResource");
-        if (!device_) return nullptr;
+        if (!device_)
+        {
+            return nullptr;
+        }
 
         const float length_ = (std::max)(settings_.beamLength, 0.001f);
         const float halfHeight_ = (std::max)(settings_.beamHalfHeight, 0.001f);
@@ -1387,7 +1432,10 @@ namespace
             0.01f);
 
         const size_t pointCount_ = (std::min)(innerPoints_.size(), outerPoints_.size());
-        if (pointCount_ < 2) return;
+        if (pointCount_ < 2)
+        {
+            return;
+        }
 
         const uint32_t baseIndex_ = static_cast<uint32_t>(mesh_.vertices.size());
 
@@ -1425,7 +1473,10 @@ namespace
 
     std::shared_ptr<ModelResource> CreateInternalMeshSlashCrossCrescentModelResource(ID3D11Device* device_)
     {
-        if (!device_) return nullptr;
+        if (!device_)
+        {
+            return nullptr;
+        }
 
         auto resource_ = CreateGeneratedModelResource(INTERNAL_MESH_SLASH_CROSS_CRESCENT_MODEL_PATH);
         auto& mesh_ = resource_->meshes[0];
@@ -1447,7 +1498,10 @@ namespace
     {
         std::string extension_ = path_.extension().string();
         std::transform(extension_.begin(), extension_.end(), extension_.begin(),
-            [](unsigned char character_) { return static_cast<char>(std::tolower(character_)); });
+            [](unsigned char character_)
+        {
+            return static_cast<char>(std::tolower(character_));
+        });
         return std::find(extensions_.begin(), extensions_.end(), extension_) != extensions_.end();
     }
 
@@ -1460,7 +1514,10 @@ namespace
     template<typename T>
     void ReadFloatArray(const nlohmann::json& json_, const char* key_, T& value_, size_t count_)
     {
-        if (!json_.contains(key_) || !json_[key_].is_array()) return;
+        if (!json_.contains(key_) || !json_[key_].is_array())
+        {
+            return;
+        }
         float* values_ = reinterpret_cast<float*>(&value_);
         const auto& array_ = json_[key_];
         for (size_t index_ = 0; index_ < count_ && index_ < array_.size(); ++index_)
@@ -1475,7 +1532,10 @@ namespace
         const std::vector<std::string>& curveNames_)
     {
         bool changed_ = ImGui::InputText(label_, &curveName_);
-        if (curveNames_.empty()) return changed_;
+        if (curveNames_.empty())
+        {
+            return changed_;
+        }
 
         ImGui::SameLine();
         const std::string comboLabel_ = std::string("##") + label_ + "CurveSelect";
@@ -1513,7 +1573,10 @@ void MeshVFXComponent::Start()
 void MeshVFXComponent::Update(float deltaTime_)
 {
     // Advance the component time. Per-part time is evaluated by the render system.
-    if (isPlaying) time += deltaTime_ * playbackSpeed;
+    if (isPlaying)
+    {
+        time += deltaTime_ * playbackSpeed;
+    }
 }
 
 
@@ -1521,7 +1584,10 @@ std::vector<std::string> MeshVFXComponent::GetCurveTrackNames() const
 {
     const std::shared_ptr<GameObject> owner_ =
         const_cast<MeshVFXComponent*>(this)->GetGameObject();
-    if (!owner_) return {};
+    if (!owner_)
+    {
+        return {};
+    }
 
     const std::shared_ptr<CurveComponent> curveComponent_ = owner_->GetComponent<CurveComponent>();
     return curveComponent_ ? curveComponent_->GetTrackNames() : std::vector<std::string>{};
@@ -1532,14 +1598,23 @@ float MeshVFXComponent::EvaluateCurveValue(
     float normalizedTime_,
     float fallbackValue_) const
 {
-    if (curveName_.empty()) return fallbackValue_;
+    if (curveName_.empty())
+    {
+        return fallbackValue_;
+    }
 
     const std::shared_ptr<GameObject> owner_ =
         const_cast<MeshVFXComponent*>(this)->GetGameObject();
-    if (!owner_) return fallbackValue_;
+    if (!owner_)
+    {
+        return fallbackValue_;
+    }
 
     const std::shared_ptr<CurveComponent> curveComponent_ = owner_->GetComponent<CurveComponent>();
-    if (!curveComponent_) return fallbackValue_;
+    if (!curveComponent_)
+    {
+        return fallbackValue_;
+    }
 
     if (!curveComponent_->HasTrack(curveName_))
     {
@@ -1555,11 +1630,20 @@ void MeshVFXComponent::Gui()
 {
     // Draw the MeshVFX asset, part, texture, UV, noise, and edge editing UI.
     ImGui::SeparatorText("Mesh VFX");
-    if (ImGui::Button(isPlaying ? "Stop" : "Play")) isPlaying ? Stop() : Play();
+    if (ImGui::Button(isPlaying ? "Stop" : "Play"))
+    {
+        isPlaying ? Stop() : Play();
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Reset")) Reset();
+    if (ImGui::Button("Reset"))
+    {
+        Reset();
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Refresh Assets")) RefreshAssetLists();
+    if (ImGui::Button("Refresh Assets"))
+    {
+        RefreshAssetLists();
+    }
     ImGui::Text("Time: %.2f", time);
     ImGui::DragFloat("Playback Speed", &playbackSpeed, 0.01f, 0.0f, 10.0f);
     const std::vector<std::string> curveNames_ = GetCurveTrackNames();
@@ -1572,8 +1656,14 @@ void MeshVFXComponent::Gui()
         nullptr,
         "Data/VFX"))
     {
-        if (selectedAssetPath_.empty()) assetPath.clear();
-        else if (LoadAsset(selectedAssetPath_)) assetPath = selectedAssetPath_;
+        if (selectedAssetPath_.empty())
+        {
+            assetPath.clear();
+        }
+        else if (LoadAsset(selectedAssetPath_))
+        {
+            assetPath = selectedAssetPath_;
+        }
     }
     if (ImGui::Button("Save Mesh VFX JSON..."))
     {
@@ -1584,7 +1674,10 @@ void MeshVFXComponent::Gui()
             L"Save Mesh VFX",
             initialPath_,
             GraphicsDeviceManager::Instance().GetWindowHandle());
-        if (!selectedPath_.empty() && SaveAsset(selectedPath_)) assetPath = selectedPath_;
+        if (!selectedPath_.empty() && SaveAsset(selectedPath_))
+        {
+            assetPath = selectedPath_;
+        }
     }
 
     if (ImGui::Button("Add Part"))
@@ -1687,19 +1780,52 @@ void MeshVFXComponent::Gui()
             }
 
             const char* slashPresetPreview_ = "Select Slash Preset";
-            if (part_.modelPath == INTERNAL_MESH_SLASH_CRESCENT_MODEL_PATH) slashPresetPreview_ = "Crescent";
-            else if (part_.modelPath == INTERNAL_MESH_SLASH_CROSS_CRESCENT_MODEL_PATH) slashPresetPreview_ = "Cross Crescent";
-            else if (part_.modelPath == INTERNAL_MESH_SLASH_VERTICAL_CRESCENT_MODEL_PATH) slashPresetPreview_ = "Vertical Crescent";
-            else if (part_.modelPath == INTERNAL_MESH_SLASH_RAISED_CRESCENT_MODEL_PATH) slashPresetPreview_ = "Raised Crescent";
-            else if (part_.modelPath == INTERNAL_MESH_SLASH_FAN_MODEL_PATH) slashPresetPreview_ = "Fan";
-            else if (part_.modelPath == INTERNAL_MESH_SLASH_ARC_RIBBON_MODEL_PATH) slashPresetPreview_ = "Arc Ribbon";
-            else if (part_.modelPath == INTERNAL_MESH_SLASH_CROSS_MODEL_PATH) slashPresetPreview_ = "Cross Slash";
-            else if (part_.modelPath == INTERNAL_MESH_SLASH_GROUND_MODEL_PATH) slashPresetPreview_ = "Ground Slash";
-            else if (part_.modelPath == INTERNAL_MESH_DANGER_AREA_MODEL_PATH) slashPresetPreview_ = "Danger Area";
-            else if (part_.modelPath == INTERNAL_MESH_DANGER_FAN_MODEL_PATH) slashPresetPreview_ = "Danger Fan";
-            else if (part_.modelPath == INTERNAL_MESH_DANGER_BOX_MODEL_PATH) slashPresetPreview_ = "Danger Box";
+            if (part_.modelPath == INTERNAL_MESH_SLASH_CRESCENT_MODEL_PATH)
+                    {
+                        slashPresetPreview_ = "Crescent";
+                    }
+                    else if (part_.modelPath == INTERNAL_MESH_SLASH_CROSS_CRESCENT_MODEL_PATH)
+                    {
+                        slashPresetPreview_ = "Cross Crescent";
+                    }
+                    else if (part_.modelPath == INTERNAL_MESH_SLASH_VERTICAL_CRESCENT_MODEL_PATH)
+                    {
+                        slashPresetPreview_ = "Vertical Crescent";
+                    }
+                    else if (part_.modelPath == INTERNAL_MESH_SLASH_RAISED_CRESCENT_MODEL_PATH)
+                    {
+                        slashPresetPreview_ = "Raised Crescent";
+                    }
+                    else if (part_.modelPath == INTERNAL_MESH_SLASH_FAN_MODEL_PATH)
+                    {
+                        slashPresetPreview_ = "Fan";
+                    }
+                    else if (part_.modelPath == INTERNAL_MESH_SLASH_ARC_RIBBON_MODEL_PATH)
+                    {
+                        slashPresetPreview_ = "Arc Ribbon";
+                    }
+                    else if (part_.modelPath == INTERNAL_MESH_SLASH_CROSS_MODEL_PATH)
+                    {
+                        slashPresetPreview_ = "Cross Slash";
+                    }
+                    else if (part_.modelPath == INTERNAL_MESH_SLASH_GROUND_MODEL_PATH)
+                    {
+                        slashPresetPreview_ = "Ground Slash";
+                    }
+                    else if (part_.modelPath == INTERNAL_MESH_DANGER_AREA_MODEL_PATH)
+                    {
+                        slashPresetPreview_ = "Danger Area";
+                    }
+                    else if (part_.modelPath == INTERNAL_MESH_DANGER_FAN_MODEL_PATH)
+                    {
+                        slashPresetPreview_ = "Danger Fan";
+                    }
+                    else if (part_.modelPath == INTERNAL_MESH_DANGER_BOX_MODEL_PATH)
+                    {
+                        slashPresetPreview_ = "Danger Box";
+                    }
 
-            if (ImGui::BeginCombo("Internal Slash Mesh", slashPresetPreview_))
+                    if (ImGui::BeginCombo("Internal Slash Mesh", slashPresetPreview_))
             {
                 struct SlashPresetEntry
                 {
@@ -1764,8 +1890,11 @@ void MeshVFXComponent::Gui()
 
                 if (ImGui::BeginCombo("Mesh", meshPreview_.c_str()))
                 {
-                    if (ImGui::Selectable("All Meshes", part_.meshIndex == -1)) part_.meshIndex = -1;
-                    for (int meshIndex_ = 0; meshIndex_ < static_cast<int>(modelResource_->meshes.size()); ++meshIndex_)
+                    if (ImGui::Selectable("All Meshes", part_.meshIndex == -1))
+                            {
+                                part_.meshIndex = -1;
+                            }
+                            for (int meshIndex_ = 0; meshIndex_ < static_cast<int>(modelResource_->meshes.size()); ++meshIndex_)
                     {
                         const auto& mesh_ = modelResource_->meshes[meshIndex_];
                         const std::string nodeName_ = mesh_.node ? mesh_.node->name : "No Node";
@@ -1831,8 +1960,11 @@ void MeshVFXComponent::Gui()
                 if (part_.materialPaths.size() > 1u)
                 {
                     ImGui::SameLine();
-                    if (ImGui::Button("Remove")) removeMaterialIndex_ = materialIndex_;
-                }
+                    if (ImGui::Button("Remove"))
+                            {
+                                removeMaterialIndex_ = materialIndex_;
+                            }
+                        }
                 ImGui::PopID();
             }
             if (removeMaterialIndex_ >= 0)
@@ -1860,9 +1992,15 @@ void MeshVFXComponent::Gui()
                     : nullptr,
                 "Data/VFXMaterials"))
             {
-                if (part_.materialPaths.empty()) part_.materialPaths.push_back(part_.materialPath);
-                else part_.materialPaths.front() = part_.materialPath;
-                LoadPartResource(static_cast<size_t>(partIndex_));
+                if (part_.materialPaths.empty())
+                        {
+                            part_.materialPaths.push_back(part_.materialPath);
+                        }
+                        else
+                        {
+                            part_.materialPaths.front() = part_.materialPath;
+                        }
+                        LoadPartResource(static_cast<size_t>(partIndex_));
             }
             if (runtimePart_ && runtimePart_->materialResource)
             {
@@ -1918,8 +2056,11 @@ void MeshVFXComponent::Gui()
                         layer_.blendMode = static_cast<MeshVFXMaskBlendMode>(blendMode_);
                     }
                     ImGui::Checkbox("Invert", &layer_.invert);
-                    if (ImGui::Button("Remove Mask Layer")) removeLayerIndex_ = layerIndex_;
-                    ImGui::Separator();
+                    if (ImGui::Button("Remove Mask Layer"))
+                            {
+                                removeLayerIndex_ = layerIndex_;
+                            }
+                            ImGui::Separator();
                     ImGui::PopID();
                 }
                 if (removeLayerIndex_ >= 0)
@@ -1948,8 +2089,11 @@ void MeshVFXComponent::Gui()
                         : nullptr;
                     layeredTextureChanged_ |= AssetSlotGui::Draw(
                         "Noise Texture Asset", AssetSlotType::TEXTURE, path_, previewTexture_, "Data/Texture");
-                    if (ImGui::Button("Remove Noise Layer")) removeLayerIndex_ = layerIndex_;
-                    ImGui::Separator();
+                    if (ImGui::Button("Remove Noise Layer"))
+                            {
+                                removeLayerIndex_ = layerIndex_;
+                            }
+                            ImGui::Separator();
                     ImGui::PopID();
                 }
                 if (removeLayerIndex_ >= 0)
@@ -2543,6 +2687,12 @@ void MeshVFXComponent::Gui()
             {
                 part_.blendMode = static_cast<MeshVFXBlendMode>(blendMode_);
             }
+            const char* cullItems_[] = { "None", "Back Faces", "Front Faces" };
+            int cullMode_ = static_cast<int>(part_.cullMode);
+            if (ImGui::Combo("Cull Mode", &cullMode_, cullItems_, IM_ARRAYSIZE(cullItems_)))
+            {
+                part_.cullMode = static_cast<VFX_MATERIAL_CULL_MODE>(cullMode_);
+            }
 
                     ImGui::EndTabItem();
                 }
@@ -2567,11 +2717,26 @@ void MeshVFXComponent::Gui()
         }
     }
 
-    if (ImGui::Button("Reload All Resources")) LoadPartResources();
+    if (ImGui::Button("Reload All Resources"))
+    {
+        LoadPartResources();
+    }
 }
-void MeshVFXComponent::Play() { isPlaying = true; }
-void MeshVFXComponent::Stop() { isPlaying = false; }
-void MeshVFXComponent::Reset() { time = 0.0f; }
+
+void MeshVFXComponent::Play()
+{
+    isPlaying = true;
+}
+
+void MeshVFXComponent::Stop()
+{
+    isPlaying = false;
+}
+
+void MeshVFXComponent::Reset()
+{
+    time = 0.0f;
+}
 
 void MeshVFXComponent::RefreshAssetLists()
 {
@@ -2583,13 +2748,22 @@ void MeshVFXComponent::RefreshAssetLists()
         std::vector<std::string>& assetPaths_)
         {
             std::error_code error_;
-            if (!std::filesystem::is_directory(rootPath_, error_)) return;
+            if (!std::filesystem::is_directory(rootPath_, error_))
+        {
+            return;
+        }
 
-            for (const auto& entry_ : std::filesystem::recursive_directory_iterator(rootPath_, error_))
+        for (const auto& entry_ : std::filesystem::recursive_directory_iterator(rootPath_, error_))
             {
-                if (error_) break;
-                if (!entry_.is_regular_file(error_) || !HasExtension(entry_.path(), extensions_)) continue;
-                assetPaths_.push_back(WindowsDialogHelper::PathToUtf8(entry_.path().lexically_normal()));
+                if (error_)
+            {
+                break;
+            }
+            if (!entry_.is_regular_file(error_) || !HasExtension(entry_.path(), extensions_))
+            {
+                continue;
+            }
+            assetPaths_.push_back(WindowsDialogHelper::PathToUtf8(entry_.path().lexically_normal()));
             }
             std::sort(assetPaths_.begin(), assetPaths_.end());
         };
@@ -2816,6 +2990,7 @@ void MeshVFXComponent::Serialize(nlohmann::json& json_) const
         partJson_["GradientSampleMode"] = static_cast<int>(part_.gradientSampleMode);
         partJson_["GradientDirection"] = static_cast<int>(part_.gradientDirection);
         partJson_["BlendMode"] = static_cast<int>(part_.blendMode);
+        partJson_["CullMode"] = static_cast<int>(part_.cullMode);
         json_["Parts"].push_back(partJson_);
     }
 }
@@ -2828,7 +3003,10 @@ void MeshVFXComponent::Deserialize(const nlohmann::json& json_)
     isPlaying = json_.value("IsPlaying", true);
     playbackSpeed = (std::max)(json_.value("PlaybackSpeed", 1.0f), 0.0f);
     time = 0.0f;
-    if (!json_.contains("Parts") || !json_["Parts"].is_array()) return;
+    if (!json_.contains("Parts") || !json_["Parts"].is_array())
+    {
+        return;
+    }
 
     for (const auto& partJson_ : json_["Parts"])
     {
@@ -3100,6 +3278,13 @@ void MeshVFXComponent::Deserialize(const nlohmann::json& json_)
         part_.gradientDirection = static_cast<MESH_VFX_GRADIENT_DIRECTION>(
             std::clamp(partJson_.value("GradientDirection", 0), 0, 1));
         part_.blendMode = static_cast<MeshVFXBlendMode>(std::clamp(partJson_.value("BlendMode", 0), 0, 1));
+        // 旧バリアの内側表示設定も、表面を除くカリングへ移行する。
+        const auto defaultCullMode_ = partJson_.value("InsideCylinderRadius", 0.0f) > 0.0f
+            ? VFX_MATERIAL_CULL_MODE::FRONT
+            : VFX_MATERIAL_CULL_MODE::NONE;
+        part_.cullMode = static_cast<VFX_MATERIAL_CULL_MODE>(std::clamp(
+            partJson_.value("CullMode", static_cast<int>(defaultCullMode_)),
+            0, static_cast<int>(VFX_MATERIAL_CULL_MODE::FRONT)));
         asset.parts.push_back(part_);
     }
     LoadPartResources();
@@ -3108,7 +3293,10 @@ void MeshVFXComponent::Deserialize(const nlohmann::json& json_)
 bool MeshVFXComponent::SaveAsset(const std::string& path_) const
 {
     // Save the current full MeshVFX asset JSON.
-    if (path_.empty()) return false;
+    if (path_.empty())
+    {
+        return false;
+    }
     nlohmann::json json_;
     json_["AssetType"] = "MeshVFX";
     json_["AssetVersion"] = 1;
@@ -3119,10 +3307,16 @@ bool MeshVFXComponent::SaveAsset(const std::string& path_) const
     if (assetPath_.has_parent_path())
     {
         std::filesystem::create_directories(assetPath_.parent_path(), error_);
-        if (error_) return false;
+        if (error_)
+        {
+            return false;
+        }
     }
     std::ofstream file_(assetPath_, std::ios::out | std::ios::trunc);
-    if (!file_.is_open()) return false;
+    if (!file_.is_open())
+    {
+        return false;
+    }
     file_ << json_.dump(4);
     return file_.good();
 }
@@ -3130,10 +3324,16 @@ bool MeshVFXComponent::SaveAsset(const std::string& path_) const
 bool MeshVFXComponent::LoadAsset(const std::string& path_)
 {
     // Load a MeshVFX asset JSON and rebuild its runtime resources.
-    if (path_.empty()) return false;
+    if (path_.empty())
+    {
+        return false;
+    }
     const std::filesystem::path assetPath_ = WindowsDialogHelper::Utf8ToPath(path_);
     std::ifstream file_(assetPath_);
-    if (!file_.is_open()) return false;
+    if (!file_.is_open())
+    {
+        return false;
+    }
 
     nlohmann::json json_;
     try
@@ -3141,7 +3341,10 @@ bool MeshVFXComponent::LoadAsset(const std::string& path_)
         file_ >> json_;
         const nlohmann::json& meshVFXJson_ =
             json_.contains("MeshVFX") ? json_["MeshVFX"] : json_;
-        if (!meshVFXJson_.contains("Parts") || !meshVFXJson_["Parts"].is_array()) return false;
+        if (!meshVFXJson_.contains("Parts") || !meshVFXJson_["Parts"].is_array())
+        {
+            return false;
+        }
         Deserialize(meshVFXJson_);
         assetPath = path_;
     }
@@ -3155,7 +3358,10 @@ bool MeshVFXComponent::LoadAsset(const std::string& path_)
 bool MeshVFXComponent::SavePartAsset(size_t partIndex_, const std::string& path_) const
 {
     // Save only the selected part as a reusable part asset.
-    if (path_.empty() || partIndex_ >= asset.parts.size()) return false;
+    if (path_.empty() || partIndex_ >= asset.parts.size())
+    {
+        return false;
+    }
 
     nlohmann::json componentJson_;
     Serialize(componentJson_);
@@ -3169,10 +3375,16 @@ bool MeshVFXComponent::SavePartAsset(size_t partIndex_, const std::string& path_
     if (assetPath_.has_parent_path())
     {
         std::filesystem::create_directories(assetPath_.parent_path(), error_);
-        if (error_) return false;
+        if (error_)
+        {
+            return false;
+        }
     }
     std::ofstream file_(assetPath_, std::ios::out | std::ios::trunc);
-    if (!file_.is_open()) return false;
+    if (!file_.is_open())
+    {
+        return false;
+    }
     file_ << json_.dump(4);
     return file_.good();
 }
@@ -3180,9 +3392,15 @@ bool MeshVFXComponent::SavePartAsset(size_t partIndex_, const std::string& path_
 bool MeshVFXComponent::LoadPartAsset(size_t partIndex_, const std::string& path_)
 {
     // Load a single part asset into the selected part slot.
-    if (path_.empty() || partIndex_ >= asset.parts.size()) return false;
+    if (path_.empty() || partIndex_ >= asset.parts.size())
+    {
+        return false;
+    }
     std::ifstream file_(WindowsDialogHelper::Utf8ToPath(path_));
-    if (!file_.is_open()) return false;
+    if (!file_.is_open())
+    {
+        return false;
+    }
 
     try
     {
@@ -3203,7 +3421,10 @@ bool MeshVFXComponent::LoadPartAsset(size_t partIndex_, const std::string& path_
         componentJson_["Parts"] = nlohmann::json::array({ partJson_ });
         MeshVFXComponent parsedComponent_;
         parsedComponent_.Deserialize(componentJson_);
-        if (parsedComponent_.asset.parts.empty()) return false;
+        if (parsedComponent_.asset.parts.empty())
+        {
+            return false;
+        }
 
         asset.parts[partIndex_] = std::move(parsedComponent_.asset.parts.front());
         asset.parts[partIndex_].partAssetPath = path_;
@@ -3240,8 +3461,14 @@ bool MeshVFXComponent::HasRuntimeResources() const
     for (size_t partIndex_ = 0; partIndex_ < asset.parts.size(); ++partIndex_)
     {
         const MeshVFXPart& part_ = asset.parts[partIndex_];
-        if (!part_.renderEnabled) continue;
-        if (runtimeParts[partIndex_].modelResource) return true;
+        if (!part_.renderEnabled)
+        {
+            continue;
+        }
+        if (runtimeParts[partIndex_].modelResource)
+        {
+            return true;
+        }
     }
     return false;
 }
@@ -3259,11 +3486,20 @@ void MeshVFXComponent::LoadPartResources()
 void MeshVFXComponent::LoadPartResource(size_t partIndex_)
 {
     // Load model, material, and texture resources for the selected part.
-    if (partIndex_ >= asset.parts.size()) return;
-    if (runtimeParts.size() < asset.parts.size()) runtimeParts.resize(asset.parts.size());
+    if (partIndex_ >= asset.parts.size())
+    {
+        return;
+    }
+    if (runtimeParts.size() < asset.parts.size())
+    {
+        runtimeParts.resize(asset.parts.size());
+    }
 
     ID3D11Device* device_ = GraphicsDeviceManager::Instance().GetDevice();
-    if (!device_) return;
+    if (!device_)
+    {
+        return;
+    }
 
     MeshVFXPart& part_ = asset.parts[partIndex_];
     MeshVFXRuntimePart& runtimePart_ = runtimeParts[partIndex_];
@@ -3280,12 +3516,21 @@ void MeshVFXComponent::LoadPartResource(size_t partIndex_)
     }
     for (const std::string& materialPath_ : part_.materialPaths)
     {
-        if (materialPath_.empty()) continue;
+        if (materialPath_.empty())
+        {
+            continue;
+        }
         std::shared_ptr<VFXMaterialResource> materialResource_ =
             VFXMaterialResourceManager::GetInstance().Load(materialPath_);
-        if (!materialResource_) continue;
+        if (!materialResource_)
+        {
+            continue;
+        }
         runtimePart_.materialResources.push_back(materialResource_);
-        if (!runtimePart_.materialResource) runtimePart_.materialResource = materialResource_;
+        if (!runtimePart_.materialResource)
+        {
+            runtimePart_.materialResource = materialResource_;
+        }
     }
     if (!runtimePart_.materialResource && !part_.materialPath.empty())
     {
@@ -3451,7 +3696,10 @@ void MeshVFXComponent::LoadPartResource(size_t partIndex_)
 bool MeshVFXComponent::ConvertPartToMaterial(size_t partIndex_)
 {
     BS_PROFILE_SCOPE("MeshVFXComponent::ConvertPartToMaterial");
-    if (partIndex_ >= asset.parts.size()) return false;
+    if (partIndex_ >= asset.parts.size())
+    {
+        return false;
+    }
 
     MeshVFXPart& part_ = asset.parts[partIndex_];
     const std::string defaultPath_ =
@@ -3460,15 +3708,27 @@ bool MeshVFXComponent::ConvertPartToMaterial(size_t partIndex_)
         L"Convert MeshVFX Part To VFX Material",
         defaultPath_,
         GraphicsDeviceManager::Instance().GetWindowHandle());
-    if (selectedPath_.empty()) return false;
+    if (selectedPath_.empty())
+    {
+        return false;
+    }
 
     VFXMaterialData materialData_ = VFXMaterialConversionUtility::FromMeshVFXPart(
         part_,
         "MeshVFXPart_" + std::to_string(partIndex_) + "_Material");
-    if (!VFXMaterialSerializer::Save(selectedPath_, materialData_)) return false;
+    if (!VFXMaterialSerializer::Save(selectedPath_, materialData_))
+    {
+        return false;
+    }
 
-    if (part_.materialPaths.empty()) part_.materialPaths.push_back(selectedPath_);
-    else part_.materialPaths.front() = selectedPath_;
+    if (part_.materialPaths.empty())
+    {
+        part_.materialPaths.push_back(selectedPath_);
+    }
+    else
+    {
+        part_.materialPaths.front() = selectedPath_;
+    }
     part_.materialPath = selectedPath_;
     LoadPartResource(partIndex_);
     return true;

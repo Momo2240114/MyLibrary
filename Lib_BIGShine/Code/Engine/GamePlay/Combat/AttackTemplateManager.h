@@ -188,7 +188,12 @@ public:
     bool DuplicateTemplate(const AttackTemplate& source_, const std::string& newId_);
     AttackTemplate* FindTemplate(const std::string& id_);
     const AttackTemplate* FindTemplate(const std::string& id_) const;
-    const std::vector<AttackTemplate>& GetTemplates() const { return templates; }
+
+    const std::vector<AttackTemplate>& GetTemplates() const
+    {
+        return templates;
+    }
+
     std::string NormalizeAttackTemplatePath(const std::string& pathOrId_) const;
     void OpenEditor(const std::string& id_);
     void DrawEditorGui();

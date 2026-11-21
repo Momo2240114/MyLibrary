@@ -45,18 +45,56 @@ public:
     void Stop(SkillExecutionResult result_ = SkillExecutionResult::INTERRUPTED);
     // Animation Event/ActionSequenceのActionEndを現在のPhaseに渡す。
     void NotifyPhaseEnd();
+
+    void SetForwardTarget(const std::shared_ptr<GameObject>& target_, float stopDistance_)
+    {
+        forwardTarget = target_;
+        forwardStopDistance = stopDistance_;
+    }
+
     // 実行中の待機Phaseだけを延長し、保存された定義と攻撃方向は変更しない。
     bool ExtendCurrentDuration(float extension_, float maximum_);
-    bool IsActive() const { return active; }
-    int GetPhaseIndex() const { return phaseIndex; }
-    float GetPhaseTime() const { return phaseTime; }
-    const std::string& GetSkillName() const { return definition.name; }
-    SkillExecutionResult GetResult() const { return result; }
-    const std::string& GetError() const { return error; }
+
+    bool IsActive() const
+    {
+        return active;
+    }
+
+    int GetPhaseIndex() const
+    {
+        return phaseIndex;
+    }
+
+    float GetPhaseTime() const
+    {
+        return phaseTime;
+    }
+
+    const std::string& GetSkillName() const
+    {
+        return definition.name;
+    }
+
+    SkillExecutionResult GetResult() const
+    {
+        return result;
+    }
+
+    const std::string& GetError() const
+    {
+        return error;
+    }
+
     const SkillPhase* GetCurrentPhase() const
     {
         return active && phaseIndex >= 0 && phaseIndex < static_cast<int>(definition.phases.size())
             ? &definition.phases[phaseIndex] : nullptr;
+    }
+
+    const SkillPhase* GetNextPhase() const
+    {
+        return active && phaseIndex + 1 < static_cast<int>(definition.phases.size())
+            ? &definition.phases[phaseIndex + 1] : nullptr;
     }
 
 private:
@@ -82,6 +120,8 @@ private:
     float originalGravityScale = 1.0f;
     bool gravitySuspended = false;
     float pendingVerticalImpulse = 0.0f;
+    std::weak_ptr<GameObject> forwardTarget;
+    float forwardStopDistance = 0.0f;
     std::weak_ptr<GameObject> owner;
     SkillDefinition definition;
     PhaseCallback phaseCallback;

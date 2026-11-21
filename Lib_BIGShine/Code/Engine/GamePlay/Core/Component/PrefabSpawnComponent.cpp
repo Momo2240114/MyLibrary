@@ -56,7 +56,10 @@ void PrefabSpawnComponent::Update(float deltaTime_)
     (void)deltaTime_;
     BS_PROFILE_SCOPE("PrefabSpawnComponent::Update");
 
-    if (!spawnOnStart || hasSpawned) return;
+    if (!spawnOnStart || hasSpawned)
+    {
+        return;
+    }
 
     hasSpawned = true;
     for (const SpawnEntry& entry_ : entries)
@@ -130,7 +133,10 @@ void PrefabSpawnComponent::Deserialize(const nlohmann::json& json_)
     hasSpawned = false;
     entries.clear();
 
-    if (!json_.contains("Entries") || !json_["Entries"].is_array()) return;
+    if (!json_.contains("Entries") || !json_["Entries"].is_array())
+    {
+        return;
+    }
 
     for (const nlohmann::json& entryJson_ : json_["Entries"])
     {
@@ -149,10 +155,16 @@ void PrefabSpawnComponent::SpawnEntryNow(const SpawnEntry& entry_)
 {
     BS_PROFILE_SCOPE("PrefabSpawnComponent::SpawnEntryNow");
 
-    if (!entry_.enabled || entry_.prefabName.empty()) return;
+    if (!entry_.enabled || entry_.prefabName.empty())
+    {
+        return;
+    }
 
     std::shared_ptr<GameObject> spawnedObject_ = GetManager().Instantiate(entry_.prefabName);
-    if (!spawnedObject_ || !spawnedObject_->transform) return;
+    if (!spawnedObject_ || !spawnedObject_->transform)
+    {
+        return;
+    }
 
     // Prefab読込後に、シーン配置用の初期Transformで上書きする。
     spawnedObject_->transform->localPosition = entry_.position;

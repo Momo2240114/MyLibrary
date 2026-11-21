@@ -31,8 +31,12 @@ public:
 
     // 指定した音声ファイルをFMOD Soundとして読み込み、再生用AudioSourceを生成する。
     AudioSource* LoadAudioSource(const char* filename_);
+
     // 3D Listener設定など、FMOD APIを直接利用する処理へSystemを公開する。
-    FMOD::System* GetSystem() const { return system; }
+    FMOD::System* GetSystem() const
+    {
+        return system;
+    }
 
 private:
     // FMOD全体の初期化、Sound生成、再生更新を担当するSystem本体。

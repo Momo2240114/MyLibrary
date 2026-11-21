@@ -64,12 +64,21 @@ void MovementComponent::Turn(float et)
 	{
 		// 0~360度を -180~180度に変換して計算しやすくする
 		float normalizedX = nextRot.x;
-		if (normalizedX > 180.0f) normalizedX -= 360.0f;
+		if (normalizedX > 180.0f)
+		{
+			normalizedX -= 360.0f;
+		}
 
 		// クランプ処理 (m_MinPitch: 上限, m_MaxPitch: 下限)
 		// 例: -80度 ～ 80度
-		if (normalizedX < m_MinPitch) normalizedX = m_MinPitch;
-		if (normalizedX > m_MaxPitch) normalizedX = m_MaxPitch;
+		if (normalizedX < m_MinPitch)
+		{
+			normalizedX = m_MinPitch;
+		}
+		if (normalizedX > m_MaxPitch)
+		{
+			normalizedX = m_MaxPitch;
+		}
 
 		// 0~360度の仕様に戻す
 		if (normalizedX < 0.0f) {

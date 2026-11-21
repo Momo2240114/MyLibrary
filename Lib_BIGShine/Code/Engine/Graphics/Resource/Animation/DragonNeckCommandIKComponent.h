@@ -101,9 +101,16 @@ public:
 
     // 常時Target Objectを見るModeを切り替える。
     void SetTargetObjectLookMode(bool enabled_);
-    void SetTargetObjectName(const std::string& targetName_) { lookTargetObjectName = targetName_; }
 
-    bool IsCommandActive() const { return currentCommand.mode != DRAGON_NECK_IK_MODE::DISABLED; }
+    void SetTargetObjectName(const std::string& targetName_)
+    {
+        lookTargetObjectName = targetName_;
+    }
+
+    bool IsCommandActive() const
+    {
+        return currentCommand.mode != DRAGON_NECK_IK_MODE::DISABLED;
+    }
 
     // 口元のWorld位置/方向を取得する。BreathやVFXの基準に使う。
     bool GetMouthWorldPosition(DirectX::XMFLOAT3& position_) const;

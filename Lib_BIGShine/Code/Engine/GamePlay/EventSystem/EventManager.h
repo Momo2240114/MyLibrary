@@ -3,6 +3,7 @@
 #include<string>
 #include<map>
 #include <functional>
+
 class EventManager
 {
 public:
@@ -27,6 +28,7 @@ public:
 		// Scene切り替えなどで古いCallbackが残らないよう、Event登録を全て破棄する。
 		m_Events.clear();
 	}
+
 private:
 
 	// Header内に実体を置いても複数定義扱いにならないよう、inline staticで共有する。

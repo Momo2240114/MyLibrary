@@ -39,7 +39,12 @@ public:
     void Shutdown();
     void OnResize(int newWidth_, int newHeight_);
     void SetFullscreen(bool enabled_);
-    bool IsFullscreen() const { return fullscreen; }
+
+    bool IsFullscreen() const
+    {
+        return fullscreen;
+    }
+
     void Finalize();
     //====================================================
     // フレーム制御
@@ -50,44 +55,171 @@ public:
     //====================================================
     // アクセッサ
     //====================================================
-    ID3D11Device* GetDevice() const { return device.Get(); }
-    ID3D11DeviceContext* GetContext() const { return immediateContext.Get(); }
-    IDXGISwapChain* GetSwapChain() const { return swapChain.Get(); }
-    BS_PROFILE_GPU_CONTEXT_HANDLE GetTracyGpuContext() const { return tracyGpuContext; }
-    ID3D11RenderTargetView* GetRenderTargetView() const { return renderTargetView.Get(); }
-    ID3D11DepthStencilView* GetDepthStencilView() const { return depthStencilView.Get(); }
-    ID3D11ShaderResourceView* GetMainDepthSRV() const { return depthStencilSRV.Get(); }
-    HWND GetWindowHandle() { return windowHandle; }
-    ShapeRenderSystem& GetShapeRendererSystem() { return shapeRendererSystem; }
-    // レンダーステート取得
-    RenderState* GetRenderState() { return renderState.get(); }
-    // アクセッサ欄に追加
-    ID3D11ShaderResourceView* GetSceneSRV(){ return sceneSRV.Get(); }
-    ID3D11RenderTargetView* GetSceneViewRenderTargetView() const { return sceneViewRTV.Get(); }
-    ID3D11ShaderResourceView* GetSceneViewSRV() const { return sceneViewSRV.Get(); }
-    int GetRenderWidth() const { return width; }
-    int GetRenderHeight() const { return height; }
-    ID3D11ShaderResourceView* GetNormalSRV() { return gBufferNormalSRV.Get(); }
-    ID3D11ShaderResourceView* GetSceneNormalSRV() { return sceneNormalSRV.Get(); }
-    ID3D11ShaderResourceView* GetSceneDistortionSRV() { return sceneDistortionSRV.Get(); }
-    bool IsSceneDistortionUsed() const { return sceneDistortionUsed; }
-    ID3D11ShaderResourceView* GetGBufferBaseColorSRV() { return gBufferBaseColorSRV.Get(); }
-    ID3D11ShaderResourceView* GetGBufferNormalSRV() { return gBufferNormalSRV.Get(); }
-    ID3D11ShaderResourceView* GetGBufferMaterialSRV() { return gBufferMaterialSRV.Get(); }
-    ID3D11ShaderResourceView* GetGBufferEmissiveSRV() { return gBufferEmissiveSRV.Get(); }
-    ID3D11ShaderResourceView* GetGBufferStyleSRV() { return gBufferStyleSRV.Get(); }
+    ID3D11Device* GetDevice() const
+    {
+        return device.Get();
+    }
 
-    ID3D11ShaderResourceView* GetIBLDiffuseSRV() { return iblDiffuseIemSRV.Get(); }
-    ID3D11ShaderResourceView* GetIBLSpecularSRV() { return iblSpecularPmremSRV.Get(); }
-    ID3D11ShaderResourceView* GetIBLLutGGXSRV() { return iblLutGgxSRV.Get(); }
-    const std::wstring& GetIBLSpecularHdrPath() const { return iblSpecularHdrPath; }
-    float GetIBLHdrIntensity() const { return iblHdrIntensity; }
-    const std::string& GetLastIBLError() const { return lastIBLError; }
+    ID3D11DeviceContext* GetContext() const
+    {
+        return immediateContext.Get();
+    }
+
+    IDXGISwapChain* GetSwapChain() const
+    {
+        return swapChain.Get();
+    }
+
+    BS_PROFILE_GPU_CONTEXT_HANDLE GetTracyGpuContext() const
+    {
+        return tracyGpuContext;
+    }
+
+    ID3D11RenderTargetView* GetRenderTargetView() const
+    {
+        return renderTargetView.Get();
+    }
+
+    ID3D11DepthStencilView* GetDepthStencilView() const
+    {
+        return depthStencilView.Get();
+    }
+
+    ID3D11ShaderResourceView* GetMainDepthSRV() const
+    {
+        return depthStencilSRV.Get();
+    }
+
+    HWND GetWindowHandle()
+    {
+        return windowHandle;
+    }
+
+    ShapeRenderSystem& GetShapeRendererSystem()
+    {
+        return shapeRendererSystem;
+    }
+
+    // レンダーステート取得
+    RenderState* GetRenderState()
+    {
+        return renderState.get();
+    }
+
+    // アクセッサ欄に追加
+    ID3D11ShaderResourceView* GetSceneSRV()
+    {
+        return sceneSRV.Get();
+    }
+
+    ID3D11RenderTargetView* GetSceneViewRenderTargetView() const
+    {
+        return sceneViewRTV.Get();
+    }
+
+    ID3D11ShaderResourceView* GetSceneViewSRV() const
+    {
+        return sceneViewSRV.Get();
+    }
+
+    int GetRenderWidth() const
+    {
+        return width;
+    }
+
+    int GetRenderHeight() const
+    {
+        return height;
+    }
+
+    ID3D11ShaderResourceView* GetNormalSRV()
+    {
+        return gBufferNormalSRV.Get();
+    }
+
+    ID3D11ShaderResourceView* GetSceneNormalSRV()
+    {
+        return sceneNormalSRV.Get();
+    }
+
+    ID3D11ShaderResourceView* GetSceneDistortionSRV()
+    {
+        return sceneDistortionSRV.Get();
+    }
+
+    bool IsSceneDistortionUsed() const
+    {
+        return sceneDistortionUsed;
+    }
+
+    ID3D11ShaderResourceView* GetGBufferBaseColorSRV()
+    {
+        return gBufferBaseColorSRV.Get();
+    }
+
+    ID3D11ShaderResourceView* GetGBufferNormalSRV()
+    {
+        return gBufferNormalSRV.Get();
+    }
+
+    ID3D11ShaderResourceView* GetGBufferMaterialSRV()
+    {
+        return gBufferMaterialSRV.Get();
+    }
+
+    ID3D11ShaderResourceView* GetGBufferEmissiveSRV()
+    {
+        return gBufferEmissiveSRV.Get();
+    }
+
+    ID3D11ShaderResourceView* GetGBufferStyleSRV()
+    {
+        return gBufferStyleSRV.Get();
+    }
+
+    ID3D11ShaderResourceView* GetIBLDiffuseSRV()
+    {
+        return iblDiffuseIemSRV.Get();
+    }
+
+    ID3D11ShaderResourceView* GetIBLSpecularSRV()
+    {
+        return iblSpecularPmremSRV.Get();
+    }
+
+    ID3D11ShaderResourceView* GetIBLLutGGXSRV()
+    {
+        return iblLutGgxSRV.Get();
+    }
+
+    const std::wstring& GetIBLSpecularHdrPath() const
+    {
+        return iblSpecularHdrPath;
+    }
+
+    float GetIBLHdrIntensity() const
+    {
+        return iblHdrIntensity;
+    }
+
+    const std::string& GetLastIBLError() const
+    {
+        return lastIBLError;
+    }
+
     bool ReloadIBLTextures();
     bool ReloadIBLTextures(const std::wstring& specularHdrPath_, float hdrIntensity_);
 
-    CascadeShadowMap& GetCascadeShadowMap() { return cascadeShadowMap; }
-    PostRenderSystem& GetPostRenderSystem() { return postRenderSystem; }
+    CascadeShadowMap& GetCascadeShadowMap()
+    {
+        return cascadeShadowMap;
+    }
+
+    PostRenderSystem& GetPostRenderSystem()
+    {
+        return postRenderSystem;
+    }
+
     //====================================================
     // Instanceアクセッサ
     //====================================================
@@ -97,14 +229,45 @@ public:
     }
 
     // ブルーム設定の取得・操作用
-    BloomSystem::Parameters& GetBloomParams() { return bloomParams; }
-    RadialBlurSystem::Parameters& GetRadialBlurParams() { return radialBlurParams; }
-    XeGtaoSystem::Parameters& GetXeGtaoParams() { return xeGtaoParams; }
-    MotionBlurSystem::Parameters& GetMotionBlurParams() { return motionBlurParams; }
-    VignetteSystem::Parameters& GetVignetteParams() { return vignetteParams; }
-    FogSystem::Parameters& GetFogParams() { return fogParams; }
-    FxaaSystem::Parameters& GetFxaaParams() { return fxaaParams; }
-    BloomSystem::CbColorFilter& GetFilterParams() { return filterParams; }
+    BloomSystem::Parameters& GetBloomParams()
+    {
+        return bloomParams;
+    }
+
+    RadialBlurSystem::Parameters& GetRadialBlurParams()
+    {
+        return radialBlurParams;
+    }
+
+    XeGtaoSystem::Parameters& GetXeGtaoParams()
+    {
+        return xeGtaoParams;
+    }
+
+    MotionBlurSystem::Parameters& GetMotionBlurParams()
+    {
+        return motionBlurParams;
+    }
+
+    VignetteSystem::Parameters& GetVignetteParams()
+    {
+        return vignetteParams;
+    }
+
+    FogSystem::Parameters& GetFogParams()
+    {
+        return fogParams;
+    }
+
+    FxaaSystem::Parameters& GetFxaaParams()
+    {
+        return fxaaParams;
+    }
+
+    BloomSystem::CbColorFilter& GetFilterParams()
+    {
+        return filterParams;
+    }
 
     // パーティクルはカラーバッファにだけ影響を与えたい
     void SetParticleRenderTarget();
@@ -123,12 +286,28 @@ public:
     // ブルーム調整用GUI
     void ResetFilter();
     void PlayDamageVignette();
-    void ResetDamageVignette() { damageVignetteEndTime = 0; }
+
+    void ResetDamageVignette()
+    {
+        damageVignetteEndTime = 0;
+    }
+
     float GetDamageVignetteOpacity() const;
+    const std::vector<LayerPostEffectSettings>& GetLayerPostEffects() const
+    {
+        return layerPostEffects;
+    }
+
+    void ClearLayerPostEffects()
+    {
+        layerPostEffects.clear();
+    }
+
     void DrawPostEffectGuiContent();
     void ShowPostEffectGui();
     void SerializePostEffectSettings(nlohmann::json& json_) const;
     void DeserializePostEffectSettings(const nlohmann::json& json_);
+
 private:
     ShapeRenderSystem shapeRendererSystem;
     PostRenderSystem postRenderSystem;
@@ -163,6 +342,7 @@ public:
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> sceneNormalSRV;
     Microsoft::WRL::ComPtr<ID3D11RenderTargetView>   sceneDistortionRTV;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> sceneDistortionSRV;
+
 private:
 
     HWND											windowHandle = nullptr;
@@ -197,6 +377,7 @@ private:
     bool CreateDepthStencil();
     void ReleaseResources();
     void SetRenderTargets();
+
 private:
     // --- ブルーム関連リソース ---
     BloomSystem bloomSystem;
@@ -208,6 +389,7 @@ private:
     VignetteSystem::Parameters vignetteParams;
     FogSystem::Parameters fogParams;
     FxaaSystem::Parameters fxaaParams;
+    std::vector<LayerPostEffectSettings> layerPostEffects;
     uint64_t damageVignetteEndTime = 0;
 
     CascadeShadowMap cascadeShadowMap;

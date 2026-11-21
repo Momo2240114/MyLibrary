@@ -61,7 +61,9 @@ float4 main(float4 pos : SV_POSITION, float2 uv : TEXCOORD0) : SV_TARGET
 
     // 安全のためNaN/Infガード
     if (any(isnan(bloom)) || any(isinf(bloom)))
+    {
         bloom = 0;
+    }
 
     // 1. ブルーム合成
     float3 combined = base + (bloom * g_intensity);
@@ -69,7 +71,9 @@ float4 main(float4 pos : SV_POSITION, float2 uv : TEXCOORD0) : SV_TARGET
     // 露出とToneMappingを一か所に集約し、表示用の色へ変換する。
     combined = max(0.0f, combined) * max(0.0f, g_exposure);
     if (g_toneMappingEnabled > 0.5f)
+    {
         combined = ToneMapACES(combined);
+    }
     combined = pow(max(combined, 0.0f), 1.0f / 2.2f);
 
     float3 original = combined; // フィルタ適用前の色を保存

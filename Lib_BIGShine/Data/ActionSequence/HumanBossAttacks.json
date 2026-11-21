@@ -2,6 +2,20 @@
   "RegisterGlobal": false,
   "Sequences": [
     {
+      "name": "HumanBoss_ComboTell",
+      "duration": 1.0,
+      "completionAction": "",
+      "actions": [
+        {
+          "cat": "HumanBoss",
+          "name": "ActionEnd",
+          "time": 0.5,
+          "animationState": "SS_Take",
+          "useNormalizedTime": true
+        }
+      ]
+    },
+    {
       "name": "HumanBoss_COMBO_PATTERN_01",
       "duration": 1.0,
       "completionAction": "",

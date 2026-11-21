@@ -14,7 +14,11 @@ public:
     explicit AssetBrowserWindow(GameObjectManager* manager_);
     void Draw() override;
     void DrawContent();
-    void SetPrefabOpenHandler(std::function<void(const std::filesystem::path&)> handler_) { prefabOpenHandler = handler_; }
+
+    void SetPrefabOpenHandler(std::function<void(const std::filesystem::path&)> handler_)
+    {
+        prefabOpenHandler = handler_;
+    }
 
 private:
     enum class AssetType

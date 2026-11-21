@@ -925,6 +925,9 @@
     <ClCompile Include="Code\Engine\GamePlay\Camera\CameraLockOnComponent.cpp">
       <Filter>Code\Engine\GamePlay\Camera</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\Camera\SpecialAttackCameraComponent.cpp">
+      <Filter>Code\Engine\GamePlay\Camera</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\GamePlay\Camera\CombatCameraCompositionComponent.cpp">
       <Filter>Code\Engine\GamePlay\Camera</Filter>
     </ClCompile>
@@ -1764,6 +1767,9 @@
     <ClInclude Include="Code\Engine\GamePlay\Camera\CameraLockOnComponent.h">
       <Filter>Code\Engine\GamePlay\Camera</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\Camera\SpecialAttackCameraComponent.h">
+      <Filter>Code\Engine\GamePlay\Camera</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Engine\GamePlay\Camera\CombatCameraCompositionComponent.h">
       <Filter>Code\Engine\GamePlay\Camera</Filter>
     </ClInclude>
@@ -2400,6 +2406,12 @@
       <Filter>Shaders\PostEffect</Filter>
     </FxCompile>
     <FxCompile Include="Shader\MotionVelocityNeighborMaxPS.hlsl">
+      <Filter>Shaders\PostEffect</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\LayerModelMaskPS.hlsl">
+      <Filter>Shaders\PostEffect</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\LayerPostEffectPS.hlsl">
       <Filter>Shaders\PostEffect</Filter>
     </FxCompile>
     <FxCompile Include="Shader\PostDistortionPS.hlsl">

@@ -12,6 +12,7 @@ public:
 		static std::string name = "Input";
 		return name;
 	}
+
 	// GameObjectに付ける入力処理の入口。現状は派生/拡張用の空Component。
 	void Update(float deltaTime);
 };

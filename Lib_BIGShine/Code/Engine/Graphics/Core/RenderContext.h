@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <cstdint>
 #include <memory>
 #include <algorithm>
 #include <d3d11.h>
@@ -12,6 +13,14 @@
 #include "Engine/Graphics/RenderSystem/CascadeShadowMap.h"
 
 class ShapeRenderSystem;
+
+enum class LayerCaptureMode : uint32_t
+{
+    DEPTH = 0,
+    BLOOM_COLOR = 1,
+    MODEL_VELOCITY = 2,
+    SILHOUETTE_EXCLUSION = 3
+};
 
 // ===========================
 // RenderContext
@@ -30,6 +39,11 @@ struct RenderContext
     ID3D11RenderTargetView* backBufferRTV = nullptr;
     ID3D11ShaderResourceView* depthSRV = nullptr;    // 現在の深度バッファのSRV
     ID3D11ShaderResourceView* baseColorSRV = nullptr;
+    ID3D11DepthStencilView* layerDepthTarget = nullptr;
+    ID3D11PixelShader* layerModelMaskShader = nullptr;
+    ID3D11RenderTargetView* layerColorTarget = nullptr;
+    LayerCaptureMode layerCaptureMode = LayerCaptureMode::DEPTH;
+    DirectX::XMFLOAT2 layerPixelSize{};
     ShapeRenderSystem* shapeSystem = nullptr;        // Boxメッシュの供給源
 
     CascadeShadowMap* cascadeShadowMap = nullptr;

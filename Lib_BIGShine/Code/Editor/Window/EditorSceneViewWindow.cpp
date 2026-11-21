@@ -47,7 +47,9 @@ void EditorSceneViewWindow::Draw()
         ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
     // カメラ設定の変更後も、操作開始時に現在の視点を引き継ぐ。
     if (previewHovered_ && ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+    {
         editorCameraData.CaptureFromCamera(*editorCamera_);
+    }
     editorCameraData.UpdatePreviewFreeCamera(
         *editorCamera_,
         ImGui::GetIO().DeltaTime,
@@ -86,19 +88,30 @@ void EditorSceneViewWindow::Draw()
 
 std::shared_ptr<CameraComponent> EditorSceneViewWindow::ResolveEditorCamera()
 {
-    if (!gameObjectManager) return nullptr;
+    if (!gameObjectManager)
+    {
+        return nullptr;
+    }
 
     CameraManager* cameraManager_ = gameObjectManager->GetCameraManager();
-    if (!cameraManager_) return nullptr;
+    if (!cameraManager_)
+    {
+        return nullptr;
+    }
 
     std::shared_ptr<CameraComponent> editorCamera_ = cameraManager_->GetEditorCamera();
-    if (!editorCamera_) return nullptr;
+    if (!editorCamera_)
+    {
+        return nullptr;
+    }
 
     if (!initializedFromRuntimeCamera)
     {
         // Editorでは中央ビューの視点を維持し、実行中だけゲームカメラを初期値にする。
         if (!gameObjectManager->SupportsEditorPlayMode() || gameObjectManager->GetEditorPlayMode() != EditorPlayMode::EDITOR)
+        {
             cameraManager_->CopyActiveCameraToEditorCamera();
+        }
         editorCameraData.CaptureFromCamera(*editorCamera_);
         initializedFromRuntimeCamera = true;
     }
@@ -108,7 +121,10 @@ std::shared_ptr<CameraComponent> EditorSceneViewWindow::ResolveEditorCamera()
 
 void EditorSceneViewWindow::DrawMenuBarContent(const std::shared_ptr<CameraComponent>& editorCamera_)
 {
-    if (!ImGui::BeginMenuBar()) return;
+    if (!ImGui::BeginMenuBar())
+    {
+        return;
+    }
 
     if (ImGui::BeginMenu("Camera"))
     {
@@ -139,7 +155,10 @@ void EditorSceneViewWindow::DrawMenuBarContent(const std::shared_ptr<CameraCompo
 
 void EditorSceneViewWindow::DrawCameraSettings(const std::shared_ptr<CameraComponent>& editorCamera_)
 {
-    if (!editorCamera_) return;
+    if (!editorCamera_)
+    {
+        return;
+    }
 
     if (ImGui::CollapsingHeader("Editor Camera", ImGuiTreeNodeFlags_DefaultOpen))
     {
@@ -166,16 +185,25 @@ void EditorSceneViewWindow::RenderEditorSceneView(const std::shared_ptr<CameraCo
 {
     BS_PROFILE_SCOPE("EditorSceneViewWindow::RenderEditorSceneView");
 
-    if (!gameObjectManager || !spriteRenderSystem || !modelRenderSystem || !editorCamera_) return;
+    if (!gameObjectManager || !spriteRenderSystem || !modelRenderSystem || !editorCamera_)
+    {
+        return;
+    }
 
     GraphicsDeviceManager& graphics_ = GraphicsDeviceManager::Instance();
     ID3D11Device* device_ = graphics_.GetDevice();
     ID3D11DeviceContext* context_ = graphics_.GetContext();
-    if (!device_ || !context_) return;
+    if (!device_ || !context_)
+    {
+        return;
+    }
 
     const int renderWidth_ = (std::max)(1, graphics_.GetRenderWidth());
     const int renderHeight_ = (std::max)(1, graphics_.GetRenderHeight());
-    if (!sceneViewTarget.Resize(device_, renderWidth_, renderHeight_)) return;
+    if (!sceneViewTarget.Resize(device_, renderWidth_, renderHeight_))
+    {
+        return;
+    }
 
     editorCamera_->SetPerspectiveFov(
         editorCamera_->GetFovY(),

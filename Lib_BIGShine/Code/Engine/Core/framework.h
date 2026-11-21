@@ -55,12 +55,14 @@ private:
 	void render(float elapsedTime/*Elapsed seconds from last frame*/);
 	bool uninitialize();
 	void GuiDraw();
+
 private:
 	// FPS計測は累積時間を使い、開発用構成だけでWindowタイトルへ反映する。
 	high_resolution_timer tictoc;
     bool mouseRecaptureRequired = false;
 	uint32_t frames_per_second{ 0 };
 	float count_by_seconds{ 0.0f };
+
 	void calculate_frame_stats()
 	{
 		if (++frames_per_second, (tictoc.time_stamp() - count_by_seconds) >= 1.0f)

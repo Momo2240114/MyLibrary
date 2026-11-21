@@ -78,6 +78,7 @@ public:
         static const std::string NAME = "ActorPresentationActionComponent";
         return NAME;
     }
+
     // Scene開始時に設定済みActionを公開する。
     void Start() override;
     void OnDestroy() override;
@@ -105,6 +106,7 @@ private:
         std::weak_ptr<GameObject> actor;
         std::vector<std::pair<std::weak_ptr<Component>, bool>> componentStates;
     };
+
     // 重複停止では状態を保存し直さず、復帰時に最初の状態を戻す。
     void SetActorFrozen(const std::shared_ptr<GameObject>& actor_, bool frozen_);
     std::vector<FrozenActor> frozenActors;

@@ -98,7 +98,7 @@ cbuffer CbMeshVFX : register(b0)
     uint useFresnelNoise;
     uint useBackFaceBoost;
     
-    uint meshVFXPadding;
+    uint layerMaskPass;
 
     uint baseSamplerMode;
     uint maskSamplerMode;

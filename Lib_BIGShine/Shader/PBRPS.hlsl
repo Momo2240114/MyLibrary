@@ -99,7 +99,9 @@ PS_OUT main(VS_OUT pin)
     // --- 1. テクスチャのサンプリング ---
     float4 base = BaseMap.Sample(LinearSampler, pin.texcoord) * baseColor * 0.8f;
     if (base.a < 0.1f)
+    {
         discard;
+    }
 
     float3 N = normalize(pin.normal);
     float3 T = normalize(pin.tangent.xyz);
@@ -154,7 +156,9 @@ PS_OUT main(VS_OUT pin)
         float3 Lvec = pl.position - pin.position;
         float d = length(Lvec);
         if (d > pl.range)
+        {
             continue;
+        }
 
         float3 L = normalize(Lvec);
         float3 H = normalize(L + V);
@@ -180,7 +184,9 @@ PS_OUT main(VS_OUT pin)
         float3 Lvec = sl.position - pin.position;
         float d = length(Lvec);
         if (d > sl.range)
+        {
             continue;
+        }
 
         float3 L = normalize(Lvec);
         float cosAngle = dot(normalize(sl.direction), -L);
@@ -189,7 +195,9 @@ PS_OUT main(VS_OUT pin)
         float spotAtt = saturate((cosAngle - cosOuter) / (cosInner - cosOuter));
         spotAtt *= spotAtt;
         if (spotAtt <= 0.0f)
+        {
             continue;
+        }
 
         float3 H = normalize(L + V);
         float NdotL = saturate(dot(N, L));

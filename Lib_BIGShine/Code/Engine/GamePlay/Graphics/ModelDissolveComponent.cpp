@@ -17,7 +17,10 @@ void ModelDissolveComponent::Start()
 void ModelDissolveComponent::RegisterActions()
 {
     const auto owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
     const std::weak_ptr<GameObject> weakOwner_ = owner_;
     const auto register_ = [&](const std::string& name_, bool reveal_, bool reset_)
     {
@@ -25,9 +28,18 @@ void ModelDissolveComponent::RegisterActions()
         {
             const auto owner_ = weakOwner_.lock();
             const auto component_ = owner_ ? owner_->GetComponent<ModelDissolveComponent>() : nullptr;
-            if (!component_) return;
-            if (reset_) component_->Reset(reveal_);
-            else component_->Play(reveal_);
+            if (!component_)
+            {
+                return;
+            }
+            if (reset_)
+            {
+                component_->Reset(reveal_);
+            }
+            else
+            {
+                component_->Play(reveal_);
+            }
         });
     };
     register_("DissolveOut", false, false);
@@ -48,7 +60,9 @@ void ModelDissolveComponent::Reset(bool visible_)
     progress = visible_ ? 0.0f : 1.0f;
     const auto owner_ = GetGameObject();
     if (const auto model_ = owner_ ? owner_->GetComponent<GltfModelCommponennt>() : nullptr)
+    {
         model_->SetRuntimeVisible(visible_);
+    }
 }
 
 void ModelDissolveComponent::Play(bool reveal_)
@@ -62,8 +76,13 @@ void ModelDissolveComponent::Play(bool reveal_)
     // 形成中はモデルを描画キューへ戻し、Shaderのclipで輪郭を段階的に出す。
     const auto owner_ = GetGameObject();
     if (const auto model_ = owner_ ? owner_->GetComponent<GltfModelCommponennt>() : nullptr)
+    {
         model_->SetRuntimeVisible(true);
-    if (duration <= 0.0f) Reset(reveal_);
+    }
+    if (duration <= 0.0f)
+    {
+        Reset(reveal_);
+    }
 }
 
 void ModelDissolveComponent::UpdateLoadState()
@@ -81,15 +100,24 @@ void ModelDissolveComponent::Update(float deltaTime_)
     BS_PROFILE_SCOPE("ModelDissolveComponent::Update");
     // 実行中のEditor差し替えも、再生やScene再読込を待たずに読み込みへ反映する。
     UpdateLoadState();
-    if (!playing) return;
+    if (!playing)
+    {
+        return;
+    }
     const auto owner_ = GetGameObject();
     const auto model_ = owner_ ? owner_->GetComponent<GltfModelCommponennt>() : nullptr;
-    if (!model_ || !model_->IsModelReady()) return;
+    if (!model_ || !model_->IsModelReady())
+    {
+        return;
+    }
     elapsed += (std::max)(deltaTime_, 0.0f);
     const float rate_ = duration <= 0.0f ? 1.0f : std::clamp(elapsed / duration, 0.0f, 1.0f);
     const float eased_ = rate_ * rate_ * (3.0f - 2.0f * rate_);
     progress = startProgress + (targetProgress - startProgress) * eased_;
-    if (rate_ >= 1.0f) Reset(targetProgress <= 0.0f);
+    if (rate_ >= 1.0f)
+    {
+        Reset(targetProgress <= 0.0f);
+    }
 }
 
 void ModelDissolveComponent::Gui()
@@ -105,13 +133,27 @@ void ModelDissolveComponent::Gui()
     ImGui::SliderFloat("Directional Weight", &settings.directionalWeight, 0.0f, 1.0f);
     ImGui::DragFloat("Direction Extent", &settings.directionExtent, 0.1f, 0.01f, 200.0f);
     if (ImGui::InputText("Noise Texture", &noiseTexturePath))
+    {
         noiseMaterial.SetTexture(ModelMaterial::TextureSlot::NORMAL, noiseTexturePath);
-    if (ImGui::Button("Dissolve Out")) Play(false);
+    }
+    if (ImGui::Button("Dissolve Out"))
+    {
+        Play(false);
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Dissolve In")) Play(true);
-    if (ImGui::Button("Reset Visible")) Reset(true);
+    if (ImGui::Button("Dissolve In"))
+    {
+        Play(true);
+    }
+    if (ImGui::Button("Reset Visible"))
+    {
+        Reset(true);
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Reset Hidden")) Reset(false);
+    if (ImGui::Button("Reset Hidden"))
+    {
+        Reset(false);
+    }
     ImGui::Text("Progress: %.3f", progress);
 }
 
@@ -138,9 +180,13 @@ void ModelDissolveComponent::Deserialize(const nlohmann::json& json_)
     settings.directionalWeight = std::clamp(json_.value("DirectionalWeight", 0.4f), 0.0f, 1.0f);
     settings.directionExtent = (std::max)(json_.value("DirectionExtent", 10.0f), 0.01f);
     if (json_.contains("Direction") && json_["Direction"].is_array() && json_["Direction"].size() == 3)
+    {
         settings.direction = { json_["Direction"][0], json_["Direction"][1], json_["Direction"][2] };
+    }
     if (json_.contains("EdgeColor") && json_["EdgeColor"].is_array() && json_["EdgeColor"].size() == 4)
+    {
         settings.edgeColor = { json_["EdgeColor"][0], json_["EdgeColor"][1], json_["EdgeColor"][2], json_["EdgeColor"][3] };
+    }
     noiseMaterial.SetTexture(ModelMaterial::TextureSlot::NORMAL, noiseTexturePath);
 }
 

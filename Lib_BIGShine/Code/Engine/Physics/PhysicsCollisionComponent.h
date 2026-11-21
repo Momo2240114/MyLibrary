@@ -23,24 +23,44 @@ public:
     void SetSphere(float r);
     void SetCapsule(float r, float h);
 
-    void SetKinematic(bool k) { isKinematic = k; }
-    void SetUseGravity(bool g) { useGravity = g; }
+    void SetKinematic(bool k)
+    {
+        isKinematic = k;
+    }
+
+    void SetUseGravity(bool g)
+    {
+        useGravity = g;
+    }
 
     void OnCollisionEnter(std::shared_ptr<GameObject> other);
     void OnTriggerEnter(std::shared_ptr<GameObject> other);
     void OnTriggerStay(std::shared_ptr<GameObject> other);
     void OnTriggerExit(std::shared_ptr<GameObject> other);
 
-    void Start() override { CreateActor(); }
+    void Start() override
+    {
+        CreateActor();
+    }
+
     void Update(float dt) override;
 
     void Gui();
 
     // setter
-    void SetCollisionOffset(const DirectX::XMFLOAT3& off) { collisionOffset = off; }
+    void SetCollisionOffset(const DirectX::XMFLOAT3& off)
+    {
+        collisionOffset = off;
+    }
+
     void SetLockRotation(bool x, bool y, bool z) {
-        lockRotationX = x; lockRotationY = y; lockRotationZ = z;
-        if (actor) ApplyLockRotation(); // すでに生成済みなら適用
+        lockRotationX = x;
+        lockRotationY = y;
+        lockRotationZ = z;
+        if (actor)
+        {
+            ApplyLockRotation(); // すでに生成済みなら適用
+        }
     }
 
 private:

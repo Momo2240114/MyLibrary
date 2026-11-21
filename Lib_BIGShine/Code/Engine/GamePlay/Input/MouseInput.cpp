@@ -11,13 +11,22 @@ void MouseInput::RegisterRawMouse(HWND hwnd_)
 
 void MouseInput::OnRawMouseInput(HRAWINPUT input_)
 {
-    if (!m_IsCursorLocked || !rawMouseRegistered) return;
+    if (!m_IsCursorLocked || !rawMouseRegistered)
+    {
+        return;
+    }
 
     RAWINPUT raw_{};
     UINT size_ = sizeof(raw_);
     const UINT copied_ = GetRawInputData(input_, RID_INPUT, &raw_, &size_, sizeof(RAWINPUTHEADER));
-    if (copied_ == static_cast<UINT>(-1) || raw_.header.dwType != RIM_TYPEMOUSE) return;
-    if (raw_.data.mouse.usFlags & MOUSE_MOVE_ABSOLUTE) return;
+    if (copied_ == static_cast<UINT>(-1) || raw_.header.dwType != RIM_TYPEMOUSE)
+    {
+        return;
+    }
+    if (raw_.data.mouse.usFlags & MOUSE_MOVE_ABSOLUTE)
+    {
+        return;
+    }
 
     pendingRawDelta.x += static_cast<float>(raw_.data.mouse.lLastX);
     pendingRawDelta.y += static_cast<float>(raw_.data.mouse.lLastY);
@@ -55,7 +64,10 @@ void MouseInput::Update(HWND hwnd_)
     }
     else
     {
-        if (wasLocked_) ReleaseCursorLock();
+        if (wasLocked_)
+        {
+            ReleaseCursorLock();
+        }
         m_SubMousePos = !hasPosition_ || m_IsFirstMouseUpdate ? Vector2{} :
             Vector2(static_cast<float>(clientPos_.x), static_cast<float>(clientPos_.y)) - m_PrevMousePos;
     }
@@ -70,7 +82,9 @@ void MouseInput::Update(HWND hwnd_)
     // 中ボタンとサイドボタンも既存の状態取得経路で一度だけ読み取る。
     previousExtraButtons = extraButtons;
     for (std::size_t index_ = 0; index_ < extraButtons.size(); ++index_)
+    {
         extraButtons[index_] = (GetAsyncKeyState(VK_MBUTTON + static_cast<int>(index_)) & 0x8000) != 0;
+    }
     SHORT leftState_ = GetAsyncKeyState(VK_LBUTTON);
     SHORT rightState_ = GetAsyncKeyState(VK_RBUTTON);
 
@@ -100,20 +114,38 @@ bool MouseInput::GetButtonState(int buttonCode, int type) const
     // type: 0=Down(Hold), 1=Pressed(In), 2=Released(Out)
     switch (buttonCode) {
     case 0x01: // VK_LBUTTON
-        if (type == 0) return LeftDown();
-        if (type == 1) return LeftPressed();
+        if (type == 0)
+        {
+            return LeftDown();
+        }
+        if (type == 1)
+        {
+            return LeftPressed();
+        }
         return LeftReleased();
     case 0x02: // VK_RBUTTON
-        if (type == 0) return RightDown();
-        if (type == 1) return RightPressed();
+        if (type == 0)
+        {
+            return RightDown();
+        }
+        if (type == 1)
+        {
+            return RightPressed();
+        }
         return RightReleased();
     case VK_MBUTTON:
     case VK_XBUTTON1:
     case VK_XBUTTON2:
     {
         const auto index_ = static_cast<std::size_t>(buttonCode - VK_MBUTTON);
-        if (type == 0) return extraButtons[index_];
-        if (type == 1) return extraButtons[index_] && !previousExtraButtons[index_];
+        if (type == 0)
+        {
+            return extraButtons[index_];
+        }
+        if (type == 1)
+        {
+            return extraButtons[index_] && !previousExtraButtons[index_];
+        }
         return !extraButtons[index_] && previousExtraButtons[index_];
     }
     }
@@ -122,7 +154,10 @@ bool MouseInput::GetButtonState(int buttonCode, int type) const
 
 void MouseInput::ReleaseCursorLock()
 {
-    if (m_IsCursorLocked) SetCursor(LoadCursor(nullptr, IDC_ARROW));
+    if (m_IsCursorLocked)
+    {
+        SetCursor(LoadCursor(nullptr, IDC_ARROW));
+    }
     m_IsCursorLocked = false;
     m_IsFirstMouseUpdate = true;
     m_SubMousePos = Vector2{};
@@ -131,9 +166,15 @@ void MouseInput::ReleaseCursorLock()
 
 void MouseInput::SetCursorLockEnabled(bool enabled_)
 {
-    if (m_IsCursorLockEnabled == enabled_) return;
+    if (m_IsCursorLockEnabled == enabled_)
+    {
+        return;
+    }
     m_IsCursorLockEnabled = enabled_;
-    if (!enabled_) ReleaseCursorLock();
+    if (!enabled_)
+    {
+        ReleaseCursorLock();
+    }
 }
 
 //void MouseInput::GetWorldRay(const HWND hwnd)

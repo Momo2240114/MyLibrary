@@ -8,9 +8,15 @@ void CameraComponent::Start()
     BS_PROFILE_SCOPE("CameraComponent::Start");
     eventPriorityActive = false;
     // 描画用・Editor用カメラはRegistry初期化前に生成されるため、演出用カメラだけActionを登録する。
-    if (!useEventPriority) return;
+    if (!useEventPriority)
+    {
+        return;
+    }
     const auto owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
     const std::weak_ptr<GameObject> weakOwner_ = owner_;
     // Object名付きActionにして、Mainカメラの優先度を変更せず演出へ切り替える。
     owner_->RegisterGlobalAction("Camera", "ActivateEventPriority", [weakOwner_]()
@@ -18,14 +24,20 @@ void CameraComponent::Start()
         BS_PROFILE_SCOPE("CameraComponent::ActivateEventPriority");
         const auto owner_ = weakOwner_.lock();
         const auto camera_ = owner_ ? owner_->GetComponent<CameraComponent>() : nullptr;
-        if (camera_) camera_->eventPriorityActive = true;
+        if (camera_)
+        {
+            camera_->eventPriorityActive = true;
+        }
     });
     owner_->RegisterGlobalAction("Camera", "RestorePriority", [weakOwner_]()
     {
         BS_PROFILE_SCOPE("CameraComponent::RestorePriority");
         const auto owner_ = weakOwner_.lock();
         const auto camera_ = owner_ ? owner_->GetComponent<CameraComponent>() : nullptr;
-        if (camera_) camera_->eventPriorityActive = false;
+        if (camera_)
+        {
+            camera_->eventPriorityActive = false;
+        }
     });
 }
 

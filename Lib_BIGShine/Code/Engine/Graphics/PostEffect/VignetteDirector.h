@@ -24,6 +24,7 @@ public:
         static const std::string name_ = "VignetteDirector";
         return name_;
     }
+
     void Update(float elapsedTime_) override;
     void Gui() override;
     void Serialize(nlohmann::json& json_) const override;

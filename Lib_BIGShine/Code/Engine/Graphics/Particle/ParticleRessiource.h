@@ -51,7 +51,9 @@ struct Particle
 {
     DirectX::XMFLOAT4 parameter = { 0, 0, 0, 0 };      // x:スプライト番号 y:残り寿命 z:総寿命 w:描画タイプ。
     DirectX::XMFLOAT4 position = { 0, 0, 0, 1 };       // ワールド座標。wは同次座標用。
-    DirectX::XMFLOAT4 rotation = { 0, 0, 0, 0 };       // z:現在角度 w:角速度。
+    DirectX::XMFLOAT2 colorRandomRates = { 0, 0 };     // 生成時に決めた開始色・終了色の補間率。
+    float rotation = 0.0f;
+    float angularSpeed = 0.0f;
     DirectX::XMFLOAT4 scale = { 1, 1, 1, 0 };          // x/y:開始サイズ z:終了サイズ。
     DirectX::XMFLOAT4 velocity = { 0, 0, 0, 0 };       // 速度。Update_CSで位置へ積分する。
     DirectX::XMFLOAT4 acceleration = { 0, 0, 0, 0 };   // 基本加速度。重力などを入れる。
@@ -64,7 +66,9 @@ struct EmitParticleData
 {
     DirectX::XMFLOAT4 parameter = { 0, 1, 0, 0 };      // x:スプライト番号 y:初期寿命 z:未使用 w:描画タイプ。
     DirectX::XMFLOAT4 position = { 0, 0, 0, 1 };       // 生成時のワールド座標。
-    DirectX::XMFLOAT4 rotation = { 0, 0, 0, 0 };       // 生成時角度と角速度。
+    DirectX::XMFLOAT2 colorRandomRates = { 0, 0 };
+    float rotation = 0.0f;
+    float angularSpeed = 0.0f;
     DirectX::XMFLOAT4 scale = { 1, 1, 1, 0 };          // 開始サイズと終了サイズ。
     DirectX::XMFLOAT4 velocity = { 0, 0, 0, 0 };       // 生成時の初速。
     DirectX::XMFLOAT4 acceleration = { 0, 0, 0, 0 };   // 生成時の基本加速度。
@@ -131,7 +135,7 @@ struct ParticleSystemConstants
 
     uint32_t useColorOverLife = 0;        // 寿命に応じた色補間を行うか。
     uint32_t useRandomSize = 0;           // サイズにランダム倍率を掛けるか。
-    uint32_t padding0 = 0;                // HLSLとの16byteアライン用。
+    uint32_t useRandomColor = 0;          // 粒子ごとに色の補間率を変えるか。
     uint32_t padding1 = 0;                // HLSLとの16byteアライン用。
 
     DirectX::XMUINT2 textureSplitCount = { 1, 1 };    // スプライトシートの列数/行数。
@@ -181,7 +185,11 @@ struct ParticleSystemConstants
     float shadeGradientEndUv = 1.0f;
     uint32_t shadeGradientSampleMode = PARTICLE_GRADIENT_SAMPLE_MODE_HORIZONTAL;
     uint32_t shadeGradientDirection = PARTICLE_GRADIENT_DIRECTION_FORWARD;
+
+    DirectX::XMFLOAT4 randomColorStart = { 1, 1, 1, 1 };
+    DirectX::XMFLOAT4 randomColorEnd = { 1, 1, 1, 1 };
 };
+
 static_assert(sizeof(ParticleSystemConstants) % 16 == 0);
 
 struct particle_system_settings

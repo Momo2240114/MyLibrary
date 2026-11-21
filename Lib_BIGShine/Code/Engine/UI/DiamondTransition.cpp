@@ -2,8 +2,19 @@
 #include "DiamondTransition.h"
 #include <imgui.h>
 #include "Engine/Debug/TracyProfiler.h"
-namespace { const bool REGISTERED = TransitionEffectFactory::Register("DIAMOND",[]() { return std::make_unique<DiamondTransition>(); }); }
-DiamondTransition::DiamondTransition() : ShaderTransitionEffect("Data/Shader/DiamondTransitionPS.cso") {}
+
+namespace
+{
+    const bool REGISTERED = TransitionEffectFactory::Register("DIAMOND",[]()
+    {
+        return std::make_unique<DiamondTransition>();
+    });
+}
+
+DiamondTransition::DiamondTransition() : ShaderTransitionEffect("Data/Shader/DiamondTransitionPS.cso")
+{
+}
+
 // 固有の形状設定を共通Inspectorへ公開する。
 void DiamondTransition::Gui(TransitionParameters& parameters_)
 {

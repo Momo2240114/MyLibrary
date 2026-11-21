@@ -20,7 +20,10 @@ void TransformDirector::Update(float et)
 {
     auto go = GetGameObject();
     auto easingComp = go->GetComponent<EasingComponent>();
-    if (!isMoving || !easingComp) return;
+    if (!isMoving || !easingComp)
+    {
+        return;
+    }
 
     float easedT = easingComp->GetValue(easingIndex);
 
@@ -31,7 +34,10 @@ void TransformDirector::Update(float et)
         go->transform->localRotation = LerpVector(startAngle, targetAngle, easedT);
         go->transform->localScale = LerpVector(startScale, targetScale, easedT);
         go->transform->MarkDirty();
-        if (easingComp->GetEndFlag(easingIndex)) isMoving = false;
+        if (easingComp->GetEndFlag(easingIndex))
+        {
+            isMoving = false;
+        }
     }
      else
      {
@@ -77,8 +83,11 @@ void TransformDirector::Update(float et)
          go->transform->localRotation.z = DirectX::XMConvertToDegrees(angle.z);
 
          go->transform->MarkDirty();
-         if (easingComp->GetEndFlag(easingIndex)) isMoving = false;
-     }
+         if (easingComp->GetEndFlag(easingIndex))
+        {
+            isMoving = false;
+        }
+    }
 }
 
 void TransformDirector::PlayMove(const TransformWayPoint& wp, EasingType type)
@@ -127,8 +136,15 @@ void TransformDirector::Gui()
                 wp.easing = (EasingType)currentEasing;
             }
 
-            if (ImGui::Button("Play")) PlayMove(wp, wp.easing);
-            if (ImGui::Button("Remove")) { EditorWaypoints.erase(EditorWaypoints.begin() + i); i--; }
+            if (ImGui::Button("Play"))
+            {
+                PlayMove(wp, wp.easing);
+            }
+            if (ImGui::Button("Remove"))
+            {
+                EditorWaypoints.erase(EditorWaypoints.begin() + i);
+                i--;
+            }
 
             //現在の座標から加算するモーションを作る
             ImGui::Checkbox("AddWorldMatrix",&wp.m_AddFlag);
@@ -184,7 +200,10 @@ void TransformDirector::Serialize(nlohmann::json& j) const
 
 void TransformDirector::Deserialize(const nlohmann::json& j)
 {
-    if (!j.contains("TransformWaypoints") || !j["TransformWaypoints"].is_array()) return;
+    if (!j.contains("TransformWaypoints") || !j["TransformWaypoints"].is_array())
+    {
+        return;
+    }
 
     EditorWaypoints.clear();
     for (const auto& wj : j["TransformWaypoints"]) {
@@ -207,6 +226,7 @@ void TransformDirector::Deserialize(const nlohmann::json& j)
         EditorWaypoints.push_back(wp);
     }
 }
+
 void TransformDirector::CaptureCurrentState()
 {
     TransformWayPoint wp;
@@ -230,7 +250,10 @@ void TransformDirector::PlayMoveByIndex(int idx)
 void TransformDirector::RegisterActions()
 {
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     for (int i = 0; i < (int)EditorWaypoints.size(); ++i) {
         const std::string actionName_ = "Trans_" + std::to_string(i);

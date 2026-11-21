@@ -24,7 +24,10 @@ void CombatObservationComponent::SetSystem(const std::shared_ptr<CombatObservati
 void CombatObservationComponent::Gui()
 {
     BS_PROFILE_SCOPE("CombatObservationComponent::Gui");
-    if (system) system->Gui();
+    if (system)
+    {
+        system->Gui();
+    }
 }
  
 REGISTER_COMPONENT(CombatObservationComponent, "CombatObservationComponent")

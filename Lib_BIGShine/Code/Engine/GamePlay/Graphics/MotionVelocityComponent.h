@@ -21,24 +21,85 @@ public:
     void ResetHistory();
 
     // previousWorldが有効かどうか。
-    bool HasHistory() const { return hasHistory; }
-    bool IsVelocityEnabled() const { return velocityEnabled; }
-    float GetVelocityScale() const { return velocityScale; }
-    bool ShouldAffectModel() const { return affectModel; }
-    bool ShouldAffectParticle() const { return affectParticle; }
-    bool ShouldAffectMeshVFX() const { return affectMeshVFX; }
-    float GetModelVelocityScale() const { return modelVelocityScale; }
-    float GetParticleVelocityScale() const { return particleVelocityScale; }
-    float GetMeshVFXVelocityScale() const { return meshVFXVelocityScale; }
+    bool HasHistory() const
+    {
+        return hasHistory;
+    }
 
-    void SetVelocityEnabled(bool velocityEnabled_) { velocityEnabled = velocityEnabled_; }
-    void SetVelocityScale(float velocityScale_) { velocityScale = ClampScale(velocityScale_); }
-    void SetAffectModel(bool affectModel_) { affectModel = affectModel_; }
-    void SetAffectParticle(bool affectParticle_) { affectParticle = affectParticle_; }
-    void SetAffectMeshVFX(bool affectMeshVFX_) { affectMeshVFX = affectMeshVFX_; }
+    bool IsVelocityEnabled() const
+    {
+        return velocityEnabled;
+    }
 
-    const DirectX::XMFLOAT4X4& GetCurrentWorld() const { return currentWorld; }
-    const DirectX::XMFLOAT4X4& GetPreviousWorld() const { return previousWorld; }
+    float GetVelocityScale() const
+    {
+        return velocityScale;
+    }
+
+    bool ShouldAffectModel() const
+    {
+        return affectModel;
+    }
+
+    bool ShouldAffectParticle() const
+    {
+        return affectParticle;
+    }
+
+    bool ShouldAffectMeshVFX() const
+    {
+        return affectMeshVFX;
+    }
+
+    float GetModelVelocityScale() const
+    {
+        return modelVelocityScale;
+    }
+
+    float GetParticleVelocityScale() const
+    {
+        return particleVelocityScale;
+    }
+
+    float GetMeshVFXVelocityScale() const
+    {
+        return meshVFXVelocityScale;
+    }
+
+    void SetVelocityEnabled(bool velocityEnabled_)
+    {
+        velocityEnabled = velocityEnabled_;
+    }
+
+    void SetVelocityScale(float velocityScale_)
+    {
+        velocityScale = ClampScale(velocityScale_);
+    }
+
+    void SetAffectModel(bool affectModel_)
+    {
+        affectModel = affectModel_;
+    }
+
+    void SetAffectParticle(bool affectParticle_)
+    {
+        affectParticle = affectParticle_;
+    }
+
+    void SetAffectMeshVFX(bool affectMeshVFX_)
+    {
+        affectMeshVFX = affectMeshVFX_;
+    }
+
+    const DirectX::XMFLOAT4X4& GetCurrentWorld() const
+    {
+        return currentWorld;
+    }
+
+    const DirectX::XMFLOAT4X4& GetPreviousWorld() const
+    {
+        return previousWorld;
+    }
 
 private:
     // Velocity倍率は負値にならないように丸める。

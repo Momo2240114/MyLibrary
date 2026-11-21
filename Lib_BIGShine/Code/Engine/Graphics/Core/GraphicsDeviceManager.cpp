@@ -10,7 +10,9 @@
 #include <SDL3/SDL_timer.h>
 #include <d3d11sdklayers.h>
 #include <dxgidebug.h>
+#include <utility>
 
+#include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/Graphics/Core/CPUResourceLoader.h"
 #include "Engine/Graphics/Particle/ParticleEmitter.h"
 #include "Engine/Graphics/Resource/HDRTexture.h"
@@ -29,7 +31,10 @@ namespace
 {
     void UnbindShaderResourceViews(ID3D11DeviceContext* deviceContext_)
     {
-        if (!deviceContext_) return;
+        if (!deviceContext_)
+        {
+            return;
+        }
 
         ID3D11ShaderResourceView* nullShaderResources_[D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT] = {};
         // Render-target hazards in this renderer come from post/scene sampling.
@@ -40,7 +45,10 @@ namespace
 
     void ReportLiveDeviceObjects(ID3D11Device* device_)
     {
-        if (!device_) return;
+        if (!device_)
+        {
+            return;
+        }
 
 #if defined(DEBUG) || defined(_DEBUG)
         Microsoft::WRL::ComPtr<ID3D11Debug> debugDevice_;
@@ -63,7 +71,10 @@ namespace
             HRESULT(WINAPI*)(REFIID riid_, void** debugInterface_);
 
         HMODULE dxgiDebugModule_ = LoadLibraryW(L"dxgidebug.dll");
-        if (!dxgiDebugModule_) return;
+        if (!dxgiDebugModule_)
+        {
+            return;
+        }
 
         auto getDebugInterface_ = reinterpret_cast<DXGIGetDebugInterfaceFunc>(
             GetProcAddress(dxgiDebugModule_, "DXGIGetDebugInterface"));
@@ -447,6 +458,7 @@ void GraphicsDeviceManager::Shutdown()
     device.Reset();
     ReportLiveDxgiObjects();
 }
+
 /**
  * @brief ウィンドウサイズ変更時に呼び出される
  * @param newWidth_ 新しい幅
@@ -657,6 +669,7 @@ void GraphicsDeviceManager::SetParticleRenderTargetWithDistortion()
     ID3D11RenderTargetView* renderTargets_[] = { sceneRTV.Get(), sceneDistortionRTV.Get() };
     immediateContext->OMSetRenderTargets(2, renderTargets_, depthStencilView.Get());
 }
+
 void GraphicsDeviceManager::SetBackBufferRenderTarget()
 {
     UnbindShaderResourceViews(immediateContext.Get());
@@ -666,7 +679,10 @@ void GraphicsDeviceManager::SetBackBufferRenderTarget()
 
 void GraphicsDeviceManager::ClearSceneRenderTargets(const float clearColor_[4])
 {
-    if (!immediateContext) return;
+    if (!immediateContext)
+    {
+        return;
+    }
 
     sceneDistortionUsed = false;
     UnbindShaderResourceViews(immediateContext.Get());
@@ -749,7 +765,10 @@ void GraphicsDeviceManager::ResolveBloom(const RenderContext& rc) {
 
 void GraphicsDeviceManager::RenderSkyBox(const RenderContext& rc)
 {
-    if (rc.suppressSkybox) return;
+    if (rc.suppressSkybox)
+    {
+        return;
+    }
     ID3D11DeviceContext* deviceContext_ = immediateContext.Get();
 
     // IBL specular_pmrem を t10 にバインド
@@ -810,7 +829,10 @@ void GraphicsDeviceManager::PlayDamageVignette()
 float GraphicsDeviceManager::GetDamageVignetteOpacity() const
 {
     const auto now_ = SDL_GetTicks();
-    if (now_ >= damageVignetteEndTime) return 0.0f;
+    if (now_ >= damageVignetteEndTime)
+    {
+        return 0.0f;
+    }
     const float remaining_ = static_cast<float>(damageVignetteEndTime - now_) / DAMAGE_VIGNETTE_DURATION_MS;
     return 0.28f * remaining_ * remaining_;
 }
@@ -873,6 +895,108 @@ void GraphicsDeviceManager::DrawPostEffectGuiContent()
         }
     }
 
+    if (ImGui::CollapsingHeader("Layer Post Effects"))
+    {
+        if (!postRenderSystem.IsLayerPostEffectAvailable())
+        {
+            ImGui::TextDisabled("Layer post-effect shaders unavailable. Build LayerPostEffectPS.hlsl and LayerModelMaskPS.hlsl.");
+        }
+
+        if (ImGui::Button("Add Layer Effect"))
+        {
+            auto& effect_ = layerPostEffects.emplace_back();
+            effect_.layerId = static_cast<uint32_t>(LayerType::Player);
+        }
+
+        constexpr const char* LAYER_NAMES[]{ "Player", "Enemy", "Stage (Terrain)", "Effect" };
+        constexpr LayerType LAYERS[]{ LayerType::Player, LayerType::Enemy, LayerType::Terrain, LayerType::EFFECT };
+        constexpr const char* EFFECT_NAMES[]{ "Occluded Silhouette", "Visible Tint", "Bloom", "Motion Blur" };
+
+        for (size_t index_ = 0; index_ < layerPostEffects.size();)
+        {
+            auto& effect_ = layerPostEffects[index_];
+            ImGui::PushID(static_cast<int>(index_));
+            ImGui::Separator();
+            ImGui::Checkbox("Enabled", &effect_.enabled);
+            ImGui::SameLine();
+            const bool remove_ = ImGui::Button("Remove");
+            if (!remove_)
+            {
+                const char* preview_ = "Custom";
+                for (size_t layerIndex_ = 0; layerIndex_ < _countof(LAYERS); ++layerIndex_)
+                {
+                    if (effect_.layerId == static_cast<uint32_t>(LAYERS[layerIndex_]))
+                    {
+                        preview_ = LAYER_NAMES[layerIndex_];
+                        break;
+                    }
+                }
+                if (ImGui::BeginCombo("Layer Preset", preview_))
+                {
+                    for (size_t layerIndex_ = 0; layerIndex_ < _countof(LAYERS); ++layerIndex_)
+                    {
+                        const auto id_ = static_cast<uint32_t>(LAYERS[layerIndex_]);
+                        if (ImGui::Selectable(LAYER_NAMES[layerIndex_], effect_.layerId == id_))
+                        {
+                            effect_.layerId = id_;
+                        }
+                    }
+                    ImGui::EndCombo();
+                }
+                ImGui::InputScalar("Layer ID", ImGuiDataType_U32, &effect_.layerId);
+                int type_ = static_cast<int>(effect_.type);
+                if (ImGui::Combo("Effect", &type_, EFFECT_NAMES, IM_ARRAYSIZE(EFFECT_NAMES)))
+                {
+                    effect_.type = static_cast<LayerPostEffectType>(type_);
+                }
+                switch (effect_.type)
+                {
+                case LayerPostEffectType::BLOOM:
+                    ImGui::SliderFloat("Threshold", &effect_.bloom.threshold, 0.0f, 5.0f);
+                    ImGui::SliderFloat("Intensity", &effect_.bloom.intensity, 0.0f, 10.0f);
+                    ImGui::SliderFloat("Spread", &effect_.bloom.kawaseScale, 0.0f, 8.0f);
+                    ImGui::SliderInt("Blur Passes", &effect_.bloom.blurPasses, 1, 8);
+                    break;
+                case LayerPostEffectType::MOTION_BLUR:
+                {
+                    const char* sources_[]{ "Object Movement (Models)", "Camera Movement" };
+                    int source_ = effect_.motionBlur.useCameraVelocity ? 1 : 0;
+                    if (ImGui::Combo("Motion Source", &source_, sources_, IM_ARRAYSIZE(sources_)))
+                    {
+                        effect_.motionBlur.useCameraVelocity = source_ != 0;
+                    }
+                    ImGui::SliderFloat("Strength", &effect_.motionBlur.strength, 0.0f, 2.0f);
+                    ImGui::SliderFloat("Max Blur Length", &effect_.motionBlur.maxVelocity, 0.001f, 0.2f, "%.3f");
+                    ImGui::SliderInt("Samples", &effect_.motionBlur.sampleCount, 2, 16);
+                    break;
+                }
+                default:
+                    if (effect_.type == LayerPostEffectType::OCCLUDED_SILHOUETTE)
+                    {
+                        ImGui::Checkbox("Use Outline Color", &effect_.useOutlineColor);
+                    }
+                    if (effect_.type == LayerPostEffectType::VISIBLE_TINT || !effect_.useOutlineColor)
+                    {
+                        ImGui::ColorEdit3("Color", &effect_.color.x);
+                    }
+                    ImGui::SliderFloat("Opacity", &effect_.color.w, 0.0f, 1.0f);
+                    break;
+                }
+            }
+            ImGui::PopID();
+
+            if (remove_)
+            {
+                layerPostEffects.erase(layerPostEffects.begin() +
+                    static_cast<std::vector<LayerPostEffectSettings>::difference_type>(index_));
+            }
+            else
+            {
+                ++index_;
+            }
+        }
+    }
+
     // --- 【追加】カラーフィルター設定 ---
     if (ImGui::CollapsingHeader("Color Filter", ImGuiTreeNodeFlags_DefaultOpen))
     {
@@ -899,6 +1023,7 @@ void GraphicsDeviceManager::DrawPostEffectGuiContent()
     if (ImGui::CollapsingHeader("Motion Blur", ImGuiTreeNodeFlags_DefaultOpen))
     {
         ImGui::Checkbox("Motion Blur Enabled", &motionBlurParams.enabled);
+        ImGui::TextDisabled("For selected layers, use Layer Post Effects.");
         ImGui::Checkbox("Motion Blur Camera Velocity", &motionBlurParams.useCameraVelocity);
         ImGui::SliderInt("Motion Blur Samples", &motionBlurParams.sampleCount, 2, 16);
         ImGui::DragFloat("Motion Blur Strength", &motionBlurParams.strength, 0.01f, 0.0f, 2.0f, "%.2f");
@@ -924,7 +1049,10 @@ void GraphicsDeviceManager::DrawPostEffectGuiContent()
 
     if (ImGui::CollapsingHeader("Fog", ImGuiTreeNodeFlags_DefaultOpen))
     {
-        if (!postRenderSystem.IsFogAvailable()) ImGui::TextDisabled("Fog shader unavailable. Build FogPS.hlsl.");
+        if (!postRenderSystem.IsFogAvailable())
+        {
+            ImGui::TextDisabled("Fog shader unavailable. Build FogPS.hlsl.");
+        }
         ImGui::Checkbox("Fog Enabled", &fogParams.enabled);
         ImGui::ColorEdit3("Fog Color", &fogParams.color.x);
         ImGui::DragFloat("Fog Start", &fogParams.startDistance, 0.5f, 0.0f, 10000.0f);
@@ -939,7 +1067,10 @@ void GraphicsDeviceManager::DrawPostEffectGuiContent()
 
     if (ImGui::CollapsingHeader("FXAA", ImGuiTreeNodeFlags_DefaultOpen))
     {
-        if (!postRenderSystem.IsFxaaAvailable()) ImGui::TextDisabled("FXAA shader unavailable. Build FxaaPS.hlsl.");
+        if (!postRenderSystem.IsFxaaAvailable())
+        {
+            ImGui::TextDisabled("FXAA shader unavailable. Build FxaaPS.hlsl.");
+        }
         ImGui::Checkbox("FXAA Enabled", &fxaaParams.enabled);
         ImGui::SliderFloat("FXAA Edge Threshold", &fxaaParams.edgeThreshold, 0.0312f, 0.333f);
         ImGui::SliderFloat("FXAA Minimum Threshold", &fxaaParams.edgeThresholdMin, 0.0f, 0.0833f);
@@ -996,6 +1127,34 @@ void GraphicsDeviceManager::ShowPostEffectGui()
 
 void GraphicsDeviceManager::SerializePostEffectSettings(nlohmann::json& json_) const
 {
+    auto& layerEffects_ = json_["LayerPostEffects"] = nlohmann::json::array();
+    for (const auto& effect_ : layerPostEffects)
+    {
+        nlohmann::json params_;
+        switch (effect_.type)
+        {
+        case LayerPostEffectType::BLOOM:
+            params_ = { {"threshold", effect_.bloom.threshold}, {"intensity", effect_.bloom.intensity},
+                {"spread", effect_.bloom.kawaseScale}, {"blurPasses", effect_.bloom.blurPasses} };
+            break;
+        case LayerPostEffectType::MOTION_BLUR:
+            params_ = { {"useCameraVelocity", effect_.motionBlur.useCameraVelocity},
+                {"strength", effect_.motionBlur.strength}, {"maxVelocity", effect_.motionBlur.maxVelocity},
+                {"samples", effect_.motionBlur.sampleCount} };
+            break;
+        default:
+            params_ = { {"useOutlineColor", effect_.useOutlineColor},
+                {"color", { effect_.color.x, effect_.color.y, effect_.color.z, effect_.color.w }} };
+            break;
+        }
+        layerEffects_.push_back({
+            {"layerId", effect_.layerId},
+            {"type", static_cast<uint32_t>(effect_.type)},
+            {"enabled", effect_.enabled},
+            {"parameters", std::move(params_)}
+        });
+    }
+
     json_["Fog"] = {
         {"enabled", fogParams.enabled},
         {"color", {fogParams.color.x, fogParams.color.y, fogParams.color.z}},
@@ -1024,6 +1183,62 @@ void GraphicsDeviceManager::SerializePostEffectSettings(nlohmann::json& json_) c
 
 void GraphicsDeviceManager::DeserializePostEffectSettings(const nlohmann::json& json_)
 {
+    layerPostEffects.clear();
+    if (const auto effects_ = json_.find("LayerPostEffects"); effects_ != json_.end() && effects_->is_array())
+    {
+        for (const auto& entry_ : *effects_)
+        {
+            if (!entry_.is_object())
+            {
+                continue;
+            }
+            try
+            {
+                LayerPostEffectSettings effect_{};
+                const auto id_ = entry_.value("layerId", int64_t{ 0 });
+                const auto type_ = entry_.value("type", 0u);
+                if (id_ < 0 || id_ > UINT32_MAX || type_ > static_cast<uint32_t>(LayerPostEffectType::MOTION_BLUR))
+                {
+                    continue;
+                }
+                effect_.layerId = static_cast<uint32_t>(id_);
+                effect_.type = static_cast<LayerPostEffectType>(type_);
+                effect_.enabled = entry_.value("enabled", true);
+                if (const auto params_ = entry_.find("parameters"); params_ != entry_.end() && params_->is_object())
+                {
+                    if (effect_.type == LayerPostEffectType::BLOOM)
+                    {
+                        effect_.bloom.threshold = std::clamp(params_->value("threshold", effect_.bloom.threshold), 0.0f, 5.0f);
+                        effect_.bloom.intensity = std::clamp(params_->value("intensity", effect_.bloom.intensity), 0.0f, 10.0f);
+                        effect_.bloom.kawaseScale = std::clamp(params_->value("spread", effect_.bloom.kawaseScale), 0.0f, 8.0f);
+                        effect_.bloom.blurPasses = std::clamp(params_->value("blurPasses", effect_.bloom.blurPasses), 1, 8);
+                    }
+                    else if (effect_.type == LayerPostEffectType::MOTION_BLUR)
+                    {
+                        effect_.motionBlur.useCameraVelocity = params_->value("useCameraVelocity", false);
+                        effect_.motionBlur.strength = std::clamp(params_->value("strength", effect_.motionBlur.strength), 0.0f, 2.0f);
+                        effect_.motionBlur.maxVelocity = std::clamp(params_->value("maxVelocity", effect_.motionBlur.maxVelocity), 0.001f, 0.2f);
+                        effect_.motionBlur.sampleCount = std::clamp(params_->value("samples", effect_.motionBlur.sampleCount), 2, 16);
+                    }
+                    effect_.useOutlineColor = params_->value("useOutlineColor", effect_.useOutlineColor);
+                    if (const auto color_ = params_->find("color"); color_ != params_->end() &&
+                        color_->is_array() && color_->size() == 4)
+                    {
+                        effect_.color = { std::clamp((*color_)[0].get<float>(), 0.0f, 1.0f),
+                            std::clamp((*color_)[1].get<float>(), 0.0f, 1.0f),
+                            std::clamp((*color_)[2].get<float>(), 0.0f, 1.0f),
+                            std::clamp((*color_)[3].get<float>(), 0.0f, 1.0f) };
+                    }
+                }
+                layerPostEffects.push_back(effect_);
+            }
+            catch (const nlohmann::json::exception&)
+            {
+                // 不正な設定行だけを除外し、残りのScene描画設定は読み込む。
+            }
+        }
+    }
+
     fogParams = FogSystem::Parameters{};
     fxaaParams = FxaaSystem::Parameters{};
     if (json_.contains("Fog") && json_["Fog"].is_object())
@@ -1107,7 +1322,10 @@ bool GraphicsDeviceManager::CreateDeviceAndSwapChain(HWND hwnd_)
     // =========================
     Microsoft::WRL::ComPtr<IDXGIFactory> dxgiFactory_;
     result_ = CreateDXGIFactory(__uuidof(IDXGIFactory), reinterpret_cast<void**>(dxgiFactory_.GetAddressOf()));
-    if (FAILED(result_)) return false;
+    if (FAILED(result_))
+    {
+        return false;
+    }
 
     Microsoft::WRL::ComPtr<IDXGIAdapter> bestAdapter_;
     SIZE_T bestVideoMemory_ = 0;
@@ -1190,7 +1408,10 @@ bool GraphicsDeviceManager::CreateDeviceAndSwapChain(HWND hwnd_)
     );
 
     _ASSERT_EXPR(SUCCEEDED(result_), L"D3D11CreateDeviceAndSwapChain");
-    if (FAILED(result_)) return false;
+    if (FAILED(result_))
+    {
+        return false;
+    }
 
     // 独自のボーダーレス切替とDXGI標準のAlt+Enterが二重に動かないようにする。
     dxgiFactory_->MakeWindowAssociation(hwnd_, DXGI_MWA_NO_ALT_ENTER);
@@ -1303,6 +1524,7 @@ bool GraphicsDeviceManager::CreateDepthStencil()
     }
     return SUCCEEDED(hr_);
 }
+
 /**
  * @brief 全てのDirect3Dリソースを解放する
  */
@@ -1327,6 +1549,7 @@ void GraphicsDeviceManager::ReleaseResources()
         bloomParams
     );
 }
+
 void GraphicsDeviceManager::SetRenderTargets()
 {
     UnbindShaderResourceViews(immediateContext.Get());
@@ -1350,7 +1573,10 @@ bool GraphicsDeviceManager::CreateSceneRenderTarget(int width_, int height_)
 
     Microsoft::WRL::ComPtr<ID3D11Texture2D> texture;
     HRESULT result_ = device->CreateTexture2D(&desc, nullptr, texture.GetAddressOf());
-    if (FAILED(result_)) return false;
+    if (FAILED(result_))
+    {
+        return false;
+    }
 
     device->CreateRenderTargetView(texture.Get(), nullptr, sceneRTV.ReleaseAndGetAddressOf());
     device->CreateShaderResourceView(texture.Get(), nullptr, sceneSRV.ReleaseAndGetAddressOf());
@@ -1368,26 +1594,47 @@ bool GraphicsDeviceManager::CreateSceneRenderTarget(int width_, int height_)
     distortionDesc_.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
     Microsoft::WRL::ComPtr<ID3D11Texture2D> distortionTexture_;
     result_ = device->CreateTexture2D(&distortionDesc_, nullptr, distortionTexture_.GetAddressOf());
-    if (FAILED(result_)) return false;
+    if (FAILED(result_))
+    {
+        return false;
+    }
     result_ = device->CreateRenderTargetView(distortionTexture_.Get(), nullptr, sceneDistortionRTV.ReleaseAndGetAddressOf());
-    if (FAILED(result_)) return false;
+    if (FAILED(result_))
+    {
+        return false;
+    }
     result_ = device->CreateShaderResourceView(distortionTexture_.Get(), nullptr, sceneDistortionSRV.ReleaseAndGetAddressOf());
-    if (FAILED(result_)) return false;
+    if (FAILED(result_))
+    {
+        return false;
+    }
 
     desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 
     result_ = device->CreateTexture2D(&desc, nullptr, copySceneColorTexture.ReleaseAndGetAddressOf());
-    if (FAILED(result_)) return false;
+    if (FAILED(result_))
+    {
+        return false;
+    }
 
     result_ = device->CreateShaderResourceView(copySceneColorTexture.Get(), nullptr, copySceneColorSRV.ReleaseAndGetAddressOf());
-    if (FAILED(result_)) return false;
+    if (FAILED(result_))
+    {
+        return false;
+    }
 
     // --- 法線のコピー用 ---
     result_ = device->CreateTexture2D(&desc, nullptr, copyNormalTexture.ReleaseAndGetAddressOf());
-    if (FAILED(result_)) return false;
+    if (FAILED(result_))
+    {
+        return false;
+    }
 
     result_ = device->CreateShaderResourceView(copyNormalTexture.Get(), nullptr, copyNormalSRV.ReleaseAndGetAddressOf());
-    if (FAILED(result_)) return false;
+    if (FAILED(result_))
+    {
+        return false;
+    }
 
     return true;
 }
@@ -1408,10 +1655,16 @@ bool GraphicsDeviceManager::CreateSceneViewRenderTarget(int width_, int height_)
 
     Microsoft::WRL::ComPtr<ID3D11Texture2D> texture_;
     HRESULT result_ = device->CreateTexture2D(&desc_, nullptr, texture_.GetAddressOf());
-    if (FAILED(result_)) return false;
+    if (FAILED(result_))
+    {
+        return false;
+    }
 
     result_ = device->CreateRenderTargetView(texture_.Get(), nullptr, sceneViewRTV.ReleaseAndGetAddressOf());
-    if (FAILED(result_)) return false;
+    if (FAILED(result_))
+    {
+        return false;
+    }
 
     result_ = device->CreateShaderResourceView(texture_.Get(), nullptr, sceneViewSRV.ReleaseAndGetAddressOf());
     return SUCCEEDED(result_);
@@ -1420,6 +1673,7 @@ bool GraphicsDeviceManager::CreateSceneViewRenderTarget(int width_, int height_)
 bool GraphicsDeviceManager::CreateGBufferTargets(int width_, int height_)
 {
     BS_PROFILE_SCOPE("GraphicsDeviceManager::CreateGBufferTargets");
+
     struct Target_
     {
         DXGI_FORMAT format_;
@@ -1464,6 +1718,7 @@ bool GraphicsDeviceManager::CreateGBufferTargets(int width_, int height_)
     }
     return true;
 }
+
 void GraphicsDeviceManager::Finalize()
 {
     BS_PROFILE_SCOPE("GraphicsDeviceManager::Finalize");

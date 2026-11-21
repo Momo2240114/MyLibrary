@@ -44,7 +44,10 @@ public:
     std::vector<std::string> GetActionNames(const std::string& category) {
         std::vector<std::string> names;
         if (actions.count(category)) {
-            for (auto const& [name, _] : actions[category]) names.push_back(name);
+            for (auto const& [name, _] : actions[category])
+            {
+                names.push_back(name);
+            }
         }
         return names;
     }
@@ -76,6 +79,7 @@ public:
             categoryIndex.clear();
         }
     };
+
 private:
     void RebuildActionIndexForName(const std::string& actionName_);
 

@@ -36,20 +36,52 @@ public:
     void Play();
     void Stop();
     void Reset();
-    void SetPlaybackSpeed(float playbackSpeed_) { playbackSpeed = playbackSpeed_; }
-    float GetPlaybackSpeed() const { return playbackSpeed; }
 
-    MeshVFXAsset& GetAsset() { return asset; }
-    const MeshVFXAsset& GetAsset() const { return asset; }
-    const std::vector<MeshVFXRuntimePart>& GetRuntimeParts() const { return runtimeParts; }
+    void SetPlaybackSpeed(float playbackSpeed_)
+    {
+        playbackSpeed = playbackSpeed_;
+    }
+
+    float GetPlaybackSpeed() const
+    {
+        return playbackSpeed;
+    }
+
+    MeshVFXAsset& GetAsset()
+    {
+        return asset;
+    }
+
+    const MeshVFXAsset& GetAsset() const
+    {
+        return asset;
+    }
+
+    const std::vector<MeshVFXRuntimePart>& GetRuntimeParts() const
+    {
+        return runtimeParts;
+    }
+
     bool HasRuntimeResources() const;
-    virtual size_t GetMaxRenderParts() const { return static_cast<size_t>(-1); }
+
+    virtual size_t GetMaxRenderParts() const
+    {
+        return static_cast<size_t>(-1);
+    }
 
     std::vector<std::string> GetCurveTrackNames() const;
     float EvaluateCurveValue(const std::string& curveName_, float normalizedTime_, float fallbackValue_) const;
 
-    float GetTime() const { return time; }
-    bool IsPlaying() const { return isPlaying; }
+    float GetTime() const
+    {
+        return time;
+    }
+
+    bool IsPlaying() const
+    {
+        return isPlaying;
+    }
+
     // Assetを上書きせず、環境演出中だけ大きさと色を差し替える。
     void SetRuntimeAppearance(const DirectX::XMFLOAT3& scale_, const DirectX::XMFLOAT4& color_, const DirectX::XMFLOAT4& edgeColor_)
     {
@@ -58,24 +90,59 @@ public:
         runtimeAppearanceColor = color_;
         runtimeAppearanceEdgeColor = edgeColor_;
     }
-    void ClearRuntimeAppearance() { runtimeAppearanceEnabled = false; }
-    bool HasRuntimeAppearance() const { return runtimeAppearanceEnabled; }
-    const DirectX::XMFLOAT3& GetRuntimeAppearanceScale() const { return runtimeAppearanceScale; }
-    const DirectX::XMFLOAT4& GetRuntimeAppearanceColor() const { return runtimeAppearanceColor; }
-    const DirectX::XMFLOAT4& GetRuntimeAppearanceEdgeColor() const { return runtimeAppearanceEdgeColor; }
-    virtual bool UsesOwnerModel() const { return false; }
-    virtual bool UsesModelPoses() const { return false; }
-    virtual bool HasModelPoses() const { return false; }
+
+    void ClearRuntimeAppearance()
+    {
+        runtimeAppearanceEnabled = false;
+    }
+
+    bool HasRuntimeAppearance() const
+    {
+        return runtimeAppearanceEnabled;
+    }
+
+    const DirectX::XMFLOAT3& GetRuntimeAppearanceScale() const
+    {
+        return runtimeAppearanceScale;
+    }
+
+    const DirectX::XMFLOAT4& GetRuntimeAppearanceColor() const
+    {
+        return runtimeAppearanceColor;
+    }
+
+    const DirectX::XMFLOAT4& GetRuntimeAppearanceEdgeColor() const
+    {
+        return runtimeAppearanceEdgeColor;
+    }
+
+    virtual bool UsesOwnerModel() const
+    {
+        return false;
+    }
+
+    virtual bool UsesModelPoses() const
+    {
+        return false;
+    }
+
+    virtual bool HasModelPoses() const
+    {
+        return false;
+    }
+
     virtual bool GetDynamicMesh(MeshVFXDynamicMesh& mesh_) const
     {
         mesh_ = {};
         return false;
     }
+
     virtual bool GetModelPoses(std::vector<MeshVFXModelPose>& poses_) const
     {
         poses_.clear();
         return false;
     }
+
     virtual bool GetModelPoseViews(std::vector<MeshVFXModelPoseView>& poses_) const
     {
         poses_.clear();

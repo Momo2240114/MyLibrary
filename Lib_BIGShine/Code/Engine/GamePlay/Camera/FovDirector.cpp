@@ -13,7 +13,10 @@
 void FovDirector::Start()
 {
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     const std::shared_ptr<CameraComponent> camera_ =
         owner_->GetComponent<CameraComponent>();
@@ -27,7 +30,10 @@ void FovDirector::Start()
     const std::shared_ptr<EasingComponent> easing_ =
         owner_->GetOrAddComponent<EasingComponent>();
 
-    if (!easing_) return;
+    if (!easing_)
+    {
+        return;
+    }
 
     // ヒットストップやスロー演出中でも FOV 演出は止めたくないので UnscaledTime を使う。
     easing_->SetUseUnscaledTime(true);
@@ -45,7 +51,10 @@ void FovDirector::Update(float elapsedTime_)
         ? owner_->GetComponent<EasingComponent>()
         : nullptr;
 
-    if (!easing_ || phase == PHASE::IDLE) return;
+    if (!easing_ || phase == PHASE::IDLE)
+    {
+        return;
+    }
     const auto camera_ = owner_->GetComponent<CameraComponent>();
     if (!camera_ || !camera_->CanPlayEventAction())
     {
@@ -76,7 +85,10 @@ void FovDirector::Update(float elapsedTime_)
         easing_->GetRatio(easingIndex),
         easing_->GetValue(easingIndex));
 
-    if (!easing_->GetEndFlag(easingIndex)) return;
+    if (!easing_->GetEndFlag(easingIndex))
+    {
+        return;
+    }
 
     if (phase == PHASE::TO_TARGET)
     {
@@ -105,7 +117,10 @@ void FovDirector::PlayFov(
     EasingType type_)
 {
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     const std::shared_ptr<CameraComponent> camera_ =
         owner_->GetComponent<CameraComponent>();
@@ -113,7 +128,10 @@ void FovDirector::PlayFov(
     const std::shared_ptr<EasingComponent> easing_ =
         owner_->GetOrAddComponent<EasingComponent>();
 
-    if (!camera_ || !easing_ || !camera_->CanPlayEventAction()) return;
+    if (!camera_ || !easing_ || !camera_->CanPlayEventAction())
+    {
+        return;
+    }
 
     startFov = camera_->GetFovY();
     targetFov = wayPoint_.fov;
@@ -150,7 +168,10 @@ void FovDirector::ApplyInterpolated(
         ? owner_->GetComponent<CameraComponent>()
         : nullptr;
 
-    if (!camera_) return;
+    if (!camera_)
+    {
+        return;
+    }
 
     const float ratioClamped_ = std::clamp(ratio_, 0.0f, 1.0f);
     const float easedRatioClamped_ = std::clamp(easedRatio_, 0.0f, 1.0f);
@@ -186,7 +207,10 @@ void FovDirector::ApplyInterpolated(
 void FovDirector::BeginTransitionToDefault()
 {
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     const std::shared_ptr<CameraComponent> camera_ =
         owner_->GetComponent<CameraComponent>();
@@ -329,7 +353,10 @@ void FovDirector::Gui()
 void FovDirector::RegisterActions()
 {
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     for (size_t index_ = 0; index_ < editorWaypoints.size(); ++index_)
     {
@@ -406,7 +433,10 @@ void FovDirector::CaptureCurrentState()
         ? owner_->GetComponent<CameraComponent>()
         : nullptr;
 
-    if (!camera_) return;
+    if (!camera_)
+    {
+        return;
+    }
 
     FovWayPoint wayPoint_;
     // 現在のカメラ FOV を WayPoint として取り込み、エディタ調整の初期値にする。

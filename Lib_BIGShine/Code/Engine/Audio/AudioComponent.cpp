@@ -22,7 +22,10 @@ void AudioComponent::Start()
         AudioManager::Instance().AddAudioFromFile(audioPath, isBGM);
     }
     RegisterActions();
-    if (playOnStart) Play();
+    if (playOnStart)
+    {
+        Play();
+    }
 }
 
 // 使用モードを判定し、Workspaceプリセットまたは直接指定音声を再生する。
@@ -35,7 +38,10 @@ void AudioComponent::Play()
         return;
     }
 
-    if (audioPath.empty()) return;
+    if (audioPath.empty())
+    {
+        return;
+    }
 
     // 直接指定モードでは、音源を登録してからComponent側の設定をAudioSourceへ反映する。
     AudioManager& audioManager_ = AudioManager::Instance();
@@ -62,7 +68,10 @@ void AudioComponent::Stop()
         return;
     }
 
-    if (audioPath.empty()) return;
+    if (audioPath.empty())
+    {
+        return;
+    }
     AudioManager::Instance().StopByPath(audioPath);
 }
 
@@ -70,8 +79,14 @@ void AudioComponent::Stop()
 void AudioComponent::SetMuffled(bool muffled_)
 {
     muffled = muffled_;
-    if (useWorkspacePreset) return;
-    if (audioPath.empty()) return;
+    if (useWorkspacePreset)
+    {
+        return;
+    }
+    if (audioPath.empty())
+    {
+        return;
+    }
     AudioManager::Instance().SetMuffledByPath(audioPath, muffled, muffledCutoff);
 }
 
@@ -99,7 +114,10 @@ std::string AudioComponent::GetClearMuffleActionName() const
 void AudioComponent::RegisterActions()
 {
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     // Componentごとに解決したAction名と、実際の音声操作関数を対応付ける。
     owner_->RegisterAction("Audio", GetPlayActionName(), [this]()
@@ -123,8 +141,14 @@ void AudioComponent::RegisterActions()
 // Action接頭辞が設定されている場合だけ、基本名の前へ付加する。
 std::string AudioComponent::ResolveActionName(const std::string& actionName_) const
 {
-    if (actionName_.empty()) return {};
-    if (actionPrefix.empty()) return actionName_;
+    if (actionName_.empty())
+    {
+        return {};
+    }
+    if (actionPrefix.empty())
+    {
+        return actionName_;
+    }
     return actionPrefix + "_" + actionName_;
 }
 
@@ -171,9 +195,15 @@ void AudioComponent::Gui()
             ImGui::EndCombo();
         }
 
-        if (ImGui::Button(IM_U8("再生##AudioComponent_PlayButton"))) Play();
+        if (ImGui::Button(IM_U8("再生##AudioComponent_PlayButton")))
+        {
+            Play();
+        }
         ImGui::SameLine();
-        if (ImGui::Button(IM_U8("停止##AudioComponent_StopButton"))) Stop();
+        if (ImGui::Button(IM_U8("停止##AudioComponent_StopButton")))
+        {
+            Stop();
+        }
 
         ImGui::SeparatorText(IM_U8("アクション##AudioComponent_ActionsHeader"));
         char prefixBuffer_[64];
@@ -185,15 +215,24 @@ void AudioComponent::Gui()
 
         char playBuffer_[64];
         strncpy_s(playBuffer_, playActionName.c_str(), sizeof(playBuffer_));
-        if (ImGui::InputText(IM_U8("再生アクション##AudioComponent_PlayActionInput"), playBuffer_, sizeof(playBuffer_))) playActionName = playBuffer_;
+        if (ImGui::InputText(IM_U8("再生アクション##AudioComponent_PlayActionInput"), playBuffer_, sizeof(playBuffer_)))
+        {
+            playActionName = playBuffer_;
+        }
 
         char stopBuffer_[64];
         strncpy_s(stopBuffer_, stopActionName.c_str(), sizeof(stopBuffer_));
-        if (ImGui::InputText(IM_U8("停止アクション##AudioComponent_StopActionInput"), stopBuffer_, sizeof(stopBuffer_))) stopActionName = stopBuffer_;
+        if (ImGui::InputText(IM_U8("停止アクション##AudioComponent_StopActionInput"), stopBuffer_, sizeof(stopBuffer_)))
+        {
+            stopActionName = stopBuffer_;
+        }
 
         ImGui::Text(IM_U8("再生: %s"), GetPlayActionName().c_str());
         ImGui::Text(IM_U8("停止: %s"), GetStopActionName().c_str());
-        if (ImGui::Button(IM_U8("オーディオアクション登録##AudioComponent_RegisterAudioActionsButton"))) RegisterActions();
+        if (ImGui::Button(IM_U8("オーディオアクション登録##AudioComponent_RegisterAudioActionsButton")))
+        {
+            RegisterActions();
+        }
         return;
     }
 
@@ -226,9 +265,15 @@ void AudioComponent::Gui()
         AudioManager::Instance().SetMuffledByPath(audioPath, muffled, muffledCutoff);
     }
 
-    if (ImGui::Button(IM_U8("再生##AudioComponent_PlayButton_Manual"))) Play();
+    if (ImGui::Button(IM_U8("再生##AudioComponent_PlayButton_Manual")))
+    {
+        Play();
+    }
     ImGui::SameLine();
-    if (ImGui::Button(IM_U8("停止##AudioComponent_StopButton_Manual"))) Stop();
+    if (ImGui::Button(IM_U8("停止##AudioComponent_StopButton_Manual")))
+    {
+        Stop();
+    }
 
     ImGui::SeparatorText(IM_U8("アクション##AudioComponent_ActionsHeader_Manual"));
     char prefixBuffer_[64];

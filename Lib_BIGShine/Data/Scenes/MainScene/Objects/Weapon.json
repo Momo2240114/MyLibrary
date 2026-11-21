@@ -151,7 +151,7 @@
                         "name": "Weapon_Sword_Shiled.001",
                         "normalScale": 1.0,
                         "occlusionStrength": 0.9879999756813049,
-                        "outlineThicknessOffset": 0.0024999999441206455,
+                        "outlineThicknessOffset": 0.014999999664723873,
                         "rimStrength": 0.05999999865889549,
                         "roughness": 1.0,
                         "shaderId": 3,
@@ -176,6 +176,13 @@
                     }
                 ],
                 "ModelName": "./Data/Model/SwordPlayer/Blender/Sword.gltf",
+                "OutlineColor": [
+                    0.019607843831181526,
+                    0.019607843831181526,
+                    0.2549019753932953,
+                    1.0
+                ],
+                "OverrideOutlineColor": true,
                 "RootMotionName": "",
                 "ShaderID": 1,
                 "StaticModel": false,
@@ -246,6 +253,7 @@
                             0.37254902720451355,
                             0.6745098233222961
                         ],
+                        "CullMode": 0,
                         "DissolveCurveName": "",
                         "DissolveEdgeColor": [
                             -107374176.0,
@@ -560,6 +568,7 @@
                             0.007843137718737125,
                             1.0
                         ],
+                        "CullMode": 0,
                         "DissolveCurveName": "",
                         "DissolveEdgeColor": [
                             -107374176.0,

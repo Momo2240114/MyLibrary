@@ -25,13 +25,35 @@ public:
     // ==========================
     // クリック情報
     // ==========================
-    bool LeftPressed()   const { return m_leftPressed; }
-    bool LeftDown()      const { return m_leftDown; }
-    bool LeftReleased()  const { return m_leftReleased; }
+    bool LeftPressed()   const
+    {
+        return m_leftPressed;
+    }
 
-    bool RightPressed()  const { return m_rightPressed; }
-    bool RightDown()     const { return m_rightDown; }
-    bool RightReleased() const { return m_rightReleased; }
+    bool LeftDown()      const
+    {
+        return m_leftDown;
+    }
+
+    bool LeftReleased()  const
+    {
+        return m_leftReleased;
+    }
+
+    bool RightPressed()  const
+    {
+        return m_rightPressed;
+    }
+
+    bool RightDown()     const
+    {
+        return m_rightDown;
+    }
+
+    bool RightReleased() const
+    {
+        return m_rightReleased;
+    }
 
     bool GetButtonState(int buttonCode, int type) const;
 
@@ -39,26 +61,46 @@ public:
     // マウス座標取得
     // ==========================
     // Windows API クライアント座標 (左上 0,0)
-    POINT GetClientPos() const { return m_clientPos; }
+    POINT GetClientPos() const
+    {
+        return m_clientPos;
+    }
 
     // DirectX スクリーン座標 (左上 0,0, 右下 width,height)
-    DirectX::XMFLOAT2 GetScreenPos() const { return m_screenPos; }
+    DirectX::XMFLOAT2 GetScreenPos() const
+    {
+        return m_screenPos;
+    }
 
     // ==========================
     //　ホイール処理
     // ==========================
 
     // フレーム開始で更新される
-    int GetWheelDelta() const { return m_wheelDelta; }
+    int GetWheelDelta() const
+    {
+        return m_wheelDelta;
+    }
+
     // 公開関数でフレーム内ホイール取得
-    int GetWheelDeltaThisFrame() const { return m_wheelDeltaThisFrame; }
+    int GetWheelDeltaThisFrame() const
+    {
+        return m_wheelDeltaThisFrame;
+    }
+
     // ホイールの消費処理と独立した通知番号を表示側へ公開する。
-    std::uint64_t GetWheelRevision() const { return wheelRevision; }
+    std::uint64_t GetWheelRevision() const
+    {
+        return wheelRevision;
+    }
 
     void OnMouseWheel(int delta)
     {
         m_wheelDelta = delta; // WM_MOUSEWHEEL で呼ぶ
-        if (delta != 0) ++wheelRevision;
+        if (delta != 0)
+        {
+            ++wheelRevision;
+        }
     }
 
     float ConsumeWheelDelta()
@@ -81,8 +123,15 @@ public:
     
 
     /*void GetWorldRay(const HWND hwnd);*/
-    DirectX::XMFLOAT3 GetRayStart() { return RayStart; }
-    DirectX::XMFLOAT3 GetRayEnd() { return RayEnd; }
+    DirectX::XMFLOAT3 GetRayStart()
+    {
+        return RayStart;
+    }
+
+    DirectX::XMFLOAT3 GetRayEnd()
+    {
+        return RayEnd;
+    }
 
 
 private:
@@ -130,7 +179,15 @@ private:
 
 public:
     void SetCursorLockEnabled(bool enabled_);
-    bool IsCursorLockEnabled() const { return m_IsCursorLockEnabled; }
+
+    bool IsCursorLockEnabled() const
+    {
+        return m_IsCursorLockEnabled;
+    }
+
     // 固定の要求ではなく、フォーカスや解放操作を反映した実際の状態を返す。
-    bool IsCursorLocked() const { return m_IsCursorLocked; }
+    bool IsCursorLocked() const
+    {
+        return m_IsCursorLocked;
+    }
 };

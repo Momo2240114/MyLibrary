@@ -50,9 +50,20 @@ public:
     // Playerが受けたダメージ回数と合計ダメージを記録する。
     void NotifyPlayerDamaged(float damage_);
 
-    const AIDirectorStats& GetStats() const { return stats; }
-    const AIDirectorRates& GetRates() const { return rates; }
-    const AIDirectorPolicy& GetPolicy() const { return policy; }
+    const AIDirectorStats& GetStats() const
+    {
+        return stats;
+    }
+
+    const AIDirectorRates& GetRates() const
+    {
+        return rates;
+    }
+
+    const AIDirectorPolicy& GetPolicy() const
+    {
+        return policy;
+    }
 
 private:
     // OwnerのManagerからGameModeManagerを取得する。

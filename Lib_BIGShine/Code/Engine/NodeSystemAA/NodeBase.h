@@ -32,7 +32,10 @@ namespace NodeSystem
         std::vector<Pin> inputs;
         std::vector<Pin> outputs;
 
-        Node(uintptr_t id_, const std::string& name_) : id(id_), name(name_) {}
+        Node(uintptr_t id_, const std::string& name_) : id(id_), name(name_)
+        {
+        }
+
         virtual ~Node() = default;
 
         virtual void Evaluate() = 0;

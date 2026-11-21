@@ -59,7 +59,10 @@ public:
         {
             isPlaybackEnabled = false;
             isStarted = false;
-            if (emitter) emitter->SetEmissionEnabled(false);
+            if (emitter)
+            {
+                emitter->SetEmissionEnabled(false);
+            }
         }
     };
 
@@ -67,7 +70,11 @@ public:
     ParticleComponent() = default;
     virtual ~ParticleComponent() = default;
 
-    const std::string& GetName() const override { static std::string name = "ParticleComponent"; return name; }
+    const std::string& GetName() const override
+    {
+        static std::string name = "ParticleComponent";
+        return name;
+    }
 
     void Start() override;
     void Update(float deltaTime) override;
@@ -92,7 +99,12 @@ public:
     void SetRuntimeSizeScale(float scale_);
     // 外周Particleの半径と色を、保存設定とは別の実行時補正として渡す。
     void SetRuntimeRingAppearance(float radius_, const DirectX::XMFLOAT4& color_);
-    void ClearRuntimeRingAppearance() { runtimeRingEnabled = false; }
+
+    void ClearRuntimeRingAppearance()
+    {
+        runtimeRingEnabled = false;
+    }
+
     void ResetRuntime();
     bool HasRuntimeResources() const;
     bool PlayEmitter(const std::string& emitterName_);
@@ -115,10 +127,21 @@ public:
     bool LoadAsset(const std::string& path_);
     bool SaveEmitterAsset(size_t emitterIndex_, const std::string& path_);
     bool LoadEmitterAsset(const std::string& path_);
-    const std::string& GetAssetPath() const { return assetPath; }
 
-    const std::vector<EmitterTrack>& GetTracks() const { return tracks; }
-    std::vector<EmitterTrack>& GetTracks() { return tracks; }
+    const std::string& GetAssetPath() const
+    {
+        return assetPath;
+    }
+
+    const std::vector<EmitterTrack>& GetTracks() const
+    {
+        return tracks;
+    }
+
+    std::vector<EmitterTrack>& GetTracks()
+    {
+        return tracks;
+    }
 
 private:
     bool LoadEmitterTexture(EmitterTrack& track, const std::string& fullPath);

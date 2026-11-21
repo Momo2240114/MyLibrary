@@ -55,19 +55,28 @@ void TimeScaleDirector::Play(size_t index_)
 {
     // GlobalActionやEditorのPlayボタンから呼ばれる再生入口。
     // 範囲外IndexやTimeManager未取得時は、演出を発火せず安全に抜ける。
-    if (index_ >= editorWaypoints.size()) return;
+    if (index_ >= editorWaypoints.size())
+    {
+        return;
+    }
 
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     const std::shared_ptr<TimeManager> timeManager_ = owner_
         ? owner_->GetManager().GetTimeManager()
         : nullptr;
 
-    if (!timeManager_) return;
+    if (!timeManager_)
+    {
+        return;
+    }
 
     const TimeScaleWayPoint& wayPoint_ = editorWaypoints[index_];
 
     // Layer指定が空の演出は意図しない全体停止にならないよう再生しない。
-    if (wayPoint_.layerMask == 0u) return;
+    if (wayPoint_.layerMask == 0u)
+    {
+        return;
+    }
 
     timeManager_->PlayTimedScale(
         wayPoint_.layerMask,
@@ -82,12 +91,24 @@ void TimeScaleDirector::ResetTimeScale()
 {
     BS_PROFILE_SCOPE("TimeScaleDirector::ResetTimeScale");
     const auto owner_ = GetGameObject();
-    if (!owner_ || !owner_->manager) return;
+    if (!owner_ || !owner_->manager)
+    {
+        return;
+    }
     const auto timeManager_ = owner_->GetManager().GetTimeManager();
-    if (!timeManager_) return;
+    if (!timeManager_)
+    {
+        return;
+    }
     uint32_t layerMask_ = 0u;
-    for (const auto& waypoint_ : editorWaypoints) layerMask_ |= SanitizeTimeScaleLayerMask(waypoint_.layerMask);
-    if (layerMask_ != 0u) timeManager_->ResetToDefaults(layerMask_);
+    for (const auto& waypoint_ : editorWaypoints)
+    {
+        layerMask_ |= SanitizeTimeScaleLayerMask(waypoint_.layerMask);
+    }
+    if (layerMask_ != 0u)
+    {
+        timeManager_->ResetToDefaults(layerMask_);
+    }
 }
 
 void TimeScaleDirector::RegisterActions()
@@ -95,8 +116,14 @@ void TimeScaleDirector::RegisterActions()
     // Waypointごとに TimeScale_0, TimeScale_1... のGlobalActionを登録する。
     // Timelineや他Componentから名前でTimeScale演出を呼び出せるようにする。
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
-    owner_->RegisterGlobalAction("TimeScale", "ResetTimeScale", [this]() { ResetTimeScale(); });
+    if (!owner_)
+    {
+        return;
+    }
+    owner_->RegisterGlobalAction("TimeScale", "ResetTimeScale", [this]()
+    {
+        ResetTimeScale();
+    });
     for (size_t index_ = 0; index_ < editorWaypoints.size(); ++index_)
     {
         owner_->RegisterGlobalAction(

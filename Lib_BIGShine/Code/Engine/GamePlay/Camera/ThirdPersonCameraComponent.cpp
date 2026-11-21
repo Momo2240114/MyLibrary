@@ -3,6 +3,7 @@
 #include "ThirdPersonCameraComponent.h"
 
 #include "CameraComponent.h"
+#include "SpecialAttackCameraComponent.h"
 #include "Engine/Debug/TracyProfiler.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
@@ -64,12 +65,20 @@ void ThirdPersonCameraComponent::LateUpdate(float deltaTime_)
     ResolveCamera();
     ResolveTarget();
     // LockOnなどが制御中ならTPS側ではCameraを動かさない。
-    if (controlSuppressed) return;
+    if (controlSuppressed)
+    {
+        return;
+    }
 
     const std::shared_ptr<GameObject> targetObject_ = target.lock();
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!targetObject_ || !owner_ ||
         !owner_->transform || !targetObject_->transform)
+    {
+        return;
+    }
+
+    if (const auto special_ = owner_->GetComponent<SpecialAttackCameraComponent>(); special_ && special_->IsTracking())
     {
         return;
     }
@@ -178,7 +187,10 @@ void ThirdPersonCameraComponent::SetControlSuppressed(bool suppressed_)
 {
     // 抑制解除時は追従中心をリセットし、古いSmoothing位置へ戻らないようにする。
     controlSuppressed = suppressed_;
-    if (!controlSuppressed) ResetFollowTracking();
+    if (!controlSuppressed)
+    {
+        ResetFollowTracking();
+    }
 }
 
 void ThirdPersonCameraComponent::SynchronizeViewAngles(
@@ -231,7 +243,10 @@ void ThirdPersonCameraComponent::BeginReturnBlendFromCurrentCamera()
 
 float ThirdPersonCameraComponent::CalculateReturnBlendRate() const
 {
-    if (returnBlendDuration <= 0.0001f) return 1.0f;
+    if (returnBlendDuration <= 0.0001f)
+    {
+        return 1.0f;
+    }
     return SmoothStep(returnBlendTimer / returnBlendDuration);
 }
 
@@ -301,7 +316,11 @@ void ThirdPersonCameraComponent::Gui()
 
 void ThirdPersonCameraComponent::Serialize(nlohmann::json& json_) const
 {
-    if (runtimeSettingsActive) { json_ = originalRuntimeSettings; return; }
+    if (runtimeSettingsActive)
+    {
+        json_ = originalRuntimeSettings;
+        return;
+    }
     // RuntimeのBlend状態は保存せず、Camera設定とTarget名だけを保存する。
     json_["targetName"] = targetName;
     json_["baseDistance"] = baseDistance;
@@ -416,12 +435,21 @@ void ThirdPersonCameraComponent::RegisterDefaultInputBindings()
 void ThirdPersonCameraComponent::ResolveTarget()
 {
     // 既に解決済み、またはTarget名が空なら何もしない。
-    if (target.lock() || targetName.empty()) return;
+    if (target.lock() || targetName.empty())
+    {
+        return;
+    }
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_ || !owner_->manager) return;
+    if (!owner_ || !owner_->manager)
+    {
+        return;
+    }
     const std::shared_ptr<GameObject> resolvedTarget_ =
         owner_->manager->Find(targetName);
-    if (resolvedTarget_) SetTarget(resolvedTarget_);
+    if (resolvedTarget_)
+    {
+        SetTarget(resolvedTarget_);
+    }
 }
 
 std::shared_ptr<GameObject> ThirdPersonCameraComponent::GetFollowTarget()
@@ -432,9 +460,15 @@ std::shared_ptr<GameObject> ThirdPersonCameraComponent::GetFollowTarget()
 
 void ThirdPersonCameraComponent::ResolveCamera()
 {
-    if (camera.lock()) return;
+    if (camera.lock())
+    {
+        return;
+    }
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (owner_) camera = owner_->GetComponent<CameraComponent>();
+    if (owner_)
+    {
+        camera = owner_->GetComponent<CameraComponent>();
+    }
 }
 
 void ThirdPersonCameraComponent::ResetFollowTracking()
@@ -466,7 +500,10 @@ void ThirdPersonCameraComponent::ApplyRuntimeSettings(const nlohmann::json& sett
 
 void ThirdPersonCameraComponent::ClearRuntimeSettings()
 {
-    if (!runtimeSettingsActive) return;
+    if (!runtimeSettingsActive)
+    {
+        return;
+    }
     const auto original_ = originalRuntimeSettings;
     Deserialize(original_);
 }

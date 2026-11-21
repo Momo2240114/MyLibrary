@@ -24,7 +24,10 @@ void GameModeDeathNotifierComponent::Start()
 void GameModeDeathNotifierComponent::RegisterActions()
 {
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     // HealthComponentの死亡通知を、GameMode用Global Actionへ変換する。
     owner_->RegisterAction("Health", ACTION_HEALTH_DEATH, [this]()

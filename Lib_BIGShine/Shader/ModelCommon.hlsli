@@ -11,6 +11,7 @@ cbuffer CbSeparateMaterialMaps : register(b12)
     uint roughnessChannel;
     uint2 separateMaterialPadding;
 };
+
 Texture2D SeparateMetallicMap : register(t19);
 Texture2D SeparateRoughnessMap : register(t20);
 
@@ -19,9 +20,13 @@ float2 ApplySeparateMaterialMaps(float4 packedSample_, float2 factors_, SamplerS
 {
     float2 metalRough_ = float2(packedSample_[packedMetallicChannel], packedSample_[packedRoughnessChannel]) * factors_;
     if (useMetallicMap != 0)
+    {
         metalRough_.x = SeparateMetallicMap.Sample(sampler_, uv_)[metallicChannel];
+    }
     if (useRoughnessMap != 0)
+    {
         metalRough_.y = SeparateRoughnessMap.Sample(sampler_, uv_)[roughnessChannel];
+    }
     return metalRough_;
 }
 
@@ -94,9 +99,18 @@ float RandomShadowRotation(float2 uv_)
 
 float SampleCascadeShadowMap(int index_, float2 uv_)
 {
-    if (index_ == 0) return CascadeShadowMap0.Sample(ShadowSampler, uv_).r;
-    if (index_ == 1) return CascadeShadowMap1.Sample(ShadowSampler, uv_).r;
-    if (index_ == 2) return CascadeShadowMap2.Sample(ShadowSampler, uv_).r;
+    if (index_ == 0)
+    {
+        return CascadeShadowMap0.Sample(ShadowSampler, uv_).r;
+    }
+    if (index_ == 1)
+    {
+        return CascadeShadowMap1.Sample(ShadowSampler, uv_).r;
+    }
+    if (index_ == 2)
+    {
+        return CascadeShadowMap2.Sample(ShadowSampler, uv_).r;
+    }
     return CascadeShadowMap3.Sample(ShadowSampler, uv_).r;
 }
 
@@ -104,10 +118,22 @@ float2 GetCascadeShadowMapSize(int index_)
 {
     uint width_;
     uint height_;
-    if (index_ == 0) CascadeShadowMap0.GetDimensions(width_, height_);
-    else if (index_ == 1) CascadeShadowMap1.GetDimensions(width_, height_);
-    else if (index_ == 2) CascadeShadowMap2.GetDimensions(width_, height_);
-    else CascadeShadowMap3.GetDimensions(width_, height_);
+    if (index_ == 0)
+    {
+        CascadeShadowMap0.GetDimensions(width_, height_);
+    }
+    else if (index_ == 1)
+    {
+        CascadeShadowMap1.GetDimensions(width_, height_);
+    }
+    else if (index_ == 2)
+    {
+        CascadeShadowMap2.GetDimensions(width_, height_);
+    }
+    else
+    {
+        CascadeShadowMap3.GetDimensions(width_, height_);
+    }
     return float2(width_, height_);
 }
 

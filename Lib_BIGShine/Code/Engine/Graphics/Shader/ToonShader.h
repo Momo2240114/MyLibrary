@@ -25,10 +25,24 @@ public:
     // ShaderResource などを解除し、次の描画へ状態を残さない。
     void End(const RenderContext& rc) override;
     void Gui();
-    const DirectX::XMFLOAT4& GetShadeSteps() const { return shadeSteps; }
-    DirectX::XMFLOAT4 GetShadeFeather() const { return shadeFeathers; }
-    void SetShadeFeather(DirectX::XMFLOAT4 shadeFeather_) { shadeFeathers = shadeFeather_; }
+
+    const DirectX::XMFLOAT4& GetShadeSteps() const
+    {
+        return shadeSteps;
+    }
+
+    DirectX::XMFLOAT4 GetShadeFeather() const
+    {
+        return shadeFeathers;
+    }
+
+    void SetShadeFeather(DirectX::XMFLOAT4 shadeFeather_)
+    {
+        shadeFeathers = shadeFeather_;
+    }
+
     void SetShadeSettings(const DirectX::XMFLOAT4& shadeSteps_, DirectX::XMFLOAT4 shadeFeather_);
+
 private:
     // PBRと同様、メッシュ固有のパラメータをb0に集約する
     struct CbMesh

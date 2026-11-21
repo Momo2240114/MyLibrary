@@ -44,29 +44,56 @@ void AttackEffectHitComponent::Start()
 {
     BS_PROFILE_SCOPE("AttackEffectHitComponent::Start");
 
-    // 保存済みのテンプレートから、実際に判定を持つ子GameObject/HitBoxを作り直す。
-    RebuildHitShapes();
+    // SetHitShapesやDeserializeで生成済みの判定を、開始時に未初期化の子へ差し替えない。
+    if (runtimeHitShapes.empty() && !hitShapes.empty())
+    {
+        RebuildHitShapes();
+    }
 }
 
 void AttackEffectHitComponent::Update(float deltaTime_)
 {
     BS_PROFILE_SCOPE("AttackEffectHitComponent::Update");
 
-    if (!playing) return;
+    if (!playing)
+    {
+        return;
+    }
     // 命中履歴は次のフレームにも残るため、FrameHitEventsの更新順へ依存せず弾を閉じる。
     for (const auto& runtime_ : runtimeHitShapes)
+    {
         if (runtime_.templateIndex < hitShapes.size() && hitShapes[runtime_.templateIndex].destroyOnHit)
+        {
             if (const auto hitBox_ = runtime_.hitBox; hitBox_ && hitBox_->HasRegisteredHit())
             {
                 Stop();
-                if (const auto object_ = GetGameObject()) object_->GetManager().Destroy(object_);
+                if (const auto object_ = GetGameObject())
+                {
+                    object_->GetManager().Destroy(object_);
+                }
                 return;
             }
+        }
+    }
     BS_PROFILE_PLOT(
         "AttackEffectHitComponent::RuntimeHitShapeCount",
         runtimeHitShapes.size());
 
-    const float safeDeltaTime_ = (std::max)(deltaTime_, 0.0f);
+    const bool starting_ = IsStarted() && !playbackStarted && !runtimeHitShapes.empty();
+    if (starting_)
+    {
+        // 子HitBoxが衝突判定の対象になるまで待ち、最初の更新は時刻0の判定を通す。
+        if (std::any_of(runtimeHitShapes.begin(), runtimeHitShapes.end(), [](const RuntimeHitShape& runtime_)
+        {
+            return runtime_.hitBox && !runtime_.hitBox->IsStarted();
+        }))
+        {
+            return;
+        }
+    }
+    playbackStarted = true;
+
+    const float safeDeltaTime_ = starting_ ? 0.0f : (std::max)(deltaTime_, 0.0f);
     elapsedTime += safeDeltaTime_;
     hitIntervalTimer -= safeDeltaTime_;
 
@@ -91,40 +118,107 @@ void AttackEffectHitComponent::Update(float deltaTime_)
             break;
         }
     }
-    if (intervalReady_) ClearHitHistory();
+    if (intervalReady_)
+    {
+        ClearHitHistory();
+    }
 
     // 各HitBoxの有効時間をテンプレートのactiveStart/Endに合わせて切り替える。
     for (RuntimeHitShape& runtime_ : runtimeHitShapes)
     {
-        if (!runtime_.hitBox || runtime_.templateIndex >= hitShapes.size()) continue;
+        if (!runtime_.hitBox || runtime_.templateIndex >= hitShapes.size())
+        {
+            continue;
+        }
         const AttackEffectHitShapeTemplate& shape_ = hitShapes[runtime_.templateIndex];
         const bool active_ = shape_.enabled &&
             elapsedTime >= shape_.activeStartTime && elapsedTime <= shape_.activeEndTime;
-        if (active_ && !runtime_.hitBox->IsEnabled()) runtime_.hitBox->Activate();
-        if (!active_ && runtime_.hitBox->IsEnabled()) runtime_.hitBox->Deactivate();
+        if (active_ && !runtime_.hitBox->IsEnabled())
+        {
+            runtime_.hitBox->Activate();
+        }
+        if (!active_ && runtime_.hitBox->IsEnabled())
+        {
+            runtime_.hitBox->Deactivate();
+        }
     }
 
     if (elapsedTime >= lifeTime)
     {
         // コンポーネント寿命が終わったら判定を止め、必要なら演出用GameObjectごと消す。
         Stop();
-        if (destroyOnLifeEnd && object_) object_->GetManager().Destroy(object_);
+        if (destroyOnLifeEnd && object_)
+        {
+            object_->GetManager().Destroy(object_);
+        }
     }
 }
 
-void AttackEffectHitComponent::SetOwner(GameObject* owner_) { ownerObject = owner_; }
-void AttackEffectHitComponent::SetAttackInstanceId(uint32_t attackInstanceId_) { attackInstanceId = attackInstanceId_; }
-void AttackEffectHitComponent::SetHitGroupId(uint32_t hitGroupId_) { hitGroupId = hitGroupId_; }
-void AttackEffectHitComponent::SetDamage(float damage_) { damage = damage_; }
-void AttackEffectHitComponent::SetDamageRate(float damageRate_) { damageRate = (std::max)(damageRate_, 0.0f); }
-void AttackEffectHitComponent::SetFixedDamage(float fixedDamage_) { fixedDamage = fixedDamage_; }
-void AttackEffectHitComponent::SetDamageApplyType(DAMAGE_APPLY_TYPE damageApplyType_) { damageApplyType = damageApplyType_; }
-void AttackEffectHitComponent::SetDamageHitInterval(float damageHitInterval_) { damageHitInterval = (std::max)(damageHitInterval_, 0.0f); }
-void AttackEffectHitComponent::SetMaxHitCount(int maxHitCount_) { maxHitCount = maxHitCount_; }
-void AttackEffectHitComponent::SetImpactPower(float impactPower_) { impactPower = (std::max)(impactPower_, 0.0f); }
-void AttackEffectHitComponent::SetHitStopDuration(float hitStopDuration_) { hitStopDuration = hitStopDuration_; }
-void AttackEffectHitComponent::SetHitStopScale(float hitStopScale_) { hitStopScale = hitStopScale_; }
-void AttackEffectHitComponent::SetKnockBackPower(float knockBackPower_) { knockBackPower = knockBackPower_; }
+void AttackEffectHitComponent::SetOwner(GameObject* owner_)
+{
+    ownerObject = owner_;
+}
+
+void AttackEffectHitComponent::SetAttackInstanceId(uint32_t attackInstanceId_)
+{
+    attackInstanceId = attackInstanceId_;
+}
+
+void AttackEffectHitComponent::SetHitGroupId(uint32_t hitGroupId_)
+{
+    hitGroupId = hitGroupId_;
+}
+
+void AttackEffectHitComponent::SetDamage(float damage_)
+{
+    damage = damage_;
+}
+
+void AttackEffectHitComponent::SetDamageRate(float damageRate_)
+{
+    damageRate = (std::max)(damageRate_, 0.0f);
+}
+
+void AttackEffectHitComponent::SetFixedDamage(float fixedDamage_)
+{
+    fixedDamage = fixedDamage_;
+}
+
+void AttackEffectHitComponent::SetDamageApplyType(DAMAGE_APPLY_TYPE damageApplyType_)
+{
+    damageApplyType = damageApplyType_;
+}
+
+void AttackEffectHitComponent::SetDamageHitInterval(float damageHitInterval_)
+{
+    damageHitInterval = (std::max)(damageHitInterval_, 0.0f);
+}
+
+void AttackEffectHitComponent::SetMaxHitCount(int maxHitCount_)
+{
+    maxHitCount = maxHitCount_;
+}
+
+void AttackEffectHitComponent::SetImpactPower(float impactPower_)
+{
+    impactPower = (std::max)(impactPower_, 0.0f);
+}
+
+void AttackEffectHitComponent::SetHitStopDuration(float hitStopDuration_)
+{
+    hitStopDuration = hitStopDuration_;
+}
+
+void AttackEffectHitComponent::SetHitStopScale(float hitStopScale_)
+{
+    hitStopScale = hitStopScale_;
+}
+
+void AttackEffectHitComponent::SetKnockBackPower(float knockBackPower_)
+{
+    knockBackPower = knockBackPower_;
+}
+
 void AttackEffectHitComponent::SetAirLiftPower(float targetAirLiftPower_, float attackerAirLiftPower_)
 {
     targetAirLiftPower = (std::max)(targetAirLiftPower_, 0.0f);
@@ -218,18 +312,47 @@ void AttackEffectHitComponent::SetHitImpactEffectAssetPath(const std::string& pa
     hitImpactEffectAssetPath = path_;
 }
 
-void AttackEffectHitComponent::SetAllowMultiHit(bool allowMultiHit_) { allowMultiHit = allowMultiHit_; }
-void AttackEffectHitComponent::SetCanHitOwner(bool canHitOwner_) { canHitOwner = canHitOwner_; }
+void AttackEffectHitComponent::SetAllowMultiHit(bool allowMultiHit_)
+{
+    allowMultiHit = allowMultiHit_;
+}
+
+void AttackEffectHitComponent::SetCanHitOwner(bool canHitOwner_)
+{
+    canHitOwner = canHitOwner_;
+}
+
 void AttackEffectHitComponent::SetGuardProperties(bool canBeGuarded_, bool guardBreak_)
 {
     canBeGuarded = canBeGuarded_;
     guardBreak = guardBreak_;
 }
-void AttackEffectHitComponent::SetSourceAction(const std::string& sourceAction_) { sourceAction = sourceAction_; }
-void AttackEffectHitComponent::SetJustGuardedActionName(const std::string& actionName_) { justGuardedActionName = actionName_; }
-void AttackEffectHitComponent::SetEffectType(ATTACK_EFFECT_TYPE effectType_) { effectType = effectType_; }
-void AttackEffectHitComponent::SetLifeTime(float lifeTime_) { lifeTime = (std::max)(lifeTime_, 0.0f); }
-void AttackEffectHitComponent::SetDestroyOnLifeEnd(bool destroyOnLifeEnd_) { destroyOnLifeEnd = destroyOnLifeEnd_; }
+
+void AttackEffectHitComponent::SetSourceAction(const std::string& sourceAction_)
+{
+    sourceAction = sourceAction_;
+}
+
+void AttackEffectHitComponent::SetJustGuardedActionName(const std::string& actionName_)
+{
+    justGuardedActionName = actionName_;
+}
+
+void AttackEffectHitComponent::SetEffectType(ATTACK_EFFECT_TYPE effectType_)
+{
+    effectType = effectType_;
+}
+
+void AttackEffectHitComponent::SetLifeTime(float lifeTime_)
+{
+    lifeTime = (std::max)(lifeTime_, 0.0f);
+}
+
+void AttackEffectHitComponent::SetDestroyOnLifeEnd(bool destroyOnLifeEnd_)
+{
+    destroyOnLifeEnd = destroyOnLifeEnd_;
+}
+
 void AttackEffectHitComponent::SetMovement(const DirectX::XMFLOAT3& direction_, float speed_)
 {
     movementDirection = direction_;
@@ -241,7 +364,10 @@ void AttackEffectHitComponent::SetRuntimeHitOwner(GameObject* owner_)
     ownerObject = owner_;
     for (RuntimeHitShape& runtime_ : runtimeHitShapes)
     {
-        if (runtime_.hitBox) runtime_.hitBox->SetOwner(owner_);
+        if (runtime_.hitBox)
+        {
+            runtime_.hitBox->SetOwner(owner_);
+        }
     }
 }
 
@@ -249,7 +375,10 @@ void AttackEffectHitComponent::SetRuntimeHitTeamId(int teamId_)
 {
     for (RuntimeHitShape& runtime_ : runtimeHitShapes)
     {
-        if (runtime_.hitBox) runtime_.hitBox->teamId = teamId_;
+        if (runtime_.hitBox)
+        {
+            runtime_.hitBox->teamId = teamId_;
+        }
     }
 }
 
@@ -258,7 +387,10 @@ void AttackEffectHitComponent::SetRuntimeSourceAction(const std::string& sourceA
     sourceAction = sourceAction_;
     for (RuntimeHitShape& runtime_ : runtimeHitShapes)
     {
-        if (runtime_.hitBox) runtime_.hitBox->sourceAction = sourceAction_;
+        if (runtime_.hitBox)
+        {
+            runtime_.hitBox->sourceAction = sourceAction_;
+        }
     }
 }
 
@@ -284,9 +416,15 @@ bool AttackEffectHitComponent::SetCapsuleWorldSpan(std::size_t shapeIndex_,
     const DirectX::XMFLOAT3& start_, const DirectX::XMFLOAT3& end_)
 {
     BS_PROFILE_SCOPE("AttackEffectHitComponent::SetCapsuleWorldSpan");
-    if (shapeIndex_ >= hitShapes.size() || hitShapes[shapeIndex_].shape != ATTACK_HIT_SHAPE::CAPSULE) return false;
+    if (shapeIndex_ >= hitShapes.size() || hitShapes[shapeIndex_].shape != ATTACK_HIT_SHAPE::CAPSULE)
+    {
+        return false;
+    }
     const float baseHalfHeight_ = hitShapes[shapeIndex_].halfHeight;
-    if (baseHalfHeight_ <= 0.0001f) return false;
+    if (baseHalfHeight_ <= 0.0001f)
+    {
+        return false;
+    }
     using namespace DirectX;
     const XMVECTOR segment_ = XMVectorSubtract(XMLoadFloat3(&end_), XMLoadFloat3(&start_));
     const float length_ = XMVectorGetX(XMVector3Length(segment_));
@@ -303,7 +441,10 @@ bool AttackEffectHitComponent::SetCapsuleWorldSpan(std::size_t shapeIndex_,
     world_.r[3] = XMVectorSetW(XMVectorScale(XMVectorAdd(XMLoadFloat3(&start_), XMLoadFloat3(&end_)), 0.5f), 1.0f);
     for (auto& runtime_ : runtimeHitShapes)
     {
-        if (runtime_.templateIndex != shapeIndex_ || !runtime_.object || !runtime_.object->transform) continue;
+        if (runtime_.templateIndex != shapeIndex_ || !runtime_.object || !runtime_.object->transform)
+        {
+            continue;
+        }
         runtime_.object->transform->ApplyWorldMatrix(world_);
         return true;
     }
@@ -326,13 +467,19 @@ void AttackEffectHitComponent::Stop()
     // 停止時は生成済みHitBoxをすべて無効化し、残った判定が当たり続けないようにする。
     playing = false;
     for (RuntimeHitShape& runtime_ : runtimeHitShapes)
-        if (runtime_.hitBox) runtime_.hitBox->Deactivate();
+    {
+        if (runtime_.hitBox)
+        {
+            runtime_.hitBox->Deactivate();
+        }
+    }
 }
 
 void AttackEffectHitComponent::ResetRuntime()
 {
     elapsedTime = 0.0f;
     hitIntervalTimer = 0.0f;
+    playbackStarted = false;
     ClearHitHistory();
 }
 
@@ -341,7 +488,10 @@ void AttackEffectHitComponent::SubmitDebugShapes()
     // デバッグ描画用に、子判定オブジェクトのTransformとHitBox状態だけを即時更新する。
     for (RuntimeHitShape& runtime_ : runtimeHitShapes)
     {
-        if (!runtime_.object || !runtime_.hitBox) continue;
+        if (!runtime_.object || !runtime_.hitBox)
+        {
+            continue;
+        }
         runtime_.object->UpdateTransform();
         runtime_.hitBox->Update(0.0f);
     }
@@ -361,7 +511,12 @@ void AttackEffectHitComponent::ClearHitHistory()
         object_->GetManager().GetGuardSystem().ClearAttackHitGroup(attackInstanceId, hitGroupId);
     }
     for (RuntimeHitShape& runtime_ : runtimeHitShapes)
-        if (runtime_.hitBox) runtime_.hitBox->ClearHitTargets();
+    {
+        if (runtime_.hitBox)
+        {
+            runtime_.hitBox->ClearHitTargets();
+        }
+    }
 }
 
 void AttackEffectHitComponent::ConfigureHitBox(
@@ -457,10 +612,18 @@ void AttackEffectHitComponent::RebuildHitShapes()
 
     // 古いランタイム判定を破棄してから、現在のテンプレートを元に子GameObjectを再生成する。
     for (RuntimeHitShape& runtime_ : runtimeHitShapes)
-        if (runtime_.object) runtime_.object->GetManager().Destroy(runtime_.object);
+    {
+        if (runtime_.object)
+        {
+            runtime_.object->GetManager().Destroy(runtime_.object);
+        }
+    }
     runtimeHitShapes.clear();
     const std::shared_ptr<GameObject> effectObject_ = GetGameObject();
-    if (!effectObject_) return;
+    if (!effectObject_)
+    {
+        return;
+    }
 
     size_t createdHitBoxCount_ = 0u;
     {
@@ -470,14 +633,20 @@ void AttackEffectHitComponent::RebuildHitShapes()
         {
             const AttackEffectHitShapeTemplate& shape_ = hitShapes[shapeIndex_];
             const ATTACK_HIT_SHAPE normalizedShape_ = NormalizeAttackHitShape(shape_.shape);
-            if (!shape_.enabled || normalizedShape_ == ATTACK_HIT_SHAPE::NONE) continue;
+            if (!shape_.enabled || normalizedShape_ == ATTACK_HIT_SHAPE::NONE)
+            {
+                continue;
+            }
             // SphereGroupは複数のSphere HitBoxへ展開し、それ以外は1つのHitBoxとして生成する。
             const size_t sphereCount_ = normalizedShape_ == ATTACK_HIT_SHAPE::SPHERE_GROUP
                 ? shape_.spheres.size() : 1u;
             for (size_t sphereIndex_ = 0; sphereIndex_ < sphereCount_; ++sphereIndex_)
             {
                 const std::shared_ptr<GameObject> hitObject_ = effectObject_->GetManager().Create("RuntimeAttackHitShape");
-                if (!hitObject_) continue;
+                if (!hitObject_)
+                {
+                    continue;
+                }
                 hitObject_->SetNoSaveObject();
                 hitObject_->transform->SetParent(effectObject_->transform);
                 DirectX::XMFLOAT3 offset_ = shape_.localOffset;
@@ -518,7 +687,9 @@ void AttackEffectHitComponent::Gui()
     int effectType_ = static_cast<int>(effectType);
     const char* effectNames_[] = { "Instant Area", "Projectile", "Area Over Time", "Beam", "Breath" };
     if (ImGui::Combo("Effect Type", &effectType_, effectNames_, IM_ARRAYSIZE(effectNames_)))
+    {
         effectType = static_cast<ATTACK_EFFECT_TYPE>(effectType_);
+    }
     ImGui::DragFloat("Life Time", &lifeTime, 0.01f, 0.0f);
     ImGui::Text("Elapsed: %.3f", elapsedTime);
     ImGui::Checkbox("Playing", &playing);
@@ -530,7 +701,9 @@ void AttackEffectHitComponent::Gui()
     const char* damageApplyTypeNames_[] = { "Single Hit", "Multi Hit", "Damage Over Time" };
     int damageApplyType_ = static_cast<int>(damageApplyType);
     if (ImGui::Combo("Damage Apply Type", &damageApplyType_, damageApplyTypeNames_, IM_ARRAYSIZE(damageApplyTypeNames_)))
+    {
         damageApplyType = static_cast<DAMAGE_APPLY_TYPE>((std::clamp)(damageApplyType_, 0, 2));
+    }
     ImGui::DragFloat("Damage Hit Interval", &damageHitInterval, 0.01f, 0.0f);
     ImGui::DragInt("Max Hit Count", &maxHitCount, 1.0f, 0, 9999);
     ImGui::DragFloat("Impact Power", &impactPower, 0.1f, 0.0f);
@@ -552,9 +725,15 @@ void AttackEffectHitComponent::Gui()
     ImGui::InputText("Hit Impact Effect", &hitImpactEffectAssetPath);
     ImGui::DragFloat3("Movement Direction", &movementDirection.x, 0.01f);
     ImGui::DragFloat("Movement Speed", &movementSpeed, 0.1f);
-    if (ImGui::Button("Play")) Play();
+    if (ImGui::Button("Play"))
+    {
+        Play();
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Stop")) Stop();
+    if (ImGui::Button("Stop"))
+    {
+        Stop();
+    }
     ImGui::SeparatorText("Hit Shapes");
     bool rebuild_ = false;
     if (ImGui::Button("Add Hit Shape"))
@@ -607,7 +786,9 @@ void AttackEffectHitComponent::Gui()
                 rebuild_ |= ImGui::DragFloat("Fan Half Height", &shape_.halfHeight, .1f, 0.0f, 10.0f);
             }
             if (shape_.shape == ATTACK_HIT_SHAPE::CAPSULE)
+            {
                 rebuild_ |= ImGui::DragFloat("Half Height", &shape_.halfHeight, 0.01f, 0.0f);
+            }
             if (shape_.shape == ATTACK_HIT_SHAPE::BOX)
             {
                 rebuild_ |= ImGui::DragFloat("Box Length", &shape_.range, 0.1f, 0.01f, 200.0f);
@@ -634,7 +815,10 @@ void AttackEffectHitComponent::Gui()
                     ImGui::SameLine();
                     rebuild_ |= ImGui::DragFloat3("Offset", &shape_.spheres[sphereIndex_].localOffset.x, 0.01f);
                     rebuild_ |= ImGui::DragFloat("Sphere Radius", &shape_.spheres[sphereIndex_].radius, 0.01f, 0.01f);
-                    if (ImGui::Button("Remove Sphere")) removeSphereIndex_ = sphereIndex_;
+                    if (ImGui::Button("Remove Sphere"))
+                    {
+                        removeSphereIndex_ = sphereIndex_;
+                    }
                     ImGui::PopID();
                 }
                 if (removeSphereIndex_ >= 0)
@@ -643,7 +827,10 @@ void AttackEffectHitComponent::Gui()
                     rebuild_ = true;
                 }
             }
-            if (ImGui::Button("Remove Hit Shape")) removeIndex_ = shapeIndex_;
+            if (ImGui::Button("Remove Hit Shape"))
+            {
+                removeIndex_ = shapeIndex_;
+            }
             ImGui::TreePop();
         }
         ImGui::PopID();
@@ -653,7 +840,10 @@ void AttackEffectHitComponent::Gui()
         hitShapes.erase(hitShapes.begin() + removeIndex_);
         rebuild_ = true;
     }
-    if (rebuild_) RebuildHitShapes();
+    if (rebuild_)
+    {
+        RebuildHitShapes();
+    }
 }
 
 void AttackEffectHitComponent::Serialize(nlohmann::json& json_) const
@@ -704,7 +894,9 @@ void AttackEffectHitComponent::Serialize(nlohmann::json& json_) const
     {
         nlohmann::json spheres_ = nlohmann::json::array();
         for (const AttackEffectSphereTemplate& sphere_ : shape_.spheres)
+        {
             spheres_.push_back({ { "LocalOffset", { sphere_.localOffset.x, sphere_.localOffset.y, sphere_.localOffset.z } }, { "Radius", sphere_.radius } });
+        }
         json_["HitShapes"].push_back({
             { "Enabled", shape_.enabled }, { "HitBoxName", shape_.hitBoxName },
             { "Shape", static_cast<int>(NormalizeAttackHitShape(shape_.shape)) },
@@ -771,10 +963,12 @@ void AttackEffectHitComponent::Deserialize(const nlohmann::json& json_)
     movementSpeed = json_.value("MovementSpeed", 0.0f);
     const nlohmann::json movementDirection_ = json_.value("MovementDirection", nlohmann::json::array());
     if (movementDirection_.is_array() && movementDirection_.size() >= 3u)
+    {
         movementDirection = {
             movementDirection_[0].get<float>(),
             movementDirection_[1].get<float>(),
             movementDirection_[2].get<float>() };
+    }
     hitShapes.clear();
     for (const nlohmann::json& shapeJson_ : json_.value("HitShapes", nlohmann::json::array()))
     {
@@ -787,8 +981,11 @@ void AttackEffectHitComponent::Deserialize(const nlohmann::json& json_)
         auto readVector_ = [&shapeJson_](const char* key_, const DirectX::XMFLOAT3& fallback_)
             {
                 const nlohmann::json value_ = shapeJson_.value(key_, nlohmann::json::array());
-                if (!value_.is_array() || value_.size() < 3u) return fallback_;
-                return DirectX::XMFLOAT3{ value_[0].get<float>(), value_[1].get<float>(), value_[2].get<float>() };
+                if (!value_.is_array() || value_.size() < 3u)
+            {
+                return fallback_;
+            }
+            return DirectX::XMFLOAT3{ value_[0].get<float>(), value_[1].get<float>(), value_[2].get<float>() };
             };
         shape_.localOffset = readVector_("LocalOffset", shape_.localOffset);
         shape_.localRotation = readVector_("LocalRotation", shape_.localRotation);
@@ -807,7 +1004,9 @@ void AttackEffectHitComponent::Deserialize(const nlohmann::json& json_)
             AttackEffectSphereTemplate sphere_{};
             const nlohmann::json offset_ = sphereJson_.value("LocalOffset", nlohmann::json::array());
             if (offset_.is_array() && offset_.size() >= 3u)
+            {
                 sphere_.localOffset = { offset_[0].get<float>(), offset_[1].get<float>(), offset_[2].get<float>() };
+            }
             sphere_.radius = sphereJson_.value("Radius", 0.5f);
             shape_.spheres.push_back(sphere_);
         }

@@ -21,9 +21,17 @@ namespace
     {
         if (name_.empty() || name_ == "." || name_ == ".." ||
             name_.find_first_of("<>:\"/\\|?*") != std::string::npos ||
-            name_.back() == '.' || name_.back() == ' ') return false;
+            name_.back() == '.' || name_.back() == ' ')
+        {
+            return false;
+        }
         for (const unsigned char character_ : name_)
-            if (character_ < 32) return false;
+        {
+            if (character_ < 32)
+            {
+                return false;
+            }
+        }
         return true;
     }
 
@@ -36,7 +44,10 @@ namespace
         const auto text_ = document_.dump(4);
         for (const char character_ : text_)
         {
-            if (character_ == '\n') file_.put('\r');
+            if (character_ == '\n')
+            {
+                file_.put('\r');
+            }
             file_.put(character_);
         }
         file_ << "\r\n";
@@ -50,9 +61,15 @@ namespace
         BS_PROFILE_SCOPE("GamePackageExporter::CopyData");
         for (const auto& entry_ : std::filesystem::recursive_directory_iterator(source_))
         {
-            if (entry_.is_symlink()) throw std::runtime_error("Data contains a symbolic link. Export stopped.");
+            if (entry_.is_symlink())
+            {
+                throw std::runtime_error("Data contains a symbolic link. Export stopped.");
+            }
             const auto target_ = destination_ / entry_.path().lexically_relative(source_);
-            if (entry_.is_directory()) std::filesystem::create_directories(target_);
+            if (entry_.is_directory())
+            {
+                std::filesystem::create_directories(target_);
+            }
             else if (entry_.is_regular_file())
             {
                 std::filesystem::create_directories(target_.parent_path());
@@ -70,7 +87,9 @@ bool GamePackageExporter::SaveGameIcon(const std::filesystem::path& icon_, std::
     {
         const auto source_ = std::filesystem::canonical(icon_);
         if (!std::filesystem::is_regular_file(source_))
+        {
             throw std::runtime_error("Select an ICO file.");
+        }
         const auto fileSize_ = std::filesystem::file_size(source_);
         std::ifstream file_(source_, std::ios::binary);
         file_.exceptions(std::ios::badbit | std::ios::failbit);
@@ -80,7 +99,9 @@ bool GamePackageExporter::SaveGameIcon(const std::filesystem::path& icon_, std::
         const auto directorySize_ = 6ull + 16ull * imageCount_;
         if (header_[0] != 0 || header_[1] != 0 || header_[2] != 1 || header_[3] != 0 ||
             imageCount_ == 0 || directorySize_ > fileSize_)
+        {
             throw std::runtime_error("The selected file is not a valid ICO file.");
+        }
 
         // 複数解像度の各画像がファイル内に収まることを確認し、不正なデータ範囲を拒否する。
         for (unsigned int index_ = 0; index_ < imageCount_; ++index_)
@@ -97,21 +118,30 @@ bool GamePackageExporter::SaveGameIcon(const std::filesystem::path& icon_, std::
             const auto imageSize_ = readUInt32_(8);
             const auto imageOffset_ = readUInt32_(12);
             if (imageSize_ == 0 || imageOffset_ < directorySize_ || imageOffset_ + imageSize_ > fileSize_)
+            {
                 throw std::runtime_error("The ICO file contains an invalid image range.");
+            }
         }
         file_.close();
         const auto preview_ = static_cast<HICON>(LoadImageW(nullptr, source_.c_str(), IMAGE_ICON,
             0, 0, LR_LOADFROMFILE | LR_DEFAULTSIZE));
-        if (!preview_) throw std::runtime_error("Windows could not load the selected ICO file.");
+        if (!preview_)
+        {
+            throw std::runtime_error("Windows could not load the selected ICO file.");
+        }
         DestroyIcon(preview_);
 
         // Icons.rcのGame分岐が参照する固定パスへ保存し、Engine用ICOには触れない。
         const auto destination_ = std::filesystem::current_path() / "Data" / "Icons" / "ANATHEMA" / "ANATHEMA.ico";
         if (!std::filesystem::is_regular_file("BIGShine.vcxproj"))
+        {
             throw std::runtime_error("Save the icon from the project directory.");
+        }
         std::filesystem::create_directories(destination_.parent_path());
         if (!std::filesystem::exists(destination_) || !std::filesystem::equivalent(source_, destination_))
+        {
             std::filesystem::copy_file(source_, destination_, std::filesystem::copy_options::overwrite_existing);
+        }
         error_.clear();
         return true;
     }
@@ -131,33 +161,47 @@ bool GamePackageExporter::Export(GameObjectManager& manager_, const std::filesys
     try
     {
         if (manager_.GetSceneRuntimeState() != SCENE_RUNTIME_STATE::RUNNING)
+        {
             throw std::runtime_error("Wait for the scene to finish loading before exporting.");
+        }
         const auto sourceRoot_ = std::filesystem::current_path();
         const auto executablePath_ = std::filesystem::canonical(executable_);
         if (!std::filesystem::is_regular_file(executablePath_) || executablePath_.extension() != ".exe")
+        {
             throw std::runtime_error("Select a built Release or Shipping executable.");
+        }
         const auto dataPath_ = sourceRoot_ / "Data";
         const auto readmePath_ = sourceRoot_ / "ReadMe.txt";
         if (!std::filesystem::is_directory(dataPath_) || !std::filesystem::is_regular_file(readmePath_))
+        {
             throw std::runtime_error("Data or ReadMe.txt was not found in the project directory.");
+        }
 
         auto snapshot_ = manager_.CaptureStandaloneScene();
         const auto sceneName_ = snapshot_.at("SceneName").get<std::string>();
         if (!IsSafeFileName(sceneName_) || !snapshot_.at("Objects").is_object() ||
             !snapshot_.at("ObjectList").is_array())
+        {
             throw std::runtime_error("The startup scene snapshot is invalid.");
+        }
         for (const auto& nameJson_ : snapshot_.at("ObjectList"))
         {
             const auto name_ = nameJson_.get<std::string>();
             if (!IsSafeFileName(name_) || !snapshot_.at("Objects").contains(name_))
+            {
                 throw std::runtime_error("The scene contains an invalid object name or missing object.");
+            }
         }
 
         // EXEと同じ場所のDLLを優先し、PhysXなどプロジェクト直下の依存DLLを補完する。
         std::map<std::filesystem::path, std::filesystem::path> libraries_;
         for (const auto& entry_ : std::filesystem::directory_iterator(executablePath_.parent_path()))
+        {
             if (entry_.is_regular_file() && entry_.path().extension() == ".dll")
+            {
                 libraries_[entry_.path().filename()] = entry_.path();
+            }
+        }
         constexpr std::array<const char*, 6> REQUIRED_LIBRARIES{
             "SDL3.dll", "fmod.dll", "PhysX_64.dll", "PhysXCommon_64.dll",
             "PhysXCooking_64.dll", "PhysXFoundation_64.dll"
@@ -166,9 +210,13 @@ bool GamePackageExporter::Export(GameObjectManager& manager_, const std::filesys
         {
             const auto fileName_ = std::filesystem::path(name_);
             if (libraries_.count(fileName_) == 0 && std::filesystem::is_regular_file(sourceRoot_ / fileName_))
+            {
                 libraries_[fileName_] = sourceRoot_ / fileName_;
+            }
             if (libraries_.count(fileName_) == 0)
+            {
                 throw std::runtime_error(std::string("Required runtime DLL not found beside EXE or project: ") + name_);
+            }
         }
 
         SYSTEMTIME time_{};
@@ -180,13 +228,17 @@ bool GamePackageExporter::Export(GameObjectManager& manager_, const std::filesys
         std::filesystem::create_directories(exportRoot_);
         const auto output_ = exportRoot_ / folderName_;
         if (!std::filesystem::create_directory(output_))
+        {
             throw std::runtime_error("The export directory already exists. Please retry.");
+        }
         outputDirectory_ = WindowsDialogHelper::PathToUtf8(output_);
 
         CopyData(dataPath_, output_ / "Data");
         std::filesystem::copy_file(executablePath_, output_ / "Game.exe");
         for (const auto& [name_, library_] : libraries_)
+        {
             std::filesystem::copy_file(library_, output_ / name_);
+        }
         std::filesystem::copy_file(readmePath_, output_ / "ReadMe.txt");
 
         // Play開始前の配置と描画設定を配布側のSceneへ反映し、編集カメラは含めない。
@@ -211,7 +263,9 @@ bool GamePackageExporter::Export(GameObjectManager& manager_, const std::filesys
             {
                 nlohmann::json units_ = nlohmann::json::array();
                 for (const auto& unit_ : combo_)
+                {
                     units_.push_back({{"dev", static_cast<int>(unit_.device)}, {"code", unit_.code}});
+                }
                 input_["actions"][name_].push_back(std::move(units_));
             }
         }
@@ -219,9 +273,11 @@ bool GamePackageExporter::Export(GameObjectManager& manager_, const std::filesys
         {
             input_["axes"][name_] = nlohmann::json::array();
             for (const auto& unit_ : binds_)
+            {
                 input_["axes"][name_].push_back({{"sourceType", static_cast<int>(unit_.sourceType)},
                     {"dev", static_cast<int>(unit_.device)}, {"code", unit_.code},
                     {"scale", unit_.scale}, {"deadZone", unit_.deadZone}});
+            }
         }
         WriteJson(output_ / "Data" / "Input" / "KeyConfig.json", input_);
         // 全コピーが成功した最後に起動設定を保存し、未完了フォルダーと区別する。
@@ -233,7 +289,10 @@ bool GamePackageExporter::Export(GameObjectManager& manager_, const std::filesys
     catch (const std::exception& exception_)
     {
         error_ = exception_.what();
-        if (!outputDirectory_.empty()) error_ += "\nIncomplete export: " + outputDirectory_;
+        if (!outputDirectory_.empty())
+        {
+            error_ += "\nIncomplete export: " + outputDirectory_;
+        }
         return false;
     }
 }

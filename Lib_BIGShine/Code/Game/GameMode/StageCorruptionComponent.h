@@ -13,6 +13,7 @@ public:
         static const std::string NAME = "StageCorruptionComponent";
         return NAME;
     }
+
     // 遷移前の設定を保存し、開始・完了状態・復元Actionを公開する。
     void Start() override;
     // CurveまたはSmoothStepを使い、環境の侵食率を更新する。

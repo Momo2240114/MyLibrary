@@ -22,6 +22,7 @@ public:
 
     // ContainmentVolume など、範囲内へ押し戻す追加制約の種類。
     enum class CollisionContainmentMode { NONE, KEEP_INSIDE };
+
 public:
 
     //現在ヒットしているコリジョン
@@ -80,38 +81,95 @@ public:
     // 設定変更後に PhysX Actor/Shape を作り直す。
     void RecreatePhysXActor();
     void ReleasePhysXActor();
-    CollisionRole GetCollisionRole() const { return collisionRole; }
+
+    CollisionRole GetCollisionRole() const
+    {
+        return collisionRole;
+    }
+
     // 直前のCCT移動が側面で制限されたかを、地上移動の実速度補正へ公開する。
-    bool WasHorizontalMovementBlocked() const { return horizontalMovementBlocked; }
+    bool WasHorizontalMovementBlocked() const
+    {
+        return horizontalMovementBlocked;
+    }
 
     // collisionOwnerObjectName が指定されていれば、その GameObject を判定上の所有者として解決する。
     std::shared_ptr<GameObject> ResolveCollisionOwnerObject();
     uint32_t GetCollisionOwnerId();
-    const std::string& GetColliderName() const { return colliderName; }
-    const std::string& GetCollisionOwnerObjectName() const { return collisionOwnerObjectName; }
-    float GetMass() const { return mass; }
-    void SetVelocityRotationMode(VelocityRotationMode mode_) { velocityRotationMode = mode_; }
-    VelocityRotationMode GetVelocityRotationMode() const { return velocityRotationMode; }
-    bool UsesPhysicsResponse() const { return usePhysicsResponse; }
-    bool CanBeCharacterGround() const { return canBeCharacterGround; }
+
+    const std::string& GetColliderName() const
+    {
+        return colliderName;
+    }
+
+    const std::string& GetCollisionOwnerObjectName() const
+    {
+        return collisionOwnerObjectName;
+    }
+
+    float GetMass() const
+    {
+        return mass;
+    }
+
+    void SetVelocityRotationMode(VelocityRotationMode mode_)
+    {
+        velocityRotationMode = mode_;
+    }
+
+    VelocityRotationMode GetVelocityRotationMode() const
+    {
+        return velocityRotationMode;
+    }
+
+    bool UsesPhysicsResponse() const
+    {
+        return usePhysicsResponse;
+    }
+
+    bool CanBeCharacterGround() const
+    {
+        return canBeCharacterGround;
+    }
 
     // 派生 Collider が Role を固定している場合、GUI/Deserialize の変更から保護する。
-    virtual bool HasFixedCollisionRole() const { return false; }
+    virtual bool HasFixedCollisionRole() const
+    {
+        return false;
+    }
 
     // HitBox など物理挙動を固定したい Collider が上書きする。
-    virtual bool HasFixedPhysicsBehavior() const { return false; }
+    virtual bool HasFixedPhysicsBehavior() const
+    {
+        return false;
+    }
 
     // CollisionRole に応じた isTrigger/usePhysicsResponse などの既定値を適用する。
     void ApplyRoleDefaults();
     // GUIの共通部分
     virtual void Gui();
 
-    virtual void OnTriggerEnter(std::shared_ptr<GameObject> other) {}
-    virtual void OnTriggerStay(std::shared_ptr<GameObject> other) {}
-    virtual void OnTriggerExit(std::shared_ptr<GameObject> other) {}
-    virtual void OnCollisionEnter(std::shared_ptr<GameObject> other) {}
+    virtual void OnTriggerEnter(std::shared_ptr<GameObject> other)
+    {
+    }
 
-    virtual CollisionManifold CheckCollision(std::shared_ptr<ColliderComponent> other) { return{}; };
+    virtual void OnTriggerStay(std::shared_ptr<GameObject> other)
+    {
+    }
+
+    virtual void OnTriggerExit(std::shared_ptr<GameObject> other)
+    {
+    }
+
+    virtual void OnCollisionEnter(std::shared_ptr<GameObject> other)
+    {
+    }
+
+    virtual CollisionManifold CheckCollision(std::shared_ptr<ColliderComponent> other)
+    {
+        return{};
+    };
+
     virtual ColliderType GetColliderType() const = 0;
 
     virtual ~ColliderComponent();
@@ -133,12 +191,15 @@ public:
     }
 
     void Start()override;
+
 protected:
     // Collider 固有の形状情報を PhysX Shape へ反映する。
     void UpdatePhysXShape();
 
     // 派生クラスが Shape 作成直前に半径や高さを調整したい時のフック。
-    virtual void OnPhysicsShapePrepared() {}
+    virtual void OnPhysicsShapePrepared()
+    {
+    }
 
     bool m_IsHitFlag = false;
 

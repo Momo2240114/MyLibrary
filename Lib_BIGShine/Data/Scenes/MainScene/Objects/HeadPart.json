@@ -129,7 +129,7 @@
                     0.11999999731779099,
                     1.0
                 ],
-                "EndNodeName": "PlainsDragon_Tongue_4",
+                "EndNodeName": "PlainsDragon_-Spine1",
                 "Feedback": {
                     "attackStrength": 0.30000001192092896,
                     "duration": 0.11999999731779099,
@@ -181,7 +181,7 @@
                 "Mass": 0.0,
                 "MaxHitCount": 1,
                 "NodeModelObjectName": "TestTarget",
-                "NodeSegmentScale": 1.0,
+                "NodeSegmentScale": 0.6000000238418579,
                 "Offset": [
                     0.0,
                     0.0,
@@ -195,7 +195,7 @@
                 "SectorRange": 0.0,
                 "ShapeRenderFlg": false,
                 "SourceAction": "Bite",
-                "StartNodeName": "PlainsDragon_Tongue_2",
+                "StartNodeName": "PlainsDragon_Tongue_4",
                 "TargetAirLiftPower": 0.0,
                 "TeamId": 1,
                 "UseGravity": false,

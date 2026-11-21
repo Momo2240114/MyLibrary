@@ -1,5 +1,6 @@
 #pragma once
 #include "ShaderTransitionEffect.h"
+
 // タイルを時間差で覆うトランジション。
 class CheckerTransition final : public ShaderTransitionEffect
 {

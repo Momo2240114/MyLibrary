@@ -40,7 +40,10 @@ HRESULT CPUResourceLoader::LoadTextureFromFile(ID3D11Device* device_,
     {
         // キャッシュヒット
         srv_ = it->second;
-        if (!srv_) return E_FAIL;
+        if (!srv_)
+        {
+            return E_FAIL;
+        }
         srv_->GetResource(resource_.GetAddressOf());
     }
     else
@@ -54,7 +57,10 @@ HRESULT CPUResourceLoader::LoadTextureFromFile(ID3D11Device* device_,
             hr = CreateDDSTextureFromFile(device_, dds_filename.c_str(),
                 resource_.GetAddressOf(), srv_.GetAddressOf()); // ← srv_ に受ける
             // 任意のUIマスクTextureが破損していても、呼び出し元の代替描画へ戻す。
-            if (FAILED(hr) || !resource_ || !srv_) return FAILED(hr) ? hr : E_FAIL;
+            if (FAILED(hr) || !resource_ || !srv_)
+            {
+                return FAILED(hr) ? hr : E_FAIL;
+            }
             _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
         }
         else
@@ -65,7 +71,10 @@ HRESULT CPUResourceLoader::LoadTextureFromFile(ID3D11Device* device_,
                 D3D11_BIND_SHADER_RESOURCE, 0, 0, flags,
                 resource_.GetAddressOf(), srv_.GetAddressOf());
             // 任意のUIマスクTextureが破損していても、呼び出し元の代替描画へ戻す。
-            if (FAILED(hr) || !resource_ || !srv_) return FAILED(hr) ? hr : E_FAIL;
+            if (FAILED(hr) || !resource_ || !srv_)
+            {
+                return FAILED(hr) ? hr : E_FAIL;
+            }
             _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
         }
 
@@ -99,12 +108,14 @@ HRESULT CPUResourceLoader::LoadTextureFromMemory(
 
     //DDS形式のテクスチャデータをして読み込む
     if (hr != S_OK)
-    // DDSで試す
+    {
+        // DDSで試す
     hr = CreateDDSTextureFromMemory(device_,
         reinterpret_cast<const uint8_t*>(data),
         size,
         resource.GetAddressOf(),
         shader_resource_view_ ? shader_resource_view_ : nullptr);
+    }
 
     if (FAILED(hr))
     {
@@ -129,7 +140,10 @@ HRESULT CPUResourceLoader::LoadTextureFromMemory(
     {
         Microsoft::WRL::ComPtr<ID3D11Texture2D> texture2D;
         hr = resource->QueryInterface(texture2D.GetAddressOf());
-        if (FAILED(hr)) return hr;
+        if (FAILED(hr))
+        {
+            return hr;
+        }
 
         // デバッグ用に SRV なしでもOK
         // 必要に応じてここで他の処理も可能
@@ -143,7 +157,10 @@ HRESULT CPUResourceLoader::LoadTextureFromMemory(
 
 HRESULT CPUResourceLoader::CreateDummyTexture(ID3D11Device* device_, UINT colorRGBA8, ID3D11ShaderResourceView** outSRV_)
 {
-    if (!device_ || !outSRV_) return E_INVALIDARG;
+    if (!device_ || !outSRV_)
+    {
+        return E_INVALIDARG;
+    }
 
     UINT32 pixel = colorRGBA8;
 
@@ -163,7 +180,10 @@ HRESULT CPUResourceLoader::CreateDummyTexture(ID3D11Device* device_, UINT colorR
 
     Microsoft::WRL::ComPtr<ID3D11Texture2D> tex;
     HRESULT hr = device_->CreateTexture2D(&desc, &init, tex.GetAddressOf());
-    if (FAILED(hr)) return hr;
+    if (FAILED(hr))
+    {
+        return hr;
+    }
 
     return device_->CreateShaderResourceView(tex.Get(), nullptr, outSRV_);
 }
@@ -237,24 +257,37 @@ HRESULT CPUResourceLoader::LoadVertexShader(ID3D11Device* device, const char* fi
     // ファイルを開く
     FILE* fp = nullptr;
     fopen_s(&fp, filename, "rb");
-    if (!fp) return HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND);
+    if (!fp)
+    {
+        return HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND);
+    }
 
     // ファイルのサイズを求める
     fseek(fp, 0, SEEK_END);
     long size = ftell(fp);
-    if (size <= 0) { fclose(fp); return E_FAIL; }
+    if (size <= 0)
+    {
+        fclose(fp);
+        return E_FAIL;
+    }
     fseek(fp, 0, SEEK_SET);
 
     // メモリ上に頂点シェーダーデータを格納する領域を用意する
     std::unique_ptr<std::uint8_t[]> data = std::make_unique<std::uint8_t[]>(size);
     const size_t readCount_ = fread(data.get(), size, 1, fp);
     fclose(fp);
-    if (readCount_ != 1) return E_FAIL;
+    if (readCount_ != 1)
+    {
+        return E_FAIL;
+    }
 
     // 頂点シェーダー生成
     HRESULT hr = device->CreateVertexShader(data.get(), size, nullptr, vertexShader);
     _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
-    if (FAILED(hr)) return hr;
+    if (FAILED(hr))
+    {
+        return hr;
+    }
 
     // 入力レイアウト
     if (inputLayout != nullptr)
@@ -271,19 +304,29 @@ HRESULT CPUResourceLoader::LoadPixelShader(ID3D11Device* device, const char* fil
     // ファイルを開く
     FILE* fp = nullptr;
     fopen_s(&fp, filename, "rb");
-    if (!fp) return HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND);
+    if (!fp)
+    {
+        return HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND);
+    }
 
     // ファイルのサイズを求める
     fseek(fp, 0, SEEK_END);
     long size = ftell(fp);
-    if (size <= 0) { fclose(fp); return E_FAIL; }
+    if (size <= 0)
+    {
+        fclose(fp);
+        return E_FAIL;
+    }
     fseek(fp, 0, SEEK_SET);
 
     // メモリ上に頂点シェーダーデータを格納する領域を用意する
     std::unique_ptr<std::uint8_t[]> data = std::make_unique<std::uint8_t[]>(size);
     const size_t readCount_ = fread(data.get(), size, 1, fp);
     fclose(fp);
-    if (readCount_ != 1) return E_FAIL;
+    if (readCount_ != 1)
+    {
+        return E_FAIL;
+    }
 
     // ピクセルシェーダー生成
     HRESULT hr = device->CreatePixelShader(data.get(), size, nullptr, pixelShader);

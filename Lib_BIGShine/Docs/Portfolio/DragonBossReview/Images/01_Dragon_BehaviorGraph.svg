@@ -1,0 +1,665 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3416" height="4509" viewBox="0 0 3416 4509" role="img">
+<rect width="3416" height="4509" fill="#0d1420"/>
+<rect x="60" y="49" width="44" height="5" rx="2" fill="#61d2e6" stroke="none"/>
+<text x="60" y="104" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="36" font-weight="700">ドラゴン第1形態 BehaviorGraph 全体図</text>
+<text x="60" y="137" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="500">ANATHEMA   /   本編データ DragonFirstForm.json   /   74ノード・75接続</text>
+<rect x="57" y="162" width="13" height="13" rx="3" fill="#8cc9ff" stroke="none"/>
+<text x="77" y="174" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="15" font-weight="500">Root</text>
+<rect x="267" y="162" width="13" height="13" rx="3" fill="#a3a6ff" stroke="none"/>
+<text x="287" y="174" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="15" font-weight="500">Selector</text>
+<rect x="477" y="162" width="13" height="13" rx="3" fill="#61d2e6" stroke="none"/>
+<text x="497" y="174" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="15" font-weight="500">Sequence</text>
+<rect x="687" y="162" width="13" height="13" rx="3" fill="#f3bf71" stroke="none"/>
+<text x="707" y="174" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="15" font-weight="500">BlackboardCondition</text>
+<rect x="897" y="162" width="13" height="13" rx="3" fill="#df98f6" stroke="none"/>
+<text x="917" y="174" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="15" font-weight="500">RandomSelector</text>
+<rect x="1107" y="162" width="13" height="13" rx="3" fill="#71dfb4" stroke="none"/>
+<text x="1127" y="174" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="15" font-weight="500">PlayAction</text>
+<text x="57" y="211" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="16" font-weight="500">左から親 → 子。WはJSONの基本重み。ピンクの接続は中距離と遠距離で共有される2つの候補へのリンクです。</text>
+<g data-link-id="7"><path d="M 457,2041.75 C 499.0,2041.75 499.0,2041.75 541,2041.75" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="541,2041.75 532.0,2037.75 532.0,2045.75" fill="#89a6c6"/></g>
+<g data-link-id="18"><path d="M 941,2039.25 C 983.0,2039.25 983.0,867.25 1025,867.25" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1025,867.25 1015.3372294857157,869.1554831377571 1019.9393268297941,875.6992358864195" fill="#89a6c6"/></g>
+<g data-link-id="19"><path d="M 941,2044.25 C 983.0,2044.25 983.0,3216.25 1025,3216.25" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1025,3216.25 1019.9393268297944,3207.8007641135805 1015.3372294857157,3214.3445168622425" fill="#89a6c6"/></g>
+<g data-link-id="351"><path d="M 1425,862.25 C 1467.0,862.25 1467.0,406.0 1509,406.0" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1509,406.0 1499.2631979560497,404.51855274919245 1501.375707887475,412.2345945965148" fill="#89a6c6"/></g>
+<g data-link-id="87"><path d="M 1425,867.25 C 1467.0,867.25 1467.0,775.0 1509,775.0" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1509,775.0 1499.7926708310986,771.5035604430368 1500.2348449063923,779.4913312263741" fill="#89a6c6"/></g>
+<g data-link-id="327"><path d="M 1425,872.25 C 1467.0,872.25 1467.0,1328.5 1509,1328.5" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1509,1328.5 1501.3757078874755,1322.265405403485 1499.2631979560497,1329.9814472508072" fill="#89a6c6"/></g>
+<g data-link-id="336"><path d="M 1909,398.5 C 1951.0,398.5 1951.0,283 1993,283" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1993,283 1983.7449701351143,279.6318518144125 1984.2981071074241,287.6127063732843" fill="#89a6c6"/></g>
+<g data-link-id="340"><path d="M 1909,403.5 C 1951.0,403.5 1951.0,365 1993,365" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1993,365 1983.9100148383125,361.20893553730616 1984.0947868368696,369.20680145944743" fill="#89a6c6"/></g>
+<g data-link-id="344"><path d="M 1909,408.5 C 1951.0,408.5 1951.0,447 1993,447" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1993,447 1984.0947868368696,442.7931985405524 1983.9100148383125,450.79106446269367" fill="#89a6c6"/></g>
+<g data-link-id="348"><path d="M 1909,413.5 C 1951.0,413.5 1951.0,529 1993,529" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1993,529 1984.2981071074241,524.3872936267157 1983.7449701351143,532.3681481855874" fill="#89a6c6"/></g>
+<g data-link-id="91"><path d="M 1909,765.0 C 1951.0,765.0 1951.0,611 1993,611" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1993,611 1983.670110071125,607.8451380513442 1984.4062587043288,615.8111963733646" fill="#89a6c6"/></g>
+<g data-link-id="95"><path d="M 1909,770.0 C 1951.0,770.0 1951.0,693 1993,693" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1993,693 1983.8249675123839,689.4196677736293 1984.1942161650131,697.4111416947862" fill="#89a6c6"/></g>
+<g data-link-id="99"><path d="M 1909,775.0 C 1951.0,775.0 1951.0,775 1993,775" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1993,775 1984.0,771.0 1984.0,779.0" fill="#89a6c6"/></g>
+<g data-link-id="103"><path d="M 1909,780.0 C 1951.0,780.0 1951.0,857 1993,857" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1993,857 1984.1942161650131,852.5888583052134 1983.8249675123839,860.5803322263704" fill="#89a6c6"/></g>
+<g data-link-id="107"><path d="M 1909,785.0 C 1951.0,785.0 1951.0,939 1993,939" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1993,939 1984.4062587043288,934.1888036266354 1983.670110071125,942.1548619486558" fill="#89a6c6"/></g>
+<g data-link-id="115"><path d="M 2393,1136.5 C 2435.0,1136.5 2435.0,1021 2477,1021" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2477,1021 2467.7449701351147,1017.6318518144122 2468.298107107424,1025.612706373284" fill="#89a6c6"/></g>
+<g data-link-id="119"><path d="M 2393,1141.5 C 2435.0,1141.5 2435.0,1103 2477,1103" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2477,1103 2467.9100148383122,1099.2089355373064 2468.0947868368694,1107.206801459448" fill="#89a6c6"/></g>
+<g data-link-id="123"><path d="M 2393,1146.5 C 2435.0,1146.5 2435.0,1185 2477,1185" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2477,1185 2468.0947868368694,1180.7931985405528 2467.9100148383122,1188.7910644626943" fill="#89a6c6"/></g>
+<g data-link-id="127"><path d="M 2393,1151.5 C 2435.0,1151.5 2435.0,1267 2477,1267" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2477,1267 2468.298107107424,1262.3872936267157 2467.7449701351147,1270.3681481855874" fill="#89a6c6"/></g>
+<g data-link-id="155"><path d="M 2393,1503.0 C 2435.0,1503.0 2435.0,1349 2477,1349" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2477,1349 2467.670110071125,1345.8451380513436 2468.4062587043286,1353.8111963733643" fill="#89a6c6"/></g>
+<g data-link-id="159"><path d="M 2393,1508.0 C 2435.0,1508.0 2435.0,1431 2477,1431" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2477,1431 2467.824967512384,1427.4196677736293 2468.1942161650127,1435.411141694786" fill="#89a6c6"/></g>
+<g data-link-id="163"><path d="M 2393,1513.0 C 2435.0,1513.0 2435.0,1513 2477,1513" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2477,1513 2468.0,1509.0 2468.0,1517.0" fill="#89a6c6"/></g>
+<g data-link-id="167"><path d="M 2393,1518.0 C 2435.0,1518.0 2435.0,1595 2477,1595" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2477,1595 2468.1942161650127,1590.588858305214 2467.824967512384,1598.5803322263707" fill="#89a6c6"/></g>
+<g data-link-id="171"><path d="M 2393,1523.0 C 2435.0,1523.0 2435.0,1677 2477,1677" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2477,1677 2468.406258704329,1672.188803626635 2467.6701100711252,1680.1548619486557" fill="#89a6c6"/></g>
+<g data-link-id="175"><path d="M 1425,3206.25 C 1467.0,3206.25 1467.0,2119.5 1509,2119.5" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1509,2119.5 1499.2763799474778,2121.0656350386307 1503.64629298317,2127.7666692916764" fill="#89a6c6"/></g>
+<g data-link-id="223"><path d="M 1425,3211.25 C 1467.0,3211.25 1467.0,3103.5 1509,3103.5" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1509,3103.5 1499.760662971069,3100.0890395391 1500.2768447415947,3108.072369444583" fill="#89a6c6"/></g>
+<g data-link-id="267"><path d="M 1425,3216.25 C 1467.0,3216.25 1467.0,3657.0 1509,3657.0" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1509,3657.0 1501.3219236675966,3650.831763312438 1499.276412339065,3658.565836198366" fill="#89a6c6"/></g>
+<g data-link-id="291"><path d="M 1425,3221.25 C 1467.0,3221.25 1467.0,4026.0 1509,4026.0" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1509,4026.0 1502.634927652651,4018.484292846777 1499.1560761071157,4025.6882911757693" fill="#89a6c6"/></g>
+<g data-link-id="311"><path d="M 1425,3226.25 C 1467.0,3226.25 1467.0,4313.0 1509,4313.0" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1509,4313.0 1503.64629298317,4304.733330708324 1499.2763799474778,4311.434364961368" fill="#89a6c6"/></g>
+<g data-link-id="179"><path d="M 1909,2109.5 C 1951.0,2109.5 1951.0,1771 1993,1771" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1993,1771 1983.3838776749835,1768.871575364191 1984.976345104079,1776.711476351274" fill="#89a6c6"/></g>
+<g data-link-id="183"><path d="M 1909,2114.5 C 1951.0,2114.5 1951.0,1853 1993,1853" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1993,1853 1983.4887150967966,1850.4435455235628 1984.7288841132813,1858.3468347635282" fill="#89a6c6"/></g>
+<g data-link-id="187"><path d="M 1909,2119.5 C 1951.0,2119.5 1951.0,1935 1993,1935" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1993,1935 1983.6144943206596,1932.014655272323 1984.4948176335065,1939.9660721815824" fill="#89a6c6"/></g>
+<g data-link-id="191"><path d="M 1909,2124.5 C 1951.0,2124.5 1951.0,2017 1993,2017" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1993,2017 1983.7611726518226,2013.5876592739635 1984.2761617535448,2021.5710662049116" fill="#89a6c6"/></g>
+<g data-link-id="195"><path d="M 1909,2129.5 C 1951.0,2129.5 1951.0,2468.0 1993,2468.0" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1993,2468.0 1984.976345104079,2462.288523648726 1983.3838776749835,2470.1284246358096" fill="#89a6c6"/></g>
+<g data-link-id="199"><path d="M 2393,2458.0 C 2435.0,2458.0 2435.0,2140.0 2477,2140.0" fill="none" stroke="#ed9bd6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2477,2140.0 2467.409755790085,2137.7578546001223 2468.909274820251,2145.6160632177507" fill="#ed9bd6"/></g>
+<g data-link-id="211"><path d="M 2393,2463.0 C 2435.0,2463.0 2435.0,2304.0 2477,2304.0" fill="none" stroke="#ed9bd6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2477,2304.0 2467.6607684282576,2300.872900121619 2468.4206057380757,2308.836733825471" fill="#ed9bd6"/></g>
+<g data-link-id="378"><path d="M 2393,2468.0 C 2435.0,2468.0 2435.0,2468.0 2477,2468.0" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2477,2468.0 2468.0,2464.0 2468.0,2472.0" fill="#89a6c6"/></g>
+<g data-link-id="381"><path d="M 2393,2473.0 C 2435.0,2473.0 2435.0,2632.0 2477,2632.0" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2477,2632.0 2468.4206057380757,2627.163266174529 2467.6607684282576,2635.127099878381" fill="#89a6c6"/></g>
+<g data-link-id="375"><path d="M 2393,2478.0 C 2435.0,2478.0 2435.0,2796.0 2477,2796.0" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2477,2796.0 2468.909274820251,2790.3839367822493 2467.409755790085,2798.2421453998777" fill="#89a6c6"/></g>
+<g data-link-id="203"><path d="M 2877,2137.5 C 2919.0,2137.5 2919.0,2099 2961,2099" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2961,2099 2951.9100148383122,2095.2089355373064 2952.0947868368694,2103.206801459448" fill="#89a6c6"/></g>
+<g data-link-id="207"><path d="M 2877,2142.5 C 2919.0,2142.5 2919.0,2181 2961,2181" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2961,2181 2952.0947868368694,2176.793198540552 2951.9100148383122,2184.7910644626936" fill="#89a6c6"/></g>
+<g data-link-id="376"><path d="M 2877,2793.5 C 2919.0,2793.5 2919.0,2755 2961,2755" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2961,2755 2951.9100148383122,2751.2089355373064 2952.0947868368694,2759.206801459448" fill="#89a6c6"/></g>
+<g data-link-id="377"><path d="M 2877,2798.5 C 2919.0,2798.5 2919.0,2837 2961,2837" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2961,2837 2952.0947868368694,2832.793198540552 2951.9100148383122,2840.7910644626936" fill="#89a6c6"/></g>
+<g data-link-id="379"><path d="M 2877,2465.5 C 2919.0,2465.5 2919.0,2427 2961,2427" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2961,2427 2951.9100148383122,2423.2089355373064 2952.0947868368694,2431.206801459448" fill="#89a6c6"/></g>
+<g data-link-id="380"><path d="M 2877,2470.5 C 2919.0,2470.5 2919.0,2509 2961,2509" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2961,2509 2952.0947868368694,2504.793198540552 2951.9100148383122,2512.7910644626936" fill="#89a6c6"/></g>
+<g data-link-id="382"><path d="M 2877,2629.5 C 2919.0,2629.5 2919.0,2591 2961,2591" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2961,2591 2951.9100148383127,2587.208935537305 2952.094786836869,2595.2068014594465" fill="#89a6c6"/></g>
+<g data-link-id="383"><path d="M 2877,2634.5 C 2919.0,2634.5 2919.0,2673 2961,2673" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2961,2673 2952.0947868368694,2668.793198540552 2951.9100148383122,2676.7910644626936" fill="#89a6c6"/></g>
+<g data-link-id="215"><path d="M 2877,2301.5 C 2919.0,2301.5 2919.0,2263 2961,2263" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2961,2263 2951.9100148383122,2259.2089355373064 2952.0947868368694,2267.206801459448" fill="#89a6c6"/></g>
+<g data-link-id="219"><path d="M 2877,2306.5 C 2919.0,2306.5 2919.0,2345 2961,2345" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2961,2345 2952.0947868368694,2340.793198540552 2951.9100148383122,2348.7910644626936" fill="#89a6c6"/></g>
+<g data-link-id="227"><path d="M 1909,3096.0 C 1951.0,3096.0 1951.0,2919 1993,2919" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1993,2919 1983.6278664875888,2915.9729365012377 1984.4728118534265,2923.9281905718976" fill="#89a6c6"/></g>
+<g data-link-id="231"><path d="M 1909,3101.0 C 1951.0,3101.0 1951.0,3001 1993,3001" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1993,3001 1983.776563427228,2997.546274795521 1984.2557567839933,3005.5319102572007" fill="#89a6c6"/></g>
+<g data-link-id="235"><path d="M 1909,3106.0 C 1951.0,3106.0 1951.0,3083 1993,3083" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1993,3083 1983.9456559495793,3079.124583400896 1984.0560581606924,3087.1238215741087" fill="#89a6c6"/></g>
+<g data-link-id="239"><path d="M 1909,3111.0 C 1951.0,3111.0 1951.0,3288.0 1993,3288.0" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1993,3288.0 1984.4728118534274,3283.0718094281015 1983.6278664875883,3291.0270634987614" fill="#89a6c6"/></g>
+<g data-link-id="331"><path d="M 2393,3280.5 C 2435.0,3280.5 2435.0,2140.0 2477,2140.0" fill="none" stroke="#ed9bd6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2477,2140.0 2467.313703251838,2141.782036842084 2471.8319315876233,2148.3839769134343" fill="#ed9bd6"/></g>
+<g data-link-id="332"><path d="M 2393,3285.5 C 2435.0,3285.5 2435.0,2304.0 2477,2304.0" fill="none" stroke="#ed9bd6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2477,2304.0 2467.2151199044224,2305.1207682700574 2471.275032053934,2312.0140340663434" fill="#ed9bd6"/></g>
+<g data-link-id="243"><path d="M 2393,3290.5 C 2435.0,3290.5 2435.0,3206.0 2477,3206.0" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2477,3206.0 2467.808984469038,3202.4608993360434 2468.214110749305,3210.450634794557" fill="#89a6c6"/></g>
+<g data-link-id="255"><path d="M 2393,3295.5 C 2435.0,3295.5 2435.0,3370.0 2477,3370.0" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2477,3370.0 2468.1876222061305,3365.602046201002 2467.830337833718,3373.594063961069" fill="#89a6c6"/></g>
+<g data-link-id="247"><path d="M 2877,3203.5 C 2919.0,3203.5 2919.0,3165 2961,3165" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2961,3165 2951.9100148383127,3161.208935537305 2952.094786836869,3169.2068014594465" fill="#89a6c6"/></g>
+<g data-link-id="251"><path d="M 2877,3208.5 C 2919.0,3208.5 2919.0,3247 2961,3247" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2961,3247 2952.0947868368694,3242.793198540552 2951.9100148383122,3250.7910644626936" fill="#89a6c6"/></g>
+<g data-link-id="259"><path d="M 2877,3367.5 C 2919.0,3367.5 2919.0,3329 2961,3329" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2961,3329 2951.9100148383127,3325.208935537305 2952.094786836869,3333.2068014594465" fill="#89a6c6"/></g>
+<g data-link-id="263"><path d="M 2877,3372.5 C 2919.0,3372.5 2919.0,3411 2961,3411" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2961,3411 2952.0947868368694,3406.793198540552 2951.9100148383122,3414.7910644626936" fill="#89a6c6"/></g>
+<g data-link-id="271"><path d="M 1909,3647.0 C 1951.0,3647.0 1951.0,3493 1993,3493" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1993,3493 1983.670110071125,3489.845138051344 1984.4062587043288,3497.811196373364" fill="#89a6c6"/></g>
+<g data-link-id="275"><path d="M 1909,3652.0 C 1951.0,3652.0 1951.0,3575 1993,3575" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1993,3575 1983.8249675123836,3571.41966777363 1984.1942161650134,3579.411141694787" fill="#89a6c6"/></g>
+<g data-link-id="279"><path d="M 1909,3657.0 C 1951.0,3657.0 1951.0,3657 1993,3657" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1993,3657 1984.0,3653.0 1984.0,3661.0" fill="#89a6c6"/></g>
+<g data-link-id="283"><path d="M 1909,3662.0 C 1951.0,3662.0 1951.0,3739 1993,3739" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1993,3739 1984.1942161650134,3734.588858305213 1983.8249675123836,3742.58033222637" fill="#89a6c6"/></g>
+<g data-link-id="287"><path d="M 1909,3667.0 C 1951.0,3667.0 1951.0,3821 1993,3821" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1993,3821 1984.4062587043295,3816.1888036266346 1983.6701100711248,3824.154861948655" fill="#89a6c6"/></g>
+<g data-link-id="295"><path d="M 1909,4018.5 C 1951.0,4018.5 1951.0,3903 1993,3903" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1993,3903 1983.7449701351147,3899.6318518144117 1984.2981071074237,3907.612706373284" fill="#89a6c6"/></g>
+<g data-link-id="299"><path d="M 1909,4023.5 C 1951.0,4023.5 1951.0,3985 1993,3985" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1993,3985 1983.9100148383122,3981.2089355373064 1984.0947868368698,3989.206801459448" fill="#89a6c6"/></g>
+<g data-link-id="303"><path d="M 1909,4028.5 C 1951.0,4028.5 1951.0,4067 1993,4067" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1993,4067 1984.0947868368698,4062.793198540552 1983.9100148383122,4070.7910644626936" fill="#89a6c6"/></g>
+<g data-link-id="307"><path d="M 1909,4033.5 C 1951.0,4033.5 1951.0,4149 1993,4149" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1993,4149 1984.2981071074246,4144.387293626715 1983.7449701351143,4152.3681481855865" fill="#89a6c6"/></g>
+<g data-link-id="315"><path d="M 1909,4308.0 C 1951.0,4308.0 1951.0,4231 1993,4231" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1993,4231 1983.8249675123836,4227.41966777363 1984.1942161650134,4235.411141694786" fill="#89a6c6"/></g>
+<g data-link-id="319"><path d="M 1909,4313.0 C 1951.0,4313.0 1951.0,4313 1993,4313" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1993,4313 1984.0,4309.0 1984.0,4317.0" fill="#89a6c6"/></g>
+<g data-link-id="323"><path d="M 1909,4318.0 C 1951.0,4318.0 1951.0,4395 1993,4395" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1993,4395 1984.1942161650134,4390.588858305214 1983.8249675123836,4398.58033222637" fill="#89a6c6"/></g>
+<g data-link-id="328"><path d="M 1909,1326.0 C 1951.0,1326.0 1951.0,1144.0 1993,1144.0" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1993,1144.0 1983.6189296553027,1141.0007468950018 1984.4874660209773,1148.953459927766" fill="#89a6c6"/></g>
+<g data-link-id="330"><path d="M 1909,1331.0 C 1951.0,1331.0 1951.0,1513.0 1993,1513.0" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1993,1513.0 1984.487466020977,1508.0465400722344 1983.618929655303,1515.999253104999" fill="#89a6c6"/></g>
+<g data-node-id="337"><title>Ground Idle</title>
+<rect x="1993" y="249" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1994" y="257" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="2006" y="266" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#337   BlackboardCondition   /   Priority 0</text>
+<text x="2006" y="287" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Ground Idle</text>
+<text x="2006" y="307" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI.State = 0</text>
+</g>
+<g data-node-id="341"><title>Target Behind</title>
+<rect x="1993" y="331" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1994" y="339" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="2006" y="348" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#341   BlackboardCondition   /   Priority 1</text>
+<text x="2006" y="369" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Target Behind</text>
+<text x="2006" y="389" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI.IsTargetBehind = true</text>
+</g>
+<g data-node-id="345"><title>Can Tail Sweep</title>
+<rect x="1993" y="413" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1994" y="421" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="2006" y="430" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#345   BlackboardCondition   /   Priority 2</text>
+<text x="2006" y="451" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Can Tail Sweep</text>
+<text x="2006" y="471" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI.CanUseTailSweep = true</text>
+</g>
+<g data-node-id="349"><title>Behind Tail Sweep Action</title>
+<rect x="1993" y="495" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1994" y="503" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="2006" y="512" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#349   PlayAction   /   Priority 3   /   W 1   /   Wait ON</text>
+<text x="2006" y="533" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Behind Tail Sweep Action</text>
+<text x="2006" y="553" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI_TurnTailSweep</text>
+</g>
+<g data-node-id="333"><title>Behind Tail Sweep Sequence</title>
+<rect x="1509" y="372.0" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1510" y="380.0" width="4" height="52" rx="2" fill="#61d2e6" stroke="none"/>
+<text x="1522" y="389.0" fill="#61d2e6" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#333   Sequence   /   Priority 0   /   W 1.4</text>
+<text x="1522" y="410.0" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Behind Tail Sweep Sequence</text>
+</g>
+<g data-node-id="88"><title>Ground Idle</title>
+<rect x="1993" y="577" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1994" y="585" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="2006" y="594" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#88   BlackboardCondition   /   Priority 0</text>
+<text x="2006" y="615" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Ground Idle</text>
+<text x="2006" y="635" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI.State = 0</text>
+</g>
+<g data-node-id="92"><title>Has Target</title>
+<rect x="1993" y="659" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1994" y="667" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="2006" y="676" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#92   BlackboardCondition   /   Priority 1</text>
+<text x="2006" y="697" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Has Target</text>
+<text x="2006" y="717" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI.HasTarget = true</text>
+</g>
+<g data-node-id="96"><title>Not Front</title>
+<rect x="1993" y="741" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1994" y="749" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="2006" y="758" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#96   BlackboardCondition   /   Priority 2</text>
+<text x="2006" y="779" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Not Front</text>
+<text x="2006" y="799" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI.IsTargetInFront = false</text>
+</g>
+<g data-node-id="100"><title>Can Turn</title>
+<rect x="1993" y="823" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1994" y="831" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="2006" y="840" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#100   BlackboardCondition   /   Priority 3</text>
+<text x="2006" y="861" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Can Turn</text>
+<text x="2006" y="881" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI.CanUseTurnToPlayer = true</text>
+</g>
+<g data-node-id="104"><title>Turn To Player Action</title>
+<rect x="1993" y="905" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1994" y="913" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="2006" y="922" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#104   PlayAction   /   Priority 4   /   W 1   /   Wait ON</text>
+<text x="2006" y="943" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Turn To Player Action</text>
+<text x="2006" y="963" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI_TurnToPlayer</text>
+</g>
+<g data-node-id="84"><title>Turn To Player Sequence</title>
+<rect x="1509" y="741.0" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1510" y="749.0" width="4" height="52" rx="2" fill="#61d2e6" stroke="none"/>
+<text x="1522" y="758.0" fill="#61d2e6" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#84   Sequence   /   Priority 1   /   W 1</text>
+<text x="1522" y="779.0" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Turn To Player Sequence</text>
+</g>
+<g data-node-id="112"><title>Ground Idle</title>
+<rect x="2477" y="987" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2478" y="995" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="2490" y="1004" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#112   BlackboardCondition   /   Priority 0</text>
+<text x="2490" y="1025" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Ground Idle</text>
+<text x="2490" y="1045" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI.State = 0</text>
+</g>
+<g data-node-id="116"><title>Under Body</title>
+<rect x="2477" y="1069" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2478" y="1077" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="2490" y="1086" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#116   BlackboardCondition   /   Priority 1</text>
+<text x="2490" y="1107" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Under Body</text>
+<text x="2490" y="1127" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI.IsTargetUnderBody = true</text>
+</g>
+<g data-node-id="120"><title>Can Bite</title>
+<rect x="2477" y="1151" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2478" y="1159" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="2490" y="1168" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#120   BlackboardCondition   /   Priority 2</text>
+<text x="2490" y="1189" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Can Bite</text>
+<text x="2490" y="1209" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI.CanUseBite = true</text>
+</g>
+<g data-node-id="124"><title>Under Body Bite Action</title>
+<rect x="2477" y="1233" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2478" y="1241" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="2490" y="1250" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#124   PlayAction   /   Priority 3   /   W 1   /   Wait ON</text>
+<text x="2490" y="1271" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Under Body Bite Action</text>
+<text x="2490" y="1291" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI_Bite</text>
+</g>
+<g data-node-id="108"><title>Under Body Bite Sequence</title>
+<rect x="1993" y="1110.0" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1994" y="1118.0" width="4" height="52" rx="2" fill="#61d2e6" stroke="none"/>
+<text x="2006" y="1127.0" fill="#61d2e6" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#108   Sequence   /   Priority 0   /   W 3.5</text>
+<text x="2006" y="1148.0" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Under Body Bite Sequence</text>
+</g>
+<g data-node-id="152"><title>Ground Idle</title>
+<rect x="2477" y="1315" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2478" y="1323" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="2490" y="1332" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#152   BlackboardCondition   /   Priority 0</text>
+<text x="2490" y="1353" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Ground Idle</text>
+<text x="2490" y="1373" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI.State = 0</text>
+</g>
+<g data-node-id="156"><title>Front Bite</title>
+<rect x="2477" y="1397" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2478" y="1405" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="2490" y="1414" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#156   BlackboardCondition   /   Priority 1</text>
+<text x="2490" y="1435" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Front Bite</text>
+<text x="2490" y="1455" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI.IsTargetInFront = true</text>
+</g>
+<g data-node-id="160"><title>Bite Range</title>
+<rect x="2477" y="1479" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2478" y="1487" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="2490" y="1496" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#160   BlackboardCondition   /   Priority 2</text>
+<text x="2490" y="1517" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Bite Range</text>
+<text x="2490" y="1537" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI.TargetHorizontalDistance &lt; 4.8</text>
+</g>
+<g data-node-id="164"><title>Can Bite</title>
+<rect x="2477" y="1561" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2478" y="1569" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="2490" y="1578" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#164   BlackboardCondition   /   Priority 3</text>
+<text x="2490" y="1599" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Can Bite</text>
+<text x="2490" y="1619" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI.CanUseBite = true</text>
+</g>
+<g data-node-id="168"><title>Close Bite Action</title>
+<rect x="2477" y="1643" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2478" y="1651" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="2490" y="1660" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#168   PlayAction   /   Priority 4   /   W 1   /   Wait ON</text>
+<text x="2490" y="1681" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Close Bite Action</text>
+<text x="2490" y="1701" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI_Bite</text>
+</g>
+<g data-node-id="148"><title>Close Bite Sequence</title>
+<rect x="1993" y="1479.0" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1994" y="1487.0" width="4" height="52" rx="2" fill="#61d2e6" stroke="none"/>
+<text x="2006" y="1496.0" fill="#61d2e6" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#148   Sequence   /   Priority 2   /   W 7</text>
+<text x="2006" y="1517.0" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Close Bite Sequence</text>
+</g>
+<g data-node-id="324"><title>Ground Close Random</title>
+<rect x="1509" y="1294.5" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1510" y="1302.5" width="4" height="52" rx="2" fill="#df98f6" stroke="none"/>
+<text x="1522" y="1311.5" fill="#df98f6" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#324   RandomSelector   /   Priority 2</text>
+<text x="1522" y="1332.5" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Ground Close Random</text>
+</g>
+<g data-node-id="11"><title>Ground Turn / Close Decision</title>
+<rect x="1025" y="833.25" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1026" y="841.25" width="4" height="52" rx="2" fill="#a3a6ff" stroke="none"/>
+<text x="1038" y="850.25" fill="#a3a6ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#11   Selector   /   Priority 1</text>
+<text x="1038" y="871.25" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Ground Turn / Close Decision</text>
+</g>
+<g data-node-id="176"><title>Ground Idle</title>
+<rect x="1993" y="1737" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1994" y="1745" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="2006" y="1754" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#176   BlackboardCondition   /   Priority 0</text>
+<text x="2006" y="1775" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Ground Idle</text>
+<text x="2006" y="1795" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI.State = 0</text>
+</g>
+<g data-node-id="180"><title>Front Fire</title>
+<rect x="1993" y="1819" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1994" y="1827" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="2006" y="1836" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#180   BlackboardCondition   /   Priority 1</text>
+<text x="2006" y="1857" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Front Fire</text>
+<text x="2006" y="1877" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI.IsTargetInFront = true</text>
+</g>
+<g data-node-id="184"><title>Beyond Bite</title>
+<rect x="1993" y="1901" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1994" y="1909" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="2006" y="1918" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#184   BlackboardCondition   /   Priority 2</text>
+<text x="2006" y="1939" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Beyond Bite</text>
+<text x="2006" y="1959" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI.TargetHorizontalDistance ≥ 16</text>
+</g>
+<g data-node-id="188"><title>Mid Range</title>
+<rect x="1993" y="1983" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1994" y="1991" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="2006" y="2000" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#188   BlackboardCondition   /   Priority 3</text>
+<text x="2006" y="2021" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Mid Range</text>
+<text x="2006" y="2041" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI.TargetHorizontalDistance &lt; 22</text>
+</g>
+<g data-node-id="200"><title>Can Fire Ball</title>
+<rect x="2961" y="2065" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2962" y="2073" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="2974" y="2082" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#200   BlackboardCondition   /   Priority 0</text>
+<text x="2974" y="2103" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Can Fire Ball</text>
+<text x="2974" y="2123" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI.CanUseFireBall = true</text>
+</g>
+<g data-node-id="204"><title>Fire Ball Action</title>
+<rect x="2961" y="2147" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2962" y="2155" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="2974" y="2164" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#204   PlayAction   /   Priority 1   /   W 0.45   /   Wait ON</text>
+<text x="2974" y="2185" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Fire Ball Action</text>
+<text x="2974" y="2205" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI_FireBall</text>
+</g>
+<g data-node-id="196"><title>Fire Ball Choice</title>
+<rect x="2477" y="2106.0" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2478" y="2114.0" width="4" height="52" rx="2" fill="#61d2e6" stroke="none"/>
+<text x="2490" y="2123.0" fill="#61d2e6" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#196   Sequence   /   Priority 0   /   W 0.45</text>
+<text x="2490" y="2144.0" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Fire Ball Choice</text>
+</g>
+<g data-node-id="212"><title>Can Fire Ball Sweep</title>
+<rect x="2961" y="2229" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2962" y="2237" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="2974" y="2246" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#212   BlackboardCondition   /   Priority 0</text>
+<text x="2974" y="2267" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Can Fire Ball Sweep</text>
+<text x="2974" y="2287" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI.CanUseFireBallSweep = true</text>
+</g>
+<g data-node-id="216"><title>Fire Ball Sweep Action</title>
+<rect x="2961" y="2311" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2962" y="2319" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="2974" y="2328" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#216   PlayAction   /   Priority 1   /   W 1.05   /   Wait ON</text>
+<text x="2974" y="2349" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Fire Ball Sweep Action</text>
+<text x="2974" y="2369" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI_FireBallSweep</text>
+</g>
+<g data-node-id="208"><title>Fire Ball Sweep Choice</title>
+<rect x="2477" y="2270.0" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2478" y="2278.0" width="4" height="52" rx="2" fill="#61d2e6" stroke="none"/>
+<text x="2490" y="2287.0" fill="#61d2e6" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#208   Sequence   /   Priority 1   /   W 1.05</text>
+<text x="2490" y="2308.0" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Fire Ball Sweep Choice</text>
+</g>
+<g data-node-id="364"><title>Can Fire Ball Triple</title>
+<rect x="2961" y="2393" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2962" y="2401" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="2974" y="2410" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#364   BlackboardCondition   /   Priority 0</text>
+<text x="2974" y="2431" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Can Fire Ball Triple</text>
+<text x="2974" y="2451" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI.CanUseFireBallTriple = true</text>
+</g>
+<g data-node-id="366"><title>Fire Ball Triple Action</title>
+<rect x="2961" y="2475" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2962" y="2483" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="2974" y="2492" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#366   PlayAction   /   Priority 1   /   W 1.2   /   Wait ON</text>
+<text x="2974" y="2513" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Fire Ball Triple Action</text>
+<text x="2974" y="2533" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI_FireBallTriple</text>
+</g>
+<g data-node-id="361"><title>Fire Ball Triple Choice</title>
+<rect x="2477" y="2434.0" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2478" y="2442.0" width="4" height="52" rx="2" fill="#61d2e6" stroke="none"/>
+<text x="2490" y="2451.0" fill="#61d2e6" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#361   Sequence   /   Priority 1   /   W 1.2</text>
+<text x="2490" y="2472.0" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Fire Ball Triple Choice</text>
+</g>
+<g data-node-id="371"><title>Can Fire Beam Sweep</title>
+<rect x="2961" y="2557" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2962" y="2565" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="2974" y="2574" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#371   BlackboardCondition   /   Priority 0</text>
+<text x="2974" y="2595" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Can Fire Beam Sweep</text>
+<text x="2974" y="2615" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI.CanUseFireBeamSweep = true</text>
+</g>
+<g data-node-id="373"><title>Fire Beam Sweep Action</title>
+<rect x="2961" y="2639" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2962" y="2647" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="2974" y="2656" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#373   PlayAction   /   Priority 1   /   W 1.15   /   Wait ON</text>
+<text x="2974" y="2677" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Fire Beam Sweep Action</text>
+<text x="2974" y="2697" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI_FireBeamSweep</text>
+</g>
+<g data-node-id="368"><title>Fire Beam Sweep Choice</title>
+<rect x="2477" y="2598.0" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2478" y="2606.0" width="4" height="52" rx="2" fill="#61d2e6" stroke="none"/>
+<text x="2490" y="2615.0" fill="#61d2e6" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#368   Sequence   /   Priority 2   /   W 1.15</text>
+<text x="2490" y="2636.0" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Fire Beam Sweep Choice</text>
+</g>
+<g data-node-id="357"><title>Can Fire Ball Front</title>
+<rect x="2961" y="2721" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2962" y="2729" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="2974" y="2738" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#357   BlackboardCondition   /   Priority 0</text>
+<text x="2974" y="2759" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Can Fire Ball Front</text>
+<text x="2974" y="2779" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI.CanUseFireBallFront = true</text>
+</g>
+<g data-node-id="359"><title>Fire Ball Front Action</title>
+<rect x="2961" y="2803" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2962" y="2811" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="2974" y="2820" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#359   PlayAction   /   Priority 1   /   W 1.1   /   Wait ON</text>
+<text x="2974" y="2841" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Fire Ball Front Action</text>
+<text x="2974" y="2861" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI_FireBallFront</text>
+</g>
+<g data-node-id="354"><title>Fire Ball Front Choice</title>
+<rect x="2477" y="2762.0" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2478" y="2770.0" width="4" height="52" rx="2" fill="#61d2e6" stroke="none"/>
+<text x="2490" y="2779.0" fill="#61d2e6" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#354   Sequence   /   Priority 4   /   W 1.1</text>
+<text x="2490" y="2800.0" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Fire Ball Front Choice</text>
+</g>
+<g data-node-id="192"><title>Mid Fire Ball Random</title>
+<rect x="1993" y="2434.0" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1994" y="2442.0" width="4" height="52" rx="2" fill="#df98f6" stroke="none"/>
+<text x="2006" y="2451.0" fill="#df98f6" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#192   RandomSelector   /   Priority 4</text>
+<text x="2006" y="2472.0" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Mid Fire Ball Random</text>
+</g>
+<g data-node-id="172"><title>Mid Fire Ball Sequence</title>
+<rect x="1509" y="2085.5" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1510" y="2093.5" width="4" height="52" rx="2" fill="#61d2e6" stroke="none"/>
+<text x="1522" y="2102.5" fill="#61d2e6" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#172   Sequence   /   Priority 0   /   W 2</text>
+<text x="1522" y="2123.5" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Mid Fire Ball Sequence</text>
+</g>
+<g data-node-id="224"><title>Ground Idle</title>
+<rect x="1993" y="2885" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1994" y="2893" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="2006" y="2902" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#224   BlackboardCondition   /   Priority 0</text>
+<text x="2006" y="2923" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Ground Idle</text>
+<text x="2006" y="2943" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI.State = 0</text>
+</g>
+<g data-node-id="228"><title>Front Breath</title>
+<rect x="1993" y="2967" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1994" y="2975" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="2006" y="2984" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#228   BlackboardCondition   /   Priority 1</text>
+<text x="2006" y="3005" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Front Breath</text>
+<text x="2006" y="3025" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI.IsTargetInFront = true</text>
+</g>
+<g data-node-id="232"><title>Far Range</title>
+<rect x="1993" y="3049" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1994" y="3057" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="2006" y="3066" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#232   BlackboardCondition   /   Priority 2</text>
+<text x="2006" y="3087" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Far Range</text>
+<text x="2006" y="3107" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI.TargetHorizontalDistance ≥ 22</text>
+</g>
+<g data-node-id="244"><title>Can Spread Breath</title>
+<rect x="2961" y="3131" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2962" y="3139" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="2974" y="3148" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#244   BlackboardCondition   /   Priority 0</text>
+<text x="2974" y="3169" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Can Spread Breath</text>
+<text x="2974" y="3189" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI.CanUseSpreadBreath = true</text>
+</g>
+<g data-node-id="248"><title>Spread Breath Action</title>
+<rect x="2961" y="3213" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2962" y="3221" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="2974" y="3230" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#248   PlayAction   /   Priority 1   /   W 0.9   /   Wait ON</text>
+<text x="2974" y="3251" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Spread Breath Action</text>
+<text x="2974" y="3271" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI_SpreadBreath</text>
+</g>
+<g data-node-id="240"><title>Spread Breath Choice</title>
+<rect x="2477" y="3172.0" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2478" y="3180.0" width="4" height="52" rx="2" fill="#61d2e6" stroke="none"/>
+<text x="2490" y="3189.0" fill="#61d2e6" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#240   Sequence   /   Priority 2   /   W 0.9</text>
+<text x="2490" y="3210.0" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Spread Breath Choice</text>
+</g>
+<g data-node-id="256"><title>Can Spread Breath Forward</title>
+<rect x="2961" y="3295" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2962" y="3303" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="2974" y="3312" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#256   BlackboardCondition   /   Priority 0</text>
+<text x="2974" y="3333" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Can Spread Breath Forward</text>
+<text x="2974" y="3353" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI.CanUseSpreadBreathForward = true</text>
+</g>
+<g data-node-id="260"><title>Spread Breath Forward Action</title>
+<rect x="2961" y="3377" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2962" y="3385" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="2974" y="3394" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#260   PlayAction   /   Priority 1   /   W 0.7   /   Wait ON</text>
+<text x="2974" y="3415" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Spread Breath Forward Action</text>
+<text x="2974" y="3435" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI_SpreadBreathForward</text>
+</g>
+<g data-node-id="252"><title>Spread Breath Forward Choice</title>
+<rect x="2477" y="3336.0" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2478" y="3344.0" width="4" height="52" rx="2" fill="#61d2e6" stroke="none"/>
+<text x="2490" y="3353.0" fill="#61d2e6" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#252   Sequence   /   Priority 3   /   W 0.7</text>
+<text x="2490" y="3374.0" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Spread Breath Forward Choice</text>
+</g>
+<g data-node-id="236"><title>Far Breath Random</title>
+<rect x="1993" y="3254.0" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1994" y="3262.0" width="4" height="52" rx="2" fill="#df98f6" stroke="none"/>
+<text x="2006" y="3271.0" fill="#df98f6" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#236   RandomSelector   /   Priority 3</text>
+<text x="2006" y="3292.0" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Far Breath Random</text>
+</g>
+<g data-node-id="220"><title>Far Breath Sequence</title>
+<rect x="1509" y="3069.5" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1510" y="3077.5" width="4" height="52" rx="2" fill="#61d2e6" stroke="none"/>
+<text x="1522" y="3086.5" fill="#61d2e6" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#220   Sequence   /   Priority 1   /   W 1.6</text>
+<text x="1522" y="3107.5" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Far Breath Sequence</text>
+</g>
+<g data-node-id="268"><title>Ground Idle</title>
+<rect x="1993" y="3459" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1994" y="3467" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="2006" y="3476" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#268   BlackboardCondition   /   Priority 0</text>
+<text x="2006" y="3497" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Ground Idle</text>
+<text x="2006" y="3517" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI.State = 0</text>
+</g>
+<g data-node-id="272"><title>Front Run</title>
+<rect x="1993" y="3541" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1994" y="3549" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="2006" y="3558" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#272   BlackboardCondition   /   Priority 1</text>
+<text x="2006" y="3579" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Front Run</text>
+<text x="2006" y="3599" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI.IsTargetInFront = true</text>
+</g>
+<g data-node-id="276"><title>Run Range</title>
+<rect x="1993" y="3623" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1994" y="3631" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="2006" y="3640" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#276   BlackboardCondition   /   Priority 2</text>
+<text x="2006" y="3661" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Run Range</text>
+<text x="2006" y="3681" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI.TargetHorizontalDistance ≥ 16</text>
+</g>
+<g data-node-id="280"><title>Can Run</title>
+<rect x="1993" y="3705" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1994" y="3713" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="2006" y="3722" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#280   BlackboardCondition   /   Priority 3</text>
+<text x="2006" y="3743" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Can Run</text>
+<text x="2006" y="3763" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI.CanUseRunCharge = true</text>
+</g>
+<g data-node-id="284"><title>Run Charge Action</title>
+<rect x="1993" y="3787" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1994" y="3795" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="2006" y="3804" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#284   PlayAction   /   Priority 4   /   W 1   /   Wait ON</text>
+<text x="2006" y="3825" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Run Charge Action</text>
+<text x="2006" y="3845" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI_RunCharge</text>
+</g>
+<g data-node-id="264"><title>Run Charge Sequence</title>
+<rect x="1509" y="3623.0" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1510" y="3631.0" width="4" height="52" rx="2" fill="#61d2e6" stroke="none"/>
+<text x="1522" y="3640.0" fill="#61d2e6" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#264   Sequence   /   Priority 2   /   W 1.5</text>
+<text x="1522" y="3661.0" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Run Charge Sequence</text>
+</g>
+<g data-node-id="292"><title>Ground Idle</title>
+<rect x="1993" y="3869" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1994" y="3877" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="2006" y="3886" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#292   BlackboardCondition   /   Priority 0</text>
+<text x="2006" y="3907" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Ground Idle</text>
+<text x="2006" y="3927" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI.State = 0</text>
+</g>
+<g data-node-id="296"><title>Any Damage Phase</title>
+<rect x="1993" y="3951" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1994" y="3959" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="2006" y="3968" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#296   BlackboardCondition   /   Priority 1</text>
+<text x="2006" y="3989" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Any Damage Phase</text>
+<text x="2006" y="4009" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI.DamagePhase ≥ 0</text>
+</g>
+<g data-node-id="300"><title>Can Spin</title>
+<rect x="1993" y="4033" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1994" y="4041" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="2006" y="4050" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#300   BlackboardCondition   /   Priority 2</text>
+<text x="2006" y="4071" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Can Spin</text>
+<text x="2006" y="4091" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI.CanUseSpinSweep = true</text>
+</g>
+<g data-node-id="304"><title>Low HP Spin Action</title>
+<rect x="1993" y="4115" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1994" y="4123" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="2006" y="4132" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#304   PlayAction   /   Priority 3   /   W 1   /   Wait ON</text>
+<text x="2006" y="4153" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Low HP Spin Action</text>
+<text x="2006" y="4173" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI_SpinTailSweep</text>
+</g>
+<g data-node-id="288"><title>Low HP Spin Sequence</title>
+<rect x="1509" y="3992.0" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1510" y="4000.0" width="4" height="52" rx="2" fill="#61d2e6" stroke="none"/>
+<text x="1522" y="4009.0" fill="#61d2e6" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#288   Sequence   /   Priority 3   /   W 1</text>
+<text x="1522" y="4030.0" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Low HP Spin Sequence</text>
+</g>
+<g data-node-id="312"><title>Ground Idle</title>
+<rect x="1993" y="4197" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1994" y="4205" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="2006" y="4214" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#312   BlackboardCondition   /   Priority 0</text>
+<text x="2006" y="4235" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Ground Idle</text>
+<text x="2006" y="4255" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI.State = 0</text>
+</g>
+<g data-node-id="316"><title>Has Target</title>
+<rect x="1993" y="4279" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1994" y="4287" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="2006" y="4296" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#316   BlackboardCondition   /   Priority 1</text>
+<text x="2006" y="4317" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Has Target</text>
+<text x="2006" y="4337" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI.HasTarget = true</text>
+</g>
+<g data-node-id="320"><title>Walk Approach Action</title>
+<rect x="1993" y="4361" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1994" y="4369" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="2006" y="4378" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#320   PlayAction   /   Priority 2   /   W 1   /   Wait ON</text>
+<text x="2006" y="4399" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Walk Approach Action</text>
+<text x="2006" y="4419" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">DragonAI_WalkApproach</text>
+</g>
+<g data-node-id="308"><title>Walk Approach Sequence</title>
+<rect x="1509" y="4279.0" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1510" y="4287.0" width="4" height="52" rx="2" fill="#61d2e6" stroke="none"/>
+<text x="1522" y="4296.0" fill="#61d2e6" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#308   Sequence   /   Priority 4   /   W 0.5</text>
+<text x="1522" y="4317.0" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Walk Approach Sequence</text>
+</g>
+<g data-node-id="14"><title>Ground Ranged / Move Random</title>
+<rect x="1025" y="3182.25" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1026" y="3190.25" width="4" height="52" rx="2" fill="#df98f6" stroke="none"/>
+<text x="1038" y="3199.25" fill="#df98f6" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#14   RandomSelector   /   Priority 2</text>
+<text x="1038" y="3220.25" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Ground Ranged / Move Random</text>
+</g>
+<g data-node-id="4"><title>Dragon Decision Selector</title>
+<rect x="541" y="2007.75" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="542" y="2015.75" width="4" height="52" rx="2" fill="#a3a6ff" stroke="none"/>
+<text x="554" y="2024.75" fill="#a3a6ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#4   Selector   /   Priority 0</text>
+<text x="554" y="2045.75" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Dragon Decision Selector</text>
+</g>
+<g data-node-id="1"><title>Dragon Root</title>
+<rect x="57" y="2007.75" width="400" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="58" y="2015.75" width="4" height="52" rx="2" fill="#8cc9ff" stroke="none"/>
+<text x="70" y="2024.75" fill="#8cc9ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#1   Root   /   Priority 0</text>
+<text x="70" y="2045.75" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Dragon Root</text>
+</g>
+<text x="57" y="4483" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="15" font-weight="500">通常行動の保存データを再配置。HPに応じた隕石・急降下は別の状態制御で進行します。</text>
+</svg>

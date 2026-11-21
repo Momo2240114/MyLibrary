@@ -13,7 +13,10 @@
 
 bool MotionVelocityRenderSystem::Initialize(ID3D11Device* device_)
 {
-    if (device_ == nullptr) return false;
+    if (device_ == nullptr)
+    {
+        return false;
+    }
     // Shaderが無い環境ではMotionBlurを無効化し、通常描画だけ継続できるようにする。
     if (!std::filesystem::exists("Data/Shader/MotionObjectVelocityVS.cso") ||
         !std::filesystem::exists("Data/Shader/MotionObjectVelocityPS.cso"))
@@ -71,7 +74,10 @@ bool MotionVelocityRenderSystem::Initialize(ID3D11Device* device_)
 
 void MotionVelocityRenderSystem::Register(const std::shared_ptr<MotionVelocityComponent>& component_)
 {
-    if (!component_) return;
+    if (!component_)
+    {
+        return;
+    }
 
     RemoveExpiredComponents();
     // 同じComponentを二重登録しないよう、weak_ptrをlockして実体を比較する。
@@ -82,7 +88,10 @@ void MotionVelocityRenderSystem::Register(const std::shared_ptr<MotionVelocityCo
         {
             return registered_.lock() == component_;
         });
-    if (exists_) return;
+    if (exists_)
+    {
+        return;
+    }
 
     components.push_back(component_);
 }
@@ -116,7 +125,10 @@ void MotionVelocityRenderSystem::DrawObjectVelocity(
     }
 
     RemoveExpiredComponents();
-    if (components.empty()) return;
+    if (components.empty())
+    {
+        return;
+    }
 
     ID3D11DeviceContext* dc_ = rc_.deviceContext;
     // Velocity RTと同じ大きさで描画し、Screen Space速度の座標系を合わせる。
@@ -209,7 +221,10 @@ void MotionVelocityRenderSystem::DrawModelVelocity(
 {
     const std::shared_ptr<GameObject> owner_ = component_ ? component_->GetGameObject() : nullptr;
     const std::shared_ptr<GltfModelCommponennt> model_ = owner_ ? owner_->GetComponent<GltfModelCommponennt>() : nullptr;
-    if (!model_ || !model_->IsEnabled() || !model_->IsRuntimeVisible()) return;
+    if (!model_ || !model_->IsEnabled() || !model_->IsRuntimeVisible())
+    {
+        return;
+    }
 
     // Model側のWorld/Bone行列が古い場合に更新してからVelocityを計算する。
     model_->UpdateTransformIfDirty();

@@ -38,6 +38,7 @@ public:
 		QueryPerformanceCounter(&start_ticks);
 		QueryPerformanceCounter(&current_ticks);
 	}
+
 	~benchmark() = default;
 	benchmark(const benchmark&) = delete;
 	benchmark& operator=(const benchmark&) = delete;
@@ -49,6 +50,7 @@ public:
 		// 計測開始時刻を更新する。
 		QueryPerformanceCounter(&start_ticks);
 	}
+
 	float end()
 	{
 		// beginからの経過秒を返す。

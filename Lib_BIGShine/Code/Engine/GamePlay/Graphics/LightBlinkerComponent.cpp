@@ -24,7 +24,10 @@ void LightBlinkerComponent::Start()
 
 void LightBlinkerComponent::Update(float et)
 {
-    if (!active || !light || !easingComp) return;
+    if (!active || !light || !easingComp)
+    {
+        return;
+    }
 
     // イージング値をライトに適用
     light->intensity = easingComp->GetValue(intensityIdx);
@@ -42,7 +45,10 @@ void LightBlinkerComponent::Update(float et)
 
 void LightBlinkerComponent::RestartIntensityEasing()
 {
-    if (!easingComp) return;
+    if (!easingComp)
+    {
+        return;
+    }
 
     // Intensityの計算
     // 次の点滅速度をランダムに決定
@@ -68,7 +74,10 @@ void LightBlinkerComponent::Gui()
 
     if (ImGui::TreeNode("Intensity Settings")) {
         if (ImGui::DragFloat("Base Intensity", &baseIntensity, 0.1f)) {
-            if (!active) light->intensity = baseIntensity; // 非実行時は即反映
+            if (!active)
+            {
+                light->intensity = baseIntensity; // 非実行時は即反映
+            }
         }
         ImGui::DragFloat("Multiplier", &intensityMultiplier, 0.05f, 0.0f, 5.0f);
         ImGui::TreePop();
@@ -77,7 +86,10 @@ void LightBlinkerComponent::Gui()
     if (ImGui::TreeNode("Range Settings")) {
         ImGui::Checkbox("Use Range Blink", &useRangeBlink);
         if (ImGui::DragFloat("Base Range", &baseRange, 0.1f)) {
-            if (!active) light->range = baseRange;
+            if (!active)
+            {
+                light->range = baseRange;
+            }
         }
         ImGui::DragFloat("Range Multiplier", &rangeMultiplier, 0.05f, 0.0f, 5.0f);
         ImGui::TreePop();
@@ -92,7 +104,10 @@ void LightBlinkerComponent::Gui()
         maxSpeed = speeds[1];
 
         // 最小値が最大値を上回らないように調整
-        if (minSpeed > maxSpeed) maxSpeed = minSpeed;
+        if (minSpeed > maxSpeed)
+        {
+            maxSpeed = minSpeed;
+        }
     }
 
 

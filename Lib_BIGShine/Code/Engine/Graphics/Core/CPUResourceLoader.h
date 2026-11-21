@@ -26,7 +26,8 @@ public:
 		const wchar_t* filename_,
 		ID3D11ShaderResourceView** shader_resource_view_,
 		D3D11_TEXTURE2D_DESC* texture2d_desc_ = nullptr,
-		TextureType type = TextureType::Color);;
+		TextureType type = TextureType::Color);
+	;
 
 	// メモリ上の画像データからSRVを作る。組み込み画像やアーカイブ展開後に使う。
 	static HRESULT LoadTextureFromMemory(
@@ -34,7 +35,8 @@ public:
 		const void* data,
 		size_t size,
 		ID3D11ShaderResourceView** shader_resource_view_ = nullptr,
-		TextureType type = TextureType::Color);;
+		TextureType type = TextureType::Color);
+	;
 
 	// テクスチャ未設定時の白/黒など、1x1の代替SRVを作る。
 	static HRESULT CreateDummyTexture(

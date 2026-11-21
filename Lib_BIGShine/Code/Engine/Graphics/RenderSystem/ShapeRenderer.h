@@ -10,7 +10,10 @@ class ShapeRenderSystem
 {
 public:
 	ShapeRenderSystem() {};
-	~ShapeRenderSystem() {}
+
+	~ShapeRenderSystem()
+	{
+	}
 
 	void Initialize(ID3D11Device* device);
 	void Finalize();
@@ -59,7 +62,10 @@ public:
 	// ★ 追加：デカール描画用にBoxメッシュをバインドする
 	void BindBoxVB(ID3D11DeviceContext* dc)
 	{
-		if (!unitBoxMesh.vertexBuffer) return;
+		if (!unitBoxMesh.vertexBuffer)
+		{
+			return;
+		}
 
 		UINT stride = sizeof(DirectX::XMFLOAT3); 
 		UINT offset = 0;
@@ -69,7 +75,10 @@ public:
 	}
 
 	// ★ 追加：Boxの頂点数を取得する
-	UINT GetBoxVertexCount() const { return unitBoxMesh.vertexCount; }
+	UINT GetBoxVertexCount() const
+	{
+		return unitBoxMesh.vertexCount;
+	}
 
 private:
 	struct Mesh

@@ -15,8 +15,19 @@ public:
         physx::PxU32 count) override;
 
     // 使わないイベント
-    void onConstraintBreak(physx::PxConstraintInfo*, physx::PxU32) override {}
-    void onWake(physx::PxActor**, physx::PxU32) override {}
-    void onSleep(physx::PxActor**, physx::PxU32) override {}
-    void onAdvance(const physx::PxRigidBody* const*, const physx::PxTransform*, physx::PxU32) override {}
+    void onConstraintBreak(physx::PxConstraintInfo*, physx::PxU32) override
+    {
+    }
+
+    void onWake(physx::PxActor**, physx::PxU32) override
+    {
+    }
+
+    void onSleep(physx::PxActor**, physx::PxU32) override
+    {
+    }
+
+    void onAdvance(const physx::PxRigidBody* const*, const physx::PxTransform*, physx::PxU32) override
+    {
+    }
 };

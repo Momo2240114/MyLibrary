@@ -29,23 +29,63 @@ public:
 
     virtual ~Component() = default;
     virtual const std::string& GetName() const = 0;
+
     // GameObjectのLifecycleから呼ばれる基本処理。必要なComponentだけoverrideする。
-    virtual void Start() {}
+    virtual void Start()
+    {
+    }
+
     // Sceneから外れる前に、予約処理や外部への参照を終了する。
-    virtual void OnDestroy() {}
-    virtual void Update(float deltaTime_) {}
+    virtual void OnDestroy()
+    {
+    }
+
+    virtual void Update(float deltaTime_)
+    {
+    }
+
     // ポーズやTimeScaleと独立して進めるUI用の更新。Managerが通常更新前に一度呼ぶ。
-    virtual void UpdateUnscaled(float deltaTime_) {}
+    virtual void UpdateUnscaled(float deltaTime_)
+    {
+    }
+
     // 通常RenderからImGuiへ提出する画面UI。InspectorのGuiとは用途を分ける。
-    virtual void RenderUI() {}
-    virtual void LateUpdate(float elapsedTime_) {}
-    virtual void Submit(ID3D11DeviceContext* context_) {}
-    virtual void Gui() {}
+    virtual void RenderUI()
+    {
+    }
+
+    virtual void LateUpdate(float elapsedTime_)
+    {
+    }
+
+    virtual void Submit(ID3D11DeviceContext* context_)
+    {
+    }
+
+    virtual void Gui()
+    {
+    }
+
     // 非同期LoadやRuntime準備が必要なComponent用の状態確認Hook。
-    virtual void UpdateLoadState() {}
-    virtual bool IsLoadReady() const { return true; }
-    virtual bool IsRuntimeReady() const { return true; }
-    virtual bool HasRuntimeFailure() const { return false; }
+    virtual void UpdateLoadState()
+    {
+    }
+
+    virtual bool IsLoadReady() const
+    {
+        return true;
+    }
+
+    virtual bool IsRuntimeReady() const
+    {
+        return true;
+    }
+
+    virtual bool HasRuntimeFailure() const
+    {
+        return false;
+    }
+
     void DrawGuiProfiled()
     {
         // ComponentごとのGui負荷をTracyで追えるようにしてからGuiを呼ぶ。
@@ -55,9 +95,15 @@ public:
     }
 
     // Save用: 引数のJSON Objectへ自分の変数を書き込む。
-    virtual void Serialize(nlohmann::json& json_) const {}
+    virtual void Serialize(nlohmann::json& json_) const
+    {
+    }
+
     // Load用: 引数のJSON Objectから自分の変数を読み出す。
-    virtual void Deserialize(const nlohmann::json& json_) {}
+    virtual void Deserialize(const nlohmann::json& json_)
+    {
+    }
+
     void DeserializeProfiled(const nlohmann::json& json_)
     {
         // Load時の重いDeserializeをComponent名単位でProfileする。
@@ -86,21 +132,72 @@ public:
     GameObjectManager& GetManager();
 
 
-    bool IsEnabled() const { return enabled && !runtimeSuppressed; }
-    void SetEnabled(bool enabled_) { enabled = enabled_; }
-    // 演出の一時停止を、Sceneへ保存する有効設定から分離する。
-    bool IsConfiguredEnabled() const { return enabled; }
-    bool IsRuntimeSuppressed() const { return runtimeSuppressed; }
-    void SetRuntimeSuppressed(bool suppressed_) { runtimeSuppressed = suppressed_; }
+    bool IsEnabled() const
+    {
+        return enabled && !runtimeSuppressed;
+    }
 
-    bool ShouldUpdate() const { return updateEnabled; }
-    void SetUpdateEnabled(bool enabled_) { updateEnabled = enabled_; }
-    bool ShouldLateUpdate() const { return lateUpdateEnabled; }
-    void SetLateUpdateEnabled(bool enabled_) { lateUpdateEnabled = enabled_; }
-    int GetUpdatePriority() const { return updatePriority; }
-    void SetUpdatePriority(int priority_) { updatePriority = priority_; }
-    int GetLateUpdatePriority() const { return lateUpdatePriority; }
-    void SetLateUpdatePriority(int priority_) { lateUpdatePriority = priority_; }
+    void SetEnabled(bool enabled_)
+    {
+        enabled = enabled_;
+    }
+
+    // 演出の一時停止を、Sceneへ保存する有効設定から分離する。
+    bool IsConfiguredEnabled() const
+    {
+        return enabled;
+    }
+
+    bool IsRuntimeSuppressed() const
+    {
+        return runtimeSuppressed;
+    }
+
+    void SetRuntimeSuppressed(bool suppressed_)
+    {
+        runtimeSuppressed = suppressed_;
+    }
+
+    bool ShouldUpdate() const
+    {
+        return updateEnabled;
+    }
+
+    void SetUpdateEnabled(bool enabled_)
+    {
+        updateEnabled = enabled_;
+    }
+
+    bool ShouldLateUpdate() const
+    {
+        return lateUpdateEnabled;
+    }
+
+    void SetLateUpdateEnabled(bool enabled_)
+    {
+        lateUpdateEnabled = enabled_;
+    }
+
+    int GetUpdatePriority() const
+    {
+        return updatePriority;
+    }
+
+    void SetUpdatePriority(int priority_)
+    {
+        updatePriority = priority_;
+    }
+
+    int GetLateUpdatePriority() const
+    {
+        return lateUpdatePriority;
+    }
+
+    void SetLateUpdatePriority(int priority_)
+    {
+        lateUpdatePriority = priority_;
+    }
+
     void ResetUpdateTiming()
     {
         // Editor調整などで変更した更新Timingを標準状態へ戻す。
@@ -111,12 +208,26 @@ public:
     }
 
     // Startが既に呼ばれたかどうか
-    bool IsStarted() const { return isStarted; }
+    bool IsStarted() const
+    {
+        return isStarted;
+    }
 
     // フラグを手動で立てる（GameObject側からStartを呼ぶ際にセットする）
-    void SetStarted(bool started_) { isStarted = started_; }
-    bool IsRequiredForSceneStart() const { return requiredForSceneStart; }
-    void SetRequiredForSceneStart(bool required_) { requiredForSceneStart = required_; }
+    void SetStarted(bool started_)
+    {
+        isStarted = started_;
+    }
+
+    bool IsRequiredForSceneStart() const
+    {
+        return requiredForSceneStart;
+    }
+
+    void SetRequiredForSceneStart(bool required_)
+    {
+        requiredForSceneStart = required_;
+    }
 
 protected:
     bool runtimeSuppressed = false; // 演出中だけ使い、Serializeの対象にはしない。

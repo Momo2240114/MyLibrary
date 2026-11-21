@@ -71,7 +71,10 @@ struct CurveTrack
             entries_.emplace_back(points[index_], pointOptions[index_]);
         }
         std::stable_sort(entries_.begin(), entries_.end(),
-            [](const auto& left_, const auto& right_) { return left_.first.x < right_.first.x; });
+            [](const auto& left_, const auto& right_)
+        {
+            return left_.first.x < right_.first.x;
+        });
         for (size_t index_ = 0; index_ < entries_.size(); ++index_)
         {
             points[index_] = entries_[index_].first;
@@ -106,15 +109,27 @@ struct CurveTrack
     float Evaluate(float time_) const
     {
         // 指定時刻の値を、前後のPointと補間設定から求める。
-        if (points.empty()) return 0.0f;
-        if (time_ <= points.front().x) return points.front().y;
-        if (time_ >= points.back().x) return points.back().y;
+        if (points.empty())
+        {
+            return 0.0f;
+        }
+        if (time_ <= points.front().x)
+        {
+            return points.front().y;
+        }
+        if (time_ >= points.back().x)
+        {
+            return points.back().y;
+        }
 
         for (size_t index_ = 0; index_ + 1 < points.size(); ++index_)
         {
             const ImVec2& startPoint_ = points[index_];
             const ImVec2& endPoint_ = points[index_ + 1];
-            if (time_ < startPoint_.x || time_ > endPoint_.x) continue;
+            if (time_ < startPoint_.x || time_ > endPoint_.x)
+            {
+                continue;
+            }
 
             const float timeRange_ = endPoint_.x - startPoint_.x;
             float rate_ = timeRange_ > 0.0f ? (time_ - startPoint_.x) / timeRange_ : 0.0f;

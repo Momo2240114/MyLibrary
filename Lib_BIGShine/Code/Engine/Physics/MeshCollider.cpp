@@ -55,7 +55,10 @@ void MeshCollider::Gui()
     ImGui::TextDisabled("Animated/skinned deformation is not rebuilt automatically.");
     if (ImGui::Checkbox("Convex Mesh", &convex))
     {
-        if (!convex) isStatic = true;
+        if (!convex)
+        {
+            isStatic = true;
+        }
         RecreatePhysXActor();
     }
     if (ImGui::Button("Rebuild Mesh Collider"))
@@ -68,10 +71,16 @@ bool MeshCollider::CanBuildMesh() const
 {
     // 同じGameObjectのGltfModelがReadyになり、Mesh配列を持っている時だけCollider作成可能。
     auto owner_ = gameObject.lock();
-    if (!owner_) return false;
+    if (!owner_)
+    {
+        return false;
+    }
 
     auto model_ = owner_->GetComponent<GltfModelCommponennt>();
-    if (model_) model_->UpdateLoadState();
+    if (model_)
+    {
+        model_->UpdateLoadState();
+    }
     return model_ && model_->IsModelReady() && !model_->GetMeshes().empty();
 }
 
@@ -97,7 +106,10 @@ bool MeshCollider::HasRuntimeFailure() const
 {
     // 必須Modelが存在しない、またはModel側がLoad失敗した場合はScene Runtime失敗として扱う。
     auto owner_ = gameObject.lock();
-    if (!owner_) return true;
+    if (!owner_)
+    {
+        return true;
+    }
 
     auto model_ = owner_->GetComponent<GltfModelCommponennt>();
     return !model_ || model_->HasRuntimeFailure();

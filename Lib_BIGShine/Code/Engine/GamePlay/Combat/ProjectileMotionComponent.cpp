@@ -41,9 +41,16 @@ void ProjectileMotionComponent::Update(float deltaTime_)
 {
     BS_PROFILE_SCOPE("ProjectileMotionComponent::Update");
 
-    if (homingEnabled) { UpdateHoming(deltaTime_); return; }
+    if (homingEnabled)
+    {
+        UpdateHoming(deltaTime_);
+        return;
+    }
     const float safeDeltaTime_ = (std::max)(deltaTime_, 0.0f);
-    if (safeDeltaTime_ <= 0.0f) return;
+    if (safeDeltaTime_ <= 0.0f)
+    {
+        return;
+    }
 
     const DirectX::XMFLOAT3 normalizedDirection_ = NormalizeDirection(direction);
     velocity.x += normalizedDirection_.x * acceleration * safeDeltaTime_;
@@ -64,7 +71,10 @@ void ProjectileMotionComponent::Update(float deltaTime_)
     }
 
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_ || !owner_->transform) return;
+    if (!owner_ || !owner_->transform)
+    {
+        return;
+    }
 
     // 判定Object自体を動かすことで、子になっているHitBoxと見た目を同じ弾道へ追従させる。
     const physx::PxVec3 displacement_(velocity.x * safeDeltaTime_,
@@ -241,7 +251,10 @@ void ProjectileMotionComponent::ConfigureHoming(const std::shared_ptr<GameObject
     homingElapsed = 0.0f;
     homingTurnSpeed = std::clamp(turnDegreesPerSecond_, 0.0f, 180.0f);
     homingCollisionRadius = (std::max)(0.01f, collisionRadius_);
-    if (const auto owner_ = GetGameObject()) hoverPosition = owner_->transform->GetWorldPosition();
+    if (const auto owner_ = GetGameObject())
+    {
+        hoverPosition = owner_->transform->GetWorldPosition();
+    }
 }
 
 void ProjectileMotionComponent::ConfigureOrbit(float radius_, float height_, float tiltDegrees_, float angularSpeed_, float phaseDegrees_, float yawDegrees_)
@@ -260,7 +273,10 @@ void ProjectileMotionComponent::Reflect(const std::shared_ptr<GameObject>& targe
     const std::shared_ptr<GameObject>& attacker_, float speedMultiplier_)
 {
     const auto projectile_ = GetGameObject();
-    if (!projectile_ || !projectile_->transform || !target_ || !target_->transform || !attacker_) return;
+    if (!projectile_ || !projectile_->transform || !target_ || !target_->transform || !attacker_)
+    {
+        return;
+    }
     const auto position_ = projectile_->transform->GetWorldPosition();
     const auto aim_ = target_->transform->GetWorldPosition();
     direction = NormalizeDirection({ aim_.x - position_.x, aim_.y + 1.0f - position_.y, aim_.z - position_.z });
@@ -280,7 +296,10 @@ void ProjectileMotionComponent::UpdateOrbitPosition(float elapsedTime_)
     BS_PROFILE_SCOPE("ProjectileMotionComponent::UpdateOrbitPosition");
     const auto owner_ = GetGameObject();
     const auto attacker_ = homingAttacker.lock();
-    if (!owner_ || !owner_->transform || !attacker_ || !attacker_->transform) return;
+    if (!owner_ || !owner_->transform || !attacker_ || !attacker_->transform)
+    {
+        return;
+    }
     const float angle_ = DirectX::XMConvertToRadians(orbitPhase + orbitAngularSpeed * elapsedTime_);
     const float tilt_ = DirectX::XMConvertToRadians(orbitTilt);
     // 軌道面を傾けてから生成時の敵の向きへ回し、敵の旋回で軌道を急変させない。
@@ -307,18 +326,29 @@ bool ProjectileMotionComponent::UpdateHoming(float deltaTime_)
     BS_PROFILE_SCOPE("ProjectileMotionComponent::UpdateHoming");
     const auto owner_ = GetGameObject();
     const auto attacker_ = homingAttacker.lock();
-    if (!owner_ || !owner_->manager || !owner_->transform || owner_->IsPendingDestroy()) return false;
+    if (!owner_ || !owner_->manager || !owner_->transform || owner_->IsPendingDestroy())
+    {
+        return false;
+    }
     const auto health_ = attacker_ ? attacker_->GetComponent<HealthComponent>() : nullptr;
     if (!attacker_ || attacker_->IsPendingDestroy() || !attacker_->IsCombatReady() || (health_ && health_->IsDead()))
-    { owner_->GetManager().Destroy(owner_); return false; }
+    {
+        owner_->GetManager().Destroy(owner_);
+        return false;
+    }
     const float delta_ = (std::max)(0.0f, deltaTime_);
     const bool wasWaiting_ = homingElapsed < homingWaitTime;
     homingElapsed += delta_;
     if (orbitEnabled && (wasWaiting_ || homingElapsed < homingWaitTime))
+    {
         UpdateOrbitPosition((std::min)(homingElapsed, homingWaitTime));
+    }
     if (homingElapsed < homingWaitTime)
     {
-        if (orbitEnabled) return true;
+        if (orbitEnabled)
+        {
+            return true;
+        }
         // 待機中の揺れは基準位置から計算し、上下移動を累積しない。
         owner_->transform->ApplyWorldMatrix(DirectX::XMMatrixTranslation(hoverPosition.x,
             hoverPosition.y + std::sin(homingElapsed * 3.0f) * 0.12f, hoverPosition.z));
@@ -345,16 +375,25 @@ bool ProjectileMotionComponent::UpdateHoming(float deltaTime_)
         const auto next_ = XMLoadFloat3(&desired_);
         const float angle_ = std::acos(std::clamp(XMVectorGetX(XMVector3Dot(current_, next_)), -1.0f, 1.0f));
         const float limit_ = XMConvertToRadians(homingTurnSpeed) * moveDelta_;
-        if (angle_ <= limit_) direction = desired_;
+        if (angle_ <= limit_)
+        {
+            direction = desired_;
+        }
         else if (limit_ > 0.0f)
         {
             auto axis_ = XMVector3Cross(current_, next_);
-            if (XMVectorGetX(XMVector3LengthSq(axis_)) < 0.000001f) axis_ = XMVector3Orthogonal(current_);
+            if (XMVectorGetX(XMVector3LengthSq(axis_)) < 0.000001f)
+            {
+                axis_ = XMVector3Orthogonal(current_);
+            }
             XMStoreFloat3(&direction, XMVector3Normalize(XMVector3Rotate(current_, XMQuaternionRotationAxis(axis_, limit_))));
         }
     }
     speed = (std::max)(0.0f, speed + acceleration * moveDelta_);
-    if (maxSpeed > 0.0f) speed = (std::min)(speed, maxSpeed);
+    if (maxSpeed > 0.0f)
+    {
+        speed = (std::min)(speed, maxSpeed);
+    }
     const float distance_ = speed * moveDelta_;
     // Sphere sweepで壁の手前に止め、低フレームレートでも障害物を飛び越えない。
     if (auto scene_ = PhysXSystem::GetScene(); scene_ && distance_ > 0.0001f)
@@ -365,7 +404,10 @@ bool ProjectileMotionComponent::UpdateHoming(float deltaTime_)
         if (scene_->sweep(physx::PxSphereGeometry(homingCollisionRadius),
             physx::PxTransform(physx::PxVec3(position_.x, position_.y, position_.z)),
             physx::PxVec3(direction.x, direction.y, direction.z), distance_, hit_, physx::PxHitFlag::eDEFAULT, filter_) && hit_.hasBlock)
-        { owner_->GetManager().Destroy(owner_); return false; }
+        {
+            owner_->GetManager().Destroy(owner_);
+            return false;
+        }
     }
     owner_->transform->AddMoveOffset({ direction.x * distance_, direction.y * distance_, direction.z * distance_ });
     return true;

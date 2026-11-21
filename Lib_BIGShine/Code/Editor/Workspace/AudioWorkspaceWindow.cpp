@@ -38,8 +38,15 @@ struct AudioWorkspaceWindow::AudioSequenceAdapter : public ImSequencer::Sequence
     float fps = 60.0f;
     std::vector<FrameRange> frameRanges;
 
-    int ToFrame(float time_) const { return static_cast<int>(time_ * fps); }
-    float ToTime(int frame_) const { return static_cast<float>(frame_) / fps; }
+    int ToFrame(float time_) const
+    {
+        return static_cast<int>(time_ * fps);
+    }
+
+    float ToTime(int frame_) const
+    {
+        return static_cast<float>(frame_) / fps;
+    }
 
     void SyncFrames()
     {
@@ -54,17 +61,41 @@ struct AudioWorkspaceWindow::AudioSequenceAdapter : public ImSequencer::Sequence
         }
     }
 
-    int GetFrameMin() const override { return 0; }
-    int GetFrameMax() const override { return (std::max)(1, ToFrame(sequenceLength)); }
-    int GetItemCount() const override { return events ? static_cast<int>(events->size()) : 0; }
-    int GetItemTypeCount() const override { return 1; }
-    const char* GetItemTypeName(int typeIndex_) const override { return "Audio Event"; }
+    int GetFrameMin() const override
+    {
+        return 0;
+    }
 
-    void BeginEdit(int index_) override {}
+    int GetFrameMax() const override
+    {
+        return (std::max)(1, ToFrame(sequenceLength));
+    }
+
+    int GetItemCount() const override
+    {
+        return events ? static_cast<int>(events->size()) : 0;
+    }
+
+    int GetItemTypeCount() const override
+    {
+        return 1;
+    }
+
+    const char* GetItemTypeName(int typeIndex_) const override
+    {
+        return "Audio Event";
+    }
+
+    void BeginEdit(int index_) override
+    {
+    }
 
     void EndEdit() override
     {
-        if (!events) return;
+        if (!events)
+        {
+            return;
+        }
         // タイムライン上で動かされたバーを秒へ戻し、シーケンス長の範囲に収める。
         for (int eventIndex_ = 0;
             eventIndex_ < static_cast<int>(events->size()) && eventIndex_ < static_cast<int>(frameRanges.size());
@@ -79,18 +110,39 @@ struct AudioWorkspaceWindow::AudioSequenceAdapter : public ImSequencer::Sequence
 
     void Get(int index_, int** start_, int** end_, int* type_, unsigned int* color_) override
     {
-        if (!events || index_ < 0 || index_ >= static_cast<int>(events->size())) return;
-        if (frameRanges.size() != events->size()) SyncFrames();
+        if (!events || index_ < 0 || index_ >= static_cast<int>(events->size()))
+        {
+            return;
+        }
+        if (frameRanges.size() != events->size())
+        {
+            SyncFrames();
+        }
 
-        if (start_) *start_ = &frameRanges[index_].start;
-        if (end_) *end_ = &frameRanges[index_].end;
-        if (type_) *type_ = 0;
-        if (color_) *color_ = 0xFF46D98A;
+        if (start_)
+        {
+            *start_ = &frameRanges[index_].start;
+        }
+        if (end_)
+        {
+            *end_ = &frameRanges[index_].end;
+        }
+        if (type_)
+        {
+            *type_ = 0;
+        }
+        if (color_)
+        {
+            *color_ = 0xFF46D98A;
+        }
     }
 
     const char* GetItemLabel(int index_) const override
     {
-        if (!events || index_ < 0 || index_ >= static_cast<int>(events->size())) return "";
+        if (!events || index_ < 0 || index_ >= static_cast<int>(events->size()))
+        {
+            return "";
+        }
         return (*events)[index_].name.c_str();
     }
 
@@ -102,7 +154,10 @@ struct AudioWorkspaceWindow::AudioSequenceAdapter : public ImSequencer::Sequence
         const ImRect& clippingRect_,
         const ImRect& legendClippingRect_) override
     {
-        if (!events || index_ < 0 || index_ >= static_cast<int>(events->size())) return;
+        if (!events || index_ < 0 || index_ >= static_cast<int>(events->size()))
+        {
+            return;
+        }
 
         // バー上にはイベント名と参照プリセット名を出し、音源の割り当てミスを見つけやすくする。
         const SequenceEvent& event_ = (*events)[index_];
@@ -120,7 +175,10 @@ struct AudioWorkspaceWindow::AudioSequenceAdapter : public ImSequencer::Sequence
 
     void Add(int type_) override
     {
-        if (!events) return;
+        if (!events)
+        {
+            return;
+        }
 
         // 追加イベントは最後のイベントの少し後へ置き、連続追加しても重なりにくい初期値にする。
         SequenceEvent event_;
@@ -135,14 +193,20 @@ struct AudioWorkspaceWindow::AudioSequenceAdapter : public ImSequencer::Sequence
 
     void Del(int index_) override
     {
-        if (!events || index_ < 0 || index_ >= static_cast<int>(events->size())) return;
+        if (!events || index_ < 0 || index_ >= static_cast<int>(events->size()))
+        {
+            return;
+        }
         events->erase(events->begin() + index_);
         SyncFrames();
     }
 
     void Duplicate(int index_) override
     {
-        if (!events || index_ < 0 || index_ >= static_cast<int>(events->size())) return;
+        if (!events || index_ < 0 || index_ >= static_cast<int>(events->size()))
+        {
+            return;
+        }
         // 複製直後に再生済みフラグが残ると鳴らないため、コピー時は未発火へ戻す。
         SequenceEvent copied_ = (*events)[index_];
         copied_.name += " Copy";
@@ -165,14 +229,23 @@ AudioWorkspaceWindow::AudioWorkspaceWindow(GameObjectManager* manager_)
 
 void AudioWorkspaceWindow::Update(float deltaTime_)
 {
-    if (!sequencePlaying) return;
+    if (!sequencePlaying)
+    {
+        return;
+    }
 
     // 再生中は現在時刻を進め、開始時刻を超えたイベントだけを一度ずつ発火する。
     sequenceTime += (std::max)(deltaTime_, 0.0f);
     for (SequenceEvent& event_ : sequenceEvents)
     {
-        if (event_.fired || event_.presetIndex < 0 || event_.presetIndex >= static_cast<int>(presets.size())) continue;
-        if (sequenceTime < event_.startTime) continue;
+        if (event_.fired || event_.presetIndex < 0 || event_.presetIndex >= static_cast<int>(presets.size()))
+        {
+            continue;
+        }
+        if (sequenceTime < event_.startTime)
+        {
+            continue;
+        }
 
         FireSequenceEvent(event_);
         event_.fired = true;
@@ -236,19 +309,37 @@ void AudioWorkspaceWindow::DrawToolbar()
     // 保存/読込と試聴系の操作を上部に集約し、プリセット調整中にすぐ確認できるようにする。
     if (ImGui::BeginMenuBar())
     {
-        if (ImGui::MenuItem("Save")) SaveWorkspace();
-        if (ImGui::MenuItem("Load")) LoadWorkspace();
-        if (ImGui::MenuItem("Refresh Files")) RefreshAudioFiles();
+        if (ImGui::MenuItem("Save"))
+        {
+            SaveWorkspace();
+        }
+        if (ImGui::MenuItem("Load"))
+        {
+            LoadWorkspace();
+        }
+        if (ImGui::MenuItem("Refresh Files"))
+        {
+            RefreshAudioFiles();
+        }
         ImGui::EndMenuBar();
     }
 
-    if (ImGui::Button("Play", ImVec2(80.0f, 0.0f))) PlaySelected();
+    if (ImGui::Button("Play", ImVec2(80.0f, 0.0f)))
+    {
+        PlaySelected();
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Stop", ImVec2(80.0f, 0.0f))) StopSelected();
+    if (ImGui::Button("Stop", ImVec2(80.0f, 0.0f)))
+    {
+        StopSelected();
+    }
     ImGui::SameLine();
     if (ImGui::Button("Overlap", ImVec2(90.0f, 0.0f)))
     {
-        if (const AudioPreset* preset_ = GetSelectedPreset()) PlayPreset(*preset_, true);
+        if (const AudioPreset* preset_ = GetSelectedPreset())
+        {
+            PlayPreset(*preset_, true);
+        }
     }
     ImGui::SameLine();
     if (ImGui::Button(sequencePlaying ? "Stop Seq" : "Play Seq", ImVec2(100.0f, 0.0f)))
@@ -256,7 +347,10 @@ void AudioWorkspaceWindow::DrawToolbar()
         sequencePlaying ? StopSequence() : PlaySequence();
     }
     ImGui::SameLine();
-    if (ImGui::Button("Save JSON", ImVec2(100.0f, 0.0f))) SaveWorkspace();
+    if (ImGui::Button("Save JSON", ImVec2(100.0f, 0.0f)))
+    {
+        SaveWorkspace();
+    }
     ImGui::Separator();
 }
 
@@ -316,11 +410,17 @@ void AudioWorkspaceWindow::DrawInspector()
 
     char nameBuffer_[128];
     strncpy_s(nameBuffer_, preset_->name.c_str(), sizeof(nameBuffer_));
-    if (ImGui::InputText("Name", nameBuffer_, sizeof(nameBuffer_))) preset_->name = nameBuffer_;
+    if (ImGui::InputText("Name", nameBuffer_, sizeof(nameBuffer_)))
+    {
+        preset_->name = nameBuffer_;
+    }
 
     char actionNameBuffer_[128];
     strncpy_s(actionNameBuffer_, preset_->actionName.c_str(), sizeof(actionNameBuffer_));
-    if (ImGui::InputText("Action Name", actionNameBuffer_, sizeof(actionNameBuffer_))) preset_->actionName = actionNameBuffer_;
+    if (ImGui::InputText("Action Name", actionNameBuffer_, sizeof(actionNameBuffer_)))
+    {
+        preset_->actionName = actionNameBuffer_;
+    }
 
     char pathBuffer_[256];
     strncpy_s(pathBuffer_, preset_->path.c_str(), sizeof(pathBuffer_));
@@ -374,9 +474,15 @@ void AudioWorkspaceWindow::DrawInspector()
     }
 
     ImGui::Separator();
-    if (ImGui::Button("Play Current", ImVec2(140.0f, 0.0f))) PlaySelected();
+    if (ImGui::Button("Play Current", ImVec2(140.0f, 0.0f)))
+    {
+        PlaySelected();
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Overlap Current", ImVec2(150.0f, 0.0f))) PlayPreset(*preset_, true);
+    if (ImGui::Button("Overlap Current", ImVec2(150.0f, 0.0f)))
+    {
+        PlayPreset(*preset_, true);
+    }
     ImGui::SameLine();
     if (ImGui::Button("Register Action", ImVec2(140.0f, 0.0f)))
     {
@@ -500,7 +606,10 @@ void AudioWorkspaceWindow::DrawSequencer()
     // 選択イベントではプリセット音に対する音量・ピッチ・パン・位置の上書きだけを編集する。
     char eventNameBuffer_[128];
     strncpy_s(eventNameBuffer_, event_.name.c_str(), sizeof(eventNameBuffer_));
-    if (ImGui::InputText("Event Name", eventNameBuffer_, sizeof(eventNameBuffer_))) event_.name = eventNameBuffer_;
+    if (ImGui::InputText("Event Name", eventNameBuffer_, sizeof(eventNameBuffer_)))
+    {
+        event_.name = eventNameBuffer_;
+    }
 
     ImGui::SetNextItemWidth(160.0f);
     ImGui::DragFloat("Start Time", &event_.startTime, 0.01f, 0.0f, sequenceLength, "%.2f sec");
@@ -521,7 +630,10 @@ void AudioWorkspaceWindow::DrawSequencer()
             {
                 event_.presetIndex = presetIndex_;
             }
-            if (selected_) ImGui::SetItemDefaultFocus();
+            if (selected_)
+            {
+                ImGui::SetItemDefaultFocus();
+            }
         }
         ImGui::EndCombo();
     }
@@ -558,7 +670,10 @@ void AudioWorkspaceWindow::DrawSequencer()
 void AudioWorkspaceWindow::DrawAudioFileBrowser()
 {
     // Data/Audio配下のファイルを選ぶと、現在プリセットのパスへ直接割り当てて読み込む。
-    if (ImGui::Button("Refresh Audio Files")) RefreshAudioFiles();
+    if (ImGui::Button("Refresh Audio Files"))
+    {
+        RefreshAudioFiles();
+    }
     ImGui::Separator();
 
     AudioPreset* preset_ = GetSelectedPreset();
@@ -579,12 +694,18 @@ void AudioWorkspaceWindow::DrawAudioFileBrowser()
 
 void AudioWorkspaceWindow::PlaySelected()
 {
-    if (AudioPreset* preset_ = GetSelectedPreset()) PlayPreset(*preset_, false);
+    if (AudioPreset* preset_ = GetSelectedPreset())
+    {
+        PlayPreset(*preset_, false);
+    }
 }
 
 void AudioWorkspaceWindow::FireSequenceEvent(const SequenceEvent& event_)
 {
-    if (event_.presetIndex < 0 || event_.presetIndex >= static_cast<int>(presets.size())) return;
+    if (event_.presetIndex < 0 || event_.presetIndex >= static_cast<int>(presets.size()))
+    {
+        return;
+    }
 
     // プリセット設定をベースに、イベント固有の倍率や位置指定を重ねてワンショット再生する。
     const AudioPreset& preset_ = presets[event_.presetIndex];
@@ -602,7 +723,10 @@ void AudioWorkspaceWindow::FireSequenceEvent(const SequenceEvent& event_)
 
 void AudioWorkspaceWindow::PlayPreset(const AudioPreset& preset_, bool allowOverlap_)
 {
-    if (preset_.path.empty()) return;
+    if (preset_.path.empty())
+    {
+        return;
+    }
 
     // 重ね再生や3D音は個別インスタンス扱いにし、通常の2D音は既存再生の設定を更新してから鳴らす。
     AudioManager& audioManager_ = AudioManager::Instance();
@@ -627,14 +751,20 @@ void AudioWorkspaceWindow::PlayPreset(const AudioPreset& preset_, bool allowOver
 void AudioWorkspaceWindow::StopSelected()
 {
     const AudioPreset* preset_ = GetSelectedPreset();
-    if (preset_ == nullptr || preset_->path.empty()) return;
+    if (preset_ == nullptr || preset_->path.empty())
+    {
+        return;
+    }
     AudioManager::Instance().StopByPath(preset_->path);
 }
 
 void AudioWorkspaceWindow::ApplySelected()
 {
     const AudioPreset* preset_ = GetSelectedPreset();
-    if (preset_ == nullptr || preset_->path.empty()) return;
+    if (preset_ == nullptr || preset_->path.empty())
+    {
+        return;
+    }
 
     AudioManager& audioManager_ = AudioManager::Instance();
     // Inspectorの値を現在読み込まれている音源へ即時反映し、編集中の試聴結果と保存値をそろえる。
@@ -649,7 +779,10 @@ void AudioWorkspaceWindow::PlaySequence()
 {
     sequenceTime = 0.0f;
     sequencePlaying = true;
-    for (SequenceEvent& event_ : sequenceEvents) event_.fired = false;
+    for (SequenceEvent& event_ : sequenceEvents)
+    {
+        event_.fired = false;
+    }
 }
 
 void AudioWorkspaceWindow::StopSequence()
@@ -672,8 +805,14 @@ void AudioWorkspaceWindow::SaveWorkspace()
     json_["SequenceLength"] = sequenceLength;
     json_["Presets"] = nlohmann::json::array();
     json_["SequenceEvents"] = nlohmann::json::array();
-    for (const AudioPreset& preset_ : presets) json_["Presets"].push_back(SerializePreset(preset_));
-    for (const SequenceEvent& event_ : sequenceEvents) json_["SequenceEvents"].push_back(SerializeSequenceEvent(event_));
+    for (const AudioPreset& preset_ : presets)
+    {
+        json_["Presets"].push_back(SerializePreset(preset_));
+    }
+    for (const SequenceEvent& event_ : sequenceEvents)
+    {
+        json_["SequenceEvents"].push_back(SerializeSequenceEvent(event_));
+    }
 
     std::ofstream file_(workspacePath);
     if (file_.is_open())
@@ -687,7 +826,10 @@ void AudioWorkspaceWindow::SaveWorkspace()
 void AudioWorkspaceWindow::LoadWorkspace()
 {
     std::ifstream file_(workspacePath);
-    if (!file_.is_open()) return;
+    if (!file_.is_open())
+    {
+        return;
+    }
 
     // 保存データを読み直すときは配列を作り直し、空なら編集可能なデフォルト要素を補う。
     nlohmann::json json_;
@@ -714,8 +856,14 @@ void AudioWorkspaceWindow::LoadWorkspace()
         }
     }
 
-    if (presets.empty()) presets.push_back(AudioPreset{});
-    if (sequenceEvents.empty()) sequenceEvents.push_back(SequenceEvent{});
+    if (presets.empty())
+    {
+        presets.push_back(AudioPreset{});
+    }
+    if (sequenceEvents.empty())
+    {
+        sequenceEvents.push_back(SequenceEvent{});
+    }
 
     selectedPresetIndex = std::clamp(json_.value("SelectedPresetIndex", 0), 0, static_cast<int>(presets.size()) - 1);
     selectedSequenceEventIndex = std::clamp(json_.value("SelectedSequenceEventIndex", -1), -1, static_cast<int>(sequenceEvents.size()) - 1);
@@ -729,11 +877,17 @@ void AudioWorkspaceWindow::RefreshAudioFiles()
     // 音声ブラウザは実ファイル階層を再帰走査し、表示順が安定するよう最後にソートする。
     audioFiles.clear();
     const std::filesystem::path rootPath_("Data/Audio");
-    if (!std::filesystem::exists(rootPath_)) return;
+    if (!std::filesystem::exists(rootPath_))
+    {
+        return;
+    }
 
     for (const auto& entry_ : std::filesystem::recursive_directory_iterator(rootPath_))
     {
-        if (!entry_.is_regular_file() || !IsAudioFile(entry_.path())) continue;
+        if (!entry_.is_regular_file() || !IsAudioFile(entry_.path()))
+        {
+            continue;
+        }
         audioFiles.push_back(entry_.path().generic_string());
     }
 
@@ -852,13 +1006,19 @@ AudioPlaybackSettings AudioWorkspaceWindow::MakeSettings(const AudioPreset& pres
 
 AudioWorkspaceWindow::AudioPreset* AudioWorkspaceWindow::GetSelectedPreset()
 {
-    if (selectedPresetIndex < 0 || selectedPresetIndex >= static_cast<int>(presets.size())) return nullptr;
+    if (selectedPresetIndex < 0 || selectedPresetIndex >= static_cast<int>(presets.size()))
+    {
+        return nullptr;
+    }
     return &presets[selectedPresetIndex];
 }
 
 const AudioWorkspaceWindow::AudioPreset* AudioWorkspaceWindow::GetSelectedPreset() const
 {
-    if (selectedPresetIndex < 0 || selectedPresetIndex >= static_cast<int>(presets.size())) return nullptr;
+    if (selectedPresetIndex < 0 || selectedPresetIndex >= static_cast<int>(presets.size()))
+    {
+        return nullptr;
+    }
     return &presets[selectedPresetIndex];
 }
 

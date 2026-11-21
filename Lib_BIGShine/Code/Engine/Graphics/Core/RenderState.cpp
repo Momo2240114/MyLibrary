@@ -174,7 +174,8 @@ RenderState::RenderState(ID3D11Device* device)
 		desc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
 		desc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 		HRESULT hr = device->CreateBlendState(&desc,
-			blendStates[static_cast<int>(BlendState::Transparency)].GetAddressOf());;
+			blendStates[static_cast<int>(BlendState::Transparency)].GetAddressOf());
+		;
 	}
 	// 加算合成
 	{

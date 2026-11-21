@@ -13,7 +13,11 @@
 #include <vector>
 
 // 前方宣言
-namespace ax { namespace NodeEditor { struct EditorContext; } }
+namespace ax { namespace NodeEditor
+    {
+        struct EditorContext;
+    }
+}
 
 
 // アニメーション再生、遷移グラフ、SequencerイベントをまとめるComponent。
@@ -21,15 +25,29 @@ namespace ax { namespace NodeEditor { struct EditorContext; } }
 class AnimationControllerComponent : public Component
 {
 public:
-    const std::string& GetName() const override { static std::string name_ = "AnimationControllerComponent"; return name_; }
+    const std::string& GetName() const override
+    {
+        static std::string name_ = "AnimationControllerComponent";
+        return name_;
+    }
+
     ~AnimationControllerComponent();
     void Start() override;
     void Update(float deltaTime_) override;
 
     void Gui() override;
     void ShowSequencerEditor();
-    void SetSequencerWindowVisible(bool visible_) { showSequencerWindow = visible_; }
-    bool IsSequencerWindowVisible() const { return showSequencerWindow; }
+
+    void SetSequencerWindowVisible(bool visible_)
+    {
+        showSequencerWindow = visible_;
+    }
+
+    bool IsSequencerWindowVisible() const
+    {
+        return showSequencerWindow;
+    }
+
     // エディタ用表示関数
     void PrepareGraphEditor();
     void OnGuiNodeEditor();
@@ -37,15 +55,35 @@ public:
     void DrawTransitionInspectorContent();
 
     // エディタ側からポーズライブラリを直接操作・保存できるように、ゲッターを用意すると便利です
-    std::shared_ptr<PoseLibraryResource> GetPoseLibrary() { return poseLibrary; }
+    std::shared_ptr<PoseLibraryResource> GetPoseLibrary()
+    {
+        return poseLibrary;
+    }
+
     // 特定のステートへ遷移させる（直接呼び出し用）
     void ChangeState(const std::string& stateName_, float duration_ = 0.2f, bool restart_ = false, float startTime_ = 0.0f);
+
     // 演出再生中は通常グラフの自動遷移だけを抑制し、Animationとイベントは更新する。
-    void SetPresentationControlled(bool controlled_) { presentationControlled = controlled_; }
-    bool IsPresentationControlled() const { return presentationControlled; }
+    void SetPresentationControlled(bool controlled_)
+    {
+        presentationControlled = controlled_;
+    }
+
+    bool IsPresentationControlled() const
+    {
+        return presentationControlled;
+    }
+
     // SkillStateがPhaseを選択中も、Animation EventとRootMotionは通常どおり更新する。
-    void SetSkillControlled(bool controlled_) { skillControlled = controlled_; }
-    bool IsSkillControlled() const { return skillControlled; }
+    void SetSkillControlled(bool controlled_)
+    {
+        skillControlled = controlled_;
+    }
+
+    bool IsSkillControlled() const
+    {
+        return skillControlled;
+    }
 
     // セーブ・ロードの実装
     void Serialize(nlohmann::json& json_) const override;
@@ -70,14 +108,47 @@ public:
 
     // Blackboard へのアクセス権を渡す
     const BlackboardCategory& GetBlackboard() const;
-    const AnimState* GetCurrentState() { return currentState; }
-    float GetAnimatorTime() const { return animator.GetCurrentFadeTime(); }
-    float GetCurrentSampleDuration() const { return animator.GetCurrentSampleDuration(); }
-    void SetAnimatorTime(float time_) { animator.SetCurrentTime(time_); }
-    void SetAnimationPaused(bool paused_) { animationPaused = paused_; }
-    bool IsAnimationPaused() const { return animationPaused; }
-    void SetEditorPoseOverride(bool enabled_) { editorPoseOverride = enabled_; }
-    bool IsEditorPoseOverride() const { return editorPoseOverride; }
+
+    const AnimState* GetCurrentState()
+    {
+        return currentState;
+    }
+
+    float GetAnimatorTime() const
+    {
+        return animator.GetCurrentFadeTime();
+    }
+
+    float GetCurrentSampleDuration() const
+    {
+        return animator.GetCurrentSampleDuration();
+    }
+
+    void SetAnimatorTime(float time_)
+    {
+        animator.SetCurrentTime(time_);
+    }
+
+    void SetAnimationPaused(bool paused_)
+    {
+        animationPaused = paused_;
+    }
+
+    bool IsAnimationPaused() const
+    {
+        return animationPaused;
+    }
+
+    void SetEditorPoseOverride(bool enabled_)
+    {
+        editorPoseOverride = enabled_;
+    }
+
+    bool IsEditorPoseOverride() const
+    {
+        return editorPoseOverride;
+    }
+
     // AIなど外部制御から、RootMotionのYaw回転が指定角度を超えないように制限する。
     void SetRootMotionYawLimit(float yawDegrees_);
     void ClearRootMotionYawLimit();
@@ -86,11 +157,26 @@ public:
         float endNormalizedTime_, DirectX::XMFLOAT3& localDelta_, float& playbackDuration_) const;
 
     // ーーー 窓にデータを差し出すためのゲッター群 ーーー
-    std::vector<AnimGraphNode>& GetGraphNodes() { return graphNodes; }
-    std::vector<AnimTransition>& GetTransitions() { return graphTransitions; }
-    std::unordered_map<std::string, std::unique_ptr<AnimState>>& GetStates() { return states; }
+    std::vector<AnimGraphNode>& GetGraphNodes()
+    {
+        return graphNodes;
+    }
 
-    uintptr_t GetNextId() { return nextGraphElementId++; }
+    std::vector<AnimTransition>& GetTransitions()
+    {
+        return graphTransitions;
+    }
+
+    std::unordered_map<std::string, std::unique_ptr<AnimState>>& GetStates()
+    {
+        return states;
+    }
+
+    uintptr_t GetNextId()
+    {
+        return nextGraphElementId++;
+    }
+
     void SetIdCounterFloor(uintptr_t minValue_);
     // 内部処理用
     void EvaluateGraphTransitions();
@@ -100,7 +186,12 @@ public:
     void ProcessBlackboardGraphRequests(bool transitions_ = true);
     // AIへ公開する現在State・再生時間・制御権をBlackboardへ反映する。
     void PublishGraphFeedback();
-    void SetUseTransitionGraph(bool useTransitionGraph_) { useTransitionGraph = useTransitionGraph_; }
+
+    void SetUseTransitionGraph(bool useTransitionGraph_)
+    {
+        useTransitionGraph = useTransitionGraph_;
+    }
+
 private:
     bool processingBlackboardGraphRequests = false; // Actionからの再入時は次の処理へ要求を残す。
     std::string graphAssetFilePath;
@@ -247,6 +338,14 @@ private:
 public:
     // 外部からのパラメータ入力
     void SetParam(const std::string& name_, BlackBoardValue value_);
-    void SetBlackboardCategory(const std::string& category_) { animationBlackboardCategory = category_; }
-    const std::string& GetBlackboardCategory() const { return animationBlackboardCategory; }
+
+    void SetBlackboardCategory(const std::string& category_)
+    {
+        animationBlackboardCategory = category_;
+    }
+
+    const std::string& GetBlackboardCategory() const
+    {
+        return animationBlackboardCategory;
+    }
 };

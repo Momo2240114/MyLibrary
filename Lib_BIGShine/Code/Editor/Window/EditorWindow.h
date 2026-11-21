@@ -18,38 +18,132 @@ public:
         : windowName(name), gameObjectManager(manager), isVisible(true)
     {
     }
+
     virtual ~EditorWindow() = default;
 
     virtual void Draw() = 0; // 各Window固有の描画処理。
-    virtual void Update(float deltaTime_) {}
-    virtual void DrawMenuBar() {}
-    virtual void OnVisibilityChanged(bool visible) {}
+
+    virtual void Update(float deltaTime_)
+    {
+    }
+
+    virtual void DrawMenuBar()
+    {
+    }
+
+    virtual void OnVisibilityChanged(bool visible)
+    {
+    }
+
     // 専用Workspaceとして扱うWindowはScene EditorのDock表示とは別枠で表示する。
-    virtual bool IsEditorWorkspace() const { return false; }
-    virtual bool ShouldShowInWindowMenu() const { return true; }
+    virtual bool IsEditorWorkspace() const
+    {
+        return false;
+    }
+
+    virtual bool ShouldShowInWindowMenu() const
+    {
+        return true;
+    }
+
     // Animation/Particleなど、編集中にScene更新を止めたいWindowがtrueを返す。
-    virtual bool ShouldPauseScene() const { return false; }
-    virtual bool ShouldRenderSceneWhenPaused() const { return false; }
+    virtual bool ShouldPauseScene() const
+    {
+        return false;
+    }
+
+    virtual bool ShouldRenderSceneWhenPaused() const
+    {
+        return false;
+    }
+
     // Sceneの最終画像をWorkspace内に表示する場合だけ、専用RenderTargetを要求する。
-    virtual bool RequiresSceneRenderTarget() const { return false; }
+    virtual bool RequiresSceneRenderTarget() const
+    {
+        return false;
+    }
+
     // ActionSequenceから指定された対象を受け取れるWorkspaceだけがtrueを返す。
-    virtual bool OpenCinematicSequence(const std::string& ownerName_, int sequenceIndex_) { return false; }
+    virtual bool OpenCinematicSequence(const std::string& ownerName_, int sequenceIndex_)
+    {
+        return false;
+    }
 
     // Windowの表示状態を確認・設定する。変更時はOnVisibilityChangedで派生側へ通知する。
-    bool IsVisible() const { return isVisible; }
-    void SetVisible(bool visible) { if (isVisible != visible) { isVisible = visible; OnVisibilityChanged(visible); } }
-    bool IsKeepOnTop() const { return keepOnTop; }
-    void SetKeepOnTop(bool enabled) { keepOnTop = enabled; }
-    bool IsLockToMainViewport() const { return lockToMainViewport; }
-    void SetLockToMainViewport(bool enabled) { lockToMainViewport = enabled; }
-    void SetLayoutRect(const ImVec2& pos, const ImVec2& size, bool locked = true) { layoutPos = pos; layoutSize = size; hasLayoutRect = true; layoutLocked = locked; }
-    void ClearLayoutRect() { hasLayoutRect = false; }
-    void SetDockId(ImGuiID id) { dockId = id; hasDockId = (id != 0); }
-    void ClearDockId() { dockId = 0; hasDockId = false; }
-    static void SetMenuInteractionActive(bool active) { menuInteractionActive = active; }
+    bool IsVisible() const
+    {
+        return isVisible;
+    }
 
-    const std::string& GetName() const { return windowName; }
-    WindowStyle& GetStyle() { return style; }
+    void SetVisible(bool visible)
+    {
+        if (isVisible != visible)
+        {
+            isVisible = visible;
+            OnVisibilityChanged(visible);
+        }
+    }
+
+    bool IsKeepOnTop() const
+    {
+        return keepOnTop;
+    }
+
+    void SetKeepOnTop(bool enabled)
+    {
+        keepOnTop = enabled;
+    }
+
+    bool IsLockToMainViewport() const
+    {
+        return lockToMainViewport;
+    }
+
+    void SetLockToMainViewport(bool enabled)
+    {
+        lockToMainViewport = enabled;
+    }
+
+    void SetLayoutRect(const ImVec2& pos, const ImVec2& size, bool locked = true)
+    {
+        layoutPos = pos;
+        layoutSize = size;
+        hasLayoutRect = true;
+        layoutLocked = locked;
+    }
+
+    void ClearLayoutRect()
+    {
+        hasLayoutRect = false;
+    }
+
+    void SetDockId(ImGuiID id)
+    {
+        dockId = id;
+        hasDockId = (id != 0);
+    }
+
+    void ClearDockId()
+    {
+        dockId = 0;
+        hasDockId = false;
+    }
+
+    static void SetMenuInteractionActive(bool active)
+    {
+        menuInteractionActive = active;
+    }
+
+    const std::string& GetName() const
+    {
+        return windowName;
+    }
+
+    WindowStyle& GetStyle()
+    {
+        return style;
+    }
+
 protected:
     void ApplyStyleToGlobalImGui()
     {
@@ -68,6 +162,7 @@ protected:
     }
 
     WindowStyle style;
+
     // 共通のスタイル編集UIを描画する関数。
     void DrawStylePopup() {
         if (ImGui::BeginPopupContextWindow("WindowSettings", ImGuiPopupFlags_MouseButtonRight)) {
@@ -84,7 +179,10 @@ protected:
                 ApplyStyleToGlobalImGui();
             }
 
-            if (ImGui::Button("Close")) ImGui::CloseCurrentPopup();
+            if (ImGui::Button("Close"))
+            {
+                ImGui::CloseCurrentPopup();
+            }
             ImGui::EndPopup();
         }
     }

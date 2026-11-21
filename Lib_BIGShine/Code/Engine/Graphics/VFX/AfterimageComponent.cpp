@@ -49,10 +49,16 @@ void AfterimageComponent::LateUpdate(float deltaTime_)
     snapshots.erase(
         std::remove_if(
             snapshots.begin(), snapshots.end(),
-            [this](const Snapshot& snapshot_) { return snapshot_.age >= lifetime; }),
+            [this](const Snapshot& snapshot_)
+    {
+        return snapshot_.age >= lifetime;
+    }),
         snapshots.end());
 
-    if (!isEmitting && pendingBurstCount <= 0) return;
+    if (!isEmitting && pendingBurstCount <= 0)
+    {
+        return;
+    }
 
     spawnTimer += deltaTime_;
     const float safeInterval_ = (std::max)(spawnInterval, 0.001f);
@@ -93,9 +99,15 @@ void AfterimageComponent::Gui()
         isEmitting ? StopEmission() : StartEmission();
     }
     ImGui::SameLine();
-    if (ImGui::Button("Burst")) Burst();
+    if (ImGui::Button("Burst"))
+    {
+        Burst();
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Clear")) Clear();
+    if (ImGui::Button("Clear"))
+    {
+        Clear();
+    }
 
     MeshVFXComponent::Gui();
 }
@@ -205,20 +217,38 @@ void AfterimageComponent::Clear()
 void AfterimageComponent::RegisterActions()
 {
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     // アニメーションイベントや他コンポーネントから、名前指定で残像制御できるように登録する。
     auto& registry_ = owner_->GetLocalRegistry();
-    registry_.RegisterAction("VFX", "AfterimageStart", [this]() { StartEmission(); });
-    registry_.RegisterAction("VFX", "AfterimageStop", [this]() { StopEmission(); });
-    registry_.RegisterAction("VFX", "AfterimageBurst", [this]() { Burst(); });
-    registry_.RegisterAction("VFX", "AfterimageClear", [this]() { Clear(); });
+    registry_.RegisterAction("VFX", "AfterimageStart", [this]()
+    {
+        StartEmission();
+    });
+    registry_.RegisterAction("VFX", "AfterimageStop", [this]()
+    {
+        StopEmission();
+    });
+    registry_.RegisterAction("VFX", "AfterimageBurst", [this]()
+    {
+        Burst();
+    });
+    registry_.RegisterAction("VFX", "AfterimageClear", [this]()
+    {
+        Clear();
+    });
 }
 
 bool AfterimageComponent::CaptureSnapshot(Snapshot& snapshot_)
 {
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_ || !owner_->transform) return false;
+    if (!owner_ || !owner_->transform)
+    {
+        return false;
+    }
 
     // ルートの現在位置を距離補間用に保存し、描画用のモデル姿勢はCaptureObjectで集める。
     snapshot_.poses.reserve(includeChildren ? 4 : 1);
@@ -327,7 +357,10 @@ void AfterimageComponent::CaptureObject(
     const std::shared_ptr<GameObject>& object_,
     Snapshot& snapshot_)
 {
-    if (!object_ || !object_->transform) return;
+    if (!object_ || !object_->transform)
+    {
+        return;
+    }
 
     // 対象GameObjectにモデルがあれば、現在のスキニング/メッシュ姿勢を残像用に保存する。
     const std::shared_ptr<GltfModelCommponennt> model_ =
@@ -373,11 +406,17 @@ void AfterimageComponent::CaptureObject(
         snapshot_.poses.push_back(std::move(pose_));
     }
 
-    if (!includeChildren) return;
+    if (!includeChildren)
+    {
+        return;
+    }
     // 武器や分割モデルもまとめて残像化したい場合は、子GameObjectを再帰的に拾う。
     for (const std::shared_ptr<Transform>& childTransform_ : object_->transform->children)
     {
-        if (!childTransform_) continue;
+        if (!childTransform_)
+        {
+            continue;
+        }
         CaptureObject(childTransform_->gameObject.lock(), snapshot_);
     }
 }

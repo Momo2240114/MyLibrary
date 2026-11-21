@@ -94,7 +94,9 @@ PS_OUT main(VS_OUT pin)
 {
     float4 base = baseMap.Sample(linearSampler, pin.texcoord) * baseColor;
     if (base.a < 0.1f)
+    {
         discard;
+    }
 
     // 法線マップによるディテール展開
     float3 N = normalize(pin.normal);
@@ -140,7 +142,9 @@ PS_OUT main(VS_OUT pin)
         float3 Lvec = pl.position - pin.position;
         float d = length(Lvec);
         if (d > pl.range)
+        {
             continue;
+        }
 
         float att = saturate(1.0f - (d / pl.range));
         att *= att;
@@ -161,7 +165,9 @@ PS_OUT main(VS_OUT pin)
         float3 Lvec = sl.position - pin.position;
         float d = length(Lvec);
         if (d > sl.range)
+        {
             continue;
+        }
 
         float3 L = normalize(Lvec);
         float cosAngle = dot(normalize(sl.direction), -L);
@@ -170,7 +176,9 @@ PS_OUT main(VS_OUT pin)
         float spotAtt = saturate((cosAngle - cosOuter) / max(cosInner - cosOuter, 1e-4f));
         spotAtt *= spotAtt;
         if (spotAtt <= 0.0f)
+        {
             continue;
+        }
 
         float att = saturate(1.0f - (d / sl.range));
         att = att * att * spotAtt;

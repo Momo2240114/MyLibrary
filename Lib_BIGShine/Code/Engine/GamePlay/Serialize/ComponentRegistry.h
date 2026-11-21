@@ -38,7 +38,10 @@ public:
         creators[name] = func;
     }
 
-    const auto& GetAll() const { return creators; }
+    const auto& GetAll() const
+    {
+        return creators;
+    }
 
     class AutoRegister
     {

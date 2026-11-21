@@ -36,7 +36,10 @@ namespace
     {
         if (input_.contains("Slot"))
         {
-            if (!input_.at("Slot").is_number_integer()) throw std::runtime_error("Input Slot must be an integer.");
+            if (!input_.at("Slot").is_number_integer())
+            {
+                throw std::runtime_error("Input Slot must be an integer.");
+            }
             return input_.at("Slot").get<int>();
         }
         const std::string action_ = input_.value("Action", std::string());
@@ -48,14 +51,21 @@ namespace
     {
         try
         {
-            if (!document_.at("Inputs").is_array()) throw std::runtime_error("Inputs must be an array.");
+            if (!document_.at("Inputs").is_array())
+            {
+                throw std::runtime_error("Inputs must be an array.");
+            }
             for (const auto& input_ : document_.at("Inputs"))
             {
                 const int slotIndex_ = GetInputSlotIndex(input_);
                 if (slotIndex_ < 0 || slotIndex_ >= static_cast<int>(PlayerSkillLoadout::SLOT_COUNT))
+                {
                     throw std::runtime_error("Input Slot must be 0, 1, 2 or 3.");
+                }
                 if (input_.at("ModifierAction").get<std::string>().empty() || input_.at("TriggerAction").get<std::string>().empty())
+                {
                     throw std::runtime_error("Input Action names must not be empty.");
+                }
                 const int priority_ = input_.value("Priority", 100);
                 (void)priority_;
             }
@@ -67,6 +77,7 @@ namespace
             return false;
         }
     }
+
     // 手入力も維持し、選択Actorに登録された既存Actionから設定できるようにする。
     bool DrawActionField(const char* label_, std::string& value_, const std::shared_ptr<GameObject>& owner_, const char* category_ = nullptr)
     {
@@ -83,13 +94,22 @@ namespace
                 {
                     ImGui::PushID(categoryName_.c_str());
                     for (const auto& name_ : registry_.GetActionNames(categoryName_))
-                        if (ImGui::Selectable(name_.c_str(), value_ == name_)) { value_ = name_; changed_ = true; }
+                    {
+                        if (ImGui::Selectable(name_.c_str(), value_ == name_))
+                        {
+                            value_ = name_;
+                            changed_ = true;
+                        }
+                    }
                     ImGui::PopID();
                 }
                 ImGui::PopID();
             };
             drawRegistry_(owner_->GetLocalRegistry(), "Owner");
-            if (!category_) drawRegistry_(ActionRegistry::Instance(), "Global");
+            if (!category_)
+            {
+                drawRegistry_(ActionRegistry::Instance(), "Global");
+            }
             ImGui::EndCombo();
         }
         ImGui::PopID();
@@ -101,27 +121,72 @@ namespace
 struct SkillWorkspaceWindow::PhaseTimelineAdapter : ImSequencer::SequenceInterface
 {
     SkillWorkspaceWindow& workspace;
-    explicit PhaseTimelineAdapter(SkillWorkspaceWindow& workspace_) : workspace(workspace_) {}
-    int GetFrameMin() const override { return 0; }
+
+    explicit PhaseTimelineAdapter(SkillWorkspaceWindow& workspace_) : workspace(workspace_)
+    {
+    }
+
+    int GetFrameMin() const override
+    {
+        return 0;
+    }
+
     int GetFrameMax() const override
     {
         int maximumFrame_ = 60;
-        for (const auto& frame_ : workspace.phaseFrames) maximumFrame_ = (std::max)(maximumFrame_, frame_.end + 30);
+        for (const auto& frame_ : workspace.phaseFrames)
+        {
+            maximumFrame_ = (std::max)(maximumFrame_, frame_.end + 30);
+        }
         return maximumFrame_;
     }
-    int GetItemCount() const override { return static_cast<int>(workspace.phaseFrames.size()); }
-    int GetItemTypeCount() const override { return 1; }
-    const char* GetItemTypeName(int typeIndex_) const override { return "Phase"; }
-    const char* GetItemLabel(int index_) const override { return workspace.draft.phases[index_].animationState.c_str(); }
+
+    int GetItemCount() const override
+    {
+        return static_cast<int>(workspace.phaseFrames.size());
+    }
+
+    int GetItemTypeCount() const override
+    {
+        return 1;
+    }
+
+    const char* GetItemTypeName(int typeIndex_) const override
+    {
+        return "Phase";
+    }
+
+    const char* GetItemLabel(int index_) const override
+    {
+        return workspace.draft.phases[index_].animationState.c_str();
+    }
+
     void Get(int index_, int** start_, int** end_, int* type_, unsigned int* color_) override
     {
         auto& frame_ = workspace.phaseFrames[index_];
-        if (start_) *start_ = &frame_.start;
-        if (end_) *end_ = &frame_.end;
-        if (type_) *type_ = 0;
-        if (color_) *color_ = 0xFFBB8844;
+        if (start_)
+        {
+            *start_ = &frame_.start;
+        }
+        if (end_)
+        {
+            *end_ = &frame_.end;
+        }
+        if (type_)
+        {
+            *type_ = 0;
+        }
+        if (color_)
+        {
+            *color_ = 0xFFBB8844;
+        }
     }
-    void BeginEdit(int index_) override { workspace.timelineEditing = true; }
+
+    void BeginEdit(int index_) override
+    {
+        workspace.timelineEditing = true;
+    }
+
     void EndEdit() override
     {
         workspace.CommitDraft();
@@ -166,21 +231,36 @@ SkillWorkspaceWindow::SkillWorkspaceWindow(GameObjectManager* manager_)
 void SkillWorkspaceWindow::Update(float deltaTime_)
 {
     BS_PROFILE_SCOPE("SkillWorkspaceWindow::Update");
-    if (gameObjectManager) targetObject = gameObjectManager->GetSelectedObject();
+    if (gameObjectManager)
+    {
+        targetObject = gameObjectManager->GetSelectedObject();
+    }
 }
 
 void SkillWorkspaceWindow::OnVisibilityChanged(bool visible_)
 {
-    if (!visible_) simulateScene = false;
+    if (!visible_)
+    {
+        simulateScene = false;
+    }
 }
 
 void SkillWorkspaceWindow::LoadLibrary()
 {
     std::vector<SkillDefinition> definitions_;
     nlohmann::json loaded_;
-    if (!LoadSkillDefinitions(libraryPath, definitions_, loaded_, statusText)) return;
-    if (!loaded_.contains("Inputs")) loaded_["Inputs"] = nlohmann::json::array();
-    if (!ValidateCallerSettings(loaded_, statusText)) return;
+    if (!LoadSkillDefinitions(libraryPath, definitions_, loaded_, statusText))
+    {
+        return;
+    }
+    if (!loaded_.contains("Inputs"))
+    {
+        loaded_["Inputs"] = nlohmann::json::array();
+    }
+    if (!ValidateCallerSettings(loaded_, statusText))
+    {
+        return;
+    }
     for (auto& input_ : loaded_["Inputs"])
     {
         input_["Slot"] = GetInputSlotIndex(input_);
@@ -191,21 +271,32 @@ void SkillWorkspaceWindow::LoadLibrary()
     selectedPhase = -1;
     dirty = false;
     timelineEditing = false;
-    if (!definitions_.empty()) SelectSkill(0);
+    if (!definitions_.empty())
+    {
+        SelectSkill(0);
+    }
     statusText = "Loaded: " + libraryPath;
 }
 
 void SkillWorkspaceWindow::CommitDraft()
 {
     if (selectedSkill >= 0 && selectedSkill < static_cast<int>(document["Skills"].size()))
+    {
         SerializeSkillDefinition(draft, document["Skills"][selectedSkill]);
+    }
 }
 
 bool SkillWorkspaceWindow::SaveLibrary()
 {
     CommitDraft();
-    if (!ValidateCallerSettings(document, statusText)) return false;
-    if (!SaveSkillDefinitions(libraryPath, document, statusText)) return false;
+    if (!ValidateCallerSettings(document, statusText))
+    {
+        return false;
+    }
+    if (!SaveSkillDefinitions(libraryPath, document, statusText))
+    {
+        return false;
+    }
     dirty = false;
     statusText = "Saved: " + libraryPath;
     return true;
@@ -214,9 +305,15 @@ bool SkillWorkspaceWindow::SaveLibrary()
 void SkillWorkspaceWindow::SelectSkill(int index_)
 {
     CommitDraft();
-    if (index_ < 0 || index_ >= static_cast<int>(document["Skills"].size())) return;
+    if (index_ < 0 || index_ >= static_cast<int>(document["Skills"].size()))
+    {
+        return;
+    }
     SkillDefinition loaded_;
-    if (!DeserializeSkillDefinition(document["Skills"][index_], loaded_, statusText)) return;
+    if (!DeserializeSkillDefinition(document["Skills"][index_], loaded_, statusText))
+    {
+        return;
+    }
     selectedSkill = index_;
     draft = std::move(loaded_);
     selectedPhase = draft.phases.empty() ? -1 : 0;
@@ -227,13 +324,20 @@ void SkillWorkspaceWindow::AddSkill(bool duplicate_)
 {
     CommitDraft();
     SkillDefinition definition_ = duplicate_ && selectedSkill >= 0 ? draft : SkillDefinition();
-    if (definition_.phases.empty()) definition_.phases.push_back(SkillPhase());
+    if (definition_.phases.empty())
+    {
+        definition_.phases.push_back(SkillPhase());
+    }
     const std::string base_ = duplicate_ ? definition_.name + "_Copy" : "NewSkill";
     definition_.name = base_;
     int suffix_ = 1;
     while (std::any_of(document["Skills"].begin(), document["Skills"].end(), [&definition_](const nlohmann::json& json_)
-        { return json_.value("Name", std::string()) == definition_.name; }))
+        {
+        return json_.value("Name", std::string()) == definition_.name;
+    }))
+    {
         definition_.name = base_ + std::to_string(suffix_++);
+    }
     nlohmann::json json_ = duplicate_ && selectedSkill >= 0 ? document["Skills"][selectedSkill] : nlohmann::json::object();
     json_.erase("Action");
     SerializeSkillDefinition(definition_, json_);
@@ -246,7 +350,11 @@ void SkillWorkspaceWindow::Draw()
 {
     BS_PROFILE_SCOPE("SkillWorkspaceWindow::Draw");
     EnsurePreviewResources();
-    if (!BeginWorkspaceWindow()) { EndEditorWindow(); return; }
+    if (!BeginWorkspaceWindow())
+    {
+        EndEditorWindow();
+        return;
+    }
     DrawToolbar();
     const ImVec2 available_ = ImGui::GetContentRegionAvail();
     const float topHeight_ = (std::max)(200.0f, available_.y * 0.57f);
@@ -265,25 +373,49 @@ void SkillWorkspaceWindow::Draw()
     ImGui::BeginChild("SkillTimelineAndEvents", ImVec2(0.0f, 0.0f), true);
     if (ImGui::BeginTabBar("SkillEditingTabs"))
     {
-        if (ImGui::BeginTabItem("Phases")) { DrawTimeline(); ImGui::EndTabItem(); }
+        if (ImGui::BeginTabItem("Phases"))
+        {
+            DrawTimeline();
+            ImGui::EndTabItem();
+        }
         if (ImGui::BeginTabItem("Action Sequence"))
         {
             const auto target_ = targetObject.lock();
             const auto sequence_ = target_ ? target_->GetComponent<ActionSequence>() : nullptr;
-            if (sequence_) sequence_->DrawEditorGui();
-            else if (target_ && ImGui::Button("Add ActionSequence")) target_->GetOrAddComponent<ActionSequence>();
-            else ImGui::TextDisabled("Select an actor to edit timed actions.");
+            if (sequence_)
+            {
+                sequence_->DrawEditorGui();
+            }
+            else if (target_ && ImGui::Button("Add ActionSequence"))
+            {
+                target_->GetOrAddComponent<ActionSequence>();
+            }
+            else
+            {
+                ImGui::TextDisabled("Select an actor to edit timed actions.");
+            }
             ImGui::EndTabItem();
         }
-        if (ImGui::BeginTabItem("Input Bindings")) { DrawInputBindings(); ImGui::EndTabItem(); }
-        if (ImGui::BeginTabItem("Player / AI")) { DrawExecutionPanel(); ImGui::EndTabItem(); }
+        if (ImGui::BeginTabItem("Input Bindings"))
+        {
+            DrawInputBindings();
+            ImGui::EndTabItem();
+        }
+        if (ImGui::BeginTabItem("Player / AI"))
+        {
+            DrawExecutionPanel();
+            ImGui::EndTabItem();
+        }
         ImGui::EndTabBar();
     }
     ImGui::EndChild();
     EndEditorWindow();
     const auto target_ = targetObject.lock();
     const auto animation_ = target_ ? target_->GetComponent<AnimationControllerComponent>() : nullptr;
-    if (animation_ && animation_->IsSequencerWindowVisible()) animation_->ShowSequencerEditor();
+    if (animation_ && animation_->IsSequencerWindowVisible())
+    {
+        animation_->ShowSequencerEditor();
+    }
 }
 
 void SkillWorkspaceWindow::DrawToolbar()
@@ -291,34 +423,62 @@ void SkillWorkspaceWindow::DrawToolbar()
     ImGui::SetNextItemWidth(420.0f);
     ImGui::InputText("Library", &libraryPath);
     ImGui::SameLine();
-    if (ImGui::Button("Load")) LoadLibrary();
+    if (ImGui::Button("Load"))
+    {
+        LoadLibrary();
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Save")) SaveLibrary();
+    if (ImGui::Button("Save"))
+    {
+        SaveLibrary();
+    }
     ImGui::SameLine();
     ImGui::Checkbox("Simulate Scene", &simulateScene);
     ImGui::SameLine();
-    if (ImGui::Button("Save & Play")) PlaySelected();
+    if (ImGui::Button("Save & Play"))
+    {
+        PlaySelected();
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Stop")) StopSelected();
-    if (dirty) { ImGui::SameLine(); ImGui::TextUnformatted("Unsaved"); }
+    if (ImGui::Button("Stop"))
+    {
+        StopSelected();
+    }
+    if (dirty)
+    {
+        ImGui::SameLine();
+        ImGui::TextUnformatted("Unsaved");
+    }
     ImGui::Checkbox("Grid", &showGrid);
     ImGui::SameLine();
     ImGui::Checkbox("Free Camera", &editorCamera.enablePreviewFreeCamera);
     ImGui::SameLine();
-    if (ImGui::Button("Reset Camera")) editorCamera.ResetPreviewCamera(previewCamera);
+    if (ImGui::Button("Reset Camera"))
+    {
+        editorCamera.ResetPreviewCamera(previewCamera);
+    }
     ImGui::TextWrapped("%s", statusText.c_str());
 }
 
 void SkillWorkspaceWindow::DrawLibraryPanel()
 {
-    if (ImGui::Button("New Skill")) AddSkill(false);
+    if (ImGui::Button("New Skill"))
+    {
+        AddSkill(false);
+    }
     ImGui::SameLine();
-    if (selectedSkill >= 0 && ImGui::Button("Copy")) AddSkill(true);
+    if (selectedSkill >= 0 && ImGui::Button("Copy"))
+    {
+        AddSkill(true);
+    }
     for (int index_ = 0; index_ < static_cast<int>(document["Skills"].size()); ++index_)
     {
         const std::string name_ = index_ == selectedSkill ? draft.name : document["Skills"][index_].value("Name", std::string());
         ImGui::PushID(index_);
-        if (ImGui::Selectable(name_.c_str(), selectedSkill == index_)) SelectSkill(index_);
+        if (ImGui::Selectable(name_.c_str(), selectedSkill == index_))
+        {
+            SelectSkill(index_);
+        }
         ImGui::PopID();
     }
     if (selectedSkill >= 0 && ImGui::Button("Remove Skill"))
@@ -328,7 +488,10 @@ void SkillWorkspaceWindow::DrawLibraryPanel()
         selectedPhase = -1;
         timelineEditing = false;
         dirty = true;
-        if (!document["Skills"].empty()) SelectSkill(0);
+        if (!document["Skills"].empty())
+        {
+            SelectSkill(0);
+        }
     }
     ImGui::SeparatorText("Target Actor");
     const auto target_ = targetObject.lock();
@@ -336,7 +499,10 @@ void SkillWorkspaceWindow::DrawLibraryPanel()
     {
         for (const auto& object_ : gameObjectManager->GetObjects())
         {
-            if (!object_ || !object_->GetComponent<AnimationControllerComponent>()) continue;
+            if (!object_ || !object_->GetComponent<AnimationControllerComponent>())
+            {
+                continue;
+            }
             ImGui::PushID(object_.get());
             if (ImGui::Selectable(object_->GetName().c_str(), object_ == target_))
             {
@@ -351,7 +517,11 @@ void SkillWorkspaceWindow::DrawLibraryPanel()
 
 void SkillWorkspaceWindow::DrawInspector()
 {
-    if (selectedSkill < 0) { ImGui::TextDisabled("Create or select a skill."); return; }
+    if (selectedSkill < 0)
+    {
+        ImGui::TextDisabled("Create or select a skill.");
+        return;
+    }
     dirty |= ImGui::InputText("Name", &draft.name);
     dirty |= ImGui::Checkbox("Enabled", &draft.enabled);
     dirty |= ImGui::DragFloat("Cooldown", &draft.cooldown, 0.05f, 0.0f, 300.0f);
@@ -362,7 +532,10 @@ void SkillWorkspaceWindow::DrawInspector()
         {
             const auto category_ = static_cast<SkillCategory>(index_);
             if (ImGui::Selectable(GetSkillCategoryName(category_), draft.category == category_))
-            { draft.category = category_; dirty = true; }
+            {
+                draft.category = category_;
+                dirty = true;
+            }
         }
         ImGui::EndCombo();
     }
@@ -379,7 +552,10 @@ void SkillWorkspaceWindow::DrawInspector()
     {
         ImGui::PushID(index_);
         const std::string label_ = std::to_string(index_) + ": " + draft.phases[index_].animationState;
-        if (ImGui::Selectable(label_.c_str(), selectedPhase == index_)) selectedPhase = index_;
+        if (ImGui::Selectable(label_.c_str(), selectedPhase == index_))
+        {
+            selectedPhase = index_;
+        }
         ImGui::PopID();
     }
     DrawPhaseInspector();
@@ -387,7 +563,10 @@ void SkillWorkspaceWindow::DrawInspector()
 
 void SkillWorkspaceWindow::DrawPhaseInspector()
 {
-    if (selectedPhase < 0 || selectedPhase >= static_cast<int>(draft.phases.size())) return;
+    if (selectedPhase < 0 || selectedPhase >= static_cast<int>(draft.phases.size()))
+    {
+        return;
+    }
     auto& phase_ = draft.phases[selectedPhase];
     const auto target_ = targetObject.lock();
     const auto animation_ = target_ ? target_->GetComponent<AnimationControllerComponent>() : nullptr;
@@ -398,13 +577,26 @@ void SkillWorkspaceWindow::DrawPhaseInspector()
     if (animation_ && ImGui::BeginCombo("Actor Animations", phase_.animationState.c_str()))
     {
         for (const auto& [name_, state_] : animation_->GetStates())
-            if (ImGui::Selectable(name_.c_str(), phase_.animationState == name_)) { phase_.animationState = name_; dirty = true; }
+        {
+            if (ImGui::Selectable(name_.c_str(), phase_.animationState == name_))
+            {
+                phase_.animationState = name_;
+                dirty = true;
+            }
+        }
         ImGui::EndCombo();
     }
     int end_ = static_cast<int>(phase_.endCondition);
     const char* endNames_[] = { "Animation End", "Duration", "Action End", "Ground Contact" };
-    if (ImGui::Combo("End", &end_, endNames_, 4)) { phase_.endCondition = static_cast<SkillPhaseEnd>(end_); dirty = true; }
-    if (phase_.endCondition == SkillPhaseEnd::DURATION || phase_.endCondition == SkillPhaseEnd::GROUND_CONTACT) dirty |= ImGui::DragFloat("Duration", &phase_.duration, 0.01f, 0.0f, 120.0f);
+    if (ImGui::Combo("End", &end_, endNames_, 4))
+    {
+        phase_.endCondition = static_cast<SkillPhaseEnd>(end_);
+        dirty = true;
+    }
+    if (phase_.endCondition == SkillPhaseEnd::DURATION || phase_.endCondition == SkillPhaseEnd::GROUND_CONTACT)
+    {
+        dirty |= ImGui::DragFloat("Duration", &phase_.duration, 0.01f, 0.0f, 120.0f);
+    }
     dirty |= ImGui::DragFloat("Maximum Duration", &phase_.maximumDuration, 0.1f, 0.1f, 300.0f);
     dirty |= ImGui::DragFloat("Blend Duration", &phase_.blendDuration, 0.01f, 0.0f, 10.0f);
     dirty |= ImGui::DragFloat("Forward Speed", &phase_.forwardSpeed, 0.1f, -100.0f, 100.0f);
@@ -413,19 +605,31 @@ void SkillWorkspaceWindow::DrawPhaseInspector()
     if (curve_ && ImGui::BeginCombo("Movement Curves", phase_.forwardSpeedCurveName.c_str()))
     {
         if (ImGui::Selectable("(None)", phase_.forwardSpeedCurveName.empty()))
-        { phase_.forwardSpeedCurveName.clear(); dirty = true; }
+        {
+            phase_.forwardSpeedCurveName.clear();
+            dirty = true;
+        }
         for (const auto& name_ : curve_->GetTrackNames())
+        {
             if (ImGui::Selectable(name_.c_str(), phase_.forwardSpeedCurveName == name_))
-            { phase_.forwardSpeedCurveName = name_; dirty = true; }
+            {
+                phase_.forwardSpeedCurveName = name_;
+                dirty = true;
+            }
+        }
         ImGui::EndCombo();
     }
     dirty |= ImGui::DragFloat("Warp Height", &phase_.warpHeight, 0.1f, 0.0f, 100.0f);
     dirty |= ImGui::DragFloat("Vertical Impulse", &phase_.verticalImpulse, 0.1f, -100.0f, 100.0f);
     dirty |= ImGui::Checkbox("Suspend Gravity", &phase_.suspendGravity);
     if (phase_.suspendGravity)
+    {
         dirty |= ImGui::DragFloat("Vertical Speed", &phase_.verticalSpeed, 0.1f, -100.0f, 100.0f);
+    }
     if (phase_.suspendGravity)
+    {
         dirty |= ImGui::InputText("Vertical Speed Curve (seconds)", &phase_.verticalSpeedCurveName);
+    }
     else
     {
         phase_.verticalSpeed = 0.0f;
@@ -441,8 +645,14 @@ void SkillWorkspaceWindow::DrawPhaseInspector()
     dirty |= ImGui::Checkbox("Prevent Flinch", &phase_.preventFlinch);
     if (animation_ && ImGui::Button("Edit Animation Events"))
     {
-        if (animation_->SelectStateForEditing(phase_.animationState)) animation_->SetSequencerWindowVisible(true);
-        else statusText = "Animation State not found: " + phase_.animationState;
+        if (animation_->SelectStateForEditing(phase_.animationState))
+        {
+            animation_->SetSequencerWindowVisible(true);
+        }
+        else
+        {
+            statusText = "Animation State not found: " + phase_.animationState;
+        }
     }
     if (ImGui::Button("Remove Phase"))
     {
@@ -459,7 +669,11 @@ void SkillWorkspaceWindow::DrawPhaseInspector()
 void SkillWorkspaceWindow::DrawInputBindings()
 {
     auto& inputs_ = document["Inputs"];
-    if (!inputs_.is_array()) { ImGui::TextDisabled("Inputs must be an array."); return; }
+    if (!inputs_.is_array())
+    {
+        ImGui::TextDisabled("Inputs must be an array.");
+        return;
+    }
     if (ImGui::Button("Add Input Binding"))
     {
         inputs_.push_back({ { "Slot", 1 }, { "ModifierAction", "Player.SkillModifier" },
@@ -481,20 +695,33 @@ void SkillWorkspaceWindow::DrawInputBindings()
         changed_ |= ImGui::InputInt("Priority", &priority_);
         if (changed_)
         {
-            json_["Slot"] = (std::clamp)(slotIndex_, 0, static_cast<int>(PlayerSkillLoadout::SLOT_COUNT) - 1); json_["ModifierAction"] = modifier_; json_["TriggerAction"] = trigger_; json_["Priority"] = priority_;
+            json_["Slot"] = (std::clamp)(slotIndex_, 0, static_cast<int>(PlayerSkillLoadout::SLOT_COUNT) - 1);
+            json_["ModifierAction"] = modifier_;
+            json_["TriggerAction"] = trigger_;
+            json_["Priority"] = priority_;
             json_.erase("Action");
             dirty = true;
         }
-        if (ImGui::Button("Remove Binding")) remove_ = index_;
+        if (ImGui::Button("Remove Binding"))
+        {
+            remove_ = index_;
+        }
         ImGui::Separator();
         ImGui::PopID();
     }
-    if (remove_ >= 0) { inputs_.erase(inputs_.begin() + remove_); dirty = true; }
+    if (remove_ >= 0)
+    {
+        inputs_.erase(inputs_.begin() + remove_);
+        dirty = true;
+    }
 }
 
 float SkillWorkspaceWindow::GetPhaseDisplayDuration(const SkillPhase& phase_) const
 {
-    if (phase_.endCondition == SkillPhaseEnd::DURATION) return (std::max)(0.05f, phase_.duration);
+    if (phase_.endCondition == SkillPhaseEnd::DURATION)
+    {
+        return (std::max)(0.05f, phase_.duration);
+    }
     const auto target_ = targetObject.lock();
     const auto animation_ = target_ ? target_->GetComponent<AnimationControllerComponent>() : nullptr;
     const auto model_ = target_ ? target_->GetComponent<GltfModelCommponennt>() : nullptr;
@@ -506,9 +733,14 @@ float SkillWorkspaceWindow::GetPhaseDisplayDuration(const SkillPhase& phase_) co
             const auto& state_ = *iterator_->second;
             // Custom/Blend StateはモデルのAnimation番号を持たない場合がある。
             if (state_.animationIndex < 0 || state_.animationIndex >= static_cast<int>(model_->GetAnimations().size()))
+            {
                 return (std::max)(0.05f, phase_.maximumDuration);
+            }
             const float duration_ = model_->GetAnimationDuration(state_.animationIndex);
-            if (duration_ > 0.0f) return duration_ / (std::max)(0.01f, state_.playbackSpeed);
+            if (duration_ > 0.0f)
+            {
+                return duration_ / (std::max)(0.01f, state_.playbackSpeed);
+            }
         }
     }
     return (std::max)(0.05f, phase_.maximumDuration);
@@ -516,7 +748,10 @@ float SkillWorkspaceWindow::GetPhaseDisplayDuration(const SkillPhase& phase_) co
 
 void SkillWorkspaceWindow::SyncPhaseFrames()
 {
-    if (timelineEditing) return;
+    if (timelineEditing)
+    {
+        return;
+    }
     phaseFrames.clear();
     int start_ = 0;
     for (const auto& phase_ : draft.phases)
@@ -529,7 +764,10 @@ void SkillWorkspaceWindow::SyncPhaseFrames()
 
 void SkillWorkspaceWindow::DrawTimeline()
 {
-    if (selectedSkill < 0) return;
+    if (selectedSkill < 0)
+    {
+        return;
+    }
     SyncPhaseFrames();
     ImGui::TextUnformatted("Sequential phases / 60 FPS");
     ImGui::TextDisabled("Move bars to reorder. Resize a bar to use Duration. Animation / Action End widths are estimates.");
@@ -541,7 +779,11 @@ void SkillWorkspaceWindow::DrawTimeline()
 void SkillWorkspaceWindow::DrawExecutionPanel()
 {
     const auto target_ = targetObject.lock();
-    if (!target_) { ImGui::TextDisabled("Select a target actor."); return; }
+    if (!target_)
+    {
+        ImGui::TextDisabled("Select a target actor.");
+        return;
+    }
     ImGui::Text("Actor: %s", target_->GetName().c_str());
     const auto dragon_ = target_->GetComponent<DragonAIComponent>();
     const auto player_ = target_->GetComponent<PlayerControllerComponent>();
@@ -552,16 +794,27 @@ void SkillWorkspaceWindow::DrawExecutionPanel()
         ImGui::TextDisabled("Save the scene to keep the equipped skills.");
         const char* slotNames_[] = { "SkillSlot0 (Square)", "SkillSlot1 (Triangle)", "SkillSlot2 (Circle)", "SkillSlot3 (Cross)" };
         ImGui::Combo("Equip / Preview Slot", &selectedPlayerSlot, slotNames_, static_cast<int>(PlayerSkillLoadout::SLOT_COUNT));
-        if (ImGui::Button("Reset Skill Cooldowns")) player_->ResetSkillCooldowns();
+        if (ImGui::Button("Reset Skill Cooldowns"))
+        {
+            player_->ResetSkillCooldowns();
+        }
     }
     else if (dragon_)
     {
         const auto& actions_ = dragon_->GetActionDefinitions();
-        if (selectedDragonAction >= static_cast<int>(actions_.size())) selectedDragonAction = 0;
+        if (selectedDragonAction >= static_cast<int>(actions_.size()))
+        {
+            selectedDragonAction = 0;
+        }
         if (!actions_.empty() && ImGui::BeginCombo("Dragon Action", GetDragonActionName(actions_[selectedDragonAction].action)))
         {
             for (int index_ = 0; index_ < static_cast<int>(actions_.size()); ++index_)
-                if (ImGui::Selectable(GetDragonActionName(actions_[index_].action), index_ == selectedDragonAction)) selectedDragonAction = index_;
+            {
+                if (ImGui::Selectable(GetDragonActionName(actions_[index_].action), index_ == selectedDragonAction))
+                {
+                    selectedDragonAction = index_;
+                }
+            }
             ImGui::EndCombo();
         }
     }
@@ -571,17 +824,34 @@ void SkillWorkspaceWindow::DrawExecutionPanel()
         if (ai_ && ImGui::BeginCombo("Existing AI Actions", aiActionName.c_str()))
         {
             for (const auto& action_ : ai_->GetActions())
-                if (ImGui::Selectable(action_.aiActionName.c_str(), aiActionName == action_.aiActionName)) aiActionName = action_.aiActionName;
+            {
+                if (ImGui::Selectable(action_.aiActionName.c_str(), aiActionName == action_.aiActionName))
+                {
+                    aiActionName = action_.aiActionName;
+                }
+            }
             ImGui::EndCombo();
         }
-        if (!ai_ && ImGui::Button("Add AIActionComponent")) target_->GetOrAddComponent<AIActionComponent>();
+        if (!ai_ && ImGui::Button("Add AIActionComponent"))
+        {
+            target_->GetOrAddComponent<AIActionComponent>();
+        }
     }
     if (selectedSkill >= 0 && ImGui::Button("Save & Apply Binding"))
-        if (SaveLibrary() && ApplyBinding()) statusText = "Binding applied. Save the scene to keep actor settings.";
+    {
+        if (SaveLibrary() && ApplyBinding())
+        {
+            statusText = "Binding applied. Save the scene to keep actor settings.";
+        }
+    }
     const auto blackboard_ = target_->GetComponent<BlackboardComponent>();
     if (blackboard_)
     {
-        std::string name_; bool active_ = false; int phase_ = -1; float time_ = 0.0f; int result_ = 0;
+        std::string name_;
+        bool active_ = false;
+        int phase_ = -1;
+        float time_ = 0.0f;
+        int result_ = 0;
         blackboard_->GetString("Skill", "Name", name_);
         blackboard_->GetBool("Skill", "Active", active_);
         blackboard_->GetInt("Skill", "Phase", phase_);
@@ -595,42 +865,77 @@ void SkillWorkspaceWindow::DrawExecutionPanel()
 bool SkillWorkspaceWindow::ApplyBinding()
 {
     const auto target_ = targetObject.lock();
-    if (!target_ || selectedSkill < 0) return false;
+    if (!target_ || selectedSkill < 0)
+    {
+        return false;
+    }
     if (const auto player_ = target_->GetComponent<PlayerControllerComponent>())
     {
-        if (!player_->ReloadSkillDefinitions(libraryPath)) { statusText = "Player library reload failed or a skill is active."; return false; }
-        if (!player_->SetEquippedSkill(static_cast<std::size_t>(selectedPlayerSlot), draft.name)) { statusText = "Cannot equip the selected skill."; return false; }
+        if (!player_->ReloadSkillDefinitions(libraryPath))
+        {
+            statusText = "Player library reload failed or a skill is active.";
+            return false;
+        }
+        if (!player_->SetEquippedSkill(static_cast<std::size_t>(selectedPlayerSlot), draft.name))
+        {
+            statusText = "Cannot equip the selected skill.";
+            return false;
+        }
         return true;
     }
     if (const auto dragon_ = target_->GetComponent<DragonAIComponent>())
     {
         const auto& actions_ = dragon_->GetActionDefinitions();
-        if (selectedDragonAction < 0 || selectedDragonAction >= static_cast<int>(actions_.size())) return false;
+        if (selectedDragonAction < 0 || selectedDragonAction >= static_cast<int>(actions_.size()))
+        {
+            return false;
+        }
         if (!dragon_->SetSkillForAction(actions_[selectedDragonAction].action, draft.name, libraryPath))
-        { statusText = "Dragon binding failed or a skill is active."; return false; }
+        {
+            statusText = "Dragon binding failed or a skill is active.";
+            return false;
+        }
         return true;
     }
     const auto ai_ = target_->GetComponent<AIActionComponent>();
-    if (!ai_) { statusText = "Add AIActionComponent to this actor first."; return false; }
+    if (!ai_)
+    {
+        statusText = "Add AIActionComponent to this actor first.";
+        return false;
+    }
     if (!ai_->SetSkillForAction(aiActionName, draft.name, libraryPath))
-    { statusText = "AI binding failed or a skill is active."; return false; }
+    {
+        statusText = "AI binding failed or a skill is active.";
+        return false;
+    }
     return true;
 }
 
 void SkillWorkspaceWindow::PlaySelected()
 {
-    if (!SaveLibrary() || !ApplyBinding()) return;
+    if (!SaveLibrary() || !ApplyBinding())
+    {
+        return;
+    }
     const auto target_ = targetObject.lock();
     const auto animation_ = target_ ? target_->GetComponent<AnimationControllerComponent>() : nullptr;
-    if (animation_) animation_->SetAnimationPaused(false);
+    if (animation_)
+    {
+        animation_->SetAnimationPaused(false);
+    }
     bool requested_ = false;
     if (const auto player_ = target_->GetComponent<PlayerControllerComponent>())
     {
         requested_ = player_->RequestSkillSlot(static_cast<std::size_t>(selectedPlayerSlot));
     }
     else if (const auto dragon_ = target_->GetComponent<DragonAIComponent>())
+    {
         requested_ = dragon_->RequestAction(dragon_->GetActionDefinitions()[selectedDragonAction].action);
-    else if (const auto ai_ = target_->GetComponent<AIActionComponent>()) requested_ = ai_->ExecuteAIAction(aiActionName);
+    }
+    else if (const auto ai_ = target_->GetComponent<AIActionComponent>())
+    {
+        requested_ = ai_->ExecuteAIAction(aiActionName);
+    }
     simulateScene = requested_;
     statusText = requested_ ? "Playing on target actor." : "Request rejected. Check animation, cooldown and cancel gates.";
 }
@@ -640,9 +945,18 @@ void SkillWorkspaceWindow::StopSelected()
     const auto target_ = targetObject.lock();
     if (target_)
     {
-        if (const auto player_ = target_->GetComponent<PlayerControllerComponent>()) player_->StopSkill();
-        else if (const auto dragon_ = target_->GetComponent<DragonAIComponent>()) dragon_->StopSkill();
-        else if (const auto ai_ = target_->GetComponent<AIActionComponent>()) ai_->StopSkill();
+        if (const auto player_ = target_->GetComponent<PlayerControllerComponent>())
+        {
+            player_->StopSkill();
+        }
+        else if (const auto dragon_ = target_->GetComponent<DragonAIComponent>())
+        {
+            dragon_->StopSkill();
+        }
+        else if (const auto ai_ = target_->GetComponent<AIActionComponent>())
+        {
+            ai_->StopSkill();
+        }
     }
     simulateScene = false;
 }
@@ -651,10 +965,16 @@ void SkillWorkspaceWindow::EnsurePreviewResources()
 {
     BS_PROFILE_SCOPE("SkillWorkspaceWindow::EnsurePreviewResources");
 
-    if (isPreviewResourceInitialized) return;
+    if (isPreviewResourceInitialized)
+    {
+        return;
+    }
 
     ID3D11Device* device_ = GraphicsDeviceManager::Instance().GetDevice();
-    if (!device_) return;
+    if (!device_)
+    {
+        return;
+    }
 
     // Skill Workspaceの専用RTへ現在のSceneを描画する。
     editorPrimitiveRenderer.Initialize(device_);
@@ -708,16 +1028,25 @@ void SkillWorkspaceWindow::RenderPreview(const ImVec2& previewSize_)
 {
     BS_PROFILE_SCOPE("SkillWorkspaceWindow::RenderPreview");
 
-    if (!gameObjectManager) return;
+    if (!gameObjectManager)
+    {
+        return;
+    }
 
     auto& graphics_ = GraphicsDeviceManager::Instance();
     ID3D11Device* device_ = graphics_.GetDevice();
     ID3D11DeviceContext* context_ = graphics_.GetContext();
-    if (!device_ || !context_) return;
+    if (!device_ || !context_)
+    {
+        return;
+    }
 
     const int width_ = (std::max)(1, static_cast<int>(previewSize_.x));
     const int height_ = (std::max)(1, static_cast<int>(previewSize_.y));
-    if (!previewTarget.Resize(device_, width_, height_)) return;
+    if (!previewTarget.Resize(device_, width_, height_))
+    {
+        return;
+    }
 
     previewCamera.SetPerspectiveFov(
         45.0f,
@@ -772,7 +1101,10 @@ void SkillWorkspaceWindow::RenderPreview(const ImVec2& previewSize_)
 
     for (const std::shared_ptr<GameObject>& object_ : gameObjectManager->GetObjects())
     {
-        if (!object_) continue;
+        if (!object_)
+        {
+            continue;
+        }
 
         // 停止中のSceneでもInspector変更後の位置関係をPreviewへ反映する。
         object_->UpdateTransform();

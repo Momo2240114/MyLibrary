@@ -49,10 +49,16 @@ float3 SmoothNoise3(float3 p)
 void main(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
     uint headerIndex = dispatchThreadID.x;
-    if (headerIndex >= systemNumParticles) return;
+    if (headerIndex >= systemNumParticles)
+    {
+        return;
+    }
 
     ParticleHeader header = particleHeaderBuffer[headerIndex];
-    if (header.alive == 0) return;
+    if (header.alive == 0)
+    {
+        return;
+    }
 
     uint dataIndex = header.particleIndex;
     Particle data = particleDataBuffer[dataIndex];
@@ -151,7 +157,7 @@ void main(uint3 dispatchThreadID : SV_DispatchThreadID)
     }
 
     data.position.xyz += data.velocity.xyz * elapsedTime;
-    data.rotation.z += data.rotation.w * elapsedTime;
+    data.rotation += data.angularSpeed * elapsedTime;
 
     uint spriteIndex = (uint)(data.parameter.x + 0.5f);
     if (useSpriteAnimation != 0)
@@ -160,8 +166,14 @@ void main(uint3 dispatchThreadID : SV_DispatchThreadID)
         uint animationEnd = max(spriteAnimationStartIndex, spriteAnimationEndIndex);
         uint animationLength = max(1u, animationEnd - animationStart + 1u);
         uint animationFrame = (uint)floor(age * max(spriteAnimationFps, 0.0f));
-        if (spriteAnimationLoop != 0) animationFrame %= animationLength;
-        else animationFrame = min(animationFrame, animationLength - 1u);
+        if (spriteAnimationLoop != 0)
+        {
+            animationFrame %= animationLength;
+        }
+        else
+        {
+            animationFrame = min(animationFrame, animationLength - 1u);
+        }
         spriteIndex = animationStart + animationFrame;
     }
     spriteIndex = min(spriteIndex, max(1u, textureSplitCount.x * textureSplitCount.y) - 1u);
@@ -175,17 +187,25 @@ void main(uint3 dispatchThreadID : SV_DispatchThreadID)
     float fadeOut = fadeDuration.y > 0.0f ? saturate(data.parameter.y / fadeDuration.y) : 1.0f;
     float alphaFade = min(fadeIn, fadeOut);
 
-    if (useColorOverLife != 0)
+    bool fadeColor_ = useColorOverLife != 0;
+    float4 startColor_ = fadeColor_ ? colorStart : manualColor;
+    if (useRandomColor != 0)
     {
-        float4 lifeColor = lerp(colorStart, colorEnd, life01);
-        data.color.rgb = lifeColor.rgb;
-        data.color.a = lifeColor.a * alphaFade;
+        startColor_ = lerp(startColor_, randomColorStart, data.colorRandomRates.x);
     }
-    else
+
+    float4 lifeColor_ = startColor_;
+    if (fadeColor_)
     {
-        data.color.rgb = manualColor.rgb;
-        data.color.a = manualColor.a * alphaFade;
+        float4 endColor_ = colorEnd;
+        if (useRandomColor != 0)
+        {
+            endColor_ = lerp(endColor_, randomColorEnd, data.colorRandomRates.y);
+        }
+        lifeColor_ = lerp(startColor_, endColor_, life01);
     }
+
+    data.color = float4(lifeColor_.rgb, lifeColor_.a * alphaFade);
 
     float4 clip = mul(float4(data.position.xyz, 1.0f), viewProjection);
     header.depth = clip.w;

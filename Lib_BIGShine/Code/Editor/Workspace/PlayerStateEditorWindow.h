@@ -13,6 +13,7 @@ namespace ax::NodeEditor
     struct EditorContext;
     struct Config;
 }
+
 //わたしのプロジェクトに合わせたステートグラフです
 //行動のキャンセルを設定するためのWindowです
 class PlayerStateEditorWindow : public EditorWorkspaceWindow

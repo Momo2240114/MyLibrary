@@ -30,6 +30,7 @@ private:
         std::string hitObject;
         std::vector<std::string> objects;
     };
+
     // 作例を構成する背景、文字、画像の名前を同じページにまとめる。
     struct GalleryPage
     {
@@ -37,6 +38,7 @@ private:
         std::vector<std::string> objects;
         std::vector<GalleryWindow> windows;
     };
+
     // ページ番号を循環させ、演出を先頭から再生する。
     void SelectPage(int index_);
     // Start順に依存せず、全描画先が準備できるまで表示設定を再適用する。

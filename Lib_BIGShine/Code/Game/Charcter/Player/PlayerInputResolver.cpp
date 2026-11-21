@@ -13,9 +13,15 @@ int PlayerInputResolver::ResolveSkillSlot(const KeyConfig& keyConfig_,
     {
         // Triggerを先に押してからModifierを追加しても、この条件では発動しない。
         if (!keyConfig_.ActionPressed(binding_.modifierAction) ||
-            !keyConfig_.ActionPressedIn(binding_.triggerAction)) continue;
+            !keyConfig_.ActionPressedIn(binding_.triggerAction))
+        {
+            continue;
+        }
         // 同じ優先度なら先に登録した候補を維持し、入力表の並び順で選択を安定させる。
-        if (!selected_ || binding_.priority > selected_->priority) selected_ = &binding_;
+        if (!selected_ || binding_.priority > selected_->priority)
+        {
+            selected_ = &binding_;
+        }
     }
     return selected_ ? selected_->slotIndex : -1;
 }
@@ -25,7 +31,12 @@ bool PlayerInputResolver::IsActionConsumed(const KeyConfig& keyConfig_,
     const std::vector<PlayerSkillInputBinding>& bindings_, const std::string& action_)
 {
     for (const auto& binding_ : bindings_)
-        if (binding_.triggerAction == action_ && keyConfig_.ActionPressed(binding_.modifierAction)) return true;
+    {
+        if (binding_.triggerAction == action_ && keyConfig_.ActionPressed(binding_.modifierAction))
+        {
+            return true;
+        }
+    }
     return false;
 }
 

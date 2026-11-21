@@ -17,7 +17,11 @@ public:
         return name;
     }
 
-    ColliderType GetColliderType() const override { return ColliderType::Cylinder; }
+    ColliderType GetColliderType() const override
+    {
+        return ColliderType::Cylinder;
+    }
+
     void Gui() override;
     void Update(float dt_) override;
 

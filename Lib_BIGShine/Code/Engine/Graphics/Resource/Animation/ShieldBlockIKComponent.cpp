@@ -75,7 +75,10 @@ namespace
     {
         const XMFLOAT3 difference_ = Subtract(endPosition_, startPosition_);
         const float length_ = Length(difference_);
-        if (length_ <= EPSILON) return;
+        if (length_ <= EPSILON)
+        {
+            return;
+        }
 
         const XMVECTOR forward_ = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
         const XMVECTOR direction_ = XMVector3Normalize(XMLoadFloat3(&difference_));
@@ -109,10 +112,16 @@ const std::string& ShieldBlockIKComponent::GetName() const
 void ShieldBlockIKComponent::Start()
 {
     // IKMap側に盾ガード用チェーンを登録しておき、実際のボーン指定はIKMapのGUIで調整できるようにする。
-    if (!ResolveDependencies()) return;
+    if (!ResolveDependencies())
+    {
+        return;
+    }
 
     const std::shared_ptr<IKMapComponent> ikMap_ = ikMap.lock();
-    if (!ikMap_) return;
+    if (!ikMap_)
+    {
+        return;
+    }
 
     ikMap_->AddShieldBlockChain("ShieldBlock");
 }
@@ -121,7 +130,10 @@ bool ShieldBlockIKComponent::IsLoadReady() const
 {
     const auto owner_ = const_cast<ShieldBlockIKComponent*>(this)->GetGameObject();
     const auto model_ = owner_ ? owner_->GetComponent<GltfModelCommponennt>() : nullptr;
-    if (!model_) return true;
+    if (!model_)
+    {
+        return true;
+    }
 
     model_->UpdateLoadState();
     return !model_->IsModelLoading();
@@ -131,10 +143,19 @@ bool ShieldBlockIKComponent::ResolveDependencies()
 {
     // 同じGameObject上のIKMapとモデルを取得し、ロード完了後のLateUpdateで使える状態にする。
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return false;
+    if (!owner_)
+    {
+        return false;
+    }
 
-    if (ikMap.expired()) ikMap = owner_->GetComponent<IKMapComponent>();
-    if (model.expired()) model = owner_->GetComponent<GltfModelCommponennt>();
+    if (ikMap.expired())
+    {
+        ikMap = owner_->GetComponent<IKMapComponent>();
+    }
+    if (model.expired())
+    {
+        model = owner_->GetComponent<GltfModelCommponennt>();
+    }
 
     return !ikMap.expired() && !model.expired();
 }
@@ -144,17 +165,32 @@ void ShieldBlockIKComponent::LateUpdate(float deltaTime_)
     BS_PROFILE_SCOPE("ShieldBlockIKComponent::LateUpdate");
 
     // アクティブな攻撃HitBoxを探し、近い攻撃方向へ盾腕を2ボーンIKで向ける。
-    if (!enabled || !ResolveDependencies()) return;
+    if (!enabled || !ResolveDependencies())
+    {
+        return;
+    }
 
     const std::shared_ptr<GltfModelCommponennt> model_ = model.lock();
-    if (model_) model_->UpdateLoadState();
-    if (!model_ || !model_->IsModelReady()) return;
+    if (model_)
+    {
+        model_->UpdateLoadState();
+    }
+    if (!model_ || !model_->IsModelReady())
+    {
+        return;
+    }
 
     const std::shared_ptr<IKMapComponent> ikMap_ = ikMap.lock();
-    if (!ikMap_) return;
+    if (!ikMap_)
+    {
+        return;
+    }
 
     std::vector<IKMapComponent::IKChain>& chains_ = ikMap_->GetChains();
-    if (shieldStates.size() != chains_.size()) shieldStates.resize(chains_.size());
+    if (shieldStates.size() != chains_.size())
+    {
+        shieldStates.resize(chains_.size());
+    }
 
     const float safeDeltaTime_ = std::clamp(deltaTime_, 0.0f, 0.1f);
     const std::vector<GltfModelCommponennt::Node>& nodes_ = model_->GetNodes();
@@ -162,8 +198,14 @@ void ShieldBlockIKComponent::LateUpdate(float deltaTime_)
     for (size_t chainIndex_ = 0; chainIndex_ < chains_.size(); ++chainIndex_)
     {
         IKMapComponent::IKChain& chain_ = chains_[chainIndex_];
-        if (!chain_.enabled || chain_.type != IKMapComponent::IK_TYPE::SHIELD_BLOCK) continue;
-        if (!ResolveChain(chain_) || chain_.nodeIndices.size() < 3) continue;
+        if (!chain_.enabled || chain_.type != IKMapComponent::IK_TYPE::SHIELD_BLOCK)
+        {
+            continue;
+        }
+        if (!ResolveChain(chain_) || chain_.nodeIndices.size() < 3)
+        {
+            continue;
+        }
 
         std::vector<XMFLOAT3> animatedPositions_;
         animatedPositions_.reserve(3u);
@@ -182,11 +224,17 @@ void ShieldBlockIKComponent::LateUpdate(float deltaTime_)
         state_.activeWeight += (desiredWeight_ - state_.activeWeight) * blend_;
 
         const float finalWeight_ = std::clamp(state_.activeWeight * chain_.influence, 0.0f, 1.0f);
-        if (finalWeight_ <= EPSILON || !hasAttack_) continue;
+        if (finalWeight_ <= EPSILON || !hasAttack_)
+        {
+            continue;
+        }
 
         const XMFLOAT3 targetDirection_ = ClampDirection(chain_, animatedPositions_[0], attackPosition_);
         std::vector<XMFLOAT3> solvedPositions_ = animatedPositions_;
-        if (!SolveTwoBone(chain_, animatedPositions_, targetDirection_, solvedPositions_)) continue;
+        if (!SolveTwoBone(chain_, animatedPositions_, targetDirection_, solvedPositions_))
+        {
+            continue;
+        }
 
         ApplySolvedPose(chain_, solvedPositions_, finalWeight_);
         DrawDebugShapes(chain_, solvedPositions_, attackPosition_);
@@ -196,15 +244,27 @@ void ShieldBlockIKComponent::LateUpdate(float deltaTime_)
 bool ShieldBlockIKComponent::ResolveChain(IKMapComponent::IKChain& chain_)
 {
     // rootからtipまで親をたどり、肩/肘/手首の最低3点を持つチェーンとして解決する。
-    if (chain_.rootNodeName.empty() || chain_.tipNodeName.empty()) return false;
-    if (!chain_.nodeIndices.empty()) return chain_.nodeIndices.size() >= 3;
+    if (chain_.rootNodeName.empty() || chain_.tipNodeName.empty())
+    {
+        return false;
+    }
+    if (!chain_.nodeIndices.empty())
+    {
+        return chain_.nodeIndices.size() >= 3;
+    }
 
     const std::shared_ptr<GltfModelCommponennt> model_ = model.lock();
-    if (!model_) return false;
+    if (!model_)
+    {
+        return false;
+    }
 
     const int rootIndex_ = model_->GetNodeIndex(chain_.rootNodeName.c_str());
     const int tipIndex_ = model_->GetNodeIndex(chain_.tipNodeName.c_str());
-    if (rootIndex_ < 0 || tipIndex_ < 0) return false;
+    if (rootIndex_ < 0 || tipIndex_ < 0)
+    {
+        return false;
+    }
 
     const std::vector<GltfModelCommponennt::Node>& nodes_ = model_->GetNodes();
     std::vector<int> reverseIndices_;
@@ -212,10 +272,16 @@ bool ShieldBlockIKComponent::ResolveChain(IKMapComponent::IKChain& chain_)
         currentIndex_ = nodes_.at(currentIndex_).parentIndex)
     {
         reverseIndices_.push_back(currentIndex_);
-        if (currentIndex_ == rootIndex_) break;
+        if (currentIndex_ == rootIndex_)
+        {
+            break;
+        }
     }
 
-    if (reverseIndices_.empty() || reverseIndices_.back() != rootIndex_) return false;
+    if (reverseIndices_.empty() || reverseIndices_.back() != rootIndex_)
+    {
+        return false;
+    }
 
     chain_.nodeIndices.assign(reverseIndices_.rbegin(), reverseIndices_.rend());
     return chain_.nodeIndices.size() >= 3;
@@ -228,7 +294,10 @@ bool ShieldBlockIKComponent::FindNearestAttack(
 {
     // CollisionStepSystemから現在有効なHitBoxを集め、自分以外で最も近い攻撃中心を盾の向き先にする。
     const std::shared_ptr<GameObject> owner_ = gameObject.lock();
-    if (!owner_ || !owner_->manager) return false;
+    if (!owner_ || !owner_->manager)
+    {
+        return false;
+    }
 
     const float searchRadius_ = (std::max)(chain_.shieldSearchRadius, 0.0f);
     const float searchRadiusSq_ = searchRadius_ * searchRadius_;
@@ -239,16 +308,25 @@ bool ShieldBlockIKComponent::FindNearestAttack(
         owner_->manager->GetCollisionStepSystem().CollectActiveHitBoxes();
     for (const std::shared_ptr<HitBox>& hitBox_ : hitBoxes_)
     {
-        if (!hitBox_ || hitBox_->ownerObject == owner_.get()) continue;
+        if (!hitBox_ || hitBox_->ownerObject == owner_.get())
+        {
+            continue;
+        }
 
         const std::shared_ptr<GameObject> hitObject_ = hitBox_->GetGameObject();
-        if (hitObject_.get() == owner_.get()) continue;
+        if (hitObject_.get() == owner_.get())
+        {
+            continue;
+        }
 
         const XMFLOAT3 center_ = GetCapsuleCenter(hitBox_->GetCapsuleData());
         const XMFLOAT3 difference_ = Subtract(center_, origin_);
         const float distanceSq_ =
             difference_.x * difference_.x + difference_.y * difference_.y + difference_.z * difference_.z;
-        if (distanceSq_ > nearestDistanceSq_) continue;
+        if (distanceSq_ > nearestDistanceSq_)
+        {
+            continue;
+        }
 
         nearestDistanceSq_ = distanceSq_;
         attackPosition_ = center_;
@@ -265,7 +343,10 @@ XMFLOAT3 ShieldBlockIKComponent::ClampDirection(
 {
     // 攻撃方向をキャラクター基準のyaw/pitch上限内へ収め、腕が無理な方向へねじれないようにする。
     const std::shared_ptr<GameObject> owner_ = gameObject.lock();
-    if (!owner_ || !owner_->transform) return Normalize(Subtract(to_, from_));
+    if (!owner_ || !owner_->transform)
+    {
+        return Normalize(Subtract(to_, from_));
+    }
 
     const XMMATRIX ownerWorld_ = owner_->transform->GetWorldMatrix();
     const XMVECTOR ownerRight_ = XMVector3Normalize(ownerWorld_.r[0]);
@@ -315,14 +396,20 @@ bool ShieldBlockIKComponent::SolveTwoBone(
     std::vector<XMFLOAT3>& solvedPositions_) const
 {
     // 肩から見た防御方向へ手首目標を置き、余弦定理で肘位置を求めて腕の長さを保つ。
-    if (animatedPositions_.size() < 3 || solvedPositions_.size() < 3) return false;
+    if (animatedPositions_.size() < 3 || solvedPositions_.size() < 3)
+    {
+        return false;
+    }
 
     const XMFLOAT3 shoulderPosition_ = animatedPositions_[0];
     const XMFLOAT3 elbowPosition_ = animatedPositions_[1];
     const XMFLOAT3 wristPosition_ = animatedPositions_[2];
     const float upperLength_ = Length(Subtract(elbowPosition_, shoulderPosition_));
     const float lowerLength_ = Length(Subtract(wristPosition_, elbowPosition_));
-    if (upperLength_ <= EPSILON || lowerLength_ <= EPSILON) return false;
+    if (upperLength_ <= EPSILON || lowerLength_ <= EPSILON)
+    {
+        return false;
+    }
 
     const float ratio_ = std::clamp(chain_.shieldElbowWristRatio, 0.0f, 1.0f);
     const XMFLOAT3 shieldPoint_ = Lerp(elbowPosition_, wristPosition_, ratio_);
@@ -331,12 +418,18 @@ bool ShieldBlockIKComponent::SolveTwoBone(
         std::abs(upperLength_ - lowerLength_) + EPSILON,
         upperLength_ + lowerLength_ - EPSILON);
     const XMFLOAT3 direction_ = Normalize(targetDirection_);
-    if (Length(direction_) <= EPSILON) return false;
+    if (Length(direction_) <= EPSILON)
+    {
+        return false;
+    }
 
     const XMFLOAT3 wristTarget_ = Add(shoulderPosition_, Scale(direction_, targetDistance_));
     const XMFLOAT3 shoulderToWrist_ = Subtract(wristTarget_, shoulderPosition_);
     const float distance_ = Length(shoulderToWrist_);
-    if (distance_ <= EPSILON) return false;
+    if (distance_ <= EPSILON)
+    {
+        return false;
+    }
 
     const XMFLOAT3 axisDirection_ = Normalize(shoulderToWrist_);
 
@@ -392,7 +485,10 @@ void ShieldBlockIKComponent::ApplySolvedPose(
 {
     // 解いた肩/肘/手首の方向に合わせて各ボーンのローカル回転を更新し、現在ポーズへ重み付きで混ぜる。
     const std::shared_ptr<GltfModelCommponennt> model_ = model.lock();
-    if (!model_) return;
+    if (!model_)
+    {
+        return;
+    }
 
     std::vector<GltfModelCommponennt::Node>& nodes_ = model_->GetNodes();
     bool chainChanged_ = false;
@@ -409,12 +505,18 @@ void ShieldBlockIKComponent::ApplySolvedPose(
             Subtract(GetTranslation(child_.worldTransform), GetTranslation(node_.worldTransform)));
         const XMFLOAT3 targetDirection_ = Normalize(
             Subtract(solvedPositions_[pointIndex_ + 1], solvedPositions_[pointIndex_]));
-        if (Length(currentDirection_) <= EPSILON || Length(targetDirection_) <= EPSILON) continue;
+        if (Length(currentDirection_) <= EPSILON || Length(targetDirection_) <= EPSILON)
+        {
+            continue;
+        }
 
         const XMVECTOR currentVector_ = XMLoadFloat3(&currentDirection_);
         const XMVECTOR targetVector_ = XMLoadFloat3(&targetDirection_);
         XMVECTOR axis_ = XMVector3Cross(currentVector_, targetVector_);
-        if (XMVectorGetX(XMVector3LengthSq(axis_)) <= EPSILON) continue;
+        if (XMVectorGetX(XMVector3LengthSq(axis_)) <= EPSILON)
+        {
+            continue;
+        }
 
         axis_ = XMVector3Normalize(axis_);
         const float dot_ = std::clamp(XMVectorGetX(XMVector3Dot(currentVector_, targetVector_)), -1.0f, 1.0f);
@@ -463,7 +565,10 @@ void ShieldBlockIKComponent::DrawDebugShapes(
 {
     // 解決後の腕ラインと攻撃方向を描画し、探索範囲や角度制限の調整をしやすくする。
     (void)chain_;
-    if (!showDebugShapes || solvedPositions_.size() < 3) return;
+    if (!showDebugShapes || solvedPositions_.size() < 3)
+    {
+        return;
+    }
 
     ShapeRenderSystem& renderer_ = GraphicsDeviceManager::Instance().GetShapeRendererSystem();
     DrawBoneBetween(renderer_, solvedPositions_[0], solvedPositions_[1], debugChainColor);

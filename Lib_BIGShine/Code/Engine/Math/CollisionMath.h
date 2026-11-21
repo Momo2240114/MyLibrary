@@ -7,7 +7,10 @@
 class CollisionMath {
 public:
     // --- 補助関数 ---
-    static float Clamp(float n, float min, float max) { return (std::max)(min, (std::min)(n, max)); }
+    static float Clamp(float n, float min, float max)
+    {
+        return (std::max)(min, (std::min)(n, max));
+    }
 
     static DirectX::XMVECTOR ClosestPointOnSegment(DirectX::XMVECTOR P, DirectX::XMVECTOR A, DirectX::XMVECTOR B)
     {
@@ -61,7 +64,11 @@ public:
 
         // 判定すべき15軸のリストを作成
         std::vector<DirectX::XMVECTOR> testAxes;
-        for (int i = 0; i < 3; ++i) { testAxes.push_back(a.axes[i]); testAxes.push_back(b.axes[i]); }
+        for (int i = 0; i < 3; ++i)
+        {
+            testAxes.push_back(a.axes[i]);
+            testAxes.push_back(b.axes[i]);
+        }
         for (int i = 0; i < 3; ++i) {
             for (int j = 0; j < 3; ++j) {
                 testAxes.push_back(DirectX::XMVector3Cross(a.axes[i], b.axes[j]));
@@ -70,14 +77,19 @@ public:
 
         for (auto& axis : testAxes) {
             float lenSq = DirectX::XMVectorGetX(DirectX::XMVector3LengthSq(axis));
-            if (lenSq < 0.001f) continue;
+            if (lenSq < 0.001f)
+            {
+                continue;
+            }
             DirectX::XMVECTOR L = DirectX::XMVector3Normalize(axis);
 
             // 投影範囲の計算
             auto GetProjectedRadius = [](const OBB& obb, DirectX::XMVECTOR L) {
                 float r = 0;
                 for (int i = 0; i < 3; ++i)
+                {
                     r += obb.halfSize[i] * fabsf(DirectX::XMVectorGetX(DirectX::XMVector3Dot(obb.axes[i], L)));
+                }
                 return r;
                 };
 
@@ -86,7 +98,10 @@ public:
             float d = fabsf(DirectX::XMVectorGetX(DirectX::XMVector3Dot(toCenter, L)));
 
             float overlap = ra + rb - d;
-            if (overlap <= 0) return { false }; // 隙間があれば即終了
+            if (overlap <= 0)
+            {
+                return { false }; // 隙間があれば即終了
+            }
 
             if (overlap < m.depth) {
                 m.depth = overlap;
@@ -95,7 +110,9 @@ public:
         }
         m.isHit = true;
         if (DirectX::XMVectorGetX(DirectX::XMVector3Dot(toCenter, m.normal)) < 0)
+        {
             m.normal = DirectX::XMVectorNegate(m.normal);
+        }
         return m;
     }
 
@@ -122,7 +139,8 @@ public:
         float D = a_val * c_val - b_val * b_val;
 
         // パラメータ sc, tc を計算（線分上の位置 0.0~1.0）
-        if (D < 0.0001f) { // 平行な場合
+        if (D < 0.0001f)
+        { // 平行な場合
             sc = 0.0f;
             tc = (b_val > c_val ? d_val / b_val : e_val / c_val);
         }
@@ -175,12 +193,19 @@ public:
                 Clamp(XMVectorGetZ(P), -a.halfSize[2], a.halfSize[2]), 0);
 
             float dSq = XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(P, Q)));
-            if (dSq < minDistSq) { minDistSq = dSq; bestQ = Q; }
+            if (dSq < minDistSq)
+            {
+                minDistSq = dSq;
+                bestQ = Q;
+            }
         }
 
         // 3. ローカルの最短点Qをワールドに戻す
         XMVECTOR worldQ = a.center;
-        for (int i = 0; i < 3; ++i) worldQ = XMVectorAdd(worldQ, XMVectorScale(a.axes[i], XMVectorGetByIndex(bestQ, i)));
+        for (int i = 0; i < 3; ++i)
+        {
+            worldQ = XMVectorAdd(worldQ, XMVectorScale(a.axes[i], XMVectorGetByIndex(bestQ, i)));
+        }
 
         // 4. カプセルの線分上でworldQに最も近い点Paを求め、球判定
         XMVECTOR Pa = ClosestPointOnSegment(worldQ, b.p0, b.p1);

@@ -42,14 +42,20 @@ namespace
     void DeserializeFloat2(const nlohmann::json& json_, const char* key_, DirectX::XMFLOAT2& value_)
     {
         // Keyが無い古いデータでは現在値を保持する。
-        if (!json_.contains(key_) || !json_[key_].is_array() || json_[key_].size() < 2) return;
+        if (!json_.contains(key_) || !json_[key_].is_array() || json_[key_].size() < 2)
+        {
+            return;
+        }
         value_.x = json_[key_][0].get<float>();
         value_.y = json_[key_][1].get<float>();
     }
 
     void DeserializeFloat4(const nlohmann::json& json_, const char* key_, DirectX::XMFLOAT4& value_)
     {
-        if (!json_.contains(key_) || !json_[key_].is_array() || json_[key_].size() < 4) return;
+        if (!json_.contains(key_) || !json_[key_].is_array() || json_[key_].size() < 4)
+        {
+            return;
+        }
         value_.x = json_[key_][0].get<float>();
         value_.y = json_[key_][1].get<float>();
         value_.z = json_[key_][2].get<float>();
@@ -103,12 +109,18 @@ void UIVertexModifierComponent::Deserialize(const nlohmann::json& json_)
 {
     BS_PROFILE_SCOPE("UIVertexModifierComponent::Deserialize");
 
-    if (!json_.contains("Vertices") || !json_["Vertices"].is_object()) return;
+    if (!json_.contains("Vertices") || !json_["Vertices"].is_object())
+    {
+        return;
+    }
 
     const nlohmann::json& verticesJson_ = json_["Vertices"];
     for (int index_ = 0; index_ < static_cast<int>(UI_VERTEX_INDEX::MAX); ++index_)
     {
-        if (!verticesJson_.contains(UI_VERTEX_NAMES[index_])) continue;
+        if (!verticesJson_.contains(UI_VERTEX_NAMES[index_]))
+        {
+            continue;
+        }
 
         UIVertexModification& modification_ = vertexModifications[static_cast<size_t>(index_)];
         const nlohmann::json& vertexJson_ = verticesJson_[UI_VERTEX_NAMES[index_]];

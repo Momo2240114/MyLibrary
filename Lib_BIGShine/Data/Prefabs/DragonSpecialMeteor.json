@@ -2,11 +2,51 @@
     "AssetType": "Prefab",
     "ObjectList": [
         "DragonSpecialMeteor",
-        "DragonSpecialMeteorCover",
         "DragonSpecialMeteorScorch"
     ],
     "Objects": {
         "DragonSpecialMeteor": {
+            "ColliderComponents": [
+                {
+                    "Data": {
+                        "CanBeCharacterGround": false,
+                        "ColliderName": "MeteorSolid",
+                        "CollisionOwnerObjectName": "",
+                        "CollisionRole": 0,
+                        "ContainmentMode": 0,
+                        "Convex": false,
+                        "DebugPrimitiveColor": [
+                            0.0,
+                            0.0,
+                            0.0,
+                            1.0
+                        ],
+                        "GravityScale": 1.0,
+                        "IsStatic": true,
+                        "IsTrigger": false,
+                        "Mass": 0.0,
+                        "Offset": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "PhysicsControlsTransform": false,
+                        "RotateVelocityThreshold": 0.0010000000474974513,
+                        "ShapeRenderFlg": false,
+                        "UseGravity": false,
+                        "UsePhysicsResponse": true,
+                        "VelocityRotationMode": 0,
+                        "shapeSizeScale": 1.0
+                    },
+                    "Enabled": true,
+                    "LateUpdateEnabled": true,
+                    "LateUpdatePriority": 0,
+                    "RequiredForSceneStart": true,
+                    "TypeName": "MeshCollider",
+                    "UpdateEnabled": true,
+                    "UpdatePriority": 0
+                }
+            ],
             "CollisionMask": 0,
             "Components": [
                 {
@@ -113,71 +153,6 @@
                 "Pos": [
                     0.0,
                     0.0,
-                    0.0
-                ],
-                "Rot": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "Scale": [
-                    1.0,
-                    1.0,
-                    1.0
-                ]
-            }
-        },
-        "DragonSpecialMeteorCover": {
-            "ColliderComponents": [
-                {
-                    "Data": {
-                        "CanBeCharacterGround": false,
-                        "ColliderName": "",
-                        "CollisionOwnerObjectName": "",
-                        "CollisionRole": 0,
-                        "ContainmentMode": 0,
-                        "DebugPrimitiveColor": [
-                            0.0,
-                            0.0,
-                            0.0,
-                            1.0
-                        ],
-                        "GravityScale": 1.0,
-                        "IsStatic": true,
-                        "IsTrigger": false,
-                        "Mass": 0.0,
-                        "Offset": [
-                            0.0,
-                            0.0,
-                            0.0
-                        ],
-                        "PhysicsControlsTransform": false,
-                        "Radius": 0.8999999761581421,
-                        "RotateVelocityThreshold": 0.0010000000474974513,
-                        "ShapeRenderFlg": false,
-                        "UseGravity": false,
-                        "UsePhysicsResponse": true,
-                        "VelocityRotationMode": 0,
-                        "shapeSizeScale": 1.0
-                    },
-                    "Enabled": false,
-                    "LateUpdateEnabled": true,
-                    "LateUpdatePriority": 0,
-                    "RequiredForSceneStart": false,
-                    "TypeName": "SphereCollider",
-                    "UpdateEnabled": true,
-                    "UpdatePriority": 0
-                }
-            ],
-            "CollisionMask": 0,
-            "Layer": 32,
-            "Name": "DragonSpecialMeteorCover",
-            "ParentName": "DragonSpecialMeteor",
-            "RequiredForSceneStart": false,
-            "Transform": {
-                "Pos": [
-                    0.0,
-                    1.0,
                     0.0
                 ],
                 "Rot": [

@@ -19,6 +19,7 @@ class BossFinishDirector
 {
 public:
     enum class Ending { TRUE_END, BAD_END };
+
     struct EndingCue
     {
         const char* label;
@@ -30,24 +31,68 @@ public:
     ~BossFinishDirector();
     // 生のフレーム時間で進行し、trueの間はManager側の通常更新を停止する。
     bool Update(float rawDeltaTime_);
-    bool IsActive() const { return active; }
-    bool IsPreview() const { return preview; }
-    bool IsPaused() const { return paused; }
-    float GetTime() const { return elapsed; }
+
+    bool IsActive() const
+    {
+        return active;
+    }
+
+    bool IsPreview() const
+    {
+        return preview;
+    }
+
+    bool IsPaused() const
+    {
+        return paused;
+    }
+
+    float GetTime() const
+    {
+        return elapsed;
+    }
+
     float GetCaptureTime() const;
     void Begin(bool preview_, Ending previewEnding_ = Ending::TRUE_END);
     // プレビュー前のTransform・ポーズを戻し、戦闘再開時の位置飛びを防ぐ。
     void Stop();
-    void SetPaused(bool paused_) { paused = paused_; }
+
+    void SetPaused(bool paused_)
+    {
+        paused = paused_;
+    }
+
     void Seek(float time_);
     void RequestCapture();
-    void SetShowFixed(bool fixed_) { showFixed = fixed_; }
-    bool IsShowingFixed() const { return showFixed; }
-    std::shared_ptr<CameraComponent> GetCamera() const { return camera; }
-    const std::vector<std::shared_ptr<GameObject>>& GetEffects() const { return effects; }
+
+    void SetShowFixed(bool fixed_)
+    {
+        showFixed = fixed_;
+    }
+
+    bool IsShowingFixed() const
+    {
+        return showFixed;
+    }
+
+    std::shared_ptr<CameraComponent> GetCamera() const
+    {
+        return camera;
+    }
+
+    const std::vector<std::shared_ptr<GameObject>>& GetEffects() const
+    {
+        return effects;
+    }
+
     bool ShouldRenderActor(const std::shared_ptr<GameObject>& object_) const;
     bool IsBadEndingImpactShot() const;
-    bool IsBadEnding() const { return ending == Ending::BAD_END; }
+
+    bool IsBadEnding() const
+    {
+        return ending == Ending::BAD_END;
+    }
+
     float GetEndingBranchTime() const;
     float GetClearTime() const;
     float GetPreviewEndTime(Ending ending_) const;
@@ -55,8 +100,17 @@ public:
     std::span<const EndingCue> GetTrueEndingCues() const;
     // PostEffect後、UI描画前の出力だけを複製し、同じ画像をSDRの2D経路で表示する。
     void RenderOutput(SpriteRenderSystem& sprites_, ID3D11RenderTargetView* target_);
-    ID3D11ShaderResourceView* GetCapture() const { return capturedView.Get(); }
-    DirectX::XMFLOAT4 GetCaptureUv() const { return captureUv; }
+
+    ID3D11ShaderResourceView* GetCapture() const
+    {
+        return capturedView.Get();
+    }
+
+    DirectX::XMFLOAT4 GetCaptureUv() const
+    {
+        return captureUv;
+    }
+
     float GetAspect() const;
     DirectX::XMFLOAT4 GetBackgroundColor() const;
     void CaptureEditorCamera();
@@ -65,6 +119,7 @@ public:
     // 本番の既定プリセットを残したまま、演出案を別ファイルで保存・読込する。
     bool SavePreset(const std::string& path_);
     bool LoadPreset(const std::string& path_);
+
     // 専用Animatorが実際に評価したState尺と時刻をEditorへ公開する。
     struct PreviewActorInfo
     {
@@ -73,13 +128,26 @@ public:
         float sampleTime = 0.0f;
         bool ready = false;
     };
+
     PreviewActorInfo GetPreviewActorInfo(bool boss_) const;
     float GetImpactCueTime() const;
     // プレビューだけに再生倍率と撮影用フリーカメラを適用する。
     void SetPreviewPlaybackRate(float rate_);
-    void SetPreviewCameraOverride(bool enabled_) { previewCameraOverride = enabled_ && preview; }
-    nlohmann::json& GetSettings() { return settings; }
-    const std::string& GetStatus() const { return status; }
+
+    void SetPreviewCameraOverride(bool enabled_)
+    {
+        previewCameraOverride = enabled_ && preview;
+    }
+
+    nlohmann::json& GetSettings()
+    {
+        return settings;
+    }
+
+    const std::string& GetStatus() const
+    {
+        return status;
+    }
 
 private:
     // 通常Animatorへ触れず、イベントを取り除いたコピーを専用Animatorで評価する。
@@ -94,6 +162,7 @@ private:
         bool hasRootReference = false;
         bool constrainHorizontal = true;
     };
+
     // 装備のAttachment更新で変化する行列も含め、編集前の状態を記録する。
     struct SavedActor
     {
@@ -103,6 +172,7 @@ private:
         bool visible = true;
         std::vector<std::pair<std::weak_ptr<Component>,bool>> colliderStates;
     };
+
     void PrepareActor(ActorPose& actor_, const char* key_);
     void PrepareActor(ActorPose& actor_, const std::shared_ptr<GameObject>& object_, AnimState state_,
         const std::string& animation_, bool loop_);

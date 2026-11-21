@@ -9,14 +9,21 @@ class ResourceManager
 {
 public:
     ResourceManager() = default;
-    ~ResourceManager() { Clear(); }
+
+    ~ResourceManager()
+    {
+        Clear();
+    }
 
     //あらゆるリソースを追加する
     // 型はテンプレートで受け取り、内部ではshared_ptr<void>として名前付き保管する。
     template<typename T>
     void Add(const std::string& name, std::shared_ptr<T> resource)
     {
-        if (!resource) return;
+        if (!resource)
+        {
+            return;
+        }
         // 型を消去して voidポインタの形で保管庫へと格納する
         resourceMap[name] = std::static_pointer_cast<void>(resource);
         std::cout << "[Resource] 登録完了: " << name << " (型: " << typeid(T).name() << ")" << std::endl;
@@ -35,7 +42,10 @@ public:
     std::shared_ptr<T> Get(const std::string& name)
     {
         auto it = resourceMap.find(name);
-        if (it == resourceMap.end()) return nullptr;
+        if (it == resourceMap.end())
+        {
+            return nullptr;
+        }
 
         // 虚無のポインタ（void*）から、元の光輝く型へと安全にキャストして返す
         return std::static_pointer_cast<T>(it->second);

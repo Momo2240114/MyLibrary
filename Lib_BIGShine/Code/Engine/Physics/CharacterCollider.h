@@ -10,19 +10,55 @@ public:
     CharacterCollider();
 
     const std::string& GetName() const override;
-    bool HasFixedCollisionRole() const override { return true; }
+
+    bool HasFixedCollisionRole() const override
+    {
+        return true;
+    }
+
     void Gui() override;
     void Serialize(nlohmann::json& json_) const override;
     void Deserialize(const nlohmann::json& j_) override;
 
-    float GetStepOffset() const { return stepOffset; }
-    float GetContactOffset() const { return contactOffset; }
-    float GetGroundSnapDistance() const { return groundSnapDistance; }
-    bool ShouldLimitHorizontalLift() const { return limitHorizontalLift; }
-    float GetMaxHorizontalLift() const { return maxHorizontalLift; }
-    bool ShouldSlideOffNonGround() const { return slideOffNonGround; }
-    float GetNonGroundSlideSpeed() const { return nonGroundSlideSpeed; }
-    float GetNonGroundLift() const { return nonGroundLift; }
+    float GetStepOffset() const
+    {
+        return stepOffset;
+    }
+
+    float GetContactOffset() const
+    {
+        return contactOffset;
+    }
+
+    float GetGroundSnapDistance() const
+    {
+        return groundSnapDistance;
+    }
+
+    bool ShouldLimitHorizontalLift() const
+    {
+        return limitHorizontalLift;
+    }
+
+    float GetMaxHorizontalLift() const
+    {
+        return maxHorizontalLift;
+    }
+
+    bool ShouldSlideOffNonGround() const
+    {
+        return slideOffNonGround;
+    }
+
+    float GetNonGroundSlideSpeed() const
+    {
+        return nonGroundSlideSpeed;
+    }
+
+    float GetNonGroundLift() const
+    {
+        return nonGroundLift;
+    }
 
 private:
     // Character用として固定したCollisionRoleとPhysics挙動を再適用する。

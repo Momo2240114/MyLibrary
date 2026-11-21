@@ -10,7 +10,10 @@
 void PlayerMoveState::Enter()
 {
     PlayerControllerComponent* player_ = GetPlayerController();
-    if (!player_) return;
+    if (!player_)
+    {
+        return;
+    }
 
     player_->EnterAction(PLAYER_ACTION::MOVE);
 }
@@ -19,7 +22,10 @@ void PlayerMoveState::Enter()
 void PlayerMoveState::Execute(float)
 {
     PlayerControllerComponent* player_ = GetPlayerController();
-    if (!player_) return;
+    if (!player_)
+    {
+        return;
+    }
 
     player_->ProcessActionInput();
     // 移動更新はController終端へ集約し、EnterとExecuteによる二重加速を防ぐ。

@@ -76,7 +76,10 @@ void EffectAssetListWindow::Draw()
 
 void EffectAssetListWindow::DrawAssetTable(EFFECT_ASSET_LIST_TYPE type_)
 {
-    if (!gameObjectManager) return;
+    if (!gameObjectManager)
+    {
+        return;
+    }
 
     // 指定された種別に応じてEffectManager内の対応リストとTable IDを選ぶ。
     const EffectManager& effectManager_ = gameObjectManager->GetEffectManager();
@@ -101,7 +104,10 @@ void EffectAssetListWindow::DrawAssetTable(EFFECT_ASSET_LIST_TYPE type_)
         tableId_ = "ImpactEffectAssetTable";
         break;
     }
-    if (!assets_ || !tableId_) return;
+    if (!assets_ || !tableId_)
+    {
+        return;
+    }
 
     ImGui::Text("Count: %d", static_cast<int>(assets_->size()));
     if (ImGui::BeginTable(

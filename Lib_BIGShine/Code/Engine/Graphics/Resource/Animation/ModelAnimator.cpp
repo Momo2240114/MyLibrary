@@ -18,8 +18,14 @@ namespace
     float NormalizeAngleDegrees(float degrees_)
     {
         // 回転差分を扱いやすいよう、角度を-180〜180度の範囲へ寄せる。
-        while (degrees_ > 180.0f) degrees_ -= 360.0f;
-        while (degrees_ < -180.0f) degrees_ += 360.0f;
+        while (degrees_ > 180.0f)
+        {
+            degrees_ -= 360.0f;
+        }
+        while (degrees_ < -180.0f)
+        {
+            degrees_ += 360.0f;
+        }
         return degrees_;
     }
 
@@ -36,7 +42,10 @@ namespace
 
 static bool CallLocalAnimationAction(const std::shared_ptr<GameObject>& owner_, const std::string& actionName_)
 {
-    if (!owner_ || actionName_.empty()) return false;
+    if (!owner_ || actionName_.empty())
+    {
+        return false;
+    }
 
     // まず所有オブジェクトの命名規則込みのAction名を探し、なければ素の名前でも探す。
     // これにより、汎用イベント名とオブジェクト固有イベント名の両方を扱える。
@@ -56,7 +65,10 @@ static bool CallLocalAnimationAction(const std::shared_ptr<GameObject>& owner_, 
 
 static std::shared_ptr<GameObject> GetParentObject(const std::shared_ptr<GameObject>& owner_)
 {
-    if (!owner_ || !owner_->transform) return nullptr;
+    if (!owner_ || !owner_->transform)
+    {
+        return nullptr;
+    }
 
     // Transform階層から親GameObjectを取り出し、アニメイベントの伝搬先を探す。
     auto parentTransform_ = owner_->transform->parent.lock();
@@ -82,12 +94,18 @@ static bool CallAncestorAnimationAction(const std::shared_ptr<GameObject>& owner
 
 static bool CallChildAnimationAction(const std::shared_ptr<GameObject>& owner_, const std::string& actionName_)
 {
-    if (!owner_ || !owner_->transform) return false;
+    if (!owner_ || !owner_->transform)
+    {
+        return false;
+    }
 
     // 親モデル側のアニメイベントから、武器や子オブジェクト側のActionも拾えるように再帰探索する。
     for (const auto& childTransform_ : owner_->transform->children)
     {
-        if (!childTransform_) continue;
+        if (!childTransform_)
+        {
+            continue;
+        }
 
         auto child_ = childTransform_->gameObject.lock();
         if (CallLocalAnimationAction(child_, actionName_) ||
@@ -104,7 +122,10 @@ static void SpawnAnimationMeshVFXEvent(
     const std::shared_ptr<GameObject>& owner_,
     const AnimEvent& event_)
 {
-    if (!owner_ || event_.meshVFXAssetPath.empty()) return;
+    if (!owner_ || event_.meshVFXAssetPath.empty())
+    {
+        return;
+    }
 
     // アニメーションイベントからEffectManager用のリクエストへ変換し、VFX生成処理を一元化する。
     AttackEffectSpawnRequest request_{};
@@ -120,9 +141,13 @@ static void SpawnAnimationMeshVFXEvent(
     request_.setting.mirror = event_.mirrorMeshVFX;
     owner_->GetManager().GetEffectManager().SpawnSlashEffect(request_);
 }
+
 static void CallAnimationAction(const std::shared_ptr<GameObject>& owner_, const std::string& actionName_)
 {
-    if (actionName_.empty()) return;
+    if (actionName_.empty())
+    {
+        return;
+    }
 
     // ローカル、親階層、子階層の順に探し、それでも見つからなければグローバルActionへ委譲する。
     if (CallLocalAnimationAction(owner_, actionName_) ||
@@ -139,17 +164,26 @@ static void ApplyAnimationBlackboardWrites(
     const std::shared_ptr<GameObject>& owner_,
     const std::vector<AnimBlackboardWrite>& writes_)
 {
-    if (!owner_ || writes_.empty()) return;
+    if (!owner_ || writes_.empty())
+    {
+        return;
+    }
 
     const std::shared_ptr<BlackboardComponent> blackboard_ =
         owner_->GetComponent<BlackboardComponent>();
-    if (!blackboard_) return;
+    if (!blackboard_)
+    {
+        return;
+    }
 
     // アニメーションイベントからAI/行動制御用のBlackboard値を書き換える。
     // 型ごとにSet関数を分け、JSON側の値型とランタイム側の保存先を一致させる。
     for (const AnimBlackboardWrite& write_ : writes_)
     {
-        if (write_.category.empty() || write_.key.empty()) continue;
+        if (write_.category.empty() || write_.key.empty())
+        {
+            continue;
+        }
 
         switch (write_.type)
         {
@@ -171,7 +205,10 @@ static void ApplyAnimationBlackboardWrites(
 
 static void CallStateExitEndActions(ModelAnimator::ActiveSlot& slot_, const std::shared_ptr<GameObject>& owner_)
 {
-    if (!slot_.state) return;
+    if (!slot_.state)
+    {
+        return;
+    }
 
     // ステートを途中で抜けた場合でも、開始済みイベントの終了処理だけは取りこぼさない。
     for (auto& ev_ : const_cast<AnimState*>(slot_.state)->events)
@@ -222,7 +259,10 @@ static float ResolveBlendWeight(
     const AnimState* state_,
     const BlackboardCategory* blackboard_)
 {
-    if (!state_) return 0.0f;
+    if (!state_)
+    {
+        return 0.0f;
+    }
 
     // ブレンド用Blackboardがない場合は、ステートに設定されたデフォルトウェイトを使う。
     if (!blackboard_ || state_->blendParamName.empty())
@@ -248,6 +288,7 @@ static float ResolveBlendWeight(
         0.0f,
         1.0f);
 }
+
 static bool IsValidAnimationIndex(
     const GltfModelCommponennt* model_,
     int animationIndex_)
@@ -256,16 +297,23 @@ static bool IsValidAnimationIndex(
         animationIndex_ >= 0 &&
         animationIndex_ < static_cast<int>(model_->GetAnimations().size());
 }
+
 static float ResolveBlendDuration(
     const AnimState* state_,
     GltfModelCommponennt* model_,
     const BlackboardCategory* blackboard_)
 {
-    if (!state_ || !model_) return 1.0f;
+    if (!state_ || !model_)
+    {
+        return 1.0f;
+    }
 
     const bool validA_ = IsValidAnimationIndex(model_, state_->animIndexA);
     const bool validB_ = IsValidAnimationIndex(model_, state_->animIndexB);
-    if (!validA_ && !validB_) return 1.0f;
+    if (!validA_ && !validB_)
+    {
+        return 1.0f;
+    }
 
     const float durationA_ = validA_
         ? (std::max)(model_->GetAnimationDuration(state_->animIndexA), 0.0001f)
@@ -294,7 +342,10 @@ static Blend2DSelection ResolveBlend2DSelection(
     const BlackboardCategory* blackboard_)
 {
     Blend2DSelection selection_{};
-    if (!state_) return selection_;
+    if (!state_)
+    {
+        return selection_;
+    }
 
     DirectX::SimpleMath::Vector2 input_
     {
@@ -410,7 +461,10 @@ static Blend2DSelection ResolveBlend2DSelection(
         constexpr float TWO_PI_ = 6.28318530718f;
         constexpr float SEGMENT_ANGLE_ = TWO_PI_ / 8.0f;
         float angle_ = std::atan2(input_.x, input_.y);
-        if (angle_ < 0.0f) angle_ += TWO_PI_;
+        if (angle_ < 0.0f)
+        {
+            angle_ += TWO_PI_;
+        }
 
         const float segment_ = angle_ / SEGMENT_ANGLE_;
         const int indexA_ = static_cast<int>(std::floor(segment_)) % 8;
@@ -460,13 +514,25 @@ static float ResolveBlend2DDuration(
     const Blend2DSelection selection_ = ResolveBlend2DSelection(state_, blackboard_);
     const bool validA_ = IsValidAnimationIndex(model_, selection_.animationIndexA);
     const bool validB_ = IsValidAnimationIndex(model_, selection_.animationIndexB);
-    if (!validA_ && !validB_) return 1.0f;
-    if (!validA_) return (std::max)(model_->GetAnimationDuration(selection_.animationIndexB), 0.0001f);
-    if (!validB_) return (std::max)(model_->GetAnimationDuration(selection_.animationIndexA), 0.0001f);
+    if (!validA_ && !validB_)
+    {
+        return 1.0f;
+    }
+    if (!validA_)
+    {
+        return (std::max)(model_->GetAnimationDuration(selection_.animationIndexB), 0.0001f);
+    }
+    if (!validB_)
+    {
+        return (std::max)(model_->GetAnimationDuration(selection_.animationIndexA), 0.0001f);
+    }
 
     const float durationA_ = (std::max)(
         model_->GetAnimationDuration(selection_.animationIndexA), 0.0001f);
-    if (!state_->blend2DSyncNormalizedTime) return durationA_;
+    if (!state_->blend2DSyncNormalizedTime)
+    {
+        return durationA_;
+    }
 
     const float durationB_ = (std::max)(
         model_->GetAnimationDuration(selection_.animationIndexB), 0.0001f);
@@ -477,17 +543,26 @@ static const AnimState* ResolveSequenceReferencedState(
     const AnimSequenceClip& clip_,
     const std::unordered_map<std::string, std::unique_ptr<AnimState>>* states_)
 {
-    if (!states_ || clip_.stateName.empty()) return nullptr;
+    if (!states_ || clip_.stateName.empty())
+    {
+        return nullptr;
+    }
 
     const auto iterator_ = states_->find(clip_.stateName);
-    if (iterator_ == states_->end() || !iterator_->second) return nullptr;
+    if (iterator_ == states_->end() || !iterator_->second)
+    {
+        return nullptr;
+    }
 
     return iterator_->second.get();
 }
 
 static float ResolveSequenceDuration(const AnimState* state_)
 {
-    if (!state_ || state_->sequenceClips.empty()) return 1.0f;
+    if (!state_ || state_->sequenceClips.empty())
+    {
+        return 1.0f;
+    }
 
     float duration_ = 0.0f;
     for (const AnimSequenceClip& clip_ : state_->sequenceClips)
@@ -505,7 +580,10 @@ static float ResolveStateDuration(
     const std::unordered_map<std::string, std::unique_ptr<AnimState>>* states_,
     int depth_)
 {
-    if (!state_ || !model_ || depth_ > 8) return 1.0f;
+    if (!state_ || !model_ || depth_ > 8)
+    {
+        return 1.0f;
+    }
 
     if (state_->type == AnimStateType::Custom &&
         poseLibrary_ &&
@@ -540,7 +618,10 @@ static const AnimSequenceClip* ResolveSequenceClipAtTime(
     const AnimState* state_,
     float time_)
 {
-    if (!state_) return nullptr;
+    if (!state_)
+    {
+        return nullptr;
+    }
 
     const AnimSequenceClip* firstClip_ = nullptr;
     const AnimSequenceClip* previousClip_ = nullptr;
@@ -573,7 +654,10 @@ static float ResolveBlendSampleTime(
     bool syncNormalizedTime_,
     bool loop_)
 {
-    if (animationDuration_ <= 0.0f) return 0.0f;
+    if (animationDuration_ <= 0.0f)
+    {
+        return 0.0f;
+    }
 
     float sampleTime_ = stateTime_ + phaseOffset_ * animationDuration_;
     if (syncNormalizedTime_ && stateDuration_ > 0.0f)
@@ -584,7 +668,10 @@ static float ResolveBlendSampleTime(
     if (loop_)
     {
         sampleTime_ = std::fmod(sampleTime_, animationDuration_);
-        if (sampleTime_ < 0.0f) sampleTime_ += animationDuration_;
+        if (sampleTime_ < 0.0f)
+        {
+            sampleTime_ += animationDuration_;
+        }
         return sampleTime_;
     }
 
@@ -596,8 +683,14 @@ static bool IsNodeInBlendMask(
     const std::vector<GltfModelCommponennt::Node>& nodes_,
     size_t nodeIndex_)
 {
-    if (!state_ || !state_->blendUseMask) return true;
-    if (state_->blendMaskRootNodes.empty()) return false;
+    if (!state_ || !state_->blendUseMask)
+    {
+        return true;
+    }
+    if (state_->blendMaskRootNodes.empty())
+    {
+        return false;
+    }
 
     int currentIndex_ = static_cast<int>(nodeIndex_);
     while (currentIndex_ >= 0 && currentIndex_ < static_cast<int>(nodes_.size()))
@@ -615,6 +708,7 @@ static bool IsNodeInBlendMask(
 
     return false;
 }
+
 void ModelAnimator::SetCurrentTime(float time_)
 {
     attackTelegraphs.Reset();
@@ -639,7 +733,10 @@ void ModelAnimator::SetCurrentTime(float time_)
 void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent* curvecomp, const std::shared_ptr<PoseLibraryResource>& poseLib, std::shared_ptr<GameObject> owner, const BlackboardCategory* blackboard_, const std::unordered_map<std::string, std::unique_ptr<AnimState>>* states_)
 {
     BS_PROFILE_SCOPE("ModelAnimator::Update");
-    if (!current.state || !model) return;
+    if (!current.state || !model)
+    {
+        return;
+    }
 
     const size_t nodeCount = model->GetNodes().size();
     BS_PROFILE_PLOT("Animation.UpdatedNodeCount", static_cast<int64_t>(nodeCount));
@@ -663,12 +760,30 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
     }
 #endif
 
-    if (tempPoseA.size() != nodeCount) tempPoseA.resize(nodeCount);
-    if (tempPoseB.size() != nodeCount) tempPoseB.resize(nodeCount);
-    if (blendPoseScratch.size() != nodeCount) blendPoseScratch.resize(nodeCount);
-    if (finalPose.size() != nodeCount) finalPose.resize(nodeCount);
-    if (rootMotionLoopStartPose.size() != nodeCount) rootMotionLoopStartPose.resize(nodeCount);
-    if (rootMotionLoopEndPose.size() != nodeCount) rootMotionLoopEndPose.resize(nodeCount);
+    if (tempPoseA.size() != nodeCount)
+    {
+        tempPoseA.resize(nodeCount);
+    }
+    if (tempPoseB.size() != nodeCount)
+    {
+        tempPoseB.resize(nodeCount);
+    }
+    if (blendPoseScratch.size() != nodeCount)
+    {
+        blendPoseScratch.resize(nodeCount);
+    }
+    if (finalPose.size() != nodeCount)
+    {
+        finalPose.resize(nodeCount);
+    }
+    if (rootMotionLoopStartPose.size() != nodeCount)
+    {
+        rootMotionLoopStartPose.resize(nodeCount);
+    }
+    if (rootMotionLoopEndPose.size() != nodeCount)
+    {
+        rootMotionLoopEndPose.resize(nodeCount);
+    }
 
     // ------------------------------------------------------------
     // 補助: 状態から pose をサンプルする
@@ -677,8 +792,11 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
     SamplePose = [&](const AnimState* state, float time, float sampleDuration_, std::vector<GltfModelCommponennt::NodePose>& outPose, int depth_)
         {
             BS_PROFILE_SCOPE("ModelAnimator::SampleAnimation");
-            if (!state || depth_ > 8) return;
-            BS_PROFILE_TEXT(state->name.c_str(), state->name.size());
+            if (!state || depth_ > 8)
+        {
+            return;
+        }
+        BS_PROFILE_TEXT(state->name.c_str(), state->name.size());
 
             auto fillBindPose_ = [&]()
                 {
@@ -792,8 +910,11 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
                 BS_PROFILE_SCOPE("ModelAnimator::BlendAnimation");
                 const bool validA_ = IsValidAnimationIndex(model, state->animIndexA);
                 const bool validB_ = IsValidAnimationIndex(model, state->animIndexB);
-                if (!validA_ && !validB_) break;
-                if (!validA_)
+                if (!validA_ && !validB_)
+            {
+                break;
+            }
+            if (!validA_)
                 {
                     model->ComputeAnimation(state->animIndexB, time, outPose);
                     break;
@@ -831,9 +952,12 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
                 const auto& nodes_ = model->GetNodes();
                 for (size_t nodeIndex_ = 0; nodeIndex_ < nodeCount; ++nodeIndex_)
                 {
-                    if (!IsNodeInBlendMask(state, nodes_, nodeIndex_)) continue;
+                    if (!IsNodeInBlendMask(state, nodes_, nodeIndex_))
+                {
+                    continue;
+                }
 
-                    outPose[nodeIndex_].position = DirectX::SimpleMath::Vector3::Lerp(
+                outPose[nodeIndex_].position = DirectX::SimpleMath::Vector3::Lerp(
                         outPose[nodeIndex_].position,
                         blendPoseScratch[nodeIndex_].position,
                         blendWeight_);
@@ -856,8 +980,11 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
                 const Blend2DSelection selection_ = ResolveBlend2DSelection(state, blackboard_);
                 const bool validA_ = IsValidAnimationIndex(model, selection_.animationIndexA);
                 const bool validB_ = IsValidAnimationIndex(model, selection_.animationIndexB);
-                if (!validA_ && !validB_) break;
-                if (!validA_)
+                if (!validA_ && !validB_)
+            {
+                break;
+            }
+            if (!validA_)
                 {
                     model->ComputeAnimation(selection_.animationIndexB, time, outPose);
                     break;
@@ -1017,9 +1144,12 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
     auto resolveRootNodeIndex_ = [&](const AnimState* state_)
         {
             // 演出の移動固定は、GameObjectへのRootMotion適用とは独立して処理する。
-            if (!state_ || (!state_->rootMotion.enable && !state_->rootMotion.cutVisualWhenDisabled)) return -1;
+            if (!state_ || (!state_->rootMotion.enable && !state_->rootMotion.cutVisualWhenDisabled))
+        {
+            return -1;
+        }
 
-            const std::string rootName_ = state_->rootMotion.sourceNodeName.empty()
+        const std::string rootName_ = state_->rootMotion.sourceNodeName.empty()
                 ? model->GetRootMotionName()
                 : state_->rootMotion.sourceNodeName;
 
@@ -1107,9 +1237,18 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
                 SamplePose(current.state, 0.0f, baseDuration, rootMotionLoopStartPose, 0);
                 rootMotionBasePosition = rootMotionLoopStartPose[currentRootNodeIndex_].position;
                 Vector3 delta_ = rawPos_ - rootMotionBasePosition;
-                if (!current.state->rootMotion.applyPositionX) delta_.x = 0.0f;
-                if (!current.state->rootMotion.applyPositionY) delta_.y = 0.0f;
-                if (!current.state->rootMotion.applyPositionZ) delta_.z = 0.0f;
+                if (!current.state->rootMotion.applyPositionX)
+                {
+                    delta_.x = 0.0f;
+                }
+                if (!current.state->rootMotion.applyPositionY)
+                {
+                    delta_.y = 0.0f;
+                }
+                if (!current.state->rootMotion.applyPositionZ)
+                {
+                    delta_.z = 0.0f;
+                }
                 currentRootMotionDelta.deltaPosition = Vector3::TransformNormal(delta_,
                     getParentGlobalMatrix_(tempPoseA, currentRootNodeIndex_)) * rootMotionScale_;
             }
@@ -1139,9 +1278,18 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
             }
 
             // ステート設定で許可されていない軸の移動差分を除外する。
-            if (!current.state->rootMotion.applyPositionX) deltaPos_.x = 0.0f;
-            if (!current.state->rootMotion.applyPositionY) deltaPos_.y = 0.0f;
-            if (!current.state->rootMotion.applyPositionZ) deltaPos_.z = 0.0f;
+            if (!current.state->rootMotion.applyPositionX)
+            {
+                deltaPos_.x = 0.0f;
+            }
+            if (!current.state->rootMotion.applyPositionY)
+            {
+                deltaPos_.y = 0.0f;
+            }
+            if (!current.state->rootMotion.applyPositionZ)
+            {
+                deltaPos_.z = 0.0f;
+            }
 
             const Matrix parentGlobalMatrix_ = getParentGlobalMatrix_(tempPoseA, currentRootNodeIndex_);
             // Rootノードの親階層方向を反映し、最終的なローカルRootMotion移動差分として保存する。
@@ -1184,15 +1332,27 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
         int nodeIndex_,
         const DirectX::SimpleMath::Vector3& basePosition_)
         {
-            if (nodeIndex_ < 0 || pose_.size() <= nodeIndex_) return;
+            if (nodeIndex_ < 0 || pose_.size() <= nodeIndex_)
+        {
+            return;
+        }
 
-            const bool resetX_ = !state_ || state_->rootMotion.applyPositionX || state_->rootMotion.cutVisualPositionX;
+        const bool resetX_ = !state_ || state_->rootMotion.applyPositionX || state_->rootMotion.cutVisualPositionX;
             const bool resetY_ = !state_ || state_->rootMotion.applyPositionY || state_->rootMotion.cutVisualPositionY;
             const bool resetZ_ = !state_ || state_->rootMotion.applyPositionZ || state_->rootMotion.cutVisualPositionZ;
-            if (resetX_) pose_[nodeIndex_].position.x = basePosition_.x;
-            if (resetY_) pose_[nodeIndex_].position.y = basePosition_.y;
-            if (resetZ_) pose_[nodeIndex_].position.z = basePosition_.z;
-        };
+            if (resetX_)
+        {
+            pose_[nodeIndex_].position.x = basePosition_.x;
+        }
+        if (resetY_)
+        {
+            pose_[nodeIndex_].position.y = basePosition_.y;
+        }
+        if (resetZ_)
+        {
+            pose_[nodeIndex_].position.z = basePosition_.z;
+        }
+    };
 
     auto resetVisualRootRotation_ = [&](
         std::vector<GltfModelCommponennt::NodePose>& pose_,
@@ -1200,9 +1360,12 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
         int nodeIndex_,
         const DirectX::SimpleMath::Quaternion& baseRotation_)
         {
-            if (!state_ || nodeIndex_ < 0 || pose_.size() <= nodeIndex_) return;
+            if (!state_ || nodeIndex_ < 0 || pose_.size() <= nodeIndex_)
+        {
+            return;
+        }
 
-            if (state_->rootMotion.applyRotationX ||
+        if (state_->rootMotion.applyRotationX ||
                 state_->rootMotion.applyRotationY ||
                 state_->rootMotion.applyRotationZ)
             {
@@ -1218,9 +1381,12 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
         const DirectX::SimpleMath::Vector3& basePosition_,
         const DirectX::SimpleMath::Quaternion& baseRotation_)
         {
-            if (!state_ || sourceNodeIndex_ < 0 || pose_.size() <= sourceNodeIndex_) return;
+            if (!state_ || sourceNodeIndex_ < 0 || pose_.size() <= sourceNodeIndex_)
+        {
+            return;
+        }
 
-            if (sourceNodeIndex_ == defaultRootNodeIndex_)
+        if (sourceNodeIndex_ == defaultRootNodeIndex_)
             {
                 resetVisualRootPosition_(pose_, state_, sourceNodeIndex_, basePosition_);
                 resetVisualRootRotation_(pose_, state_, sourceNodeIndex_, baseRotation_);
@@ -1233,11 +1399,20 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
             Vector3 currentGlobalPosition_ = Vector3::Transform(pose_[sourceNodeIndex_].position, parentGlobalMatrix_);
             const Vector3 baseGlobalPosition_ = Vector3::Transform(basePosition_, parentGlobalMatrix_);
 
-            if (state_->rootMotion.applyPositionX || state_->rootMotion.cutVisualPositionX) currentGlobalPosition_.x = baseGlobalPosition_.x;
-            if (state_->rootMotion.applyPositionY || state_->rootMotion.cutVisualPositionY) currentGlobalPosition_.y = baseGlobalPosition_.y;
-            if (state_->rootMotion.applyPositionZ || state_->rootMotion.cutVisualPositionZ) currentGlobalPosition_.z = baseGlobalPosition_.z;
+            if (state_->rootMotion.applyPositionX || state_->rootMotion.cutVisualPositionX)
+        {
+            currentGlobalPosition_.x = baseGlobalPosition_.x;
+        }
+        if (state_->rootMotion.applyPositionY || state_->rootMotion.cutVisualPositionY)
+        {
+            currentGlobalPosition_.y = baseGlobalPosition_.y;
+        }
+        if (state_->rootMotion.applyPositionZ || state_->rootMotion.cutVisualPositionZ)
+        {
+            currentGlobalPosition_.z = baseGlobalPosition_.z;
+        }
 
-            pose_[sourceNodeIndex_].position = Vector3::Transform(currentGlobalPosition_, inverseParentGlobalMatrix_);
+        pose_[sourceNodeIndex_].position = Vector3::Transform(currentGlobalPosition_, inverseParentGlobalMatrix_);
             resetVisualRootRotation_(pose_, state_, sourceNodeIndex_, baseRotation_);
         };
 
@@ -1287,25 +1462,41 @@ void ModelAnimator::SampleWeaponHitBoxes(const std::shared_ptr<GameObject>& owne
 {
     if (!weaponSampleState || !weaponSampleState->sampleWeaponHitBoxes ||
         weaponSampleState->type != AnimStateType::Single || !model_ ||
-        weaponSampleEndTime <= weaponSampleStartTime) return;
+        weaponSampleEndTime <= weaponSampleStartTime)
+    {
+        return;
+    }
     // 被弾などの中断後は判定を残さず、弱コンボ内の次段への移行だけ同じ剣撃として扱う。
     if (current.state != weaponSampleState && (!current.state ||
-        !current.state->sampleWeaponHitBoxes)) return;
+        !current.state->sampleWeaponHitBoxes))
+    {
+        return;
+    }
     BS_PROFILE_SCOPE("ModelAnimator::SampleWeaponHitBoxes");
     for (auto& event_ : const_cast<AnimState*>(weaponSampleState)->events)
+    {
         if (event_.eventTemplateType == ANIMATION_EVENT_TEMPLATE_TYPE::ATTACK_TEMPLATE)
+        {
             AttackTemplateRuntime::SampleWeaponInterval(owner_, event_, model_, *weaponSampleState,
                 weaponSampleStartTime, weaponSampleEndTime);
+        }
+    }
 }
 
 void ModelAnimator::UpdateBlend(float et, GltfModelCommponennt* model, int indexA, int indexB, float alpha, bool loop, float speed)
 {
-    if (!model) return;
+    if (!model)
+    {
+        return;
+    }
 
     // 1. 各アニメーションの時間を進める (簡易化のため共通の時間管理)
     float durationA = model->GetAnimationDuration(indexA);
     manualBlendTime += et * speed;
-    if (loop && durationA > 0.0f) manualBlendTime = fmod(manualBlendTime, durationA);
+    if (loop && durationA > 0.0f)
+    {
+        manualBlendTime = fmod(manualBlendTime, durationA);
+    }
 
     // 2. AとBのポーズをそれぞれ計算
     model->ComputeAnimation(indexA, manualBlendTime, tempPoseA);
@@ -1315,7 +1506,10 @@ void ModelAnimator::UpdateBlend(float et, GltfModelCommponennt* model, int index
     model->ComputeAnimation(indexB, timeB, tempPoseB);
 
     // 3. alpha を用いて線形補間
-    if (finalPose.size() != tempPoseA.size()) finalPose.resize(tempPoseA.size());
+    if (finalPose.size() != tempPoseA.size())
+    {
+        finalPose.resize(tempPoseA.size());
+    }
 
     for (size_t i = 0; i < tempPoseA.size(); ++i)
     {
@@ -1336,8 +1530,14 @@ void ModelAnimator::UpdateBlend(float et, GltfModelCommponennt* model, int index
 
 void ModelAnimator::CrossFadeTo(const AnimState* newState, float duration, std::shared_ptr<GameObject> owner, bool restart_, float startTime_)
 {
-    if (!newState) return;
-    if (current.state == newState && !restart_) return;
+    if (!newState)
+    {
+        return;
+    }
+    if (current.state == newState && !restart_)
+    {
+        return;
+    }
 
     CallStateExitEndActions(current, owner);
     // Exit Actionが旧攻撃の予兆を停止しても、新しい区間の再開始は抑制しない。
@@ -1392,15 +1592,21 @@ void ModelAnimator::ComputeCustomAnimationPose(const CustomAnimation& customAnim
 
     auto sampleModelAnimation_ = [&](int animationIndex_, float sampleTime_, std::vector<GltfModelCommponennt::NodePose>& pose_) -> bool
         {
-            if (animationIndex_ < 0 || animationIndex_ >= static_cast<int>(model->GetAnimations().size())) return false;
+            if (animationIndex_ < 0 || animationIndex_ >= static_cast<int>(model->GetAnimations().size()))
+        {
+            return false;
+        }
 
-            fillBindPose_(pose_);
+        fillBindPose_(pose_);
             const float duration_ = model->GetAnimationDuration(animationIndex_);
             if (duration_ > 0.0f)
             {
                 sampleTime_ = (std::max)(0.0f, sampleTime_);
-                if (sampleTime_ > duration_) sampleTime_ = std::fmod(sampleTime_, duration_);
+                if (sampleTime_ > duration_)
+            {
+                sampleTime_ = std::fmod(sampleTime_, duration_);
             }
+        }
             model->ComputeAnimation(animationIndex_, sampleTime_, pose_);
             return true;
         };
@@ -1434,11 +1640,23 @@ void ModelAnimator::ComputeCustomAnimationPose(const CustomAnimation& customAnim
         for (int keyIndex_ = 0; keyIndex_ < static_cast<int>(customAnim.keyframes.size()); ++keyIndex_)
         {
             const float keyTime_ = customAnim.keyframes[keyIndex_].time;
-            if (keyTime_ <= time && (leftKey_ < 0 || keyTime_ > customAnim.keyframes[leftKey_].time)) leftKey_ = keyIndex_;
-            if (keyTime_ >= time && (rightKey_ < 0 || keyTime_ < customAnim.keyframes[rightKey_].time)) rightKey_ = keyIndex_;
+            if (keyTime_ <= time && (leftKey_ < 0 || keyTime_ > customAnim.keyframes[leftKey_].time))
+            {
+                leftKey_ = keyIndex_;
+            }
+            if (keyTime_ >= time && (rightKey_ < 0 || keyTime_ < customAnim.keyframes[rightKey_].time))
+            {
+                rightKey_ = keyIndex_;
+            }
         }
-        if (leftKey_ < 0) leftKey_ = rightKey_;
-        if (rightKey_ < 0) rightKey_ = leftKey_;
+        if (leftKey_ < 0)
+        {
+            leftKey_ = rightKey_;
+        }
+        if (rightKey_ < 0)
+        {
+            rightKey_ = leftKey_;
+        }
 
         std::vector<GltfModelCommponennt::NodePose> leftPose_;
         std::vector<GltfModelCommponennt::NodePose> rightPose_;
@@ -1498,13 +1716,19 @@ void ModelAnimator::ComputeCustomAnimationPose(const CustomAnimation& customAnim
         fillBindPose_(outPose);
     }
 
-    if (!customAnim.naturalMotion.enabled) return;
+    if (!customAnim.naturalMotion.enabled)
+    {
+        return;
+    }
 
     const auto& settings_ = customAnim.naturalMotion;
     const float blend_ = (std::max)(0.0f, (std::min)(1.0f, settings_.blend));
     for (size_t nodeIndex_ = 0; nodeIndex_ < nodeCount_; ++nodeIndex_)
     {
-        if (!MatchesNaturalMotionNode(settings_.nodeFilter, nodes_[nodeIndex_].name)) continue;
+        if (!MatchesNaturalMotionNode(settings_.nodeFilter, nodes_[nodeIndex_].name))
+        {
+            continue;
+        }
 
         const float wave_ = std::sin((time * settings_.frequency + settings_.phase + static_cast<float>(nodeIndex_) * 0.173f) * DirectX::XM_2PI);
         const float strength_ = wave_ * blend_;
@@ -1522,9 +1746,13 @@ void ModelAnimator::ComputeCustomAnimationPose(const CustomAnimation& customAnim
         }
     }
 }
+
 void ModelAnimator::ActiveSlot::Update(float et, float duration, CurveComponent* curveComp, std::shared_ptr<GameObject> owner, AttackTelegraphRuntime* telegraphs_, const BlackboardCategory* blackboard_, float* advancedTime_)
 {
-    if (!state) return;
+    if (!state)
+    {
+        return;
+    }
 
     const AnimState* updatingState_ = state;
 
@@ -1533,17 +1761,26 @@ void ModelAnimator::ActiveSlot::Update(float et, float duration, CurveComponent*
     {
         float speed_ = state->playbackSpeed;
         if (curveComp && !state->speedCurveName.empty() && curveComp->HasTrack(state->speedCurveName))
+        {
             speed_ = curveComp->GetValue(state->speedCurveName, duration > 0.0f ? sampleTime_ / duration : 0.0f);
+        }
         for (const auto& event_ : state->events)
+        {
             if (event_.overridePlaybackSpeed && sampleTime_ >= event_.startTime && sampleTime_ <= event_.endTime)
+            {
                 speed_ = (std::max)(event_.playbackSpeed, 0.01f);
+            }
+        }
         if (blackboard_ && !state->playbackSpeedParamName.empty())
         {
             const auto parameter_ = blackboard_->find(state->playbackSpeedParamName);
             if (parameter_ != blackboard_->end())
             {
                 const float multiplier_ = BlackboardComponent::ToFloat(parameter_->second);
-                if (std::isfinite(multiplier_)) speed_ *= std::clamp(multiplier_, 0.01f, 10.0f);
+                if (std::isfinite(multiplier_))
+                {
+                    speed_ *= std::clamp(multiplier_, 0.01f, 10.0f);
+                }
             }
         }
         return std::isfinite(speed_) ? (std::max)(speed_, 0.0f) : 0.0f;
@@ -1565,12 +1802,24 @@ void ModelAnimator::ActiveSlot::Update(float et, float duration, CurveComponent*
         time += evaluateSpeed_(midpoint_) * step_;
         remainingTime_ -= step_;
     }
-    if (state->sampleWeaponHitBoxes && !state->isLoop) time = (std::min)(time, duration);
-    if (advancedTime_) *advancedTime_ = time;
-    if (et <= 0.0f) return;
+    if (state->sampleWeaponHitBoxes && !state->isLoop)
+    {
+        time = (std::min)(time, duration);
+    }
+    if (advancedTime_)
+    {
+        *advancedTime_ = time;
+    }
+    if (et <= 0.0f)
+    {
+        return;
+    }
 
     // 速度カーブ・イベント速度・TimeScaleを反映済みの、攻撃判定と同じ時間で予兆を判定する。
-    if (telegraphs_) telegraphs_->Advance(owner, *state, prevTime, time);
+    if (telegraphs_)
+    {
+        telegraphs_->Advance(owner, *state, prevTime, time);
+    }
 
     // 配列の並び順ではなくアニメーション時刻順に、開始・更新・終了を処理する。
     struct EventBoundary
@@ -1579,53 +1828,86 @@ void ModelAnimator::ActiveSlot::Update(float et, float duration, CurveComponent*
         std::size_t eventIndex;
         int phase;
     };
+
     std::vector<EventBoundary> boundaries_;
     auto& events_ = const_cast<AnimState*>(state)->events;
     for (std::size_t index_ = 0; index_ < events_.size(); ++index_)
     {
         const auto& event_ = events_[index_];
         if (!event_.isFired && time >= event_.startTime)
+        {
             boundaries_.push_back({ event_.startTime, index_, 0 });
+        }
         const bool intersectsWindow_ = state->sampleWeaponHitBoxes
             ? prevTime <= event_.endTime : time <= event_.endTime;
         if (time >= event_.startTime && intersectsWindow_ && !event_.isEndFired)
+        {
             boundaries_.push_back({ (std::min)(time, event_.endTime), index_, 1 });
+        }
         if (!event_.isEndFired && prevTime <= event_.endTime && time >= event_.endTime)
+        {
             boundaries_.push_back({ event_.endTime, index_, 2 });
+        }
     }
-    if (state->sampleWeaponHitBoxes) std::stable_sort(boundaries_.begin(), boundaries_.end(), [](const EventBoundary& left_, const EventBoundary& right_)
+    if (state->sampleWeaponHitBoxes)
     {
-        if (left_.sampleTime != right_.sampleTime) return left_.sampleTime < right_.sampleTime;
-        return left_.phase < right_.phase;
+        std::stable_sort(boundaries_.begin(), boundaries_.end(), [](const EventBoundary& left_, const EventBoundary& right_)
+    {
+        if (left_.sampleTime != right_.sampleTime)
+            {
+                return left_.sampleTime < right_.sampleTime;
+            }
+            return left_.phase < right_.phase;
     });
+    }
     for (const auto& boundary_ : boundaries_)
     {
         auto& event_ = events_[boundary_.eventIndex];
         if (boundary_.phase == 0)
         {
             if (event_.eventTemplateType == ANIMATION_EVENT_TEMPLATE_TYPE::ATTACK_TEMPLATE)
+            {
                 AttackTemplateRuntime::Start(owner, event_);
+            }
             if (event_.eventTemplateType == ANIMATION_EVENT_TEMPLATE_TYPE::VFX_TEMPLATE || !event_.meshVFXAssetPath.empty())
+            {
                 SpawnAnimationMeshVFXEvent(owner, event_);
+            }
             ApplyAnimationBlackboardWrites(owner, event_.blackboardWrites);
             event_.isFired = true;
-            if (!event_.startAction.empty()) CallAnimationAction(owner, event_.startAction);
+            if (!event_.startAction.empty())
+            {
+                CallAnimationAction(owner, event_.startAction);
+            }
         }
         else if (boundary_.phase == 1)
         {
             if (event_.eventTemplateType == ANIMATION_EVENT_TEMPLATE_TYPE::ATTACK_TEMPLATE)
+            {
                 AttackTemplateRuntime::Update(owner, event_, boundary_.sampleTime - event_.startTime);
-            if (!event_.updateAction.empty()) CallAnimationAction(owner, event_.updateAction);
+            }
+            if (!event_.updateAction.empty())
+            {
+                CallAnimationAction(owner, event_.updateAction);
+            }
         }
         else
         {
             if (event_.eventTemplateType == ANIMATION_EVENT_TEMPLATE_TYPE::ATTACK_TEMPLATE)
+            {
                 AttackTemplateRuntime::End(owner, event_);
+            }
             event_.isEndFired = true;
-            if (!event_.endAction.empty()) CallAnimationAction(owner, event_.endAction);
+            if (!event_.endAction.empty())
+            {
+                CallAnimationAction(owner, event_.endAction);
+            }
         }
         // キャンセルやコンボ遷移後に、旧Stateのイベントを発生させない。
-        if (state != updatingState_) return;
+        if (state != updatingState_)
+        {
+            return;
+        }
     }
 
     // ループ処理とフラグのリセット

@@ -143,7 +143,10 @@ void CharacterMovementComponent::StopHorizontalMovementImmediately()
     // 予約速度だけでなく、現在Colliderへ残っている水平速度も即座に止める。
     StopHorizontalMovement();
     const std::shared_ptr<ColliderComponent> collider_ = ResolveCollider();
-    if (!collider_) return;
+    if (!collider_)
+    {
+        return;
+    }
 
     collider_->velocity.x = 0.0f;
     collider_->velocity.z = 0.0f;
@@ -161,7 +164,10 @@ void CharacterMovementComponent::ResetMovementRequests()
     impulseVelocity = { 0.0f, 0.0f, 0.0f };
     hasFacingRequest = false;
     unscaledDeltaTime = 0.0f;
-    if (const auto collider_ = ResolveCollider()) collider_->velocity = { 0.0f, 0.0f, 0.0f };
+    if (const auto collider_ = ResolveCollider())
+    {
+        collider_->velocity = { 0.0f, 0.0f, 0.0f };
+    }
 }
 
 void CharacterMovementComponent::AddRootMotionDelta(
@@ -201,7 +207,10 @@ void CharacterMovementComponent::SetFacingDirection(
     // 高さ方向を無視した向きだけを予約し、ApplyFacingでYaw回転へ反映する。
     const float horizontalLengthSquared_ =
         direction_.x * direction_.x + direction_.z * direction_.z;
-    if (horizontalLengthSquared_ <= 0.0001f) return;
+    if (horizontalLengthSquared_ <= 0.0001f)
+    {
+        return;
+    }
 
     facingDirection = { direction_.x, 0.0f, direction_.z };
     facingImmediate = immediate_;
@@ -212,7 +221,10 @@ void CharacterMovementComponent::SetVerticalMovementLocked(bool locked_)
 {
     // 地上固定Actionなどで縦方向のRootMotion/Impulse/Collider速度を止める。
     verticalMovementLocked = locked_;
-    if (!verticalMovementLocked) return;
+    if (!verticalMovementLocked)
+    {
+        return;
+    }
 
     rootMotionDelta.y = 0.0f;
     pendingVerticalImpulse = 0.0f;
@@ -228,7 +240,10 @@ std::shared_ptr<ColliderComponent> CharacterMovementComponent::ResolveCollider()
 {
     // CharacterColliderを優先し、なければ通常ColliderへFallbackする。
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return nullptr;
+    if (!owner_)
+    {
+        return nullptr;
+    }
 
     if (const std::shared_ptr<ColliderComponent> characterCollider_ =
         owner_->GetComponent<CharacterCollider>())
@@ -258,10 +273,16 @@ std::shared_ptr<ColliderComponent> CharacterMovementComponent::ResolveCollider()
 void CharacterMovementComponent::ApplyFacing(float deltaTime_)
 {
     // 即時旋回か補間旋回かを選んで、TransformのYawだけを更新する。
-    if (!hasFacingRequest) return;
+    if (!hasFacingRequest)
+    {
+        return;
+    }
 
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_ || !owner_->transform) return;
+    if (!owner_ || !owner_->transform)
+    {
+        return;
+    }
 
     owner_->transform->SetForwardYawOnly(
         { facingDirection.x, 0.0f, facingDirection.z },

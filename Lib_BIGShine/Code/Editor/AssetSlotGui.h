@@ -138,7 +138,10 @@ namespace AssetSlotGui
             : WindowsDialogHelper::PathToUtf8(WindowsDialogHelper::Utf8ToPath(path_).filename());
         ImGui::TextWrapped("%s", fileName_.c_str());
         ImGui::TextDisabled("%s", path_.empty() ? "Drop an asset here" : path_.c_str());
-        if (ImGui::SmallButton("Browse...")) browseRequested_ = true;
+        if (ImGui::SmallButton("Browse..."))
+        {
+            browseRequested_ = true;
+        }
         ImGui::SameLine();
         if (ImGui::SmallButton("Clear") && !path_.empty())
         {

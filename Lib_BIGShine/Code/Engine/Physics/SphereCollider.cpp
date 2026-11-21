@@ -19,7 +19,9 @@ void SphereCollider::Update(float dt) {
 
     // ワールド座標 + オフセット
     DirectX::XMFLOAT3 pos = t->GetWorldPosition();
-    pos.x += offset.x; pos.y += offset.y; pos.z += offset.z;
+    pos.x += offset.x;
+    pos.y += offset.y;
+    pos.z += offset.z;
 
     float worldRadius = radius * t->GetWorldScale().x;
     if(shapeRenderEnabled)

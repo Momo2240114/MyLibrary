@@ -77,10 +77,10 @@
         },
         {
             "Data": {
-                "baseDistance": 14.0,
+                "baseDistance": 9.5,
                 "currentPitch": 2.326159954071045,
                 "currentYaw": 109.11370086669922,
-                "distance": 14.0,
+                "distance": 9.5,
                 "horizontalFollowSpeed": 5.0,
                 "lookSpeedX": 500.0,
                 "lookSpeedY": 300.0,
@@ -106,6 +106,53 @@
         },
         {
             "Data": {
+                "baseDistance": 7.0,
+                "cameraHeight": 0.75,
+                "centerDistanceWeight": 0.3499999940395355,
+                "closeDistance": 8.0,
+                "closeFocusBias": 0.18000000715255737,
+                "closeRangeDirectionHoldDistance": 1.5,
+                "closeRangeOrbitTurnSpeed": 90.0,
+                "currentSide": 1.0,
+                "directionalDotThreshold": 0.3499999940395355,
+                "enableCloseRangeDistanceGuard": false,
+                "farFocusBias": 0.3400000035762787,
+                "lockOnEnabled": true,
+                "lockOnFocusTargetName": "",
+                "lockOnTargetName": "",
+                "lookAtInterpolationSpeed": 12.5,
+                "maxDistance": 255.0,
+                "mouseAccumulationResetTime": 0.11999999731779099,
+                "mouseSwitchThreshold": 35.0,
+                "playerOffset": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "playerTargetName": "PlayerModel",
+                "positionInterpolationSpeed": 7.0,
+                "priorityWeight": 0.25,
+                "screenDistanceWeight": 0.550000011920929,
+                "sideOffset": 3.5,
+                "switchCooldown": 0.18000000715255737,
+                "switchStickReleaseThreshold": 0.25,
+                "switchStickThreshold": 0.6499999761581421,
+                "targetOffset": [
+                    0.0,
+                    1.7999999523162842,
+                    0.0
+                ]
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "CameraLockOnComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
                 "arenaCameraMargin": 0.800000011920929,
                 "arenaCenter": [
                     0.0,
@@ -115,7 +162,6 @@
                 "arenaRadius": 67.5,
                 "baseDistance": 7.0,
                 "cameraHeight": 1.0,
-                "centerDistanceWeight": 0.3499999940395355,
                 "closeDistance": 8.0,
                 "closeFocusBias": 0.18000000715255737,
                 "closeRangeDirectionHoldDistance": 1.5,
@@ -127,9 +173,8 @@
                 "collisionLookAtLowerHeight": 1.100000023841858,
                 "collisionLookAtSearchRadius": 1.7999999523162842,
                 "currentSide": 1.0,
-                "directionalDotThreshold": 0.3499999940395355,
                 "distanceScale": 0.44999998807907104,
-                "enableCircularArenaCamera": true,
+                "enableCircularArenaCamera": false,
                 "enableCloseRangeDistanceGuard": false,
                 "enableCollisionVerticalCorrection": true,
                 "farFocusBias": 0.3400000035762787,
@@ -137,15 +182,9 @@
                 "heightDifferenceScale": 1.0,
                 "horizontalSafeMax": 0.8999999761581421,
                 "horizontalSafeMin": 0.10000000149011612,
-                "lockOnEnabled": true,
-                "lockOnFocusTargetName": "",
-                "lockOnTargetName": "",
                 "lookAtInterpolationSpeed": 12.5,
                 "maxCameraDistance": 14.0,
-                "maxDistance": 255.0,
                 "minCameraDistance": 6.0,
-                "mouseAccumulationResetTime": 0.11999999731779099,
-                "mouseSwitchThreshold": 35.0,
                 "playerBottomLimit": 0.699999988079071,
                 "playerBottomOffset": [
                     0.0,
@@ -158,15 +197,9 @@
                     0.0,
                     0.0
                 ],
-                "playerTargetName": "PlayerModel",
                 "positionInterpolationSpeed": 7.0,
-                "priorityWeight": 0.25,
-                "screenDistanceWeight": 0.550000011920929,
                 "separationHeightScale": 0.05000000074505806,
                 "sideOffset": 3.5,
-                "switchCooldown": 0.18000000715255737,
-                "switchStickReleaseThreshold": 0.25,
-                "switchStickThreshold": 0.6499999761581421,
                 "targetFocusWeight": 0.25,
                 "targetOffset": [
                     0.0,
@@ -198,7 +231,7 @@
             "LateUpdateEnabled": true,
             "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "CameraLockOnComponent",
+            "TypeName": "SpecialAttackCameraComponent",
             "UpdateEnabled": true,
             "UpdatePriority": 0
         },
@@ -230,7 +263,7 @@
             "Data": {
                 "presets": [
                     {
-                        "actionName": "JustGuard",
+                        "actionName": "Camera_JustGuard",
                         "attackDirectionKey": "Normal",
                         "autoFrameTargets": false,
                         "blackboardCategory": "Guard",
@@ -275,7 +308,7 @@
                         "useUnscaledTime": true
                     },
                     {
-                        "actionName": "JustDodgeT",
+                        "actionName": "Camera_JustDodge",
                         "attackDirectionKey": "Normal",
                         "autoFrameTargets": false,
                         "blackboardCategory": "Dodge",

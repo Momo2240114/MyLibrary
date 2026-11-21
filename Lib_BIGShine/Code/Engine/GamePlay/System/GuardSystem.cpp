@@ -23,7 +23,10 @@ namespace
     {
         while (object_)
         {
-            if (object_->GetLayer() == LayerType::Player) return object_;
+            if (object_->GetLayer() == LayerType::Player)
+            {
+                return object_;
+            }
             const auto parent_ = object_->transform ? object_->transform->parent.lock() : nullptr;
             object_ = parent_ ? parent_->gameObject.lock() : nullptr;
         }
@@ -47,7 +50,10 @@ void GuardSystem::Clear()
 
 void GuardSystem::ClearAttackInstance(uint32_t attackInstanceId_)
 {
-    if (attackInstanceId_ == 0u) return;
+    if (attackInstanceId_ == 0u)
+    {
+        return;
+    }
 
     // 攻撃IDが終わったら、同じ攻撃に対するガード履歴も破棄する。
     for (auto iterator_ = registeredGuardTargets.begin();
@@ -68,7 +74,10 @@ void GuardSystem::ClearAttackHitGroup(
     uint32_t attackInstanceId_,
     uint32_t hitGroupId_)
 {
-    if (attackInstanceId_ == 0u) return;
+    if (attackInstanceId_ == 0u)
+    {
+        return;
+    }
 
     const uint64_t guardKey_ =
         (static_cast<uint64_t>(attackInstanceId_) << 32u) |
@@ -99,7 +108,10 @@ bool GuardSystem::HandleGuard(
         return false;
     }
     // 扇形の安全側では広域Sphereが重なってもガード成立にしない。
-    if (!hitBox_.IsWithinAttackSector(defender_.get())) return false;
+    if (!hitBox_.IsWithinAttackSector(defender_.get()))
+    {
+        return false;
+    }
     if (!hitBox_.IsEnabled() || !guardCollider_.IsEnabled())
     {
         return false;
@@ -123,7 +135,10 @@ bool GuardSystem::HandleGuard(
 
     guardCollider_.RecordGuardedAttack(hitBox_);
     // Playerが受付を閉じた後も、受け止め済みの同一Activationを通常Hitとして再適用しない。
-    if (guardCollider_.GuardsBodyContact()) hitBox_.RegisterHit(defender_.get());
+    if (guardCollider_.GuardsBodyContact())
+    {
+        hitBox_.RegisterHit(defender_.get());
+    }
 
     // 成立したガード情報を、受け手/攻撃側/CameraActionへ配るためのイベントにまとめる。
     GuardEvent event_{};
@@ -141,7 +156,9 @@ bool GuardSystem::HandleGuard(
     event_.teamId = hitBox_.teamId;
     event_.damage = hitBox_.damage;
     if (const auto hurtBox_ = defender_->GetComponent<HurtBox>())
+    {
         event_.damage = AttackSystem::CalculateGuardDamage(hitBox_, *hurtBox_);
+    }
     event_.impactPower = hitBox_.impactPower;
     event_.knockBackPower = hitBox_.knockBackPower;
     event_.sourceAction = hitBox_.sourceAction;
@@ -149,9 +166,13 @@ bool GuardSystem::HandleGuard(
 
     frameGuardEvents.push_back(event_);
     if (const auto player_ = FindPlayerOwner(defender_))
+    {
         player_->ExecuteAction(event_.guardBroken ? "Controller.RumbleGuardBreak" : "Controller.RumbleGuard");
+    }
     else if (const auto attackingPlayer_ = FindPlayerOwner(attacker_))
+    {
         attackingPlayer_->ExecuteAction("Controller.RumbleAttackGuarded");
+    }
     // 成立したガードの接触点で剣戟音を鳴らし、崩された場合だけ重い衝突音へ切り替える。
     const auto soundPosition_ = event_.hasContact || !defender_->transform
         ? event_.guardPosition : defender_->transform->GetWorldPosition();
@@ -162,18 +183,30 @@ bool GuardSystem::HandleGuard(
     if (event_.guardBroken)
     {
         if (const auto health_ = defender_->GetComponent<HealthComponent>())
+        {
             health_->ApplyDamage(event_.damage * guardCollider_.GetGuardBreakDamageRate());
+        }
         if (defender_->manager && hitBox_.hitStopDuration > 0.0f)
+        {
             if (const auto time_ = defender_->GetManager().GetTimeManager())
+            {
                 time_->TriggerHitStop(hitBox_.hitStopLayerMask == 0u ? static_cast<uint32_t>(TarGetLayerType::All) : hitBox_.hitStopLayerMask,
                     hitBox_.hitStopDuration, hitBox_.hitStopScale);
+            }
+        }
     }
     PublishGuardToDefender(event_);
-    if (!event_.guardBroken) PublishGuardToAttacker(event_);
+    if (!event_.guardBroken)
+    {
+        PublishGuardToAttacker(event_);
+    }
 
     for (const GuardCallback& callback_ : guardCallbacks)
     {
-        if (callback_) callback_(event_);
+        if (callback_)
+        {
+            callback_(event_);
+        }
     }
 
     BS_LOG_SUCCESS(
@@ -185,7 +218,10 @@ bool GuardSystem::HandleGuard(
 
 void GuardSystem::AddGuardCallback(GuardCallback callback_)
 {
-    if (callback_) guardCallbacks.push_back(std::move(callback_));
+    if (callback_)
+    {
+        guardCallbacks.push_back(std::move(callback_));
+    }
 }
 
 bool GuardSystem::RegisterGuard(
@@ -221,11 +257,17 @@ std::shared_ptr<GameObject> GuardSystem::GetHierarchyRoot(
     {
         const std::shared_ptr<Transform> parentTransform_ =
             object_->transform->parent.lock();
-        if (!parentTransform_) break;
+        if (!parentTransform_)
+        {
+            break;
+        }
 
         const std::shared_ptr<GameObject> parentObject_ =
             parentTransform_->gameObject.lock();
-        if (!parentObject_) break;
+        if (!parentObject_)
+        {
+            break;
+        }
 
         object_ = parentObject_;
     }
@@ -242,7 +284,10 @@ void GuardSystem::PublishGuardToAttacker(const GuardEvent& event_)
     }
 
     const std::shared_ptr<GameObject> receiver_ = FindBlackboardReceiver(attacker_);
-    if (!receiver_) return;
+    if (!receiver_)
+    {
+        return;
+    }
 
     if (const std::shared_ptr<BlackboardComponent> blackboard_ =
         receiver_->GetOrAddComponent<BlackboardComponent>())
@@ -259,11 +304,17 @@ void GuardSystem::PublishGuardToDefender(const GuardEvent& event_)
 {
     const std::shared_ptr<GameObject> defender_ = event_.defender.lock();
     const std::shared_ptr<GameObject> receiver_ = FindBlackboardReceiver(defender_);
-    if (!receiver_) return;
+    if (!receiver_)
+    {
+        return;
+    }
 
     const std::shared_ptr<BlackboardComponent> blackboard_ =
         receiver_->GetOrAddComponent<BlackboardComponent>();
-    if (!blackboard_) return;
+    if (!blackboard_)
+    {
+        return;
+    }
 
     blackboard_->SetBool("Guard", "GuardSucceeded", !event_.guardBroken);
     blackboard_->SetBool("Guard", "GuardBroken", event_.guardBroken);
@@ -286,7 +337,10 @@ void GuardSystem::PublishGuardToDefender(const GuardEvent& event_)
 std::shared_ptr<GameObject> GuardSystem::FindBlackboardReceiver(
     std::shared_ptr<GameObject> object_) const
 {
-    if (!object_) return nullptr;
+    if (!object_)
+    {
+        return nullptr;
+    }
 
     // Colliderが子Objectに付いていても、親側のBlackboardを優先してイベントを届ける。
     std::shared_ptr<GameObject> fallback_ = object_;
@@ -297,15 +351,24 @@ std::shared_ptr<GameObject> GuardSystem::FindBlackboardReceiver(
             return object_;
         }
 
-        if (!object_->transform) break;
+        if (!object_->transform)
+        {
+            break;
+        }
 
         const std::shared_ptr<Transform> parentTransform_ =
             object_->transform->parent.lock();
-        if (!parentTransform_) break;
+        if (!parentTransform_)
+        {
+            break;
+        }
 
         const std::shared_ptr<GameObject> parentObject_ =
             parentTransform_->gameObject.lock();
-        if (!parentObject_) break;
+        if (!parentObject_)
+        {
+            break;
+        }
 
         fallback_ = parentObject_;
         object_ = parentObject_;

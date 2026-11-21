@@ -9,6 +9,30 @@
             "threshold": 1.8899999856948853,
             "toneMappingEnabled": true
         },
+        "FXAA": {
+            "edgeThreshold": 0.125,
+            "edgeThresholdMin": 0.031199999153614044,
+            "enabled": true
+        },
+        "Fog": {
+            "color": [
+                0.41999998688697815,
+                0.47999998927116394,
+                0.5799999833106995
+            ],
+            "density": 0.3499999940395355,
+            "enabled": false,
+            "endDistance": 160.0,
+            "hatchScale": 1.0,
+            "hatchStrength": 0.0,
+            "startDistance": 35.0,
+            "texturePath": "",
+            "textureStrength": 0.0,
+            "textureTiling": [
+                1.0,
+                1.0
+            ]
+        },
         "IBL": {
             "hdrIntensity": 0.003000000026077032,
             "specularHdrPath": "Data/Texture/IBL/qwantani_dusk_2_2k.hdr"
@@ -31,6 +55,7 @@
             ],
             "cascadeXyPadding": 8.0,
             "displayCascadeArea": false,
+            "indirectShadowAttenuation": 1.0,
             "lightDistance": 500.0,
             "shadowAttenuation": 0.0,
             "texelSnapEnabled": true,
@@ -52,6 +77,17 @@
                 0.05000000074505806
             ]
         },
+        "LayerPostEffects": [
+            {
+                "enabled": true,
+                "layerId": 1,
+                "parameters": {
+                    "color": [0.35, 0.75, 1.0, 1.0],
+                    "useOutlineColor": true
+                },
+                "type": 0
+            }
+        ],
         "ToonOutline": {
             "color": [
                 0.19607843458652496,
@@ -72,6 +108,32 @@
                 0.3720000088214874,
                 0.8349999785423279,
                 0.847000002861023,
+                1.0
+            ]
+        },
+        "Vignette": {
+            "center": [
+                0.5,
+                0.5
+            ],
+            "color": [
+                1.0,
+                0.8823529481887817,
+                1.0,
+                1.0
+            ],
+            "enabled": true,
+            "hatchScale": 1.0,
+            "hatchStrength": 0.0,
+            "intensity": 0.5,
+            "opacity": 1.0,
+            "rounded": 0.0,
+            "roundness": 1.0,
+            "smoothness": 0.20000000298023224,
+            "texturePath": "",
+            "textureStrength": 0.0,
+            "textureTiling": [
+                1.0,
                 1.0
             ]
         }

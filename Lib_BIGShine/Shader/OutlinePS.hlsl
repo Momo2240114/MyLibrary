@@ -4,7 +4,9 @@ cbuffer CbOutline : register(b0)
 {
     float4 outlineColor;
     float outlineThickness;
-    float3 padding;
+    float depthScale;
+    float maxDistanceScale;
+    float padding;
 };
 
 struct OUTLINE_VS_OUT

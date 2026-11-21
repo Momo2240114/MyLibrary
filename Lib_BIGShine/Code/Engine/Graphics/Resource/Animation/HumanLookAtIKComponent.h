@@ -45,10 +45,26 @@ public:
     void Serialize(nlohmann::json& json_) const override;
     void Deserialize(const nlohmann::json& json_) override;
 
-    void SetLookEnabled(bool enabled_) { lookEnabled = enabled_; }
-    bool IsLookEnabled() const { return lookEnabled; }
-    void SetUseLockOnTarget(bool enabled_) { lookTargetMode = enabled_ ? LOOK_TARGET_MODE::LOCK_ON_TARGET : LOOK_TARGET_MODE::TARGET_OBJECT; }
-    void SetLookTargetMode(LOOK_TARGET_MODE mode_) { lookTargetMode = mode_; }
+    void SetLookEnabled(bool enabled_)
+    {
+        lookEnabled = enabled_;
+    }
+
+    bool IsLookEnabled() const
+    {
+        return lookEnabled;
+    }
+
+    void SetUseLockOnTarget(bool enabled_)
+    {
+        lookTargetMode = enabled_ ? LOOK_TARGET_MODE::LOCK_ON_TARGET : LOOK_TARGET_MODE::TARGET_OBJECT;
+    }
+
+    void SetLookTargetMode(LOOK_TARGET_MODE mode_)
+    {
+        lookTargetMode = mode_;
+    }
+
     void SetTargetName(const std::string& targetName_);
 
 private:

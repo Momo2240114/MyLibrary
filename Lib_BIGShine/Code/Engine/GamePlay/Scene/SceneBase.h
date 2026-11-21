@@ -19,12 +19,25 @@ public:
 	}
 
     // SceneLoadingは次Sceneを主スレッドで準備し、ゲーム用Updateは完了後まで呼ばない。
-    void SetLoadingPreparation(bool enabled_) { isLoadingPreparation = enabled_; }
+    void SetLoadingPreparation(bool enabled_)
+	{
+		isLoadingPreparation = enabled_;
+	}
+
     void ActivateContext();
+
     // Editorへ入るロード画面では、ゲームのブランドを表示しない。
-    virtual bool IsEditorDestination() const { return false; }
+    virtual bool IsEditorDestination() const
+	{
+		return false;
+	}
+
     // Scene基底と表示Sceneで保持している名前を、演出設定の選択に使う。
-    const std::string& GetTransitionSceneName() const { return sceneName; }
+    const std::string& GetTransitionSceneName() const
+	{
+		return sceneName;
+	}
+
 	virtual void Initialize();
 	virtual void Finalize();
 	// 更新処理
@@ -37,12 +50,23 @@ public:
 	void DrawGUI();
 
 	std::shared_ptr<GameObjectManager> GetGameObjectManager();
+
+    bool IsEditorVisible() const
+	{
+		return isEditorVisible;
+	}
+
     bool IsEditorWorkspaceOpen() const
     {
         return isEditorVisible && editorWindowManager && editorWindowManager->IsWorkspaceMode();
     }
+
     // 表示専用Sceneでは、ロード中もメニュー操作用カーソルを解放する。
-    bool RequiresFreeCursor() const override { return isLoadingPresentation; }
+    bool RequiresFreeCursor() const override
+	{
+		return isLoadingPresentation;
+	}
+
 protected:
 	template<class T>
 	void ChangeScene()

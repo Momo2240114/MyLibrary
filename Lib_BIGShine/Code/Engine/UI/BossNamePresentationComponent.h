@@ -12,6 +12,7 @@ public:
         static const std::string NAME = "BossNamePresentationComponent";
         return NAME;
     }
+
     // 透明状態を準備し、表示Actionを公開する。
     void Start() override;
     // FadeIn、表示保持、FadeOutの順に透明度を更新する。
@@ -27,6 +28,7 @@ public:
     void ShowBossName();
     // 再生を止め、透明状態へ戻す。
     void HideBossName();
+
 private:
     // 同じObject上のSpriteの透明度へ反映する。
     void ApplyAlpha(float alpha_);
@@ -36,5 +38,6 @@ private:
     float fadeInDuration = 0.35f;
     float fadeOutDuration = 0.45f;
     float elapsed = 0.0f;
+    bool dissolveOnFadeOut = false;
     bool playing = false;
 };

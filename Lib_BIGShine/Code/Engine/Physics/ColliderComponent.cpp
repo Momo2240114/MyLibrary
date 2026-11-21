@@ -31,11 +31,17 @@ namespace
         {
             const std::shared_ptr<Transform> parentTransform_ =
                 currentObject_->transform->parent.lock();
-            if (!parentTransform_) break;
+            if (!parentTransform_)
+            {
+                break;
+            }
 
             const std::shared_ptr<GameObject> parentObject_ =
                 parentTransform_->gameObject.lock();
-            if (!parentObject_) break;
+            if (!parentObject_)
+            {
+                break;
+            }
 
             collisionOwnerObject_ = parentObject_;
             currentObject_ = parentObject_;
@@ -46,17 +52,26 @@ namespace
 
     ColliderComponent* GetColliderFromShape(const PxShape* shape_)
     {
-        if (!shape_) return nullptr;
+        if (!shape_)
+        {
+            return nullptr;
+        }
 
         const PxRigidActor* actor_ = shape_->getActor();
-        if (!actor_) return nullptr;
+        if (!actor_)
+        {
+            return nullptr;
+        }
 
         return static_cast<ColliderComponent*>(actor_->userData);
     }
 
     bool HasSameCollisionOwner(ColliderComponent* colliderA_, ColliderComponent* colliderB_)
     {
-        if (!colliderA_ || !colliderB_) return false;
+        if (!colliderA_ || !colliderB_)
+        {
+            return false;
+        }
 
         const uint32_t ownerIdA_ = colliderA_->GetCollisionOwnerId();
         const uint32_t ownerIdB_ = colliderB_->GetCollisionOwnerId();
@@ -94,7 +109,10 @@ namespace
     float SanitizePositiveSize(float value_)
     {
         constexpr float MIN_SIZE = 0.001f;
-        if (!IsFiniteFloat(value_)) return MIN_SIZE;
+        if (!IsFiniteFloat(value_))
+        {
+            return MIN_SIZE;
+        }
         return (std::max)(std::abs(value_), MIN_SIZE);
     }
 
@@ -115,7 +133,10 @@ namespace
         const DirectX::XMFLOAT3& rotation_,
         PxTransform& pose_)
     {
-        if (!IsFiniteFloat3(position_) || !IsFiniteFloat3(rotation_)) return false;
+        if (!IsFiniteFloat3(position_) || !IsFiniteFloat3(rotation_))
+        {
+            return false;
+        }
 
         pose_ = PxTransform(
             PxVec3(position_.x, position_.y, position_.z),
@@ -269,14 +290,20 @@ namespace
             (closestSelfFloat_.z - closestOtherFloat_.z));
         const float radiusSum_ = selfCapsule_.radius + otherCapsuleData_.radius;
         const float horizontalDepth_ = radiusSum_ - horizontalDistance_;
-        if (horizontalDepth_ <= 0.0f) return false;
+        if (horizontalDepth_ <= 0.0f)
+        {
+            return false;
+        }
 
         const PxVec3 horizontalDirection_ = BuildHorizontalPushDirection(
             closestSelfFloat_,
             closestOtherFloat_,
             selfCenterFloat_,
             fallbackDirection_);
-        if (horizontalDirection_.magnitudeSquared() <= 0.000001f) return false;
+        if (horizontalDirection_.magnitudeSquared() <= 0.000001f)
+        {
+            return false;
+        }
 
         displacement_ = horizontalDirection_ * horizontalDepth_;
         return true;
@@ -294,7 +321,10 @@ namespace
         BS_PROFILE_SCOPE("ColliderComponent::TryGetNonGroundPush");
 
         PxScene* scene_ = PhysXSystem::GetScene();
-        if (!scene_ || !selfCollider_) return false;
+        if (!scene_ || !selfCollider_)
+        {
+            return false;
+        }
 
         const PxTransform selfPose_(
             PxVec3(
@@ -321,12 +351,24 @@ namespace
         {
             const PxOverlapHit& hit_ = overlapBuffer_.getAnyHit(hitIndex_);
             ColliderComponent* otherCollider_ = GetColliderFromShape(hit_.shape);
-            if (!otherCollider_ || otherCollider_ == selfCollider_) continue;
-            if (HasSameCollisionOwner(selfCollider_, otherCollider_)) continue;
-            if (otherCollider_->CanBeCharacterGround()) continue;
+            if (!otherCollider_ || otherCollider_ == selfCollider_)
+            {
+                continue;
+            }
+            if (HasSameCollisionOwner(selfCollider_, otherCollider_))
+            {
+                continue;
+            }
+            if (otherCollider_->CanBeCharacterGround())
+            {
+                continue;
+            }
 
             const PxRigidActor* otherActor_ = hit_.actor;
-            if (!otherActor_) continue;
+            if (!otherActor_)
+            {
+                continue;
+            }
 
             PxVec3 direction_(0.0f, 0.0f, 0.0f);
             PxF32 depth_ = 0.0f;
@@ -344,7 +386,10 @@ namespace
                 continue;
             }
 
-            if (direction_.magnitudeSquared() <= 0.000001f || depth_ <= 0.0f) continue;
+            if (direction_.magnitudeSquared() <= 0.000001f || depth_ <= 0.0f)
+            {
+                continue;
+            }
 
             PxVec3 displacement_ = direction_.getNormalized() * depth_;
             if (CapsuleCollider* otherCapsule_ =
@@ -373,7 +418,10 @@ namespace
             accumulatedDisplacement_ += displacement_;
         }
 
-        if (accumulatedDisplacement_.magnitudeSquared() <= 0.000001f) return false;
+        if (accumulatedDisplacement_.magnitudeSquared() <= 0.000001f)
+        {
+            return false;
+        }
 
         const PxVec3 horizontalDisplacement_(
             accumulatedDisplacement_.x,
@@ -395,7 +443,10 @@ namespace
             finalDisplacement_.y = maxLiftDistance_;
         }
 
-        if (finalDisplacement_.magnitudeSquared() <= 0.000001f) return false;
+        if (finalDisplacement_.magnitudeSquared() <= 0.000001f)
+        {
+            return false;
+        }
 
         pushDisplacement_ = finalDisplacement_;
         return true;
@@ -420,7 +471,10 @@ void ColliderComponent::ReleasePhysXActor()
 
     ReleaseCharacterController();
 
-    if (!actor && !shapeMaterial) return;
+    if (!actor && !shapeMaterial)
+    {
+        return;
+    }
 
     if (!PhysXSystem::GetPhysics())
     {
@@ -465,13 +519,22 @@ void ColliderComponent::CreateCharacterController()
     auto scene_ = PhysXSystem::GetScene();
     auto controllerManager_ = PhysXSystem::GetControllerManager();
 
-    if (!owner_ || !physics_ || !scene_ || !controllerManager_) return;
+    if (!owner_ || !physics_ || !scene_ || !controllerManager_)
+    {
+        return;
+    }
 
     auto capsule_ = dynamic_cast<CapsuleCollider*>(this);
-    if (!capsule_) return;
+    if (!capsule_)
+    {
+        return;
+    }
 
     auto transform_ = owner_->transform;
-    if (!transform_) return;
+    if (!transform_)
+    {
+        return;
+    }
 
     auto scale_ = transform_->GetWorldScale();
     scale_.x *= shapeSizeScale;
@@ -480,7 +543,10 @@ void ColliderComponent::CreateCharacterController()
     scale_ = SanitizeScale(scale_);
 
     auto material_ = GetShapeMaterial();
-    if (!material_) return;
+    if (!material_)
+    {
+        return;
+    }
 
     physx::PxCapsuleControllerDesc desc_;
     desc_.material = material_;
@@ -490,7 +556,10 @@ void ColliderComponent::CreateCharacterController()
         transform_->localPosition.y + offset.y,
         transform_->localPosition.z + offset.z
     };
-    if (!IsFiniteFloat3(controllerPosition_)) return;
+    if (!IsFiniteFloat3(controllerPosition_))
+    {
+        return;
+    }
 
     desc_.position = physx::PxExtendedVec3(
         controllerPosition_.x,
@@ -515,10 +584,16 @@ void ColliderComponent::CreateCharacterController()
     desc_.scaleCoeff = 0.8f;
     desc_.volumeGrowth = 1.5f;
 
-    if (!desc_.isValid()) return;
+    if (!desc_.isValid())
+    {
+        return;
+    }
 
     characterController = controllerManager_->createController(desc_);
-    if (!characterController) return;
+    if (!characterController)
+    {
+        return;
+    }
     characterController->setUserData(this);
 
     if (auto controllerActor_ = characterController->getActor())
@@ -574,13 +649,19 @@ void ColliderComponent::ReleaseCharacterController()
 std::shared_ptr<GameObject> ColliderComponent::ResolveCollisionOwnerObject()
 {
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return nullptr;
+    if (!owner_)
+    {
+        return nullptr;
+    }
 
     if (!collisionOwnerObjectName.empty() && owner_->manager)
     {
         const std::shared_ptr<GameObject> collisionOwner_ =
             owner_->GetManager().Find(collisionOwnerObjectName);
-        if (collisionOwner_) return collisionOwner_;
+        if (collisionOwner_)
+        {
+            return collisionOwner_;
+        }
     }
 
     return ResolveHierarchyCollisionOwnerObject(owner_);
@@ -624,7 +705,10 @@ void ColliderComponent::CreatePhysXActor()
     auto owner_ = GetGameObject();
     auto physics_ = PhysXSystem::GetPhysics();
     auto scene_ = PhysXSystem::GetScene();
-    if (!owner_ || !physics_ || !scene_) return;
+    if (!owner_ || !physics_ || !scene_)
+    {
+        return;
+    }
 
     auto transform_ = owner_->transform;
     PxTransform pose_;
@@ -652,7 +736,10 @@ void ColliderComponent::CreatePhysXActor()
         actor = dynamicActor_;
     }
 
-    if (!actor) return;
+    if (!actor)
+    {
+        return;
+    }
 
     actor->userData = this;
     UpdatePhysXShape();
@@ -666,7 +753,10 @@ void ColliderComponent::UpdatePhysXShape()
 {
     BS_PROFILE_SCOPE("ColliderComponent::UpdatePhysXShape");
 
-    if (!actor) return;
+    if (!actor)
+    {
+        return;
+    }
 
     PxShape* shape_ = nullptr;
     if (actor->getNbShapes() > 0)
@@ -675,9 +765,15 @@ void ColliderComponent::UpdatePhysXShape()
     }
 
     auto owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
-    if (!owner_->transform) return;
+    if (!owner_->transform)
+    {
+        return;
+    }
 
     auto scale_ = owner_->transform->GetWorldScale();
     scale_.x *= shapeSizeScale;
@@ -688,7 +784,10 @@ void ColliderComponent::UpdatePhysXShape()
     if (!shape_)
     {
         auto material_ = GetShapeMaterial();
-        if (!material_) return;
+        if (!material_)
+        {
+            return;
+        }
 
         switch (GetColliderType())
         {
@@ -754,9 +853,12 @@ void ColliderComponent::UpdatePhysXShape()
         {
             auto meshCollider_ = static_cast<MeshCollider*>(this);
             auto model_ = owner_->GetComponent<GltfModelCommponennt>();
-            if (!model_) break;
+            if (!model_)
+            {
+                break;
+            }
 
-			std::vector<DirectX::XMFLOAT3> vertices_;
+            std::vector<DirectX::XMFLOAT3> vertices_;
 			std::vector<uint32_t> indices_;
             for (const auto& modelMesh_ : model_->GetMeshes())
             {
@@ -774,7 +876,10 @@ void ColliderComponent::UpdatePhysXShape()
                     DirectX::XMStoreFloat3(&transformedPosition_, position_);
                     vertices_.push_back(transformedPosition_);
                 }
-                for (const auto index_ : modelMesh_.indices) indices_.push_back(vertexOffset_ + index_);
+                for (const auto index_ : modelMesh_.indices)
+                {
+                    indices_.push_back(vertexOffset_ + index_);
+                }
             }
 
 			// node.globalTransformにはModelのLocalScaleが含まれる。
@@ -853,16 +958,25 @@ void ColliderComponent::UpdatePhysXShape()
         }
     }
 
-    if (!shape_) return;
+    if (!shape_)
+    {
+        return;
+    }
 
     PxQuat shapeRotation_ = PxQuat(PxIdentity);
     if (GetColliderType() == ColliderType::Capsule)
     {
         shapeRotation_ = PxQuat(PxHalfPi, PxVec3(0.0f, 0.0f, 1.0f));
     }
-    if (!IsFiniteFloat3(offset)) return;
+    if (!IsFiniteFloat3(offset))
+    {
+        return;
+    }
     const PxTransform localPose_(PxVec3(offset.x, offset.y, offset.z), shapeRotation_);
-    if (!localPose_.isSane()) return;
+    if (!localPose_.isSane())
+    {
+        return;
+    }
 
     shape_->setLocalPose(localPose_);
     shape_->setFlag(PxShapeFlag::eSIMULATION_SHAPE, !isTrigger);
@@ -883,7 +997,10 @@ void ColliderComponent::SyncFromPhysics(float dt_)
     if (characterController && physicsControlsTransform)
     {
         auto owner_ = GetGameObject();
-        if (!owner_ || !owner_->transform) return;
+        if (!owner_ || !owner_->transform)
+        {
+            return;
+        }
 
         if (HasExternalTransformChange())
         {
@@ -893,7 +1010,10 @@ void ColliderComponent::SyncFromPhysics(float dt_)
                 owner_->transform->localPosition.y + offset.y,
                 owner_->transform->localPosition.z + offset.z
             };
-            if (!IsFiniteFloat3(controllerPosition_)) return;
+            if (!IsFiniteFloat3(controllerPosition_))
+            {
+                return;
+            }
 
             characterController->setPosition(
                 PxExtendedVec3(
@@ -940,11 +1060,17 @@ void ColliderComponent::SyncFromPhysics(float dt_)
         return;
     }
 
-    if (!actor || actorIsStatic || !physicsControlsTransform) return;
+    if (!actor || actorIsStatic || !physicsControlsTransform)
+    {
+        return;
+    }
 
     auto owner_ = GetGameObject();
     auto dynamicActor_ = actor->is<PxRigidDynamic>();
-    if (!owner_ || !dynamicActor_) return;
+    if (!owner_ || !dynamicActor_)
+    {
+        return;
+    }
 
     if (HasExternalTransformChange())
     {
@@ -1039,16 +1165,25 @@ void ColliderComponent::PreparePhysicsStep(float deltaTime_)
         {
             RecreatePhysXActor();
         }
-        if (!characterController) return;
+        if (!characterController)
+        {
+            return;
+        }
 
         auto owner_ = GetGameObject();
-        if (!owner_ || !owner_->transform) return;
+        if (!owner_ || !owner_->transform)
+        {
+            return;
+        }
 
         if (auto controllerActor_ = characterController->getActor())
         {
             controllerActor_->setActorFlag(PxActorFlag::eDISABLE_SIMULATION, !enabled);
         }
-        if (!enabled) return;
+        if (!enabled)
+        {
+            return;
+        }
 
         if (HasExternalTransformChange())
         {
@@ -1058,7 +1193,10 @@ void ColliderComponent::PreparePhysicsStep(float deltaTime_)
                 owner_->transform->localPosition.y + offset.y,
                 owner_->transform->localPosition.z + offset.z
             };
-            if (!IsFiniteFloat3(controllerPosition_)) return;
+            if (!IsFiniteFloat3(controllerPosition_))
+            {
+                return;
+            }
 
             characterController->setPosition(
                 PxExtendedVec3(
@@ -1218,13 +1356,22 @@ void ColliderComponent::PreparePhysicsStep(float deltaTime_)
 
         RecreatePhysXActor();
     }
-    if (!actor) return;
+    if (!actor)
+    {
+        return;
+    }
 
     auto owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     actor->setActorFlag(PxActorFlag::eDISABLE_SIMULATION, !enabled);
-    if (!enabled) return;
+    if (!enabled)
+    {
+        return;
+    }
 
     UpdatePhysXShape();
 
@@ -1298,7 +1445,10 @@ PxMaterial* ColliderComponent::GetShapeMaterial()
     if (!shapeMaterial)
     {
         auto physics_ = PhysXSystem::GetPhysics();
-        if (!physics_) return nullptr;
+        if (!physics_)
+        {
+            return nullptr;
+        }
 
         shapeMaterial = physics_->createMaterial(0.0f, 0.0f, 0.0f);
         shapeMaterial->setFrictionCombineMode(PxCombineMode::eMIN);
@@ -1310,10 +1460,16 @@ PxMaterial* ColliderComponent::GetShapeMaterial()
 
 bool ColliderComponent::HasExternalTransformChange()
 {
-    if (!hasTransformSnapshot) return false;
+    if (!hasTransformSnapshot)
+    {
+        return false;
+    }
 
     auto owner_ = GetGameObject();
-    if (!owner_) return false;
+    if (!owner_)
+    {
+        return false;
+    }
 
     constexpr float epsilon_ = 0.0001f;
     const auto angleDifference_ = [](float angleA_, float angleB_)
@@ -1333,7 +1489,10 @@ bool ColliderComponent::HasExternalTransformChange()
 void ColliderComponent::CaptureTransformSnapshot()
 {
     auto owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     lastTransformPosition = owner_->transform->localPosition;
     lastTransformRotation = owner_->transform->localRotation;
@@ -1344,10 +1503,16 @@ void ColliderComponent::PushTransformToPhysics()
 {
     BS_PROFILE_SCOPE("ColliderComponent::PushTransformToPhysics");
 
-    if (!actor) return;
+    if (!actor)
+    {
+        return;
+    }
 
     auto owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     const auto transform_ = owner_->transform;
     PxTransform pose_;

@@ -4081,6 +4081,16 @@
                             {
                                 "animationState": "",
                                 "blackboardWrites": [],
+                                "cat": "UI",
+                                "name": "BossPhase2Name_ShowBossName",
+                                "time": 10.5,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
                                 "cat": "CameraAction",
                                 "name": "TransitionSwordClash",
                                 "time": 11.699999809265137,
@@ -4838,6 +4848,16 @@
                     },
                     {
                         "actions": [
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "UI",
+                                "name": "BossPhase2Name_HideBossName",
+                                "time": 0.0,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
                             {
                                 "animationState": "",
                                 "blackboardWrites": [],
@@ -13038,6 +13058,16 @@
                     },
                     {
                         "actions": [
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "UI",
+                                "name": "BossPhase2Name_HideBossName",
+                                "time": 0.0,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
                             {
                                 "animationState": "",
                                 "blackboardWrites": [],

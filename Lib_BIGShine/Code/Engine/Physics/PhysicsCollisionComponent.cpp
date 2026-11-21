@@ -13,15 +13,21 @@ using namespace physx;
 //@param half ボックスの半サイズ（幅，高さ，奥行） 
 //--- 
 void PhysicsCollisionComponent::SetBox(const DirectX::XMFLOAT3& half) 
-{ shapeType = ShapeType::Box; boxHalfSize = half; } 
+{
+    shapeType = ShapeType::Box;
+    boxHalfSize = half;
+}
+
 //---
 // @brief 衝突形状を球として設定する 
 // @param r 球の半径 
 //--- 
 void PhysicsCollisionComponent::SetSphere(float r)
 { 
-    shapeType = ShapeType::Sphere; sphereRadius = r;
-} 
+    shapeType = ShapeType::Sphere;
+    sphereRadius = r;
+}
+
 //--- 
 // @brief 衝突形状をカプセルとして設定する 
 // @param r カプセルの半径
@@ -44,7 +50,10 @@ PhysicsCollisionComponent::~PhysicsCollisionComponent()
         if (actor->isReleasable())
         {
             auto* scene = actor->getScene();
-            if (scene) scene->removeActor(*actor);
+            if (scene)
+            {
+                scene->removeActor(*actor);
+            }
             actor->release();
         }
         actor = nullptr;
@@ -138,12 +147,18 @@ void PhysicsCollisionComponent::Gui()
     // --- 基本設定 (変更なし) ---
     if (ImGui::Checkbox("Is Kinematic", &isKinematic))
     {
-        if (actor) actor->setRigidBodyFlag(physx::PxRigidBodyFlag::eKINEMATIC, isKinematic);
+        if (actor)
+        {
+            actor->setRigidBodyFlag(physx::PxRigidBodyFlag::eKINEMATIC, isKinematic);
+        }
     }
     ImGui::SameLine();
     if (ImGui::Checkbox("Use Gravity", &useGravity))
     {
-        if (actor) actor->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, !useGravity);
+        if (actor)
+        {
+            actor->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, !useGravity);
+        }
     }
 
     if (ImGui::Checkbox("Is Trigger", &isTrigger))
@@ -163,11 +178,16 @@ void PhysicsCollisionComponent::Gui()
 
     ImGui::Text("Lock Rotation:");
     bool changedLock = false;
-    changedLock |= ImGui::Checkbox("X", &lockRotationX); ImGui::SameLine();
-    changedLock |= ImGui::Checkbox("Y", &lockRotationY); ImGui::SameLine();
+    changedLock |= ImGui::Checkbox("X", &lockRotationX);
+    ImGui::SameLine();
+    changedLock |= ImGui::Checkbox("Y", &lockRotationY);
+    ImGui::SameLine();
     changedLock |= ImGui::Checkbox("Z", &lockRotationZ);
 
-    if (changedLock) ApplyLockRotation();
+    if (changedLock)
+    {
+        ApplyLockRotation();
+    }
 
     ImGui::Separator();
 
@@ -221,7 +241,10 @@ void PhysicsCollisionComponent::Gui()
 void PhysicsCollisionComponent::Update(float dt)
 {
     auto& t = GetGameObject()->transform;
-    if (!actor) return;
+    if (!actor)
+    {
+        return;
+    }
 
     if (isKinematic)
     {
@@ -356,12 +379,24 @@ void PhysicsCollisionComponent::Update(float dt)
 
 void PhysicsCollisionComponent::ApplyLockRotation()
 {
-    if (!actor) return;
+    if (!actor)
+    {
+        return;
+    }
 
     PxRigidDynamicLockFlags flags;
-    if (lockRotationX) flags |= PxRigidDynamicLockFlag::eLOCK_ANGULAR_X;
-    if (lockRotationY) flags |= PxRigidDynamicLockFlag::eLOCK_ANGULAR_Y;
-    if (lockRotationZ) flags |= PxRigidDynamicLockFlag::eLOCK_ANGULAR_Z;
+    if (lockRotationX)
+    {
+        flags |= PxRigidDynamicLockFlag::eLOCK_ANGULAR_X;
+    }
+    if (lockRotationY)
+    {
+        flags |= PxRigidDynamicLockFlag::eLOCK_ANGULAR_Y;
+    }
+    if (lockRotationZ)
+    {
+        flags |= PxRigidDynamicLockFlag::eLOCK_ANGULAR_Z;
+    }
 
     actor->setRigidDynamicLockFlags(flags);
 }
@@ -373,10 +408,21 @@ void PhysicsCollisionComponent::OnCollisionEnter(std::shared_ptr<GameObject> oth
     if (auto obj = GetGameObject())
     {
         auto col = obj->GetComponent<ColliderComponent>();
-        if (col) col->OnCollisionEnter(other);
+        if (col)
+        {
+            col->OnCollisionEnter(other);
+        }
     }
 }
 
-void PhysicsCollisionComponent::OnTriggerEnter(std::shared_ptr<GameObject> other) { /* 同上 */ }
-void PhysicsCollisionComponent::OnTriggerStay(std::shared_ptr<GameObject> other) { /* 同上 */ }
-void PhysicsCollisionComponent::OnTriggerExit(std::shared_ptr<GameObject> other) { /* 同上 */ }
+void PhysicsCollisionComponent::OnTriggerEnter(std::shared_ptr<GameObject> other)
+{ /* 同上 */
+}
+
+void PhysicsCollisionComponent::OnTriggerStay(std::shared_ptr<GameObject> other)
+{ /* 同上 */
+}
+
+void PhysicsCollisionComponent::OnTriggerExit(std::shared_ptr<GameObject> other)
+{ /* 同上 */
+}

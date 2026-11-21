@@ -29,7 +29,11 @@ class ParticleEditorWindow : public EditorWorkspaceWindow
 public:
     explicit ParticleEditorWindow(GameObjectManager* manager_);
     void Draw() override;
-    bool ShouldPauseScene() const override { return true; }
+
+    bool ShouldPauseScene() const override
+    {
+        return true;
+    }
 
 private:
     // Timeline上で扱う再生対象の種類。

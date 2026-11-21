@@ -32,6 +32,7 @@ ToonShader::ToonShader(ID3D11Device* device)
     sd.AddressU = sd.AddressV = sd.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
     device->CreateSamplerState(&sd, samplerState.GetAddressOf());
 }
+
 void ToonShader::Begin(const RenderContext& rc)
 {
     ID3D11DeviceContext* dc = rc.deviceContext;

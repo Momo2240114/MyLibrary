@@ -15,7 +15,10 @@ void ColorFilterDirector::Start()
 {
     // ColorFilter演出はEasingComponentに時間補間を任せる。
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
     const std::shared_ptr<EasingComponent> easing_ = owner_->GetOrAddComponent<EasingComponent>();
     // Pause中でも画面演出は戻し切りたいのでUnscaled Timeで進める。
     easing_->SetUseUnscaledTime(true);
@@ -23,7 +26,9 @@ void ColorFilterDirector::Start()
     ResetToDefault();
     // Sceneの初期化Frameでも暗転が途切れないよう、保存済みの開始設定を適用する。
     if (startWaypointIndex >= 0 && startWaypointIndex < static_cast<int>(editorWaypoints.size()))
+    {
         PlayFilter(editorWaypoints[startWaypointIndex]);
+    }
 }
 
 void ColorFilterDirector::Update(float elapsedTime_)
@@ -32,20 +37,29 @@ void ColorFilterDirector::Update(float elapsedTime_)
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     const std::shared_ptr<EasingComponent> easing_ = owner_
         ? owner_->GetComponent<EasingComponent>() : nullptr;
-    if (!easing_ || phase == PHASE::IDLE) return;
+    if (!easing_ || phase == PHASE::IDLE)
+    {
+        return;
+    }
 
     if (phase == PHASE::HOLD)
     {
         // Hold中はEasingを使わず、RawDeltaで保持時間だけ進める。
         const std::shared_ptr<TimeManager> timeManager_ = owner_->GetManager().GetTimeManager();
         holdElapsed += timeManager_ ? timeManager_->GetLastRawDeltaTime() : elapsedTime_;
-        if (holdElapsed >= holdDuration) BeginTransitionToDefault();
+        if (holdElapsed >= holdDuration)
+        {
+            BeginTransitionToDefault();
+        }
         return;
     }
 
     // TO_TARGET/TO_DEFAULT中はEasingの現在値をFilter補間率として使う。
     ApplyInterpolated(easing_->GetValue(easingIndex));
-    if (!easing_->GetEndFlag(easingIndex)) return;
+    if (!easing_->GetEndFlag(easingIndex))
+    {
+        return;
+    }
     if (phase == PHASE::TO_TARGET)
     {
         phase = PHASE::HOLD;
@@ -63,7 +77,10 @@ void ColorFilterDirector::PlayFilter(const ColorFilterWayPoint& wayPoint_)
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     const std::shared_ptr<EasingComponent> easing_ = owner_
         ? owner_->GetOrAddComponent<EasingComponent>() : nullptr;
-    if (!easing_) return;
+    if (!easing_)
+    {
+        return;
+    }
 
     startParams = GraphicsDeviceManager::Instance().GetFilterParams();
     targetParams = wayPoint_.filter;
@@ -166,7 +183,10 @@ void ColorFilterDirector::Gui()
         RegisterActions();
     }
     ImGui::SameLine();
-    if (ImGui::Button("Reset Color Filter")) ResetToDefault();
+    if (ImGui::Button("Reset Color Filter"))
+    {
+        ResetToDefault();
+    }
 
     for (int index_ = 0; index_ < static_cast<int>(editorWaypoints.size()); ++index_)
     {
@@ -185,7 +205,10 @@ void ColorFilterDirector::Gui()
             ImGui::DragFloat("Time To Target", &wayPoint_.duration, 0.01f, 0.0f, 60.0f);
             ImGui::DragFloat("Hold", &wayPoint_.holdDuration, 0.01f, 0.0f, 60.0f);
             ImGui::DragFloat("Time To Default", &wayPoint_.returnDuration, 0.01f, 0.0f, 60.0f);
-            if (ImGui::Button("Play")) PlayFilter(wayPoint_);
+            if (ImGui::Button("Play"))
+            {
+                PlayFilter(wayPoint_);
+            }
             ImGui::SameLine();
             if (ImGui::Button("Remove"))
             {
@@ -201,14 +224,23 @@ void ColorFilterDirector::RegisterActions()
 {
     // PostProcessカテゴリにColor_0, Color_1...として登録する。
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
     // 途中再生を中止した場合も、暗転を残さず通常の色へ戻せるようにする。
-    owner_->RegisterGlobalAction("PostProcess", "ResetColor", [this]() { ResetToDefault(); });
+    owner_->RegisterGlobalAction("PostProcess", "ResetColor", [this]()
+    {
+        ResetToDefault();
+    });
     for (size_t index_ = 0; index_ < editorWaypoints.size(); ++index_)
     {
         owner_->RegisterGlobalAction("PostProcess", "Color_" + std::to_string(index_), [this, index_]()
         {
-            if (index_ < editorWaypoints.size()) PlayFilter(editorWaypoints[index_]);
+            if (index_ < editorWaypoints.size())
+            {
+                PlayFilter(editorWaypoints[index_]);
+            }
         });
     }
 }
@@ -261,7 +293,10 @@ void ColorFilterDirector::Deserialize(const nlohmann::json& json_)
         }
     };
     defaultParams.colorOffset = {};
-    if (json_.contains("DefaultFilter")) read_(json_["DefaultFilter"], defaultParams);
+    if (json_.contains("DefaultFilter"))
+    {
+        read_(json_["DefaultFilter"], defaultParams);
+    }
     editorWaypoints.clear();
     if (json_.contains("ColorFilterWaypoints") && json_["ColorFilterWaypoints"].is_array())
     {

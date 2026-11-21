@@ -18,7 +18,11 @@ using BlackboardCategory = std::unordered_map<std::string, BlackBoardValue>;
 class BlackboardComponent : public Component
 {
 public:
-    const std::string& GetName() const override { static std::string name = "BlackboardComponent"; return name; }
+    const std::string& GetName() const override
+    {
+        static std::string name = "BlackboardComponent";
+        return name;
+    }
 
     void Gui() override;
     void Serialize(nlohmann::json& j_) const override;
@@ -52,7 +56,11 @@ public:
 
     const BlackboardCategory& GetCategory(const std::string& category_) const;
     BlackboardCategory& GetOrCreateCategory(const std::string& category_);
-    const std::unordered_map<std::string, BlackboardCategory>& GetBoard() const { return board; }
+
+    const std::unordered_map<std::string, BlackboardCategory>& GetBoard() const
+    {
+        return board;
+    }
 
     // BoolやVectorも条件判定へ使えるよう、必要に応じてfloatへ変換する。
     static float ToFloat(const BlackBoardValue& value_);

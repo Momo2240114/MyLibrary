@@ -38,14 +38,19 @@ namespace
         for (const auto& replacement_ : SE_PATH_REPLACEMENTS)
         {
             if (normalizedPath_ == std::string("Data/Audio/SE/") + replacement_.first)
+            {
                 return std::string("Data/Audio/SE/") + replacement_.second;
+            }
         }
         return path_;
     }
 
     DirectX::XMFLOAT3 ReadFloat3(const nlohmann::json& json_, const char* key_, const DirectX::XMFLOAT3& fallback_)
     {
-        if (!json_.contains(key_) || !json_[key_].is_array() || json_[key_].size() < 3) return fallback_;
+        if (!json_.contains(key_) || !json_[key_].is_array() || json_[key_].size() < 3)
+        {
+            return fallback_;
+        }
         return {
             json_[key_][0].get<float>(),
             json_[key_][1].get<float>(),
@@ -131,11 +136,17 @@ void AudioManager::Update()
     UpdatePresentationAudio();
     for (const std::unique_ptr<AudioSource>& audioBGM_ : audioBGMs)
     {
-        if (audioBGM_) audioBGM_->Update();
+        if (audioBGM_)
+        {
+            audioBGM_->Update();
+        }
     }
     for (const std::unique_ptr<AudioSource>& audioSE_ : audioSEs)
     {
-        if (audioSE_) audioSE_->Update();
+        if (audioSE_)
+        {
+            audioSE_->Update();
+        }
     }
 
     Audio::Instance().Update();
@@ -147,21 +158,40 @@ void AudioManager::EnsurePresentationAudio()
     BS_PROFILE_SCOPE("AudioManager::EnsurePresentationAudio");
     auto system_ = Audio::Instance().GetSystem();
     FMOD::ChannelGroup* master_ = nullptr;
-    if (!system_ || system_->getMasterChannelGroup(&master_) != FMOD_OK || !master_) return;
+    if (!system_ || system_->getMasterChannelGroup(&master_) != FMOD_OK || !master_)
+    {
+        return;
+    }
     const auto attach_ = [&](FMOD::ChannelGroup* group_, FMOD::DSP*& dsp_)
     {
-        if (!group_ || dsp_) return;
-        if (system_->createDSPByType(FMOD_DSP_TYPE_LOWPASS, &dsp_) != FMOD_OK) { dsp_ = nullptr; return; }
+        if (!group_ || dsp_)
+        {
+            return;
+        }
+        if (system_->createDSPByType(FMOD_DSP_TYPE_LOWPASS, &dsp_) != FMOD_OK)
+        {
+            dsp_ = nullptr;
+            return;
+        }
         dsp_->setBypass(true);
-        if (group_->addDSP(0, dsp_) != FMOD_OK) { dsp_->release(); dsp_ = nullptr; }
+        if (group_->addDSP(0, dsp_) != FMOD_OK)
+        {
+            dsp_->release();
+            dsp_ = nullptr;
+        }
     };
     attach_(master_, sharedMuffleDsp);
     if (!bgmPresentationGroup)
     {
         if (system_->createChannelGroup("BGM Presentation", &bgmPresentationGroup) != FMOD_OK)
+        {
             bgmPresentationGroup = nullptr;
+        }
         if (bgmPresentationGroup && master_->addGroup(bgmPresentationGroup) != FMOD_OK)
-        { bgmPresentationGroup->release(); bgmPresentationGroup = nullptr; }
+        {
+            bgmPresentationGroup->release();
+            bgmPresentationGroup = nullptr;
+        }
     }
     attach_(bgmPresentationGroup, bgmMuffleDsp);
     attach_(bgmPresentationGroup, bgmDistanceDsp);
@@ -171,7 +201,10 @@ void AudioManager::PlaySpatialAttackSound(const std::string& path_, const Direct
     float volume_, float minDistance_, float maxDistance_, bool muffled_, float cutoff_)
 {
     BS_PROFILE_SCOPE("AudioManager::PlaySpatialAttackSound");
-    if (path_.empty() || !std::isfinite(volume_) || !std::isfinite(minDistance_) || !std::isfinite(maxDistance_)) return;
+    if (path_.empty() || !std::isfinite(volume_) || !std::isfinite(minDistance_) || !std::isfinite(maxDistance_))
+    {
+        return;
+    }
     AudioPlaybackSettings settings_;
     settings_.use3D = true;
     settings_.position = position_;
@@ -188,7 +221,10 @@ void AudioManager::PlaySpatialAttackSound(const std::string& path_, const Direct
 void AudioManager::PlayTimedMuffle(float duration_, float cutoff_)
 {
     BS_PROFILE_SCOPE("AudioManager::PlayTimedMuffle");
-    if (!std::isfinite(duration_) || !std::isfinite(cutoff_) || duration_ <= 0.0f) return;
+    if (!std::isfinite(duration_) || !std::isfinite(cutoff_) || duration_ <= 0.0f)
+    {
+        return;
+    }
     EnsurePresentationAudio();
     muffleDuration = muffleRemaining = std::clamp(duration_, 0.05f, 10.0f);
     muffleCutoff = std::clamp(cutoff_, 10.0f, 22000.0f);
@@ -201,7 +237,10 @@ void AudioManager::UpdatePresentationAudio()
     const auto now_ = std::chrono::steady_clock::now();
     const float deltaTime_ = std::chrono::duration<float>(now_ - previousAudioUpdate).count();
     previousAudioUpdate = now_;
-    if (editorPlayPaused || (!bgmMuffleDsp && !sharedMuffleDsp)) return;
+    if (editorPlayPaused || (!bgmMuffleDsp && !sharedMuffleDsp))
+    {
+        return;
+    }
     muffleRemaining = (std::max)(muffleRemaining - deltaTime_, 0.0f);
     const float releaseTime_ = (std::min)(muffleDuration * 0.4f, 0.2f);
     const float attackTime_ = (std::min)(muffleDuration * 0.1f, 0.025f);
@@ -225,10 +264,16 @@ void AudioManager::UpdatePresentationAudio()
 void AudioManager::SetDeathBgmEffect(float amount_)
 {
     BS_PROFILE_SCOPE("AudioManager::SetDeathBgmEffect");
-    if (!std::isfinite(amount_)) return;
+    if (!std::isfinite(amount_))
+    {
+        return;
+    }
     EnsurePresentationAudio();
     const float amountValue_ = std::clamp(amount_, 0.0f, 1.0f);
-    if (bgmPresentationGroup) bgmPresentationGroup->setVolume((1.0f - amountValue_) * (1.0f - amountValue_));
+    if (bgmPresentationGroup)
+    {
+        bgmPresentationGroup->setVolume((1.0f - amountValue_) * (1.0f - amountValue_));
+    }
     if (bgmDistanceDsp)
     {
         bgmDistanceDsp->setParameterFloat(FMOD_DSP_LOWPASS_CUTOFF, 22000.0f * std::pow(600.0f / 22000.0f, amountValue_));
@@ -242,16 +287,31 @@ void AudioManager::ResetPresentationAudio()
     muffleRemaining = 0.0f;
     hasPreviousListenerPosition = false;
     previousAudioUpdate = std::chrono::steady_clock::now();
-    if (bgmMuffleDsp) bgmMuffleDsp->setBypass(true);
-    if (sharedMuffleDsp) sharedMuffleDsp->setBypass(true);
-    if (bgmDistanceDsp) bgmDistanceDsp->setBypass(true);
-    if (bgmPresentationGroup) bgmPresentationGroup->setVolume(1.0f);
+    if (bgmMuffleDsp)
+    {
+        bgmMuffleDsp->setBypass(true);
+    }
+    if (sharedMuffleDsp)
+    {
+        sharedMuffleDsp->setBypass(true);
+    }
+    if (bgmDistanceDsp)
+    {
+        bgmDistanceDsp->setBypass(true);
+    }
+    if (bgmPresentationGroup)
+    {
+        bgmPresentationGroup->setVolume(1.0f);
+    }
 }
 
 // CameraをListenerとして扱い、位置・速度・前方・上方向をFMODへ渡す。
 void AudioManager::UpdateListenerFromCamera(const CameraComponent* camera_, float deltaTime_)
 {
-    if (camera_ == nullptr || Audio::Instance().GetSystem() == nullptr) return;
+    if (camera_ == nullptr || Audio::Instance().GetSystem() == nullptr)
+    {
+        return;
+    }
 
     // Listener位置にはCameraの視点位置、向きにはCameraの前方・上方向を使用する。
     const DirectX::XMFLOAT3 position_ = camera_->GetEye();
@@ -283,6 +343,7 @@ void AudioManager::UpdateListenerFromCamera(const CameraComponent* camera_, floa
     // 演出カメラの即時切替後は速度差分を再開せず、次の通常更新で基準位置を取り直す。
     hasPreviousListenerPosition = deltaTime_ > 0.0001f;
 }
+
 // 管理中の音声をすべて停止・破棄してからFMOD Systemを終了する。
 void AudioManager::Finalize()
 {
@@ -293,7 +354,10 @@ void AudioManager::Finalize()
 void AudioManager::AddBGM(std::unique_ptr<AudioSource> source_)
 {
     EnsurePresentationAudio();
-    if (source_) source_->SetChannelGroup(bgmPresentationGroup);
+    if (source_)
+    {
+        source_->SetChannelGroup(bgmPresentationGroup);
+    }
     audioBGMs.push_back(std::move(source_));
 }
 
@@ -304,7 +368,10 @@ void AudioManager::AddSE(std::unique_ptr<AudioSource> source_)
 
 void AudioManager::PlayBGM(size_t index_) const
 {
-    if (index_ >= audioBGMs.size()) return;
+    if (index_ >= audioBGMs.size())
+    {
+        return;
+    }
     audioBGMs[index_]->Play(true);
     currentBgmIndex = index_;
 }
@@ -312,7 +379,10 @@ void AudioManager::PlayBGM(size_t index_) const
 void AudioManager::SwitchBGM(size_t index_)
 {
     BS_PROFILE_SCOPE("AudioManager::SwitchBGM");
-    if (index_ >= audioBGMs.size() || !audioBGMs[index_] || currentBgmIndex == index_) return;
+    if (index_ >= audioBGMs.size() || !audioBGMs[index_] || currentBgmIndex == index_)
+    {
+        return;
+    }
     // 個別音量を維持したまま旧曲を停止し、同時に複数の戦闘曲が鳴ることを防ぐ。
     StopBGM();
     PlayBGM(index_);
@@ -320,32 +390,49 @@ void AudioManager::SwitchBGM(size_t index_)
 
 void AudioManager::SetVolumeBGM(size_t index_, float volume_) const
 {
-    if (index_ >= audioBGMs.size()) return;
+    if (index_ >= audioBGMs.size())
+    {
+        return;
+    }
     audioBGMs[index_]->SetVolume(volume_);
 }
 
 std::vector<float> AudioManager::CaptureBgmVolumes() const
 {
     std::vector<float> volumes_;
-    for (const auto& source_ : audioBGMs) volumes_.push_back(source_ ? source_->GetVolume() : 1.0f);
+    for (const auto& source_ : audioBGMs)
+    {
+        volumes_.push_back(source_ ? source_->GetVolume() : 1.0f);
+    }
     return volumes_;
 }
 
 void AudioManager::ApplyBgmVolumes(const std::vector<float>& volumes_, float scale_)
 {
     for (std::size_t index_ = 0; index_ < (std::min)(volumes_.size(),audioBGMs.size()); ++index_)
-        if (audioBGMs[index_]) audioBGMs[index_]->SetVolume(volumes_[index_]*std::clamp(scale_,0.0f,1.0f));
+    {
+        if (audioBGMs[index_])
+        {
+            audioBGMs[index_]->SetVolume(volumes_[index_]*std::clamp(scale_,0.0f,1.0f));
+        }
+    }
 }
 
 void AudioManager::SetVolumeSE(size_t index_, float volume_) const
 {
-    if (index_ >= audioSEs.size()) return;
+    if (index_ >= audioSEs.size())
+    {
+        return;
+    }
     audioSEs[index_]->SetVolume(volume_);
 }
 
 void AudioManager::PlaySE(size_t index_) const
 {
-    if (index_ >= audioSEs.size()) return;
+    if (index_ >= audioSEs.size())
+    {
+        return;
+    }
     audioSEs[index_]->Play(false);
 }
 
@@ -355,19 +442,27 @@ void AudioManager::StopBGM()
     SetDeathBgmEffect(0.0f);
     for (auto& audioBGM_ : audioBGMs)
     {
-        if (audioBGM_) audioBGM_->Stop();
+        if (audioBGM_)
+        {
+            audioBGM_->Stop();
+        }
     }
 }
 
 void AudioManager::SetEditorPlayPaused(bool paused_)
 {
     // 同じ状態を毎フレームFMODへ送らず、変更が必要な時だけMixerを切り替える。
-    if (editorPlayPaused == paused_) return;
+    if (editorPlayPaused == paused_)
+    {
+        return;
+    }
     if (auto system_ = Audio::Instance().GetSystem())
     {
         FMOD::ChannelGroup* master_ = nullptr;
         if (system_->getMasterChannelGroup(&master_) == FMOD_OK && master_ && master_->setPaused(paused_) == FMOD_OK)
+        {
             editorPlayPaused = paused_;
+        }
     }
 }
 
@@ -375,13 +470,19 @@ void AudioManager::StopSE()
 {
     for (auto& audioSE_ : audioSEs)
     {
-        if (audioSE_) audioSE_->Stop();
+        if (audioSE_)
+        {
+            audioSE_->Stop();
+        }
     }
 }
 
 void AudioManager::StopSE(int index_)
 {
-    if (index_ < 0 || static_cast<size_t>(index_) >= audioSEs.size()) return;
+    if (index_ < 0 || static_cast<size_t>(index_) >= audioSEs.size())
+    {
+        return;
+    }
     audioSEs[index_]->Stop();
 }
 
@@ -401,7 +502,10 @@ void AudioManager::PlayBGMByPath(const std::string& path_, bool loop_)
     if (index_ < audioBGMs.size())
     {
         // SceneのAudioComponentによる選曲も、通常戦闘曲と重ならないようにする。
-        if (currentBgmIndex != index_) StopBGM();
+        if (currentBgmIndex != index_)
+        {
+            StopBGM();
+        }
         audioBGMs[index_]->Play(loop_);
         currentBgmIndex = index_;
     }
@@ -410,7 +514,10 @@ void AudioManager::PlayBGMByPath(const std::string& path_, bool loop_)
 void AudioManager::PlaySEByPath(const std::string& path_, bool loop_)
 {
     const size_t index_ = AddAudioFromFile(path_, false);
-    if (index_ < audioSEs.size()) audioSEs[index_]->Play(loop_);
+    if (index_ < audioSEs.size())
+    {
+        audioSEs[index_]->Play(loop_);
+    }
 }
 
 // パスから音源を取得し、指定設定で既存再生と重ねるOneShot再生を行う。
@@ -422,11 +529,17 @@ void AudioManager::PlayOneShotByPath(
     const size_t index_ = AddAudioFromFile(path_, isBGM_);
     if (isBGM_)
     {
-        if (index_ < audioBGMs.size()) audioBGMs[index_]->PlayOneShot(settings_);
+        if (index_ < audioBGMs.size())
+        {
+            audioBGMs[index_]->PlayOneShot(settings_);
+        }
         return;
     }
 
-    if (index_ < audioSEs.size()) audioSEs[index_]->PlayOneShot(settings_);
+    if (index_ < audioSEs.size())
+    {
+        audioSEs[index_]->PlayOneShot(settings_);
+    }
 }
 
 // BGMとSEの検索テーブルからパスを探し、対応するAudioSourceを停止する。
@@ -437,7 +550,10 @@ void AudioManager::StopByPath(const std::string& path_)
     if (bgmIt_ != bgmPathToIndex.end() && bgmIt_->second < audioBGMs.size())
     {
         audioBGMs[bgmIt_->second]->Stop();
-        if (currentBgmIndex == bgmIt_->second) currentBgmIndex = INVALID_AUDIO_INDEX;
+        if (currentBgmIndex == bgmIt_->second)
+        {
+            currentBgmIndex = INVALID_AUDIO_INDEX;
+        }
         return;
     }
 
@@ -518,7 +634,10 @@ void AudioManager::SetMuffledByPath(const std::string& path_, bool muffled_, flo
 bool AudioManager::LoadAudioWorkspace(const std::string& path_)
 {
     std::ifstream file_(path_);
-    if (!file_.is_open()) return false;
+    if (!file_.is_open())
+    {
+        return false;
+    }
 
     nlohmann::json json_;
     file_ >> json_;
@@ -527,7 +646,10 @@ bool AudioManager::LoadAudioWorkspace(const std::string& path_)
     workspacePresets.clear();
     workspacePresetToIndex.clear();
 
-    if (!json_.contains("Presets") || !json_["Presets"].is_array()) return false;
+    if (!json_.contains("Presets") || !json_["Presets"].is_array())
+    {
+        return false;
+    }
 
     for (const auto& presetJson_ : json_["Presets"])
     {
@@ -538,12 +660,21 @@ bool AudioManager::LoadAudioWorkspace(const std::string& path_)
         preset_.path = presetJson_.value("Path", std::string{});
         preset_.isBGM = presetJson_.value("IsBGM", false);
         preset_.settings = ReadPlaybackSettings(presetJson_);
-        if (preset_.path.empty()) continue;
+        if (preset_.path.empty())
+        {
+            continue;
+        }
 
         const size_t index_ = workspacePresets.size();
         workspacePresets.push_back(preset_);
-        if (!preset_.name.empty()) workspacePresetToIndex[preset_.name] = index_;
-        if (!preset_.actionName.empty()) workspacePresetToIndex[preset_.actionName] = index_;
+        if (!preset_.name.empty())
+        {
+            workspacePresetToIndex[preset_.name] = index_;
+        }
+        if (!preset_.actionName.empty())
+        {
+            workspacePresetToIndex[preset_.actionName] = index_;
+        }
         AddAudioFromFile(preset_.path, preset_.isBGM);
     }
 
@@ -568,8 +699,14 @@ void AudioManager::RegisterAudioWorkspaceActions(const std::string& path_)
     for (const AudioWorkspacePreset& preset_ : workspacePresets)
     {
         const std::string actionName_ = preset_.actionName.empty() ? preset_.name : preset_.actionName;
-        if (actionName_.empty()) continue;
-        if (registry_.HasActionInCategory("Audio", actionName_)) continue;
+        if (actionName_.empty())
+        {
+            continue;
+        }
+        if (registry_.HasActionInCategory("Audio", actionName_))
+        {
+            continue;
+        }
 
         registry_.RegisterAction("Audio", actionName_, [this, actionName_]()
             {
@@ -585,9 +722,15 @@ bool AudioManager::PlayWorkspacePreset(const std::string& presetName_, bool allo
     auto it_ = workspacePresetToIndex.find(presetName_);
     if (it_ == workspacePresetToIndex.end())
     {
-        if (!LoadAudioWorkspace()) return false;
+        if (!LoadAudioWorkspace())
+        {
+            return false;
+        }
         it_ = workspacePresetToIndex.find(presetName_);
-        if (it_ == workspacePresetToIndex.end()) return false;
+        if (it_ == workspacePresetToIndex.end())
+        {
+            return false;
+        }
     }
 
     const AudioWorkspacePreset& preset_ = workspacePresets[it_->second];
@@ -619,9 +762,15 @@ bool AudioManager::StopWorkspacePreset(const std::string& presetName_)
     auto it_ = workspacePresetToIndex.find(presetName_);
     if (it_ == workspacePresetToIndex.end())
     {
-        if (!LoadAudioWorkspace()) return false;
+        if (!LoadAudioWorkspace())
+        {
+            return false;
+        }
         it_ = workspacePresetToIndex.find(presetName_);
-        if (it_ == workspacePresetToIndex.end()) return false;
+        if (it_ == workspacePresetToIndex.end())
+        {
+            return false;
+        }
     }
 
     StopByPath(workspacePresets[it_->second].path);
@@ -656,9 +805,12 @@ void AudioManager::DrawGUI()
 
             for (const auto& entry_ : fs::directory_iterator(directory_))
             {
-                if (!entry_.is_regular_file()) continue;
+                if (!entry_.is_regular_file())
+            {
+                continue;
+            }
 
-                const std::string path_ = entry_.path().generic_string();
+            const std::string path_ = entry_.path().generic_string();
                 const std::string fileName_ = entry_.path().filename().string();
                 const bool isLoaded_ = loadedPaths.find(path_) != loadedPaths.end();
 
@@ -698,25 +850,40 @@ void AudioManager::ClearAll()
     {
         FMOD::ChannelGroup* master_ = nullptr;
         if (auto system_ = Audio::Instance().GetSystem())
-            if (system_->getMasterChannelGroup(&master_) == FMOD_OK && master_) master_->removeDSP(sharedMuffleDsp);
+        {
+            if (system_->getMasterChannelGroup(&master_) == FMOD_OK && master_)
+            {
+                master_->removeDSP(sharedMuffleDsp);
+            }
+        }
         sharedMuffleDsp->release();
         sharedMuffleDsp = nullptr;
     }
     if (bgmMuffleDsp)
     {
-        if (bgmPresentationGroup) bgmPresentationGroup->removeDSP(bgmMuffleDsp);
+        if (bgmPresentationGroup)
+        {
+            bgmPresentationGroup->removeDSP(bgmMuffleDsp);
+        }
         bgmMuffleDsp->release();
         bgmMuffleDsp = nullptr;
     }
     if (bgmDistanceDsp)
     {
-        if (bgmPresentationGroup) bgmPresentationGroup->removeDSP(bgmDistanceDsp);
+        if (bgmPresentationGroup)
+        {
+            bgmPresentationGroup->removeDSP(bgmDistanceDsp);
+        }
         bgmDistanceDsp->release();
         bgmDistanceDsp = nullptr;
     }
     audioBGMs.clear();
     audioSEs.clear();
-    if (bgmPresentationGroup) { bgmPresentationGroup->release(); bgmPresentationGroup = nullptr; }
+    if (bgmPresentationGroup)
+    {
+        bgmPresentationGroup->release();
+        bgmPresentationGroup = nullptr;
+    }
     loadedPaths.clear();
     bgmPathToIndex.clear();
     sePathToIndex.clear();
@@ -729,23 +896,38 @@ void AudioManager::ClearAll()
 size_t AudioManager::AddAudioFromFile(const std::string& path_, bool isBGM_)
 {
     const std::string resolvedPath_ = ResolveSeAssetPath(path_);
-    if (resolvedPath_.empty()) return INVALID_AUDIO_INDEX;
+    if (resolvedPath_.empty())
+    {
+        return INVALID_AUDIO_INDEX;
+    }
 
     if (isBGM_)
     {
         auto it_ = bgmPathToIndex.find(resolvedPath_);
-        if (it_ != bgmPathToIndex.end()) return it_->second;
+        if (it_ != bgmPathToIndex.end())
+        {
+            return it_->second;
+        }
     }
     else
     {
         auto it_ = sePathToIndex.find(resolvedPath_);
-        if (it_ != sePathToIndex.end()) return it_->second;
+        if (it_ != sePathToIndex.end())
+        {
+            return it_->second;
+        }
     }
 
     AudioSource* raw_ = Audio::Instance().LoadAudioSource(resolvedPath_.c_str());
-    if (!raw_) return INVALID_AUDIO_INDEX;
+    if (!raw_)
+    {
+        return INVALID_AUDIO_INDEX;
+    }
     EnsurePresentationAudio();
-    if (isBGM_) raw_->SetChannelGroup(bgmPresentationGroup);
+    if (isBGM_)
+    {
+        raw_->SetChannelGroup(bgmPresentationGroup);
+    }
 
     if (isBGM_)
     {

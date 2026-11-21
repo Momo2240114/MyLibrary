@@ -1,0 +1,106 @@
+{
+    "CollisionMask": 0,
+    "Components": [
+        {
+            "Data": {
+                "InputEnabled": false,
+                "ParentWidgetId": "BattleHudRoot",
+                "RaycastTarget": false,
+                "RectTransform": {
+                    "AnchorMax": [
+                        0.5,
+                        0.5
+                    ],
+                    "AnchorMin": [
+                        0.5,
+                        0.5
+                    ],
+                    "AnchoredPosition": [
+                        266.0,
+                        108.0
+                    ],
+                    "LocalRotation": 0.0,
+                    "LocalScale": [
+                        1.0,
+                        1.0
+                    ],
+                    "Pivot": [
+                        0.5,
+                        0.5
+                    ],
+                    "SizeDelta": [
+                        348.0,
+                        54.0
+                    ]
+                },
+                "Version": 1,
+                "Visible": true,
+                "WidgetId": "HudGuideFollowUpRushBackground",
+                "ZOrder": 80
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "UIWidgetComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "CatPos": [
+                    0.0,
+                    0.0
+                ],
+                "CatSize": [
+                    220.0,
+                    44.0
+                ],
+                "Color": [
+                    0.6899999976158142,
+                    0.8500000238418579,
+                    1.0,
+                    1.0
+                ],
+                "LinearSampling": true,
+                "LocalSize": [
+                    348.0,
+                    54.0
+                ],
+                "SdrTexture": true,
+                "ShaderID": 0,
+                "TexturePath": "./Data/Sprite/UI/Hud/ActionGuide/ActionGuide_LabelBackground.png",
+                "Visible": false,
+                "pivotType": 0
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "SpriteRenderer",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        }
+    ],
+    "Layer": 16,
+    "Name": "HudGuideFollowUpRushBackground",
+    "ParentName": "UIRoot",
+    "RequiredForSceneStart": false,
+    "Transform": {
+        "Pos": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

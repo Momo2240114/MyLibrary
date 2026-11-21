@@ -11,7 +11,7 @@
                     1920.0,
                     1080.0
                 ],
-                "ScaleMode": "SCALE_WITH_SCREEN_SIZE",
+                "ScaleMode": "EXPAND",
                 "Version": 1,
                 "Visible": true,
                 "ZOrder": 100
@@ -52,8 +52,8 @@
                         0.5
                     ],
                     "SizeDelta": [
-                        800.0,
-                        130.0
+                        796.0,
+                        123.0
                     ]
                 },
                 "Version": 1,
@@ -77,7 +77,7 @@
                 ],
                 "CatSize": [
                     796.0,
-                    134.0
+                    123.0
                 ],
                 "Color": [
                     1.0,
@@ -85,15 +85,15 @@
                     1.0,
                     1.0
                 ],
-                "LinearSampling": false,
+                "LinearSampling": true,
                 "LocalSize": [
                     796.0,
-                    134.0
+                    123.0
                 ],
                 "SdrTexture": false,
                 "ShaderID": 0,
                 "TexturePath": "",
-                "Visible": true,
+                "Visible": false,
                 "pivotType": 0
             },
             "Enabled": true,
@@ -106,20 +106,20 @@
         },
         {
             "Data": {
-                "AutoSizeWidget": false,
+                "AutoSizeWidget": true,
                 "Color": [
                     1.0,
                     1.0,
                     1.0,
                     1.0
                 ],
-                "FontPath": "Data/Font/NotoSansJP-Regular.otf",
-                "FontSize": 38.0,
+                "FontPath": "Data/Font/Zen_Old_Mincho/ZenOldMincho-Black.ttf",
+                "FontSize": 68.0,
                 "FontStrokeWidth": 0.0,
                 "HorizontalAlign": "CENTER",
                 "MaxWidth": 780.0,
                 "Padding": 8.0,
-                "Text": "断崖の龍\nDRAGON NAME",
+                "Text": "断崖の龍",
                 "Version": 1,
                 "VerticalAlign": "CENTER"
             },
@@ -134,10 +134,11 @@
         {
             "Data": {
                 "BossName": "断崖の龍",
-                "DisplayDuration": 1.2000000476837158,
-                "FadeInDuration": 0.3499999940395355,
-                "FadeOutDuration": 0.44999998807907104,
-                "SubName": "DRAGON NAME"
+                "DisplayDuration": 1.2699999809265137,
+                "DissolveOnFadeOut": true,
+                "FadeInDuration": 0.5,
+                "FadeOutDuration": 0.8799999952316284,
+                "SubName": ""
             },
             "Enabled": true,
             "LateUpdateEnabled": true,
@@ -146,6 +147,120 @@
             "TypeName": "BossNamePresentationComponent",
             "UpdateEnabled": true,
             "UpdatePriority": 100
+        },
+        {
+            "Data": {
+                "PlayOnStart": false,
+                "Preset": "GoldGradient",
+                "Settings": {
+                    "BurnColor": [
+                        1.0,
+                        0.24,
+                        0.025,
+                        1.0
+                    ],
+                    "EdgeWidth": 0.12,
+                    "GlowColor": [
+                        1.0,
+                        0.56,
+                        0.22,
+                        1.0
+                    ],
+                    "GlowIntensity": 0.45,
+                    "GlowRadius": 7.0,
+                    "GradientBottom": [
+                        0.63,
+                        0.4,
+                        0.19,
+                        1.0
+                    ],
+                    "GradientStrength": 0.92,
+                    "GradientTop": [
+                        1.0,
+                        0.95,
+                        0.79,
+                        1.0
+                    ],
+                    "MaskInvert": true,
+                    "MaskOffset": [
+                        0.07,
+                        0.06
+                    ],
+                    "MaskScale": [
+                        1.7,
+                        0.88
+                    ],
+                    "MaskTexture": "Data/Texture/TransitionMasks/Waves.png",
+                    "OutlineColor": [
+                        0.09,
+                        0.045,
+                        0.02,
+                        0.95
+                    ],
+                    "OutlineWidth": 2.2,
+                    "ShadowColor": [
+                        0.02,
+                        0.01,
+                        0.008,
+                        0.83
+                    ],
+                    "ShadowOffset": [
+                        0.0,
+                        5.0
+                    ],
+                    "ShadowOpacity": 0.95,
+                    "ShadowSoftness": 4.0,
+                    "SweepColor": [
+                        1.0,
+                        0.85,
+                        0.54,
+                        1.0
+                    ],
+                    "SweepIntensity": 0.22,
+                    "SweepSpeed": 0.7,
+                    "SweepWidth": 0.085
+                }
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "UIVisualEffectComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "PlayOnStart": false,
+                "Preset": "PopIn",
+                "Settings": {
+                    "Duration": 0.64,
+                    "Easing": 2,
+                    "OffsetFrom": [
+                        0.0,
+                        -12.0
+                    ],
+                    "OffsetTo": [
+                        0.0,
+                        0.0
+                    ],
+                    "ScaleFrom": [
+                        1.13,
+                        1.13
+                    ],
+                    "ScaleTo": [
+                        1.0,
+                        1.0
+                    ]
+                }
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "UIMotionComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         }
     ],
     "Layer": 16,

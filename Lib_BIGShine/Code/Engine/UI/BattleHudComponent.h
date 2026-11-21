@@ -22,6 +22,7 @@ public:
         static const std::string NAME = "BattleHudComponent";
         return NAME;
     }
+
     // Sceneに保存されたWidgetを参照し、表示専用Actionを登録する。
     void Start() override;
     // 全ComponentのUpdate後にHP・入力・演出状態を反映する。
@@ -50,6 +51,7 @@ private:
         bool runtimeLayout = false;
         int group = 0;
     };
+
     // 文字列化やTexture更新を、表示内容が変わった場合だけに限定するための実行時キャッシュ。
     struct GuideDisplayCache
     {
@@ -66,6 +68,7 @@ private:
         bool skillInitialized = false;
         bool hintInitialized = false;
     };
+
     // Scene内の表示専用Objectを一度解決する。
     void ResolveElements();
     // 名前が一致する表示要素を探す。
@@ -95,6 +98,7 @@ private:
         std::string fallback;
         bool initialized = false;
     };
+
     InputIconAtlas inputAtlas;
     std::unordered_map<std::string, InputCombo> actionBindings;
     std::unordered_map<std::string, BindingVisual> bindingVisuals;

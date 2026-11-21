@@ -63,7 +63,10 @@ namespace
         const XMFLOAT3& groundPosition_,
         bool grounded_)
     {
-        if (!grounded_) return footPosition_;
+        if (!grounded_)
+        {
+            return footPosition_;
+        }
 
         XMFLOAT3 result_ = footPosition_;
 
@@ -86,7 +89,10 @@ namespace
     {
         const XMFLOAT3 difference_ = Subtract(endPosition_, startPosition_);
         const float length_ = Length(difference_);
-        if (length_ <= EPSILON) return;
+        if (length_ <= EPSILON)
+        {
+            return;
+        }
 
         const XMVECTOR forward_ = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
         const XMVECTOR direction_ = XMVector3Normalize(XMLoadFloat3(&difference_));
@@ -139,9 +145,18 @@ namespace
             (void)filterData_;
             (void)queryFlags_;
 
-            if (!shape_ || !actor_) return PxQueryHitType::eNONE;
-            if (!shape_->getFlags().isSet(PxShapeFlag::eSCENE_QUERY_SHAPE)) return PxQueryHitType::eNONE;
-            if (shape_->getFlags().isSet(PxShapeFlag::eTRIGGER_SHAPE)) return PxQueryHitType::eNONE;
+            if (!shape_ || !actor_)
+            {
+                return PxQueryHitType::eNONE;
+            }
+            if (!shape_->getFlags().isSet(PxShapeFlag::eSCENE_QUERY_SHAPE))
+            {
+                return PxQueryHitType::eNONE;
+            }
+            if (shape_->getFlags().isSet(PxShapeFlag::eTRIGGER_SHAPE))
+            {
+                return PxQueryHitType::eNONE;
+            }
 
             // Owner自身のColliderは足IKの接地判定から除外する。
             if (std::find(ignoredUserData.begin(), ignoredUserData.end(), actor_->userData)
@@ -184,9 +199,15 @@ const std::string& FootIKComponent::GetName() const
 // 必要Componentを取得し、左右のFootチェーンを作成する。
 void FootIKComponent::Start()
 {
-    if (!ResolveDependencies()) return;
+    if (!ResolveDependencies())
+    {
+        return;
+    }
     const std::shared_ptr<IKMapComponent> ikMap_ = ikMap.lock();
-    if (!ikMap_) return;
+    if (!ikMap_)
+    {
+        return;
+    }
     ikMap_->AddFootChain("FootL");
     ikMap_->AddFootChain("FootR");
 }
@@ -195,7 +216,10 @@ bool FootIKComponent::IsLoadReady() const
 {
     const auto owner_ = const_cast<FootIKComponent*>(this)->GetGameObject();
     const auto model_ = owner_ ? owner_->GetComponent<GltfModelCommponennt>() : nullptr;
-    if (!model_) return true;
+    if (!model_)
+    {
+        return true;
+    }
 
     model_->UpdateLoadState();
     return !model_->IsModelLoading();
@@ -205,10 +229,19 @@ bool FootIKComponent::IsLoadReady() const
 bool FootIKComponent::ResolveDependencies()
 {
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return false;
+    if (!owner_)
+    {
+        return false;
+    }
 
-    if (ikMap.expired()) ikMap = owner_->GetComponent<IKMapComponent>();
-    if (model.expired()) model = owner_->GetComponent<GltfModelCommponennt>();
+    if (ikMap.expired())
+    {
+        ikMap = owner_->GetComponent<IKMapComponent>();
+    }
+    if (model.expired())
+    {
+        model = owner_->GetComponent<GltfModelCommponennt>();
+    }
 
     return !ikMap.expired() && !model.expired();
 }
@@ -218,15 +251,30 @@ void FootIKComponent::LateUpdate(float deltaTime_)
 {
     BS_PROFILE_SCOPE("FootIKComponent::LateUpdate");
 
-    if (!enabled || !ResolveDependencies()) return;
+    if (!enabled || !ResolveDependencies())
+    {
+        return;
+    }
     const std::shared_ptr<GltfModelCommponennt> modelReady_ = model.lock();
-    if (modelReady_) modelReady_->UpdateLoadState();
-    if (!modelReady_ || !modelReady_->IsModelReady()) return;
+    if (modelReady_)
+    {
+        modelReady_->UpdateLoadState();
+    }
+    if (!modelReady_ || !modelReady_->IsModelReady())
+    {
+        return;
+    }
 
     const std::shared_ptr<IKMapComponent> ikMap_ = ikMap.lock();
-    if (!ikMap_) return;
+    if (!ikMap_)
+    {
+        return;
+    }
     std::vector<IKMapComponent::IKChain>& chains_ = ikMap_->GetChains();
-    if (footStates.size() != chains_.size()) footStates.resize(chains_.size());
+    if (footStates.size() != chains_.size())
+    {
+        footStates.resize(chains_.size());
+    }
 
     std::vector<IKMapComponent::IKChain*> footChains_;
 
@@ -234,8 +282,14 @@ void FootIKComponent::LateUpdate(float deltaTime_)
     for (size_t chainIndex_ = 0; chainIndex_ < chains_.size(); ++chainIndex_)
     {
         IKMapComponent::IKChain& chain_ = chains_[chainIndex_];
-        if (!chain_.enabled || chain_.type != IKMapComponent::IK_TYPE::FOOT) continue;
-        if (ResolveChain(chain_)) footChains_.push_back(&chain_);
+        if (!chain_.enabled || chain_.type != IKMapComponent::IK_TYPE::FOOT)
+        {
+            continue;
+        }
+        if (ResolveChain(chain_))
+        {
+            footChains_.push_back(&chain_);
+        }
     }
 
     // 足が届くように先に骨盤高さを補正する。
@@ -245,8 +299,14 @@ void FootIKComponent::LateUpdate(float deltaTime_)
     for (size_t chainIndex_ = 0; chainIndex_ < chains_.size(); ++chainIndex_)
     {
         IKMapComponent::IKChain& chain_ = chains_[chainIndex_];
-        if (!chain_.enabled || chain_.type != IKMapComponent::IK_TYPE::FOOT) continue;
-        if (!chain_.nodeIndices.empty()) SolveChain(chain_, footStates[chainIndex_], deltaTime_);
+        if (!chain_.enabled || chain_.type != IKMapComponent::IK_TYPE::FOOT)
+        {
+            continue;
+        }
+        if (!chain_.nodeIndices.empty())
+        {
+            SolveChain(chain_, footStates[chainIndex_], deltaTime_);
+        }
     }
 }
 
@@ -254,10 +314,16 @@ void FootIKComponent::LateUpdate(float deltaTime_)
 int FootIKComponent::FindCommonAncestor(
     const std::vector<IKMapComponent::IKChain*>& footChains_) const
 {
-    if (footChains_.size() < 2) return -1;
+    if (footChains_.size() < 2)
+    {
+        return -1;
+    }
 
     const std::shared_ptr<GltfModelCommponennt> model_ = model.lock();
-    if (!model_) return -1;
+    if (!model_)
+    {
+        return -1;
+    }
     const std::vector<GltfModelCommponennt::Node>& nodes_ = model_->GetNodes();
     std::vector<int> ancestors_;
 
@@ -294,7 +360,10 @@ int FootIKComponent::FindCommonAncestor(
             }
         }
 
-        if (sharedByAll_) return candidateIndex_;
+        if (sharedByAll_)
+        {
+            return candidateIndex_;
+        }
     }
 
     return -1;
@@ -305,12 +374,21 @@ void FootIKComponent::ApplyPelvisAdjustment(
     const std::vector<IKMapComponent::IKChain*>& footChains_,
     float deltaTime_)
 {
-    if (footChains_.empty()) return;
+    if (footChains_.empty())
+    {
+        return;
+    }
     const std::shared_ptr<GltfModelCommponennt> model_ = model.lock();
-    if (!model_) return;
+    if (!model_)
+    {
+        return;
+    }
 
     const int pelvisNodeIndex_ = FindCommonAncestor(footChains_);
-    if (pelvisNodeIndex_ < 0) return;
+    if (pelvisNodeIndex_ < 0)
+    {
+        return;
+    }
 
     float requiredDrop_ = 0.0f;
     const std::vector<GltfModelCommponennt::Node>& nodes_ = model_->GetNodes();
@@ -319,7 +397,10 @@ void FootIKComponent::ApplyPelvisAdjustment(
     {
         for (const IKMapComponent::IKChain* chain_ : footChains_)
         {
-            if (!chain_ || chain_->nodeIndices.size() < 2) continue;
+            if (!chain_ || chain_->nodeIndices.size() < 2)
+            {
+                continue;
+            }
 
             const XMFLOAT3 rootPosition_ = GetTranslation(
                 nodes_.at(chain_->nodeIndices.front()).worldTransform);
@@ -328,7 +409,10 @@ void FootIKComponent::ApplyPelvisAdjustment(
 
             XMFLOAT3 hitPosition_{};
             XMFLOAT3 hitNormal_{};
-            if (!QueryGround(*chain_, footPosition_, hitPosition_, hitNormal_)) continue;
+            if (!QueryGround(*chain_, footPosition_, hitPosition_, hitNormal_))
+            {
+                continue;
+            }
 
             float legLength_ = 0.0f;
 
@@ -381,7 +465,10 @@ void FootIKComponent::ApplyPelvisAdjustment(
 void FootIKComponent::ApplyPelvisOffset(int pelvisNodeIndex_, float worldDrop_)
 {
     const std::shared_ptr<GltfModelCommponennt> model_ = model.lock();
-    if (!model_) return;
+    if (!model_)
+    {
+        return;
+    }
     std::vector<GltfModelCommponennt::Node>& nodes_ = model_->GetNodes();
     GltfModelCommponennt::Node& pelvisNode_ = nodes_.at(pelvisNodeIndex_);
 
@@ -427,14 +514,26 @@ void FootIKComponent::ApplyPelvisOffset(int pelvisNodeIndex_, float worldDrop_)
 // RootからTipまでのFootチェーンNodeIndex列を解決する。
 bool FootIKComponent::ResolveChain(IKMapComponent::IKChain& chain_)
 {
-    if (chain_.rootNodeName.empty() || chain_.tipNodeName.empty()) return false;
-    if (!chain_.nodeIndices.empty()) return chain_.nodeIndices.size() >= 2;
+    if (chain_.rootNodeName.empty() || chain_.tipNodeName.empty())
+    {
+        return false;
+    }
+    if (!chain_.nodeIndices.empty())
+    {
+        return chain_.nodeIndices.size() >= 2;
+    }
 
     const std::shared_ptr<GltfModelCommponennt> model_ = model.lock();
-    if (!model_) return false;
+    if (!model_)
+    {
+        return false;
+    }
     const int rootIndex_ = model_->GetNodeIndex(chain_.rootNodeName.c_str());
     const int tipIndex_ = model_->GetNodeIndex(chain_.tipNodeName.c_str());
-    if (rootIndex_ < 0 || tipIndex_ < 0) return false;
+    if (rootIndex_ < 0 || tipIndex_ < 0)
+    {
+        return false;
+    }
 
     const std::vector<GltfModelCommponennt::Node>& nodes_ = model_->GetNodes();
     std::vector<int> reverseIndices_;
@@ -444,15 +543,22 @@ bool FootIKComponent::ResolveChain(IKMapComponent::IKChain& chain_)
         currentIndex_ = nodes_.at(currentIndex_).parentIndex)
     {
         reverseIndices_.push_back(currentIndex_);
-        if (currentIndex_ == rootIndex_) break;
+        if (currentIndex_ == rootIndex_)
+        {
+            break;
+        }
     }
 
-    if (reverseIndices_.empty() || reverseIndices_.back() != rootIndex_) return false;
+    if (reverseIndices_.empty() || reverseIndices_.back() != rootIndex_)
+    {
+        return false;
+    }
 
     // RootからTipの順番で格納する。
     chain_.nodeIndices.assign(reverseIndices_.rbegin(), reverseIndices_.rend());
     return chain_.nodeIndices.size() >= 2;
 }
+
 // 足位置から下方向へRayを飛ばして地面を取得する。
 bool FootIKComponent::QueryGround(
     const IKMapComponent::IKChain& chain_,
@@ -462,21 +568,30 @@ bool FootIKComponent::QueryGround(
 {
     PxScene* scene_ = PhysXSystem::GetScene();
     const std::shared_ptr<GameObject> owner_ = gameObject.lock();
-    if (!scene_ || !owner_) return false;
+    if (!scene_ || !owner_)
+    {
+        return false;
+    }
 
     std::vector<const void*> ignoredUserData_;
 
     // Owner自身のColliderをRaycast対象から除外する。
     for (const std::shared_ptr<ColliderComponent>& collider_ : owner_->GetComponents<ColliderComponent>())
     {
-        if (collider_) ignoredUserData_.push_back(collider_.get());
+        if (collider_)
+        {
+            ignoredUserData_.push_back(collider_.get());
+        }
     }
 
     FootQueryFilter queryFilter_(ignoredUserData_);
     PxQueryFlags queryFlags_ = PxQueryFlag::eSTATIC | PxQueryFlag::ePREFILTER;
 
     // 設定が有効なら動的Colliderも地面判定に含める。
-    if (chain_.footIncludeDynamicColliders) queryFlags_ |= PxQueryFlag::eDYNAMIC;
+    if (chain_.footIncludeDynamicColliders)
+    {
+        queryFlags_ |= PxQueryFlag::eDYNAMIC;
+    }
 
     const float safeStepUp_ = (std::max)(chain_.footMaxStepUp, 0.0f);
     const float safeStepDown_ = (std::max)(chain_.footMaxStepDown, 0.0f);
@@ -494,7 +609,10 @@ bool FootIKComponent::QueryGround(
         PxQueryFilterData(PxFilterData(), queryFlags_),
         &queryFilter_);
 
-    if (!hasHit_ || !rayHit_.hasBlock) return false;
+    if (!hasHit_ || !rayHit_.hasBlock)
+    {
+        return false;
+    }
 
     const PxRaycastHit& block_ = rayHit_.block;
 
@@ -515,7 +633,10 @@ void FootIKComponent::SolveChain(
     float deltaTime_)
 {
     const std::shared_ptr<GltfModelCommponennt> model_ = model.lock();
-    if (!model_) return;
+    if (!model_)
+    {
+        return;
+    }
     const std::vector<GltfModelCommponennt::Node>& nodes_ = model_->GetNodes();
 
     std::vector<XMFLOAT3> animatedPositions_;
@@ -622,7 +743,10 @@ void FootIKComponent::SolveChain(
                 solvedPositions_[pointIndex_] = Add(solvedPositions_[pointIndex_ - 1], Scale(direction_, lengths_[pointIndex_ - 1]));
             }
 
-            if (Length(Subtract(solvedPositions_.back(), targetPosition_)) <= 0.001f) break;
+            if (Length(Subtract(solvedPositions_.back(), targetPosition_)) <= 0.001f)
+            {
+                break;
+            }
         }
     }
 
@@ -644,7 +768,10 @@ void FootIKComponent::ApplySolvedPose(
     const std::vector<XMFLOAT3>& solvedPositions_)
 {
     const std::shared_ptr<GltfModelCommponennt> model_ = model.lock();
-    if (!model_) return;
+    if (!model_)
+    {
+        return;
+    }
     std::vector<GltfModelCommponennt::Node>& nodes_ = model_->GetNodes();
     bool chainChanged_ = false;
 
@@ -666,7 +793,10 @@ void FootIKComponent::ApplySolvedPose(
 
         // 現在方向から目標方向へ回す軸を求める。
         XMVECTOR axis_ = XMVector3Cross(currentVector_, targetVector_);
-        if (XMVectorGetX(XMVector3LengthSq(axis_)) <= EPSILON) continue;
+        if (XMVectorGetX(XMVector3LengthSq(axis_)) <= EPSILON)
+        {
+            continue;
+        }
 
         axis_ = XMVector3Normalize(axis_);
 
@@ -718,7 +848,10 @@ void FootIKComponent::AlignFootToGround(
     float deltaTime_)
 {
     const std::shared_ptr<GltfModelCommponennt> model_ = model.lock();
-    if (!model_) return;
+    if (!model_)
+    {
+        return;
+    }
     std::vector<GltfModelCommponennt::Node>& nodes_ = model_->GetNodes();
     GltfModelCommponennt::Node& footNode_ = nodes_.at(chain_.nodeIndices.back());
     XMMATRIX footWorldRotation_ = XMLoadFloat4x4(&footNode_.worldTransform);
@@ -726,7 +859,10 @@ void FootIKComponent::AlignFootToGround(
     const XMVECTOR currentUp_ = XMVector3Normalize(footWorldRotation_.r[1]);
     const XMVECTOR desiredUp_ = XMLoadFloat3(&groundNormal_);
     XMVECTOR axis_ = XMVector3Cross(currentUp_, desiredUp_);
-    if (XMVectorGetX(XMVector3LengthSq(axis_)) <= EPSILON) return;
+    if (XMVectorGetX(XMVector3LengthSq(axis_)) <= EPSILON)
+    {
+        return;
+    }
     axis_ = XMVector3Normalize(axis_);
     const float dot_ = std::clamp(
         XMVectorGetX(XMVector3Dot(currentUp_, desiredUp_)), -1.0f, 1.0f);
@@ -754,9 +890,15 @@ void FootIKComponent::ApplyPoleConstraint(
     std::vector<XMFLOAT3>& solvedPositions_) const
 {
     const std::shared_ptr<GltfModelCommponennt> model_ = model.lock();
-    if (!model_) return;
+    if (!model_)
+    {
+        return;
+    }
     const float bendWeight_ = std::clamp(chain_.footBendWeight, 0.0f, 1.0f);
-    if (bendWeight_ <= EPSILON || solvedPositions_.size() < 3) return;
+    if (bendWeight_ <= EPSILON || solvedPositions_.size() < 3)
+    {
+        return;
+    }
     XMFLOAT3 configuredPolePosition_{};
     bool hasConfiguredPole_ = false;
     if (!chain_.footPoleNodeName.empty())
@@ -774,7 +916,10 @@ void FootIKComponent::ApplyPoleConstraint(
         const XMFLOAT3 previousPosition_ = solvedPositions_[pointIndex_ - 1];
         const XMFLOAT3 nextPosition_ = solvedPositions_[pointIndex_ + 1];
         const XMFLOAT3 axisDirection_ = Normalize(Subtract(nextPosition_, previousPosition_));
-        if (Length(axisDirection_) <= EPSILON) continue;
+        if (Length(axisDirection_) <= EPSILON)
+        {
+            continue;
+        }
         const XMFLOAT3 polePosition_ = hasConfiguredPole_
             ? configuredPolePosition_ : animatedPositions_[pointIndex_];
         const XMFLOAT3 currentOffset_ = Subtract(
@@ -788,7 +933,10 @@ void FootIKComponent::ApplyPoleConstraint(
         const XMVECTOR poleProjected_ = XMVectorSubtract(poleVector_,
             XMVectorScale(axisVector_, XMVectorGetX(XMVector3Dot(poleVector_, axisVector_))));
         if (XMVectorGetX(XMVector3LengthSq(currentProjected_)) <= EPSILON
-            || XMVectorGetX(XMVector3LengthSq(poleProjected_)) <= EPSILON) continue;
+            || XMVectorGetX(XMVector3LengthSq(poleProjected_)) <= EPSILON)
+        {
+            continue;
+        }
         const XMVECTOR currentDirection_ = XMVector3Normalize(currentProjected_);
         const XMVECTOR poleDirection_ = XMVector3Normalize(poleProjected_);
         const float cosine_ = std::clamp(
@@ -808,9 +956,15 @@ void FootIKComponent::DrawDebugShapes(
     const FootRuntimeState& state_,
     const std::vector<XMFLOAT3>& solvedPositions_) const
 {
-    if (!showDebugShapes) return;
+    if (!showDebugShapes)
+    {
+        return;
+    }
     const std::shared_ptr<GltfModelCommponennt> model_ = model.lock();
-    if (!model_) return;
+    if (!model_)
+    {
+        return;
+    }
     ShapeRenderSystem& renderer_ =
         GraphicsDeviceManager::Instance().GetShapeRendererSystem();
     if (!chain_.footPoleNodeName.empty())
@@ -832,7 +986,10 @@ void FootIKComponent::DrawDebugShapes(
     const XMFLOAT3 rayEnd_ = Add(animatedFootPosition_,
         { 0.0f, -(std::max)(chain_.footMaxStepDown, 0.0f), 0.0f });
     DrawBoneBetween(renderer_, rayStart_, rayEnd_, debugRayColor);
-    if (!state_.grounded) return;
+    if (!state_.grounded)
+    {
+        return;
+    }
     const XMFLOAT3 normalEnd_ = Add(state_.targetPosition,
         Scale(Normalize(state_.groundNormal), (std::max)(debugNormalLength, 0.001f)));
     DrawBoneBetween(renderer_, state_.targetPosition, normalEnd_, debugGroundColor);
@@ -862,7 +1019,10 @@ void FootIKComponent::Gui()
     }
     const std::shared_ptr<IKMapComponent> ikMap_ = ikMap.lock();
     const std::shared_ptr<GltfModelCommponennt> model_ = model.lock();
-    if (!ikMap_ || !model_) return;
+    if (!ikMap_ || !model_)
+    {
+        return;
+    }
     if (adjustedPelvisNodeIndex >= 0
         && adjustedPelvisNodeIndex < static_cast<int>(model_->GetNodes().size()))
     {
@@ -872,7 +1032,10 @@ void FootIKComponent::Gui()
     ImGui::SeparatorText("IKMap Chains");
     for (const IKMapComponent::IKChain& chain_ : ikMap_->GetChains())
     {
-        if (chain_.type != IKMapComponent::IK_TYPE::FOOT) continue;
+        if (chain_.type != IKMapComponent::IK_TYPE::FOOT)
+        {
+            continue;
+        }
         ImGui::Text("%s: %s -> %s", chain_.name.c_str(),
             chain_.rootNodeName.empty() ? "Select Root" : chain_.rootNodeName.c_str(),
             chain_.tipNodeName.empty() ? "Select Tip" : chain_.tipNodeName.c_str());
@@ -905,15 +1068,24 @@ void FootIKComponent::Deserialize(const nlohmann::json& json_)
     footReachTolerance = (std::max)(json_.value("FootReachTolerance", 0.01f), 0.0f);
     showDebugShapes = json_.value("ShowDebugShapes", true);
     debugNormalLength = json_.value("DebugNormalLength", 0.2f);
-    if (json_.contains("DebugChainColor")) debugChainColor = {
+    if (json_.contains("DebugChainColor"))
+    {
+        debugChainColor = {
         json_["DebugChainColor"][0], json_["DebugChainColor"][1],
         json_["DebugChainColor"][2], json_["DebugChainColor"][3] };
-    if (json_.contains("DebugRayColor")) debugRayColor = {
+    }
+    if (json_.contains("DebugRayColor"))
+    {
+        debugRayColor = {
         json_["DebugRayColor"][0], json_["DebugRayColor"][1],
         json_["DebugRayColor"][2], json_["DebugRayColor"][3] };
-    if (json_.contains("DebugGroundColor")) debugGroundColor = {
+    }
+    if (json_.contains("DebugGroundColor"))
+    {
+        debugGroundColor = {
         json_["DebugGroundColor"][0], json_["DebugGroundColor"][1],
         json_["DebugGroundColor"][2], json_["DebugGroundColor"][3] };
+    }
     footStates.clear();
     adjustedPelvisNodeIndex = -1;
     currentPelvisDrop = 0.0f;

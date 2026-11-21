@@ -15,24 +15,43 @@ const std::string& AnimationGraphBridgeComponent::GetName() const
 
 std::shared_ptr<AnimationGraphBridgeComponent> AnimationGraphBridgeComponent::Acquire(const std::shared_ptr<GameObject>& owner_)
 {
-    if (!owner_) return nullptr;
+    if (!owner_)
+    {
+        return nullptr;
+    }
     if (const auto bridge_ = owner_->GetComponent<AnimationGraphBridgeComponent>())
     {
-        if (!bridge_->ResolveController()) return nullptr;
+        if (!bridge_->ResolveController())
+        {
+            return nullptr;
+        }
         // Start中に追加されたFacadeも準備済みにし、階層の生成待ちを阻害しない。
-        if (!bridge_->IsStarted()) { bridge_->Start(); bridge_->SetStarted(true); }
+        if (!bridge_->IsStarted())
+        {
+            bridge_->Start();
+            bridge_->SetStarted(true);
+        }
         return bridge_;
     }
-    if (!owner_->GetComponent<AnimationControllerComponent>()) return nullptr;
+    if (!owner_->GetComponent<AnimationControllerComponent>())
+    {
+        return nullptr;
+    }
     const auto bridge_ = owner_->GetOrAddComponent<AnimationGraphBridgeComponent>(true);
     return bridge_->ResolveController() ? bridge_ : nullptr;
 }
 
 std::shared_ptr<BlackboardComponent> AnimationGraphBridgeComponent::ResolveBoard()
 {
-    if (const auto board_ = board.lock()) return board_;
+    if (const auto board_ = board.lock())
+    {
+        return board_;
+    }
     const auto owner_ = GetGameObject();
-    if (!owner_) return nullptr;
+    if (!owner_)
+    {
+        return nullptr;
+    }
     const auto board_ = owner_->GetOrAddComponent<BlackboardComponent>();
     board = board_;
     return board_;
@@ -40,10 +59,16 @@ std::shared_ptr<BlackboardComponent> AnimationGraphBridgeComponent::ResolveBoard
 
 std::shared_ptr<AnimationControllerComponent> AnimationGraphBridgeComponent::ResolveController()
 {
-    if (const auto controller_ = controller.lock()) return controller_;
+    if (const auto controller_ = controller.lock())
+    {
+        return controller_;
+    }
     const auto owner_ = GetGameObject();
     const auto controller_ = owner_ ? owner_->GetComponent<AnimationControllerComponent>() : nullptr;
-    if (!controller_) return nullptr;
+    if (!controller_)
+    {
+        return nullptr;
+    }
     controller = controller_;
     if (const auto board_ = ResolveBoard())
     {
@@ -56,21 +81,33 @@ std::shared_ptr<AnimationControllerComponent> AnimationGraphBridgeComponent::Res
 
 void AnimationGraphBridgeComponent::ProcessRequests(bool transitions_)
 {
-    if (const auto controller_ = ResolveController()) controller_->ProcessBlackboardGraphRequests(transitions_);
+    if (const auto controller_ = ResolveController())
+    {
+        controller_->ProcessBlackboardGraphRequests(transitions_);
+    }
 }
 
 void AnimationGraphBridgeComponent::RefreshFeedback()
 {
-    if (const auto controller_ = ResolveController()) controller_->PublishGraphFeedback();
+    if (const auto controller_ = ResolveController())
+    {
+        controller_->PublishGraphFeedback();
+    }
 }
 
 bool AnimationGraphBridgeComponent::RequestStateTransition(const std::string& state_, float blend_, bool restart_,
     float startTime_, bool allowSkill_, const std::string& category_)
 {
-    if (!ResolveController()) return false;
+    if (!ResolveController())
+    {
+        return false;
+    }
     BS_PROFILE_SCOPE("AnimationGraphBridgeComponent::RequestStateTransition");
     const auto board_ = ResolveBoard();
-    if (!board_ || state_.empty()) return false;
+    if (!board_ || state_.empty())
+    {
+        return false;
+    }
     board_->SetString(Keys::REQUEST, Keys::CATEGORY, category_);
     board_->SetString(Keys::REQUEST, Keys::STATE, state_);
     board_->SetFloat(Keys::REQUEST, Keys::BLEND, blend_);
@@ -87,7 +124,10 @@ bool AnimationGraphBridgeComponent::RequestStateTransition(const std::string& st
 
 void AnimationGraphBridgeComponent::RequestTrigger(const std::string& trigger_, const std::string& category_)
 {
-    if (!ResolveController()) return;
+    if (!ResolveController())
+    {
+        return;
+    }
     if (const auto board_ = ResolveBoard())
     {
         // 通常Triggerは次のAnimation更新で評価し、AI更新の途中で再生順を変えない。
@@ -100,13 +140,22 @@ void AnimationGraphBridgeComponent::RequestTrigger(const std::string& trigger_, 
 
 void AnimationGraphBridgeComponent::ClearTrigger(const std::string& trigger_, const std::string& category_)
 {
-    if (!ResolveController()) return;
-    if (const auto board_ = ResolveBoard()) board_->ResetTrigger(category_, trigger_);
+    if (!ResolveController())
+    {
+        return;
+    }
+    if (const auto board_ = ResolveBoard())
+    {
+        board_->ResetTrigger(category_, trigger_);
+    }
 }
 
 void AnimationGraphBridgeComponent::RequestEvaluation(const std::string& category_)
 {
-    if (!ResolveController()) return;
+    if (!ResolveController())
+    {
+        return;
+    }
     if (const auto board_ = ResolveBoard())
     {
         board_->SetString(Keys::REQUEST, Keys::CATEGORY, category_);
@@ -118,7 +167,10 @@ void AnimationGraphBridgeComponent::RequestEvaluation(const std::string& categor
 
 void AnimationGraphBridgeComponent::RequestInputCategory(const std::string& category_)
 {
-    if (!ResolveController() || category_.empty()) return;
+    if (!ResolveController() || category_.empty())
+    {
+        return;
+    }
     if (const auto board_ = ResolveBoard())
     {
         board_->SetString(Keys::REQUEST, Keys::INPUT_CATEGORY, category_);
@@ -130,7 +182,10 @@ void AnimationGraphBridgeComponent::RequestInputCategory(const std::string& cate
 void AnimationGraphBridgeComponent::RequestCancelAttackTelegraphs()
 {
     BS_PROFILE_SCOPE("AnimationGraphBridgeComponent::RequestCancelAttackTelegraphs");
-    if (!ResolveController()) return;
+    if (!ResolveController())
+    {
+        return;
+    }
     if (const auto board_ = ResolveBoard())
     {
         board_->SetBool(Keys::REQUEST, Keys::TELEGRAPH_CANCEL_PENDING, true);
@@ -140,7 +195,10 @@ void AnimationGraphBridgeComponent::RequestCancelAttackTelegraphs()
 
 void AnimationGraphBridgeComponent::RequestYawLimit(float degrees_)
 {
-    if (!ResolveController()) return;
+    if (!ResolveController())
+    {
+        return;
+    }
     if (const auto board_ = ResolveBoard())
     {
         board_->SetFloat(Keys::REQUEST, Keys::YAW_LIMIT, degrees_);
@@ -152,7 +210,10 @@ void AnimationGraphBridgeComponent::RequestYawLimit(float degrees_)
 
 void AnimationGraphBridgeComponent::ClearYawLimit()
 {
-    if (!ResolveController()) return;
+    if (!ResolveController())
+    {
+        return;
+    }
     if (const auto board_ = ResolveBoard())
     {
         board_->SetBool(Keys::REQUEST, Keys::YAW_ENABLED, false);
@@ -163,9 +224,15 @@ void AnimationGraphBridgeComponent::ClearYawLimit()
 
 bool AnimationGraphBridgeComponent::LoadMissingStateAsset(const std::string& state_, const std::string& path_)
 {
-    if (!ResolveController()) return false;
+    if (!ResolveController())
+    {
+        return false;
+    }
     const auto board_ = ResolveBoard();
-    if (!board_) return false;
+    if (!board_)
+    {
+        return false;
+    }
     board_->SetString(Keys::REQUEST, Keys::ASSET_STATE, state_);
     board_->SetString(Keys::REQUEST, Keys::ASSET_PATH, path_);
     board_->SetBool(Keys::REQUEST, Keys::ASSET_LOADED, false);
@@ -179,10 +246,16 @@ bool AnimationGraphBridgeComponent::LoadMissingStateAsset(const std::string& sta
 bool AnimationGraphBridgeComponent::EstimateRootMotion(const std::string& state_, float start_, float end_,
     DirectX::XMFLOAT3& delta_, float& duration_)
 {
-    if (!ResolveController()) return false;
+    if (!ResolveController())
+    {
+        return false;
+    }
     BS_PROFILE_SCOPE("AnimationGraphBridgeComponent::EstimateRootMotion");
     const auto board_ = ResolveBoard();
-    if (!board_) return false;
+    if (!board_)
+    {
+        return false;
+    }
     board_->SetString(Keys::REQUEST, Keys::ROOT_STATE, state_);
     board_->SetFloat(Keys::REQUEST, Keys::ROOT_START, start_);
     board_->SetFloat(Keys::REQUEST, Keys::ROOT_END, end_);
@@ -191,7 +264,10 @@ bool AnimationGraphBridgeComponent::EstimateRootMotion(const std::string& state_
     ProcessRequests();
     bool success_ = false;
     board_->GetBool(Keys::REQUEST, Keys::ROOT_SUCCESS, success_);
-    if (!success_) return false;
+    if (!success_)
+    {
+        return false;
+    }
     DirectX::SimpleMath::Vector3 result_{};
     board_->GetVector3(Keys::REQUEST, Keys::ROOT_DELTA, result_);
     board_->GetFloat(Keys::REQUEST, Keys::ROOT_DURATION, duration_);
@@ -211,7 +287,10 @@ const AnimState* AnimationGraphBridgeComponent::GetActiveState()
     RefreshFeedback();
     const auto board_ = ResolveBoard();
     std::string state_;
-    if (!board_ || !board_->GetString(Keys::FEEDBACK, Keys::CURRENT_STATE, state_)) return nullptr;
+    if (!board_ || !board_->GetString(Keys::FEEDBACK, Keys::CURRENT_STATE, state_))
+    {
+        return nullptr;
+    }
     const auto& catalog_ = GetStateCatalog();
     const auto iterator_ = catalog_.find(state_);
     return iterator_ != catalog_.end() ? iterator_->second.get() : nullptr;
@@ -221,7 +300,10 @@ float AnimationGraphBridgeComponent::GetPlaybackTime()
 {
     RefreshFeedback();
     float time_ = 0.0f;
-    if (const auto board_ = ResolveBoard()) board_->GetFloat(Keys::FEEDBACK, Keys::PLAYBACK_TIME, time_);
+    if (const auto board_ = ResolveBoard())
+    {
+        board_->GetFloat(Keys::FEEDBACK, Keys::PLAYBACK_TIME, time_);
+    }
     return time_;
 }
 
@@ -229,7 +311,10 @@ float AnimationGraphBridgeComponent::GetPlaybackDuration()
 {
     RefreshFeedback();
     float duration_ = 0.0f;
-    if (const auto board_ = ResolveBoard()) board_->GetFloat(Keys::FEEDBACK, Keys::PLAYBACK_DURATION, duration_);
+    if (const auto board_ = ResolveBoard())
+    {
+        board_->GetFloat(Keys::FEEDBACK, Keys::PLAYBACK_DURATION, duration_);
+    }
     return duration_;
 }
 
@@ -237,6 +322,9 @@ bool AnimationGraphBridgeComponent::IsSkillOwned()
 {
     RefreshFeedback();
     bool controlled_ = false;
-    if (const auto board_ = ResolveBoard()) board_->GetBool(Keys::FEEDBACK, Keys::SKILL_OWNED, controlled_);
+    if (const auto board_ = ResolveBoard())
+    {
+        board_->GetBool(Keys::FEEDBACK, Keys::SKILL_OWNED, controlled_);
+    }
     return controlled_;
 }

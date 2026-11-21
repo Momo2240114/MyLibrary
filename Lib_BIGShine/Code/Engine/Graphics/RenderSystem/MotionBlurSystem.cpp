@@ -30,6 +30,7 @@ bool MotionBlurSystem::Initialize(ID3D11Device* device_, int width_, int height_
         const char* path_;
         Microsoft::WRL::ComPtr<ID3D11PixelShader>* shader_;
     };
+
     PixelShaderSource pixelShaderSources_[] =
     {
         // Velocity生成、Tile最大値、近傍最大値、最終Blurの4Pass。
@@ -107,7 +108,10 @@ void MotionBlurSystem::SetObjectVelocityRenderer(ObjectVelocityRenderer* objectV
 
 void MotionBlurSystem::ClearVelocityBuffer(ID3D11DeviceContext* dc_)
 {
-    if (dc_ == nullptr || velocityBuffer.rtv == nullptr) return;
+    if (dc_ == nullptr || velocityBuffer.rtv == nullptr)
+    {
+        return;
+    }
     // Velocity 0は「Blurなし」を意味する。
     const float clearVelocity_[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
     dc_->ClearRenderTargetView(velocityBuffer.rtv.Get(), clearVelocity_);
@@ -248,8 +252,14 @@ bool MotionBlurSystem::CreateRenderTarget(
     desc_.SampleDesc.Count = 1;
     desc_.Usage = D3D11_USAGE_DEFAULT;
     desc_.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
-    if (FAILED(device_->CreateTexture2D(&desc_, nullptr, target_.texture.GetAddressOf()))) return false;
-    if (FAILED(device_->CreateRenderTargetView(target_.texture.Get(), nullptr, target_.rtv.GetAddressOf()))) return false;
+    if (FAILED(device_->CreateTexture2D(&desc_, nullptr, target_.texture.GetAddressOf())))
+    {
+        return false;
+    }
+    if (FAILED(device_->CreateRenderTargetView(target_.texture.Get(), nullptr, target_.rtv.GetAddressOf())))
+    {
+        return false;
+    }
     return SUCCEEDED(device_->CreateShaderResourceView(target_.texture.Get(), nullptr, target_.srv.GetAddressOf()));
 }
 

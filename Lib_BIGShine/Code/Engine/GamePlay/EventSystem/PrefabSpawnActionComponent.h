@@ -52,12 +52,14 @@ private:
         nlohmann::json definition;
         std::vector<ModelLoadHandle> modelHandles;
     };
+
     struct SpawnedObject
     {
         std::weak_ptr<GameObject> object;
         bool committed = false;
         std::vector<std::pair<std::weak_ptr<Component>, bool>> suspendedComponents;
     };
+
     // 未登録の実体を作らず、JSONのコピーとモデル先読みに限定する。
     void PreparePrefabCache();
     // Componentの設定を変えず、生成直後の通常更新と物理を一時停止する。

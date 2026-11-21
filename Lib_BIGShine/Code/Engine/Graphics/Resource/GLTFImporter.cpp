@@ -127,7 +127,10 @@ void GLTFImporter::LoadMeshes(MeshList& meshes, const NodeList& nodes)
 	for (int gltfNodeIndex = 0; gltfNodeIndex < gltfModel.nodes.size(); ++gltfNodeIndex)
 	{
 		const tinygltf::Node& gltfNode = gltfModel.nodes.at(gltfNodeIndex);
-		if (gltfNode.mesh < 0) continue;
+		if (gltfNode.mesh < 0)
+		{
+			continue;
+		}
 
 		const tinygltf::Mesh& gltfMesh = gltfModel.meshes.at(gltfNode.mesh);
 
@@ -183,7 +186,8 @@ void GLTFImporter::LoadMeshes(MeshList& meshes, const NodeList& nodes)
 				}
 				else
 				{
-					_ASSERT_EXPR_A(false, "This accessor component type is not supported.");;
+					_ASSERT_EXPR_A(false, "This accessor component type is not supported.");
+					;
 				}
 			}
 
@@ -451,8 +455,11 @@ void GLTFImporter::LoadMaterials(MaterialList& materials, ID3D11Device* device)
 
 		auto loadTexture = [&](int gltfTextureIndex, const char* textureType, std::string& textureFilename, ID3D11ShaderResourceView** srv)
 			{
-				if (gltfTextureIndex < 0) return;
-				BS_PROFILE_SCOPE_DYNAMIC(textureType);
+				if (gltfTextureIndex < 0)
+			{
+				return;
+			}
+			BS_PROFILE_SCOPE_DYNAMIC(textureType);
 				++profileTextureRequestCount_;
 
 				const tinygltf::Texture& gltfTexture = gltfModel.textures.at(gltfTextureIndex);
@@ -469,8 +476,11 @@ void GLTFImporter::LoadMaterials(MaterialList& materials, ID3D11Device* device)
 					if (!gltfImage.mimeType.empty()) {
 						// "image/png" -> "png"
 						size_t slash = gltfImage.mimeType.find_last_of('/');
-						if (slash != std::string::npos) extension = gltfImage.mimeType.substr(slash + 1);
+						if (slash != std::string::npos)
+					{
+						extension = gltfImage.mimeType.substr(slash + 1);
 					}
+				}
 					textureFilename = material.name + "_" + textureType + "." + extension;
 				}
 

@@ -15,6 +15,13 @@ public:
     }
 
     // シリアライズにて名前を保存・復元可能にします
-    void Serialize(nlohmann::json& j) const override { j["Name"] = name; }
-    void Deserialize(const nlohmann::json& j) override { name = j.value("Name", "NewObject"); }
+    void Serialize(nlohmann::json& j) const override
+    {
+        j["Name"] = name;
+    }
+
+    void Deserialize(const nlohmann::json& j) override
+    {
+        name = j.value("Name", "NewObject");
+    }
 };

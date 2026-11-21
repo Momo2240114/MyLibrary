@@ -1,5 +1,6 @@
 #pragma once
 #include "ShaderTransitionEffect.h"
+
 // 両側から幕を閉じるトランジション。
 class CurtainTransition final : public ShaderTransitionEffect
 {

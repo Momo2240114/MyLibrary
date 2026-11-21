@@ -94,4 +94,6 @@ void SceneStartUp::Render(float elapsedTime_)
 }
 
 // 起動の状態表示はLoadingPresentationComponentが描画する。
-void SceneStartUp::DrawGUI() {}
+void SceneStartUp::DrawGUI()
+{
+}

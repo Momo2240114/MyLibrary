@@ -2,10 +2,35 @@
 
 #include "PostRenderSystem.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
+#include "Engine/Graphics/Core/CPUResourceLoader.h"
+
+#include <algorithm>
+#include <filesystem>
+#include <utility>
+
+namespace
+{
+    struct LayerEffectConstants
+    {
+        DirectX::XMFLOAT4 color;
+        uint32_t type;
+        int sampleCount;
+        float strength;
+        float maxVelocity;
+        DirectX::XMFLOAT4X4 inverseViewProjection;
+        DirectX::XMFLOAT4X4 previousViewProjection;
+        uint32_t useCameraVelocity;
+        float padding[3];
+    };
+    static_assert(sizeof(LayerEffectConstants) == 176);
+}
 
 bool PostRenderSystem::Initialize(ID3D11Device* device, int width, int height) {
     initialized = false;
-    if (!device || width <= 0 || height <= 0) return false;
+    if (!device || width <= 0 || height <= 0)
+    {
+        return false;
+    }
     // 各ポストエフェクトを同じ解像度で初期化し、必要な中間バッファも2枚確保する。
     if (!bloom.Initialize(device, width, height))
     {
@@ -55,6 +80,21 @@ bool PostRenderSystem::Initialize(ID3D11Device* device, int width, int height) {
         fxaa.Shutdown();
         OutputDebugStringA("FxaaSystem initialization failed; FXAA is skipped.\n");
     }
+    constexpr const char* LAYER_EFFECT_SHADER_PATH = "Data/Shader/LayerPostEffectPS.cso";
+    constexpr const char* LAYER_MODEL_MASK_SHADER_PATH = "Data/Shader/LayerModelMaskPS.cso";
+    std::error_code shaderPathError_;
+    if (std::filesystem::exists(LAYER_EFFECT_SHADER_PATH, shaderPathError_) &&
+        std::filesystem::exists(LAYER_MODEL_MASK_SHADER_PATH, shaderPathError_))
+    {
+        CPUResourceLoader::LoadVertexShader(device, "Data/Shader/FullScreenVS.cso",
+            nullptr, 0, nullptr, layerEffectVertexShader.ReleaseAndGetAddressOf());
+        CPUResourceLoader::LoadPixelShader(device, LAYER_EFFECT_SHADER_PATH,
+            layerEffectPixelShader.ReleaseAndGetAddressOf());
+        CPUResourceLoader::LoadPixelShader(device, LAYER_MODEL_MASK_SHADER_PATH,
+            layerModelMaskShader.ReleaseAndGetAddressOf());
+        CPUResourceLoader::CreateConstantBuffer(device, sizeof(LayerEffectConstants),
+            layerEffectConstants.ReleaseAndGetAddressOf());
+    }
     initialized = true;
     return true;
 }
@@ -70,6 +110,14 @@ void PostRenderSystem::Shutdown() {
     postDistortion.Shutdown();
     fog.Shutdown();
     fxaa.Shutdown();
+    layerEffectVertexShader.Reset();
+    layerEffectPixelShader.Reset();
+    layerModelMaskShader.Reset();
+    layerEffectConstants.Reset();
+    layerDepthDSV.Reset();
+    layerDepthSRV.Reset();
+    layerDepthWidth = 0;
+    layerDepthHeight = 0;
     fogAvailable = false;
     fxaaAvailable = false;
     initialized = false;
@@ -77,6 +125,7 @@ void PostRenderSystem::Shutdown() {
     debugFog = {};
     debugVignette = {};
     debugFxaa = {};
+    layerMotionSource = {};
     debugCaptureEnabled = false;
 
     for (PostBuffer& buffer_ : workBuffers)
@@ -89,7 +138,10 @@ void PostRenderSystem::Shutdown() {
 
 void PostRenderSystem::Execute(const RenderContext& rc, ID3D11ShaderResourceView* sceneSRV, ID3D11RenderTargetView* finalRTV)
 {
-    if (!initialized) return;
+    if (!initialized)
+    {
+        return;
+    }
     const bool captureDebug_ = debugCaptureEnabled;
     debugCaptureEnabled = false;
     debugBloom.valid = false;
@@ -137,7 +189,10 @@ void PostRenderSystem::Execute(const RenderContext& rc, ID3D11ShaderResourceView
                 finalRTV,
                 bloomParams_,
                 filterParams_);
-            if (captureDebug_) CaptureDebugOutput(rc, finalRTV, debugBloom);
+            if (captureDebug_)
+            {
+                CopyRenderOutput(rc, finalRTV, debugBloom);
+            }
         }
         return;
     }
@@ -151,7 +206,10 @@ void PostRenderSystem::Execute(const RenderContext& rc, ID3D11ShaderResourceView
             workBuffers[0].rtv.Get(),
             bloomParams_,
             filterParams_);
-        if (captureDebug_) CaptureDebugOutput(rc, workBuffers[0].rtv.Get(), debugBloom);
+        if (captureDebug_)
+        {
+            CopyRenderOutput(rc, workBuffers[0].rtv.Get(), debugBloom);
+        }
     }
 
     ID3D11ShaderResourceView* currentSRV_ = workBuffers[0].srv.Get();
@@ -165,8 +223,13 @@ void PostRenderSystem::Execute(const RenderContext& rc, ID3D11ShaderResourceView
         fog.Execute(rc, currentSRV_, graphics_.GetMainDepthSRV(),
             hasNextPass_ ? workBuffers[1].rtv.Get() : finalRTV, fogParams_);
         if (captureDebug_)
-            CaptureDebugOutput(rc, hasNextPass_ ? workBuffers[1].rtv.Get() : finalRTV, debugFog);
-        if (!hasNextPass_) return;
+        {
+            CopyRenderOutput(rc, hasNextPass_ ? workBuffers[1].rtv.Get() : finalRTV, debugFog);
+        }
+        if (!hasNextPass_)
+        {
+            return;
+        }
         currentSRV_ = workBuffers[1].srv.Get();
         currentBufferIndex_ = 1;
     }
@@ -256,7 +319,9 @@ void PostRenderSystem::Execute(const RenderContext& rc, ID3D11ShaderResourceView
                 hasNextPass_ ? workBuffers[nextBufferIndex_].rtv.Get() : finalRTV,
                 vignetteParams_);
             if (captureDebug_)
-                CaptureDebugOutput(rc, hasNextPass_ ? workBuffers[nextBufferIndex_].rtv.Get() : finalRTV, debugVignette);
+            {
+                CopyRenderOutput(rc, hasNextPass_ ? workBuffers[nextBufferIndex_].rtv.Get() : finalRTV, debugVignette);
+            }
         }
 
         if (!hasNextPass_)
@@ -278,7 +343,10 @@ void PostRenderSystem::Execute(const RenderContext& rc, ID3D11ShaderResourceView
             currentSRV_,
             graphics_.GetSceneDistortionSRV(),
             fxaaEnabled_ ? workBuffers[nextBufferIndex_].rtv.Get() : finalRTV);
-        if (!fxaaEnabled_) return;
+        if (!fxaaEnabled_)
+        {
+            return;
+        }
         currentSRV_ = workBuffers[nextBufferIndex_].srv.Get();
     }
 
@@ -286,22 +354,266 @@ void PostRenderSystem::Execute(const RenderContext& rc, ID3D11ShaderResourceView
     {
         BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::FXAA");
         fxaa.Execute(rc, currentSRV_, finalRTV, fxaaParams_);
-        if (captureDebug_) CaptureDebugOutput(rc, finalRTV, debugFxaa);
+        if (captureDebug_)
+        {
+            CopyRenderOutput(rc, finalRTV, debugFxaa);
+        }
     }
 }
 
-void PostRenderSystem::CaptureDebugOutput(const RenderContext& rc_, ID3D11RenderTargetView* outputRTV_, DebugBuffer& buffer_)
+bool PostRenderSystem::EnsureLayerDepth(const RenderContext& rc_)
 {
-    if (!rc_.device || !rc_.deviceContext || !outputRTV_) return;
+    Microsoft::WRL::ComPtr<ID3D11Resource> sceneDepthResource_;
+    rc_.depthSRV->GetResource(sceneDepthResource_.GetAddressOf());
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> sceneDepthTexture_;
+    if (FAILED(sceneDepthResource_.As(&sceneDepthTexture_)))
+    {
+        return false;
+    }
+
+    D3D11_TEXTURE2D_DESC desc_{};
+    sceneDepthTexture_->GetDesc(&desc_);
+    if (desc_.SampleDesc.Count != 1)
+    {
+        return false;
+    }
+    if (layerDepthDSV && layerDepthWidth == desc_.Width && layerDepthHeight == desc_.Height)
+    {
+        return true;
+    }
+
+    desc_.MipLevels = 1;
+    desc_.ArraySize = 1;
+    desc_.Format = DXGI_FORMAT_R24G8_TYPELESS;
+    desc_.Usage = D3D11_USAGE_DEFAULT;
+    desc_.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+    desc_.CPUAccessFlags = 0;
+    desc_.MiscFlags = 0;
+
+    D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc_{};
+    dsvDesc_.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+    dsvDesc_.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+    D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc_{};
+    srvDesc_.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+    srvDesc_.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    srvDesc_.Texture2D.MipLevels = 1;
+
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> depth_;
+    Microsoft::WRL::ComPtr<ID3D11DepthStencilView> dsv_;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv_;
+    if (FAILED(rc_.device->CreateTexture2D(&desc_, nullptr, depth_.GetAddressOf())) ||
+        FAILED(rc_.device->CreateDepthStencilView(depth_.Get(), &dsvDesc_, dsv_.GetAddressOf())) ||
+        FAILED(rc_.device->CreateShaderResourceView(depth_.Get(), &srvDesc_, srv_.GetAddressOf())))
+    {
+        return false;
+    }
+
+    layerDepthDSV = std::move(dsv_);
+    layerDepthSRV = std::move(srv_);
+    layerDepthWidth = desc_.Width;
+    layerDepthHeight = desc_.Height;
+    return true;
+}
+
+void PostRenderSystem::ExecuteLayerEffects(const RenderContext& rc_, ID3D11RenderTargetView* finalRTV_,
+    const std::vector<LayerPostEffectSettings>& effects_,
+    const DirectX::XMFLOAT4X4* previousViewProjection_,
+    const std::function<bool(const LayerPostEffectSettings&, const RenderContext&, DirectX::XMFLOAT4&)>& drawLayer_)
+{
+    const auto isActive_ = [previousViewProjection_](const LayerPostEffectSettings& effect_)
+    {
+        if (!effect_.enabled)
+        {
+            return false;
+        }
+        switch (effect_.type)
+        {
+        case LayerPostEffectType::BLOOM:
+            return effect_.bloom.intensity > 0.0f && effect_.bloom.blurPasses > 0;
+        case LayerPostEffectType::MOTION_BLUR:
+            return effect_.motionBlur.strength > 0.0f &&
+                (!effect_.motionBlur.useCameraVelocity || previousViewProjection_ != nullptr);
+        default:
+            return effect_.color.w > 0.0f;
+        }
+    };
+    if (!initialized || !IsLayerPostEffectAvailable() || !finalRTV_ || !rc_.device ||
+        !rc_.deviceContext || !rc_.renderState || !rc_.camera || !rc_.depthSRV ||
+        std::none_of(effects_.begin(), effects_.end(), isActive_) || !EnsureLayerDepth(rc_))
+    {
+        return;
+    }
+
+    BS_PROFILE_SCOPE("PostEffect::LayerEffects");
+    auto tracyGpuContext_ = GraphicsDeviceManager::Instance().GetTracyGpuContext();
+    BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::Layer Post Effects");
+
+    auto* dc_ = rc_.deviceContext;
+    D3D11_VIEWPORT outputViewport_{};
+    UINT viewportCount_ = 1;
+    dc_->RSGetViewports(&viewportCount_, &outputViewport_);
+    if (viewportCount_ == 0)
+    {
+        return;
+    }
+
+    const D3D11_VIEWPORT maskViewport_{
+        0.0f, 0.0f, static_cast<float>(layerDepthWidth), static_cast<float>(layerDepthHeight), 0.0f, 1.0f };
+    RenderContext maskContext_ = rc_;
+    maskContext_.layerModelMaskShader = layerModelMaskShader.Get();
+    maskContext_.layerPixelSize = { 1.0f / maskViewport_.Width, 1.0f / maskViewport_.Height };
+
+    const auto drawEffect_ = [&](const LayerPostEffectSettings& effect_)
+    {
+        if (!isActive_(effect_))
+        {
+            return;
+        }
+
+        const bool silhouette_ = effect_.type == LayerPostEffectType::OCCLUDED_SILHOUETTE;
+        const bool bloom_ = effect_.type == LayerPostEffectType::BLOOM;
+        const bool motion_ = effect_.type == LayerPostEffectType::MOTION_BLUR;
+        const bool modelMotion_ = motion_ && !effect_.motionBlur.useCameraVelocity;
+        maskContext_.layerDepthTarget = bloom_
+            ? GraphicsDeviceManager::Instance().GetDepthStencilView() : layerDepthDSV.Get();
+        maskContext_.layerColorTarget = bloom_ || modelMotion_ ? workBuffers[0].rtv.Get() : nullptr;
+        maskContext_.layerCaptureMode = bloom_ ? LayerCaptureMode::BLOOM_COLOR :
+            (modelMotion_ ? LayerCaptureMode::MODEL_VELOCITY : LayerCaptureMode::DEPTH);
+
+        // Bloomの抽出元は対象レイヤーを再描画し、背景色が抽出へ混ざらないようにする。
+        dc_->RSSetViewports(1, &maskViewport_);
+        if (!bloom_)
+        {
+            dc_->ClearDepthStencilView(layerDepthDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+        }
+        if (maskContext_.layerColorTarget)
+        {
+            const float clearColor_[4]{};
+            dc_->ClearRenderTargetView(maskContext_.layerColorTarget, clearColor_);
+        }
+        DirectX::XMFLOAT4 outlineColor_{};
+        if (!drawLayer_(effect_, maskContext_, outlineColor_))
+        {
+            return;
+        }
+
+        // 全画面パスで読むマスク・カラーを先に出力先から外す。
+        dc_->OMSetRenderTargets(0, nullptr, nullptr);
+        ID3D11ShaderResourceView* layerInput_ = nullptr;
+        ID3D11ShaderResourceView* motionSource_ = nullptr;
+        LayerEffectConstants constants_{};
+        constants_.type = static_cast<uint32_t>(effect_.type);
+        constants_.color = effect_.color;
+        if (bloom_)
+        {
+            layerInput_ = bloom.ExtractGlow(rc_, workBuffers[0].srv.Get(), effect_.bloom);
+            if (!layerInput_)
+            {
+                return;
+            }
+            constants_.strength = effect_.bloom.intensity;
+        }
+        else if (motion_)
+        {
+            layerMotionSource.valid = false;
+            CopyRenderOutput(rc_, finalRTV_, layerMotionSource);
+            if (!layerMotionSource.valid)
+            {
+                return;
+            }
+            motionSource_ = layerMotionSource.srv.Get();
+            layerInput_ = modelMotion_ ? workBuffers[0].srv.Get() : nullptr;
+            constants_.strength = effect_.motionBlur.strength;
+            constants_.maxVelocity = effect_.motionBlur.maxVelocity;
+            constants_.sampleCount = effect_.motionBlur.sampleCount;
+            if (!modelMotion_)
+            {
+                const auto currentViewProjection_ = DirectX::XMLoadFloat4x4(&rc_.camera->GetView()) *
+                    DirectX::XMLoadFloat4x4(&rc_.camera->GetProjection());
+                DirectX::XMStoreFloat4x4(&constants_.inverseViewProjection,
+                    DirectX::XMMatrixInverse(nullptr, currentViewProjection_));
+                constants_.previousViewProjection = *previousViewProjection_;
+                constants_.useCameraVelocity = 1u;
+            }
+        }
+        else if (silhouette_)
+        {
+            if (effect_.useOutlineColor)
+            {
+                constants_.color = { outlineColor_.x, outlineColor_.y, outlineColor_.z, effect_.color.w };
+            }
+            // シーンの最前面に見えている装備だけを記録し、敵や地形の後ろにある装備では除外しない。
+            RenderContext exclusionContext_ = maskContext_;
+            exclusionContext_.layerDepthTarget = GraphicsDeviceManager::Instance().GetDepthStencilView();
+            exclusionContext_.layerColorTarget = workBuffers[0].rtv.Get();
+            exclusionContext_.layerCaptureMode = LayerCaptureMode::SILHOUETTE_EXCLUSION;
+            const float clearExclusion_[4]{};
+            dc_->ClearRenderTargetView(exclusionContext_.layerColorTarget, clearExclusion_);
+            DirectX::XMFLOAT4 unusedOutlineColor_{};
+            drawLayer_(effect_, exclusionContext_, unusedOutlineColor_);
+            layerInput_ = workBuffers[0].srv.Get();
+        }
+        dc_->UpdateSubresource(layerEffectConstants.Get(), 0, nullptr, &constants_, 0, 0);
+
+        dc_->OMSetRenderTargets(1, &finalRTV_, nullptr);
+        dc_->RSSetViewports(1, &outputViewport_);
+        dc_->RSSetState(rc_.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
+        dc_->OMSetDepthStencilState(rc_.renderState->GetDepthStencilState(DepthState::NoTestNoWrite), 0);
+        dc_->OMSetBlendState(rc_.renderState->GetBlendState(
+            bloom_ ? BlendState::AdditiveKeepAlpha : BlendState::TransparencyKeepAlpha), nullptr, 0xFFFFFFFF);
+        ID3D11SamplerState* samplers_[]{
+            rc_.renderState->GetSamplerState(SamplerState::LinearClamp),
+            rc_.renderState->GetSamplerState(SamplerState::PointClamp) };
+        dc_->PSSetSamplers(0, _countof(samplers_), samplers_);
+        dc_->IASetInputLayout(nullptr);
+        dc_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        dc_->VSSetShader(layerEffectVertexShader.Get(), nullptr, 0);
+        dc_->GSSetShader(nullptr, nullptr, 0);
+        dc_->PSSetShader(layerEffectPixelShader.Get(), nullptr, 0);
+        dc_->PSSetConstantBuffers(0, 1, layerEffectConstants.GetAddressOf());
+        ID3D11ShaderResourceView* srvs_[]{ bloom_ ? nullptr : layerDepthSRV.Get(),
+            bloom_ ? nullptr : rc_.depthSRV, layerInput_, motionSource_ };
+        dc_->PSSetShaderResources(0, _countof(srvs_), srvs_);
+        dc_->Draw(3, 0);
+        ID3D11ShaderResourceView* nullSrvs_[4]{};
+        dc_->PSSetShaderResources(0, _countof(nullSrvs_), nullSrvs_);
+    };
+    // 遮蔽シルエットは、発光やブラーを重ねた後も指定色で読めるよう最後に描く。
+    for (const bool silhouettePass_ : { false, true })
+    {
+        for (const auto& effect_ : effects_)
+        {
+            if ((effect_.type == LayerPostEffectType::OCCLUDED_SILHOUETTE) == silhouettePass_)
+            {
+                drawEffect_(effect_);
+            }
+        }
+    }
+    dc_->OMSetRenderTargets(1, &finalRTV_, nullptr);
+    dc_->RSSetViewports(1, &outputViewport_);
+}
+
+void PostRenderSystem::CopyRenderOutput(const RenderContext& rc_, ID3D11RenderTargetView* outputRTV_, OutputCopy& buffer_)
+{
+    if (!rc_.device || !rc_.deviceContext || !outputRTV_)
+    {
+        return;
+    }
 
     Microsoft::WRL::ComPtr<ID3D11Resource> sourceResource_;
     outputRTV_->GetResource(sourceResource_.GetAddressOf());
     Microsoft::WRL::ComPtr<ID3D11Texture2D> sourceTexture_;
-    if (!sourceResource_ || FAILED(sourceResource_.As(&sourceTexture_))) return;
+    if (!sourceResource_ || FAILED(sourceResource_.As(&sourceTexture_)))
+    {
+        return;
+    }
 
     D3D11_TEXTURE2D_DESC sourceDesc_{};
     sourceTexture_->GetDesc(&sourceDesc_);
-    if (sourceDesc_.SampleDesc.Count != 1 || sourceDesc_.MipLevels != 1 || sourceDesc_.ArraySize != 1) return;
+    if (sourceDesc_.SampleDesc.Count != 1 || sourceDesc_.MipLevels != 1 || sourceDesc_.ArraySize != 1)
+    {
+        return;
+    }
 
     bool recreate_ = !buffer_.texture || !buffer_.srv;
     if (!recreate_)
@@ -320,7 +632,10 @@ void PostRenderSystem::CaptureDebugOutput(const RenderContext& rc_, ID3D11Render
         copyDesc_.BindFlags = D3D11_BIND_SHADER_RESOURCE;
         copyDesc_.CPUAccessFlags = 0;
         copyDesc_.MiscFlags = 0;
-        if (FAILED(rc_.device->CreateTexture2D(&copyDesc_, nullptr, buffer_.texture.GetAddressOf()))) return;
+        if (FAILED(rc_.device->CreateTexture2D(&copyDesc_, nullptr, buffer_.texture.GetAddressOf())))
+        {
+            return;
+        }
         if (FAILED(rc_.device->CreateShaderResourceView(buffer_.texture.Get(), nullptr, buffer_.srv.GetAddressOf())))
         {
             buffer_.texture.Reset();
@@ -328,7 +643,7 @@ void PostRenderSystem::CaptureDebugOutput(const RenderContext& rc_, ID3D11Render
         }
     }
 
-    // Ping-Pong先は後続パスで上書きされるため、表示用に描画直後の内容を保持する。
+    // 後続パスで出力先を書き換えながら読み戻せるよう、別のテクスチャへコピーする。
     Microsoft::WRL::ComPtr<ID3D11RenderTargetView> boundRTV_;
     Microsoft::WRL::ComPtr<ID3D11DepthStencilView> boundDSV_;
     rc_.deviceContext->OMGetRenderTargets(1, boundRTV_.GetAddressOf(), boundDSV_.GetAddressOf());
@@ -353,10 +668,16 @@ bool PostRenderSystem::CreatePostBuffer(ID3D11Device* device, int width, int hei
     desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 
     HRESULT hr = device->CreateTexture2D(&desc, nullptr, outBuffer.texture.ReleaseAndGetAddressOf());
-    if (FAILED(hr)) return false;
+    if (FAILED(hr))
+    {
+        return false;
+    }
 
     hr = device->CreateRenderTargetView(outBuffer.texture.Get(), nullptr, outBuffer.rtv.ReleaseAndGetAddressOf());
-    if (FAILED(hr)) return false;
+    if (FAILED(hr))
+    {
+        return false;
+    }
 
     hr = device->CreateShaderResourceView(outBuffer.texture.Get(), nullptr, outBuffer.srv.ReleaseAndGetAddressOf());
     return SUCCEEDED(hr);

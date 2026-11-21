@@ -4,7 +4,9 @@
 // HierarchyWindow.h
 class HierarchyWindow : public EditorWindow {
 public:
-    HierarchyWindow(GameObjectManager* manager) : EditorWindow("Hierarchy", manager) {}
+    HierarchyWindow(GameObjectManager* manager) : EditorWindow("Hierarchy", manager)
+    {
+    }
 
     void Draw() override;
 };

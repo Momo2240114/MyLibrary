@@ -38,7 +38,7 @@
                                 "name": "Weapon_Sword_Shiled.001",
                                 "normalScale": 1.0,
                                 "occlusionStrength": 1.0,
-                                "outlineThicknessOffset": 0.004999999888241291,
+                                "outlineThicknessOffset": 0.012,
                                 "rimStrength": 0.05999999865889549,
                                 "roughness": 0.75,
                                 "shaderId": 3,
@@ -315,7 +315,7 @@
                                 "name": "Weapon_Sword_Shiled.001",
                                 "normalScale": 1.0,
                                 "occlusionStrength": 0.9879999756813049,
-                                "outlineThicknessOffset": 0.0024999999441206455,
+                                "outlineThicknessOffset": 0.008,
                                 "rimStrength": 0.05999999865889549,
                                 "roughness": 1.0,
                                 "shaderId": 3,
@@ -1332,7 +1332,7 @@
                                 "name": "Body.002",
                                 "normalScale": 1.0,
                                 "occlusionStrength": 0.4869999885559082,
-                                "outlineThicknessOffset": 0.029999999329447746,
+                                "outlineThicknessOffset": 0.02,
                                 "rimStrength": 0.05999999865889549,
                                 "roughness": 1.0,
                                 "shaderId": 3,
@@ -1375,7 +1375,7 @@
                                 "name": "Face.002",
                                 "normalScale": 1.0,
                                 "occlusionStrength": 0.9950000047683716,
-                                "outlineThicknessOffset": 0.0020000000949949026,
+                                "outlineThicknessOffset": 0.01,
                                 "rimStrength": 0.05999999865889549,
                                 "roughness": 0.8500000238418579,
                                 "shaderId": 3,
@@ -1461,7 +1461,7 @@
                                 "name": "Squire_Cloth.002",
                                 "normalScale": 1.0,
                                 "occlusionStrength": 0.9330000281333923,
-                                "outlineThicknessOffset": 0.02800000086426735,
+                                "outlineThicknessOffset": 0.02,
                                 "rimStrength": 0.05999999865889549,
                                 "roughness": 0.9980000257492065,
                                 "shaderId": 3,
@@ -1504,7 +1504,7 @@
                                 "name": "Shiled_Cloth.002",
                                 "normalScale": 1.0,
                                 "occlusionStrength": 1.0,
-                                "outlineThicknessOffset": 0.019999999552965164,
+                                "outlineThicknessOffset": 0.018,
                                 "rimStrength": 0.05999999865889549,
                                 "roughness": 0.9819999933242798,
                                 "shaderId": 3,
@@ -1547,7 +1547,7 @@
                                 "name": "Shiled_Hair.002",
                                 "normalScale": 1.0,
                                 "occlusionStrength": 1.0,
-                                "outlineThicknessOffset": 0.012500000186264515,
+                                "outlineThicknessOffset": 0.015,
                                 "rimStrength": 0.05999999865889549,
                                 "roughness": 1.0,
                                 "shaderId": 3,
@@ -10883,9 +10883,23 @@
                                     "Id": 237,
                                     "ToNodeId": 234,
                                     "ToPinId": 235
+                                },
+                                {
+                                    "FromNodeId": 206,
+                                    "FromPinId": 208,
+                                    "Id": 241,
+                                    "ToNodeId": 238,
+                                    "ToPinId": 239
+                                },
+                                {
+                                    "FromNodeId": 206,
+                                    "FromPinId": 208,
+                                    "Id": 245,
+                                    "ToNodeId": 242,
+                                    "ToPinId": 243
                                 }
                             ],
-                            "NextId": 238,
+                            "NextId": 246,
                             "Nodes": [
                                 {
                                     "ActionEndCategory": "HumanBossAI",
@@ -13170,6 +13184,84 @@
                                         250.0
                                     ],
                                     "Priority": 1,
+                                    "ScopeId": "Root",
+                                    "StringValue": "",
+                                    "SubGraphName": "",
+                                    "Type": "PlayAction",
+                                    "ValueType": "Bool",
+                                    "Vector2Value": [
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "Vector3Value": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "WaitForActionEnd": true,
+                                    "WaitSeconds": 0.0,
+                                    "Weight": 1.0
+                                },
+                                {
+                                    "ActionEndCategory": "HumanBossAI",
+                                    "ActionEndKey": "ActionEnded",
+                                    "ActionName": "HumanBoss_NORMAL_ATTACK_A",
+                                    "BlackboardCategory": "HumanBossAI",
+                                    "BlackboardKey": "",
+                                    "BlackboardScope": "Local",
+                                    "BoolValue": true,
+                                    "Comment": "",
+                                    "CompareType": "Equal",
+                                    "FloatValue": 0.0,
+                                    "Id": 238,
+                                    "InputPinId": 239,
+                                    "IntValue": 0,
+                                    "Name": "Combo approach A",
+                                    "OutputPinId": 240,
+                                    "Position": [
+                                        1480.0,
+                                        600.0
+                                    ],
+                                    "Priority": 4,
+                                    "ScopeId": "Root",
+                                    "StringValue": "",
+                                    "SubGraphName": "",
+                                    "Type": "PlayAction",
+                                    "ValueType": "Bool",
+                                    "Vector2Value": [
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "Vector3Value": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "WaitForActionEnd": true,
+                                    "WaitSeconds": 0.0,
+                                    "Weight": 1.0
+                                },
+                                {
+                                    "ActionEndCategory": "HumanBossAI",
+                                    "ActionEndKey": "ActionEnded",
+                                    "ActionName": "HumanBoss_NORMAL_ATTACK_B",
+                                    "BlackboardCategory": "HumanBossAI",
+                                    "BlackboardKey": "",
+                                    "BlackboardScope": "Local",
+                                    "BoolValue": true,
+                                    "Comment": "",
+                                    "CompareType": "Equal",
+                                    "FloatValue": 0.0,
+                                    "Id": 242,
+                                    "InputPinId": 243,
+                                    "IntValue": 0,
+                                    "Name": "Combo approach B",
+                                    "OutputPinId": 244,
+                                    "Position": [
+                                        1780.0,
+                                        600.0
+                                    ],
+                                    "Priority": 5,
                                     "ScopeId": "Root",
                                     "StringValue": "",
                                     "SubGraphName": "",

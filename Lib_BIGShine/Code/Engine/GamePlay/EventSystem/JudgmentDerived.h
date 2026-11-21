@@ -7,7 +7,10 @@ class EnemyComponent;
 class WanderJudgment :public JudgmentBase
 {
 public:
-	WanderJudgment(GameObject* gameObject) :JudgmentBase(gameObject){}
+	WanderJudgment(GameObject* gameObject) :JudgmentBase(gameObject)
+	{
+	}
+
 	// 巡回行動へ入れる状態かをAgentComponentの状態から判定する。
 	bool Judgment();
 
@@ -19,7 +22,10 @@ private:
 class ChaseJudgment :public JudgmentBase
 {
 public:
-	ChaseJudgment(GameObject*gameObject):JudgmentBase(gameObject){}
+	ChaseJudgment(GameObject*gameObject):JudgmentBase(gameObject)
+	{
+	}
+
 	// 敵が追跡状態へ移るべきかをEnemyComponentの検知情報から判定する。
 	bool Judgment();
 
@@ -32,7 +38,10 @@ private:
 class AttackJudgment :public JudgmentBase
 {
 public:
-	AttackJudgment(GameObject* gameObject) :JudgmentBase(gameObject) {}
+	AttackJudgment(GameObject* gameObject) :JudgmentBase(gameObject)
+	{
+	}
+
 	// 攻撃可能距離や現在状態を見て、攻撃Actionへ移れるかを判定する。
 	bool Judgment();
 
@@ -44,7 +53,9 @@ private:
 class CautionJudgment :public JudgmentBase
 {
 public:
-	CautionJudgment(GameObject* gameObject) :JudgmentBase(gameObject) {}
+	CautionJudgment(GameObject* gameObject) :JudgmentBase(gameObject)
+	{
+	}
 
 	// 警戒状態へ入るべきかを、発見度や記憶中のPlayer位置から判定する。
 	bool Judgment();
@@ -59,7 +70,9 @@ private:
 class CheckJudgment :public JudgmentBase
 {
 public:
-	CheckJudgment(GameObject* gameObject) :JudgmentBase(gameObject) {}
+	CheckJudgment(GameObject* gameObject) :JudgmentBase(gameObject)
+	{
+	}
 
 	// 気になる地点を確認する行動へ移れるかを判定する。
 	bool Judgment();

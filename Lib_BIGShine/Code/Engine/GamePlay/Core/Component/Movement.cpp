@@ -50,7 +50,10 @@ void Movement::ApplyRotation(float deltaTime)
     currentFront.Normalize();
 
     // すでに目標方向を向いているなら何もしない
-    if (currentFront.Dot(targetDir) > 0.999f) return;
+    if (currentFront.Dot(targetDir) > 0.999f)
+    {
+        return;
+    }
 
     // --- クォータニオンによる補間 ---
 

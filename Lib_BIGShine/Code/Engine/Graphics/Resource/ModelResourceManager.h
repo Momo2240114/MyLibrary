@@ -69,7 +69,10 @@ public:
     {
         ShutdownAsyncLoader();
         for (auto& pair : m_resources) {
-            if (pair.second) pair.second->Clear();
+            if (pair.second)
+            {
+                pair.second->Clear();
+            }
         }
         m_resources.clear();
         loadEntries.clear();
@@ -89,7 +92,12 @@ public:
 
 private:
     ModelResourceManager() = default;
-    ~ModelResourceManager() { Clear(); }
+
+    ~ModelResourceManager()
+    {
+        Clear();
+    }
+
     ModelResourceManager(const ModelResourceManager&) = delete;
     ModelResourceManager& operator=(const ModelResourceManager&) = delete;
 

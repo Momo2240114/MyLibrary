@@ -63,7 +63,10 @@ std::shared_ptr<GameObjectManager> SceneBase::GetGameObjectManager()
 // 同時に存在するロード画面と次SceneのAction登録先を、主スレッドで切り替える。
 void SceneBase::ActivateContext()
 {
-    if (actionRegistry) ActionRegistry::SetInstance(actionRegistry);
+    if (actionRegistry)
+	{
+		ActionRegistry::SetInstance(actionRegistry);
+	}
 }
 
 void SceneBase::Finalize()
@@ -89,7 +92,10 @@ void SceneBase::Initialize()
 	_GameObjectManager = std::make_shared<GameObjectManager>();
     // ロード中は全Effectの一括生成を避け、表示側は配置した演出だけを準備する。
 	_GameObjectManager->Initialize(isLoadingPresentation || isLoadingPreparation);
-	if (SceneManager::IsEditorPlaySessionActive()) _GameObjectManager->EnableEditorPlayMode();
+	if (SceneManager::IsEditorPlaySessionActive())
+	{
+		_GameObjectManager->EnableEditorPlayMode();
+	}
 	_GameObjectManager->SetModelRenderSystem(&m_ModelRenderSystem);
     _GameObjectManager->SetLoadingPresentation(isLoadingPresentation);
 
@@ -144,7 +150,10 @@ void SceneBase::Initialize()
 	editorWindowManager->AddWindow(std::make_unique<VFXMaterialPreviewWindow>(_GameObjectManager.get()));
 
     }
-    if (GameRuntimeSettings::IsGameOnly()) _GameObjectManager->SetShapeRenderEnabled(false);
+    if (GameRuntimeSettings::IsGameOnly())
+	{
+		_GameObjectManager->SetShapeRenderEnabled(false);
+	}
 
 	actionRegistry = std::make_shared<ActionRegistry>();
 	ActionRegistry::SetInstance(actionRegistry);
@@ -162,6 +171,12 @@ void SceneBase::Update(float elapsedTime)
 	{
 		// F1 でエディタ表示を切り替える。非表示時も Scene の更新は通常通り進む。
 		isEditorVisible = !isEditorVisible;
+        if (_GameObjectManager->SupportsEditorPlayMode())
+        {
+            // Scene画像を描かない間は、クリック待ちにせずプレイ入力へ戻す。
+            _GameObjectManager->SetPlayInputCaptured(!isEditorVisible &&
+                _GameObjectManager->GetEditorPlayMode() == EditorPlayMode::PLAY);
+        }
 	}
 
 	if (editorWindowManager)
@@ -213,9 +228,11 @@ void SceneBase::Render(float elapsedTime)
     _GameObjectManager->RenderAll(m_SpriteRenderSystem, m_ModelRenderSystem, finalRenderTargetView_, editorCamera_.get(), isLoadingPresentation);
 
     if (_GameObjectManager->IsCinematicSequencePreview())
-        ScreenTransitionManager::Instance().Render(finalRenderTargetView_);
+	{
+		ScreenTransitionManager::Instance().Render(finalRenderTargetView_);
+	}
 
-    if (useDockedSceneView_)
+	if (useDockedSceneView_)
     {
 		// SceneView 描画後は ImGui を通常のバックバッファへ描けるよう戻す。
         GraphicsDeviceManager::Instance().SetBackBufferRenderTarget();

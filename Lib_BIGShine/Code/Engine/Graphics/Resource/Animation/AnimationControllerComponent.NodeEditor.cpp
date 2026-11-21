@@ -31,12 +31,22 @@ static constexpr const char* ANY_NODE_NAME = "__Any__";
 static constexpr const char* ENTRY_NODE_PREFIX = "__Entry__:";
 static constexpr const char* EXIT_NODE_PREFIX = "__Exit__:";
 
-static std::string MakeEntryNodeName(const std::string& scopeId) { return std::string(ENTRY_NODE_PREFIX) + scopeId; }
-static std::string MakeExitNodeName(const std::string& scopeId) { return std::string(EXIT_NODE_PREFIX) + scopeId; }
+static std::string MakeEntryNodeName(const std::string& scopeId)
+{
+    return std::string(ENTRY_NODE_PREFIX) + scopeId;
+}
+
+static std::string MakeExitNodeName(const std::string& scopeId)
+{
+    return std::string(EXIT_NODE_PREFIX) + scopeId;
+}
 
 static bool ContainsCaseInsensitive(const std::string& text_, const std::string& query_)
 {
-    if (query_.empty()) return true;
+    if (query_.empty())
+    {
+        return true;
+    }
 
     return std::search(
         text_.begin(), text_.end(),
@@ -74,7 +84,9 @@ static bool IsSpecialGraphNodeName(const std::string& name)
 static ImU32 GetGraphNodeFillColor(const AnimGraphNode& node_, bool isActive_)
 {
     if (isActive_)
+    {
         return IM_COL32(150, 220, 255, 255);
+    }
 
     switch (node_.type)
     {
@@ -90,7 +102,9 @@ static ImU32 GetGraphNodeFillColor(const AnimGraphNode& node_, bool isActive_)
 static ImU32 GetGraphNodeBorderColor(const AnimGraphNode& node_, bool isActive_)
 {
     if (isActive_)
+    {
         return IM_COL32(45, 170, 255, 255);
+    }
 
     switch (node_.type)
     {
@@ -156,16 +170,26 @@ static void DrawStraightLinkArrow(ImDrawList* drawList_, const ImVec2& start_, c
     drawList_->AddTriangleFilled(tip_, backA_, backB_, IM_COL32(255, 190, 40, 255));
     drawList_->AddTriangle(tip_, backA_, backB_, IM_COL32(70, 45, 0, 255), 2.0f);
 }
+
 static void DrawLinkArrow(ImDrawList* drawList, const ImVec2& p0, const ImVec2& p3, ImU32 color)
 {
-    if (p0.x == 0.0f && p0.y == 0.0f) return;
-    if (p3.x == 0.0f && p3.y == 0.0f) return;
+    if (p0.x == 0.0f && p0.y == 0.0f)
+    {
+        return;
+    }
+    if (p3.x == 0.0f && p3.y == 0.0f)
+    {
+        return;
+    }
 
     // 始点と終点の直線距離を測る
     float distance = std::sqrt((p3.x - p0.x) * (p3.x - p0.x) + (p3.y - p0.y) * (p3.y - p0.y));
 
     // あまりにもノードが近すぎる場合は、めり込みを防ぐため矢印を描画しない
-    if (distance < 50.0f) return;
+    if (distance < 50.0f)
+    {
+        return;
+    }
 
     // imgui_node_editorのデフォルトに近いベジェの制御点を計算
     float strength = std::fmax(std::abs(p3.x - p0.x) * 0.5f, 50.0f);
@@ -299,6 +323,7 @@ static void DrawLinkArrow(ImDrawList* drawList, const ImVec2& p0, const ImVec2& 
     // 導き出された比率で描画
     drawArrowAt(targetT);
 }
+
 const std::string ASSET_DIR = "Data/Animation/StateData/";
 static constexpr float BIDIRECTIONAL_LINK_OFFSET = 14.0f;
 
@@ -402,7 +427,10 @@ void AnimationControllerComponent::OnGuiNodeEditor()
 void AnimationControllerComponent::DrawNodeEditorContent(ANIM_GRAPH_CONNECTION_MODE connectionMode_)
 {
     PrepareGraphEditor();
-    if (!nodeEditorContext) return;
+    if (!nodeEditorContext)
+    {
+        return;
+    }
 
     EnsureSpecialGraphNodes();
 
@@ -415,11 +443,17 @@ void AnimationControllerComponent::DrawNodeEditorContent(ANIM_GRAPH_CONNECTION_M
 
     auto ensureScopedEntryExitNodes = [&]() {
         const std::string scope = currentScopeName();
-        if (scope == "Root") return;
+        if (scope == "Root")
+        {
+            return;
+        }
 
         auto ensureScopedNode = [&](AnimGraphNodeType type, const std::string& internalName, const ImVec2& defaultPos) {
             auto it = std::find_if(graphNodes.begin(), graphNodes.end(),
-                [&](const AnimGraphNode& node) { return node.stateName == internalName; });
+                [&](const AnimGraphNode& node)
+            {
+                return node.stateName == internalName;
+            });
             if (it == graphNodes.end())
             {
                 AnimGraphNode node;
@@ -437,15 +471,24 @@ void AnimationControllerComponent::DrawNodeEditorContent(ANIM_GRAPH_CONNECTION_M
 
             it->type = type;
             it->scopeId = scope;
-            if ((uintptr_t)it->id.Get() == 0) it->id = ed::NodeId(GetNextId());
+            if ((uintptr_t)it->id.Get() == 0)
+            {
+                it->id = ed::NodeId(GetNextId());
+            }
             if (type == AnimGraphNodeType::Entry)
             {
                 it->inputPin = ed::PinId(0);
-                if ((uintptr_t)it->outputPin.Get() == 0) it->outputPin = ed::PinId(GetNextId());
+                if ((uintptr_t)it->outputPin.Get() == 0)
+                {
+                    it->outputPin = ed::PinId(GetNextId());
+                }
             }
             else if (type == AnimGraphNodeType::Exit)
             {
-                if ((uintptr_t)it->inputPin.Get() == 0) it->inputPin = ed::PinId(GetNextId());
+                if ((uintptr_t)it->inputPin.Get() == 0)
+                {
+                    it->inputPin = ed::PinId(GetNextId());
+                }
                 it->outputPin = ed::PinId(0);
             }
             };
@@ -519,7 +562,9 @@ void AnimationControllerComponent::DrawNodeEditorContent(ANIM_GRAPH_CONNECTION_M
     }
 
     if (ImGui::Button("Focus All"))
+    {
         ed::NavigateToContent();
+    }
 
     ImGui::SameLine();
     if (ImGui::Button("Back") && !graphScopeStack.empty())
@@ -527,7 +572,9 @@ void AnimationControllerComponent::DrawNodeEditorContent(ANIM_GRAPH_CONNECTION_M
         for (auto& node : graphNodes)
         {
             if (isNodeInCurrentScope(node))
+            {
                 node.pos = ed::GetNodePosition(node.id);
+            }
         }
         currentGraphScopeId = graphScopeStack.back();
         graphScopeStack.pop_back();
@@ -758,7 +805,9 @@ void AnimationControllerComponent::DrawNodeEditorContent(ANIM_GRAPH_CONNECTION_M
     for (auto& node : graphNodes)
     {
         if (isNodeInCurrentScope(node))
+        {
             drawGraphNode_(node);
+        }
     }
 
     std::unordered_map<std::string, AnimGraphNode*> scopedNodeByName_;
@@ -785,7 +834,10 @@ void AnimationControllerComponent::DrawNodeEditorContent(ANIM_GRAPH_CONNECTION_M
 
     for (auto& link : graphTransitions)
     {
-        if (link.scopeId != currentScopeName_) continue;
+        if (link.scopeId != currentScopeName_)
+        {
+            continue;
+        }
         const auto startNodeIterator_ = scopedNodeByName_.find(link.fromStateName);
         const auto endNodeIterator_ = scopedNodeByName_.find(link.toStateName);
         AnimGraphNode* startNode = startNodeIterator_ != scopedNodeByName_.end() ? startNodeIterator_->second : nullptr;
@@ -809,7 +861,10 @@ void AnimationControllerComponent::DrawNodeEditorContent(ANIM_GRAPH_CONNECTION_M
     ImDrawList* arrowDrawList_ = ImGui::GetWindowDrawList();
     for (auto& link_ : graphTransitions)
     {
-        if (link_.scopeId != currentScopeName_) continue;
+        if (link_.scopeId != currentScopeName_)
+        {
+            continue;
+        }
 
         const auto startNodeIterator_ = scopedNodeByName_.find(link_.fromStateName);
         const auto endNodeIterator_ = scopedNodeByName_.find(link_.toStateName);
@@ -878,7 +933,9 @@ void AnimationControllerComponent::DrawNodeEditorContent(ANIM_GRAPH_CONNECTION_M
         for (auto& node : graphNodes)
         {
             if (isNodeInCurrentScope(node))
+            {
                 ed::SetNodePosition(node.id, node.pos);
+            }
         }
 
         ed::NavigateToContent();
@@ -889,9 +946,22 @@ void AnimationControllerComponent::DrawNodeEditorContent(ANIM_GRAPH_CONNECTION_M
     {
         auto getPinInfo = [&](uintptr_t pinId, bool& isInput, std::string& nodeName) -> bool {
             for (auto& n : graphNodes) {
-                if (!isNodeInCurrentScope(n)) continue;
-                if ((uintptr_t)n.inputPin.Get() != 0 && (uintptr_t)n.inputPin.Get() == pinId) { isInput = true;  nodeName = n.stateName; return true; }
-                if ((uintptr_t)n.outputPin.Get() != 0 && (uintptr_t)n.outputPin.Get() == pinId) { isInput = false; nodeName = n.stateName; return true; }
+                if (!isNodeInCurrentScope(n))
+                {
+                    continue;
+                }
+                if ((uintptr_t)n.inputPin.Get() != 0 && (uintptr_t)n.inputPin.Get() == pinId)
+                {
+                    isInput = true;
+                    nodeName = n.stateName;
+                    return true;
+                }
+                if ((uintptr_t)n.outputPin.Get() != 0 && (uintptr_t)n.outputPin.Get() == pinId)
+                {
+                    isInput = false;
+                    nodeName = n.stateName;
+                    return true;
+                }
             }
             return false;
             };
@@ -930,7 +1000,13 @@ void AnimationControllerComponent::DrawNodeEditorContent(ANIM_GRAPH_CONNECTION_M
                     {
                         bool exists = false;
                         for (auto& t : graphTransitions)
-                            if (t.scopeId == currentScopeName() && t.fromStateName == finalFrom && t.toStateName == finalTo) { exists = true; break; }
+                        {
+                            if (t.scopeId == currentScopeName() && t.fromStateName == finalFrom && t.toStateName == finalTo)
+                            {
+                                exists = true;
+                                break;
+                            }
+                        }
 
                         if (!exists)
                         {
@@ -938,7 +1014,10 @@ void AnimationControllerComponent::DrawNodeEditorContent(ANIM_GRAPH_CONNECTION_M
                             {
                                 graphTransitions.erase(
                                     std::remove_if(graphTransitions.begin(), graphTransitions.end(),
-                                        [&](const auto& t) { return t.scopeId == currentScopeName() && t.fromStateName == START_NODE_NAME; }),
+                                        [&](const auto& t)
+                                {
+                                    return t.scopeId == currentScopeName() && t.fromStateName == START_NODE_NAME;
+                                }),
                                     graphTransitions.end());
                             }
 
@@ -962,7 +1041,10 @@ void AnimationControllerComponent::DrawNodeEditorContent(ANIM_GRAPH_CONNECTION_M
         }
 
         ed::PinId unusedPin;
-        if (ed::QueryNewNode(&unusedPin)) ed::RejectNewItem();
+        if (ed::QueryNewNode(&unusedPin))
+        {
+            ed::RejectNewItem();
+        }
     }
     ed::EndCreate();
 
@@ -975,7 +1057,10 @@ void AnimationControllerComponent::DrawNodeEditorContent(ANIM_GRAPH_CONNECTION_M
             {
                 graphTransitions.erase(
                     std::remove_if(graphTransitions.begin(), graphTransitions.end(),
-                        [&](const auto& t) { return t.id == linkId; }),
+                        [&](const auto& t)
+                {
+                    return t.id == linkId;
+                }),
                     graphTransitions.end());
 
                 useTransitionGraph = true;
@@ -986,9 +1071,14 @@ void AnimationControllerComponent::DrawNodeEditorContent(ANIM_GRAPH_CONNECTION_M
         while (ed::QueryDeletedNode(&nodeId))
         {
             auto nodeIt = std::find_if(graphNodes.begin(), graphNodes.end(),
-                [&](const auto& n) { return n.id == nodeId; });
+                [&](const auto& n)
+            {
+                return n.id == nodeId;
+            });
             if (nodeIt == graphNodes.end())
+            {
                 continue;
+            }
 
             if (IsSpecialGraphNode(*nodeIt))
             {
@@ -1009,11 +1099,16 @@ void AnimationControllerComponent::DrawNodeEditorContent(ANIM_GRAPH_CONNECTION_M
 
                 graphNodes.erase(
                     std::remove_if(graphNodes.begin(), graphNodes.end(),
-                        [&](const auto& n) { return n.stateName == deletedName; }),
+                        [&](const auto& n)
+                {
+                    return n.stateName == deletedName;
+                }),
                     graphNodes.end());
 
                 if (editingState && editingState->name == deletedName)
+                {
                     editingState = nullptr;
+                }
 
                 useTransitionGraph = true;
             }
@@ -1058,15 +1153,22 @@ void AnimationControllerComponent::DrawNodeEditorContent(ANIM_GRAPH_CONNECTION_M
     if ((uintptr_t)doubleClickedNodeId.Get() != 0)
     {
         auto it = std::find_if(graphNodes.begin(), graphNodes.end(),
-            [&](const auto& n) { return n.id == doubleClickedNodeId; });
+            [&](const auto& n)
+        {
+            return n.id == doubleClickedNodeId;
+        });
         if (it != graphNodes.end() && it->type == AnimGraphNodeType::SubGraph)
         {
             if (it->childScopeId.empty())
+            {
                 it->childScopeId = it->stateName;
+            }
             for (auto& node : graphNodes)
             {
                 if (isNodeInCurrentScope(node))
+                {
                     node.pos = ed::GetNodePosition(node.id);
+                }
             }
             graphScopeStack.push_back(currentScopeName());
             currentGraphScopeId = it->childScopeId;
@@ -1080,7 +1182,10 @@ void AnimationControllerComponent::DrawNodeEditorContent(ANIM_GRAPH_CONNECTION_M
         if (ed::GetSelectedNodes(&selectedNodeId, 1) > 0)
         {
             auto it = std::find_if(graphNodes.begin(), graphNodes.end(),
-                [&](const auto& n) { return n.id == selectedNodeId; });
+                [&](const auto& n)
+            {
+                return n.id == selectedNodeId;
+            });
             if (it != graphNodes.end() && it->type == AnimGraphNodeType::State && states.count(it->stateName))
             {
                 editingState = states[it->stateName].get();
@@ -1093,7 +1198,10 @@ void AnimationControllerComponent::DrawNodeEditorContent(ANIM_GRAPH_CONNECTION_M
     if (ed::GetSelectedNodes(&selectedSubGraphNodeId_, 1) > 0)
     {
         auto subGraphIt_ = std::find_if(graphNodes.begin(), graphNodes.end(),
-            [&](const auto& node_) { return node_.id == selectedSubGraphNodeId_ && node_.type == AnimGraphNodeType::SubGraph; });
+            [&](const auto& node_)
+        {
+            return node_.id == selectedSubGraphNodeId_ && node_.type == AnimGraphNodeType::SubGraph;
+        });
 
         if (subGraphIt_ != graphNodes.end() && subGraphIt_->scopeId == currentScopeName())
         {
@@ -1109,7 +1217,10 @@ void AnimationControllerComponent::DrawNodeEditorContent(ANIM_GRAPH_CONNECTION_M
                     newName_.rfind(ENTRY_NODE_PREFIX, 0) == 0 ||
                     newName_.rfind(EXIT_NODE_PREFIX, 0) == 0;
                 const bool exists_ = std::any_of(graphNodes.begin(), graphNodes.end(),
-                    [&](const auto& node_) { return node_.id != subGraphIt_->id && node_.stateName == newName_; });
+                    [&](const auto& node_)
+                {
+                    return node_.id != subGraphIt_->id && node_.stateName == newName_;
+                });
 
                 if (!isEmpty_ && !isSpecialName_ && !exists_ && newName_ != subGraphIt_->stateName)
                 {
@@ -1119,9 +1230,13 @@ void AnimationControllerComponent::DrawNodeEditorContent(ANIM_GRAPH_CONNECTION_M
                     for (auto& transition_ : graphTransitions)
                     {
                         if (transition_.fromStateName == oldName_)
+                        {
                             transition_.fromStateName = newName_;
+                        }
                         if (transition_.toStateName == oldName_)
+                        {
                             transition_.toStateName = newName_;
+                        }
                     }
 
                     useTransitionGraph = true;
@@ -1159,10 +1274,16 @@ void AnimationControllerComponent::DrawNodeEditorContent(ANIM_GRAPH_CONNECTION_M
 
         for (auto& [name, statePtr] : states)
         {
-            if (!ContainsCaseInsensitive(name, graphStateSearchText)) continue;
+            if (!ContainsCaseInsensitive(name, graphStateSearchText))
+            {
+                continue;
+            }
 
             auto it = std::find_if(graphNodes.begin(), graphNodes.end(),
-                [&](const auto& n) { return n.stateName == name; });
+                [&](const auto& n)
+            {
+                return n.stateName == name;
+            });
 
             if (it == graphNodes.end())
             {
@@ -1211,7 +1332,10 @@ void AnimationControllerComponent::DrawNodeEditorContent(ANIM_GRAPH_CONNECTION_M
             {
                 graphName = baseName + "_" + std::to_string(index++);
                 exists = std::any_of(graphNodes.begin(), graphNodes.end(),
-                    [&](const auto& n) { return n.stateName == graphName || n.childScopeId == graphName; });
+                    [&](const auto& n)
+                {
+                    return n.stateName == graphName || n.childScopeId == graphName;
+                });
             } while (exists);
 
             AnimGraphNode subGraphNode;
@@ -1275,7 +1399,9 @@ void AnimationControllerComponent::DrawTransitionInspectorContent()
 
     ImGui::Separator();
     if (transition_.blackboardRequestRoute)
+    {
         ImGui::TextDisabled("Blackboard request route: playback timing comes from the request.");
+    }
     if (ImGui::DragFloat("Fade Duration", &transition_.duration, 0.01f, 0.0f, 2.0f))
     {
         useTransitionGraph = true;

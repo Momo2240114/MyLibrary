@@ -20,7 +20,10 @@ bool VFXMaterialResource::ApplyLoadedData(const VFXMaterialData& materialData_)
 bool VFXMaterialResource::LoadTextures(ID3D11Device* device_)
 {
     BS_PROFILE_SCOPE("VFXMaterialResource::LoadTextures");
-    if (!device_) return false;
+    if (!device_)
+    {
+        return false;
+    }
     // Slotごとに意味のあるFallback色を使う。
     // Normalはフラット法線、Mask/Baseは白、Distortionは中間値で無効に近い状態へ倒す。
     baseTexture = LoadTextureSlot(device_, materialData.baseTexturePath, 0xFFFFFFFFu);

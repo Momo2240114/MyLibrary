@@ -50,11 +50,28 @@ public:
     bool CanStartRanged(const std::string& skillName_, const std::shared_ptr<GameObject>& target_) const;
     // 既存HP Phaseとは別に、HP条件と中央への安全な経路を確認する。
     bool CanUseRagnarok() const;
-    bool WasRagnarokUsed() const { return ragnarokUsed; }
-    const std::string& GetRagnarokBlockReason() const { return ragnarokBlockReason; }
-    float GetRagnarokHpThreshold() const { return ragnarokHpThreshold; }
+
+    bool WasRagnarokUsed() const
+    {
+        return ragnarokUsed;
+    }
+
+    const std::string& GetRagnarokBlockReason() const
+    {
+        return ragnarokBlockReason;
+    }
+
+    float GetRagnarokHpThreshold() const
+    {
+        return ragnarokHpThreshold;
+    }
+
     // 行動を開始できない理由を、AI Inspectorと実行担当へ返す。
-    const std::string& GetValidationError() const { return validationError; }
+    const std::string& GetValidationError() const
+    {
+        return validationError;
+    }
+
     // 実行に必要なAnimation、Sequence、防御Colliderの存在を確認する。
     bool CanStart(const SkillDefinition& skill_, HumanBossDefense defense_,
         const std::shared_ptr<GameObject>& target_ = nullptr) const;
@@ -69,25 +86,46 @@ public:
     void Stop(const std::string& idleState_ = "SS_Idle");
     // 自身の武器と派生攻撃だけを無効化し、中断後の再有効化予約も閉じる。
     void StopAttackHitBoxes(bool clearTrail_ = true);
+
     // 連撃中はHP減少を維持し、被弾ひるみだけで連撃全体が消えないようにする。
-    void SetBerserkProtection(bool protected_) { berserkProtection = protected_; UpdateHitProtection(0.0f); }
+    void SetBerserkProtection(bool protected_)
+    {
+        berserkProtection = protected_;
+        UpdateHitProtection(0.0f);
+    }
+
     // AIの接近目標にも、予定移動と現在の補正上限から見積もった開始範囲を渡す。
     float GetAttackStartReach(const SkillDefinition& skill_, const std::shared_ptr<GameObject>& target_) const;
-    bool IsActive() const { return execution.IsActive(); }
+
+    bool IsActive() const
+    {
+        return execution.IsActive();
+    }
+
     // 短い通常技では曲を切り替えず、ラグナロクの実行区間だけ専用曲の対象にする。
-    bool IsSpecialMusicActive() const { return execution.IsActive() && rangedSkill == "SHADOW_RAGNAROK"; }
+    bool IsSpecialMusicActive() const
+    {
+        return execution.IsActive() && rangedSkill == "SHADOW_RAGNAROK";
+    }
+
     // Combat Systemが確定した成功を一度だけAIへ返す。
     bool ConsumeJustGuardSuccess();
     // 通常Guardの実成立を、一度だけ軽反撃の判断へ渡す。
     bool ConsumeGuardSuccess();
     // Dodgeが観測された後、次の段間隔にだけ追加待機を適用する。
     bool ExtendComboDelay(float extension_, float maximum_);
-    SkillExecutionResult GetResult() const { return execution.GetResult(); }
+
+    SkillExecutionResult GetResult() const
+    {
+        return execution.GetResult();
+    }
+
     // 移動アニメーションと注視を引き受け、AIの判断から再生処理を分離する。
     void SetLocomotion(const std::string& state_, const DirectX::XMFLOAT3& velocity_,
         const DirectX::XMFLOAT3& facing_, const DirectX::XMFLOAT2& blendInput_);
     // 注視方向を既存Movementへ予約する。
     void FaceTarget(const DirectX::XMFLOAT3& direction_, bool immediate_ = false);
+
 private:
     // 自身の攻撃に対するジャストガード・ジャスト回避から無敵解除Actionへつなぐ。
     void NotifyCounterOpportunity(std::shared_ptr<GameObject> attacker_);
@@ -210,6 +248,7 @@ private:
     int ragnarokGridLineCount = 9;
     float ragnarokGridWidth = 1.4f;
     float ragnarokGridSpacing = 9.0f;
+
     // 予兆開始時の寸法を保持し、途中のGUI編集でも打撃範囲を変えない。
     struct RagnarokGridStrip
     {
@@ -220,6 +259,7 @@ private:
         float offset = 0.0f;
         int axis = 0;
     };
+
     std::vector<RagnarokGridStrip> ragnarokGrid;
     float ragnarokWarningDuration = 0.0f;
     float ragnarokRotationSpeed = 120.0f;
@@ -231,6 +271,7 @@ private:
     float electricDensityMultiplier = 4.5f; // 泥の量は維持し、共通の電撃粒子だけを増やす。
     int ragnarokParticleLineLimit = 24;
     std::string ragnarokParticleAsset = "Data/Particle/HumanBossGridElectricMud.json";
+
     // 電撃の線分移動を管理し、ダメージ判定は別の攻撃Effectで制御する。
     struct RagnarokParticleSweep
     {
@@ -240,6 +281,7 @@ private:
         float time = 0.0f;
         float duration = 0.16f; // 発生元ごとの電撃が線分を走り切る時間。
     };
+
     std::vector<RagnarokParticleSweep> ragnarokParticleSweeps;
     float ragnarokHitDuration = 0.2f;
     float ragnarokYaw = 0.0f;

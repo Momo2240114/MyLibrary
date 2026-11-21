@@ -36,6 +36,7 @@ public:
 	void EaseOutExpo(float t);
 	void GetOutExpoTime();
 	void EaseOutBounce(float t);
+
 	void SetValue(float value)
 	{
 		m_Value = value;
@@ -53,9 +54,13 @@ public:
 		return m_Value;
 	}
 
-	float GetRatio() { return m_Ratio; }
+	float GetRatio()
+	{
+		return m_Ratio;
+	}
 
 	void Gui();
+
 private:
 
 	EasingType m_EasingType;
@@ -103,7 +108,11 @@ public:
 	}
 
 	void Gui();
-	void SetUseUnscaledTime(bool enabled_) { useUnscaledTime = enabled_; }
+
+	void SetUseUnscaledTime(bool enabled_)
+	{
+		useUnscaledTime = enabled_;
+	}
 
 private:
 	std::vector<Easing> m_Easings;

@@ -25,6 +25,7 @@ public:
         static const std::string NAME = "ModelDissolveComponent";
         return NAME;
     }
+
     // 保存設定を準備し、消滅・形成・復元Actionを公開する。
     void Start() override;
     // モデルのロード完了後にDissolveの進行度を更新する。
@@ -43,9 +44,22 @@ public:
     void Play(bool reveal_);
     // 演出の直接シークは通常の消滅再生を変更せず、一時的な進行度だけを上書きする。
     void SetPresentationProgress(float progress_);
-    void ClearPresentationProgress() { presentationProgress = -1.0f; }
-    float GetProgress() const { return presentationProgress >= 0.0f ? presentationProgress : progress; }
-    const ModelDissolveSettings& GetSettings() const { return settings; }
+
+    void ClearPresentationProgress()
+    {
+        presentationProgress = -1.0f;
+    }
+
+    float GetProgress() const
+    {
+        return presentationProgress >= 0.0f ? presentationProgress : progress;
+    }
+
+    const ModelDissolveSettings& GetSettings() const
+    {
+        return settings;
+    }
+
     ID3D11ShaderResourceView* GetNoiseTexture() const;
 
 private:

@@ -15,7 +15,11 @@ public:
         PlayerControllerComponent& playerController_,
         PLAYER_ACTION action_);
 
-    const char* GetName() const override { return GetPlayerActionName(action); }
+    const char* GetName() const override
+    {
+        return GetPlayerActionName(action);
+    }
+
     // 攻撃ごとの補正基準を確定し、攻撃種別に応じた移動と反撃用Warpを開始する。
     void Enter() override;
     // グラフが該当段を再生し始めてから、旧段の時間を使わずにWarpを開始する。

@@ -36,7 +36,10 @@ namespace
     void DrawActionNameList(const char* label_, std::vector<std::string>& actionNames_)
     {
         // 複数Action名をEditorで追加/削除する共通Gui。
-        if (!ImGui::TreeNode(label_)) return;
+        if (!ImGui::TreeNode(label_))
+        {
+            return;
+        }
 
         for (size_t index_ = 0; index_ < actionNames_.size(); ++index_)
         {
@@ -75,7 +78,10 @@ void HitReactionComponent::Start()
 
 void HitReactionComponent::Update(float deltaTime_)
 {
-    if (overlayTimer <= 0.0f) return;
+    if (overlayTimer <= 0.0f)
+    {
+        return;
+    }
 
     // Hit時に開始したOverlayを一定時間後に止める。
     overlayTimer -= deltaTime_;
@@ -91,12 +97,18 @@ void HitReactionComponent::HandleHit()
     BS_PROFILE_SCOPE("HitReactionComponent::HandleHit");
 
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     // AttackSystemがBlackboardへ公開したHit情報を読み、ダメージ・ヒットストップ・吹き飛びへ分解する。
     const std::shared_ptr<BlackboardComponent> blackboard_ =
         owner_->GetComponent<BlackboardComponent>();
-    if (!blackboard_) return;
+    if (!blackboard_)
+    {
+        return;
+    }
 
     float damage_ = 0.0f;
     float hitStopDuration_ = 0.0f;
@@ -118,7 +130,9 @@ void HitReactionComponent::HandleHit()
 
     lastDamage = (std::max)(damage_, 0.0f);
     if (lastDamage > 0.0f && owner_->GetLayer() == LayerType::Player)
+    {
         GraphicsDeviceManager::Instance().PlayDamageVignette();
+    }
     if (lastDamage > 0.0f && damageFlashEnabled)
     {
         damageFlashStartTime = SDL_GetTicks();
@@ -208,13 +222,19 @@ void HitReactionComponent::HandleHit()
     {
         CallOwnerAction(overlayStartActionName);
         overlayTimer = (std::max)(overlayDuration, 0.0f);
-        if (overlayTimer <= 0.0f) CallOwnerAction(overlayStopActionName);
+        if (overlayTimer <= 0.0f)
+        {
+            CallOwnerAction(overlayStopActionName);
+        }
     }
 }
 
 float HitReactionComponent::GetDamageFlashWeight() const
 {
-    if (!damageFlashEnabled || !damageFlashActive || damageFlashDuration <= 0.0f) return 0.0f;
+    if (!damageFlashEnabled || !damageFlashActive || damageFlashDuration <= 0.0f)
+    {
+        return 0.0f;
+    }
     const float elapsed_ = static_cast<float>(SDL_GetTicks() - damageFlashStartTime) * 0.001f;
     // 前半は赤い衝撃を保ち、残りの時間で通常の外観へ戻す。
     const float fadeStart_ = damageFlashDuration * 0.3f;
@@ -234,7 +254,10 @@ void HitReactionComponent::ResetHealth()
 void HitReactionComponent::RegisterActions()
 {
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     // AttackSystemから最終的にOnHitで呼ばれる入口。Healthとは別にリアクションを担当する。
     std::weak_ptr<HitReactionComponent> weakReaction_;
@@ -261,10 +284,16 @@ void HitReactionComponent::RegisterActions()
 void HitReactionComponent::CallOwnerAction(const std::string& actionName_)
 {
     // OnHit自身を呼ぶと再帰になるため無視する。
-    if (actionName_.empty() || actionName_ == "OnHit") return;
+    if (actionName_.empty() || actionName_ == "OnHit")
+    {
+        return;
+    }
 
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (owner_) owner_->ExecuteAction(actionName_);
+    if (owner_)
+    {
+        owner_->ExecuteAction(actionName_);
+    }
 }
 
 void HitReactionComponent::CallOwnerActions(const std::vector<std::string>& actionNames_)
@@ -356,7 +385,10 @@ void HitReactionComponent::SetReactionImpactThresholds(
 void HitReactionComponent::AddCommonReactionAction(const std::string& actionName_)
 {
     // 同じActionを重複登録しない。
-    if (actionName_.empty()) return;
+    if (actionName_.empty())
+    {
+        return;
+    }
     if (std::find(commonReactionActionNames.begin(), commonReactionActionNames.end(), actionName_) ==
         commonReactionActionNames.end())
     {
@@ -366,7 +398,10 @@ void HitReactionComponent::AddCommonReactionAction(const std::string& actionName
 
 void HitReactionComponent::AddReactionAction(HIT_REACTION_KIND kind_, const std::string& actionName_)
 {
-    if (actionName_.empty()) return;
+    if (actionName_.empty())
+    {
+        return;
+    }
     std::vector<std::string>& actionNames_ = GetReactionActions(kind_);
     if (std::find(actionNames_.begin(), actionNames_.end(), actionName_) == actionNames_.end())
     {
@@ -383,9 +418,15 @@ void HitReactionComponent::Gui()
     {
         currentHealth = (std::min)(currentHealth, maxHealth);
     }
-    if (ImGui::Button("Test OnHit")) HandleHit();
+    if (ImGui::Button("Test OnHit"))
+    {
+        HandleHit();
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Reset Health")) ResetHealth();
+    if (ImGui::Button("Reset Health"))
+    {
+        ResetHealth();
+    }
 
     ImGui::Checkbox("Damage Flash Enabled", &damageFlashEnabled);
     ImGui::DragFloat("Damage Flash Duration", &damageFlashDuration, 0.01f, 0.01f, 1.0f);

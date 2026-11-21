@@ -21,17 +21,30 @@ public:
     void Deserialize(const nlohmann::json& json_) override;
 
     // 上半身Leanの有効状態を外部から切り替える。
-    void SetLeanEnabled(bool enabled_) { leanEnabled = enabled_; }
+    void SetLeanEnabled(bool enabled_)
+    {
+        leanEnabled = enabled_;
+    }
+
     // 手動の移動方向を指定する。
     void SetMoveDirection(const DirectX::XMFLOAT3& direction_);
     // 手動の移動速度を指定する。
     void SetMoveVelocity(const DirectX::XMFLOAT3& velocity_);
-    void SetLeanStrength(float strength_) { leanStrength = strength_; }
+
+    void SetLeanStrength(float strength_)
+    {
+        leanStrength = strength_;
+    }
+
     // 現在のLean角度と履歴を初期化する。
     void ResetLean();
 
     // Animation名による適用Filterを切り替える。
-    void SetUseAnimationFilter(bool enabled_) { useAnimationFilter = enabled_; }
+    void SetUseAnimationFilter(bool enabled_)
+    {
+        useAnimationFilter = enabled_;
+    }
+
     // Leanを適用するAnimation名を追加する。
     void AddApplyAnimationName(const std::string& animationName_);
     void ClearApplyAnimationNames();

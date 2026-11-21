@@ -22,7 +22,10 @@ public:
         DirectX::XMFLOAT4 decal_direction;
     };
 
-    const std::string& GetName() const override { return componentName; }
+    const std::string& GetName() const override
+    {
+        return componentName;
+    }
 
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture;
     DirectX::XMFLOAT4 color{ 1.0f, 1.0f, 1.0f, 1.0f };
@@ -39,11 +42,20 @@ public:
 
     // 時間経過に応じて複数の VFXMaterial を切り替えるためのリスト設定。
     void SetMaterials(const std::vector<std::string>& paths_);
-    const std::string& GetMaterialPath() const { return materialPath; }
-    const std::string& GetTexturePath() const { return texturePath; }
+
+    const std::string& GetMaterialPath() const
+    {
+        return materialPath;
+    }
+
+    const std::string& GetTexturePath() const
+    {
+        return texturePath;
+    }
 
     // lifeTime_ が 0 以下なら永続、正の値なら fadeOutDuration_ を使って終端で透明化する。
     void SetLifeTime(float lifeTime_, float fadeOutDuration_ = 0.0f);
+
     void SetDestroyOnLifeEnd(bool destroyOnLifeEnd_)
     {
         destroyOnLifeEnd = destroyOnLifeEnd_;

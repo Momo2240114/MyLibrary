@@ -41,6 +41,7 @@ private:
         AttackTelegraphSettings settings;
         bool consumed = false;
     };
+
     // 再生開始時だけイベントを調べ、毎フレームのTemplate検索を避ける。
     void Build(const std::shared_ptr<GameObject>& owner_, const AnimState& state_, float startTime_);
     // ノードの行列とローカルオフセットから発生位置を求め、既存EffectManagerへ渡す。

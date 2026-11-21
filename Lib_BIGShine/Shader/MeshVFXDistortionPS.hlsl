@@ -47,8 +47,14 @@ float2 ClampUVWithEdgeJitter(Texture2D texture_, float2 uv_, float effectTime_)
 
 float4 SampleVFXTexture(Texture2D texture_, float2 uv_, uint samplerMode_, float effectTime_)
 {
-    if (samplerMode_ == 1) return texture_.Sample(LinearClampSampler, ClampUVWithEdgeJitter(texture_, uv_, effectTime_));
-    if (samplerMode_ == 2) return texture_.Sample(LinearBorderSampler, uv_);
+    if (samplerMode_ == 1)
+    {
+        return texture_.Sample(LinearClampSampler, ClampUVWithEdgeJitter(texture_, uv_, effectTime_));
+    }
+    if (samplerMode_ == 2)
+    {
+        return texture_.Sample(LinearBorderSampler, uv_);
+    }
     return texture_.Sample(LinearWrapSampler, uv_);
 }
 

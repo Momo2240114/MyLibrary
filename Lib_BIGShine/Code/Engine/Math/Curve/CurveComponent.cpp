@@ -106,7 +106,10 @@ std::string CurveComponent::CreateTrack(const std::string& preferredName_, float
 
 bool CurveComponent::SaveTrackAsset(size_t trackIndex_, const std::string& assetPath_)
 {
-    if (trackIndex_ >= tracks.size()) return false;
+    if (trackIndex_ >= tracks.size())
+    {
+        return false;
+    }
 
     // パス未指定時は既存assetPathか、トラック名から作ったData/Curve配下の既定パスへ保存する。
     CurveTrack& track_ = tracks[trackIndex_];
@@ -148,9 +151,15 @@ bool CurveComponent::SaveTrackAsset(size_t trackIndex_, const std::string& asset
     assetJson_["Curve"] = std::move(curveJson_);
 
     std::ofstream file_(path_, std::ios::out | std::ios::trunc);
-    if (!file_.is_open()) return false;
+    if (!file_.is_open())
+    {
+        return false;
+    }
     file_ << assetJson_.dump(4);
-    if (!file_.good()) return false;
+    if (!file_.good())
+    {
+        return false;
+    }
 
     track_.assetPath = pathString_;
     return true;
@@ -158,11 +167,17 @@ bool CurveComponent::SaveTrackAsset(size_t trackIndex_, const std::string& asset
 
 bool CurveComponent::LoadTrackAsset(const std::string& assetPath_)
 {
-    if (assetPath_.empty()) return false;
+    if (assetPath_.empty())
+    {
+        return false;
+    }
 
     const std::filesystem::path path_ = WindowsDialogHelper::Utf8ToPath(assetPath_);
     std::ifstream file_(path_);
-    if (!file_.is_open()) return false;
+    if (!file_.is_open())
+    {
+        return false;
+    }
 
     try
     {
@@ -215,7 +230,10 @@ bool CurveComponent::LoadTrackAsset(const std::string& assetPath_)
         auto existingTrack_ = std::find_if(
             tracks.begin(),
             tracks.end(),
-            [&loadedTrack_](const CurveTrack& track_) { return track_.name == loadedTrack_.name; });
+            [&loadedTrack_](const CurveTrack& track_)
+        {
+            return track_.name == loadedTrack_.name;
+        });
         if (existingTrack_ != tracks.end())
         {
             // 同名トラックがあれば差し替え、なければ新規トラックとして追加する。
@@ -252,7 +270,10 @@ void CurveComponent::DrawTrackManager()
     {
         // AssetBrowserからCurveまたはJSONをドロップして、そのままトラックとして読み込めるようにする。
         const ImGuiPayload* payload_ = ImGui::AcceptDragDropPayload(AssetBrowserPayload::CURVE);
-        if (!payload_) payload_ = ImGui::AcceptDragDropPayload(AssetBrowserPayload::JSON);
+        if (!payload_)
+        {
+            payload_ = ImGui::AcceptDragDropPayload(AssetBrowserPayload::JSON);
+        }
         if (payload_)
         {
             droppedPath_ = static_cast<const char*>(payload_->Data);
@@ -360,8 +381,14 @@ void CurveComponent::DrawTrackManager()
             if (ImGui::Button("Remove"))
             {
                 tracks.erase(tracks.begin() + index_);
-                if (editingTrackIndex > index_) --editingTrackIndex;
-                else if (editingTrackIndex == index_) editingTrackIndex = -1;
+                if (editingTrackIndex > index_)
+                {
+                    --editingTrackIndex;
+                }
+                else if (editingTrackIndex == index_)
+                {
+                    editingTrackIndex = -1;
+                }
                 ValidateEditingTrack();
                 ImGui::TreePop();
                 ImGui::PopID();
@@ -454,10 +481,16 @@ void CurveComponent::DrawSelectedPointEditor()
 
             const bool canDelete_ = track_.points.size() > 2;
             ImGui::BeginDisabled(!canDelete_);
-            if (ImGui::Button("Delete Selected Point")) DeleteSelectedPoint();
+            if (ImGui::Button("Delete Selected Point"))
+            {
+                DeleteSelectedPoint();
+            }
             ImGui::EndDisabled();
             ImGui::SameLine();
-            if (ImGui::Button("Duplicate Selected Point")) DuplicateSelectedPoint();
+            if (ImGui::Button("Duplicate Selected Point"))
+            {
+                DuplicateSelectedPoint();
+            }
         }
         else
         {
@@ -625,14 +658,20 @@ float CurveComponent::GetValue(const std::string& name_, float time_) const
 
 bool CurveComponent::IsVisible(size_t curveIndex_)
 {
-    if (curveIndex_ >= tracks.size()) return false;
+    if (curveIndex_ >= tracks.size())
+    {
+        return false;
+    }
     return tracks[curveIndex_].visible &&
         (!showOnlyEditingTrack || static_cast<int>(curveIndex_) == editingTrackIndex);
 }
 
 float CurveComponent::Interpolate(size_t curveIndex_, size_t pointIndex_, float rate_) const
 {
-    if (curveIndex_ >= tracks.size() || pointIndex_ >= tracks[curveIndex_].pointOptions.size()) return rate_;
+    if (curveIndex_ >= tracks.size() || pointIndex_ >= tracks[curveIndex_].pointOptions.size())
+    {
+        return rate_;
+    }
     return tracks[curveIndex_].ApplyInterpolation(
         rate_, tracks[curveIndex_].pointOptions[pointIndex_].interpolationType);
 }
@@ -647,7 +686,10 @@ std::string CurveComponent::CreateLinearTrack(
 
 float CurveComponent::EvaluateSegment(size_t curveIndex_, size_t pointIndex_, float rate_)
 {
-    if (curveIndex_ >= tracks.size() || pointIndex_ + 1 >= tracks[curveIndex_].points.size()) return 0.0f;
+    if (curveIndex_ >= tracks.size() || pointIndex_ + 1 >= tracks[curveIndex_].points.size())
+    {
+        return 0.0f;
+    }
     const CurveTrack& track_ = tracks[curveIndex_];
     const float startTime_ = track_.points[pointIndex_].x;
     const float endTime_ = track_.points[pointIndex_ + 1].x;
@@ -674,7 +716,10 @@ void CurveComponent::ValidateEditingTrack()
         selectedPoints.clear();
         return;
     }
-    if (!IsValidTrackIndex(editingTrackIndex)) editingTrackIndex = 0;
+    if (!IsValidTrackIndex(editingTrackIndex))
+    {
+        editingTrackIndex = 0;
+    }
 }
 
 std::string CurveComponent::MakeUniqueTrackName(const std::string& preferredName_, int ignoredTrackIndex_) const
@@ -686,11 +731,17 @@ std::string CurveComponent::MakeUniqueTrackName(const std::string& preferredName
         {
             for (int index_ = 0; index_ < static_cast<int>(tracks.size()); ++index_)
             {
-                if (index_ != ignoredTrackIndex_ && tracks[index_].name == name_) return true;
+                if (index_ != ignoredTrackIndex_ && tracks[index_].name == name_)
+            {
+                return true;
             }
+        }
             return false;
         };
-    while (exists_(result_)) result_ = baseName_ + "_" + std::to_string(suffix_++);
+    while (exists_(result_))
+    {
+        result_ = baseName_ + "_" + std::to_string(suffix_++);
+    }
     return result_;
 }
 
@@ -706,14 +757,20 @@ int CurveComponent::EditPoint(size_t curveIndex_, int pointIndex_, ImVec2 value_
     track_.Sort();
     for (int index_ = 0; index_ < static_cast<int>(track_.points.size()); ++index_)
     {
-        if (track_.points[index_].x == value_.x && track_.points[index_].y == value_.y) return index_;
+        if (track_.points[index_].x == value_.x && track_.points[index_].y == value_.y)
+        {
+            return index_;
+        }
     }
     return pointIndex_;
 }
 
 void CurveComponent::AddPoint(size_t curveIndex_, ImVec2 value_)
 {
-    if (!IsEditableTrack(curveIndex_)) return;
+    if (!IsEditableTrack(curveIndex_))
+    {
+        return;
+    }
     CurveTrack& track_ = tracks[curveIndex_];
     track_.points.push_back(value_);
     track_.pointOptions.emplace_back();
@@ -722,9 +779,15 @@ void CurveComponent::AddPoint(size_t curveIndex_, ImVec2 value_)
 
 bool CurveComponent::DeleteSelectedPoint()
 {
-    if (selectedPoints.Size != 1) return false;
+    if (selectedPoints.Size != 1)
+    {
+        return false;
+    }
     const ImCurveEdit::EditPoint selectedPoint_ = selectedPoints[0];
-    if (!IsEditableTrack(selectedPoint_.curveIndex)) return false;
+    if (!IsEditableTrack(selectedPoint_.curveIndex))
+    {
+        return false;
+    }
     CurveTrack& track_ = tracks[selectedPoint_.curveIndex];
     if (selectedPoint_.pointIndex < 0 ||
         selectedPoint_.pointIndex >= static_cast<int>(track_.points.size()) ||
@@ -741,9 +804,15 @@ bool CurveComponent::DeleteSelectedPoint()
 
 bool CurveComponent::DuplicateSelectedPoint()
 {
-    if (selectedPoints.Size != 1) return false;
+    if (selectedPoints.Size != 1)
+    {
+        return false;
+    }
     const ImCurveEdit::EditPoint selectedPoint_ = selectedPoints[0];
-    if (!IsEditableTrack(selectedPoint_.curveIndex)) return false;
+    if (!IsEditableTrack(selectedPoint_.curveIndex))
+    {
+        return false;
+    }
     CurveTrack& track_ = tracks[selectedPoint_.curveIndex];
     if (selectedPoint_.pointIndex < 0 ||
         selectedPoint_.pointIndex >= static_cast<int>(track_.points.size()))

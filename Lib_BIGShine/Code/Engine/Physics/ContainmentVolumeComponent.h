@@ -16,11 +16,13 @@ enum class CONTAINMENT_SHAPE
     CAPSULE
 };
 
-// PlayerやCameraなどを範囲内へ留めるための閉じ込めVolume。
+// キャラクターなどを範囲内へ留めるための閉じ込めVolume。
 // 現在は対象Objectを手動で押し戻すのではなく、PhysXのStatic Triangle Mesh壁としてSceneへ置く。
 class ContainmentVolumeComponent : public Component
 {
 public:
+    static constexpr uint32_t IGNORE_CAMERA_QUERY_BIT = 0x80000000u;
+
     ~ContainmentVolumeComponent() override;
 
     const std::string& GetName() const override
@@ -30,13 +32,31 @@ public:
     }
 
     void Start() override;
-    void OnDestroy() override { ReleasePhysicsVolume(); }
+
+    void OnDestroy() override
+    {
+        ReleasePhysicsVolume();
+    }
+
     void Update(float deltaTime_) override;
     void ApplyContainment();
+
     // Sceneへ保存する半径を保ち、演出中だけ物理壁の半径を差し替える。
-    void SetRuntimeRadius(float radius_) { runtimeRadius = radius_ > 0.0f ? radius_ : 0.001f; }
-    void ClearRuntimeRadius() { runtimeRadius = -1.0f; }
-    float GetEffectiveRadius() const { return runtimeRadius >= 0.0f ? runtimeRadius : radius; }
+    void SetRuntimeRadius(float radius_)
+    {
+        runtimeRadius = radius_ > 0.0f ? radius_ : 0.001f;
+    }
+
+    void ClearRuntimeRadius()
+    {
+        runtimeRadius = -1.0f;
+    }
+
+    float GetEffectiveRadius() const
+    {
+        return runtimeRadius >= 0.0f ? runtimeRadius : radius;
+    }
+
     void Gui() override;
     void Serialize(nlohmann::json& json_) const override;
     void Deserialize(const nlohmann::json& json_) override;
@@ -60,6 +80,7 @@ private:
     void MarkPhysicsDirty();
 
     physx::PxRigidStatic* actor = nullptr;
+    bool ignoreCameraCollision = false;
     bool physicsDirty = true;
     float runtimeRadius = -1.0f;
     // 再構築が必要かを判定するため、最後にPhysXへ反映した値をCacheする。

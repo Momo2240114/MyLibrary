@@ -124,18 +124,36 @@ public:
     void ApplyGuardFacingToTarget();
     // 攻撃State間で引き継ぐ補正対象を弱参照で保持する。
     void SetAttackAssistTarget(const std::shared_ptr<GameObject>& target_);
-    std::shared_ptr<GameObject> GetAttackAssistTarget() const { return attackAssistTarget.lock(); }
+
+    std::shared_ptr<GameObject> GetAttackAssistTarget() const
+    {
+        return attackAssistTarget.lock();
+    }
+
     // スキルの補正先をロックオン優先で選び、遠距離や背後の敵への吸い付きを避ける。
-    std::shared_ptr<GameObject> ResolveSkillMotionWarpTarget() const;
-    void ClearAttackAssistTarget() { attackAssistTarget.reset(); }
+    std::shared_ptr<GameObject> ResolveSkillMotionWarpTarget(float maximumDistance_) const;
+
+    void ClearAttackAssistTarget()
+    {
+        attackAssistTarget.reset();
+    }
+
     void SetHorizontalVelocity(
         const DirectX::XMFLOAT3& dir_,
         float speed_,
         bool updateFacing_ = true); // Update終端で反映する水平速度を予約する。
     void AddHorizontalVelocityAssist(const DirectX::XMFLOAT3& dir_, float speed_); // 予約済み水平速度へ補助速度を加算する。
 
-    ColliderComponent* GetCollider() const { return collider.get(); } // PlayerのColliderを返す。
-    CharacterMovementComponent* GetMovement() const { return movement.get(); } // Playerの移動Componentを返す。
+    ColliderComponent* GetCollider() const
+    {
+        return collider.get();
+    } // PlayerのColliderを返す。
+
+    CharacterMovementComponent* GetMovement() const
+    {
+        return movement.get();
+    } // Playerの移動Componentを返す。
+
     bool IsJustDodgeColliderActive() const;
     bool IsGrounded() const;
     bool IsJumpInputPressed() const;
@@ -146,11 +164,31 @@ public:
     void EndAirborneActionContext();
     // 空中行動の終了からJumpStateへ戻る要求を、一度だけ取り出す。
     bool ConsumeJumpLoopResumeRequest();
-    PLAYER_ACTION GetCurrentAction() const { return stateMachine.GetCurrentAction(); } // 現在Actionを返す。
-    int GetComboIndex() const { return comboIndex; } // 現在のコンボ段番号を返す。
-    const std::vector<PlayerCancelTransition>& GetDodgeCancelTransitions() const { return dodgeCancelTransitions; }
-    const std::vector<PlayerCancelTransition>& GetActionBranchTransitions() const { return actionBranchTransitions; } // Action間のキャンセルルール一覧を返す。
-    const PlayerAttackAssistSettings& GetAttackAssistSettings() const { return attackAssistSettings; } // 攻撃補正設定を返す。
+
+    PLAYER_ACTION GetCurrentAction() const
+    {
+        return stateMachine.GetCurrentAction();
+    } // 現在Actionを返す。
+
+    int GetComboIndex() const
+    {
+        return comboIndex;
+    } // 現在のコンボ段番号を返す。
+
+    const std::vector<PlayerCancelTransition>& GetDodgeCancelTransitions() const
+    {
+        return dodgeCancelTransitions;
+    }
+
+    const std::vector<PlayerCancelTransition>& GetActionBranchTransitions() const
+    {
+        return actionBranchTransitions;
+    } // Action間のキャンセルルール一覧を返す。
+
+    const PlayerAttackAssistSettings& GetAttackAssistSettings() const
+    {
+        return attackAssistSettings;
+    } // 攻撃補正設定を返す。
 
     bool RequestAction(PLAYER_ACTION nextAction_); // 指定Actionへの遷移を要求する。
     bool HasCancelTransition(PLAYER_ACTION from_, PLAYER_ACTION to_) const; // 指定キャンセルルールが存在するか確認する。
@@ -183,15 +221,36 @@ public:
     void SetRuntimeArmor(float armor_);
     // 一時的な上書きを解除し、基本設定の衝撃耐性へ戻す。
     void ResetRuntimeArmor();
-    float GetCurrentArmor() const { return runtimeArmorOverrideActive ? runtimeArmor : armor; }
-    bool HasRuntimeArmorOverride() const { return runtimeArmorOverrideActive; }
+
+    float GetCurrentArmor() const
+    {
+        return runtimeArmorOverrideActive ? runtimeArmor : armor;
+    }
+
+    bool HasRuntimeArmorOverride() const
+    {
+        return runtimeArmorOverrideActive;
+    }
+
     bool ConsumeBufferedAction(); // 保存中の先行入力Actionを消費する。
     void EnterAction(PLAYER_ACTION action_); // Action開始時のRuntime状態を初期化する。
     // スキルの素材とCooldownを含む実行条件を一か所で判定する。
     bool CanExecuteSkill(PLAYER_ACTION action_) const;
+
     // HUDへ実際の入力表と受付状態を公開し、UI側で戦闘条件を再定義させない。
-    const std::vector<PlayerSkillInputBinding>& GetSkillInputBindings() const { return skillInputs; }
+    const std::vector<PlayerSkillInputBinding>& GetSkillInputBindings() const
+    {
+        return skillInputs;
+    }
+
     bool CanDisplayActionReady(PLAYER_ACTION action_) const;
+
+    PLAYER_ACTION GetBufferedAction() const
+    {
+        return actionRuntime.bufferedAction;
+    }
+
+    bool HasNextRushCombo() const;
     // HUDやEditorへ定義の秒数と、Assetへ保存しない現在の残り時間を公開する。
     float GetSkillCooldownDuration(PLAYER_ACTION action_) const;
     float GetRemainingSkillCooldown(PLAYER_ACTION action_) const;
@@ -203,7 +262,12 @@ public:
     bool ReloadSkillDefinitions(const std::string& path_);
     // 実行中の共通Skillを中断し、既存State終了処理へ接続する。
     void StopSkill();
-    const std::string& GetSkillDefinitionsPath() const { return skillDefinitionsPath; }
+
+    const std::string& GetSkillDefinitionsPath() const
+    {
+        return skillDefinitionsPath;
+    }
+
     // StateはControllerの定義を開始時に複製して使用する。
     const PlayerSkillDefinition* GetSkillDefinition(PLAYER_ACTION action_) const;
     // 本番SkillSelectも同じAPIで装備を変更し、スロットから使用要求を発行できる。
@@ -211,7 +275,12 @@ public:
     const std::string& GetEquippedSkillName(std::size_t slotIndex_) const;
     bool RequestSkillSlot(std::size_t slotIndex_);
     bool CanEditSkillLoadout() const;
-    const std::vector<PlayerSkillDefinition>& GetSkillCatalog() const { return skillDefinitions; }
+
+    const std::vector<PlayerSkillDefinition>& GetSkillCatalog() const
+    {
+        return skillDefinitions;
+    }
+
     const PlayerSkillDefinition* GetSkillDefinitionByName(const std::string& skillName_) const;
     float GetRemainingSkillCooldown(const std::string& skillName_) const;
     // Player InspectorとSkill Workspaceで同じ装備編集UIを使用する。
@@ -224,7 +293,12 @@ public:
     void SendGuardMoveInputToBlackboard(const DirectX::XMFLOAT3& input_);
     // ガード入力の保持状態をPlayerとAnimの両カテゴリへ同期する。
     void SendGuardInputToBlackboard(bool guardInput_);
-    bool IsGuardBroken() const { return guardBroken; }
+
+    bool IsGuardBroken() const
+    {
+        return guardBroken;
+    }
+
     // JumpStateの進行段階を移動アニメーション用のフラグへ反映する。
     void SendJumpPhaseToBlackboard(PLAYER_LOCOMOTION_PHASE phase_);
     // 回避用の受付窓と遷移ルールを満たす、地上・空中回避入力を要求する。
@@ -368,6 +442,7 @@ private:
     void ApplyLegacySkillLoadout();
     // Skill名をキーにした実行時情報。Serializeへは書き込まない。
     std::unordered_map<std::string, float> skillCooldowns;
+
     // 表示のたびに素材と全Phaseを再検証せず、装備別に検証結果を短時間だけ共有する。
     struct SkillHudAssetCache
     {
@@ -375,6 +450,7 @@ private:
         float recheckTime = -1.0f;
         bool available = false;
     };
+
     mutable std::array<SkillHudAssetCache, PlayerSkillLoadout::SLOT_COUNT> skillHudAssetCache;
     float hudObservationTime = 0.0f; // 検証結果の有効期間だけに使い、スキル残り時間には使用しない。
     // Cooldownと行動条件は即時参照し、素材の重い検証だけをキャッシュする。

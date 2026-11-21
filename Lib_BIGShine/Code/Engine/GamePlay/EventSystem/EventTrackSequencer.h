@@ -14,11 +14,21 @@ public:
     }
 
     // Trackの秒数をSequencer用のFrame範囲へ変換する。
-    int GetFrameMin() const override { return 0; }
-    int GetFrameMax() const override { return static_cast<int>(eventTrack->GetLength() * framesPerSecond); }
+    int GetFrameMin() const override
+    {
+        return 0;
+    }
+
+    int GetFrameMax() const override
+    {
+        return static_cast<int>(eventTrack->GetLength() * framesPerSecond);
+    }
 
     // Sequencer上のItem数はTrack内のEvent数と一致する。
-    int GetItemCount() const override { return static_cast<int>(eventTrack->GetItemCount()); }
+    int GetItemCount() const override
+    {
+        return static_cast<int>(eventTrack->GetItemCount());
+    }
 
     const char* GetItemLabel(int index) const override
     {
@@ -29,10 +39,22 @@ public:
     {
         // EventTrackの秒数/種別/色をImSequencerが扱うFrame情報へ変換して渡す。
         const auto& ev = eventTrack->GetEvent(index);
-        if (start) *start = new int(static_cast<int>(ev.startTime * framesPerSecond));
-        if (end)   *end = new int(static_cast<int>(ev.endTime * framesPerSecond));
-        if (type)  *type = static_cast<int>(ev.type);
-        if (color) *color = ev.color;
+        if (start)
+        {
+            *start = new int(static_cast<int>(ev.startTime * framesPerSecond));
+        }
+        if (end)
+        {
+            *end = new int(static_cast<int>(ev.endTime * framesPerSecond));
+        }
+        if (type)
+        {
+            *type = static_cast<int>(ev.type);
+        }
+        if (color)
+        {
+            *color = ev.color;
+        }
     }
 
     void Add(int typeIndex) override
@@ -40,16 +62,47 @@ public:
         // Sequencerから追加されたEventは、まず1秒幅の仮Eventとして置く。
         eventTrack->AddEvent(static_cast<EventType>(typeIndex), "NewEvent", 0.0f, 1.0f, 0xFF00FFFF);
     }
-    void Del(int index) override { eventTrack->DeleteEvent(index); }
-    void Duplicate(int index) override { eventTrack->DuplicateEvent(index); }
 
-    void Copy() override { eventTrack->Copy(); }
-    void Paste() override { eventTrack->Paste(); }
-    void BeginEdit(int index) override { eventTrack->BeginEdit(index); }
-    void EndEdit() override { eventTrack->EndEdit(); }
-    void DoubleClick(int index) override { eventTrack->DoubleClick(index); }
+    void Del(int index) override
+    {
+        eventTrack->DeleteEvent(index);
+    }
 
-    int GetItemTypeCount() const override { return 6; }
+    void Duplicate(int index) override
+    {
+        eventTrack->DuplicateEvent(index);
+    }
+
+    void Copy() override
+    {
+        eventTrack->Copy();
+    }
+
+    void Paste() override
+    {
+        eventTrack->Paste();
+    }
+
+    void BeginEdit(int index) override
+    {
+        eventTrack->BeginEdit(index);
+    }
+
+    void EndEdit() override
+    {
+        eventTrack->EndEdit();
+    }
+
+    void DoubleClick(int index) override
+    {
+        eventTrack->DoubleClick(index);
+    }
+
+    int GetItemTypeCount() const override
+    {
+        return 6;
+    }
+
     const char* GetItemTypeName(int typeIndex) const override
     {
         // EventTypeと同じ順番で表示名を返す。
@@ -61,7 +114,10 @@ public:
     void CustomDraw(int index, ImDrawList* draw_list, const ImRect& rc,
         const ImRect& legendRect, const ImRect& clippingRect, const ImRect& legendClippingRect)
     {
-        if (!eventTrack) return;
+        if (!eventTrack)
+        {
+            return;
+        }
 
         auto& ev = eventTrack->GetEvent(index);
         float pixelsPerSecond = 100.0f;
@@ -105,7 +161,10 @@ public:
         }
     }
 
-    void SetCurrentTimePointer(float* timePtr) { currentTimePtr = timePtr; }
+    void SetCurrentTimePointer(float* timePtr)
+    {
+        currentTimePtr = timePtr;
+    }
 
 private:
     // 表示/編集対象のEventTrack。所有は外側で管理される。

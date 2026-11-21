@@ -62,7 +62,10 @@ void ControllerInput::StopRumble()
 {
     rumbleEndTime = 0;
     rumblePriority = 0;
-    if (gamepad) SDL_RumbleGamepad(gamepad, 0, 0, 0);
+    if (gamepad)
+    {
+        SDL_RumbleGamepad(gamepad, 0, 0, 0);
+    }
 }
 
 bool ControllerInput::Initialize()
@@ -150,7 +153,12 @@ bool ControllerInput::TryOpenGamepad()
     }
 
     for (int index_ = 0; index_ < gamepadCount_; ++index_)
-        if (SelectGamepad(gamepadIds_[index_])) break;
+    {
+        if (SelectGamepad(gamepadIds_[index_]))
+        {
+            break;
+        }
+    }
     SDL_free(gamepadIds_);
     return connected;
 }
@@ -163,8 +171,14 @@ bool ControllerInput::SupportsRumble() const
 
 bool ControllerInput::SelectGamepad(SDL_JoystickID id_)
 {
-    if (!initialized || id_ == 0) return false;
-    if (id_ == GetGamepadId() && connected) return true;
+    if (!initialized || id_ == 0)
+    {
+        return false;
+    }
+    if (id_ == GetGamepadId() && connected)
+    {
+        return true;
+    }
     SDL_Gamepad* selected_ = SDL_OpenGamepad(id_);
     if (!selected_)
     {
@@ -205,16 +219,27 @@ void ControllerInput::CloseGamepad()
 bool ControllerInput::HasMeaningfulInput() const
 {
     BS_PROFILE_SCOPE("ControllerInput::HasMeaningfulInput");
-    if (!connected) return false;
+    if (!connected)
+    {
+        return false;
+    }
     for (std::size_t index_ = 0; index_ < state.buttons.size(); ++index_)
-        if (state.buttons[index_] && !previousState.buttons[index_]) return true;
+    {
+        if (state.buttons[index_] && !previousState.buttons[index_])
+        {
+            return true;
+        }
+    }
     // 軸の絶対量とフレーム間変化の両方を条件にして、静止中の微小変動を除外する。
     for (std::size_t index_ = 0; index_ < state.axes.size(); ++index_)
     {
         const float value_ = static_cast<float>(state.axes[index_]) / 32767.0f;
         const float previous_ = static_cast<float>(previousState.axes[index_]) / 32767.0f;
         const float threshold_ = index_ >= SDL_GAMEPAD_AXIS_LEFT_TRIGGER ? triggerThreshold : stickDeadZone + 0.08f;
-        if (std::abs(value_) > threshold_ && (std::abs(previous_) <= threshold_ || std::abs(value_ - previous_) > 0.04f)) return true;
+        if (std::abs(value_) > threshold_ && (std::abs(previous_) <= threshold_ || std::abs(value_ - previous_) > 0.04f))
+        {
+            return true;
+        }
     }
     return false;
 }

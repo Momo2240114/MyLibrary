@@ -22,7 +22,10 @@ namespace
     void DeserializeFloat2(const nlohmann::json& json_, const char* key_, DirectX::XMFLOAT2& value_)
     {
         // Keyが無い古いデータでは現在値を残す。
-        if (!json_.contains(key_) || !json_[key_].is_array() || json_[key_].size() < 2) return;
+        if (!json_.contains(key_) || !json_[key_].is_array() || json_[key_].size() < 2)
+        {
+            return;
+        }
         value_.x = json_[key_][0].get<float>();
         value_.y = json_[key_][1].get<float>();
     }
@@ -76,14 +79,38 @@ void UIWidgetComponent::Gui()
         MarkLayoutDirty();
     }
 
-    if (ImGui::DragFloat2("Anchor Min", &rectTransform.anchorMin.x, 0.01f, 0.0f, 1.0f)) MarkLayoutDirty();
-    if (ImGui::DragFloat2("Anchor Max", &rectTransform.anchorMax.x, 0.01f, 0.0f, 1.0f)) MarkLayoutDirty();
-    if (ImGui::DragFloat2("Pivot", &rectTransform.pivot.x, 0.01f, 0.0f, 1.0f)) MarkLayoutDirty();
-    if (ImGui::DragFloat2("Anchored Position", &rectTransform.anchoredPosition.x, 1.0f)) MarkLayoutDirty();
-    if (ImGui::DragFloat2("Size Delta", &rectTransform.sizeDelta.x, 1.0f, 1.0f, 8192.0f)) MarkLayoutDirty();
-    if (ImGui::DragFloat2("Local Scale", &rectTransform.localScale.x, 0.01f, 0.01f, 16.0f)) MarkLayoutDirty();
-    if (ImGui::DragFloat("Local Rotation", &rectTransform.localRotation, 0.5f)) MarkLayoutDirty();
-    if (ImGui::InputInt("Z Order", &zOrder)) MarkLayoutDirty();
+    if (ImGui::DragFloat2("Anchor Min", &rectTransform.anchorMin.x, 0.01f, 0.0f, 1.0f))
+    {
+        MarkLayoutDirty();
+    }
+    if (ImGui::DragFloat2("Anchor Max", &rectTransform.anchorMax.x, 0.01f, 0.0f, 1.0f))
+    {
+        MarkLayoutDirty();
+    }
+    if (ImGui::DragFloat2("Pivot", &rectTransform.pivot.x, 0.01f, 0.0f, 1.0f))
+    {
+        MarkLayoutDirty();
+    }
+    if (ImGui::DragFloat2("Anchored Position", &rectTransform.anchoredPosition.x, 1.0f))
+    {
+        MarkLayoutDirty();
+    }
+    if (ImGui::DragFloat2("Size Delta", &rectTransform.sizeDelta.x, 1.0f, 1.0f, 8192.0f))
+    {
+        MarkLayoutDirty();
+    }
+    if (ImGui::DragFloat2("Local Scale", &rectTransform.localScale.x, 0.01f, 0.01f, 16.0f))
+    {
+        MarkLayoutDirty();
+    }
+    if (ImGui::DragFloat("Local Rotation", &rectTransform.localRotation, 0.5f))
+    {
+        MarkLayoutDirty();
+    }
+    if (ImGui::InputInt("Z Order", &zOrder))
+    {
+        MarkLayoutDirty();
+    }
     ImGui::Checkbox("Visible", &visible);
     ImGui::Checkbox("Input Enabled", &inputEnabled);
     ImGui::Checkbox("Raycast Target", &raycastTarget);
@@ -156,7 +183,10 @@ void UIWidgetComponent::ResolveParentWidget()
     parentWidget.reset();
 
     auto gameObject_ = GetGameObject();
-    if (!gameObject_ || !gameObject_->transform) return;
+    if (!gameObject_ || !gameObject_->transform)
+    {
+        return;
+    }
 
     // Transform階層を上にたどり、最初に見つかったWidgetを親候補にする。
     auto parentTransform_ = gameObject_->transform->parent.lock();
@@ -194,7 +224,12 @@ void UIWidgetComponent::CalculateLayout(
 
     UIMotionSample motion_;
     if (const auto owner_ = GetGameObject())
-        if (const auto component_ = owner_->GetComponent<UIMotionComponent>(); component_ && component_->IsEnabled() && component_->IsStarted()) motion_ = component_->GetSample();
+    {
+        if (const auto component_ = owner_->GetComponent<UIMotionComponent>(); component_ && component_->IsEnabled() && component_->IsStarted())
+        {
+            motion_ = component_->GetSample();
+        }
+    }
     // 選択メニューの補正と独立して合成し、描画と入力判定で同じRectを使用する。
     const DirectX::XMFLOAT2 scale_ = board_
         ? board_->CalculateBoardScale(screenSize_)
@@ -263,6 +298,11 @@ void UIWidgetComponent::CalculateLayout(
 float UIWidgetComponent::GetVisualRotation()
 {
     if (const auto owner_ = GetGameObject())
-        if (const auto component_ = owner_->GetComponent<UIMotionComponent>(); component_ && component_->IsEnabled() && component_->IsStarted()) return rectTransform.localRotation + component_->GetSample().rotation;
+    {
+        if (const auto component_ = owner_->GetComponent<UIMotionComponent>(); component_ && component_->IsEnabled() && component_->IsStarted())
+        {
+            return rectTransform.localRotation + component_->GetSample().rotation;
+        }
+    }
     return rectTransform.localRotation;
 }

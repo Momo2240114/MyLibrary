@@ -36,13 +36,19 @@ std::shared_ptr<PoseLibraryResource> PoseLibraryResourceManager::GetOrCreateReso
 
 bool PoseLibraryResourceManager::SaveToJson(const std::string& filename, const std::shared_ptr<PoseLibraryResource>& resource)
 {
-    if (!resource) return false;
+    if (!resource)
+    {
+        return false;
+    }
 
     std::filesystem::path path(filename);
     std::filesystem::create_directories(path.parent_path()); // 途中の路（ディレクトリ）を拓く
 
     std::ofstream ostream(filename);
-    if (!ostream.is_open()) return false;
+    if (!ostream.is_open())
+    {
+        return false;
+    }
 
     nlohmann::json j;
     j["modelName"] = resource->modelName;
@@ -55,10 +61,16 @@ bool PoseLibraryResourceManager::SaveToJson(const std::string& filename, const s
 
 bool PoseLibraryResourceManager::LoadFromJson(const std::string& filename, std::shared_ptr<PoseLibraryResource>& resource)
 {
-    if (!resource) return false;
+    if (!resource)
+    {
+        return false;
+    }
 
     std::ifstream istream(filename);
-    if (!istream.is_open()) return false;
+    if (!istream.is_open())
+    {
+        return false;
+    }
 
     nlohmann::json j;
     istream >> j;

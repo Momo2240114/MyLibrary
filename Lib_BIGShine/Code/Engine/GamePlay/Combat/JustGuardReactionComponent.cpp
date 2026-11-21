@@ -21,7 +21,10 @@ ActionRegistry* JustGuardReactionComponent::GetSelectedRegistry()
     case JUST_GUARD_REACTION_ACTION_SOURCE::SELF_LOCAL:
     {
         std::shared_ptr<GameObject> owner_ = GetGameObject();
-        if (!owner_) return nullptr;
+        if (!owner_)
+        {
+            return nullptr;
+        }
 
         return &owner_->localRegistry;
     }
@@ -38,7 +41,10 @@ const ActionRegistry* JustGuardReactionComponent::GetSelectedRegistry() const
     case JUST_GUARD_REACTION_ACTION_SOURCE::SELF_LOCAL:
     {
         std::shared_ptr<GameObject> owner_ = gameObject.lock();
-        if (!owner_) return nullptr;
+        if (!owner_)
+        {
+            return nullptr;
+        }
 
         return &owner_->localRegistry;
     }
@@ -50,7 +56,10 @@ const ActionRegistry* JustGuardReactionComponent::GetSelectedRegistry() const
 
 void JustGuardReactionComponent::ExecuteReaction()
 {
-    if (attackerReactionEnabled && (selectedActionName.empty() || selectedActionName == "---")) return;
+    if (attackerReactionEnabled && (selectedActionName.empty() || selectedActionName == "---"))
+    {
+        return;
+    }
     // JustGuardSystem側でBlackboard更新とOnJustGuardが済んだ後に追加反応を呼ぶ。
     BS_LOG_INFO(
         LOG_CATEGORY::GAME,
@@ -146,7 +155,10 @@ void JustGuardReactionComponent::Gui()
     {
         for (const std::string& actionName_ : actionNames_)
         {
-            if (actionName_ == "---") continue;
+            if (actionName_ == "---")
+            {
+                continue;
+            }
 
             const bool selected_ = actionName_ == selectedActionName;
             if (ImGui::Selectable(actionName_.c_str(), selected_))
@@ -206,13 +218,31 @@ void JustGuardReactionComponent::RequestAttackerReaction(uint32_t attackInstance
 {
     BS_PROFILE_SCOPE("JustGuardReactionComponent::RequestAttackerReaction");
     if (!IsEnabled() || !attackerReactionEnabled || attackerReactionActionName.empty() ||
-        (attackInstanceId_ != 0u && attackInstanceId_ == lastReactedAttackInstanceId)) return;
+        (attackInstanceId_ != 0u && attackInstanceId_ == lastReactedAttackInstanceId))
+    {
+        return;
+    }
     const auto owner_ = GetGameObject();
-    if (!owner_) return;
-    if (const auto health_ = owner_->GetComponent<HealthComponent>()) if (health_->IsDead()) return;
+    if (!owner_)
+    {
+        return;
+    }
+    if (const auto health_ = owner_->GetComponent<HealthComponent>())
+    {
+        if (health_->IsDead())
+        {
+            return;
+        }
+    }
     auto action_ = owner_->GetLocalRegistry().GetAction(owner_->BuildActionName(attackerReactionActionName));
-    if (!action_) action_ = owner_->GetLocalRegistry().GetAction(attackerReactionActionName);
-    if (!action_) return;
+    if (!action_)
+    {
+        action_ = owner_->GetLocalRegistry().GetAction(attackerReactionActionName);
+    }
+    if (!action_)
+    {
+        return;
+    }
     // 要求前に記録し、Actionからの再入や別HitBoxの通知で同じ反応を重ねない。
     lastReactedAttackInstanceId = attackInstanceId_;
     if (const auto blackboard_ = owner_->GetOrAddComponent<BlackboardComponent>())

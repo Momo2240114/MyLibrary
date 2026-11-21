@@ -34,16 +34,51 @@ public:
     // Layout計算が必要になったことをUI Systemへ知らせる。
     void MarkLayoutDirty();
     void SetVisible(bool visible_);
-    bool IsVisible() const { return visible; }
-    bool IsInputEnabled() const { return inputEnabled; }
 
-    const std::string& GetBoardName() const { return boardName; }
-    const std::string& GetBoardId() const { return boardId; }
-    const DirectX::XMFLOAT2& GetReferenceResolution() const { return referenceResolution; }
-    UI_SCALE_MODE GetScaleMode() const { return scaleMode; }
-    int GetBoardLayer() const { return boardLayer; }
-    int GetZOrder() const { return zOrder; }
-    bool IsLayoutDirty() const { return layoutDirty; }
+    bool IsVisible() const
+    {
+        return visible;
+    }
+
+    bool IsInputEnabled() const
+    {
+        return inputEnabled;
+    }
+
+    const std::string& GetBoardName() const
+    {
+        return boardName;
+    }
+
+    const std::string& GetBoardId() const
+    {
+        return boardId;
+    }
+
+    const DirectX::XMFLOAT2& GetReferenceResolution() const
+    {
+        return referenceResolution;
+    }
+
+    UI_SCALE_MODE GetScaleMode() const
+    {
+        return scaleMode;
+    }
+
+    int GetBoardLayer() const
+    {
+        return boardLayer;
+    }
+
+    int GetZOrder() const
+    {
+        return zOrder;
+    }
+
+    bool IsLayoutDirty() const
+    {
+        return layoutDirty;
+    }
 
     // 現在の画面SizeからBoard全体に掛けるScaleを計算する。
     DirectX::XMFLOAT2 CalculateBoardScale(const DirectX::XMFLOAT2& screenSize_) const;

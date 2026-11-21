@@ -168,8 +168,14 @@ public:
     void StopActionByName(const std::string& actionName_, bool immediate_ = false);
     // 実行時にステージ寸法から組んだ演出も、通常の抑制・復帰処理を通す。
     bool PlayPresetForTarget(const CameraActionPreset& preset_, const std::shared_ptr<GameObject>& target_);
+
+    bool IsActionActive() const { return phase != CAMERA_ACTION_PHASE::IDLE; }
+    bool IsSuppressingGameplayCamera() const { return ownsThirdPersonSuppression || ownsLockOnSuppression; }
+
     bool IsPlayingAction(const std::string& actionName_) const
-    { return phase != CAMERA_ACTION_PHASE::IDLE && activePreset.actionName == actionName_; }
+    {
+        return phase != CAMERA_ACTION_PHASE::IDLE && activePreset.actionName == actionName_;
+    }
 
 private:
     // 所有 GameObject から Camera/TPS/LockOn/Blackboard などの参照を取り直す。

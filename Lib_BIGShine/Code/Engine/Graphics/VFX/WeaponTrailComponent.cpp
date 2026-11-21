@@ -22,7 +22,10 @@ namespace
     bool ContainsCaseInsensitive(const std::string& text_, const std::string& searchText_)
     {
         // GUIの候補検索用に、大文字小文字を無視して部分一致を調べる。
-        if (searchText_.empty()) return true;
+        if (searchText_.empty())
+        {
+            return true;
+        }
 
         auto toLower_ = [](unsigned char character_)
         {
@@ -52,7 +55,10 @@ namespace
         const char* key_,
         DirectX::XMFLOAT3& position_)
     {
-        if (!json_.contains(key_) || !json_[key_].is_array() || json_[key_].size() < 3) return;
+        if (!json_.contains(key_) || !json_[key_].is_array() || json_[key_].size() < 3)
+        {
+            return;
+        }
         position_ =
         {
             json_[key_][0].get<float>(),
@@ -71,7 +77,10 @@ namespace
         const float deltaZ_ = tipOffset_.z - startOffset_.z;
         const float length_ = std::sqrt(
             deltaX_ * deltaX_ + deltaY_ * deltaY_ + deltaZ_ * deltaZ_);
-        if (length_ <= 0.00001f) return { 0.0f, 0.0f, 0.0f };
+        if (length_ <= 0.00001f)
+        {
+            return { 0.0f, 0.0f, 0.0f };
+        }
 
         return
         {
@@ -138,7 +147,10 @@ bool WeaponTrailComponent::IsLoadReady() const
     WeaponTrailComponent* self_ = const_cast<WeaponTrailComponent*>(this);
     const std::shared_ptr<GameObject> targetObject_ = self_->ResolveTargetObject();
     const std::shared_ptr<GltfModelCommponennt> model_ = self_->ResolveTargetModel(targetObject_);
-    if (!model_) return true;
+    if (!model_)
+    {
+        return true;
+    }
 
     model_->UpdateLoadState();
     return !model_->IsModelLoading();
@@ -190,14 +202,20 @@ void WeaponTrailComponent::SetBladeShape(
 
 void WeaponTrailComponent::BeginTrail(bool clearExisting_)
 {
-    if (clearExisting_) Clear();
+    if (clearExisting_)
+    {
+        Clear();
+    }
     SetEmitting(true);
 }
 
 void WeaponTrailComponent::EndTrail(bool clearImmediately_)
 {
     SetEmitting(false);
-    if (clearImmediately_) Clear();
+    if (clearImmediately_)
+    {
+        Clear();
+    }
 }
 
 std::shared_ptr<GameObject> WeaponTrailComponent::ResolveTargetObject()
@@ -212,7 +230,10 @@ std::shared_ptr<GameObject> WeaponTrailComponent::ResolveTargetObject()
     }
 
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return nullptr;
+    if (!owner_)
+    {
+        return nullptr;
+    }
 
     if (targetGameObjectName.empty() || owner_->GetName() == targetGameObjectName)
     {
@@ -234,8 +255,14 @@ std::shared_ptr<GameObject> WeaponTrailComponent::ResolveTargetObject()
 std::shared_ptr<GltfModelCommponennt> WeaponTrailComponent::ResolveTargetModel(
     const std::shared_ptr<GameObject>& targetObject_)
 {
-    if (auto model_ = targetModel.lock()) return model_;
-    if (!targetObject_) return nullptr;
+    if (auto model_ = targetModel.lock())
+    {
+        return model_;
+    }
+    if (!targetObject_)
+    {
+        return nullptr;
+    }
 
     // 武器Object自身にモデルが無い場合、親階層のキャラクターモデルも探す。
     if (auto model_ = targetObject_->GetComponent<GltfModelCommponennt>())
@@ -272,16 +299,25 @@ bool WeaponTrailComponent::ResolveTargetNodeIndex(
         nodeIndex_ = -1;
         return false;
     }
-    if (!model_) return false;
+    if (!model_)
+    {
+        return false;
+    }
 
     model_->UpdateLoadState();
-    if (!model_->IsModelReady()) return false;
+    if (!model_->IsModelReady())
+    {
+        return false;
+    }
 
     const auto& nodes_ = model_->GetNodes();
     const bool validIndex_ = nodeIndex_ >= 0 &&
         nodeIndex_ < static_cast<int>(nodes_.size()) &&
         nodes_[nodeIndex_].name == nodeName_;
-    if (!validIndex_) nodeIndex_ = model_->GetNodeIndex(nodeName_.c_str());
+    if (!validIndex_)
+    {
+        nodeIndex_ = model_->GetNodeIndex(nodeName_.c_str());
+    }
     return nodeIndex_ >= 0 && nodeIndex_ < static_cast<int>(nodes_.size());
 }
 
@@ -291,13 +327,19 @@ bool WeaponTrailComponent::GetBladeSegment(
 {
     BS_PROFILE_SCOPE("WeaponTrailComponent::GetBladeSegment");
     const std::shared_ptr<GameObject> targetObject_ = ResolveTargetObject();
-    if (!targetObject_ || !targetObject_->transform) return false;
+    if (!targetObject_ || !targetObject_->transform)
+    {
+        return false;
+    }
 
     const std::shared_ptr<GltfModelCommponennt> model_ = ResolveTargetModel(targetObject_);
     if (model_)
     {
         model_->UpdateLoadState();
-        if (!model_->IsModelReady()) return false;
+        if (!model_->IsModelReady())
+        {
+            return false;
+        }
     }
 
     const bool hasStartNode_ = ResolveTargetNodeIndex(
@@ -355,18 +397,27 @@ void WeaponTrailComponent::DrawBladeGuide(
 {
     // 選択中のObjectだけ刃のデバッグカプセルを表示し、軌跡のサンプル位置を調整しやすくする。
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_ || !owner_->manager) return;
+    if (!owner_ || !owner_->manager)
+    {
+        return;
+    }
 
     const std::shared_ptr<GameObject> selectedObject_ = owner_->GetManager().GetSelectedObject();
     const std::shared_ptr<GameObject> targetObject_ = targetObject.lock();
-    if (selectedObject_ != owner_ && selectedObject_ != targetObject_) return;
+    if (selectedObject_ != owner_ && selectedObject_ != targetObject_)
+    {
+        return;
+    }
 
     const float deltaX_ = endPosition_.x - startPosition_.x;
     const float deltaY_ = endPosition_.y - startPosition_.y;
     const float deltaZ_ = endPosition_.z - startPosition_.z;
     const float length_ = std::sqrt(
         deltaX_ * deltaX_ + deltaY_ * deltaY_ + deltaZ_ * deltaZ_);
-    if (length_ <= 0.00001f) return;
+    if (length_ <= 0.00001f)
+    {
+        return;
+    }
 
     DirectX::XMFLOAT4X4 transform_{};
     DirectX::XMStoreFloat4x4(
@@ -413,7 +464,10 @@ void WeaponTrailComponent::Gui()
         {
             for (const std::shared_ptr<GameObject>& object_ : owner_->GetManager().GetObjects())
             {
-                if (!object_ || !ContainsCaseInsensitive(object_->GetName(), targetObjectSearchText)) continue;
+                if (!object_ || !ContainsCaseInsensitive(object_->GetName(), targetObjectSearchText))
+                {
+                    continue;
+                }
                 const bool selected_ = object_->GetName() == targetGameObjectName;
                 if (ImGui::Selectable(object_->GetName().c_str(), selected_))
                 {
@@ -427,7 +481,10 @@ void WeaponTrailComponent::Gui()
 
     const std::shared_ptr<GameObject> targetObject_ = ResolveTargetObject();
     const std::shared_ptr<GltfModelCommponennt> model_ = ResolveTargetModel(targetObject_);
-    if (model_) model_->UpdateLoadState();
+    if (model_)
+    {
+        model_->UpdateLoadState();
+    }
     auto drawNodeCombo_ = [this, &model_](
         const char* label_,
         std::string& nodeName_,
@@ -436,7 +493,10 @@ void WeaponTrailComponent::Gui()
     {
         // モデルノード数が多いので、検索付きComboでStart/Endノードを選ぶ。
         const char* preview_ = nodeName_.empty() ? "(None)" : nodeName_.c_str();
-        if (!ImGui::BeginCombo(label_, preview_)) return;
+        if (!ImGui::BeginCombo(label_, preview_))
+        {
+            return;
+        }
 
         ImGui::PushID(label_);
         ImGui::SetNextItemWidth(-1.0f);
@@ -452,7 +512,10 @@ void WeaponTrailComponent::Gui()
             for (int index_ = 0; index_ < static_cast<int>(nodes_.size()); ++index_)
             {
                 const std::string& candidateName_ = nodes_[index_].name;
-                if (!ContainsCaseInsensitive(candidateName_, searchText_)) continue;
+                if (!ContainsCaseInsensitive(candidateName_, searchText_))
+                {
+                    continue;
+                }
                 const bool selected_ = candidateName_ == nodeName_;
                 if (ImGui::Selectable(candidateName_.c_str(), selected_))
                 {
@@ -488,11 +551,20 @@ void WeaponTrailComponent::Gui()
     ImGui::TextDisabled("Rotation is in degrees. The base blade axis is local +Z.");
     ImGui::TextDisabled("Valid Start + End Nodes override offset, length, and rotation.");
     ImGui::TextDisabled("Without both Nodes, Start + Length + Rotation is used.");
-    if (ImGui::Button("Begin Weapon Trail")) BeginTrail();
+    if (ImGui::Button("Begin Weapon Trail"))
+    {
+        BeginTrail();
+    }
     ImGui::SameLine();
-    if (ImGui::Button("End Weapon Trail")) EndTrail();
+    if (ImGui::Button("End Weapon Trail"))
+    {
+        EndTrail();
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Resolve Weapon Again")) InvalidateTarget();
+    if (ImGui::Button("Resolve Weapon Again"))
+    {
+        InvalidateTarget();
+    }
 }
 
 void WeaponTrailComponent::Serialize(nlohmann::json& json_) const
@@ -520,7 +592,10 @@ void WeaponTrailComponent::Deserialize(const nlohmann::json& json_)
 {
     BS_PROFILE_SCOPE("WeaponTrailComponent::Deserialize");
     TrailMeshComponent::Deserialize(json_);
-    if (!json_.contains("TrailEmitting")) SetEmitting(false);
+    if (!json_.contains("TrailEmitting"))
+    {
+        SetEmitting(false);
+    }
     // 旧WeaponTargetNodeNameもStartNodeとして読み、以前の保存データをそのまま使えるようにする。
     targetGameObjectName = json_.value("WeaponTargetGameObjectName", std::string{});
     targetStartNodeName = json_.value(

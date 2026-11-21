@@ -453,6 +453,7 @@
     <ClCompile Include="Code\Engine\GamePlay\Camera\LockOnTargetComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Camera\ThirdPersonCameraComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Camera\CameraLockOnComponent.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Camera\SpecialAttackCameraComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Camera\CombatCameraCompositionComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Camera\CameraCollisionComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Camera\CameraActionDirectorComponent.cpp" />
@@ -898,6 +899,7 @@
     <ClInclude Include="Code\Engine\GamePlay\Camera\LockOnTargetComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Camera\ThirdPersonCameraComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Camera\CameraLockOnComponent.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Camera\SpecialAttackCameraComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Camera\CombatCameraCompositionComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Camera\CameraCollisionComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Camera\CameraActionDirectorComponent.h" />
@@ -1230,6 +1232,14 @@
       <ShaderModel>5.0</ShaderModel>
     </FxCompile>
     <FxCompile Include="Shader\MotionVelocityNeighborMaxPS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\LayerModelMaskPS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\LayerPostEffectPS.hlsl">
       <ShaderType>Pixel</ShaderType>
       <ShaderModel>5.0</ShaderModel>
     </FxCompile>

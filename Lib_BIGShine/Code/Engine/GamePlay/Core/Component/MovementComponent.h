@@ -63,6 +63,7 @@ public:
 		static std::string name = "Movement";
 		return name;
 	}
+
 private:
 	float m_MoveSpeed = 5.0f;
 	float m_TurnSpeed = 100.0f;

@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine/GamePlay/Core/Component/ComponentBase.h"
 #include "MenuPresentation.h"
+
 // 通常Sceneの二択メニューを、ポーズ中も動く汎用UIとして提供する。
 class GameMenuComponent : public Component
 {
@@ -16,8 +17,17 @@ public:
     void Deserialize(const nlohmann::json& json_) override;
     void Open();
     void Close();
-    bool IsOpen() const { return active; }
-    bool IsPausingWorld() const { return active && pauseWorld; }
+
+    bool IsOpen() const
+    {
+        return active;
+    }
+
+    bool IsPausingWorld() const
+    {
+        return active && pauseWorld;
+    }
+
 private:
     MenuPresentation menu;
     std::string title = "PAUSED";

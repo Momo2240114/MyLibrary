@@ -88,9 +88,15 @@ void ComponentUpdateSequencerWindow::DrawComponentTable(const std::shared_ptr<Ga
                 ? right_.component->GetUpdatePriority()
                 : right_.component->GetLateUpdatePriority();
 
-            if (leftPriority_ != rightPriority_) return leftPriority_ < rightPriority_;
-            if (left_.isCollider != right_.isCollider) return !left_.isCollider;
-            return left_.order < right_.order;
+            if (leftPriority_ != rightPriority_)
+        {
+            return leftPriority_ < rightPriority_;
+        }
+        if (left_.isCollider != right_.isCollider)
+        {
+            return !left_.isCollider;
+        }
+        return left_.order < right_.order;
         });
 
     if (ImGui::Button("Reset Visible Timing"))
@@ -98,7 +104,10 @@ void ComponentUpdateSequencerWindow::DrawComponentTable(const std::shared_ptr<Ga
         // 現在一覧に出ているComponentだけを既定の更新設定へ戻す。
         for (ComponentRow& row_ : rows_)
         {
-            if (row_.component) row_.component->ResetUpdateTiming();
+            if (row_.component)
+            {
+                row_.component->ResetUpdateTiming();
+            }
         }
     }
 
@@ -134,14 +143,20 @@ void ComponentUpdateSequencerWindow::DrawComponentTable(const std::shared_ptr<Ga
 
 void ComponentUpdateSequencerWindow::DrawComponentRow(ComponentRow& row_)
 {
-    if (!row_.component) return;
+    if (!row_.component)
+    {
+        return;
+    }
 
     // 1行でフェーズ使用可否、優先度、簡易シフトを編集できるようにする。
     Component& component_ = *row_.component;
 
     ImGui::PushID(&component_);
 
-    if (!component_.IsEnabled()) ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.45f);
+    if (!component_.IsEnabled())
+    {
+        ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.45f);
+    }
 
     ImGui::TableNextRow();
 
@@ -190,11 +205,20 @@ void ComponentUpdateSequencerWindow::DrawComponentRow(ComponentRow& row_)
     }
 
     ImGui::TableSetColumnIndex(5);
-    if (ImGui::SmallButton("-10")) MoveComponentPriority(component_, -10);
+    if (ImGui::SmallButton("-10"))
+    {
+        MoveComponentPriority(component_, -10);
+    }
     ImGui::SameLine();
-    if (ImGui::SmallButton("+10")) MoveComponentPriority(component_, 10);
+    if (ImGui::SmallButton("+10"))
+    {
+        MoveComponentPriority(component_, 10);
+    }
 
-    if (!component_.IsEnabled()) ImGui::PopStyleVar();
+    if (!component_.IsEnabled())
+    {
+        ImGui::PopStyleVar();
+    }
 
     ImGui::PopID();
 }
@@ -204,13 +228,22 @@ std::vector<ComponentUpdateSequencerWindow::ComponentRow> ComponentUpdateSequenc
 {
     // GameObjectの通常ComponentとColliderComponentを、表示オプションに合わせて行データへ変換する。
     std::vector<ComponentRow> rows_;
-    if (!object_) return rows_;
+    if (!object_)
+    {
+        return rows_;
+    }
 
     for (int order_ = 0; order_ < static_cast<int>(object_->components.size()); ++order_)
     {
         const std::shared_ptr<Component>& component_ = object_->components[order_];
-        if (!component_) continue;
-        if (!showDisabledComponents && !component_->IsEnabled()) continue;
+        if (!component_)
+        {
+            continue;
+        }
+        if (!showDisabledComponents && !component_->IsEnabled())
+        {
+            continue;
+        }
 
         rows_.push_back({ component_, false, order_ });
     }
@@ -220,8 +253,14 @@ std::vector<ComponentUpdateSequencerWindow::ComponentRow> ComponentUpdateSequenc
         for (int order_ = 0; order_ < static_cast<int>(object_->colliderComponents.size()); ++order_)
         {
             const std::shared_ptr<Component>& component_ = object_->colliderComponents[order_];
-            if (!component_) continue;
-            if (!showDisabledComponents && !component_->IsEnabled()) continue;
+            if (!component_)
+            {
+                continue;
+            }
+            if (!showDisabledComponents && !component_->IsEnabled())
+            {
+                continue;
+            }
 
             rows_.push_back({ component_, true, order_ });
         }

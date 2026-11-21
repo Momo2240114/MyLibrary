@@ -13,7 +13,11 @@ public:
 
 
     float radius = 0.5f;
-    ColliderType GetColliderType() const override { return ColliderType::Sphere; }
+
+    ColliderType GetColliderType() const override
+    {
+        return ColliderType::Sphere;
+    }
 
     void Gui()  override;
     void Update(float dt) override;

@@ -19,6 +19,7 @@ public:
     void End(const RenderContext& rc) override;
 
 	bool usePixelShader;
+
 	struct CbScene
 	{
 		DirectX::XMFLOAT4X4		viewProjection;
@@ -35,6 +36,7 @@ public:
 		//逆行列
 		DirectX::XMFLOAT4X4 invViewProjection;
 	};
+
 private:
     Microsoft::WRL::ComPtr<ID3D11VertexShader>  vertexShader;
     Microsoft::WRL::ComPtr<ID3D11PixelShader>   pixelShader;

@@ -54,12 +54,18 @@ void CombatStatsComponent::Deserialize(const nlohmann::json& json_)
 void CombatStatsComponent::PublishToBlackboard()
 {
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     // Damage計算やDebug表示が同じ値を読めるよう、Combatカテゴリへ公開する。
     const std::shared_ptr<BlackboardComponent> blackboard_ =
         owner_->GetOrAddComponent<BlackboardComponent>();
-    if (!blackboard_) return;
+    if (!blackboard_)
+    {
+        return;
+    }
 
     blackboard_->SetFloat("Combat", "AttackPower", attackPower);
     blackboard_->SetFloat("Combat", "DamageRateModifier", damageRateModifier);

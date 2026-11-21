@@ -37,7 +37,10 @@ void UIEffectsGalleryComponent::Start()
 
 void UIEffectsGalleryComponent::SelectPage(int index_)
 {
-    if (pages.empty()) return;
+    if (pages.empty())
+    {
+        return;
+    }
     ResetFocus();
     const int count_ = static_cast<int>(pages.size());
     currentPage = ((index_ % count_) + count_) % count_;
@@ -47,7 +50,10 @@ void UIEffectsGalleryComponent::SelectPage(int index_)
 void UIEffectsGalleryComponent::ApplyPage()
 {
     BS_PROFILE_SCOPE("UIEffectsGalleryComponent::ApplyPage");
-    if (pages.empty()) return;
+    if (pages.empty())
+    {
+        return;
+    }
     bool ready_ = true;
     for (std::size_t pageIndex_ = 0; pageIndex_ < pages.size(); ++pageIndex_)
     {
@@ -55,27 +61,50 @@ void UIEffectsGalleryComponent::ApplyPage()
         for (const auto& name_ : pages[pageIndex_].objects)
         {
             const auto object_ = GetManager().Find(name_);
-            if (!object_ || object_->IsPendingDestroy()) continue;
+            if (!object_ || object_->IsPendingDestroy())
+            {
+                continue;
+            }
             const auto sprite_ = object_->GetComponent<SpriteRenderer>();
-            if (!sprite_ || (sprite_->IsEnabled() && !sprite_->IsStarted())) ready_ = false;
-            if (sprite_) sprite_->SetRuntimeVisible(visible_);
+            if (!sprite_ || (sprite_->IsEnabled() && !sprite_->IsStarted()))
+            {
+                ready_ = false;
+            }
+            if (sprite_)
+            {
+                sprite_->SetRuntimeVisible(visible_);
+            }
 
             // 非表示ページの残像を破棄し、再表示時に前の演出が混ざるのを防ぐ。
             if (const auto effect_ = object_->GetComponent<UIVisualEffectComponent>())
             {
-                if (effect_->IsEnabled() && !effect_->IsStarted()) ready_ = false;
-                else if (!visible_) effect_->Stop();
+                if (effect_->IsEnabled() && !effect_->IsStarted())
+                {
+                    ready_ = false;
+                }
+                else if (!visible_)
+                {
+                    effect_->Stop();
+                }
             }
             if (const auto motion_ = object_->GetComponent<UIMotionComponent>())
             {
-                if (motion_->IsEnabled() && !motion_->IsStarted()) ready_ = false;
-                else if (!visible_) motion_->Stop();
+                if (motion_->IsEnabled() && !motion_->IsStarted())
+                {
+                    ready_ = false;
+                }
+                else if (!visible_)
+                {
+                    motion_->Stop();
+                }
             }
         }
     }
     const auto labelObject_ = GetManager().Find(pageLabelObject);
     if (const auto text_ = labelObject_ ? labelObject_->GetComponent<UITextComponent>() : nullptr)
+    {
         text_->SetText(std::to_string(currentPage + 1) + " / " + std::to_string(pages.size()) + "   " + pages[currentPage].title);
+    }
 
     // UITextがStartでRendererを追加するため、全作例の初期化後に一度だけ再生する。
     if (ready_ && replayPending)
@@ -84,9 +113,18 @@ void UIEffectsGalleryComponent::ApplyPage()
         for (const auto& name_ : pages[currentPage].objects)
         {
             const auto object_ = GetManager().Find(name_);
-            if (!object_ || object_->IsPendingDestroy()) continue;
-            if (const auto effect_ = object_->GetComponent<UIVisualEffectComponent>(); effect_ && effect_->IsEnabled()) effect_->Play(preview_);
-            if (const auto motion_ = object_->GetComponent<UIMotionComponent>(); motion_ && motion_->IsEnabled()) motion_->Play(preview_);
+            if (!object_ || object_->IsPendingDestroy())
+            {
+                continue;
+            }
+            if (const auto effect_ = object_->GetComponent<UIVisualEffectComponent>(); effect_ && effect_->IsEnabled())
+            {
+                effect_->Play(preview_);
+            }
+            if (const auto motion_ = object_->GetComponent<UIMotionComponent>(); motion_ && motion_->IsEnabled())
+            {
+                motion_->Play(preview_);
+            }
         }
         replayPending = false;
     }
@@ -95,10 +133,16 @@ void UIEffectsGalleryComponent::ApplyPage()
 
 bool UIEffectsGalleryComponent::IsControlClicked(const std::string& name_)
 {
-    if (ImGui::GetIO().WantCaptureMouse || !MouseInput::Instance().LeftPressed()) return false;
+    if (ImGui::GetIO().WantCaptureMouse || !MouseInput::Instance().LeftPressed())
+    {
+        return false;
+    }
     const auto object_ = GetManager().Find(name_);
     const auto widget_ = object_ ? object_->GetComponent<UIWidgetComponent>() : nullptr;
-    if (!widget_ || !widget_->IsEnabled() || !widget_->IsVisible()) return false;
+    if (!widget_ || !widget_->IsEnabled() || !widget_->IsVisible())
+    {
+        return false;
+    }
     const auto& rect_ = widget_->GetScreenRect();
     const auto origin_ = ImGui::GetMainViewport()->Pos;
     return ImGui::IsMouseHoveringRect(
@@ -119,25 +163,48 @@ void UIEffectsGalleryComponent::Update(float deltaTime_)
         if (focusedWindow >= 0)
         {
             if ((keyboard_ && KeyInput::KeyPressedIn(KeyInput::K_Escape)) ||
-                (!ImGui::GetIO().WantCaptureMouse && MouseInput::Instance().LeftPressed())) focusClosing = true;
+                (!ImGui::GetIO().WantCaptureMouse && MouseInput::Instance().LeftPressed()))
+            {
+                focusClosing = true;
+            }
         }
         else if ((keyboard_ && (KeyInput::KeyPressedIn(KeyInput::K_Left) || KeyInput::KeyPressedIn(KeyInput::K_PageUp))) || IsControlClicked(previousObject))
+        {
             SelectPage(currentPage - 1);
+        }
         else if ((keyboard_ && (KeyInput::KeyPressedIn(KeyInput::K_Right) || KeyInput::KeyPressedIn(KeyInput::K_PageDown))) || IsControlClicked(nextObject))
+        {
             SelectPage(currentPage + 1);
+        }
         else if ((keyboard_ && KeyInput::KeyPressedIn(KeyInput::K_R)) || IsControlClicked(replayObject))
+        {
             SelectPage(currentPage);
+        }
         else if (!pages.empty())
+        {
             for (int index_ = 0; index_ < static_cast<int>(pages[currentPage].windows.size()); ++index_)
-                if (IsControlClicked(pages[currentPage].windows[index_].hitObject)) { OpenWindow(index_); break; }
+            {
+                if (IsControlClicked(pages[currentPage].windows[index_].hitObject))
+                {
+                    OpenWindow(index_);
+                    break;
+                }
+            }
+        }
     }
-    if (displayPending || replayPending) ApplyPage();
+    if (displayPending || replayPending)
+    {
+        ApplyPage();
+    }
 }
 
 void UIEffectsGalleryComponent::OpenWindow(int index_)
 {
     BS_PROFILE_SCOPE("UIEffectsGalleryComponent::OpenWindow");
-    if (pages.empty() || index_ < 0 || index_ >= static_cast<int>(pages[currentPage].windows.size())) return;
+    if (pages.empty() || index_ < 0 || index_ >= static_cast<int>(pages[currentPage].windows.size()))
+    {
+        return;
+    }
     ResetFocus();
     focusedWindow = index_;
     UpdateFocus(0.0f);
@@ -146,17 +213,27 @@ void UIEffectsGalleryComponent::OpenWindow(int index_)
 void UIEffectsGalleryComponent::UpdateUnscaled(float deltaTime_)
 {
     BS_PROFILE_SCOPE("UIEffectsGalleryComponent::UpdateUnscaled");
-    if (focusedWindow >= 0) UpdateFocus(deltaTime_);
+    if (focusedWindow >= 0)
+    {
+        UpdateFocus(deltaTime_);
+    }
 }
 
 void UIEffectsGalleryComponent::UpdateFocus(float deltaTime_)
 {
     BS_PROFILE_SCOPE("UIEffectsGalleryComponent::UpdateFocus");
-    if (pages.empty() || focusedWindow < 0 || focusedWindow >= static_cast<int>(pages[currentPage].windows.size())) return;
+    if (pages.empty() || focusedWindow < 0 || focusedWindow >= static_cast<int>(pages[currentPage].windows.size()))
+    {
+        return;
+    }
     const auto& window_ = pages[currentPage].windows[focusedWindow];
     const auto frameObject_ = GetManager().Find(window_.hitObject);
     const auto frame_ = frameObject_ ? frameObject_->GetComponent<UIWidgetComponent>() : nullptr;
-    if (!frame_) { ResetFocus(); return; }
+    if (!frame_)
+    {
+        ResetFocus();
+        return;
+    }
     const float step_ = std::isfinite(deltaTime_) ? (std::max)(0.0f, deltaTime_) / FOCUS_DURATION : 0.0f;
     focusProgress = std::clamp(focusProgress + (focusClosing ? -step_ : step_), 0.0f, 1.0f);
     const float blend_ = focusProgress * focusProgress * (3.0f - 2.0f * focusProgress);
@@ -192,13 +269,17 @@ void UIEffectsGalleryComponent::UpdateFocus(float deltaTime_)
         sprite_->SetRuntimeColor(color_);
         sprite_->SetRuntimeVisible(true);
     }
-    if (focusClosing && focusProgress <= 0.0f) ResetFocus();
+    if (focusClosing && focusProgress <= 0.0f)
+    {
+        ResetFocus();
+    }
 }
 
 void UIEffectsGalleryComponent::ResetFocus()
 {
     BS_PROFILE_SCOPE("UIEffectsGalleryComponent::ResetFocus");
     if (!pages.empty() && focusedWindow >= 0 && focusedWindow < static_cast<int>(pages[currentPage].windows.size()))
+    {
         for (const auto& name_ : pages[currentPage].windows[focusedWindow].objects)
         {
             const auto object_ = GetManager().Find(name_);
@@ -208,10 +289,14 @@ void UIEffectsGalleryComponent::ResetFocus()
                 widget_->SetRuntimeZOrderOffset(0);
             }
         }
+    }
     for (const auto& name_ : { focusBackdropObject, focusHintObject })
     {
         const auto object_ = GetManager().Find(name_);
-        if (const auto sprite_ = object_ ? object_->GetComponent<SpriteRenderer>() : nullptr) sprite_->SetRuntimeVisible(false);
+        if (const auto sprite_ = object_ ? object_->GetComponent<SpriteRenderer>() : nullptr)
+        {
+            sprite_->SetRuntimeVisible(false);
+        }
     }
     focusedWindow = -1;
     focusProgress = 0.0f;
@@ -226,18 +311,47 @@ void UIEffectsGalleryComponent::OnDestroy()
 void UIEffectsGalleryComponent::Gui()
 {
     BS_PROFILE_SCOPE("UIEffectsGalleryComponent::Gui");
-    if (pages.empty()) { ImGui::TextUnformatted("No gallery pages."); return; }
-    if (ImGui::Button("Previous Page")) SelectPage(currentPage - 1);
+    if (pages.empty())
+    {
+        ImGui::TextUnformatted("No gallery pages.");
+        return;
+    }
+    if (ImGui::Button("Previous Page"))
+    {
+        SelectPage(currentPage - 1);
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Next Page")) SelectPage(currentPage + 1);
+    if (ImGui::Button("Next Page"))
+    {
+        SelectPage(currentPage + 1);
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Replay Page")) SelectPage(currentPage);
+    if (ImGui::Button("Replay Page"))
+    {
+        SelectPage(currentPage);
+    }
     for (int index_ = 0; index_ < static_cast<int>(pages.size()); ++index_)
-        if (ImGui::Selectable(pages[index_].title.c_str(), currentPage == index_)) SelectPage(index_);
-    if (ImGui::Button("Use Current Page On Start")) initialPage = currentPage;
-    if (ImGui::Button("Return To Gallery")) focusClosing = true;
+    {
+        if (ImGui::Selectable(pages[index_].title.c_str(), currentPage == index_))
+        {
+            SelectPage(index_);
+        }
+    }
+    if (ImGui::Button("Use Current Page On Start"))
+    {
+        initialPage = currentPage;
+    }
+    if (ImGui::Button("Return To Gallery"))
+    {
+        focusClosing = true;
+    }
     for (int index_ = 0; index_ < static_cast<int>(pages[currentPage].windows.size()); ++index_)
-        if (ImGui::Button(pages[currentPage].windows[index_].hitObject.c_str())) OpenWindow(index_);
+    {
+        if (ImGui::Button(pages[currentPage].windows[index_].hitObject.c_str()))
+        {
+            OpenWindow(index_);
+        }
+    }
 }
 
 void UIEffectsGalleryComponent::Serialize(nlohmann::json& json_) const
@@ -255,7 +369,9 @@ void UIEffectsGalleryComponent::Serialize(nlohmann::json& json_) const
     {
         nlohmann::json windows_ = nlohmann::json::array();
         for (const auto& window_ : page_.windows)
+        {
             windows_.push_back({ { "HitObject", window_.hitObject }, { "Objects", window_.objects } });
+        }
         json_["Pages"].push_back({ { "Title", page_.title }, { "Objects", page_.objects }, { "Windows", windows_ } });
     }
 }
@@ -272,17 +388,28 @@ void UIEffectsGalleryComponent::Deserialize(const nlohmann::json& json_)
     focusHintObject = json_.value("FocusHintObject", std::string());
     pages.clear();
     if (json_.contains("Pages") && json_["Pages"].is_array())
+    {
         for (const auto& page_ : json_["Pages"])
+        {
             if (page_.is_object())
             {
                 GalleryPage restoredPage_;
                 restoredPage_.title = page_.value("Title", std::string());
                 restoredPage_.objects = page_.value("Objects", std::vector<std::string>());
                 if (page_.contains("Windows") && page_["Windows"].is_array())
+                {
                     for (const auto& window_ : page_["Windows"])
-                        if (window_.is_object()) restoredPage_.windows.push_back({ window_.value("HitObject", std::string()), window_.value("Objects", std::vector<std::string>()) });
+                    {
+                        if (window_.is_object())
+                        {
+                            restoredPage_.windows.push_back({ window_.value("HitObject", std::string()), window_.value("Objects", std::vector<std::string>()) });
+                        }
+                    }
+                }
                 pages.push_back(restoredPage_);
             }
+        }
+    }
     currentPage = pages.empty() ? 0 : std::clamp(initialPage, 0, static_cast<int>(pages.size()) - 1);
     displayPending = true;
     replayPending = false;

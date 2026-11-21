@@ -245,6 +245,7 @@
                             0.7799999713897705,
                             1.0
                         ],
+                        "CullMode": 0,
                         "DissolveCurveName": "GateDissolve",
                         "DissolveEdgeColor": [
                             0.8500000238418579,
@@ -504,6 +505,7 @@
                             1.0,
                             1.0
                         ],
+                        "CullMode": 0,
                         "DissolveCurveName": "GateDissolve",
                         "DissolveEdgeColor": [
                             0.8500000238418579,
@@ -761,6 +763,7 @@
                             1.0,
                             1.0
                         ],
+                        "CullMode": 0,
                         "DissolveCurveName": "GateDissolve",
                         "DissolveEdgeColor": [
                             0.8500000238418579,

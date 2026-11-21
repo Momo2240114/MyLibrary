@@ -41,7 +41,10 @@ std::shared_ptr<GameObject> LockOnTargetComponent::GetCombatOwner() const
     }
 
     const std::shared_ptr<GameObject> currentObject_ = gameObject.lock();
-    if (!currentObject_) return nullptr;
+    if (!currentObject_)
+    {
+        return nullptr;
+    }
 
     if (!combatOwnerName.empty() && currentObject_->manager)
     {
@@ -62,9 +65,24 @@ bool LockOnTargetComponent::IsAvailable() const
     const auto object_ = gameObject.lock();
     const auto owner_ = GetCombatOwner();
     if (!IsEnabled() || !lockOnEnabled || !object_ || !object_->manager || object_->IsPendingDestroy() ||
-        !owner_ || !owner_->manager || !owner_->IsCombatReady()) return false;
-    if (const auto health_ = owner_->GetComponent<HealthComponent>()) if (health_->IsDead()) return false;
-    if (const auto collider_ = owner_->GetComponent<CharacterCollider>()) if (!collider_->IsEnabled()) return false;
+        !owner_ || !owner_->manager || !owner_->IsCombatReady())
+    {
+        return false;
+    }
+    if (const auto health_ = owner_->GetComponent<HealthComponent>())
+    {
+        if (health_->IsDead())
+        {
+            return false;
+        }
+    }
+    if (const auto collider_ = owner_->GetComponent<CharacterCollider>())
+    {
+        if (!collider_->IsEnabled())
+        {
+            return false;
+        }
+    }
     return true;
 }
 

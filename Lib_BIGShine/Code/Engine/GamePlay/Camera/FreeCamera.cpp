@@ -92,7 +92,10 @@ void CameraFreeController::UpdateRotation(float deltaTime)
 void CameraFreeController::UpdateMovement(float deltaTime)
 {
     auto t = GetGameObject()->transform;
-    if (!t) return;
+    if (!t)
+    {
+        return;
+    }
 
     // Transformから現在のカメラの「前方向」と「右方向」のベクトルを取得
     Vector3 front = t->GetFront();

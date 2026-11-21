@@ -20,7 +20,10 @@ void SceneGame::Initialize()
 {
     BS_PROFILE_SCOPE("SceneGame::Initialize");
 	SceneBase::Initialize();
-	if (!GameRuntimeSettings::IsGameOnly() && !startImmediately) _GameObjectManager->EnableEditorPlayMode();
+	if (!GameRuntimeSettings::IsGameOnly() && !startImmediately)
+	{
+		_GameObjectManager->EnableEditorPlayMode();
+	}
 	if (SceneManager::IsRestoringEditorScene())
 	{
 		_GameObjectManager->RestoreEditorSnapshot(SceneManager::GetEditorPlaySnapshot());
@@ -34,13 +37,21 @@ void SceneGame::Initialize()
         const auto name_ = GameRuntimeSettings::IsGameOnly() ? GameRuntimeSettings::GetStartupScene() : std::string("MainScene");
 #endif
         if (isLoadingPreparation)
-            _GameObjectManager->LoadSceneAsync(name_, startImmediately || GameRuntimeSettings::IsGameOnly() || SceneManager::IsEditorPlaySessionActive());
-        else _GameObjectManager->LoadScene(name_);
+		{
+			_GameObjectManager->LoadSceneAsync(name_, startImmediately || GameRuntimeSettings::IsGameOnly() || SceneManager::IsEditorPlaySessionActive());
+		}
+		else
+		{
+			_GameObjectManager->LoadScene(name_);
+		}
 	}
 	if (!isLoadingPreparation && (startImmediately || GameRuntimeSettings::IsGameOnly() || SceneManager::IsEditorPlaySessionActive()))
 	{
 		// ゲーム専用起動とテスト中のScene遷移では、Play待ちを挟まずゲーム進行を開始する。
-		if (auto gameModeManager_ = _GameObjectManager->GetGameModeManager()) gameModeManager_->BeginGameSceneFlow();
+		if (auto gameModeManager_ = _GameObjectManager->GetGameModeManager())
+		{
+			gameModeManager_->BeginGameSceneFlow();
+		}
 	}
 
 	// SceneBase側で作られたGameObjectManagerの階層関係を確定させる。
@@ -67,7 +78,14 @@ void SceneGame::DrawGUI()
 bool SceneGame::RequiresFreeCursor() const
 {
     if (_GameObjectManager)
-        for (const auto& menu_ : _GameObjectManager->FindComponents<GameMenuComponent>())
-            if (menu_ && menu_->IsEnabled() && menu_->IsOpen()) return true;
-    return SceneBase::RequiresFreeCursor();
+	{
+		for (const auto& menu_ : _GameObjectManager->FindComponents<GameMenuComponent>())
+		{
+			if (menu_ && menu_->IsEnabled() && menu_->IsOpen())
+			{
+				return true;
+			}
+		}
+	}
+	return SceneBase::RequiresFreeCursor();
 }

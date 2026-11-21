@@ -16,9 +16,18 @@ namespace NodeSystem {
 
     /// 数値演算ノードで扱えるよう、互換性のある値をfloatへ変換する。
     inline float AsFloat(const NodeValue& value_) {
-        if (auto floatValue_ = std::get_if<float>(&value_)) return *floatValue_;
-        if (auto intValue_ = std::get_if<int>(&value_)) return static_cast<float>(*intValue_);
-        if (auto boolValue_ = std::get_if<bool>(&value_)) return *boolValue_ ? 1.0f : 0.0f;
+        if (auto floatValue_ = std::get_if<float>(&value_))
+        {
+            return *floatValue_;
+        }
+        if (auto intValue_ = std::get_if<int>(&value_))
+        {
+            return static_cast<float>(*intValue_);
+        }
+        if (auto boolValue_ = std::get_if<bool>(&value_))
+        {
+            return *boolValue_ ? 1.0f : 0.0f;
+        }
         return 0.0f;
     }
 }

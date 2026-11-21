@@ -36,15 +36,46 @@ public:
     void ResetTree();
     bool SaveGraphAsset(const std::string& path_) const;
     bool LoadGraphAsset(const std::string& path_);
-    std::string& GetGraphAssetPath() { return graphAssetPath; }
-    const std::string& GetGraphAssetPath() const { return graphAssetPath; }
-    void SetGraphAssetPath(const std::string& path_) { graphAssetPath = path_; }
 
-    AIBehaviorGraph& GetGraph() { return graph; }
-    const AIBehaviorGraph& GetGraph() const { return graph; }
-    const AIBehaviorContext& GetContext() const { return context; }
-    float GetChaseSpeed() const { return chaseSpeed; }
-    float GetReturnSpeed() const { return returnSpeed; }
+    std::string& GetGraphAssetPath()
+    {
+        return graphAssetPath;
+    }
+
+    const std::string& GetGraphAssetPath() const
+    {
+        return graphAssetPath;
+    }
+
+    void SetGraphAssetPath(const std::string& path_)
+    {
+        graphAssetPath = path_;
+    }
+
+    AIBehaviorGraph& GetGraph()
+    {
+        return graph;
+    }
+
+    const AIBehaviorGraph& GetGraph() const
+    {
+        return graph;
+    }
+
+    const AIBehaviorContext& GetContext() const
+    {
+        return context;
+    }
+
+    float GetChaseSpeed() const
+    {
+        return chaseSpeed;
+    }
+
+    float GetReturnSpeed() const
+    {
+        return returnSpeed;
+    }
 
 private:
     void EnsureBlackboard();

@@ -50,15 +50,27 @@ void SceneManager::Update(float elapsedTime)
     BS_PROFILE_SCOPE("SceneManager::TransitionUpdate");
     bool deferTransition_ = false;
     if ((NextScene || IsTransitionActive()) && editorPlaySessionActive)
+    {
         if (const auto source_ = dynamic_cast<SceneBase*>(NowScene.get()))
+        {
             if (const auto manager_ = source_->GetGameObjectManager())
             {
-                if (manager_->IsEditorStopRequested()) RequestReturnToEditor();
-                else deferTransition_ = manager_->GetEditorPlayMode() == EditorPlayMode::PAUSED || manager_->IsEditorPauseRequested();
+                if (manager_->IsEditorStopRequested())
+                {
+                    RequestReturnToEditor();
+                }
+                else
+                {
+                    deferTransition_ = manager_->GetEditorPlayMode() == EditorPlayMode::PAUSED || manager_->IsEditorPauseRequested();
+                }
             }
+        }
+    }
     auto& transition_ = ScreenTransitionManager::Instance();
     if (NextScene && !deferTransition_ && !IsTransitionActive() && transition_.IsCovered(transition_.GetHandle()) && !transition_.IsPreview())
+    {
         transitionHandle = transition_.RetainCovered();
+    }
     if (NextScene && !deferTransition_ && !transition_.IsActive())
     {
         const auto source_ = dynamic_cast<SceneBase*>(NowScene.get());
@@ -78,14 +90,28 @@ void SceneManager::Update(float elapsedTime)
         try
         {
             // 旧SceneのPhysX等を先に解放する順序は維持し、遷移用GPUリソースだけを残す。
-            if (NowScene) NowScene->Finalize();
+            if (NowScene)
+            {
+                NowScene->Finalize();
+            }
             NowScene.reset();
             NextScene.reset();
             NowScene = std::move(nextScene_);
-            if (NowScene && initialize_) NowScene->Initialize();
-            if (restoringEditorScene) EndEditorPlaySession();
+            if (NowScene && initialize_)
+            {
+                NowScene->Initialize();
+            }
+            if (restoringEditorScene)
+            {
+                EndEditorPlaySession();
+            }
             if (const auto sceneBase_ = dynamic_cast<SceneBase*>(NowScene.get()))
-                if (const auto manager_ = sceneBase_->GetGameObjectManager()) manager_->ChangeScene(sceneBase_);
+            {
+                if (const auto manager_ = sceneBase_->GetGameObjectManager())
+                {
+                    manager_->ChangeScene(sceneBase_);
+                }
+            }
         }
         catch (const std::exception& exception_)
         {
@@ -99,8 +125,12 @@ void SceneManager::Update(float elapsedTime)
         }
         transition_.Hold(transitionHandle);
     }
-    if (NowScene && !initializationFailed) NowScene->Update(elapsedTime);
+    if (NowScene && !initializationFailed)
+    {
+        NowScene->Update(elapsedTime);
+    }
 }
+
 void SceneManager::Render(float elapsedTime)
 {
     if (NowScene && !initializationFailed)
@@ -111,15 +141,23 @@ void SceneManager::Render(float elapsedTime)
 
 void SceneManager::DrawGUI()
 {
-    if (NowScene && !initializationFailed) NowScene->DrawGUI();
+    if (NowScene && !initializationFailed)
+    {
+        NowScene->DrawGUI();
+    }
     if (!transitionError.empty())
     {
         if (ImGui::Begin("Scene transition error"))
         {
             ImGui::TextWrapped("%s", transitionError.c_str());
             if (!IsTransitionActive() && ImGui::Button("Return to Title"))
+            {
                 ChangeScene(std::make_unique<SceneLoading>(std::make_unique<SceneTitle>()));
-            if (IsEditorPlaySessionActive() && ImGui::Button("Return to Editor")) RequestReturnToEditor();
+            }
+            if (IsEditorPlaySessionActive() && ImGui::Button("Return to Editor"))
+            {
+                RequestReturnToEditor();
+            }
         }
         ImGui::End();
     }
@@ -131,29 +169,60 @@ void SceneManager::RenderTransition()
     bool ready_ = NowScene != nullptr;
     bool failed_ = initializationFailed;
     if (const auto source_ = dynamic_cast<SceneBase*>(NowScene.get()))
+    {
         if (const auto manager_ = source_->GetGameObjectManager())
         {
             ready_ = manager_->GetSceneRuntimeState() == SCENE_RUNTIME_STATE::RUNNING;
             failed_ = failed_ || manager_->GetSceneRuntimeState() == SCENE_RUNTIME_STATE::FAILED;
         }
+    }
     auto& transition_ = ScreenTransitionManager::Instance();
-    if (transition_.Owns(transitionHandle) && transition_.GetState() == TransitionState::WAITING_FOR_SCENE && (ready_ || failed_ || !NowScene)) transition_.Reveal(transitionHandle);
+    if (transition_.Owns(transitionHandle) && transition_.GetState() == TransitionState::WAITING_FOR_SCENE && (ready_ || failed_ || !NowScene))
+    {
+        transition_.Reveal(transitionHandle);
+    }
 }
 
-bool SceneManager::IsTransitionActive() { const auto& transition_ = ScreenTransitionManager::Instance(); return transition_.Owns(transitionHandle) && transition_.IsActive(); }
-bool SceneManager::IsTransitionInputBlocked() { return ScreenTransitionManager::Instance().IsInputBlocked(); }
+bool SceneManager::IsTransitionActive()
+{
+    const auto& transition_ = ScreenTransitionManager::Instance();
+    return transition_.Owns(transitionHandle) && transition_.IsActive();
+}
+
+bool SceneManager::IsTransitionInputBlocked()
+{
+    return ScreenTransitionManager::Instance().IsInputBlocked();
+}
+
 void SceneManager::ChangeScene(std::unique_ptr<Scene> scene, bool callInitialize)
 {
     // 試写中の完了Actionで編集Sceneを離れず、WorkspaceのStopで必ず復元できるようにする。
     if (const auto source_ = dynamic_cast<SceneBase*>(NowScene.get()))
-        if (const auto manager_ = source_->GetGameObjectManager(); manager_ && manager_->IsCinematicSequencePreview()) return;
-    if (!scene) return;
+    {
+        if (const auto manager_ = source_->GetGameObjectManager(); manager_ && manager_->IsCinematicSequencePreview())
+        {
+            return;
+        }
+    }
+    if (!scene)
+    {
+        return;
+    }
     // 最初の予約を保持する。ロード完了は開き演出中でも1件だけ受け取り、終了後に閉じる。
-    if (!restoringEditorScene && (NextScene || (IsTransitionActive() && !dynamic_cast<SceneLoading*>(NowScene.get())))) return;
-    if (ScreenTransitionManager::Instance().IsPreview()) ScreenTransitionManager::Instance().Cancel(ScreenTransitionManager::Instance().GetHandle());
+    if (!restoringEditorScene && (NextScene || (IsTransitionActive() && !dynamic_cast<SceneLoading*>(NowScene.get()))))
+    {
+        return;
+    }
+    if (ScreenTransitionManager::Instance().IsPreview())
+    {
+        ScreenTransitionManager::Instance().Cancel(ScreenTransitionManager::Instance().GetHandle());
+    }
     // 同一フレームのロード要求は最初の1件だけ受け付ける。Stopによる復元は従来経路を使う。
     if (dynamic_cast<SceneLoading*>(scene.get()) &&
-        (NextScene || (dynamic_cast<SceneLoading*>(NowScene.get()) && !initializationFailed))) return;
+        (NextScene || (dynamic_cast<SceneLoading*>(NowScene.get()) && !initializationFailed)))
+    {
+        return;
+    }
     // 新しいシーンを予約（所有権を NextScene が持つ）
     NextScene = std::move(scene);
     callInitOnChange = callInitialize;
@@ -166,7 +235,10 @@ void SceneManager::Clear()
     transitionError.clear();
     initializationFailed = false;
     // ロード済みSceneの移譲を取り消す場合も、専用の終了処理を通して解放する。
-    if (NextScene && !callInitOnChange) NextScene->Finalize();
+    if (NextScene && !callInitOnChange)
+    {
+        NextScene->Finalize();
+    }
     if (NowScene)
     {
         NowScene->Finalize();
@@ -201,18 +273,35 @@ void SceneManager::EndEditorPlaySession()
     AudioManager::Instance().SetEditorPlayPaused(false);
 }
 
-bool SceneManager::IsEditorPlaySessionActive() { return editorPlaySessionActive.load(); }
-bool SceneManager::IsRestoringEditorScene() { return restoringEditorScene.load(); }
-const nlohmann::json& SceneManager::GetEditorPlaySnapshot() { return editorPlaySnapshot; }
+bool SceneManager::IsEditorPlaySessionActive()
+{
+    return editorPlaySessionActive.load();
+}
+
+bool SceneManager::IsRestoringEditorScene()
+{
+    return restoringEditorScene.load();
+}
+
+const nlohmann::json& SceneManager::GetEditorPlaySnapshot()
+{
+    return editorPlaySnapshot;
+}
 
 void SceneManager::RequestReturnToEditor()
 {
     BS_PROFILE_SCOPE("EditorPlayMode::ReturnToEditor");
-    if (editorPlaySnapshot.is_null()) return;
+    if (editorPlaySnapshot.is_null())
+    {
+        return;
+    }
     // 読込スレッドはSceneLoadingのFinalizeで終了を待ち、退避データは復元完了まで保持する。
     ScreenTransitionManager::Instance().Cancel(ScreenTransitionManager::Instance().GetHandle());
     transitionHandle = 0;
-    if (NextScene && !callInitOnChange) NextScene->Finalize();
+    if (NextScene && !callInitOnChange)
+    {
+        NextScene->Finalize();
+    }
     NextScene.reset();
     restoringEditorScene = true;
     editorPlaySessionActive = false;
@@ -225,6 +314,9 @@ void SceneManager::RequestReturnToEditor()
 
 LoadingStatus SceneManager::GetLoadingStatus()
 {
-    if (const auto loading_ = dynamic_cast<SceneLoading*>(NowScene.get())) return loading_->GetLoadingStatus();
+    if (const auto loading_ = dynamic_cast<SceneLoading*>(NowScene.get()))
+    {
+        return loading_->GetLoadingStatus();
+    }
     return {};
 }

@@ -142,9 +142,15 @@ namespace
 
         auto fixId_ = [&](uintptr_t id_) -> uintptr_t
             {
-                if (id_ == 0) return 0;
-                if (usedIds_.insert(id_).second) return id_;
-                return getNextUniqueId_();
+                if (id_ == 0)
+            {
+                return 0;
+            }
+            if (usedIds_.insert(id_).second)
+            {
+                return id_;
+            }
+            return getNextUniqueId_();
             };
 
         for (AnimGraphNode& node_ : graphNodes_)
@@ -261,7 +267,10 @@ bool AnimationControllerComponent::SaveStateAsset(
     const std::string& assetPath_)
 {
     auto stateIt_ = states.find(stateName_);
-    if (stateIt_ == states.end() || !stateIt_->second) return false;
+    if (stateIt_ == states.end() || !stateIt_->second)
+    {
+        return false;
+    }
 
     if (!std::filesystem::exists(STATE_ASSET_DIR))
     {
@@ -283,11 +292,17 @@ bool AnimationControllerComponent::SaveStateAsset(
     }
 
     std::ofstream file_(path_, std::ios::out | std::ios::trunc);
-    if (!file_.is_open()) return false;
+    if (!file_.is_open())
+    {
+        return false;
+    }
 
     file_ << json_.dump(4);
     stateAssetPaths[stateName_] = path_;
-    if (!graphAssetFilePath.empty()) SaveGraphAsset(graphAssetFilePath);
+    if (!graphAssetFilePath.empty())
+    {
+        SaveGraphAsset(graphAssetFilePath);
+    }
     return true;
 }
 
@@ -321,11 +336,20 @@ std::string AnimationControllerComponent::BuildDefaultStateAssetPath(
 bool AnimationControllerComponent::LoadMissingStateAsset(const std::string& stateName_, const std::string& assetName_)
 {
     BS_PROFILE_SCOPE("AnimationControllerComponent::LoadMissingStateAsset");
-    if (stateName_.empty()) return false;
+    if (stateName_.empty())
+    {
+        return false;
+    }
     const auto existing_ = states.find(stateName_);
-    if (existing_ != states.end() && existing_->second) return true;
+    if (existing_ != states.end() && existing_->second)
+    {
+        return true;
+    }
     // 外部からprivateの読込処理へ直接アクセスさせず、追加時のAction登録も共有する。
-    if (!LoadStateAsset(assetName_)) return false;
+    if (!LoadStateAsset(assetName_))
+    {
+        return false;
+    }
     const auto loaded_ = states.find(stateName_);
     return loaded_ != states.end() && loaded_->second != nullptr;
 }
@@ -334,11 +358,17 @@ bool AnimationControllerComponent::LoadStateAsset(const std::string& assetName_)
 {
     BS_PROFILE_SCOPE("AnimationControllerComponent::LoadStateAsset");
 
-    if (assetName_.empty()) return false;
+    if (assetName_.empty())
+    {
+        return false;
+    }
 
     const std::string path_ = GetFullStateAssetPath(assetName_);
     std::ifstream file_(path_);
-    if (!file_.is_open()) return false;
+    if (!file_.is_open())
+    {
+        return false;
+    }
 
     AnimState state_;
     try
@@ -398,21 +428,30 @@ bool AnimationControllerComponent::LoadStateAsset(const std::string& assetName_)
 
 void AnimationControllerComponent::ApplyPendingStateAssets()
 {
-    if (pendingStateAssetPaths.empty()) return;
+    if (pendingStateAssetPaths.empty())
+    {
+        return;
+    }
 
     const auto pendingAssets_ = std::move(pendingStateAssetPaths);
     pendingStateAssetPaths.clear();
     for (const auto& [stateName_, path_] : pendingAssets_)
     {
         (void)stateName_;
-        if (!path_.empty()) LoadStateAsset(path_);
+        if (!path_.empty())
+        {
+            LoadStateAsset(path_);
+        }
     }
 }
 
 
 void AnimationControllerComponent::SaveGraphAsset(const std::string& assetName_)
 {
-    if (assetName_.empty()) return;
+    if (assetName_.empty())
+    {
+        return;
+    }
 
     if (!std::filesystem::exists(GRAPH_ASSET_DIR)) {
         std::filesystem::create_directories(GRAPH_ASSET_DIR);
@@ -425,7 +464,10 @@ void AnimationControllerComponent::SaveGraphAsset(const std::string& assetName_)
     j["StateAssets"] = nlohmann::json::object();
     for (const auto& [stateName_, path_] : stateAssetPaths)
     {
-        if (!path_.empty()) j["StateAssets"][stateName_] = path_;
+        if (!path_.empty())
+        {
+            j["StateAssets"][stateName_] = path_;
+        }
     }
 
     std::string defaultStateName_ = ResolveGraphStartStateName(graphTransitions, states);
@@ -510,14 +552,21 @@ void AnimationControllerComponent::SaveGraphAsset(const std::string& assetName_)
         graphAssetFilePath = assetName_;
     }
 }
+
 bool AnimationControllerComponent::LoadGraphAsset(const std::string& assetName_)
 {
     BS_PROFILE_SCOPE("AnimationControllerComponent::LoadGraphAsset");
 
-    if (assetName_.empty()) return false;
+    if (assetName_.empty())
+    {
+        return false;
+    }
 
     std::ifstream file(GetFullGraphAssetPath(assetName_));
-    if (!file.is_open()) return false;
+    if (!file.is_open())
+    {
+        return false;
+    }
 
     nlohmann::json j;
     try
@@ -692,7 +741,10 @@ bool AnimationControllerComponent::LoadGraphAsset(const std::string& assetName_)
         for (const auto& [stateName_, pathJson_] : j["StateAssets"].items())
         {
             (void)stateName_;
-            if (pathJson_.is_string()) LoadStateAsset(pathJson_.get<std::string>());
+            if (pathJson_.is_string())
+            {
+                LoadStateAsset(pathJson_.get<std::string>());
+            }
         }
     }
 
@@ -718,7 +770,10 @@ void AnimationControllerComponent::LoadAsset(const std::string& assetName_)
     std::string fullPath = GetFullAssetPath(assetName_);
 
     std::ifstream file(fullPath);
-    if (!file.is_open()) return;
+    if (!file.is_open())
+    {
+        return;
+    }
 
     nlohmann::json j;
     {
@@ -755,7 +810,10 @@ void AnimationControllerComponent::LoadAsset(const std::string& assetName_)
 
 void AnimationControllerComponent::SaveAsset(const std::string& assetName_)
 {
-    if (assetName_.empty()) return;
+    if (assetName_.empty())
+    {
+        return;
+    }
 
     std::string fullPath = GetFullAssetPath(assetName_);
     std::filesystem::create_directories(std::filesystem::path(fullPath).parent_path());
@@ -878,11 +936,23 @@ void AnimationControllerComponent::SaveAsset(const std::string& assetName_)
             if (j["eventTemplateType"].is_string())
             {
                 const std::string eventTemplateType_ = j["eventTemplateType"].get<std::string>();
-                if (eventTemplateType_ == "ATTACK_TEMPLATE") e.eventTemplateType = ANIMATION_EVENT_TEMPLATE_TYPE::ATTACK_TEMPLATE;
-                else if (eventTemplateType_ == "TRAIL_TEMPLATE") e.eventTemplateType = ANIMATION_EVENT_TEMPLATE_TYPE::TRAIL_TEMPLATE;
-                else if (eventTemplateType_ == "VFX_TEMPLATE") e.eventTemplateType = ANIMATION_EVENT_TEMPLATE_TYPE::VFX_TEMPLATE;
-                else if (eventTemplateType_ == "SOUND_TEMPLATE") e.eventTemplateType = ANIMATION_EVENT_TEMPLATE_TYPE::SOUND_TEMPLATE;
+                if (eventTemplateType_ == "ATTACK_TEMPLATE")
+            {
+                e.eventTemplateType = ANIMATION_EVENT_TEMPLATE_TYPE::ATTACK_TEMPLATE;
             }
+            else if (eventTemplateType_ == "TRAIL_TEMPLATE")
+            {
+                e.eventTemplateType = ANIMATION_EVENT_TEMPLATE_TYPE::TRAIL_TEMPLATE;
+            }
+            else if (eventTemplateType_ == "VFX_TEMPLATE")
+            {
+                e.eventTemplateType = ANIMATION_EVENT_TEMPLATE_TYPE::VFX_TEMPLATE;
+            }
+            else if (eventTemplateType_ == "SOUND_TEMPLATE")
+            {
+                e.eventTemplateType = ANIMATION_EVENT_TEMPLATE_TYPE::SOUND_TEMPLATE;
+            }
+        }
             else if (j["eventTemplateType"].is_number_integer())
             {
                 const int eventTemplateType_ = (std::clamp)(j["eventTemplateType"].get<int>(), 0, 4);
@@ -896,8 +966,11 @@ void AnimationControllerComponent::SaveAsset(const std::string& assetName_)
         auto readVector3_ = [&j](const char* key_, const DirectX::XMFLOAT3& fallback_)
             {
                 const nlohmann::json value_ = j.value(key_, nlohmann::json::array());
-                if (!value_.is_array() || value_.size() < 3u) return fallback_;
-                return DirectX::XMFLOAT3{
+                if (!value_.is_array() || value_.size() < 3u)
+        {
+            return fallback_;
+        }
+        return DirectX::XMFLOAT3{
                     value_[0].get<float>(),
                     value_[1].get<float>(),
                     value_[2].get<float>() };

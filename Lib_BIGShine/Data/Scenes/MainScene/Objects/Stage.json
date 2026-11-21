@@ -20,7 +20,7 @@
                 "Mass": 0.0,
                 "Offset": [
                     0.0,
-                    -11.5,
+                    -9.800000190734863,
                     0.0
                 ],
                 "PhysicsControlsTransform": false,
@@ -266,6 +266,13 @@
                     }
                 ],
                 "ModelName": "./Data/Model/Stage/Stage_Floor05.gltf",
+                "OutlineColor": [
+                    0.019999999552965164,
+                    0.019999999552965164,
+                    0.02500000037252903,
+                    1.0
+                ],
+                "OverrideOutlineColor": false,
                 "RootMotionName": "",
                 "ShaderID": 1,
                 "StaticModel": true,
@@ -362,6 +369,18 @@
                             0.0
                         ],
                         "RadialVelocity": 0.0,
+                        "RandomColorEnd": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "RandomColorStart": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
                         "RenderType": 0,
                         "RotationSpeed": [
                             0.0,
@@ -430,6 +449,7 @@
                         "UseFresnel": 1,
                         "UseGradient": 0,
                         "UseMask": 0,
+                        "UseRandomColor": 0,
                         "UseRandomSize": 0,
                         "UseSpriteAnimation": 0,
                         "UseTargetAttraction": 0,

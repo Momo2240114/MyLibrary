@@ -210,6 +210,7 @@ void Transform::SetForward(const Vector3& forward_)
 
     MarkDirty();
 }
+
 void Transform::SetParentOverride(bool enable, DirectX::XMMATRIX matrix)
 {
     m_IsOverriding = enable;
@@ -315,7 +316,10 @@ void Transform::UpdateWorldMatrix()
 
 
     // 変化がない場合は、以降の重い行列計算をスキップ
-    if (!isDirty) return;
+    if (!isDirty)
+    {
+        return;
+    }
 
     // 2. クォータニオンと行列の作成
     DirectX::XMVECTOR q = DirectX::XMQuaternionRotationRollPitchYaw(

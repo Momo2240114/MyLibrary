@@ -18,6 +18,7 @@ public:
     void Draw(bool failed_, bool standalone_ = false);
     // Scene終了時に表示用Textureを解放する。
     void Finalize();
+
 private:
     // 同じヒントの連続表示を避けて次の文章を選択する。
     void SelectHint();

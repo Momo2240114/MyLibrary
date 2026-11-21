@@ -27,17 +27,47 @@ void RegisterAllActions()
     audio.ResetPresentationAudio();
     ControllerInput::Instance().StopRumble();
     // Sequenceや被弾時の追加Actionからも、共通の手応えを呼び出せるようにする。
-    reg.RegisterAction("Controller", "Controller.RumbleAttackStart", []() { ControllerInput::Instance().PlayRumble(0.15f, 0.08f, 0.08f, 1); });
-    reg.RegisterAction("Controller", "Controller.RumbleAttack", []() { ControllerInput::Instance().PlayRumble(0.3f, 0.2f, 0.12f, 2); });
-    reg.RegisterAction("Controller", "Controller.RumbleReceiveHit", []() { ControllerInput::Instance().PlayRumble(0.65f, 0.4f, 0.18f, 3); });
+    reg.RegisterAction("Controller", "Controller.RumbleAttackStart", []()
+    {
+        ControllerInput::Instance().PlayRumble(0.15f, 0.08f, 0.08f, 1);
+    });
+    reg.RegisterAction("Controller", "Controller.RumbleAttack", []()
+    {
+        ControllerInput::Instance().PlayRumble(0.3f, 0.2f, 0.12f, 2);
+    });
+    reg.RegisterAction("Controller", "Controller.RumbleReceiveHit", []()
+    {
+        ControllerInput::Instance().PlayRumble(0.65f, 0.4f, 0.18f, 3);
+    });
     // 成立側と攻撃を受け流された側を分け、ActionSequenceからも同じ反応を再利用する。
-    reg.RegisterAction("Controller", "Controller.RumbleGuard", []() { ControllerInput::Instance().PlayRumble(0.3f, 0.45f, 0.10f, 2); });
-    reg.RegisterAction("Controller", "Controller.RumbleGuardBreak", []() { ControllerInput::Instance().PlayRumble(0.85f, 0.5f, 0.24f, 4); });
-    reg.RegisterAction("Controller", "Controller.RumbleAttackGuarded", []() { ControllerInput::Instance().PlayRumble(0.3f, 0.5f, 0.12f, 2); });
-    reg.RegisterAction("Controller", "Controller.RumbleJustGuard", []() { ControllerInput::Instance().PlayRumble(0.5f, 0.8f, 0.16f, 4); });
-    reg.RegisterAction("Controller", "Controller.RumbleJustGuarded", []() { ControllerInput::Instance().PlayRumble(0.7f, 0.45f, 0.20f, 3); });
-    reg.RegisterAction("Controller", "Controller.RumbleJustDodge", []() { ControllerInput::Instance().PlayRumble(0.18f, 0.5f, 0.14f, 3); });
-    reg.RegisterAction("Controller", "Controller.StopRumble", []() { ControllerInput::Instance().StopRumble(); });
+    reg.RegisterAction("Controller", "Controller.RumbleGuard", []()
+    {
+        ControllerInput::Instance().PlayRumble(0.3f, 0.45f, 0.10f, 2);
+    });
+    reg.RegisterAction("Controller", "Controller.RumbleGuardBreak", []()
+    {
+        ControllerInput::Instance().PlayRumble(0.85f, 0.5f, 0.24f, 4);
+    });
+    reg.RegisterAction("Controller", "Controller.RumbleAttackGuarded", []()
+    {
+        ControllerInput::Instance().PlayRumble(0.3f, 0.5f, 0.12f, 2);
+    });
+    reg.RegisterAction("Controller", "Controller.RumbleJustGuard", []()
+    {
+        ControllerInput::Instance().PlayRumble(0.5f, 0.8f, 0.16f, 4);
+    });
+    reg.RegisterAction("Controller", "Controller.RumbleJustGuarded", []()
+    {
+        ControllerInput::Instance().PlayRumble(0.7f, 0.45f, 0.20f, 3);
+    });
+    reg.RegisterAction("Controller", "Controller.RumbleJustDodge", []()
+    {
+        ControllerInput::Instance().PlayRumble(0.18f, 0.5f, 0.14f, 3);
+    });
+    reg.RegisterAction("Controller", "Controller.StopRumble", []()
+    {
+        ControllerInput::Instance().StopRumble();
+    });
 
     reg.RegisterAction("Transform", "---", nullptr);
     reg.RegisterAction("FOV", "---", nullptr);
@@ -48,19 +78,27 @@ void RegisterAllActions()
     reg.RegisterAction("Scene", "---", nullptr);
     audio.RegisterAudioWorkspaceActions();
     // 音声素材の準備後、Sequence Editorで実際のAudio Actionへ差し替えるための空Action。
-    reg.RegisterAction("Audio", "BossIntro.DrawWeaponSound", []() {});
+    reg.RegisterAction("Audio", "BossIntro.DrawWeaponSound", []()
+    {
+    });
     // 登場演出の既存通知を使い、現在のドラゴン位置から咆哮を一度だけ鳴らす。
     reg.RegisterAction("Audio", "BossIntro.RoarSound", []()
     {
         BS_PROFILE_SCOPE("Audio::BossIntroRoarSound");
         const auto scene_ = dynamic_cast<SceneBase*>(SceneManager::GetCurrentScene());
         const auto manager_ = scene_ ? scene_->GetGameObjectManager() : nullptr;
-        if (!manager_) return;
+        if (!manager_)
+        {
+            return;
+        }
         for (const auto& dragon_ : manager_->FindComponents<DragonAttackControllerComponent>())
         {
             const auto owner_ = dragon_ ? dragon_->GetGameObject() : nullptr;
             // 通常攻撃が演出用に一時停止されていても、保存上有効なドラゴンの咆哮は再生する。
-            if (!dragon_ || !dragon_->IsConfiguredEnabled() || !owner_ || owner_->IsPendingDestroy() || !owner_->transform) continue;
+            if (!dragon_ || !dragon_->IsConfiguredEnabled() || !owner_ || owner_->IsPendingDestroy() || !owner_->transform)
+            {
+                continue;
+            }
             AudioManager::Instance().PlaySpatialAttackSound("Data/Audio/SE/Sonniss/Dragon/RoarTrex.wav",
                 owner_->transform->GetWorldPosition(), 0.65f, 12.0f, 160.0f);
             break;
@@ -82,10 +120,22 @@ void RegisterAllActions()
         });
 
     // Sequenceからも通常戦闘・暴走・大技の各曲を明示的に選択できるようにする。
-    reg.RegisterAction("Audio", "PlayBGM_Game", []() { AudioManager::Instance().SwitchBGM(BGM_GAME); });
-    reg.RegisterAction("Audio", "PlayBGM_HumanBoss", []() { AudioManager::Instance().SwitchBGM(BGM_HUMAN_BOSS); });
-    reg.RegisterAction("Audio", "PlayBGM_Berserk", []() { AudioManager::Instance().SwitchBGM(BGM_BERSERK); });
-    reg.RegisterAction("Audio", "PlayBGM_SpecialAttack", []() { AudioManager::Instance().SwitchBGM(BGM_SPECIAL_ATTACK); });
+    reg.RegisterAction("Audio", "PlayBGM_Game", []()
+    {
+        AudioManager::Instance().SwitchBGM(BGM_GAME);
+    });
+    reg.RegisterAction("Audio", "PlayBGM_HumanBoss", []()
+    {
+        AudioManager::Instance().SwitchBGM(BGM_HUMAN_BOSS);
+    });
+    reg.RegisterAction("Audio", "PlayBGM_Berserk", []()
+    {
+        AudioManager::Instance().SwitchBGM(BGM_BERSERK);
+    });
+    reg.RegisterAction("Audio", "PlayBGM_SpecialAttack", []()
+    {
+        AudioManager::Instance().SwitchBGM(BGM_SPECIAL_ATTACK);
+    });
 
     reg.RegisterAction("Audio", "PlaySE_TapStart", [&]() {
         audio.PlaySE(SE_TITLESELECT);
@@ -110,9 +160,21 @@ void RegisterAllActions()
         const auto manager_ = scene_ ? scene_->GetGameObjectManager() : nullptr;
         return !manager_ || !manager_->IsCinematicSequencePreview();
     };
-    reg.RegisterAction("Application", "Application.Exit", [canExit_]() { if (canExit_()) PostQuitMessage(0); });
+    reg.RegisterAction("Application", "Application.Exit", [canExit_]()
+    {
+        if (canExit_())
+        {
+            PostQuitMessage(0);
+        }
+    });
     // 移行前のJSONやSequenceから呼ばれる終了Actionも維持する。
-    reg.RegisterAction("Title", "Title.Exit", [canExit_]() { if (canExit_()) PostQuitMessage(0); });
+    reg.RegisterAction("Title", "Title.Exit", [canExit_]()
+    {
+        if (canExit_())
+        {
+            PostQuitMessage(0);
+        }
+    });
 
     reg.RegisterAction("Scene", "GoSceneGame", []()
         {
@@ -130,8 +192,11 @@ void RegisterAllActions()
     // タイトルを経由する起動でも、従来のScene編集へ戻れる入口を残す。
     reg.RegisterAction("Scene", "GoSceneEditor", []()
         {
-            if (GameRuntimeSettings::IsGameOnly()) return;
-            SceneManager::ChangeScene(std::make_unique<SceneLoading>(std::make_unique<SceneGame>()));
+            if (GameRuntimeSettings::IsGameOnly())
+        {
+            return;
+        }
+        SceneManager::ChangeScene(std::make_unique<SceneLoading>(std::make_unique<SceneGame>()));
         });
 
     reg.RegisterAction("Scene", "GoSceneTutorial", []()
@@ -152,7 +217,10 @@ void ActionRegistry::RegisterAction(
     ActionFunc func)
 {
     auto& categoryMap_ = actions[category];
-    if (categoryMap_.find(name) != categoryMap_.end()) return;
+    if (categoryMap_.find(name) != categoryMap_.end())
+    {
+        return;
+    }
 
     categoryMap_.emplace(name, func);
 
@@ -185,8 +253,14 @@ bool ActionRegistry::RemoveAction(
     const std::string& actionName)
 {
     auto categoryIterator_ = actions.find(category);
-    if (categoryIterator_ == actions.end()) return false;
-    if (categoryIterator_->second.erase(actionName) == 0) return false;
+    if (categoryIterator_ == actions.end())
+    {
+        return false;
+    }
+    if (categoryIterator_->second.erase(actionName) == 0)
+    {
+        return false;
+    }
 
     const StringId categoryId_ = MakeActionId(category);
     const StringId actionId_ = MakeActionId(actionName);
@@ -203,8 +277,14 @@ bool ActionRegistry::RemoveAction(
 void ActionRegistry::Call(const std::string& name)
 {
     const auto iterator_ = actionIndex.find(MakeActionId(name));
-    if (iterator_ == actionIndex.end()) return;
-    if (!iterator_->second) return;
+    if (iterator_ == actionIndex.end())
+    {
+        return;
+    }
+    if (!iterator_->second)
+    {
+        return;
+    }
 
     BS_LOG_INFO(LOG_CATEGORY::GAME, "Action fired: " + name);
     // 呼び出し中のObject破棄で登録が解除されても、実行中のCallbackを保持する。
@@ -227,7 +307,10 @@ bool ActionRegistry::HasActionInCategory(
     const std::string& actionName) const
 {
     const auto categoryIterator_ = categoryIndex.find(StringIdUtility::Hash(category));
-    if (categoryIterator_ == categoryIndex.end()) return false;
+    if (categoryIterator_ == categoryIndex.end())
+    {
+        return false;
+    }
 
     return categoryIterator_->second.find(StringIdUtility::Hash(actionName)) !=
         categoryIterator_->second.end();

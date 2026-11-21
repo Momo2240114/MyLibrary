@@ -67,8 +67,15 @@ public:
     }
 
     // 保存ファイルパス設定
-    void SetConfigFile(const std::string& filename) { configFile = filename; }
-    const std::string& GetConfigFile() const { return configFile; }
+    void SetConfigFile(const std::string& filename)
+    {
+        configFile = filename;
+    }
+
+    const std::string& GetConfigFile() const
+    {
+        return configFile;
+    }
 
     // ---- バインド操作 ----
     // 同時押しセット(combo)をアクションに登録（呼ぶたびにOR条件として追加）
@@ -77,11 +84,24 @@ public:
     void RemoveAction(const std::string& action);
     bool RenameAction(const std::string& oldAction, const std::string& newAction);
     void ClearBinds(const std::string& action);
-    const std::unordered_map<std::string, std::vector<InputCombo>>& GetActionMap() const { return actionMap; }
+
+    const std::unordered_map<std::string, std::vector<InputCombo>>& GetActionMap() const
+    {
+        return actionMap;
+    }
+
     // フレームの入力取得後に呼び、ゲーム側の押下エッジを消費せず最終操作元を更新する。
     void UpdateActiveDevice(bool focused_);
-    InputDisplayDevice GetActiveDevice() const { return activeDevice; }
-    std::uint64_t GetBindingsRevision() const { return bindingsRevision; }
+
+    InputDisplayDevice GetActiveDevice() const
+    {
+        return activeDevice;
+    }
+
+    std::uint64_t GetBindingsRevision() const
+    {
+        return bindingsRevision;
+    }
 
     // ---- 入力判定 ----
     bool ActionPressed(const std::string& action) const;   // 押しっぱなし
@@ -101,7 +121,11 @@ public:
 
     float GetAxis(const std::string& axisName_) const;
     float GetRawAxis(const std::string& axisName_) const;
-    const std::unordered_map<std::string, AxisBind>& GetAxisMap() const { return axisMap; }
+
+    const std::unordered_map<std::string, AxisBind>& GetAxisMap() const
+    {
+        return axisMap;
+    }
 
 private:
     KeyConfig() = default;

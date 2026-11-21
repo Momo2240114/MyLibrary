@@ -35,26 +35,104 @@ public:
 
     // 初期化済みGPUリソースが揃っているかを確認する。
     bool HasGPUResources() const;
-    void SetEmissionEnabled(bool enabled_) { emissionEnabled = enabled_; }
-    void SetDepthSortEnabled(bool enabled_) { depthSortEnabled = enabled_; }
-    void SetDepthSortInterval(UINT interval_) { depthSortInterval = interval_ > 0 ? interval_ : 1; }
-    ParticleSystemConstants& GetSettings() { return settings; }
-    const ParticleSystemConstants& GetSettings() const { return settings; }
 
-    void SetTexture(Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv) { textureSRV = srv; }
-    void SetMaskTexture(Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv) { maskTextureSRV = srv; settings.useMaskTexture = srv ? 1u : 0u; }
-    void SetGradientTexture(Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv) { gradientTextureSRV = srv; settings.useGradientTexture = srv ? 1u : 0u; }
-    void SetShadeGradientTexture(Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv) { shadeGradientTextureSRV = srv; settings.useShadeGradientTexture = srv ? 1u : 0u; }
-    void SetMeshSpawnPositions(const std::vector<DirectX::XMFLOAT3>& positions_) { meshSpawnPositions = positions_; }
-    std::vector<DirectX::XMFLOAT3>& GetMeshSpawnPositions() { return meshSpawnPositions; }
-    ID3D11ShaderResourceView* GetSRV() const { return particleDataSRV.Get(); }
-    ID3D11ShaderResourceView* GetHeaderSRV() const { return particleHeaderSRV.Get(); }
-    ID3D11ShaderResourceView* GetTextureSRV() const { return textureSRV.Get(); }
-    ID3D11ShaderResourceView* GetMaskTextureSRV() const { return maskTextureSRV.Get(); }
-    ID3D11ShaderResourceView* GetGradientTextureSRV() const { return gradientTextureSRV.Get(); }
-    ID3D11ShaderResourceView* GetShadeGradientTextureSRV() const { return shadeGradientTextureSRV.Get(); }
-    ID3D11Buffer* GetConstantBuffer() const { return emitterConstantBuffer.Get(); }
-    UINT GetMaxParticles() const { return numParticles; }
+    void SetEmissionEnabled(bool enabled_)
+    {
+        emissionEnabled = enabled_;
+    }
+
+    void SetDepthSortEnabled(bool enabled_)
+    {
+        depthSortEnabled = enabled_;
+    }
+
+    void SetDepthSortInterval(UINT interval_)
+    {
+        depthSortInterval = interval_ > 0 ? interval_ : 1;
+    }
+
+    ParticleSystemConstants& GetSettings()
+    {
+        return settings;
+    }
+
+    const ParticleSystemConstants& GetSettings() const
+    {
+        return settings;
+    }
+
+    void SetTexture(Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv)
+    {
+        textureSRV = srv;
+    }
+
+    void SetMaskTexture(Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv)
+    {
+        maskTextureSRV = srv;
+        settings.useMaskTexture = srv ? 1u : 0u;
+    }
+
+    void SetGradientTexture(Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv)
+    {
+        gradientTextureSRV = srv;
+        settings.useGradientTexture = srv ? 1u : 0u;
+    }
+
+    void SetShadeGradientTexture(Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv)
+    {
+        shadeGradientTextureSRV = srv;
+        settings.useShadeGradientTexture = srv ? 1u : 0u;
+    }
+
+    void SetMeshSpawnPositions(const std::vector<DirectX::XMFLOAT3>& positions_)
+    {
+        meshSpawnPositions = positions_;
+    }
+
+    std::vector<DirectX::XMFLOAT3>& GetMeshSpawnPositions()
+    {
+        return meshSpawnPositions;
+    }
+
+    ID3D11ShaderResourceView* GetSRV() const
+    {
+        return particleDataSRV.Get();
+    }
+
+    ID3D11ShaderResourceView* GetHeaderSRV() const
+    {
+        return particleHeaderSRV.Get();
+    }
+
+    ID3D11ShaderResourceView* GetTextureSRV() const
+    {
+        return textureSRV.Get();
+    }
+
+    ID3D11ShaderResourceView* GetMaskTextureSRV() const
+    {
+        return maskTextureSRV.Get();
+    }
+
+    ID3D11ShaderResourceView* GetGradientTextureSRV() const
+    {
+        return gradientTextureSRV.Get();
+    }
+
+    ID3D11ShaderResourceView* GetShadeGradientTextureSRV() const
+    {
+        return shadeGradientTextureSRV.Get();
+    }
+
+    ID3D11Buffer* GetConstantBuffer() const
+    {
+        return emitterConstantBuffer.Get();
+    }
+
+    UINT GetMaxParticles() const
+    {
+        return numParticles;
+    }
 
     // 全Emitterで共有するCS/VS/GS/PSを初期化する。
     static void InitializeSharedShaders(ID3D11Device* device);

@@ -11,7 +11,10 @@ void FollowCameraComponent::Update(float deltaTime)
     RegisterDefaultInputBindings();
 
     auto tgtGO = target.lock();
-    if (!tgtGO) return;
+    if (!tgtGO)
+    {
+        return;
+    }
 
     // --- 1. マウスの移動量（Delta）を取得 ---
     // m_SubMousePos が中央からのズレなので、これを回転量として加算する

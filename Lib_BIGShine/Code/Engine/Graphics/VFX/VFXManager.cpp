@@ -46,11 +46,17 @@ void VFXManager::Update(float deltaTime_)
             [this](const ManagedEffect& effect_)
             {
                 const std::shared_ptr<GameObject> object_ = effect_.object.lock();
-                if (!object_) return true;
+                if (!object_)
+        {
+            return true;
+        }
 
-                if (effect_.lifeTimer > 0.0f) return false;
+        if (effect_.lifeTimer > 0.0f)
+        {
+            return false;
+        }
 
-                if (gameObjectManager)
+        if (gameObjectManager)
                 {
                     gameObjectManager->Destroy(object_);
                 }
@@ -111,7 +117,10 @@ const ParticleEffectAsset* VFXManager::FindParticleAsset(
     }
 
     const auto iterator_ = particleAssetMap.find(assetName_);
-    if (iterator_ == particleAssetMap.end()) return nullptr;
+    if (iterator_ == particleAssetMap.end())
+    {
+        return nullptr;
+    }
 
     return &iterator_->second;
 }
@@ -125,7 +134,10 @@ const MeshVFXAsset* VFXManager::FindMeshVFXAsset(
     }
 
     const auto iterator_ = meshVFXAssetMap.find(assetName_);
-    if (iterator_ == meshVFXAssetMap.end()) return nullptr;
+    if (iterator_ == meshVFXAssetMap.end())
+    {
+        return nullptr;
+    }
 
     return &iterator_->second;
 }
@@ -133,16 +145,25 @@ const MeshVFXAsset* VFXManager::FindMeshVFXAsset(
 std::shared_ptr<GameObject> VFXManager::SpawnParticle(
     const ParticleSpawnRequest& request_)
 {
-    if (!gameObjectManager) return nullptr;
+    if (!gameObjectManager)
+    {
+        return nullptr;
+    }
 
     // リクエストは名前指定とパス指定の両方を許可しているため、解決処理は専用関数に集約する。
     const ParticleEffectAsset* asset_ = FindParticleAssetFromRequest(request_);
-    if (!asset_) return nullptr;
+    if (!asset_)
+    {
+        return nullptr;
+    }
 
     // シーン保存対象にしない、実行時専用のGameObjectとして生成する。
     std::shared_ptr<GameObject> object_ =
         gameObjectManager->Create("RuntimeParticle");
-    if (!object_) return nullptr;
+    if (!object_)
+    {
+        return nullptr;
+    }
 
     object_->SetNoSaveObject();
 
@@ -188,16 +209,25 @@ std::shared_ptr<GameObject> VFXManager::SpawnParticle(
 std::shared_ptr<GameObject> VFXManager::SpawnMeshVFX(
     const MeshVFXSpawnRequest& request_)
 {
-    if (!gameObjectManager) return nullptr;
+    if (!gameObjectManager)
+    {
+        return nullptr;
+    }
 
     // MeshVFXもParticleと同じく、名前指定とパス指定のどちらからでもアセットを探す。
     const MeshVFXAsset* asset_ = FindMeshVFXAssetFromRequest(request_);
-    if (!asset_) return nullptr;
+    if (!asset_)
+    {
+        return nullptr;
+    }
 
     // 生成したMeshVFXは保存しない一時オブジェクトとして扱う。
     std::shared_ptr<GameObject> object_ =
         gameObjectManager->Create("RuntimeMeshVFX");
-    if (!object_) return nullptr;
+    if (!object_)
+    {
+        return nullptr;
+    }
 
     object_->SetNoSaveObject();
 
@@ -228,7 +258,10 @@ std::shared_ptr<GameObject> VFXManager::SpawnMeshVFX(
 
 void VFXManager::SpawnForHit(const AttackHitEvent& event_)
 {
-    if (!event_.hasHitContact) return;
+    if (!event_.hasHitContact)
+    {
+        return;
+    }
 
     // 攻撃判定の接触情報から、粒子とメッシュVFXの両方を必要に応じて発生させる。
     // イベント側に通常化済みの位置・法線・寿命を持たせているため、ここではSpawnRequestへ詰め替えるだけにする。
@@ -266,17 +299,35 @@ void VFXManager::LoadParticleAssetsFromDirectory(
     // Particle直下のjsonだけを効果アセットとして扱い、Emitter部品用のjsonは候補から外す。
     const fs::path rootPath_(rootDirectory_);
     std::error_code error_;
-    if (!fs::exists(rootPath_, error_) || !fs::is_directory(rootPath_, error_)) return;
+    if (!fs::exists(rootPath_, error_) || !fs::is_directory(rootPath_, error_))
+    {
+        return;
+    }
 
     for (const fs::directory_entry& entry_ : fs::recursive_directory_iterator(rootPath_, error_))
     {
-        if (error_) break;
-        if (!entry_.is_regular_file(error_)) continue;
-        if (!IsJsonFile(entry_.path())) continue;
-        if (IsUnderDirectoryName(entry_.path(), "Emitter")) continue;
+        if (error_)
+        {
+            break;
+        }
+        if (!entry_.is_regular_file(error_))
+        {
+            continue;
+        }
+        if (!IsJsonFile(entry_.path()))
+        {
+            continue;
+        }
+        if (IsUnderDirectoryName(entry_.path(), "Emitter"))
+        {
+            continue;
+        }
 
         const std::string assetName_ = BuildAssetName(entry_.path(), rootPath_);
-        if (assetName_.empty()) continue;
+        if (assetName_.empty())
+        {
+            continue;
+        }
 
         ParticleEffectAsset asset_{};
         if (!ParticleComponent::LoadAssetDataOnly(entry_.path().generic_string(), asset_))
@@ -298,14 +349,29 @@ void VFXManager::LoadMeshVFXAssetsFromDirectory(
     // MeshVFXはParts配下に部品jsonがあるため、完成アセットだけをキャッシュ対象にする。
     const fs::path rootPath_(rootDirectory_);
     std::error_code error_;
-    if (!fs::exists(rootPath_, error_) || !fs::is_directory(rootPath_, error_)) return;
+    if (!fs::exists(rootPath_, error_) || !fs::is_directory(rootPath_, error_))
+    {
+        return;
+    }
 
     for (const fs::directory_entry& entry_ : fs::recursive_directory_iterator(rootPath_, error_))
     {
-        if (error_) break;
-        if (!entry_.is_regular_file(error_)) continue;
-        if (!IsJsonFile(entry_.path())) continue;
-        if (IsUnderDirectoryName(entry_.path(), "Parts")) continue;
+        if (error_)
+        {
+            break;
+        }
+        if (!entry_.is_regular_file(error_))
+        {
+            continue;
+        }
+        if (!IsJsonFile(entry_.path()))
+        {
+            continue;
+        }
+        if (IsUnderDirectoryName(entry_.path(), "Parts"))
+        {
+            continue;
+        }
 
         MeshVFXComponent component_;
         if (!component_.LoadAsset(entry_.path().generic_string()))
@@ -314,7 +380,10 @@ void VFXManager::LoadMeshVFXAssetsFromDirectory(
         }
 
         const std::string assetName_ = BuildAssetName(entry_.path(), rootPath_);
-        if (assetName_.empty()) continue;
+        if (assetName_.empty())
+        {
+            continue;
+        }
 
         meshVFXAssetMap[assetName_] = component_.GetAsset();
         meshVFXAssetNames.push_back(assetName_);
@@ -346,7 +415,10 @@ std::string VFXManager::BuildAssetNameFromRequestPath(
     const std::string& assetPath_,
     const std::string& rootDirectory_)
 {
-    if (assetPath_.empty()) return {};
+    if (assetPath_.empty())
+    {
+        return {};
+    }
 
     // 外部からはData付きのフルパス、ルート相対パス、拡張子付きなどが混在して来るため、
     // キャッシュキーと同じ「ルート相対・拡張子なし」の形へ寄せる。
@@ -530,7 +602,10 @@ void VFXManager::RegisterManagedEffect(
     const std::shared_ptr<GameObject>& object_,
     float lifeTime_)
 {
-    if (!object_) return;
+    if (!object_)
+    {
+        return;
+    }
 
     // lifeTime未指定時でも即破棄にならないよう、最低限の表示時間を持たせて管理リストへ登録する。
     ManagedEffect managedEffect_{};

@@ -57,7 +57,7 @@
                     5.676342010498047,
                     40.785343170166016
                 ],
-                "fovY": 45.0,
+                "fovY": 60.0,
                 "nearZ": 0.10000000149011612,
                 "priority": 0,
                 "up": [
@@ -77,10 +77,10 @@
         },
         {
             "Data": {
-                "baseDistance": 9.5,
+                "baseDistance": 9.0,
                 "currentPitch": -6.344132423400879,
                 "currentYaw": -89.32049560546875,
-                "distance": 9.5,
+                "distance": 9.0,
                 "horizontalFollowSpeed": 5.0,
                 "lookSpeedX": 500.0,
                 "lookSpeedY": 300.0,

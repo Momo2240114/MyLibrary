@@ -32,7 +32,11 @@ public:
 
     // CutSceneや特殊Camera中に衝突補正を一時停止する。
     void SetCollisionSuppressed(bool suppressed_);
-    bool IsCollisionSuppressed() const { return collisionSuppressed; }
+
+    bool IsCollisionSuppressed() const
+    {
+        return collisionSuppressed;
+    }
 
 private:
     // Camera/LockOn/Ignore対象を解決する。

@@ -23,8 +23,14 @@ void DecalComponent::Start()
     BS_PROFILE_SCOPE("DecalComponent::Start");
     // 保存済みの参照情報から、優先度の高いVFXマテリアルを先に復元する。
     // マテリアルがない古いデータでは、従来のテクスチャ指定をそのまま使う。
-    if (!materialPath.empty() && !texture) SetMaterial(materialPath);
-    else if (!texturePath.empty() && !texture) SetTexture(texturePath);
+    if (!materialPath.empty() && !texture)
+    {
+        SetMaterial(materialPath);
+    }
+    else if (!texturePath.empty() && !texture)
+    {
+        SetTexture(texturePath);
+    }
     ResetLifeTime();
 }
 
@@ -55,10 +61,16 @@ void DecalComponent::SetTexture(const std::string& path_)
     materialResource.reset();
     texturePath = path_;
     texture.Reset();
-    if (texturePath.empty()) return;
+    if (texturePath.empty())
+    {
+        return;
+    }
 
     ID3D11Device* device_ = GraphicsDeviceManager::Instance().GetDevice();
-    if (!device_) return;
+    if (!device_)
+    {
+        return;
+    }
 
     ID3D11ShaderResourceView* loadedTexture_ =
         TextureResourceManager::Instance().LoadTexture(device_, texturePath);
@@ -87,7 +99,9 @@ void DecalComponent::SetGroundSurface(float emissiveStrength_, const std::string
     if (!maskPath_.empty())
     {
         if (auto* device_ = GraphicsDeviceManager::Instance().GetDevice())
+        {
             groundMask = TextureResourceManager::Instance().LoadTexture(device_, maskPath_);
+        }
     }
 }
 
@@ -105,16 +119,28 @@ void DecalComponent::SetMaterials(const std::vector<std::string>& paths_)
     materialPath = materialPaths.empty() ? std::string{} : materialPaths.front();
     materialResource.reset();
     materialResources.clear();
-    if (materialPaths.empty()) return;
+    if (materialPaths.empty())
+    {
+        return;
+    }
 
     for (const std::string& materialPath_ : materialPaths)
     {
-        if (materialPath_.empty()) continue;
+        if (materialPath_.empty())
+        {
+            continue;
+        }
         std::shared_ptr<VFXMaterialResource> loadedMaterial_ =
             VFXMaterialResourceManager::GetInstance().Load(materialPath_);
-        if (!loadedMaterial_) continue;
+        if (!loadedMaterial_)
+        {
+            continue;
+        }
         materialResources.push_back(loadedMaterial_);
-        if (!materialResource) materialResource = loadedMaterial_;
+        if (!materialResource)
+        {
+            materialResource = loadedMaterial_;
+        }
         // プレビューやフォールバック描画で使えるよう、最後に見つかったベーステクスチャを保持する。
         if (loadedMaterial_->GetBaseTexture())
         {
@@ -129,14 +155,20 @@ void DecalComponent::ApplyMaterialToDecalData(DecalData& data_) const
 {
     BS_PROFILE_SCOPE("DecalComponent::ApplyMaterialToDecalData");
 
-    if (materialResources.empty() && !materialResource) return;
+    if (materialResources.empty() && !materialResource)
+    {
+        return;
+    }
     // DecalDataは1つなので、複数マテリアルは色やUVなどを順に合成して最終値へ畳み込む。
     const size_t materialCount_ = materialResources.empty() ? 1u : materialResources.size();
     for (size_t materialIndex_ = 0; materialIndex_ < materialCount_; ++materialIndex_)
     {
         const std::shared_ptr<VFXMaterialResource>& materialResource_ =
             materialResources.empty() ? materialResource : materialResources[materialIndex_];
-        if (!materialResource_) continue;
+        if (!materialResource_)
+        {
+            continue;
+        }
         const VFXMaterialData& materialData_ = materialResource_->GetMaterialData();
     // 色はコンポーネント色とマテリアル色を掛け合わせ、alphaもマテリアル側の値を反映する。
     data_.color.x *= materialData_.baseColor.x;
@@ -172,19 +204,34 @@ void DecalComponent::ApplyMaterialToDecalData(DecalData& data_) const
     data_.blendMode = materialData_.renderState.blendMode == VFX_MATERIAL_BLEND_MODE::ADDITIVE ? 1u : 0u;
     data_.useDissolve = materialData_.dissolve.enabled ? 1u : 0u;
     // 実際のSRVはマテリアル側を優先し、未設定ならSubmit時点のtextureを使い続ける。
-    if (materialResource_->GetBaseTexture()) data_.texture = materialResource_->GetBaseTexture();
-    if (materialResource_->GetMaskTexture()) data_.maskTexture = materialResource_->GetMaskTexture();
-    if (materialResource_->GetNoiseTexture()) data_.noiseTexture = materialResource_->GetNoiseTexture();
+    if (materialResource_->GetBaseTexture())
+        {
+            data_.texture = materialResource_->GetBaseTexture();
+        }
+        if (materialResource_->GetMaskTexture())
+        {
+            data_.maskTexture = materialResource_->GetMaskTexture();
+        }
+        if (materialResource_->GetNoiseTexture())
+        {
+            data_.noiseTexture = materialResource_->GetNoiseTexture();
+        }
     }
 }
 
 void DecalComponent::SubmitDecal(DecalManager& manager_)
 {
     BS_PROFILE_SCOPE("DecalComponent::SubmitDecal");
-    if (!IsEnabled()) return;
+    if (!IsEnabled())
+    {
+        return;
+    }
 
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     DecalData data_{};
     // 描画システムへ渡すデカール情報を、現在のTransformと素材状態から毎フレーム構築する。
@@ -225,16 +272,25 @@ void DecalComponent::Update(float elapsedTime_)
             if (destroyOnLifeEnd)
             {
                 const std::shared_ptr<GameObject> owner_ = GetGameObject();
-                if (owner_) GetManager().Destroy(owner_);
+                if (owner_)
+                {
+                    GetManager().Destroy(owner_);
+                }
             }
             return;
         }
     }
-    if (!showDebugBounds) return;
+    if (!showDebugBounds)
+    {
+        return;
+    }
 
     // デバッグ時は投影範囲をボックスで表示し、向きやスケールの調整を確認しやすくする。
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_ || !owner_->transform) return;
+    if (!owner_ || !owner_->transform)
+    {
+        return;
+    }
 
     const std::shared_ptr<Transform> transform_ = owner_->transform;
     const DirectX::XMFLOAT3 rotationDegrees_ = transform_->GetWorldRotation();
@@ -272,7 +328,10 @@ void DecalComponent::Gui()
     {
         SetMaterial(selectedMaterialPath_);
     }
-    if (materialPaths.empty()) materialPaths.push_back(materialPath);
+    if (materialPaths.empty())
+    {
+        materialPaths.push_back(materialPath);
+    }
     int removeMaterialIndex_ = -1;
     // 複数スロットは順番に適用されるため、GUI上でも並びを保ったまま編集する。
     for (int materialIndex_ = 0; materialIndex_ < static_cast<int>(materialPaths.size()); ++materialIndex_)
@@ -296,7 +355,10 @@ void DecalComponent::Gui()
         if (materialPaths.size() > 1u)
         {
             ImGui::SameLine();
-            if (ImGui::Button("Remove")) removeMaterialIndex_ = materialIndex_;
+            if (ImGui::Button("Remove"))
+            {
+                removeMaterialIndex_ = materialIndex_;
+            }
         }
         ImGui::PopID();
     }
@@ -376,8 +438,14 @@ void DecalComponent::Deserialize(const nlohmann::json& json_)
             materialPaths.push_back(materialPathJson_.get<std::string>());
         }
     }
-    if (materialPaths.empty() && !materialPath.empty()) materialPaths.push_back(materialPath);
-    if (materialPath.empty() && !materialPaths.empty()) materialPath = materialPaths.front();
+    if (materialPaths.empty() && !materialPath.empty())
+    {
+        materialPaths.push_back(materialPath);
+    }
+    if (materialPath.empty() && !materialPaths.empty())
+    {
+        materialPath = materialPaths.front();
+    }
 
     std::string loadedPath_ = json_.value("TexturePath", std::string{});
     if (loadedPath_.empty())
@@ -394,9 +462,18 @@ void DecalComponent::Deserialize(const nlohmann::json& json_)
                 : "Data/Decal/" + legacyFile_;
         }
     }
-    if (!materialPaths.empty()) SetMaterials(materialPaths);
-    else if (!materialPath.empty()) SetMaterial(materialPath);
-    else SetTexture(loadedPath_);
+    if (!materialPaths.empty())
+    {
+        SetMaterials(materialPaths);
+    }
+    else if (!materialPath.empty())
+    {
+        SetMaterial(materialPath);
+    }
+    else
+    {
+        SetTexture(loadedPath_);
+    }
     ResetLifeTime();
 }
 
@@ -409,13 +486,19 @@ bool DecalComponent::ConvertToMaterial()
         L"Convert Decal To VFX Material",
         defaultPath_,
         GraphicsDeviceManager::Instance().GetWindowHandle());
-    if (selectedPath_.empty()) return false;
+    if (selectedPath_.empty())
+    {
+        return false;
+    }
 
     VFXMaterialData materialData_ = VFXMaterialConversionUtility::FromDecal(
         "DecalMaterial",
         texturePath,
         color);
-    if (!VFXMaterialSerializer::Save(selectedPath_, materialData_)) return false;
+    if (!VFXMaterialSerializer::Save(selectedPath_, materialData_))
+    {
+        return false;
+    }
 
     SetMaterial(selectedPath_);
     return true;

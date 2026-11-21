@@ -39,7 +39,9 @@ void HumanBossActionComponent::OnDestroy()
     Stop();
     // コンポーネント自体の破棄では、行動をまたいで残した弾も終了する。
     if (const auto owner_ = GetGameObject(); owner_ && owner_->manager)
+    {
         owner_->GetManager().GetEffectManager().StopAttackEffects(owner_);
+    }
     shadowOrbs.clear();
 }
 
@@ -47,7 +49,10 @@ bool HumanBossActionComponent::PlanCharge(const std::shared_ptr<GameObject>& tar
 {
     BS_PROFILE_SCOPE("HumanBossActionComponent::PlanCharge");
     const auto owner_ = gameObject.lock();
-    if (!owner_ || !owner_->transform || !target_ || !target_->transform) return false;
+    if (!owner_ || !owner_->transform || !target_ || !target_->transform)
+    {
+        return false;
+    }
     const auto start_ = owner_->transform->GetWorldPosition();
     const auto position_ = target_->transform->GetWorldPosition();
     const float dx_ = position_.x - start_.x;
@@ -55,13 +60,19 @@ bool HumanBossActionComponent::PlanCharge(const std::shared_ptr<GameObject>& tar
     const float distance_ = std::sqrt(dx_ * dx_ + dz_ * dz_);
     // 対象方向の予兆と突進を同じ倍率で伸ばし、上限距離と既存の経路検証を維持する。
     const float length_ = (std::min)(chargeMaximumDistance, (std::max)(0.0f, distance_ - chargeWidth) * chargeDistanceMultiplier);
-    if (distance_ < 0.001f || length_ < 1.0f) return false;
+    if (distance_ < 0.001f || length_ < 1.0f)
+    {
+        return false;
+    }
     end_ = { start_.x + dx_ / distance_ * length_, start_.y, start_.z + dz_ / distance_ * length_ };
     const float edgeX_ = end_.x - rangedStageCenter.x;
     const float edgeZ_ = end_.z - rangedStageCenter.z;
     const float safeRadius_ = (std::max)(1.0f, rangedStageRadius - chargeWidth * 0.5f - 1.0f);
     // 終点を別方向へ曲げず、境界内に収まる直線だけを候補にする。
-    if (edgeX_ * edgeX_ + edgeZ_ * edgeZ_ > safeRadius_ * safeRadius_) return false;
+    if (edgeX_ * edgeX_ + edgeZ_ * edgeZ_ > safeRadius_ * safeRadius_)
+    {
+        return false;
+    }
     return CanWarpPath(start_, end_);
 }
 
@@ -71,45 +82,95 @@ bool HumanBossActionComponent::CanUseRagnarok() const
     const auto owner_ = gameObject.lock();
     const auto health_ = owner_ ? owner_->GetComponent<HealthComponent>() : nullptr;
     const auto reject_ = [this](const char* reason_)
-    { ragnarokBlockReason = reason_; return false; };
-    if (!ragnarokEnabled) return reject_("Ragnarok disabled");
-    if (!owner_ || !owner_->transform || !health_) return reject_("Owner, Transform or Health missing");
-    if (health_->IsDead() || health_->GetMaxHealth() <= 0.0f) return reject_("Boss dead or invalid maximum HP");
-    if (health_->GetCurrentHealth() / health_->GetMaxHealth() > ragnarokHpThreshold) return reject_("HP above Ragnarok threshold");
+    {
+        ragnarokBlockReason = reason_;
+        return false;
+    };
+    if (!ragnarokEnabled)
+    {
+        return reject_("Ragnarok disabled");
+    }
+    if (!owner_ || !owner_->transform || !health_)
+    {
+        return reject_("Owner, Transform or Health missing");
+    }
+    if (health_->IsDead() || health_->GetMaxHealth() <= 0.0f)
+    {
+        return reject_("Boss dead or invalid maximum HP");
+    }
+    if (health_->GetCurrentHealth() / health_->GetMaxHealth() > ragnarokHpThreshold)
+    {
+        return reject_("HP above Ragnarok threshold");
+    }
     // 解禁と中央までの全経路を分け、遠方やPlayerの一時的な遮断で候補を失わない。
     const auto movement_ = owner_->GetComponent<CharacterMovementComponent>();
-    if (!movement_ || !movement_->ResolveCollider()) return reject_("Character movement or collider missing");
+    if (!movement_ || !movement_->ResolveCollider())
+    {
+        return reject_("Character movement or collider missing");
+    }
     DirectX::XMFLOAT3 ground_{};
-    if (!ResolveRangedGround(rangedStageCenter, ground_)) return reject_("Ground at stage center unavailable");
+    if (!ResolveRangedGround(rangedStageCenter, ground_))
+    {
+        return reject_("Ground at stage center unavailable");
+    }
     ragnarokBlockReason.clear();
     return true;
 }
 
 bool HumanBossActionComponent::CanStartRanged(const std::string& skillName_, const std::shared_ptr<GameObject>& target_) const
 {
-    if (!IsRangedSkill(skillName_)) return true;
+    if (!IsRangedSkill(skillName_))
+    {
+        return true;
+    }
     BS_PROFILE_SCOPE("HumanBossActionComponent::CanStartRanged");
     const auto owner_ = gameObject.lock();
-    if (!owner_ || !target_ || !target_->transform) return false;
+    if (!owner_ || !target_ || !target_->transform)
+    {
+        return false;
+    }
     auto& templates_ = AttackTemplateManager::Instance();
-    if (templates_.GetTemplates().empty()) templates_.LoadAll();
+    if (templates_.GetTemplates().empty())
+    {
+        templates_.LoadAll();
+    }
     const std::string templateName_ = skillName_ == "SHADOW_CHARGE" ? "HumanBossShadowCharge" :
         skillName_ == "SHADOW_ORB" ? "HumanBossShadowOrb" : "HumanBossShadowRagnarok";
-    if (!templates_.FindTemplate(templateName_)) { validationError = "Missing ranged AttackTemplate: " + templateName_; return false; }
+    if (!templates_.FindTemplate(templateName_))
+    {
+        validationError = "Missing ranged AttackTemplate: " + templateName_;
+        return false;
+    }
     if (skillName_ == "SHADOW_CHARGE")
     {
         DirectX::XMFLOAT3 end_{};
-        if (!attackAssistEnabled || !PlanCharge(target_, end_)) { validationError = "Charge path blocked, outside stage, or MotionWarp disabled."; return false; }
+        if (!attackAssistEnabled || !PlanCharge(target_, end_))
+        {
+            validationError = "Charge path blocked, outside stage, or MotionWarp disabled.";
+            return false;
+        }
     }
     if (skillName_ == "SHADOW_ORB")
     {
         int count_ = 0;
         for (const auto& weak_ : shadowOrbs)
-            if (const auto orb_ = weak_.lock(); orb_ && !orb_->IsPendingDestroy()) ++count_;
-        if (count_ >= orbMaximumCount) { validationError = "Shadow Orb concurrent limit reached."; return false; }
+        {
+            if (const auto orb_ = weak_.lock(); orb_ && !orb_->IsPendingDestroy())
+            {
+                ++count_;
+            }
+        }
+        if (count_ >= orbMaximumCount)
+        {
+            validationError = "Shadow Orb concurrent limit reached.";
+            return false;
+        }
     }
     if (skillName_ == "SHADOW_RAGNAROK" && !CanUseRagnarok())
-    { validationError = ragnarokBlockReason.empty() ? "Attack assist disabled" : ragnarokBlockReason; return false; }
+    {
+        validationError = ragnarokBlockReason.empty() ? "Attack assist disabled" : ragnarokBlockReason;
+        return false;
+    }
     return true;
 }
 
@@ -122,7 +183,10 @@ SkillDefinition HumanBossActionComponent::PrepareRangedSkill(const SkillDefiniti
         // 拘束本体だけを固定時間へ揃え、先頭に追加したひるみ段階の待ち時間は維持する。
         for (auto& phase_ : result_.phases)
         {
-            if (phase_.enterAction != "HumanBoss_ExecutionCapture") continue;
+            if (phase_.enterAction != "HumanBoss_ExecutionCapture")
+            {
+                continue;
+            }
             phase_.duration = executionHoldTime;
             phase_.maximumDuration = executionHoldTime + 1.0f;
         }
@@ -173,49 +237,89 @@ bool HumanBossActionComponent::StartFixedWarp(const SkillPhase& phase_, const Di
     const auto owner_ = GetGameObject();
     const auto animation_ = owner_ ? AnimationGraphBridgeComponent::Acquire(owner_) : nullptr;
     const auto warp_ = owner_ ? owner_->GetComponent<MotionWarpComponent>() : nullptr;
-    if (!owner_ || !owner_->transform || !animation_ || !warp_) return false;
+    if (!owner_ || !owner_->transform || !animation_ || !warp_)
+    {
+        return false;
+    }
     // 予兆の向きを維持し、待機中の姿勢変化で接触判定の向きがずれないようにする。
     const float yaw_ = DirectX::XMConvertToRadians(chargeYaw);
     FaceTarget({ std::sin(yaw_), 0.0f, std::cos(yaw_) }, true);
     DirectX::XMFLOAT3 local_{};
     float duration_ = 0.0f;
-    if (!animation_->EstimateRootMotion(phase_.animationState, 0.0f, CHARGE_WARP_END_NORMALIZED_TIME, local_, duration_)) return false;
+    if (!animation_->EstimateRootMotion(phase_.animationState, 0.0f, CHARGE_WARP_END_NORMALIZED_TIME, local_, duration_))
+    {
+        return false;
+    }
     DirectX::XMFLOAT3 planned_{};
     DirectX::XMStoreFloat3(&planned_, DirectX::XMVector3TransformNormal(DirectX::XMLoadFloat3(&local_), DirectX::XMMatrixRotationY(yaw_)));
     planned_.y = 0.0f;
     const std::weak_ptr<HumanBossActionComponent> weak_ = owner_->GetComponent<HumanBossActionComponent>();
     return warp_->PlayForTarget("HumanBoss.ShadowCharge", attackTarget.lock(), planned_, 0.0f, 0.0f, CHARGE_WARP_END_NORMALIZED_TIME, &end_,
         [weak_](const DirectX::XMFLOAT3& from_, const DirectX::XMFLOAT3& to_)
-        { const auto self_ = weak_.lock(); return self_ && self_->CanWarpPath(from_, to_); }, 0.0f, &chargeStart);
+        {
+        const auto self_ = weak_.lock();
+        return self_ && self_->CanWarpPath(from_, to_);
+    }, 0.0f, &chargeStart);
 }
 
 void HumanBossActionComponent::BeginRangedPhase(const SkillPhase& phase_)
 {
-    if (!IsRangedSkill(rangedSkill)) return;
+    if (!IsRangedSkill(rangedSkill))
+    {
+        return;
+    }
     BS_PROFILE_SCOPE("HumanBossActionComponent::BeginRangedPhase");
     if (rangedSkill == "SHADOW_ORB")
     {
         // 詠唱開始時に弾を確定し、後の行動切り替えで生成予約ごと失われるのを防ぐ。
         SpawnShadowOrbs();
-        if (!orbSpawnCommitted) { status = "Shadow Orb creation failed"; Stop(); return; }
+        if (!orbSpawnCommitted)
+        {
+            status = "Shadow Orb creation failed";
+            Stop();
+            return;
+        }
     }
     if (rangedSkill == "SHADOW_RAGNAROK" && phase_.animationState != "HumanBossRagnarokAdvance")
     {
         // 移動Phaseから通知で切り替わった場合も、予兆開始前にモデルと停止状態を復元する。
         SetShadowVisible(true);
         if (const auto owner_ = GetGameObject())
-            if (const auto movement_ = owner_->GetComponent<CharacterMovementComponent>()) movement_->StopHorizontalMovementImmediately();
+        {
+            if (const auto movement_ = owner_->GetComponent<CharacterMovementComponent>())
+            {
+                movement_->StopHorizontalMovementImmediately();
+            }
+        }
     }
     if (phase_.animationState == "Run_Attack_01_Seq_0")
     {
         // 予兆生成・伸長が完了していない状態では突進へ進ませない。
-        if (!chargeWarningReady) { status = "Charge warning did not complete"; Stop(); return; }
-        if (!StartFixedWarp(phase_, chargeEnd)) { status = "Charge Warp failed"; Stop(); return; }
+        if (!chargeWarningReady)
+        {
+            status = "Charge warning did not complete";
+            Stop();
+            return;
+        }
+        if (!StartFixedWarp(phase_, chargeEnd))
+        {
+            status = "Charge Warp failed";
+            Stop();
+            return;
+        }
         const auto owner_ = GetGameObject();
         const auto attack_ = AttackTemplateManager::Instance().FindTemplate("HumanBossShadowCharge");
-        if (!owner_ || !owner_->transform || !attack_) { Stop(); return; }
+        if (!owner_ || !owner_->transform || !attack_)
+        {
+            Stop();
+            return;
+        }
         const auto scale_ = owner_->transform->GetWorldScale();
-        if (std::abs(scale_.x) < 0.0001f || std::abs(scale_.y) < 0.0001f || std::abs(scale_.z) < 0.0001f) { Stop(); return; }
+        if (std::abs(scale_.x) < 0.0001f || std::abs(scale_.y) < 0.0001f || std::abs(scale_.z) < 0.0001f)
+        {
+            Stop();
+            return;
+        }
         // 武器ボーンの振れ幅から独立させ、予兆と同じ半径の判定を突進に追従させる。
         AttackEffectSpawnTemplate effect_;
         effect_.effectType = ATTACK_EFFECT_TYPE::AREA_OVER_TIME;
@@ -232,13 +336,20 @@ void HumanBossActionComponent::BeginRangedPhase(const SkillPhase& phase_)
         effect_.hitShapes.push_back(shape_);
         const auto instance_ = owner_->GetManager().GetAttackSystem().CreateAttackInstance();
         chargeHit = owner_->GetManager().GetEffectManager().SpawnAttackEffect(effect_, *attack_, owner_.get(), instance_);
-        if (chargeHit.expired()) { status = "Charge hit creation failed"; Stop(); return; }
+        if (chargeHit.expired())
+        {
+            status = "Charge hit creation failed";
+            Stop();
+            return;
+        }
         rangedProgress = "SHADOW_CHARGE: running";
         SetWeaponTrails(true, true);
         shadowEffectTimer = shadowEffectInterval;
         if (!rangedAttackSoundPath.empty())
+        {
             AudioManager::Instance().PlaySpatialAttackSound(rangedAttackSoundPath,
                 owner_->transform->GetWorldPosition(), 0.45f, 8.0f, 80.0f);
+        }
         SpawnShadowEffect();
     }
     if (phase_.animationState == "HumanBossRagnarokAdvance")
@@ -246,12 +357,23 @@ void HumanBossActionComponent::BeginRangedPhase(const SkillPhase& phase_)
         ragnarokRound = 0;
         DirectX::XMFLOAT3 ground_{};
         if (!ResolveRangedGround(rangedStageCenter, ground_))
-        { ragnarokBlockReason = "Center ground unavailable"; status = ragnarokBlockReason; Stop(); return; }
+        {
+            ragnarokBlockReason = "Center ground unavailable";
+            status = ragnarokBlockReason;
+            Stop();
+            return;
+        }
         rangedProgress = "SHADOW_RAGNAROK: approaching stage center";
         if (const auto owner_ = GetGameObject())
         {
-            if (const auto warp_ = owner_->GetComponent<MotionWarpComponent>()) warp_->Stop();
-            if (const auto movement_ = owner_->GetComponent<CharacterMovementComponent>()) movement_->StopHorizontalMovementImmediately();
+            if (const auto warp_ = owner_->GetComponent<MotionWarpComponent>())
+            {
+                warp_->Stop();
+            }
+            if (const auto movement_ = owner_->GetComponent<CharacterMovementComponent>())
+            {
+                movement_->StopHorizontalMovementImmediately();
+            }
         }
         // モデルだけを影へ隠し、被弾判定と物理衝突を保ったまま中央へ高速移動する。
         SpawnShadowEffect();
@@ -264,13 +386,46 @@ void HumanBossActionComponent::RegisterRangedActions()
 {
     BS_PROFILE_SCOPE("HumanBossActionComponent::RegisterRangedActions");
     const auto owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
     const std::weak_ptr<HumanBossActionComponent> weak_ = owner_->GetComponent<HumanBossActionComponent>();
-    owner_->RegisterAction("HumanBoss", "HumanBoss_ChargeShowArea", [weak_]() { if (const auto self_ = weak_.lock()) self_->ShowChargeArea(); });
-    owner_->RegisterAction("HumanBoss", "HumanBoss_OrbSpawn", [weak_]() { if (const auto self_ = weak_.lock()) self_->SpawnShadowOrbs(); });
-    owner_->RegisterAction("HumanBoss", "HumanBoss_RagnarokShowArea", [weak_]() { if (const auto self_ = weak_.lock()) self_->ShowRagnarokArea(); });
-    owner_->RegisterAction("HumanBoss", "HumanBoss_RagnarokStrike", [weak_]() { if (const auto self_ = weak_.lock()) self_->StrikeRagnarokArea(); });
-    owner_->RegisterAction("HumanBoss", "HumanBoss_RangedClear", [weak_]() { if (const auto self_ = weak_.lock()) self_->ClearRangedArea(); });
+    owner_->RegisterAction("HumanBoss", "HumanBoss_ChargeShowArea", [weak_]()
+    {
+        if (const auto self_ = weak_.lock())
+        {
+            self_->ShowChargeArea();
+        }
+    });
+    owner_->RegisterAction("HumanBoss", "HumanBoss_OrbSpawn", [weak_]()
+    {
+        if (const auto self_ = weak_.lock())
+        {
+            self_->SpawnShadowOrbs();
+        }
+    });
+    owner_->RegisterAction("HumanBoss", "HumanBoss_RagnarokShowArea", [weak_]()
+    {
+        if (const auto self_ = weak_.lock())
+        {
+            self_->ShowRagnarokArea();
+        }
+    });
+    owner_->RegisterAction("HumanBoss", "HumanBoss_RagnarokStrike", [weak_]()
+    {
+        if (const auto self_ = weak_.lock())
+        {
+            self_->StrikeRagnarokArea();
+        }
+    });
+    owner_->RegisterAction("HumanBoss", "HumanBoss_RangedClear", [weak_]()
+    {
+        if (const auto self_ = weak_.lock())
+        {
+            self_->ClearRangedArea();
+        }
+    });
 }
 
 bool HumanBossActionComponent::ResolveRangedGround(const DirectX::XMFLOAT3& position_, DirectX::XMFLOAT3& ground_) const
@@ -280,7 +435,10 @@ bool HumanBossActionComponent::ResolveRangedGround(const DirectX::XMFLOAT3& posi
     const auto movement_ = owner_ ? owner_->GetComponent<CharacterMovementComponent>() : nullptr;
     const auto collider_ = movement_ ? movement_->ResolveCollider() : nullptr;
     auto scene_ = PhysXSystem::GetScene();
-    if (!owner_ || !collider_ || !scene_) return false;
+    if (!owner_ || !collider_ || !scene_)
+    {
+        return false;
+    }
     physx::PxRaycastHit hits_[32];
     physx::PxRaycastBuffer hit_(hits_, 32);
     physx::PxQueryFilterData filter_;
@@ -297,7 +455,10 @@ bool HumanBossActionComponent::ResolveRangedGround(const DirectX::XMFLOAT3& posi
         const auto& touch_ = hits_[index_];
         const auto groundCollider_ = touch_.actor ? static_cast<const ColliderComponent*>(touch_.actor->userData) : nullptr;
         if (!groundCollider_ || groundCollider_->GetCollisionRole() != ColliderComponent::CollisionRole::PHYSICAL ||
-            !groundCollider_->CanBeCharacterGround() || touch_.normal.y < 0.5f || touch_.distance >= distance_) continue;
+            !groundCollider_->CanBeCharacterGround() || touch_.normal.y < 0.5f || touch_.distance >= distance_)
+        {
+            continue;
+        }
         ground_ = { touch_.position.x, touch_.position.y, touch_.position.z };
         distance_ = touch_.distance;
         found_ = true;
@@ -309,15 +470,28 @@ void HumanBossActionComponent::ShowChargeArea()
 {
     BS_PROFILE_SCOPE("HumanBossActionComponent::ShowChargeArea");
     const auto owner_ = GetGameObject();
-    if (!owner_ || !owner_->transform || rangedSkill != "SHADOW_CHARGE") return;
+    if (!owner_ || !owner_->transform || rangedSkill != "SHADOW_CHARGE")
+    {
+        return;
+    }
     chargeWarningReady = false;
     chargeElectricStruck = false;
     chargeWarningVisibleStartTime = -1.0f;
     rangedProgress = "SHADOW_CHARGE: warning preparation";
-    if (!PlanCharge(attackTarget.lock(), chargeEnd)) { status = "Charge path unavailable"; Stop(); return; }
+    if (!PlanCharge(attackTarget.lock(), chargeEnd))
+    {
+        status = "Charge path unavailable";
+        Stop();
+        return;
+    }
     chargeAreaWidth = chargeWidth;
     chargeStart = owner_->transform->GetWorldPosition();
-    if (!ResolveRangedGround(chargeStart, chargeGroundStart)) { status = "Charge ground unavailable"; Stop(); return; }
+    if (!ResolveRangedGround(chargeStart, chargeGroundStart))
+    {
+        status = "Charge ground unavailable";
+        Stop();
+        return;
+    }
     const float dx_ = chargeEnd.x - chargeStart.x;
     const float dz_ = chargeEnd.z - chargeStart.z;
     chargeLength = std::sqrt(dx_ * dx_ + dz_ * dz_);
@@ -332,22 +506,37 @@ void HumanBossActionComponent::ShowChargeArea()
     danger_.lifeTime = chargeGrowthTime + 3.0f; // 伸長後の待機と突進中も同じ予兆を維持する。
     ClearRangedArea();
     rangedDanger = owner_->GetOrAddComponent<DangerAreaComponent>()->ShowAt(danger_, chargeGroundStart, chargeYaw);
-    if (rangedDanger.expired()) { status = "Charge warning creation failed"; Stop(); return; }
+    if (rangedDanger.expired())
+    {
+        status = "Charge warning creation failed";
+        Stop();
+        return;
+    }
     UpdateRangedAttack();
 }
 
 void HumanBossActionComponent::UpdateRangedAttack()
 {
-    if (!IsRangedSkill(rangedSkill)) return;
+    if (!IsRangedSkill(rangedSkill))
+    {
+        return;
+    }
     BS_PROFILE_SCOPE("HumanBossActionComponent::UpdateRangedAttack");
     const auto owner_ = GetGameObject();
     const auto danger_ = rangedDanger.lock();
     const auto phase_ = execution.GetCurrentPhase();
-    if (!owner_ || !phase_) return;
+    if (!owner_ || !phase_)
+    {
+        return;
+    }
     if (rangedSkill == "SHADOW_RAGNAROK" && phase_->animationState == "HumanBossRagnarokAdvance")
     {
         const auto movement_ = owner_->GetComponent<CharacterMovementComponent>();
-        if (!movement_) { Stop(); return; }
+        if (!movement_)
+        {
+            Stop();
+            return;
+        }
         const auto position_ = owner_->transform->GetWorldPosition();
         const float dx_ = rangedStageCenter.x - position_.x;
         const float dz_ = rangedStageCenter.z - position_.z;
@@ -381,7 +570,11 @@ void HumanBossActionComponent::UpdateRangedAttack()
         // 経路が途中で塞がった場合、補正終了後の自然移動へ戻って突進を継続しない。
         if (warp_ && animation_ && !warp_->IsWarpActive() && animation_->GetPlaybackDuration() > 0.0f &&
             animation_->GetPlaybackTime() / animation_->GetPlaybackDuration() < CHARGE_WARP_END_NORMALIZED_TIME - 0.01f)
-        { status = "Charge interrupted: Warp path blocked"; Stop(); return; }
+        {
+            status = "Charge interrupted: Warp path blocked";
+            Stop();
+            return;
+        }
         // 振り終わり以降の硬直には接触判定を残さない。
         if (animation_ && animation_->GetActiveState() && animation_->GetActiveState()->name == phase_->animationState &&
             animation_->GetPlaybackDuration() > 0.0f &&
@@ -396,26 +589,48 @@ void HumanBossActionComponent::UpdateRangedAttack()
                 const float dz_ = position_.z - chargeEnd.z;
                 constexpr float CHARGE_ARRIVAL_TOLERANCE = 0.1f;
                 if (dx_ * dx_ + dz_ * dz_ <= CHARGE_ARRIVAL_TOLERANCE * CHARGE_ARRIVAL_TOLERANCE)
+                {
                     StrikeChargeArea();
+                }
                 else if (animation_->GetPlaybackTime() / animation_->GetPlaybackDuration() >
                     CHARGE_WARP_END_NORMALIZED_TIME + 0.1f)
-                { status = "Charge interrupted: warning endpoint not reached"; Stop(); return; }
+                {
+                    status = "Charge interrupted: warning endpoint not reached";
+                    Stop();
+                    return;
+                }
             }
         }
         if (execution.GetPhaseTime() >= shadowEffectTimer)
-        { SpawnShadowEffect(); shadowEffectTimer = execution.GetPhaseTime() + shadowEffectInterval; }
+        {
+            SpawnShadowEffect();
+            shadowEffectTimer = execution.GetPhaseTime() + shadowEffectInterval;
+        }
     }
-    if (!danger_) return;
+    if (!danger_)
+    {
+        return;
+    }
     if (rangedSkill == "SHADOW_CHARGE" && execution.GetPhaseIndex() == 0)
     {
         // GPUとObjectの開始準備が終わってから予兆の時計を進める。
-        if (!danger_->IsHierarchyReady()) return;
-        if (chargeWarningVisibleStartTime < 0.0f) chargeWarningVisibleStartTime = execution.GetPhaseTime();
+        if (!danger_->IsHierarchyReady())
+        {
+            return;
+        }
+        if (chargeWarningVisibleStartTime < 0.0f)
+        {
+            chargeWarningVisibleStartTime = execution.GetPhaseTime();
+        }
         const float visibleTime_ = execution.GetPhaseTime() - chargeWarningVisibleStartTime;
         float rate_ = std::clamp(visibleTime_ / chargeGrowthTime, 0.0f, 1.0f);
         if (!chargeGrowthCurve.empty() && rate_ < 1.0f)
+        {
             if (const auto curve_ = owner_->GetComponent<CurveComponent>(); curve_ && curve_->HasTrack(chargeGrowthCurve))
+            {
                 rate_ = std::clamp(curve_->GetValue(chargeGrowthCurve, rate_), 0.0f, 1.0f);
+            }
+        }
         // 判定中心の前方オフセットも含め、実際に通過する球の包絡範囲を表示する。
         const float half_ = chargeLength * rate_ * 0.5f + chargeAreaWidth * 0.5f;
         const float yaw_ = DirectX::XMConvertToRadians(chargeYaw);
@@ -425,7 +640,9 @@ void HumanBossActionComponent::UpdateRangedAttack()
         rangedProgress = chargeWarningReady ? "SHADOW_CHARGE: warning complete" : "SHADOW_CHARGE: warning growing";
         // 完成した予兆を追加の0.2秒表示してから、次のPhaseへ移す。
         if (chargeWarningReady && visibleTime_ >= chargeGrowthTime + 0.2f)
+        {
             execution.NotifyPhaseEnd();
+        }
     }
     if (rangedSkill == "SHADOW_RAGNAROK" && phase_->sequence == "HumanBoss_SHADOW_RAGNAROK_Sequence")
     {
@@ -452,11 +669,20 @@ void HumanBossActionComponent::SpawnShadowOrbs()
     BS_PROFILE_SCOPE("HumanBossActionComponent::SpawnShadowOrbs");
     const auto owner_ = GetGameObject();
     const auto target_ = attackTarget.lock();
-    if (!owner_ || !owner_->transform || !target_ || rangedSkill != "SHADOW_ORB" || orbSpawnCommitted) return;
+    if (!owner_ || !owner_->transform || !target_ || rangedSkill != "SHADOW_ORB" || orbSpawnCommitted)
+    {
+        return;
+    }
     shadowOrbs.erase(std::remove_if(shadowOrbs.begin(), shadowOrbs.end(), [](const std::weak_ptr<GameObject>& weak_)
-        { const auto object_ = weak_.lock(); return !object_ || object_->IsPendingDestroy(); }), shadowOrbs.end());
+        {
+        const auto object_ = weak_.lock();
+        return !object_ || object_->IsPendingDestroy();
+    }), shadowOrbs.end());
     const auto attack_ = AttackTemplateManager::Instance().FindTemplate("HumanBossShadowOrb");
-    if (!attack_ || attack_->attackEffects.empty()) return;
+    if (!attack_ || attack_->attackEffects.empty())
+    {
+        return;
+    }
     const int count_ = (std::min)(orbCount, orbMaximumCount - static_cast<int>(shadowOrbs.size()));
     // 周回弾の個数だけ音を重ねず、一回の生成要求で一度だけ鳴らす。
     if (count_ > 0)
@@ -474,10 +700,18 @@ void HumanBossActionComponent::SpawnShadowOrbs()
         effect_.lifeTime = lifeTime_;
         effect_.speed = 0.0f; // 移動は既存ProjectileMotionだけが引き受ける。
         // 周回中は攻撃判定を無効にし、発射した弾だけがプレイヤーへ命中する。
-        for (auto& shape_ : effect_.hitShapes) { shape_.activeStartTime = delay_; shape_.activeEndTime = lifeTime_; shape_.destroyOnHit = true; }
+        for (auto& shape_ : effect_.hitShapes)
+        {
+            shape_.activeStartTime = delay_;
+            shape_.activeEndTime = lifeTime_;
+            shape_.destroyOnHit = true;
+        }
         const auto instance_ = owner_->GetManager().GetAttackSystem().CreateAttackInstance();
         const auto orb_ = owner_->GetManager().GetEffectManager().SpawnAttackEffect(effect_, *attack_, owner_.get(), instance_);
-        if (!orb_ || !orb_->transform) continue;
+        if (!orb_ || !orb_->transform)
+        {
+            continue;
+        }
         const auto motion_ = orb_->GetOrAddComponent<ProjectileMotionComponent>();
         motion_->Configure({ 0.0f, 0.0f, 1.0f }, orbSpeed * orbLaunchSpeedMultiplier,
             orbAcceleration * orbLaunchSpeedMultiplier, 0.0f, (orbSpeed + 1.0f) * orbLaunchSpeedMultiplier);
@@ -506,7 +740,10 @@ void HumanBossActionComponent::BuildRagnarokGrid()
             // 偶数本でも中心線を残し、密着だけで全ラウンドを回避できる穴を作らない。
             const float offset_ = (index_ - count_ / 2) * spacing_;
             const float edge_ = std::abs(offset_) + halfWidth_;
-            if (edge_ >= radius_) continue;
+            if (edge_ >= radius_)
+            {
+                continue;
+            }
             RagnarokGridStrip strip_;
             strip_.position = axis_ == 0 ? DirectX::XMFLOAT3{ offset_, 0.0f, 0.0f } : DirectX::XMFLOAT3{ 0.0f, 0.0f, offset_ };
             strip_.yaw = axis_ == 0 ? 0.0f : 90.0f;
@@ -539,7 +776,10 @@ void HumanBossActionComponent::StrikeChargeArea()
     BS_PROFILE_SCOPE("HumanBossActionComponent::StrikeChargeArea");
     const auto owner_ = GetGameObject();
     const auto attack_ = AttackTemplateManager::Instance().FindTemplate("HumanBossShadowCharge");
-    if (!owner_ || !owner_->manager || !attack_ || chargeElectricStruck) return;
+    if (!owner_ || !owner_->manager || !attack_ || chargeElectricStruck)
+    {
+        return;
+    }
     chargeElectricStruck = true;
     const float radius_ = chargeAreaWidth * 0.5f;
     const float yaw_ = DirectX::XMConvertToRadians(chargeYaw);
@@ -581,7 +821,10 @@ void HumanBossActionComponent::StrikeChargeArea()
             DirectX::XMMatrixTranslation(chargeGroundStart.x, chargeGroundStart.y, chargeGroundStart.z));
         object_->UpdateTransform();
     }
-    if (const auto danger_ = owner_->GetComponent<DangerAreaComponent>()) danger_->StopAll();
+    if (const auto danger_ = owner_->GetComponent<DangerAreaComponent>())
+    {
+        danger_->StopAll();
+    }
     rangedDanger.reset();
     rangedProgress = "SHADOW_CHARGE: electric ground active";
 }
@@ -592,7 +835,10 @@ void HumanBossActionComponent::SpawnElectricStrip(const DirectX::XMFLOAT3& start
 {
     BS_PROFILE_SCOPE("HumanBossActionComponent::SpawnElectricStrip");
     const auto owner_ = GetGameObject();
-    if (!owner_ || !owner_->manager) return;
+    if (!owner_ || !owner_->manager)
+    {
+        return;
+    }
     auto& effects_ = owner_->GetManager().GetEffectManager();
     RagnarokParticleSweep sweep_;
     sweep_.start = start_;
@@ -618,7 +864,9 @@ void HumanBossActionComponent::SpawnElectricStrip(const DirectX::XMFLOAT3& start
         for (auto& track_ : particle_->GetTracks())
         {
             if (track_.name == "GridElectric")
+            {
                 track_.settings.burstCount = static_cast<unsigned int>(std::clamp(static_cast<int>(length_ * ragnarokParticleDensity), 16, 96) * electricDensityMultiplier);
+            }
             if (track_.name == "GridElectricSweep")
             {
                 // Pool再利用時に前回の倍率へ再乗算しないよう、標準Assetの基準発生数から求める。
@@ -626,7 +874,9 @@ void HumanBossActionComponent::SpawnElectricStrip(const DirectX::XMFLOAT3& start
                 track_.settings.burstCount = static_cast<unsigned int>(ELECTRIC_SWEEP_BASE_RATE * electricDensityMultiplier);
             }
             if (track_.name == "GridMud")
+            {
                 track_.settings.burstCount = std::clamp(static_cast<int>(length_ * ragnarokParticleDensity * 0.5f), 8, 48);
+            }
         }
         particle_->SetEmissionScale(std::clamp(length_ * ragnarokParticleDensity / 48.0f, 0.1f, 1.0f));
         // 通常Updateを待たずBurstを渡し、地面によるBillboardの隠れも避ける。
@@ -640,7 +890,10 @@ void HumanBossActionComponent::SpawnRagnarokParticles()
 {
     BS_PROFILE_SCOPE("HumanBossActionComponent::SpawnRagnarokParticles");
     const auto owner_ = GetGameObject();
-    if (!owner_ || !owner_->manager) return;
+    if (!owner_ || !owner_->manager)
+    {
+        return;
+    }
     const auto world_ = DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(ragnarokRoundStartYaw)) *
         DirectX::XMMatrixTranslation(ragnarokGroundCenter.x,ragnarokGroundCenter.y+0.65f,ragnarokGroundCenter.z);
     const int limit_ = std::clamp(ragnarokParticleLineLimit,2,24);
@@ -666,9 +919,16 @@ void HumanBossActionComponent::UpdateRagnarokParticles(float deltaTime_)
     {
         const auto object_ = sweep_.object.lock();
         const auto particle_ = object_ ? object_->GetComponent<ParticleComponent>() : nullptr;
-        if (!particle_ || object_->IsPendingDestroy()) continue;
+        if (!particle_ || object_->IsPendingDestroy())
+        {
+            continue;
+        }
         // 初回更新で終了時間を跨いでも、最低一度は通常のParticle更新へBurstを渡す。
-        if (sweep_.time >= sweep_.duration) { particle_->Stop(); continue; }
+        if (sweep_.time >= sweep_.duration)
+        {
+            particle_->Stop();
+            continue;
+        }
         const float previousProgress_ = std::clamp(sweep_.time/(std::max)(sweep_.duration,0.01f),0.0f,1.0f);
         sweep_.time += (std::max)(deltaTime_,0.0f);
         const float progress_ = std::clamp(sweep_.time/(std::max)(sweep_.duration,0.01f),0.0f,1.0f);
@@ -682,18 +942,30 @@ void HumanBossActionComponent::UpdateRagnarokParticles(float deltaTime_)
         particle_->SetEmitterLine("GridMudSweep",sample_(previousProgress_),sample_(progress_));
     }
     ragnarokParticleSweeps.erase(std::remove_if(ragnarokParticleSweeps.begin(),ragnarokParticleSweeps.end(),
-        [](const RagnarokParticleSweep& sweep_){ const auto object_ = sweep_.object.lock(); return !object_ || object_->IsPendingDestroy(); }),ragnarokParticleSweeps.end());
+        [](const RagnarokParticleSweep& sweep_)
+    {
+        const auto object_ = sweep_.object.lock();
+        return !object_ || object_->IsPendingDestroy();
+    }),ragnarokParticleSweeps.end());
 }
 
 void HumanBossActionComponent::ShowRagnarokArea()
 {
     BS_PROFILE_SCOPE("HumanBossActionComponent::ShowRagnarokArea");
     const auto owner_ = GetGameObject();
-    if (!owner_ || !owner_->transform || rangedSkill != "SHADOW_RAGNAROK") return;
+    if (!owner_ || !owner_->transform || rangedSkill != "SHADOW_RAGNAROK")
+    {
+        return;
+    }
     const auto position_ = owner_->transform->GetWorldPosition();
     const float dx_ = position_.x - rangedStageCenter.x;
     const float dz_ = position_.z - rangedStageCenter.z;
-    if (dx_ * dx_ + dz_ * dz_ > 1.5f * 1.5f) { status = "Ragnarok center not reached"; Stop(); return; }
+    if (dx_ * dx_ + dz_ * dz_ > 1.5f * 1.5f)
+    {
+        status = "Ragnarok center not reached";
+        Stop();
+        return;
+    }
     ClearRangedArea();
     ragnarokRoundStartYaw = ragnarokRound == 0 ? owner_->transform->GetWorldRotation().y : ragnarokYaw + 90.0f;
     ragnarokYaw = ragnarokRoundStartYaw;
@@ -706,15 +978,30 @@ void HumanBossActionComponent::ShowRagnarokArea()
     danger_.fanAngleDegrees = ragnarokAngle;
     danger_.lifeTime = execution.GetCurrentPhase() ? execution.GetCurrentPhase()->duration + 0.05f : 1.5f;
     DirectX::XMFLOAT3 ground_{};
-    if (!ResolveRangedGround(rangedStageCenter, ground_)) { status = "Ragnarok warning ground unavailable"; Stop(); return; }
+    if (!ResolveRangedGround(rangedStageCenter, ground_))
+    {
+        status = "Ragnarok warning ground unavailable";
+        Stop();
+        return;
+    }
     ragnarokGroundCenter = ground_;
     ragnarokWarningDuration = execution.GetCurrentPhase() ? execution.GetCurrentPhase()->duration : ragnarokRotationTime;
     BuildRagnarokGrid();
     rangedDanger = owner_->GetOrAddComponent<DangerAreaComponent>()->ShowAt(danger_, ragnarokGroundCenter, ragnarokYaw);
-    if (rangedDanger.expired()) { status = "Ragnarok warning creation failed"; Stop(); return; }
+    if (rangedDanger.expired())
+    {
+        status = "Ragnarok warning creation failed";
+        Stop();
+        return;
+    }
     const auto warning_ = rangedDanger.lock();
     const auto mesh_ = warning_ ? warning_->GetComponent<MeshVFXComponent>() : nullptr;
-    if (!mesh_ || mesh_->GetAsset().parts.empty()) { status = "Ragnarok warning mesh unavailable"; Stop(); return; }
+    if (!mesh_ || mesh_->GetAsset().parts.empty())
+    {
+        status = "Ragnarok warning mesh unavailable";
+        Stop();
+        return;
+    }
     if (mesh_)
     {
         auto asset_ = mesh_->GetAsset();
@@ -734,7 +1021,6 @@ void HumanBossActionComponent::ShowRagnarokArea()
         mesh_->Reset();
         mesh_->Play();
     }
-    ragnarokUsed = true;
     rangedProgress = "SHADOW_RAGNAROK: rotating warning " + std::to_string(ragnarokRound);
 }
 
@@ -742,9 +1028,16 @@ void HumanBossActionComponent::StrikeRagnarokArea()
 {
     BS_PROFILE_SCOPE("HumanBossActionComponent::StrikeRagnarokArea");
     const auto owner_ = GetGameObject();
-    if (!owner_ || rangedSkill != "SHADOW_RAGNAROK" || ragnarokRound <= 0) return;
+    if (!owner_ || rangedSkill != "SHADOW_RAGNAROK" || ragnarokRound <= 0)
+    {
+        return;
+    }
     const auto attack_ = AttackTemplateManager::Instance().FindTemplate("HumanBossShadowRagnarok");
-    if (!attack_) { Stop(); return; }
+    if (!attack_)
+    {
+        Stop();
+        return;
+    }
     rangedProgress = "SHADOW_RAGNAROK: strike " + std::to_string(ragnarokRound);
     // 格子の帯数に関係なく、攻撃一回につき中心位置で発動音を鳴らす。
     const auto& feedback_ = attack_->feedback;
@@ -789,6 +1082,7 @@ void HumanBossActionComponent::StrikeRagnarokArea()
         const auto object_ = owner_->GetManager().GetEffectManager().SpawnAttackEffect(effect_, *attack_, owner_.get(), instance_);
         if (object_ && object_->transform)
         {
+            ragnarokUsed = true;
             // 同じ格子の全帯で攻撃IDを共有し、交差部分でダメージを重複させない。
             object_->transform->ApplyWorldMatrix(DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(ragnarokYaw)) *
                 DirectX::XMMatrixTranslation(ragnarokGroundCenter.x, ragnarokGroundCenter.y, ragnarokGroundCenter.z));
@@ -826,7 +1120,12 @@ void HumanBossActionComponent::ClearRangedArea()
 {
     StopChargeHit();
     if (const auto owner_ = GetGameObject(); owner_ && owner_->manager)
-        if (const auto danger_ = owner_->GetComponent<DangerAreaComponent>()) danger_->StopAll();
+    {
+        if (const auto danger_ = owner_->GetComponent<DangerAreaComponent>())
+        {
+            danger_->StopAll();
+        }
+    }
     rangedDanger.reset();
 }
 
@@ -835,7 +1134,10 @@ void HumanBossActionComponent::StopChargeHit()
     BS_PROFILE_SCOPE("HumanBossActionComponent::StopChargeHit");
     if (const auto object_ = chargeHit.lock())
     {
-        if (const auto hit_ = object_->GetComponent<AttackEffectHitComponent>()) hit_->Stop();
+        if (const auto hit_ = object_->GetComponent<AttackEffectHitComponent>())
+        {
+            hit_->Stop();
+        }
         object_->GetManager().Destroy(object_);
     }
     chargeHit.reset();
@@ -844,7 +1146,10 @@ void HumanBossActionComponent::StopChargeHit()
 void HumanBossActionComponent::DrawRangedGui()
 {
     BS_PROFILE_SCOPE("HumanBossActionComponent::DrawRangedGui");
-    if (!ImGui::TreeNode("Ranged / Special attacks")) return;
+    if (!ImGui::TreeNode("Ranged / Special attacks"))
+    {
+        return;
+    }
     ImGui::DragFloat("ExecutionHoldTime", &executionHoldTime, 0.01f, 0.1f, 10.0f);
     ImGui::DragFloat("ExecutionTargetDistance", &executionTargetDistance, 0.05f, 0.8f, 4.0f);
     ImGui::DragFloat("ChargeMaximumDistance", &chargeMaximumDistance, 0.05f, 1.0f, 40.0f);
@@ -897,7 +1202,12 @@ void HumanBossActionComponent::DrawRangedGui()
     ImGui::DragFloat3("Ranged Stage Center", &rangedStageCenter.x, 0.1f);
     int orbCount_ = 0;
     for (const auto& weak_ : shadowOrbs)
-        if (const auto orb_ = weak_.lock(); orb_ && !orb_->IsPendingDestroy()) ++orbCount_;
+    {
+        if (const auto orb_ = weak_.lock(); orb_ && !orb_->IsPendingDestroy())
+        {
+            ++orbCount_;
+        }
+    }
     ImGui::Text("Independent Orbs: %d / %d", orbCount_, orbMaximumCount);
     ImGui::Text("Charge length %.2f / yaw %.1f", chargeLength, chargeYaw);
     ImGui::Text("Charge warning ready: %s / visible start %.2f", chargeWarningReady ? "YES" : "NO", chargeWarningVisibleStartTime);
@@ -1010,5 +1320,7 @@ void HumanBossActionComponent::DeserializeRanged(const nlohmann::json& json_)
     rangedAttackSoundPath = json_.value("RangedAttackSoundPath", rangedAttackSoundPath);
     ragnarokEnabled = json_.value("RagnarokEnabled", ragnarokEnabled);
     if (json_.contains("RangedStageCenter") && json_["RangedStageCenter"].is_array() && json_["RangedStageCenter"].size() == 3)
+    {
         rangedStageCenter = { json_["RangedStageCenter"][0].get<float>(), json_["RangedStageCenter"][1].get<float>(), json_["RangedStageCenter"][2].get<float>() };
+    }
 }

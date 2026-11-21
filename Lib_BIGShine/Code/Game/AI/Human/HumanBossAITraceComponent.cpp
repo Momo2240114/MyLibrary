@@ -40,7 +40,11 @@ namespace
             const std::string label_ = value_.is_object() ? field_.key() : std::to_string(field_ - value_.begin());
             if (field_->is_structured())
             {
-                if (ImGui::TreeNode(label_.c_str())) { DrawSnapshotFields(*field_); ImGui::TreePop(); }
+                if (ImGui::TreeNode(label_.c_str()))
+                {
+                    DrawSnapshotFields(*field_);
+                    ImGui::TreePop();
+                }
             }
             else
             {
@@ -79,10 +83,16 @@ void HumanBossAITraceComponent::ClearHistory()
 void HumanBossAITraceComponent::UpdateUnscaled(float deltaTime_)
 {
     BS_PROFILE_SCOPE("HumanBossAITraceComponent::UpdateUnscaled");
-    if (!IsRecording()) return;
+    if (!IsRecording())
+    {
+        return;
+    }
     const auto owner_ = GetGameObject();
     const auto ai_ = owner_ ? owner_->GetComponent<HumanBossAIComponent>() : nullptr;
-    if (ai_) Capture(*ai_, "GameMode / observed state");
+    if (ai_)
+    {
+        Capture(*ai_, "GameMode / observed state");
+    }
 }
 
 void HumanBossAITraceComponent::BeginEvaluation()
@@ -102,10 +112,16 @@ void HumanBossAITraceComponent::FinishEvaluation()
 
 void HumanBossAITraceComponent::ObserveActionWeight(const std::string& actionName_, float weight_, const std::string& reason_)
 {
-    if (!IsRecording()) return;
+    if (!IsRecording())
+    {
+        return;
+    }
     for (auto& candidate_ : evaluatedWeights)
     {
-        if (candidate_["Action"] != actionName_) continue;
+        if (candidate_["Action"] != actionName_)
+        {
+            continue;
+        }
         candidate_["RuntimeWeight"] = weight_;
         candidate_["Reason"] = weight_ <= 0.0f && reason_ == "Eligible: weighted candidate"
             ? "Weight is zero / reaction not ready" : reason_;
@@ -118,10 +134,16 @@ void HumanBossAITraceComponent::ObserveActionWeight(const std::string& actionNam
 
 void HumanBossAITraceComponent::ObserveGraphWeight(const std::string& actionName_, float baseWeight_, float modifier_)
 {
-    if (!IsRecording()) return;
+    if (!IsRecording())
+    {
+        return;
+    }
     for (auto& candidate_ : evaluatedWeights)
     {
-        if (candidate_["Action"] != actionName_) continue;
+        if (candidate_["Action"] != actionName_)
+        {
+            continue;
+        }
         candidate_["GraphWeight"] = baseWeight_;
         candidate_["EffectiveWeight"] = (std::max)(0.0f, baseWeight_) * modifier_;
         return;
@@ -130,13 +152,19 @@ void HumanBossAITraceComponent::ObserveGraphWeight(const std::string& actionName
 
 void HumanBossAITraceComponent::ObserveNode(const AIBehaviorNode& node_, AI_BEHAVIOR_STATUS status_, const AIBehaviorContext& context_)
 {
-    if (!IsRecording() || evaluatedNodes.size() >= 512) return;
+    if (!IsRecording() || evaluatedNodes.size() >= 512)
+    {
+        return;
+    }
     nlohmann::json evaluation_{ { "NodeId", node_.id }, { "Name", node_.name },
         { "Result", GetStatusName(status_) }, { "Priority", node_.priority } };
     if (node_.type == AI_BEHAVIOR_NODE_TYPE::PLAY_ACTION)
     {
         evaluation_["Action"] = node_.actionName;
-        if (status_ != AI_BEHAVIOR_STATUS::FAILURE) graphAction = node_.actionName;
+        if (status_ != AI_BEHAVIOR_STATUS::FAILURE)
+        {
+            graphAction = node_.actionName;
+        }
     }
     if (node_.type == AI_BEHAVIOR_NODE_TYPE::BLACKBOARD_CONDITION || node_.type == AI_BEHAVIOR_NODE_TYPE::WAIT_BLACKBOARD_BOOL)
     {
@@ -155,22 +183,34 @@ void HumanBossAITraceComponent::ObserveNode(const AIBehaviorNode& node_, AI_BEHA
         if (node_.valueType == AI_BLACKBOARD_VALUE_TYPE::BOOL || node_.type == AI_BEHAVIOR_NODE_TYPE::WAIT_BLACKBOARD_BOOL)
         {
             evaluation_["Expected"] = node_.boolValue;
-            if (blackboard_ && blackboard_->GetBool(node_.blackboardCategory, node_.blackboardKey, bool_)) evaluation_["Actual"] = bool_;
+            if (blackboard_ && blackboard_->GetBool(node_.blackboardCategory, node_.blackboardKey, bool_))
+            {
+                evaluation_["Actual"] = bool_;
+            }
         }
         else if (node_.valueType == AI_BLACKBOARD_VALUE_TYPE::FLOAT)
         {
             evaluation_["Expected"] = node_.floatValue;
-            if (blackboard_ && blackboard_->GetFloat(node_.blackboardCategory, node_.blackboardKey, float_)) evaluation_["Actual"] = float_;
+            if (blackboard_ && blackboard_->GetFloat(node_.blackboardCategory, node_.blackboardKey, float_))
+            {
+                evaluation_["Actual"] = float_;
+            }
         }
         else if (node_.valueType == AI_BLACKBOARD_VALUE_TYPE::INT)
         {
             evaluation_["Expected"] = node_.intValue;
-            if (blackboard_ && blackboard_->GetInt(node_.blackboardCategory, node_.blackboardKey, int_)) evaluation_["Actual"] = int_;
+            if (blackboard_ && blackboard_->GetInt(node_.blackboardCategory, node_.blackboardKey, int_))
+            {
+                evaluation_["Actual"] = int_;
+            }
         }
         else if (node_.valueType == AI_BLACKBOARD_VALUE_TYPE::STRING)
         {
             evaluation_["Expected"] = node_.stringValue;
-            if (blackboard_ && blackboard_->GetString(node_.blackboardCategory, node_.blackboardKey, string_)) evaluation_["Actual"] = string_;
+            if (blackboard_ && blackboard_->GetString(node_.blackboardCategory, node_.blackboardKey, string_))
+            {
+                evaluation_["Actual"] = string_;
+            }
         }
     }
     if (node_.type == AI_BEHAVIOR_NODE_TYPE::BLACKBOARD_CONDITION)
@@ -189,7 +229,10 @@ void HumanBossAITraceComponent::ObserveNode(const AIBehaviorNode& node_, AI_BEHA
         {
             evaluation_["Actual"] = BlackboardComponent::ToFloat(*value_);
             if (node_.valueType == AI_BLACKBOARD_VALUE_TYPE::VECTOR2 || node_.valueType == AI_BLACKBOARD_VALUE_TYPE::VECTOR3 ||
-                node_.valueType == AI_BLACKBOARD_VALUE_TYPE::TRIGGER) evaluation_["Expected"] = node_.floatValue;
+                node_.valueType == AI_BLACKBOARD_VALUE_TYPE::TRIGGER)
+            {
+                evaluation_["Expected"] = node_.floatValue;
+            }
         }
     }
     evaluatedNodes.push_back(std::move(evaluation_));
@@ -198,7 +241,10 @@ void HumanBossAITraceComponent::ObserveNode(const AIBehaviorNode& node_, AI_BEHA
 void HumanBossAITraceComponent::Capture(const HumanBossAIComponent& ai_, const char* event_, bool force_)
 {
     BS_PROFILE_SCOPE("HumanBossAITraceComponent::Capture");
-    if (!IsRecording()) return;
+    if (!IsRecording())
+    {
+        return;
+    }
     const auto owner_ = gameObject.lock();
     const auto mode_ = owner_ && owner_->manager ? owner_->GetManager().GetGameModeManager() : nullptr;
     const auto executor_ = ai_.executor.lock();
@@ -213,7 +259,9 @@ void HumanBossAITraceComponent::Capture(const HumanBossAIComponent& ai_, const c
         std::to_string(ai_.berserkStunned) + "|" + std::to_string(ai_.justGuardStunned) + "|" + std::to_string(ai_.finishRequested) + "|" +
         std::to_string(player_.serial) + "|" + std::to_string(static_cast<int>(player_.attackPhase)) + "|" + std::to_string(blackboardLocked_) + "|" +
         std::to_string(evaluating) + "|" + std::to_string(ai_.IsEnabled()) + "|" + std::to_string(ai_.ShouldUpdate()) + "|" + std::to_string(owner_ && owner_->IsCombatReady());
-    if (mode_) signature_ += "|" + std::string(mode_->GetCurrentGameStateName()) + "|" + mode_->GetCurrentSequenceName() + "|" +
+    if (mode_)
+    {
+        signature_ += "|" + std::string(mode_->GetCurrentGameStateName()) + "|" + mode_->GetCurrentSequenceName() + "|" +
         std::to_string(mode_->GetCurrentBattlePhase()) + std::to_string(mode_->IsEnemyAILocked()) +
         std::to_string(mode_->IsGameplayLocked()) + std::to_string(mode_->IsPresentationPlaying()) + std::to_string(mode_->IsBattlePaused()) + "|" +
         std::to_string(mode_->GetBossHpRate()) + "|" + std::to_string(mode_->GetPlayerHpRate()) + "|" +
@@ -221,10 +269,20 @@ void HumanBossAITraceComponent::Capture(const HumanBossAIComponent& ai_, const c
         std::to_string(mode_->GetAIDirectorPreferGuardBreak()) + std::to_string(mode_->GetAIDirectorReduceAggression()) + "|" +
         std::to_string(mode_->GetAIDirectorAttackDelayRate()) + "|" + std::to_string(mode_->GetAIDirectorFeintRate()) + "|" +
         std::to_string(mode_->GetAIDirectorGuardBreakRate()) + "|" + std::to_string(mode_->GetAIDirectorAggressionRate());
-    for (const auto id_ : ai_.behaviorGraph.GetRuntimeActiveNodeIds()) signature_ += ":" + std::to_string(id_);
-    if (!force_ && signature_ == lastSignature) return;
+    }
+    for (const auto id_ : ai_.behaviorGraph.GetRuntimeActiveNodeIds())
+    {
+        signature_ += ":" + std::to_string(id_);
+    }
+    if (!force_ && signature_ == lastSignature)
+    {
+        return;
+    }
     lastSignature = std::move(signature_);
-    if (startTime == 0) startTime = SDL_GetTicks();
+    if (startTime == 0)
+    {
+        startTime = SDL_GetTicks();
+    }
     TraceEntry entry_;
     entry_.id = nextEntryId++;
     entry_.time = static_cast<float>(SDL_GetTicks() - startTime) * 0.001f;
@@ -257,9 +315,11 @@ void HumanBossAITraceComponent::Capture(const HumanBossAIComponent& ai_, const c
         { "GuardFrequency", player_.guardFrequency }, { "DodgeFrequency", player_.dodgeFrequency } };
     snapshot_["PlayerHistory"] = nlohmann::json::array();
     for (const auto& action_ : player_.history)
+    {
         snapshot_["PlayerHistory"].push_back({ { "ObservationTime", action_.time }, { "ActionId", action_.action }, { "Action", GetPlayerActionName(static_cast<PLAYER_ACTION>(action_.action)) },
             { "Attack", action_.attack }, { "Weak", action_.weakAttack }, { "Heavy", action_.heavyAttack },
             { "Guard", action_.guard }, { "Dodge", action_.dodge }, { "DodgeDirection", static_cast<int>(action_.dodgeDirection) } });
+    }
     snapshot_["GameMode"] = { { "Available", mode_ != nullptr }, { "BlackboardLockPresent", hasBlackboardLock_ },
         { "BlackboardEnemyAILocked", blackboardLocked_ } };
     if (mode_)
@@ -289,8 +349,14 @@ void HumanBossAITraceComponent::Capture(const HumanBossAIComponent& ai_, const c
     snapshot_["GraphEvaluationComplete"] = evaluationTime != 0 && !evaluating;
     snapshot_["GraphEvaluationAgeMs"] = evaluationTime == 0 ? -1 : static_cast<int>(SDL_GetTicks() - evaluationTime);
     entries.push_back(std::move(entry_));
-    while (entries.size() > static_cast<std::size_t>(maxEntries)) entries.pop_front();
-    if (followLatest) selectedEntryId = entries.back().id;
+    while (entries.size() > static_cast<std::size_t>(maxEntries))
+    {
+        entries.pop_front();
+    }
+    if (followLatest)
+    {
+        selectedEntryId = entries.back().id;
+    }
 }
 
 void HumanBossAITraceComponent::DrawSnapshot(const nlohmann::json& snapshot_)
@@ -299,7 +365,10 @@ void HumanBossAITraceComponent::DrawSnapshot(const nlohmann::json& snapshot_)
     const auto suspension_ = snapshot_.value("Suspension", std::string{});
     ImGui::TextWrapped("Action: %s | Intent: %s", snapshot_.value("Action", std::string{}).c_str(), snapshot_.value("Intent", std::string{}).c_str());
     ImGui::TextWrapped("Decision: %s", reason_.c_str());
-    if (!suspension_.empty()) ImGui::TextColored(ImVec4(1.0f, 0.7f, 0.3f, 1.0f), "Suspended: %s", suspension_.c_str());
+    if (!suspension_.empty())
+    {
+        ImGui::TextColored(ImVec4(1.0f, 0.7f, 0.3f, 1.0f), "Suspended: %s", suspension_.c_str());
+    }
     ImGui::TextWrapped("Threat: %s", snapshot_.value("ThreatReason", std::string{}).c_str());
     const auto& mode_ = snapshot_["GameMode"];
     ImGui::TextWrapped("GameMode: %s | Battle phase: %d | Sequence: %s", mode_.value("State", std::string("Unavailable")).c_str(),
@@ -311,9 +380,13 @@ void HumanBossAITraceComponent::DrawSnapshot(const nlohmann::json& snapshot_)
     ImGui::Text("AI phase %d | Distance %.2f | Reaction budget %.2f | Reaction delay %.2f | Wait %.2f",
         ai_.value("Phase", 0), ai_.value("Distance", 0.0f), ai_.value("ReactionBudget", 0.0f), ai_.value("ReactionDelay", 0.0f), ai_.value("WaitRemaining", 0.0f));
     if (mode_.value("Available", false) && !mode_.value("BlackboardLockPresent", false))
+    {
         ImGui::TextColored(ImVec4(1.0f, 0.7f, 0.3f, 1.0f), "GlobalBlackboard AI lock key is missing; normal AI defaults to unlocked.");
+    }
     if (mode_.value("LockMismatch", false))
+    {
         ImGui::TextColored(ImVec4(1.0f, 0.35f, 0.25f, 1.0f), "GameMode AI lock differs from the GlobalBlackboard consumed by normal AI.");
+    }
     ImGui::TextWrapped("Normal AI reads GlobalBlackboard.EnemyAILocked; Berserk also checks presentation, gameplay and pause locks.");
     ImGui::TextWrapped("Candidate weights describe the actual evaluated branches. Unevaluated branches were not tested. Positive weight does not guarantee selection.");
     ImGui::TextWrapped("Candidate and route rows belong to the latest graph evaluation; GameMode or player state may change before the next graph tick.");
@@ -321,16 +394,29 @@ void HumanBossAITraceComponent::DrawSnapshot(const nlohmann::json& snapshot_)
     {
         if (ImGui::BeginTable("Candidates", 4, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable))
         {
-            ImGui::TableSetupColumn("Action"); ImGui::TableSetupColumn("Runtime");
-            ImGui::TableSetupColumn("Effective draw weight"); ImGui::TableSetupColumn("Eligibility reason"); ImGui::TableHeadersRow();
+            ImGui::TableSetupColumn("Action");
+            ImGui::TableSetupColumn("Runtime");
+            ImGui::TableSetupColumn("Effective draw weight");
+            ImGui::TableSetupColumn("Eligibility reason");
+            ImGui::TableHeadersRow();
             for (const auto& candidate_ : snapshot_["Candidates"])
             {
-                ImGui::TableNextRow(); ImGui::TableSetColumnIndex(0); ImGui::TextUnformatted(candidate_["Action"].get_ref<const std::string&>().c_str());
-                ImGui::TableSetColumnIndex(1); ImGui::Text("%.3f", candidate_.value("RuntimeWeight", 0.0f));
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0);
+                ImGui::TextUnformatted(candidate_["Action"].get_ref<const std::string&>().c_str());
+                ImGui::TableSetColumnIndex(1);
+                ImGui::Text("%.3f", candidate_.value("RuntimeWeight", 0.0f));
                 ImGui::TableSetColumnIndex(2);
-                if (candidate_.contains("EffectiveWeight")) ImGui::Text("%.3f", candidate_["EffectiveWeight"].get<float>());
-                else ImGui::TextUnformatted("No individual draw weight");
-                ImGui::TableSetColumnIndex(3); ImGui::TextWrapped("%s", candidate_.value("Reason", std::string{}).c_str());
+                if (candidate_.contains("EffectiveWeight"))
+                {
+                    ImGui::Text("%.3f", candidate_["EffectiveWeight"].get<float>());
+                }
+                else
+                {
+                    ImGui::TextUnformatted("No individual draw weight");
+                }
+                ImGui::TableSetColumnIndex(3);
+                ImGui::TextWrapped("%s", candidate_.value("Reason", std::string{}).c_str());
             }
             ImGui::EndTable();
         }
@@ -344,18 +430,28 @@ void HumanBossAITraceComponent::DrawSnapshot(const nlohmann::json& snapshot_)
         ImGui::TextWrapped("Times below use the CombatObservation clock; trace times use time since Clear History.");
         if (ImGui::BeginTable("Player History", 6, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable))
         {
-            for (const char* column_ : { "Observation time", "Action", "Attack", "Guard", "Dodge", "Direction" }) ImGui::TableSetupColumn(column_);
+            for (const char* column_ : { "Observation time", "Action", "Attack", "Guard", "Dodge", "Direction" })
+            {
+                ImGui::TableSetupColumn(column_);
+            }
             ImGui::TableHeadersRow();
             constexpr const char* DIRECTIONS[] = { "None", "Left", "Right", "Back", "Forward" };
             for (const auto& action_ : snapshot_["PlayerHistory"])
             {
-                ImGui::TableNextRow(); ImGui::TableSetColumnIndex(0); ImGui::Text("%.2f", action_.value("ObservationTime", 0.0f));
-                ImGui::TableSetColumnIndex(1); ImGui::TextUnformatted(action_.value("Action", std::string{}).c_str());
-                ImGui::TableSetColumnIndex(2); ImGui::TextUnformatted(action_.value("Heavy", false) ? "Heavy" : action_.value("Weak", false) ? "Weak" : action_.value("Attack", false) ? "Attack" : "-");
-                ImGui::TableSetColumnIndex(3); ImGui::TextUnformatted(action_.value("Guard", false) ? "Yes" : "-");
-                ImGui::TableSetColumnIndex(4); ImGui::TextUnformatted(action_.value("Dodge", false) ? "Yes" : "-");
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0);
+                ImGui::Text("%.2f", action_.value("ObservationTime", 0.0f));
+                ImGui::TableSetColumnIndex(1);
+                ImGui::TextUnformatted(action_.value("Action", std::string{}).c_str());
+                ImGui::TableSetColumnIndex(2);
+                ImGui::TextUnformatted(action_.value("Heavy", false) ? "Heavy" : action_.value("Weak", false) ? "Weak" : action_.value("Attack", false) ? "Attack" : "-");
+                ImGui::TableSetColumnIndex(3);
+                ImGui::TextUnformatted(action_.value("Guard", false) ? "Yes" : "-");
+                ImGui::TableSetColumnIndex(4);
+                ImGui::TextUnformatted(action_.value("Dodge", false) ? "Yes" : "-");
                 const int direction_ = action_.value("DodgeDirection", 0);
-                ImGui::TableSetColumnIndex(5); ImGui::TextUnformatted(direction_ >= 0 && direction_ < 5 ? DIRECTIONS[direction_] : "Unknown");
+                ImGui::TableSetColumnIndex(5);
+                ImGui::TextUnformatted(direction_ >= 0 && direction_ < 5 ? DIRECTIONS[direction_] : "Unknown");
             }
             ImGui::EndTable();
         }
@@ -366,36 +462,59 @@ void HumanBossAITraceComponent::DrawSnapshot(const nlohmann::json& snapshot_)
             snapshot_.value("GraphEvaluationComplete", false) ? "Yes" : "No / action start in progress", snapshot_.value("GraphEvaluationAgeMs", -1));
         if (ImGui::BeginTable("Evaluation Route", 5, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable))
         {
-            for (const char* column_ : { "Node", "Result", "Source / Key", "Actual", "Comparison / Expected" }) ImGui::TableSetupColumn(column_);
+            for (const char* column_ : { "Node", "Result", "Source / Key", "Actual", "Comparison / Expected" })
+            {
+                ImGui::TableSetupColumn(column_);
+            }
             ImGui::TableHeadersRow();
             for (const auto& node_ : snapshot_["EvaluatedNodes"])
             {
-                ImGui::TableNextRow(); ImGui::TableSetColumnIndex(0); ImGui::TextWrapped("%s", node_.value("Name", std::string{}).c_str());
-                ImGui::TableSetColumnIndex(1); ImGui::TextUnformatted(node_.value("Result", std::string{}).c_str());
-                ImGui::TableSetColumnIndex(2); ImGui::TextWrapped("%s %s", node_.value("Source", std::string{}).c_str(), node_.value("Key", std::string{}).c_str());
-                ImGui::TableSetColumnIndex(3); ImGui::TextUnformatted(node_.contains("Actual") ? node_["Actual"].dump().c_str() : "-");
-                ImGui::TableSetColumnIndex(4); ImGui::TextWrapped("%s %s", node_.value("Compare", std::string{}).c_str(), node_.contains("Expected") ? node_["Expected"].dump().c_str() : "");
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0);
+                ImGui::TextWrapped("%s", node_.value("Name", std::string{}).c_str());
+                ImGui::TableSetColumnIndex(1);
+                ImGui::TextUnformatted(node_.value("Result", std::string{}).c_str());
+                ImGui::TableSetColumnIndex(2);
+                ImGui::TextWrapped("%s %s", node_.value("Source", std::string{}).c_str(), node_.value("Key", std::string{}).c_str());
+                ImGui::TableSetColumnIndex(3);
+                ImGui::TextUnformatted(node_.contains("Actual") ? node_["Actual"].dump().c_str() : "-");
+                ImGui::TableSetColumnIndex(4);
+                ImGui::TextWrapped("%s %s", node_.value("Compare", std::string{}).c_str(), node_.contains("Expected") ? node_["Expected"].dump().c_str() : "");
             }
             ImGui::EndTable();
         }
     }
-    if (ImGui::CollapsingHeader("Snapshot Details (GameMode / AI / Berserk / Settings)")) DrawSnapshotFields(snapshot_);
+    if (ImGui::CollapsingHeader("Snapshot Details (GameMode / AI / Berserk / Settings)"))
+    {
+        DrawSnapshotFields(snapshot_);
+    }
 }
 
 void HumanBossAITraceComponent::DrawHistory()
 {
     BS_PROFILE_SCOPE("HumanBossAITraceComponent::DrawHistory");
-    ImGui::Checkbox("Recording", &recordingEnabled); ImGui::SameLine();
-    ImGui::Checkbox("Follow Latest", &followLatest); ImGui::SameLine();
-    if (ImGui::Button("Clear History")) ClearHistory();
+    ImGui::Checkbox("Recording", &recordingEnabled);
+    ImGui::SameLine();
+    ImGui::Checkbox("Follow Latest", &followLatest);
+    ImGui::SameLine();
+    if (ImGui::Button("Clear History"))
+    {
+        ClearHistory();
+    }
     ImGui::Text("Recorded: %d / %d (oldest entries are discarded)", static_cast<int>(entries.size()), maxEntries);
     historyFilter.Draw("Filter", 280.0f);
-    if (followLatest && !entries.empty()) selectedEntryId = entries.back().id;
+    if (followLatest && !entries.empty())
+    {
+        selectedEntryId = entries.back().id;
+    }
     if (ImGui::BeginTable("Decision History", 6, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable | ImGuiTableFlags_ScrollY,
         ImVec2(0.0f, 240.0f)))
     {
         ImGui::TableSetupScrollFreeze(0, 1);
-        for (const char* column_ : { "Time", "Event", "Action", "Intent", "Player", "GameMode" }) ImGui::TableSetupColumn(column_);
+        for (const char* column_ : { "Time", "Event", "Action", "Intent", "Player", "GameMode" })
+        {
+            ImGui::TableSetupColumn(column_);
+        }
         ImGui::TableHeadersRow();
         for (const auto& entry_ : entries)
         {
@@ -405,22 +524,43 @@ void HumanBossAITraceComponent::DrawHistory()
             const std::string player_ = data_["Player"].value("Action", std::string{});
             const std::string mode_ = data_["GameMode"].value("State", std::string("Unavailable"));
             const std::string search_ = entry_.event + " " + action_ + " " + intent_ + " " + player_ + " " + mode_ + " " + data_.value("Reason", std::string{});
-            if (!historyFilter.PassFilter(search_.c_str())) continue;
-            ImGui::TableNextRow(); ImGui::TableSetColumnIndex(0);
+            if (!historyFilter.PassFilter(search_.c_str()))
+            {
+                continue;
+            }
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0);
             const std::string label_ = std::to_string(entry_.time) + "##" + std::to_string(entry_.id);
             if (ImGui::Selectable(label_.c_str(), selectedEntryId == entry_.id, ImGuiSelectableFlags_SpanAllColumns))
-            { selectedEntryId = entry_.id; followLatest = false; }
-            ImGui::TableSetColumnIndex(1); ImGui::TextUnformatted(entry_.event.c_str());
-            ImGui::TableSetColumnIndex(2); ImGui::TextUnformatted(action_.c_str());
-            ImGui::TableSetColumnIndex(3); ImGui::TextUnformatted(intent_.c_str());
-            ImGui::TableSetColumnIndex(4); ImGui::TextUnformatted(player_.c_str());
-            ImGui::TableSetColumnIndex(5); ImGui::TextUnformatted(mode_.c_str());
+            {
+                selectedEntryId = entry_.id;
+                followLatest = false;
+            }
+            ImGui::TableSetColumnIndex(1);
+            ImGui::TextUnformatted(entry_.event.c_str());
+            ImGui::TableSetColumnIndex(2);
+            ImGui::TextUnformatted(action_.c_str());
+            ImGui::TableSetColumnIndex(3);
+            ImGui::TextUnformatted(intent_.c_str());
+            ImGui::TableSetColumnIndex(4);
+            ImGui::TextUnformatted(player_.c_str());
+            ImGui::TableSetColumnIndex(5);
+            ImGui::TextUnformatted(mode_.c_str());
         }
-        if (followLatest) ImGui::SetScrollHereY(1.0f);
+        if (followLatest)
+        {
+            ImGui::SetScrollHereY(1.0f);
+        }
         ImGui::EndTable();
     }
     for (const auto& entry_ : entries)
-        if (entry_.id == selectedEntryId) { DrawSnapshot(entry_.snapshot); return; }
+    {
+        if (entry_.id == selectedEntryId)
+        {
+            DrawSnapshot(entry_.snapshot);
+            return;
+        }
+    }
     ImGui::TextWrapped(entries.empty() ? "Waiting for AI observations. Attach this component to the HumanBoss object."
         : "Select a retained entry. The previously selected entry may have expired from the history.");
 }
@@ -429,28 +569,48 @@ void HumanBossAITraceComponent::Gui()
 {
     const auto owner_ = GetGameObject();
     if (!owner_ || !owner_->GetComponent<HumanBossAIComponent>())
+    {
         ImGui::TextWrapped("Attach this component to the same object as HumanBossAIComponent.");
+    }
     ImGui::SliderInt("Maximum Entries", &maxEntries, 32, 1024);
-    while (entries.size() > static_cast<std::size_t>(maxEntries)) entries.pop_front();
-    if (ImGui::Button("Open Trace Window")) showWindow = true;
+    while (entries.size() > static_cast<std::size_t>(maxEntries))
+    {
+        entries.pop_front();
+    }
+    if (ImGui::Button("Open Trace Window"))
+    {
+        showWindow = true;
+    }
     ImGui::SameLine();
     if (ImGui::Button("Export Trace JSON..."))
     {
         const std::string path_ = WindowsDialogHelper::SaveJsonDialog(L"Save Human Boss AI Trace", "Data/Debug/HumanBossAITrace.json");
-        if (!path_.empty()) exportStatus = ExportTrace(path_) ? "Trace exported: " + path_ : "Trace export failed: " + path_;
+        if (!path_.empty())
+        {
+            exportStatus = ExportTrace(path_) ? "Trace exported: " + path_ : "Trace export failed: " + path_;
+        }
     }
-    if (!exportStatus.empty()) ImGui::TextWrapped("%s", exportStatus.c_str());
+    if (!exportStatus.empty())
+    {
+        ImGui::TextWrapped("%s", exportStatus.c_str());
+    }
     DrawHistory();
 }
 
 void HumanBossAITraceComponent::RenderUI()
 {
     BS_PROFILE_SCOPE("HumanBossAITraceComponent::RenderUI");
-    if (!showWindow) return;
+    if (!showWindow)
+    {
+        return;
+    }
     const auto owner_ = GetGameObject();
     const std::string title_ = "Human Boss AI Trace##" + (owner_ ? owner_->GetName() : "Detached");
     ImGui::SetNextWindowSize(ImVec2(1100.0f, 760.0f), ImGuiCond_FirstUseEver);
-    if (ImGui::Begin(title_.c_str(), &showWindow)) DrawHistory();
+    if (ImGui::Begin(title_.c_str(), &showWindow))
+    {
+        DrawHistory();
+    }
     ImGui::End();
 }
 
@@ -459,13 +619,21 @@ bool HumanBossAITraceComponent::ExportTrace(const std::string& path_) const
     BS_PROFILE_SCOPE("HumanBossAITraceComponent::ExportTrace");
     nlohmann::json output_ = { { "Version", 1 }, { "Entries", nlohmann::json::array() } };
     for (const auto& entry_ : entries)
+    {
         output_["Entries"].push_back({ { "Id", entry_.id }, { "Time", entry_.time }, { "Event", entry_.event }, { "Snapshot", entry_.snapshot } });
+    }
     try
     {
         const auto parent_ = std::filesystem::path(path_).parent_path();
-        if (!parent_.empty()) std::filesystem::create_directories(parent_);
+        if (!parent_.empty())
+        {
+            std::filesystem::create_directories(parent_);
+        }
         std::ofstream file_(path_, std::ios::binary);
-        if (!file_) return false;
+        if (!file_)
+        {
+            return false;
+        }
         file_ << output_.dump(2);
         return file_.good();
     }

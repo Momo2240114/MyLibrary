@@ -56,7 +56,9 @@ public:
         for (Key key : allKeys)
         {
             if (KeyPressed(key))
+            {
                 return true;
+            }
         }
         return false;
     }

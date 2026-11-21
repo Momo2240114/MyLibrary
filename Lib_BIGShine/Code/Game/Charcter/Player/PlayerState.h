@@ -313,14 +313,27 @@ public:
     virtual void Enter() = 0;
     // State中の毎フレーム処理。
     virtual void Execute(float elapsedTime_) = 0;
-    virtual void LateExecute(float et_) {}
+
+    virtual void LateExecute(float et_)
+    {
+    }
+
     // Stateを切り替える直前に呼ばれ、一時的な判定や移動設定を解除する。
-    virtual void Exit() {}
+    virtual void Exit()
+    {
+    }
 
 protected:
     // Ownerが破棄済みの場合はnullptrを返す。
-    std::shared_ptr<GameObject> GetOwner() const { return owner.lock(); }
-    PlayerControllerComponent* GetPlayerController() const { return playerController; }
+    std::shared_ptr<GameObject> GetOwner() const
+    {
+        return owner.lock();
+    }
+
+    PlayerControllerComponent* GetPlayerController() const
+    {
+        return playerController;
+    }
 
     template<class T>
     std::shared_ptr<T> GetComponent() const
@@ -339,7 +352,10 @@ protected:
         }
 
         const std::shared_ptr<GameObject> owner_ = GetOwner();
-        if (!owner_) return nullptr;
+        if (!owner_)
+        {
+            return nullptr;
+        }
 
         // キャッシュが無効な場合だけGameObjectから取り直し、結果を次回用に保存する。
         const std::shared_ptr<T> component_ = owner_->GetComponent<T>();

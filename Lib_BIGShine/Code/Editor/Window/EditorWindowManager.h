@@ -13,7 +13,9 @@ class EditorWindowManager
 {
 public:
     // コンストラクタでObjectManagerを入れる
-    EditorWindowManager(GameObjectManager* manager) : gameObjectManager(manager) {}
+    EditorWindowManager(GameObjectManager* manager) : gameObjectManager(manager)
+    {
+    }
 
     void AddWindow(std::unique_ptr<EditorWindow> window) {
         windows.push_back(std::move(window));
@@ -21,10 +23,27 @@ public:
 
     void Update(float deltaTime_);
     void DrawAll();
-    bool IsWorkspaceMode() const { return activeWorkspaceIndex >= 0 && activeWorkspaceIndex < static_cast<int>(windows.size()) && windows[activeWorkspaceIndex]->IsVisible(); }
-    bool ShouldPauseScene() const { return IsWorkspaceMode() && windows[activeWorkspaceIndex]->ShouldPauseScene(); }
-    bool ShouldRenderSceneWhenPaused() const { return IsWorkspaceMode() && windows[activeWorkspaceIndex]->ShouldRenderSceneWhenPaused(); }
-    bool ShouldUseDockedSceneView() const { return useDockedSceneView || (IsWorkspaceMode() && windows[activeWorkspaceIndex]->RequiresSceneRenderTarget()); }
+
+    bool IsWorkspaceMode() const
+    {
+        return activeWorkspaceIndex >= 0 && activeWorkspaceIndex < static_cast<int>(windows.size()) && windows[activeWorkspaceIndex]->IsVisible();
+    }
+
+    bool ShouldPauseScene() const
+    {
+        return IsWorkspaceMode() && windows[activeWorkspaceIndex]->ShouldPauseScene();
+    }
+
+    bool ShouldRenderSceneWhenPaused() const
+    {
+        return IsWorkspaceMode() && windows[activeWorkspaceIndex]->ShouldRenderSceneWhenPaused();
+    }
+
+    bool ShouldUseDockedSceneView() const
+    {
+        return useDockedSceneView || (IsWorkspaceMode() && windows[activeWorkspaceIndex]->RequiresSceneRenderTarget());
+    }
+
 private:
     void DrawMenuBar();
     // 配布用EXEを選び、新規フォルダーへのゲーム書き出し結果を表示する。

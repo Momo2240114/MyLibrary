@@ -41,17 +41,29 @@ void ScenePresentationComponent::Start()
         cursorChanged = true;
         MouseInput::Instance().SetCursorLockEnabled(false);
     }
-    if (settings.value("StopPreviousMusic", false)) AudioManager::Instance().StopBGM();
-    if (settings.value("ResetPhysicsTimeScale", false)) PhysXSystem::SetTimeScale(1.0f);
+    if (settings.value("StopPreviousMusic", false))
+    {
+        AudioManager::Instance().StopBGM();
+    }
+    if (settings.value("ResetPhysicsTimeScale", false))
+    {
+        PhysXSystem::SetTimeScale(1.0f);
+    }
 }
 
 void ScenePresentationComponent::OnDestroy()
 {
     BS_PROFILE_SCOPE("ScenePresentationComponent::OnDestroy");
     EndRender();
-    if (cursorChanged) MouseInput::Instance().SetCursorLockEnabled(previousCursorLock);
+    if (cursorChanged)
+    {
+        MouseInput::Instance().SetCursorLockEnabled(previousCursorLock);
+    }
     cursorChanged = false;
-    if (musicStarted && !playingMusicPath.empty()) AudioManager::Instance().StopByPath(playingMusicPath);
+    if (musicStarted && !playingMusicPath.empty())
+    {
+        AudioManager::Instance().StopByPath(playingMusicPath);
+    }
     playingMusicPath.clear();
     musicStarted = false;
 }
@@ -72,7 +84,10 @@ DirectX::XMFLOAT4 ScenePresentationComponent::GetClearColor() const
 void ScenePresentationComponent::BeginRender()
 {
     BS_PROFILE_SCOPE("ScenePresentationComponent::BeginRender");
-    if (rendering) return;
+    if (rendering)
+    {
+        return;
+    }
     auto& graphics_ = GraphicsDeviceManager::Instance();
     previousBloom = graphics_.GetBloomParams();
     previousVignette = graphics_.GetVignetteParams();
@@ -90,13 +105,19 @@ void ScenePresentationComponent::BeginRender()
         graphics_.GetVignetteParams().enabled = vignette_.value("Enabled", previousVignette.enabled);
         graphics_.GetVignetteParams().intensity = vignette_.value("Intensity", previousVignette.intensity);
         const auto color_ = vignette_.value("Color", std::vector<float>{0,0,0,1});
-        if (color_.size() == 4) graphics_.GetVignetteParams().color = {color_[0],color_[1],color_[2],color_[3]};
+        if (color_.size() == 4)
+        {
+            graphics_.GetVignetteParams().color = {color_[0],color_[1],color_[2],color_[3]};
+        }
     }
 }
 
 void ScenePresentationComponent::EndRender()
 {
-    if (!rendering) return;
+    if (!rendering)
+    {
+        return;
+    }
     GraphicsDeviceManager::Instance().GetBloomParams() = previousBloom;
     GraphicsDeviceManager::Instance().GetVignetteParams() = previousVignette;
     rendering = false;
@@ -105,7 +126,10 @@ void ScenePresentationComponent::EndRender()
 void ScenePresentationComponent::Update(float deltaTime_)
 {
     BS_PROFILE_SCOPE("ScenePresentationComponent::Update");
-    if (GetManager().GetSceneRuntimeState() != SCENE_RUNTIME_STATE::RUNNING) return;
+    if (GetManager().GetSceneRuntimeState() != SCENE_RUNTIME_STATE::RUNNING)
+    {
+        return;
+    }
     elapsedTime += (std::max)(0.0f, deltaTime_);
     // 表示対象と色をScene JSONから復元し、装備にも同じ単色表示を適用する。
     if (settings.contains("Silhouette"))
@@ -113,13 +137,18 @@ void ScenePresentationComponent::Update(float deltaTime_)
         const auto& silhouette_ = settings.at("Silhouette");
         const auto color_ = silhouette_.value("Color", std::vector<float>{1,1,1,1});
         if (color_.size() == 4 && silhouette_.contains("Objects"))
+        {
             for (const auto& name_ : silhouette_.at("Objects"))
             {
                 const auto object_ = GetManager().Find(name_.get<std::string>());
                 const auto model_ = object_ ? object_->GetComponent<GltfModelCommponennt>() : nullptr;
-                if (model_) model_->SetRuntimeSilhouette(silhouette_.value("Enabled", true),
+                if (model_)
+                {
+                    model_->SetRuntimeSilhouette(silhouette_.value("Enabled", true),
                     {color_[0], color_[1], color_[2], color_[3]});
+                }
             }
+        }
     }
     // 候補名と再生間隔はJSONで指定し、既存Controllerのクロスフェードを使用する。
     if (settings.contains("AnimationCycle"))
@@ -137,7 +166,9 @@ void ScenePresentationComponent::Update(float deltaTime_)
                 animationChoice = animationChoice * 1664525u + 1013904223u;
                 const auto& name_ = states_[(animationChoice >> 16) % states_.size()];
                 if (controller_->GetStates().find(name_) != controller_->GetStates().end())
+                {
                     controller_->ChangeState(name_, (std::max)(0.0f, cycle_.value("BlendDuration", 0.3f)));
+                }
             }
         }
     }
@@ -152,12 +183,17 @@ void ScenePresentationComponent::Update(float deltaTime_)
         musicStarted = true;
     }
     if (settings.contains("AttachmentObjects"))
+    {
         for (const auto& name_ : settings.at("AttachmentObjects"))
         {
             const auto object_ = GetManager().Find(name_.get<std::string>());
             const auto attachment_ = object_ ? object_->GetComponent<ModelAttachmentComponent>() : nullptr;
-            if (attachment_ && attachment_->IsStarted() && attachment_->IsEnabled()) attachment_->SyncAttachment();
+            if (attachment_ && attachment_->IsStarted() && attachment_->IsEnabled())
+            {
+                attachment_->SyncAttachment();
+            }
         }
+    }
     auto& graphics_ = GraphicsDeviceManager::Instance();
     const float width_ = static_cast<float>((std::max)(1, graphics_.GetRenderWidth()));
     const float height_ = static_cast<float>((std::max)(1, graphics_.GetRenderHeight()));
@@ -171,7 +207,10 @@ void ScenePresentationComponent::Update(float deltaTime_)
             DirectX::XMFLOAT3 eye_{position_[0],position_[1],position_[2]};
             DirectX::XMFLOAT3 focus_{target_[0],target_[1],target_[2]};
             eye_.x += std::sin(elapsedTime * presentation_.value("CameraMotionSpeed", 0.0f)) * presentation_.value("CameraMotionAmplitude", 0.0f);
-            if (std::abs(focus_.x - eye_.x) + std::abs(focus_.z - eye_.z) < 0.01f) focus_.z = eye_.z + 1.0f;
+            if (std::abs(focus_.x - eye_.x) + std::abs(focus_.z - eye_.z) < 0.01f)
+            {
+                focus_.z = eye_.z + 1.0f;
+            }
             const float aspect_ = width_ / height_;
             // 狭い画面でもSceneの構図を保つよう、基準Aspectから縦FOVを補正する。
             const float fieldOfView_ = DirectX::XMConvertToDegrees(2.0f * std::atan(
@@ -217,18 +256,30 @@ void ScenePresentationComponent::Update(float deltaTime_)
     }
     const auto owner_ = GetGameObject();
     const auto menu_ = owner_ ? owner_->GetComponent<MenuNavigationComponent>() : nullptr;
-    if (!GameRuntimeSettings::IsGameOnly() && KeyConfig::Instance().ActionPressedIn(settings.value("SettingsInputAction", std::string()))) showSettings = !showSettings;
-    if (menu_) menu_->SetInputSuppressed(showSettings);
+    if (!GameRuntimeSettings::IsGameOnly() && KeyConfig::Instance().ActionPressedIn(settings.value("SettingsInputAction", std::string())))
+    {
+        showSettings = !showSettings;
+    }
+    if (menu_)
+    {
+        menu_->SetInputSuppressed(showSettings);
+    }
     if (showSettings && !GameRuntimeSettings::IsGameOnly())
     {
         if (ImGui::Begin("Scene presentation", &showSettings))
         {
             Gui();
-            if (menu_) menu_->Gui();
+            if (menu_)
+            {
+                menu_->Gui();
+            }
             if (ImGui::Button("Save Scene"))
             {
                 const auto sceneName_ = settings.value("SceneName", std::string());
-                if (!sceneName_.empty()) GetManager().SaveScene(sceneName_);
+                if (!sceneName_.empty())
+                {
+                    GetManager().SaveScene(sceneName_);
+                }
             }
             ImGui::SameLine();
             if (ImGui::Button("Reload"))
@@ -239,12 +290,20 @@ void ScenePresentationComponent::Update(float deltaTime_)
                 {
                     const auto object_ = nlohmann::json::parse(file_, nullptr, false);
                     if (!object_.is_discarded() && object_.contains("Components"))
+                    {
                         for (const auto& component_ : object_.at("Components"))
                         {
                             const auto type_ = component_.value("TypeName", std::string());
-                            if (type_ == GetName()) Deserialize(component_.at("Data"));
-                            else if (menu_ && type_ == menu_->GetName()) menu_->Deserialize(component_.at("Data"));
+                            if (type_ == GetName())
+                            {
+                                Deserialize(component_.at("Data"));
+                            }
+                            else if (menu_ && type_ == menu_->GetName())
+                            {
+                                menu_->Deserialize(component_.at("Data"));
+                            }
                         }
+                    }
                 }
             }
         }
@@ -256,20 +315,31 @@ void ScenePresentationComponent::Gui()
 {
     auto& presentation_ = settings["Presentation"];
     bool orthographic_ = presentation_.value("Orthographic", false);
-    if (ImGui::Checkbox("Orthographic", &orthographic_)) presentation_["Orthographic"] = orthographic_;
+    if (ImGui::Checkbox("Orthographic", &orthographic_))
+    {
+        presentation_["Orthographic"] = orthographic_;
+    }
     if (orthographic_)
     {
         float height_ = presentation_.value("OrthographicHeight", 10.0f);
         if (ImGui::DragFloat("Orthographic Height", &height_, 0.05f, 0.01f, 1000.0f) && std::isfinite(height_))
+        {
             presentation_["OrthographicHeight"] = (std::max)(0.01f, height_);
+        }
     }
     if (settings.contains("Silhouette"))
     {
         auto& silhouette_ = settings["Silhouette"];
         bool enabled_ = silhouette_.value("Enabled", true);
-        if (ImGui::Checkbox("Silhouette", &enabled_)) silhouette_["Enabled"] = enabled_;
+        if (ImGui::Checkbox("Silhouette", &enabled_))
+        {
+            silhouette_["Enabled"] = enabled_;
+        }
         auto color_ = silhouette_.value("Color", std::vector<float>{1,1,1,1});
-        if (color_.size() == 4 && ImGui::ColorEdit4("Silhouette Color", color_.data())) silhouette_["Color"] = color_;
+        if (color_.size() == 4 && ImGui::ColorEdit4("Silhouette Color", color_.data()))
+        {
+            silhouette_["Color"] = color_;
+        }
     }
     if (settings.contains("AnimationCycle"))
     {
@@ -277,22 +347,35 @@ void ScenePresentationComponent::Gui()
         float interval_ = cycle_.value("Interval", 4.0f);
         float blendDuration_ = cycle_.value("BlendDuration", 0.3f);
         if (ImGui::DragFloat("Animation Interval", &interval_, 0.05f, 0.01f, 60.0f) && std::isfinite(interval_))
+        {
             cycle_["Interval"] = (std::max)(0.01f, interval_);
+        }
         if (ImGui::DragFloat("Animation Blend", &blendDuration_, 0.01f, 0.0f, 10.0f) && std::isfinite(blendDuration_))
+        {
             cycle_["BlendDuration"] = (std::max)(0.0f, blendDuration_);
+        }
     }
     for (const char* key_ : {"CameraPosition", "LookAtPosition"})
     {
         auto value_ = presentation_.value(key_, std::vector<float>{0,0,0});
-        if (value_.size() == 3 && ImGui::DragFloat3(key_, value_.data(), 0.05f)) presentation_[key_] = value_;
+        if (value_.size() == 3 && ImGui::DragFloat3(key_, value_.data(), 0.05f))
+        {
+            presentation_[key_] = value_;
+        }
     }
     for (const char* key_ : {"FieldOfView", "CameraMotionAmplitude", "CameraMotionSpeed", "LogoCenterX", "LogoTop", "LogoWidth", "LogoMaxHeight", "MenuTop"})
     {
         float value_ = presentation_.value(key_, 0.0f);
         if (ImGui::DragFloat(key_, &value_, 0.01f) && std::isfinite(value_))
         {
-            if (std::string(key_) == "FieldOfView") value_ = std::clamp(value_, 20.0f, 80.0f);
-            else value_ = std::clamp(value_, 0.0f, 1.0f);
+            if (std::string(key_) == "FieldOfView")
+            {
+                value_ = std::clamp(value_, 20.0f, 80.0f);
+            }
+            else
+            {
+                value_ = std::clamp(value_, 0.0f, 1.0f);
+            }
             presentation_[key_] = value_;
         }
     }
@@ -308,5 +391,8 @@ void ScenePresentationComponent::Deserialize(const nlohmann::json& json_)
 {
     BS_PROFILE_SCOPE("ScenePresentationComponent::Deserialize");
     settings = json_.is_object() ? json_ : nlohmann::json::object();
-    if (!settings.contains("Presentation") || !settings["Presentation"].is_object()) settings["Presentation"] = nlohmann::json::object();
+    if (!settings.contains("Presentation") || !settings["Presentation"].is_object())
+    {
+        settings["Presentation"] = nlohmann::json::object();
+    }
 }

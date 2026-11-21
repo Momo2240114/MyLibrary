@@ -212,15 +212,5 @@
   </ItemDefinitionGroup>
 
 
-	<!-- ========================================= -->
-	<!-- Tracy Client -->
-	<!-- ========================================= -->
-	<ItemGroup Condition="'$(Platform)'=='x64' and (('$(Configuration)'=='Debug' or '$(Configuration)'=='Engine_Debug' or '$(Configuration)'=='Game_Debug') or ('$(Configuration)'=='Release' or '$(Configuration)'=='Engine_Release'))">
-		<ClCompile Include="$(ProjectDir)External\Tracy\public\TracyClient.cpp">
-			<PrecompiledHeader>NotUsing</PrecompiledHeader>
-			<DisableSpecificWarnings>4828;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-		</ClCompile>
-	</ItemGroup>
-
 </Project>
 

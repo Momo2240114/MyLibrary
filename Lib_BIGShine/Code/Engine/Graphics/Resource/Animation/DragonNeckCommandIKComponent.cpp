@@ -43,7 +43,10 @@ namespace
             value_.y * value_.y +
             value_.z * value_.z);
 
-        if (length_ <= EPSILON) return { 0.0f, 0.0f, 0.0f };
+        if (length_ <= EPSILON)
+        {
+            return { 0.0f, 0.0f, 0.0f };
+        }
 
         return {
             value_.x / length_,
@@ -61,8 +64,14 @@ namespace
 
     float NormalizeAngleDegrees(float degrees_)
     {
-        while (degrees_ > 180.0f) degrees_ -= 360.0f;
-        while (degrees_ < -180.0f) degrees_ += 360.0f;
+        while (degrees_ > 180.0f)
+        {
+            degrees_ -= 360.0f;
+        }
+        while (degrees_ < -180.0f)
+        {
+            degrees_ += 360.0f;
+        }
         return degrees_;
     }
 
@@ -100,14 +109,20 @@ namespace
 
     bool TryNormalizeVector(DirectX::XMVECTOR& value_)
     {
-        if (LengthSquared(value_) <= EPSILON * EPSILON) return false;
+        if (LengthSquared(value_) <= EPSILON * EPSILON)
+        {
+            return false;
+        }
         value_ = DirectX::XMVector3Normalize(value_);
         return true;
     }
 
     bool TryStoreNormalizedVector(DirectX::XMFLOAT3& result_, DirectX::XMVECTOR value_)
     {
-        if (!TryNormalizeVector(value_)) return false;
+        if (!TryNormalizeVector(value_))
+        {
+            return false;
+        }
         DirectX::XMStoreFloat3(&result_, value_);
         return IsFinite(result_);
     }
@@ -143,7 +158,10 @@ bool DragonNeckCommandIKComponent::IsLoadReady() const
 {
     const auto owner_ = const_cast<DragonNeckCommandIKComponent*>(this)->GetGameObject();
     const auto model_ = owner_ ? owner_->GetComponent<GltfModelCommponennt>() : nullptr;
-    if (!model_) return true;
+    if (!model_)
+    {
+        return true;
+    }
 
     model_->UpdateLoadState();
     return !model_->IsModelLoading();
@@ -151,9 +169,15 @@ bool DragonNeckCommandIKComponent::IsLoadReady() const
 
 void DragonNeckCommandIKComponent::Update(float deltaTime_)
 {
-    if (!model || !ikMap) return;
+    if (!model || !ikMap)
+    {
+        return;
+    }
     model->UpdateLoadState();
-    if (!model->IsModelReady()) return;
+    if (!model->IsModelReady())
+    {
+        return;
+    }
 
     // 現在のコマンドを毎フレーム評価し、指定時間が終わったら必要に応じて解除する。
     commandTimer += deltaTime_;
@@ -187,7 +211,10 @@ void DragonNeckCommandIKComponent::ClearCommand()
 void DragonNeckCommandIKComponent::UnregisterActions()
 {
     const auto owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     const std::string localCategory_ =
         registeredActionCategory.empty() ? actionCategory : registeredActionCategory;
@@ -211,7 +238,10 @@ void DragonNeckCommandIKComponent::UnregisterActions()
 void DragonNeckCommandIKComponent::RegisterActions()
 {
     const auto owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     // アニメイベントやAIから首の向きを命令できるよう、ローカル/必要ならグローバルActionへ登録する。
     UnregisterActions();
@@ -227,8 +257,11 @@ void DragonNeckCommandIKComponent::RegisterActions()
             {
                 const std::string globalActionName_ =
                     owner_->RegisterGlobalAction(actionCategory, actionName_, action_);
-                if (!globalActionName_.empty()) registeredGlobalActionNames.push_back(globalActionName_);
+                if (!globalActionName_.empty())
+            {
+                registeredGlobalActionNames.push_back(globalActionName_);
             }
+        }
         };
 
     registerAction_(ACTION_CLEAR, [this]()
@@ -377,7 +410,10 @@ void DragonNeckCommandIKComponent::SetTargetObjectLookMode(bool enabled_)
 
 void DragonNeckCommandIKComponent::ApplyTargetObjectLookMode()
 {
-    if (!lookTargetObjectMode) return;
+    if (!lookTargetObjectMode)
+    {
+        return;
+    }
 
     if (currentCommand.mode != DRAGON_NECK_IK_MODE::DISABLED &&
         !currentCommand.keepLastDirection)
@@ -403,20 +439,32 @@ void DragonNeckCommandIKComponent::ApplyTargetObjectLookMode()
 
 float DragonNeckCommandIKComponent::CalculateBlendRate() const
 {
-    if (currentCommand.mode == DRAGON_NECK_IK_MODE::DISABLED) return 0.0f;
+    if (currentCommand.mode == DRAGON_NECK_IK_MODE::DISABLED)
+    {
+        return 0.0f;
+    }
 
     // blendIn -> hold -> blendOutの3区間で、IKの影響度を0〜1へ変換する。
     if (commandTimer < currentCommand.blendInTime)
     {
-        if (currentCommand.blendInTime <= 0.0001f) return 1.0f;
+        if (currentCommand.blendInTime <= 0.0001f)
+        {
+            return 1.0f;
+        }
         return SmoothStep(commandTimer / currentCommand.blendInTime);
     }
 
     const float holdEndTime_ = currentCommand.blendInTime + currentCommand.duration;
-    if (commandTimer <= holdEndTime_) return 1.0f;
+    if (commandTimer <= holdEndTime_)
+    {
+        return 1.0f;
+    }
 
     const float blendOutTimer_ = commandTimer - holdEndTime_;
-    if (currentCommand.blendOutTime <= 0.0001f) return 0.0f;
+    if (currentCommand.blendOutTime <= 0.0001f)
+    {
+        return 0.0f;
+    }
 
     return 1.0f - SmoothStep(blendOutTimer_ / currentCommand.blendOutTime);
 }
@@ -433,11 +481,17 @@ bool DragonNeckCommandIKComponent::ResolveTargetPosition(DirectX::XMFLOAT3& targ
     if (currentCommand.mode == DRAGON_NECK_IK_MODE::LOOK_AT_TARGET)
     {
         const auto owner_ = GetGameObject();
-        if (!owner_ || currentCommand.targetName.empty()) return false;
+        if (!owner_ || currentCommand.targetName.empty())
+        {
+            return false;
+        }
 
         const std::shared_ptr<GameObject> targetObject_ =
             owner_->GetManager().Find(currentCommand.targetName);
-        if (!targetObject_ || !targetObject_->transform) return false;
+        if (!targetObject_ || !targetObject_->transform)
+        {
+            return false;
+        }
 
         const DirectX::XMFLOAT3 objectPosition_ = targetObject_->transform->GetWorldPosition();
         targetPosition_ = {
@@ -454,9 +508,18 @@ bool DragonNeckCommandIKComponent::ResolveTargetPosition(DirectX::XMFLOAT3& targ
 bool DragonNeckCommandIKComponent::ApplyNeckIK(float deltaTime_)
 {
     auto* chain_ = ikMap->FindChain(chainName);
-    if (!chain_ || !chain_->enabled) return false;
-    if (!ikMap->ResolveChainByName(chainName)) return false;
-    if (chain_->nodeIndices.size() < 2) return false;
+    if (!chain_ || !chain_->enabled)
+    {
+        return false;
+    }
+    if (!ikMap->ResolveChainByName(chainName))
+    {
+        return false;
+    }
+    if (chain_->nodeIndices.size() < 2)
+    {
+        return false;
+    }
 
     // アニメーション結果を基準にIK補正を重ねるため、補正前の回転とWorld行列を保持する。
     auto& nodes_ = model->GetNodes();
@@ -464,7 +527,10 @@ bool DragonNeckCommandIKComponent::ApplyNeckIK(float deltaTime_)
     const size_t boneCount_ = chain_->nodeIndices.size();
     for (const int nodeIndex_ : chain_->nodeIndices)
     {
-        if (nodeIndex_ < 0 || nodeIndex_ >= static_cast<int>(nodes_.size())) return false;
+        if (nodeIndex_ < 0 || nodeIndex_ >= static_cast<int>(nodes_.size()))
+        {
+            return false;
+        }
     }
 
     std::vector<DirectX::XMFLOAT4> animationRotations_;
@@ -622,7 +688,10 @@ bool DragonNeckCommandIKComponent::ApplyNeckIK(float deltaTime_)
         DirectX::XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f),
         aimBaseWorldMatrix_);
 
-    if (!TryNormalizeVector(aimYawAxisWorld_) || !TryNormalizeVector(aimPitchAxisWorld_)) return false;
+    if (!TryNormalizeVector(aimYawAxisWorld_) || !TryNormalizeVector(aimPitchAxisWorld_))
+    {
+        return false;
+    }
 
     std::vector<float> yawWeights_(boneCount_, 0.0f);
     std::vector<float> pitchWeights_(boneCount_, 0.0f);
@@ -645,8 +714,14 @@ bool DragonNeckCommandIKComponent::ApplyNeckIK(float deltaTime_)
 
     for (size_t boneIndex_ = 0; boneIndex_ < boneCount_; ++boneIndex_)
     {
-        if (yawWeightTotal_ > EPSILON) yawWeights_[boneIndex_] /= yawWeightTotal_;
-        if (pitchWeightTotal_ > EPSILON) pitchWeights_[boneIndex_] /= pitchWeightTotal_;
+        if (yawWeightTotal_ > EPSILON)
+        {
+            yawWeights_[boneIndex_] /= yawWeightTotal_;
+        }
+        if (pitchWeightTotal_ > EPSILON)
+        {
+            pitchWeights_[boneIndex_] /= pitchWeightTotal_;
+        }
     }
 
     for (size_t boneIndex_ = 0; boneIndex_ < boneCount_; ++boneIndex_)
@@ -687,7 +762,10 @@ bool DragonNeckCommandIKComponent::ApplyNeckIK(float deltaTime_)
         DirectX::XMVECTOR bonePitchAxisLocal_ =
             DirectX::XMVector3TransformNormal(aimPitchAxisWorld_, inverseParentWorldMatrix_);
 
-        if (!TryNormalizeVector(boneYawAxisLocal_) || !TryNormalizeVector(bonePitchAxisLocal_)) continue;
+        if (!TryNormalizeVector(boneYawAxisLocal_) || !TryNormalizeVector(bonePitchAxisLocal_))
+        {
+            continue;
+        }
 
         const float yawRadians_ = currentYawDegrees * DEG_TO_RAD * yawWeights_[boneIndex_] * influence_;
         const float pitchRadians_ = currentPitchDegrees * DEG_TO_RAD * pitchWeights_[boneIndex_] * influence_;
@@ -710,7 +788,10 @@ bool DragonNeckCommandIKComponent::ApplyNeckIK(float deltaTime_)
         // アニメーション回転へIKの追加回転を重ね、ノード行列を先頭から再計算する。
         DirectX::XMFLOAT4 resultRotationStorage_;
         DirectX::XMStoreFloat4(&resultRotationStorage_, resultRotation_);
-        if (!IsFinite(resultRotationStorage_)) continue;
+        if (!IsFinite(resultRotationStorage_))
+        {
+            continue;
+        }
 
         node_.rotation = resultRotationStorage_;
         model->UpdateNodeTransformOnly(nodeIndex_);
@@ -723,10 +804,16 @@ bool DragonNeckCommandIKComponent::ApplyNeckIK(float deltaTime_)
 bool DragonNeckCommandIKComponent::GetMouthWorldPosition(DirectX::XMFLOAT3& position_) const
 {
     // ブレスや口元エフェクトの発生位置として、設定されたMouthノードのWorld座標を返す。
-    if (!model || mouthNodeIndex < 0) return false;
+    if (!model || mouthNodeIndex < 0)
+    {
+        return false;
+    }
 
     const auto& nodes_ = model->GetNodes();
-    if (mouthNodeIndex >= static_cast<int>(nodes_.size())) return false;
+    if (mouthNodeIndex >= static_cast<int>(nodes_.size()))
+    {
+        return false;
+    }
 
     position_ = GetTranslation(nodes_.at(mouthNodeIndex).worldTransform);
     return true;
@@ -735,10 +822,16 @@ bool DragonNeckCommandIKComponent::GetMouthWorldPosition(DirectX::XMFLOAT3& posi
 bool DragonNeckCommandIKComponent::GetMouthWorldForward(DirectX::XMFLOAT3& forward_) const
 {
     // 口元エフェクトの向きに使うため、MouthノードのWorld行列へローカル前方向を変換する。
-    if (!model || mouthNodeIndex < 0) return false;
+    if (!model || mouthNodeIndex < 0)
+    {
+        return false;
+    }
 
     const auto& nodes_ = model->GetNodes();
-    if (mouthNodeIndex >= static_cast<int>(nodes_.size())) return false;
+    if (mouthNodeIndex >= static_cast<int>(nodes_.size()))
+    {
+        return false;
+    }
 
     const DirectX::XMMATRIX worldMatrix_ = DirectX::XMLoadFloat4x4(&nodes_.at(mouthNodeIndex).worldTransform);
     DirectX::XMStoreFloat3(

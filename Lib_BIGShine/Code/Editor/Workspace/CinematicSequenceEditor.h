@@ -9,7 +9,10 @@ class GameObjectManager;
 class CinematicSequenceEditor
 {
 public:
-    explicit CinematicSequenceEditor(GameObjectManager* manager_) : manager(manager_) {}
+    explicit CinematicSequenceEditor(GameObjectManager* manager_) : manager(manager_)
+    {
+    }
+
     ~CinematicSequenceEditor();
     // Action Sequencerで選んだObjectとSequenceを引き継ぐ。
     bool Bind(const std::string& ownerName_, int sequenceIndex_);
@@ -19,6 +22,7 @@ public:
     void Draw();
     // メモリへ退避したSceneの復元を、Managerの次回更新へ予約する。
     void Stop();
+
 private:
     // 選択中Sequenceの有効性と、試写する範囲を取得する。
     bool HasSequence() const;

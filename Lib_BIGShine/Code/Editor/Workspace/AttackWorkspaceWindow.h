@@ -27,8 +27,16 @@ public:
 
     void Draw() override;
     void Update(float deltaTime_) override;
-    bool ShouldPauseScene() const override { return true; }
-    bool ShouldRenderSceneWhenPaused() const override { return false; }
+
+    bool ShouldPauseScene() const override
+    {
+        return true;
+    }
+
+    bool ShouldRenderSceneWhenPaused() const override
+    {
+        return false;
+    }
 
 private:
     void EnsurePreviewResources();

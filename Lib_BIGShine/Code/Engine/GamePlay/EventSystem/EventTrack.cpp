@@ -35,13 +35,19 @@ void EventTrack::Update(float currentTime, std::shared_ptr<GameObject> owner)
         if (inRange && !ev.started) {
             ev.started = true;
             ev.ended = false;
-            if (!ev.actionStart.empty()) Execute(ev.actionStart, owner);
+            if (!ev.actionStart.empty())
+            {
+                Execute(ev.actionStart, owner);
+            }
             return; // このFrameはStartだけにして、Updateは次Frameから始める。
         }
 
         // B. Event範囲内にいる間はUpdate Actionを毎Frame実行する。
         if (inRange) {
-            if (!ev.actionUpdate.empty()) Execute(ev.actionUpdate, owner);
+            if (!ev.actionUpdate.empty())
+            {
+                Execute(ev.actionUpdate, owner);
+            }
             return;
         }
 
@@ -89,14 +95,18 @@ void EventTrack::AddEvent(EventType type, const std::string& label, float start,
 void EventTrack::DeleteEvent(int index)
 {
     if (index >= 0 && index < (int)events.size())
+    {
         events.erase(events.begin() + index);
+    }
 }
 
 void EventTrack::DuplicateEvent(int index)
 {
     if (index >= 0 && index < (int)events.size())
+    {
         // 現在の設定をそのまま複製し、細かい調整はEditor側のDrag操作で行う。
         events.push_back(events[index]);
+    }
 }
 
 void EventTrack::BeginEdit(int index)
@@ -119,14 +129,18 @@ void EventTrack::Copy()
 {
     // 編集中EventをClipboardへ保存する。
     if (editingEntry >= 0 && editingEntry < (int)events.size())
+    {
         clipboard = events[editingEntry];
+    }
 }
 
 void EventTrack::Paste()
 {
     // 編集中EventへClipboard内容を上書きする。
     if (editingEntry >= 0 && editingEntry < (int)events.size())
+    {
         events[editingEntry] = clipboard;
+    }
 }
 
 
@@ -148,14 +162,25 @@ bool EventTrack::DrawSequencer(
     auto& globalReg = ActionRegistry::Instance();
 
     // --- 1. カテゴリリストの準備 (Local/Global) ---
-    struct CategoryEntry { std::string name; bool isLocal; };
+    struct CategoryEntry
+    {
+        std::string name;
+        bool isLocal;
+    };
+
     std::vector<CategoryEntry> allCategories;
     if (owner) {
         // OwnerのLocalActionを候補に入れ、EventがObject固有の処理を呼べるようにする。
-        for (const auto& cat : owner->localRegistry.GetCategories()) allCategories.push_back({ cat, true });
+        for (const auto& cat : owner->localRegistry.GetCategories())
+        {
+            allCategories.push_back({ cat, true });
+        }
     }
     // GlobalActionも候補に入れ、Camera/VFXなど共有ActionをTrackから呼べるようにする。
-    for (const auto& cat : globalReg.GetCategories()) allCategories.push_back({ cat, false });
+    for (const auto& cat : globalReg.GetCategories())
+    {
+        allCategories.push_back({ cat, false });
+    }
 
     // Timelineの横方向Scaleを調整する。
     ImGui::SliderFloat("Zoom", &pixelsPerSecond, 20.0f, 1000.0f, "%.0f px/s");
@@ -240,7 +265,10 @@ bool EventTrack::DrawSequencer(
                         if (ImGui::Selectable(((catEntry.isLocal ? "[L] " : "[G] ") + catEntry.name).c_str())) {
                             // カテゴリ選択後は、そのカテゴリの先頭Actionを仮設定して素早く確認できるようにする。
                             auto names = catEntry.isLocal ? owner->localRegistry.GetActionNames(catEntry.name) : globalReg.GetActionNames(catEntry.name);
-                            if (!names.empty()) ev.payload = names[0];
+                            if (!names.empty())
+                            {
+                                ev.payload = names[0];
+                            }
                             ev.label = ev.payload; // ラベルも更新
                         }
                     }

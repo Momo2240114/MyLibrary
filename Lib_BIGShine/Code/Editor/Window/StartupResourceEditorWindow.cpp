@@ -19,7 +19,10 @@ namespace
         std::string normalizedPath_ = StartupResourceConfig::NormalizeResourcePath(filePath_);
 #ifdef _WIN32
         std::transform(normalizedPath_.begin(), normalizedPath_.end(), normalizedPath_.begin(),
-            [](unsigned char character_) { return static_cast<char>(std::tolower(character_)); });
+            [](unsigned char character_)
+        {
+            return static_cast<char>(std::tolower(character_));
+        });
 #endif
         return normalizedPath_;
     }
@@ -103,7 +106,10 @@ void StartupResourceEditorWindow::DrawToolbar()
 
 void StartupResourceEditorWindow::DrawCriticalModelSection()
 {
-    if (!ImGui::CollapsingHeader("Critical Models", ImGuiTreeNodeFlags_DefaultOpen)) return;
+    if (!ImGui::CollapsingHeader("Critical Models", ImGuiTreeNodeFlags_DefaultOpen))
+    {
+        return;
+    }
 
     // CriticalはTitleSceneが待つため、最初の表示に必要なModelだけ入れる。
     ImGui::TextWrapped("TitleScene waits until these models finish loading.");
@@ -120,7 +126,10 @@ void StartupResourceEditorWindow::DrawCriticalModelSection()
 
 void StartupResourceEditorWindow::DrawHighPriorityModelSection()
 {
-    if (!ImGui::CollapsingHeader("High Priority Models", ImGuiTreeNodeFlags_DefaultOpen)) return;
+    if (!ImGui::CollapsingHeader("High Priority Models", ImGuiTreeNodeFlags_DefaultOpen))
+    {
+        return;
+    }
 
     // High Priorityは先読みするが、Title表示の待機条件には含めない。
     ImGui::TextWrapped("These models are requested at startup, but TitleScene does not wait for them.");
@@ -185,10 +194,22 @@ void StartupResourceEditorWindow::DrawModelPathList(
             MarkUnsaved();
         }
 
-        if (!exists_) ImGui::TextColored(ImVec4(1.0f, 0.35f, 0.25f, 1.0f), "File not found.");
-        if (!supported_) ImGui::TextColored(ImVec4(1.0f, 0.35f, 0.25f, 1.0f), "Unsupported model extension.");
-        if (!dataPath_) ImGui::TextColored(ImVec4(1.0f, 0.78f, 0.25f, 1.0f), "Path should be under Data/.");
-        if (nameDuplicate_) ImGui::TextColored(ImVec4(1.0f, 0.35f, 0.25f, 1.0f), "Duplicated Resource name.");
+        if (!exists_)
+        {
+            ImGui::TextColored(ImVec4(1.0f, 0.35f, 0.25f, 1.0f), "File not found.");
+        }
+        if (!supported_)
+        {
+            ImGui::TextColored(ImVec4(1.0f, 0.35f, 0.25f, 1.0f), "Unsupported model extension.");
+        }
+        if (!dataPath_)
+        {
+            ImGui::TextColored(ImVec4(1.0f, 0.78f, 0.25f, 1.0f), "Path should be under Data/.");
+        }
+        if (nameDuplicate_)
+        {
+            ImGui::TextColored(ImVec4(1.0f, 0.35f, 0.25f, 1.0f), "Duplicated Resource name.");
+        }
 
         if (ImGui::SmallButton("Browse..."))
         {
@@ -203,20 +224,35 @@ void StartupResourceEditorWindow::DrawModelPathList(
         }
 
         ImGui::SameLine();
-        if (ImGui::SmallButton("Up") && index_ > 0) moveUpIndex_ = index_;
+        if (ImGui::SmallButton("Up") && index_ > 0)
+        {
+            moveUpIndex_ = index_;
+        }
         ImGui::SameLine();
-        if (ImGui::SmallButton("Down") && index_ + 1 < static_cast<int>(entries_.size())) moveDownIndex_ = index_;
+        if (ImGui::SmallButton("Down") && index_ + 1 < static_cast<int>(entries_.size()))
+        {
+            moveDownIndex_ = index_;
+        }
         ImGui::SameLine();
         if (priority_ == STARTUP_RESOURCE_PRIORITY::CRITICAL)
         {
-            if (ImGui::SmallButton("Move To High")) changePriorityIndex_ = index_;
+            if (ImGui::SmallButton("Move To High"))
+            {
+                changePriorityIndex_ = index_;
+            }
         }
         else
         {
-            if (ImGui::SmallButton("Move To Critical")) changePriorityIndex_ = index_;
+            if (ImGui::SmallButton("Move To Critical"))
+            {
+                changePriorityIndex_ = index_;
+            }
         }
         ImGui::SameLine();
-        if (ImGui::SmallButton("Delete")) removeIndex_ = index_;
+        if (ImGui::SmallButton("Delete"))
+        {
+            removeIndex_ = index_;
+        }
 
         ImGui::Separator();
         ImGui::PopID();
@@ -272,7 +308,10 @@ void StartupResourceEditorWindow::OpenModelFileDialog(STARTUP_RESOURCE_PRIORITY 
         L"Select Startup Model",
         "Data/Model",
         GraphicsDeviceManager::Instance().GetWindowHandle());
-    if (selectedPath_.empty()) return;
+    if (selectedPath_.empty())
+    {
+        return;
+    }
 
     AddModelPath(selectedPath_, priority_);
 }
@@ -344,7 +383,10 @@ void StartupResourceEditorWindow::SetModelPath(
     const std::string& filePath_)
 {
     std::vector<StartupModelEntry>& entries_ = GetEntries(priority_);
-    if (index_ >= entries_.size()) return;
+    if (index_ >= entries_.size())
+    {
+        return;
+    }
 
     const std::string normalizedPath_ = StartupResourceConfig::NormalizeResourcePath(filePath_);
     STARTUP_RESOURCE_PRIORITY foundPriority_ = STARTUP_RESOURCE_PRIORITY::HIGH;
@@ -369,7 +411,10 @@ void StartupResourceEditorWindow::SetModelPath(
 void StartupResourceEditorWindow::RemoveModelPath(STARTUP_RESOURCE_PRIORITY priority_, size_t index_)
 {
     std::vector<StartupModelEntry>& entries_ = GetEntries(priority_);
-    if (index_ >= entries_.size()) return;
+    if (index_ >= entries_.size())
+    {
+        return;
+    }
     entries_.erase(entries_.begin() + static_cast<std::ptrdiff_t>(index_));
     MarkUnsaved();
     ValidateSettings();
@@ -381,7 +426,10 @@ void StartupResourceEditorWindow::MoveModelPath(
     size_t toIndex_)
 {
     std::vector<StartupModelEntry>& entries_ = GetEntries(priority_);
-    if (fromIndex_ >= entries_.size() || toIndex_ >= entries_.size()) return;
+    if (fromIndex_ >= entries_.size() || toIndex_ >= entries_.size())
+    {
+        return;
+    }
     std::swap(entries_[fromIndex_], entries_[toIndex_]);
     MarkUnsaved();
 }
@@ -389,7 +437,10 @@ void StartupResourceEditorWindow::MoveModelPath(
 void StartupResourceEditorWindow::ChangePriority(STARTUP_RESOURCE_PRIORITY priority_, size_t index_)
 {
     std::vector<StartupModelEntry>& sourceEntries_ = GetEntries(priority_);
-    if (index_ >= sourceEntries_.size()) return;
+    if (index_ >= sourceEntries_.size())
+    {
+        return;
+    }
 
     const STARTUP_RESOURCE_PRIORITY targetPriority_ =
         priority_ == STARTUP_RESOURCE_PRIORITY::CRITICAL
@@ -552,9 +603,15 @@ bool StartupResourceEditorWindow::HasPathInAnySection(
             {
                 if (MakeComparablePath(entries_[index_].filePath) == normalizedPath_)
                 {
-                    if (foundPriority_) *foundPriority_ = priority_;
-                    if (foundIndex_) *foundIndex_ = index_;
-                    return true;
+                    if (foundPriority_)
+                {
+                    *foundPriority_ = priority_;
+                }
+                if (foundIndex_)
+                {
+                    *foundIndex_ = index_;
+                }
+                return true;
                 }
             }
             return false;
@@ -569,16 +626,25 @@ bool StartupResourceEditorWindow::HasResourceNameDuplicate(
     STARTUP_RESOURCE_PRIORITY priority_,
     size_t index_) const
 {
-    if (resourceName_.empty()) return false;
+    if (resourceName_.empty())
+    {
+        return false;
+    }
 
     auto findName_ =
         [&](const std::vector<StartupModelEntry>& entries_, STARTUP_RESOURCE_PRIORITY currentPriority_) -> bool
         {
             for (size_t currentIndex_ = 0; currentIndex_ < entries_.size(); ++currentIndex_)
             {
-                if (currentPriority_ == priority_ && currentIndex_ == index_) continue;
-                if (entries_[currentIndex_].resourceName == resourceName_) return true;
+                if (currentPriority_ == priority_ && currentIndex_ == index_)
+            {
+                continue;
             }
+            if (entries_[currentIndex_].resourceName == resourceName_)
+            {
+                return true;
+            }
+        }
             return false;
         };
 

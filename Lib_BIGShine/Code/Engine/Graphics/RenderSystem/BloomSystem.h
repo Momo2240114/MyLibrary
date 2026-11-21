@@ -38,6 +38,7 @@ public:
         DirectX::XMFLOAT3 colorOffset = { 0.0f, 0.0f, 0.0f };
         float padding = 0.0f;
     };
+
     static_assert(sizeof(CbColorFilter) == 48);
 
     // 高輝度抽出、Kawase Blur、最終合成に必要な RenderTarget と Shader を作る。
@@ -59,13 +60,27 @@ public:
         const Parameters& params,
         const CbColorFilter& colorFilterparamas );
 
-    ID3D11ShaderResourceView* GetBrightSRV() const { return brightTarget.srv.Get(); }
+    ID3D11ShaderResourceView* ExtractGlow(const RenderContext& rc_, ID3D11ShaderResourceView* source_,
+        const Parameters& params_);
+
+    ID3D11ShaderResourceView* GetBrightSRV() const
+    {
+        return brightTarget.srv.Get();
+    }
+
     ID3D11ShaderResourceView* GetBlurSRV(size_t index_) const
     {
-        if (index_ >= blurTargets.size()) return nullptr;
+        if (index_ >= blurTargets.size())
+        {
+            return nullptr;
+        }
         return blurTargets[index_].srv.Get();
     }
-    size_t GetBlurTargetCount() const { return blurTargets.size(); }
+
+    size_t GetBlurTargetCount() const
+    {
+        return blurTargets.size();
+    }
 
 private:
     struct RenderTarget 
@@ -96,6 +111,7 @@ private:
         float exposure;
         float toneMappingEnabled;
     };
+
     Microsoft::WRL::ComPtr<ID3D11Buffer> constantBuffer;
     Microsoft::WRL::ComPtr<ID3D11Buffer> filterBuffer;
 

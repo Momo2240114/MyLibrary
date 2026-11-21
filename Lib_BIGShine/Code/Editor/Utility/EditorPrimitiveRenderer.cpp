@@ -11,7 +11,10 @@
 bool EditorPrimitiveRenderer::Initialize(ID3D11Device* device_)
 {
     // エディタ補助線用の最小構成シェーダ、入力レイアウト、動的頂点バッファを準備する。
-    if (!device_) return false;
+    if (!device_)
+    {
+        return false;
+    }
 
     D3D11_INPUT_ELEMENT_DESC inputElementDesc_[]
     {
@@ -166,9 +169,18 @@ void EditorPrimitiveRenderer::Render(
     const DirectX::XMFLOAT4X4& projection_)
 {
     // 溜めた補助線を現在のViewProjectionで描画し、描画後はバッファを空にする。
-    if (!context_) return;
-    if (vertices.empty()) return;
-    if (!vertexShader || !pixelShader || !inputLayout || !vertexBuffer || !constantBuffer) return;
+    if (!context_)
+    {
+        return;
+    }
+    if (vertices.empty())
+    {
+        return;
+    }
+    if (!vertexShader || !pixelShader || !inputLayout || !vertexBuffer || !constantBuffer)
+    {
+        return;
+    }
 
     DirectX::XMMATRIX viewMatrix_ = DirectX::XMLoadFloat4x4(&view_);
     DirectX::XMMATRIX projectionMatrix_ = DirectX::XMLoadFloat4x4(&projection_);
@@ -221,7 +233,10 @@ void EditorPrimitiveRenderer::Render(
             0,
             &mappedResource_);
 
-        if (FAILED(hr_)) break;
+        if (FAILED(hr_))
+        {
+            break;
+        }
 
         std::memcpy(
             mappedResource_.pData,

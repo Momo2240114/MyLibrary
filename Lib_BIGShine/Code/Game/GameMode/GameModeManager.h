@@ -47,21 +47,60 @@ public:
     void BeginGameSceneFlow();
 
     // 他Systemが参照する共有Blackboardを返す。
-    BlackboardComponent& GetGlobalBlackboard() { return globalBlackboard; }
-    const BlackboardComponent& GetGlobalBlackboard() const { return globalBlackboard; }
+    BlackboardComponent& GetGlobalBlackboard()
+    {
+        return globalBlackboard;
+    }
 
-    GameProgressState GetCurrentGameState() const { return currentGameState; }
-    const std::string& GetCurrentSequenceName() const { return currentSequenceName; }
+    const BlackboardComponent& GetGlobalBlackboard() const
+    {
+        return globalBlackboard;
+    }
+
+    GameProgressState GetCurrentGameState() const
+    {
+        return currentGameState;
+    }
+
+    const std::string& GetCurrentSequenceName() const
+    {
+        return currentSequenceName;
+    }
+
     const char* GetCurrentGameStateName() const;
 
-    bool IsGameplayLocked() const { return cinematicPreview || gameplayLocked; }
-    bool IsPlayerControlLocked() const { return cinematicPreview || playerControlLocked; }
-    bool IsEnemyAILocked() const { return cinematicPreview || enemyAILocked; }
-    bool IsPresentationPlaying() const { return cinematicPreview || presentationPlaying; }
-    bool IsBattlePaused() const { return cinematicPreview || battlePaused; }
+    bool IsGameplayLocked() const
+    {
+        return cinematicPreview || gameplayLocked;
+    }
+
+    bool IsPlayerControlLocked() const
+    {
+        return cinematicPreview || playerControlLocked;
+    }
+
+    bool IsEnemyAILocked() const
+    {
+        return cinematicPreview || enemyAILocked;
+    }
+
+    bool IsPresentationPlaying() const
+    {
+        return cinematicPreview || presentationPlaying;
+    }
+
+    bool IsBattlePaused() const
+    {
+        return cinematicPreview || battlePaused;
+    }
+
     // 任意Sequenceのプレビュー中は、Actionによる解除と独立して戦闘入力を抑制する。
     void BeginCinematicPreview(GameProgressState context_);
-    bool IsPhaseTransitionPreview() const { return phaseTransitionPreview; }
+
+    bool IsPhaseTransitionPreview() const
+    {
+        return phaseTransitionPreview;
+    }
 
     void SetGameplayLocked(bool locked_);
     void SetPlayerControlLocked(bool locked_);
@@ -69,13 +108,25 @@ public:
     void SetPresentationPlaying(bool playing_);
     void SetBattlePaused(bool paused_);
 
-    int GetCurrentBattlePhase() const { return currentBattlePhase; }
+    int GetCurrentBattlePhase() const
+    {
+        return currentBattlePhase;
+    }
+
     void SetCurrentBattlePhase(int phase_);
 
-    float GetPlayerHpRate() const { return playerHpRate; }
+    float GetPlayerHpRate() const
+    {
+        return playerHpRate;
+    }
+
     void SetPlayerHpRate(float rate_);
 
-    float GetBossHpRate() const { return bossHpRate; }
+    float GetBossHpRate() const
+    {
+        return bossHpRate;
+    }
+
     void SetBossHpRate(float rate_);
 
     void SetAIDirectorPreferDelayedAttack(bool enabled_);
@@ -88,15 +139,45 @@ public:
     void SetAIDirectorGuardBreakRate(float rate_);
     void SetAIDirectorAggressionRate(float rate_);
 
-    bool GetAIDirectorPreferDelayedAttack() const { return preferDelayedAttack; }
-    bool GetAIDirectorPreferFeintAttack() const { return preferFeintAttack; }
-    bool GetAIDirectorPreferGuardBreak() const { return preferGuardBreak; }
-    bool GetAIDirectorReduceAggression() const { return reduceAggression; }
+    bool GetAIDirectorPreferDelayedAttack() const
+    {
+        return preferDelayedAttack;
+    }
 
-    float GetAIDirectorAttackDelayRate() const { return attackDelayRate; }
-    float GetAIDirectorFeintRate() const { return feintRate; }
-    float GetAIDirectorGuardBreakRate() const { return guardBreakRate; }
-    float GetAIDirectorAggressionRate() const { return aggressionRate; }
+    bool GetAIDirectorPreferFeintAttack() const
+    {
+        return preferFeintAttack;
+    }
+
+    bool GetAIDirectorPreferGuardBreak() const
+    {
+        return preferGuardBreak;
+    }
+
+    bool GetAIDirectorReduceAggression() const
+    {
+        return reduceAggression;
+    }
+
+    float GetAIDirectorAttackDelayRate() const
+    {
+        return attackDelayRate;
+    }
+
+    float GetAIDirectorFeintRate() const
+    {
+        return feintRate;
+    }
+
+    float GetAIDirectorGuardBreakRate() const
+    {
+        return guardBreakRate;
+    }
+
+    float GetAIDirectorAggressionRate() const
+    {
+        return aggressionRate;
+    }
 
     // 現在保持している状態値をカテゴリ別にGlobalBlackboardへ反映する。
     void WriteBlackboard();

@@ -116,7 +116,10 @@ void InputEditorWindow::Draw()
                 const auto id_ = ids_[index_];
                 const char* name_ = SDL_GetGamepadNameForID(id_);
                 const std::string label_ = std::string(name_ ? name_ : "Unknown Gamepad") + " (#" + std::to_string(id_) + ")";
-                if (ImGui::Selectable(label_.c_str(), id_ == activeId_)) controller_.SelectGamepad(id_);
+                if (ImGui::Selectable(label_.c_str(), id_ == activeId_))
+                {
+                    controller_.SelectGamepad(id_);
+                }
             }
             SDL_free(ids_);
             ImGui::EndCombo();
@@ -131,9 +134,15 @@ void InputEditorWindow::Draw()
         ImGui::SliderFloat("High Frequency", &highStrength_, 0.0f, 1.0f);
         ImGui::SliderFloat("Duration (s)", &duration_, 0.05f, 2.0f);
         constexpr int TEST_RUMBLE_PRIORITY = 100;
-        if (ImGui::Button("Test Rumble")) controller_.PlayRumble(lowStrength_, highStrength_, duration_, TEST_RUMBLE_PRIORITY);
+        if (ImGui::Button("Test Rumble"))
+        {
+            controller_.PlayRumble(lowStrength_, highStrength_, duration_, TEST_RUMBLE_PRIORITY);
+        }
         ImGui::SameLine();
-        if (ImGui::Button("Stop Rumble")) controller_.StopRumble();
+        if (ImGui::Button("Stop Rumble"))
+        {
+            controller_.StopRumble();
+        }
         ImGui::TextUnformatted(controller_.GetRumbleStatus().c_str());
     }
 
@@ -386,11 +395,16 @@ void InputEditorWindow::DrawInputPicker(InputUnit& unit_)
     // キーボード・マウス・ゲームパッドを同じInputUnitへ割り当てるため、共通コンボとして描画する。
     const std::string preview_ = BuildUnitLabel(unit_);
     ImGui::SetNextItemWidth(260.0f);
-    if (!ImGui::BeginCombo("##Input", preview_.c_str())) return;
+    if (!ImGui::BeginCombo("##Input", preview_.c_str()))
+    {
+        return;
+    }
 
     auto drawOptions_ = [&](const char* header_, const std::vector<InputOption>& options_)
         {
-            if (ImGui::Selectable(header_, false, ImGuiSelectableFlags_Disabled)) {}
+            if (ImGui::Selectable(header_, false, ImGuiSelectableFlags_Disabled))
+        {
+        }
             for (const auto& option_ : options_)
             {
                 const bool selected_ = unit_.device == option_.device && unit_.code == option_.code;
@@ -455,6 +469,7 @@ void InputEditorWindow::DrawStatusLine()
         ImGui::TextDisabled("%s", statusMessage.c_str());
     }
 }
+
 void InputEditorWindow::RefreshDraftFromConfig()
 {
     // 保存済み設定からドラフトを作り直し、先頭項目を選んだ状態にして編集を再開しやすくする。
@@ -549,9 +564,18 @@ std::string InputEditorWindow::BuildUnitLabel(const InputUnit& unit_) const
             return nullptr;
         };
 
-    if (const char* name_ = findName_(keyboardOptions)) return name_;
-    if (const char* name_ = findName_(mouseOptions)) return name_;
-    if (const char* name_ = findName_(padOptions)) return name_;
+    if (const char* name_ = findName_(keyboardOptions))
+    {
+        return name_;
+    }
+    if (const char* name_ = findName_(mouseOptions))
+    {
+        return name_;
+    }
+    if (const char* name_ = findName_(padOptions))
+    {
+        return name_;
+    }
 
     return (unit_.device == DeviceType::Gamepad ? "Pad Code " : "Key Code ") + std::to_string(unit_.code);
 }

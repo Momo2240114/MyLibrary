@@ -52,7 +52,10 @@ bool HurtBox::CanReceiveHit(const HitBox& hitBox_) const
 {
     // 明示無敵、同じHitBox activationの重複Hit、被弾直後の短い無敵をここでまとめて拒否する。
     // AttackSystem側はこの結果を見て、HitEventを作るかどうかを決める。
-    if (IsInvincible()) return false;
+    if (IsInvincible())
+    {
+        return false;
+    }
 
     const auto receivedIterator_ = receivedActivationIds.find(&hitBox_);
     if (hitBox_.hitOncePerActivation &&
@@ -69,7 +72,10 @@ void HurtBox::SetInvincible(bool invincible_)
     // ActionSequenceから完全無敵を切り替えるための入口。
     // 完全無敵に入る時は、残りTimerではなくinvincibleフラグを優先させる。
     invincible = invincible_;
-    if (invincible) invincibilityTimer = 0.0f;
+    if (invincible)
+    {
+        invincibilityTimer = 0.0f;
+    }
 }
 
 void HurtBox::AddInvincibilityTime(float duration_)
@@ -118,10 +124,16 @@ void HurtBox::Gui()
             : 0.0f,
         ImVec2(-1.0f, 0.0f),
         invincibilityTimer > 0.0f ? "INVINCIBLE" : "READY");
-    if (ImGui::Button("Reset Hit History")) ResetHitHistory();
+    if (ImGui::Button("Reset Hit History"))
+    {
+        ResetHitHistory();
+    }
     char hurtTagBuffer_[64];
     strncpy_s(hurtTagBuffer_, hurtTag.c_str(), sizeof(hurtTagBuffer_));
-    if (ImGui::InputText("Hurt Tag", hurtTagBuffer_, sizeof(hurtTagBuffer_))) hurtTag = hurtTagBuffer_;
+    if (ImGui::InputText("Hurt Tag", hurtTagBuffer_, sizeof(hurtTagBuffer_)))
+    {
+        hurtTag = hurtTagBuffer_;
+    }
 }
 
 void HurtBox::Serialize(nlohmann::json& j_) const
@@ -165,7 +177,10 @@ void HurtBox::RegisterActions()
     // 自分自身をweak_ptrとして捕まえ、ObjectのActionRegistryから無敵ON/OFFできるようにする。
     // raw thisを直接captureしないことで、Object削除後にActionが残っても安全に抜けられる。
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     std::weak_ptr<HurtBox> weakHurtBox_;
     for (const std::shared_ptr<Component>& component_ : owner_->colliderComponents)
@@ -199,7 +214,10 @@ void HurtBox::ResolveCharacterCollider()
 {
     // CharacterColliderが同じObjectにある場合、HurtBoxを本体Collider形状へ追従させる。
     // weak_ptrが生きている間は再探索せず、Component検索コストを抑える。
-    if (!characterCollider.expired()) return;
+    if (!characterCollider.expired())
+    {
+        return;
+    }
 
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (owner_)
@@ -212,11 +230,17 @@ void HurtBox::SyncCharacterColliderShape()
 {
     // Character本体と同じCapsuleで被弾したい時に、半径、高さ、Node追従情報をコピーする。
     // 部位別HurtBoxなど独自形状にしたい場合はsyncCharacterColliderShapeをfalseにする。
-    if (!syncCharacterColliderShape) return;
+    if (!syncCharacterColliderShape)
+    {
+        return;
+    }
 
     const std::shared_ptr<CharacterCollider> characterCollider_ =
         characterCollider.lock();
-    if (!characterCollider_) return;
+    if (!characterCollider_)
+    {
+        return;
+    }
 
     radius = characterCollider_->radius;
     halfHeight = characterCollider_->halfHeight;

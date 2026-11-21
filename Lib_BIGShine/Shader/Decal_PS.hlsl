@@ -83,7 +83,10 @@ float4 main(VS_OUT pin) : SV_TARGET
         PointLightData pl = pointLights[i];
         float3 Lvec = pl.position - world_pos;
         float d = length(Lvec);
-        if (d > pl.range) continue;
+        if (d > pl.range)
+        {
+            continue;
+        }
 
         float3 L = normalize(Lvec);
         float3 H = normalize(L + V);
@@ -105,7 +108,10 @@ float4 main(VS_OUT pin) : SV_TARGET
         SpotLightData sl = spotLights[j];
         float3 Lvec = sl.position - world_pos;
         float d = length(Lvec);
-        if (d > sl.range) continue;
+        if (d > sl.range)
+        {
+            continue;
+        }
 
         float3 L = normalize(Lvec);
         float cosAngle = dot(normalize(sl.direction), -L);
@@ -113,7 +119,10 @@ float4 main(VS_OUT pin) : SV_TARGET
         float cosOuter = cos(radians(sl.outerAngle));
         float spotAttenuation = saturate((cosAngle - cosOuter) / (cosInner - cosOuter));
         spotAttenuation *= spotAttenuation;
-        if (spotAttenuation <= 0.0f) continue;
+        if (spotAttenuation <= 0.0f)
+        {
+            continue;
+        }
 
         float3 H = normalize(L + V);
         float NdotL = saturate(dot(N, L));
@@ -144,6 +153,9 @@ float4 main(VS_OUT pin) : SV_TARGET
         : lerp(bg_color.rgb, final_decal_color, final_alpha);
 
     // 接地跡は現在の描画先と合成し、上層の発光が下層の焦げを塗り戻さないようにする。
-    if (decalGroundSurface != 0u) return float4(final_decal_color, final_alpha);
+    if (decalGroundSurface != 0u)
+    {
+        return float4(final_decal_color, final_alpha);
+    }
     return float4(final_rgb, 1.0f);
 }

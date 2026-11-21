@@ -68,7 +68,10 @@ namespace
     size_t CalculateRenderSampleCount(size_t sampleCount_, int smoothStep_)
     {
         // smoothStepで各サンプル間に追加点を挟むため、描画時の実サンプル数を見積もる。
-        if (sampleCount_ < 2) return sampleCount_;
+        if (sampleCount_ < 2)
+        {
+            return sampleCount_;
+        }
         return (sampleCount_ - 1) * static_cast<size_t>((std::max)(smoothStep_, 1)) + 1;
     }
 
@@ -107,7 +110,10 @@ TrailMeshComponent::TrailMeshComponent()
 void TrailMeshComponent::RegisterActions()
 {
     auto owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     // Trail操作は所有Objectと親Objectの両方から呼べるよう、登録済みActionを整理して再登録する。
     auto unregisterActions_ = [&](ActionRegistry& registry_)
@@ -120,13 +126,22 @@ void TrailMeshComponent::RegisterActions()
 
     unregisterActions_(owner_->GetLocalRegistry());
 
-    if (!owner_->transform) return;
+    if (!owner_->transform)
+    {
+        return;
+    }
 
     auto parentTransform_ = owner_->transform->parent.lock();
-    if (!parentTransform_) return;
+    if (!parentTransform_)
+    {
+        return;
+    }
 
     auto parentObject_ = parentTransform_->gameObject.lock();
-    if (!parentObject_) return;
+    if (!parentObject_)
+    {
+        return;
+    }
 
 
     unregisterActions_(parentObject_->GetLocalRegistry());
@@ -174,22 +189,31 @@ void TrailMeshComponent::RegisterActions()
             {
                 const auto trail_ = weakTrail_.lock();
                 const auto actor_ = trail_ ? trail_->GetGameObject() : nullptr;
-                if (actor_ && actor_->manager && !actor_->IsPendingDestroy()) trail_->StartTrail();
-            });
+                if (actor_ && actor_->manager && !actor_->IsPendingDestroy())
+            {
+                trail_->StartTrail();
+            }
+        });
 
         parentRegistry_.RegisterAction("Trail", ownerName_ + "_Trail_Stop", [weakTrail_ = std::weak_ptr<TrailMeshComponent>(owner_->GetComponent<TrailMeshComponent>())]()
             {
                 const auto trail_ = weakTrail_.lock();
                 const auto actor_ = trail_ ? trail_->GetGameObject() : nullptr;
-                if (actor_ && actor_->manager && !actor_->IsPendingDestroy()) trail_->StopTrail();
-            });
+                if (actor_ && actor_->manager && !actor_->IsPendingDestroy())
+            {
+                trail_->StopTrail();
+            }
+        });
 
         parentRegistry_.RegisterAction("Trail", ownerName_ + "_Trail_Clear", [weakTrail_ = std::weak_ptr<TrailMeshComponent>(owner_->GetComponent<TrailMeshComponent>())]()
             {
                 const auto trail_ = weakTrail_.lock();
                 const auto actor_ = trail_ ? trail_->GetGameObject() : nullptr;
-                if (actor_ && actor_->manager && !actor_->IsPendingDestroy()) trail_->ClearTrail();
-            });
+                if (actor_ && actor_->manager && !actor_->IsPendingDestroy())
+            {
+                trail_->ClearTrail();
+            }
+        });
 
         registeredActionNames.push_back(ownerName_ + "_Trail_Start");
         registeredActionNames.push_back(ownerName_ + "_Trail_Stop");
@@ -209,15 +233,27 @@ void TrailMeshComponent::Update(float deltaTime_)
 {
     BS_PROFILE_SCOPE("TrailMeshComponent::Update");
     MeshVFXComponent::Update(deltaTime_);
-    if (deltaTime_ <= 0.0f) return;
+    if (deltaTime_ <= 0.0f)
+    {
+        return;
+    }
     UpdateTrailParticleEmission(deltaTime_);
-    if (samples.empty()) return;
+    if (samples.empty())
+    {
+        return;
+    }
 
     // 古いサンプルは寿命で消し、消えた場合はメッシュを作り直す。
-    for (TrailSample& sample_ : samples) sample_.age += deltaTime_;
+    for (TrailSample& sample_ : samples)
+    {
+        sample_.age += deltaTime_;
+    }
     const auto removeBegin_ = std::remove_if(
         samples.begin(), samples.end(),
-        [this](const TrailSample& sample_) { return sample_.age >= lifeTime; });
+        [this](const TrailSample& sample_)
+    {
+        return sample_.age >= lifeTime;
+    });
     if (removeBegin_ != samples.end())
     {
         samples.erase(removeBegin_, samples.end());
@@ -229,7 +265,10 @@ void TrailMeshComponent::LateUpdate(float deltaTime_)
 {
     BS_PROFILE_SCOPE("TrailMeshComponent::LateUpdate");
     (void)deltaTime_;
-    if (!meshDirty) return;
+    if (!meshDirty)
+    {
+        return;
+    }
     // サンプル追加/寿命削除があったフレームだけ、CPUメッシュを再構築してGPUへ転送する。
     RebuildMesh();
     UploadMesh();
@@ -241,7 +280,10 @@ TRAIL_SAMPLE_RESULT TrailMeshComponent::AddSample(
     const DirectX::XMFLOAT3& rightPosition_)
 {
     BS_PROFILE_SCOPE("TrailMeshComponent::AddSample");
-    if (!emitting || maxSampleCount < 2) return TRAIL_SAMPLE_RESULT::REJECTED;
+    if (!emitting || maxSampleCount < 2)
+    {
+        return TRAIL_SAMPLE_RESULT::REJECTED;
+    }
 
     if (!samples.empty())
     {
@@ -271,7 +313,10 @@ TRAIL_SAMPLE_RESULT TrailMeshComponent::AddSample(
     }
 
     samples.insert(samples.begin(), { leftPosition_, rightPosition_, 0.0f });
-    if (samples.size() > maxSampleCount) samples.resize(maxSampleCount);
+    if (samples.size() > maxSampleCount)
+    {
+        samples.resize(maxSampleCount);
+    }
     meshDirty = true;
 
     if (useTrailParticle &&
@@ -315,7 +360,10 @@ void TrailMeshComponent::SetCrossSectionHeight(float height_)
 void TrailMeshComponent::SetMaxSampleCount(size_t maxSampleCount_)
 {
     maxSampleCount = (std::max)(maxSampleCount_, static_cast<size_t>(2));
-    if (samples.size() > maxSampleCount) samples.resize(maxSampleCount);
+    if (samples.size() > maxSampleCount)
+    {
+        samples.resize(maxSampleCount);
+    }
     CreateBuffers();
     meshDirty = true;
 }
@@ -351,7 +399,10 @@ bool TrailMeshComponent::CreateBuffers()
 {
     BS_PROFILE_SCOPE("TrailMeshComponent::CreateBuffers");
     ID3D11Device* device_ = GraphicsDeviceManager::Instance().GetDevice();
-    if (!device_) return false;
+    if (!device_)
+    {
+        return false;
+    }
 
     const size_t renderSampleCount_ = CalculateRenderSampleCount(maxSampleCount, smoothStep);
     const size_t crossSectionVertexCount_ = crossSectionHeight > 0.0f ? 3 : 2;
@@ -374,7 +425,10 @@ bool TrailMeshComponent::CreateBuffers()
     vertexBuffer.Reset();
     indexBuffer.Reset();
     if (FAILED(device_->CreateBuffer(
-        &vertexDescription_, nullptr, vertexBuffer.ReleaseAndGetAddressOf()))) return false;
+        &vertexDescription_, nullptr, vertexBuffer.ReleaseAndGetAddressOf())))
+    {
+        return false;
+    }
     if (FAILED(device_->CreateBuffer(
         &indexDescription_, nullptr, indexBuffer.ReleaseAndGetAddressOf())))
     {
@@ -389,7 +443,10 @@ void TrailMeshComponent::RebuildMesh()
     BS_PROFILE_SCOPE("TrailMeshComponent::RebuildMesh");
     vertices.clear();
     indices.clear();
-    if (samples.size() < 2) return;
+    if (samples.size() < 2)
+    {
+        return;
+    }
 
     // 生サンプルを補間して描画用サンプルへ増やし、滑らかな帯メッシュにする。
     std::vector<TrailSample> renderSamples_;
@@ -515,12 +572,21 @@ void TrailMeshComponent::RebuildMesh()
 void TrailMeshComponent::UploadMesh()
 {
     BS_PROFILE_SCOPE("TrailMeshComponent::UploadMesh");
-    if ((!vertexBuffer || !indexBuffer) && !CreateBuffers()) return;
-    if (vertices.empty() || indices.empty()) return;
+    if ((!vertexBuffer || !indexBuffer) && !CreateBuffers())
+    {
+        return;
+    }
+    if (vertices.empty() || indices.empty())
+    {
+        return;
+    }
 
     // RebuildMeshで作ったCPU側頂点/インデックスを、Dynamicバッファへ上書き転送する。
     ID3D11DeviceContext* context_ = GraphicsDeviceManager::Instance().GetContext();
-    if (!context_) return;
+    if (!context_)
+    {
+        return;
+    }
 
     D3D11_MAPPED_SUBRESOURCE mapped_{};
     if (SUCCEEDED(context_->Map(vertexBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped_)))
@@ -557,7 +623,10 @@ void TrailMeshComponent::UpdateTrailParticleEmission(float deltaTime_)
     {
         return;
     }
-    if (!emitting && !trailParticleEmitWhileStopping) return;
+    if (!emitting && !trailParticleEmitWhileStopping)
+    {
+        return;
+    }
 
     // 時間間隔モードでは、最新サンプル上に一定周期で粒子を予約する。
     trailParticleTimeAccumulator += deltaTime_;
@@ -582,10 +651,16 @@ void TrailMeshComponent::EmitTrailParticlesAtSample(
     int spawnCount_)
 {
     BS_PROFILE_SCOPE("TrailMeshComponent::EmitTrailParticlesAtSample");
-    if (!useTrailParticle || trailParticleAssetPath.empty()) return;
+    if (!useTrailParticle || trailParticleAssetPath.empty())
+    {
+        return;
+    }
 
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_ || !owner_->manager) return;
+    if (!owner_ || !owner_->manager)
+    {
+        return;
+    }
 
     const int clampedSpawnCount_ = (std::max)(spawnCount_, 1);
     const int maxSpawn_ = (std::max)(trailParticleMaximumSpawnPerFrame, 1);
@@ -612,7 +687,10 @@ void TrailMeshComponent::EmitTrailParticlesAlongMovement(
     float distance_)
 {
     BS_PROFILE_SCOPE("TrailMeshComponent::EmitTrailParticlesAlongMovement");
-    if (!useTrailParticle || trailParticleAssetPath.empty()) return;
+    if (!useTrailParticle || trailParticleAssetPath.empty())
+    {
+        return;
+    }
 
     const float intervalDistance_ = (std::max)(trailParticleDistance, 0.001f);
     trailParticleDistanceAccumulator += (std::max)(distance_, 0.0f);
@@ -654,8 +732,14 @@ void TrailMeshComponent::Gui()
     MeshVFXComponent::Gui();
     ImGui::SeparatorText("Trail Mesh");
     ImGui::Checkbox("Emitting", &emitting);
-    if (ImGui::DragFloat("Cross Section Height", &crossSectionHeight, 0.02f, 0.0f, 5.0f)) SetCrossSectionHeight(crossSectionHeight);
-    if (ImGui::DragFloat("Life Time", &lifeTime, 0.01f, 0.001f, 10.0f)) SetLifeTime(lifeTime);
+    if (ImGui::DragFloat("Cross Section Height", &crossSectionHeight, 0.02f, 0.0f, 5.0f))
+    {
+        SetCrossSectionHeight(crossSectionHeight);
+    }
+    if (ImGui::DragFloat("Life Time", &lifeTime, 0.01f, 0.001f, 10.0f))
+    {
+        SetLifeTime(lifeTime);
+    }
     if (ImGui::DragFloat("Minimum Sample Distance", &minimumSampleDistance, 0.001f, 0.0f, 10.0f))
     {
         SetMinimumSampleDistance(minimumSampleDistance);
@@ -671,7 +755,10 @@ void TrailMeshComponent::Gui()
         SetSmoothStep(smoothStep_);
     }
     ImGui::Text("Current Samples: %zu", samples.size());
-    if (ImGui::Button("Clear Trail")) Clear();
+    if (ImGui::Button("Clear Trail"))
+    {
+        Clear();
+    }
 
     if (ImGui::Button("Register Trail Actions"))
     {
@@ -757,7 +844,10 @@ void TrailMeshComponent::Gui()
             EmitTrailParticlesAtSample(samples.front(), trailParticleSpawnCount);
         }
         ImGui::SameLine();
-        if (ImGui::Button("Reset Particle Timer")) ResetParticleEmissionState();
+        if (ImGui::Button("Reset Particle Timer"))
+        {
+            ResetParticleEmissionState();
+        }
         ImGui::EndDisabled();
         ImGui::TreePop();
     }

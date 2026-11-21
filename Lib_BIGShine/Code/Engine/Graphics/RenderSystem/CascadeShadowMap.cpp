@@ -35,13 +35,22 @@ bool CascadeShadowMap::Initialize(ID3D11Device* device)
     {
         // Cascadeごとに別Textureを持ち、描画時は近距離から遠距離まで順に使う。
         HRESULT hr = device->CreateTexture2D(&desc, nullptr, shadowTextures[i].GetAddressOf());
-        if (FAILED(hr)) return false;
+        if (FAILED(hr))
+        {
+            return false;
+        }
 
         hr = device->CreateDepthStencilView(shadowTextures[i].Get(), &dsvDesc, shadowDSVs[i].GetAddressOf());
-        if (FAILED(hr)) return false;
+        if (FAILED(hr))
+        {
+            return false;
+        }
 
         hr = device->CreateShaderResourceView(shadowTextures[i].Get(), &srvDesc, shadowSRVs[i].GetAddressOf());
-        if (FAILED(hr)) return false;
+        if (FAILED(hr))
+        {
+            return false;
+        }
     }
 
     viewport.TopLeftX = 0.0f;
@@ -202,6 +211,9 @@ void CascadeShadowMap::SetViewport(ID3D11DeviceContext* dc) const
 
 void CascadeShadowMap::SetCascadeSplitDistance(int index_, float distance_)
 {
-    if (index_ < 0 || index_ >= CascadeCount) return;
+    if (index_ < 0 || index_ >= CascadeCount)
+    {
+        return;
+    }
     cascadeSplitDistances[index_] = distance_;
 }

@@ -25,7 +25,12 @@ public:
     // 履歴本体はシーンへ保存せず、記録設定だけを保存する。
     void Serialize(nlohmann::json& json_) const override;
     void Deserialize(const nlohmann::json& json_) override;
-    bool IsRecording() const { return IsEnabled() && recordingEnabled; }
+
+    bool IsRecording() const
+    {
+        return IsEnabled() && recordingEnabled;
+    }
+
     // 実際のグラフ評価から候補と通過条件を収集し、AIの再評価は行わない。
     void BeginEvaluation();
     void FinishEvaluation();
@@ -44,6 +49,7 @@ private:
         std::string event;
         nlohmann::json snapshot;
     };
+
     void ClearHistory();
     void DrawHistory();
     void DrawSnapshot(const nlohmann::json& snapshot_);

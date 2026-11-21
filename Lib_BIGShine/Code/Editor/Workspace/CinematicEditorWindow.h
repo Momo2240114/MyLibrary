@@ -22,15 +22,29 @@ public:
     void Update(float deltaTime_) override;
     // Workspaceを離れる時は、このEditorが開始したプレビューだけを復元する。
     void OnVisibilityChanged(bool visible_) override;
-    bool ShouldPauseScene() const override { return true; }
-    bool ShouldRenderSceneWhenPaused() const override { return true; }
-    bool RequiresSceneRenderTarget() const override { return true; }
+
+    bool ShouldPauseScene() const override
+    {
+        return true;
+    }
+
+    bool ShouldRenderSceneWhenPaused() const override
+    {
+        return true;
+    }
+
+    bool RequiresSceneRenderTarget() const override
+    {
+        return true;
+    }
+
     bool OpenCinematicSequence(const std::string& ownerName_, int sequenceIndex_) override;
 
 private:
     enum class AuthoringSource { ACTION_SEQUENCE, BAD_END, TRUE_END };
     enum class TrackType { PLAYER, BOSS, CAMERA, EFFECT, IMPACT, CAPTURE, ENDING };
     enum class DragMode { NONE, MOVE, START, END };
+
     // 表示用トラックは毎フレーム本番設定から再構築し、独自の再生データを持たない。
     struct Track
     {
@@ -41,6 +55,7 @@ private:
         float end = 0.0f;
         ImU32 color = 0;
     };
+
     // 対象Directorと、現在のプレビュー時刻・表示範囲を取得する。
     BossFinishDirector* GetDirector() const;
     // シーク中は要求時刻を表示し、映像の再構築待ちでもカーソルを追従させる。

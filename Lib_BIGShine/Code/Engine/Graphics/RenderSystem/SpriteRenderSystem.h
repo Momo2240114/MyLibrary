@@ -81,6 +81,7 @@ private:
         DirectX::XMFLOAT4 tone, style, animation, sweep, sampling, shadow, uvRect, detail, burnColor;
         DirectX::XMFLOAT4 maskUV, maskOptions;
     };
+
     Microsoft::WRL::ComPtr<ID3D11PixelShader> uiEffectShader;
     Microsoft::WRL::ComPtr<ID3D11Buffer> uiEffectBuffer;
     // UI階層やSubmit順に基づいて描画順を確定する。

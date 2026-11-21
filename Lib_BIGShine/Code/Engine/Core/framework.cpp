@@ -39,7 +39,9 @@
 
 #include <chrono>
 
-framework::framework(HWND hwnd) : hwnd(hwnd){}										  
+framework::framework(HWND hwnd) : hwnd(hwnd)
+{
+}										  
 
 
 bool framework::initialize()
@@ -130,8 +132,14 @@ void framework::update(float elapsedTime_/*Elapsed seconds from last frame*/)
             (editorPlay_ && KeyInput::KeyPressedIn(VK_F1));
         if (!focused_ || systemKey_ || (mouse_.IsCursorLocked() && releaseKey_))
         {
-            if (mouse_.IsCursorLockEnabled()) mouseRecaptureRequired = true;
-            if (editorPlay_) manager_->SetPlayInputCaptured(false);
+            if (mouse_.IsCursorLockEnabled())
+            {
+                mouseRecaptureRequired = true;
+            }
+            if (editorPlay_)
+            {
+                manager_->SetPlayInputCaptured(false);
+            }
         }
 
         bool capture_ = false;
@@ -140,11 +148,29 @@ void framework::update(float elapsedTime_/*Elapsed seconds from last frame*/)
             const bool toggle_ = KeyInput::KeyPressedIn(VK_F2) && !ImGui::GetIO().WantTextInput;
             if (editorPlay_)
             {
+                // GUI非表示時はScene画像がないため、クライアント領域のクリックで再捕捉する。
+                if (!scene_->IsEditorVisible() && !releaseKey_ && KeyInput::KeyPressedIn(VK_LBUTTON))
+                {
+                    POINT position_{};
+                    RECT client_{};
+                    if (GetCursorPos(&position_) && ScreenToClient(hwnd, &position_) &&
+                        GetClientRect(hwnd, &client_) && PtInRect(&client_, position_))
+                    {
+                        manager_->SetPlayInputCaptured(true);
+                        mouseRecaptureRequired = false;
+                    }
+                }
                 // Scene画像のクリックが前フレームで捕捉を要求した場合は、解除待ちを終える。
                 if (mouseRecaptureRequired)
                 {
-                    if (manager_->IsPlayInputCaptured()) mouseRecaptureRequired = false;
-                    else manager_->SetPlayInputCaptured(false);
+                    if (manager_->IsPlayInputCaptured())
+                    {
+                        mouseRecaptureRequired = false;
+                    }
+                    else
+                    {
+                        manager_->SetPlayInputCaptured(false);
+                    }
                 }
                 if (toggle_ && !releaseKey_)
                 {
@@ -155,7 +181,10 @@ void framework::update(float elapsedTime_/*Elapsed seconds from last frame*/)
             }
             else if (dynamic_cast<SceneGame*>(scene_))
             {
-                if (toggle_ && !releaseKey_) mouseRecaptureRequired = !mouseRecaptureRequired;
+                if (toggle_ && !releaseKey_)
+                {
+                    mouseRecaptureRequired = !mouseRecaptureRequired;
+                }
                 // OSから戻った直後は、ゲーム領域をクリックするまでカーソルを自由にする。
                 if (mouseRecaptureRequired && !releaseKey_ && KeyInput::KeyPressedIn(VK_LBUTTON))
                 {
@@ -184,16 +213,22 @@ void framework::update(float elapsedTime_/*Elapsed seconds from last frame*/)
 		BS_PROFILE_SCOPE("SceneManager::Update");
         // 前フレームの被覆通知を、Object更新やSceneの破棄に入る前に処理する。
         const auto scene_ = dynamic_cast<SceneBase*>(SceneManager::GetCurrentScene());
-        if (scene_) scene_->ActivateContext();
+        if (scene_)
+        {
+            scene_->ActivateContext();
+        }
         const auto manager_ = scene_ ? scene_->GetGameObjectManager() : nullptr;
         if (!manager_ || !manager_->IsCinematicSequencePreview())
+        {
             ScreenTransitionManager::Instance().Update(elapsedTime_);
-		SceneManager::Update(elapsedTime_);
+        }
+        SceneManager::Update(elapsedTime_);
 	}
 
 	{
 		BS_PROFILE_SCOPE("AudioManager::Update");
         if (const auto scene_ = dynamic_cast<SceneBase*>(SceneManager::GetCurrentScene()))
+        {
             if (const auto manager_ = scene_->GetGameObjectManager())
             {
                 // ゲーム内メニューの操作音と死亡時のBGM減衰を維持し、Editor Pauseは従来どおり反映する。
@@ -204,16 +239,25 @@ void framework::update(float elapsedTime_/*Elapsed seconds from last frame*/)
                         (manager_->IsGameMenuPaused() || manager_->IsPlayerDeathActive()));
                 AudioManager::Instance().SetEditorPlayPaused(paused_);
             }
-		AudioManager::Instance().Update();
+        }
+        AudioManager::Instance().Update();
 	}
 
 	{
 		BS_PROFILE_SCOPE("PhysXSystem::Step");
         bool simulate_ = true;
         if (const auto scene_ = dynamic_cast<SceneBase*>(SceneManager::GetCurrentScene()))
-            if (const auto manager_ = scene_->GetGameObjectManager()) simulate_ = manager_->ShouldSimulatePhysics();
-        if (simulate_) PhysXSystem::Step(elapsedTime_);
-	}
+        {
+            if (const auto manager_ = scene_->GetGameObjectManager())
+            {
+                simulate_ = manager_->ShouldSimulatePhysics();
+            }
+        }
+        if (simulate_)
+        {
+            PhysXSystem::Step(elapsedTime_);
+        }
+    }
 }
 
 //void framework::update(float elapsedTime_/*Elapsed seconds from last frame*/)
@@ -271,8 +315,10 @@ void framework::render(float elapsedTime_/*Elapsed seconds from last frame*/)
             const auto scene_ = dynamic_cast<SceneBase*>(SceneManager::GetCurrentScene());
             const auto manager_ = scene_ ? scene_->GetGameObjectManager() : nullptr;
             if (!manager_ || !manager_->IsCinematicSequencePreview())
+            {
                 ScreenTransitionManager::Instance().Render();
-		}
+            }
+        }
 	}
 
 	{
@@ -374,7 +420,10 @@ LRESULT framework::handle_message(HWND hWnd_, UINT msg_, WPARAM wParam_, LPARAM 
         ((msg_ == WM_KEYDOWN || msg_ == WM_SYSKEYDOWN) && (wParam_ == VK_LWIN || wParam_ == VK_RWIN)) ||
         msg_ == WM_ENTERSIZEMOVE || msg_ == WM_ENTERMENULOOP || msg_ == WM_DESTROY)
     {
-        if (mouse_.IsCursorLockEnabled()) mouseRecaptureRequired = true;
+        if (mouse_.IsCursorLockEnabled())
+        {
+            mouseRecaptureRequired = true;
+        }
         mouse_.SetCursorLockEnabled(false);
     }
     if (msg_ == WM_SETCURSOR && LOWORD(lParam_) == HTCLIENT &&

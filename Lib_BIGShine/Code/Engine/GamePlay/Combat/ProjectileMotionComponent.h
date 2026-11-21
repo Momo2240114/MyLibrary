@@ -24,7 +24,10 @@ public:
         float gravity_,
         float maxSpeed_);
 
-    void SetFireGroundMarkRadius(float radius_) { fireGroundMarkRadius = radius_; }
+    void SetFireGroundMarkRadius(float radius_)
+    {
+        fireGroundMarkRadius = radius_;
+    }
 
     // 通常の直進弾は維持し、必要な弾だけ待機後の制限付き追尾を設定する。
     void ConfigureHoming(const std::shared_ptr<GameObject>& target_, const std::shared_ptr<GameObject>& attacker_,
@@ -33,6 +36,7 @@ public:
     void ConfigureOrbit(float radius_, float height_, float tiltDegrees_, float angularSpeed_, float phaseDegrees_, float yawDegrees_);
     // 周回弾の所有者が切り替わった直後、待機を終了して新しい対象へ向ける。
     void Reflect(const std::shared_ptr<GameObject>& target_, const std::shared_ptr<GameObject>& attacker_, float speedMultiplier_);
+
 private:
     // 発射時刻で周回位置を確定し、その位置から既存の追尾移動へ引き継ぐ。
     void UpdateOrbitPosition(float elapsedTime_);

@@ -15,8 +15,16 @@ struct AnimSequenceAdapter : public ImSequencer::SequenceInterface
     float duration = 0.0f;
     float fps = 60.0f;
 
-    int ToFrame(float time) const { return static_cast<int>(time * fps); }
-    float ToTime(int frame) const { return static_cast<float>(frame) / fps; }
+    int ToFrame(float time) const
+    {
+        return static_cast<int>(time * fps);
+    }
+
+    float ToTime(int frame) const
+    {
+        return static_cast<float>(frame) / fps;
+    }
+
     int GetClipCount() const
     {
         return targetState && targetState->type == AnimStateType::SEQUENCE
@@ -24,8 +32,16 @@ struct AnimSequenceAdapter : public ImSequencer::SequenceInterface
             : 0;
     }
 
-    int GetFrameMin() const override { return 0; }
-    int GetFrameMax() const override { return ToFrame(duration); }
+    int GetFrameMin() const override
+    {
+        return 0;
+    }
+
+    int GetFrameMax() const override
+    {
+        return ToFrame(duration);
+    }
+
     int GetItemCount() const override
     {
         return targetState
@@ -37,6 +53,7 @@ struct AnimSequenceAdapter : public ImSequencer::SequenceInterface
     {
         return targetState && targetState->type == AnimStateType::SEQUENCE ? 2 : 1;
     }
+
     const char* GetItemTypeName(int typeIndex) const override
     {
         return targetState && targetState->type == AnimStateType::SEQUENCE && typeIndex == 0
@@ -46,7 +63,10 @@ struct AnimSequenceAdapter : public ImSequencer::SequenceInterface
 
     void SyncFrames()
     {
-        if (!targetState) return;
+        if (!targetState)
+        {
+            return;
+        }
 
         for (auto& clip_ : targetState->sequenceClips)
         {
@@ -68,7 +88,10 @@ struct AnimSequenceAdapter : public ImSequencer::SequenceInterface
     // ドラッグ中や終了時に呼ばれ、フレームから秒へ変換して構造体に書き戻す
     void EndEdit() override
     {
-        if (!targetState) return;
+        if (!targetState)
+        {
+            return;
+        }
         for (auto& clip_ : targetState->sequenceClips)
         {
             clip_.startTime = ToTime(clip_.frameStart);
@@ -85,42 +108,79 @@ struct AnimSequenceAdapter : public ImSequencer::SequenceInterface
     // Get メソッドで確実にポインタを渡しているか再確認
     void Get(int index, int** start, int** end, int* type, unsigned int* color) override
     {
-        if (!targetState || index < 0 || index >= GetItemCount()) return;
+        if (!targetState || index < 0 || index >= GetItemCount())
+        {
+            return;
+        }
 
         const int clipCount_ = GetClipCount();
         if (index < clipCount_)
         {
             auto& clip_ = targetState->sequenceClips[index];
-            if (start) *start = &clip_.frameStart;
-            if (end) *end = &clip_.frameEnd;
-            if (type) *type = 0;
-            if (color) *color = 0xFF44AAEE;
+            if (start)
+            {
+                *start = &clip_.frameStart;
+            }
+            if (end)
+            {
+                *end = &clip_.frameEnd;
+            }
+            if (type)
+            {
+                *type = 0;
+            }
+            if (color)
+            {
+                *color = 0xFF44AAEE;
+            }
             return;
         }
 
         auto& ev = targetState->events[index - clipCount_];
 
-        if (start) *start = &ev.frameStart; // int* へのポインタを渡す
-        if (end) *end = &ev.frameEnd;
-        if (type) *type = targetState->type == AnimStateType::SEQUENCE ? 1 : 0;
-        if (color) *color = 0xFFAA9900;
+        if (start)
+        {
+            *start = &ev.frameStart; // int* へのポインタを渡す
+        }
+        if (end)
+        {
+            *end = &ev.frameEnd;
+        }
+        if (type)
+        {
+            *type = targetState->type == AnimStateType::SEQUENCE ? 1 : 0;
+        }
+        if (color)
+        {
+            *color = 0xFFAA9900;
+        }
     }
+
     // 左側の項目名リスト
     const char* GetItemLabel(int index) const override {
-        if (!targetState || index < 0 || index >= GetItemCount()) return "";
+        if (!targetState || index < 0 || index >= GetItemCount())
+        {
+            return "";
+        }
 
         const int clipCount_ = GetClipCount();
         if (index < clipCount_)
         {
             const auto& clip_ = targetState->sequenceClips[index];
-            if (!clip_.stateName.empty()) return clip_.stateName.c_str();
+            if (!clip_.stateName.empty())
+            {
+                return clip_.stateName.c_str();
+            }
             return "Direct Animation Clip";
         }
 
         auto& ev = targetState->events[index - clipCount_];
 
         // 1. ラベルがあれば優先
-        if (!ev.eventLabel.empty()) return ev.eventLabel.c_str();
+        if (!ev.eventLabel.empty())
+        {
+            return ev.eventLabel.c_str();
+        }
 
         return "Untitled Event";
     }
@@ -128,7 +188,10 @@ struct AnimSequenceAdapter : public ImSequencer::SequenceInterface
     // タイムライン上のバーの中に描画されるテキスト
     void CustomDraw(int index, ImDrawList* draw_list, const ImRect& rc, const ImRect& legendRect, const ImRect& clippingRect, const ImRect& legendClippingRect) override
     {
-        if (!targetState || index < 0 || index >= GetItemCount()) return;
+        if (!targetState || index < 0 || index >= GetItemCount())
+        {
+            return;
+        }
         const int clipCount_ = GetClipCount();
         if (index < clipCount_)
         {
@@ -158,7 +221,10 @@ struct AnimSequenceAdapter : public ImSequencer::SequenceInterface
     }
 
     void Add(int type) override {
-        if (!targetState) return;
+        if (!targetState)
+        {
+            return;
+        }
         if (targetState->type == AnimStateType::SEQUENCE && type == 0)
         {
             AnimSequenceClip clip_;
@@ -179,7 +245,10 @@ struct AnimSequenceAdapter : public ImSequencer::SequenceInterface
 
     // 指定したインデックスのClipまたはEventを削除する。
     void Del(int index) override {
-        if (!targetState || index < 0 || index >= GetItemCount()) return;
+        if (!targetState || index < 0 || index >= GetItemCount())
+        {
+            return;
+        }
 
         const int clipCount_ = GetClipCount();
         if (index < clipCount_)

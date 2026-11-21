@@ -17,7 +17,10 @@ namespace
 void PlayerJumpState::Enter()
 {
     PlayerControllerComponent* player_ = GetPlayerController();
-    if (!player_) return;
+    if (!player_)
+    {
+        return;
+    }
 
     const bool resumeLoop_ = player_->ConsumeJumpLoopResumeRequest();
     // 空中行動の終了時に既に接地していれば、再度踏み切らず着地処理から再開する。
@@ -87,7 +90,10 @@ void PlayerJumpState::Enter()
 void PlayerJumpState::Execute(float elapsedTime_)
 {
     PlayerControllerComponent* player_ = GetPlayerController();
-    if (!player_) return;
+    if (!player_)
+    {
+        return;
+    }
 
     phaseTimer += (std::max)(elapsedTime_, 0.0f);
 
@@ -206,10 +212,16 @@ void PlayerJumpState::ApplyJumpImpulseFromSequence()
     }
 
     PlayerControllerComponent* player_ = GetPlayerController();
-    if (!player_) return;
+    if (!player_)
+    {
+        return;
+    }
 
     CharacterMovementComponent* movement_ = player_->GetMovement();
-    if (!movement_) return;
+    if (!movement_)
+    {
+        return;
+    }
 
     // 新規Jumpだけ上方向インパルスを与える。空中Action復帰や複数イベントによる二重加速を避ける。
     hasAppliedJumpImpulse = true;
@@ -222,7 +234,10 @@ void PlayerJumpState::TryStartDoubleJump(
     PlayerControllerComponent& player_,
     const DirectX::XMFLOAT3& input_)
 {
-    if (phase != PLAYER_JUMP_RUNTIME_PHASE::LOOP) return;
+    if (phase != PLAYER_JUMP_RUNTIME_PHASE::LOOP)
+    {
+        return;
+    }
     if (jumpCount >= 2)
     {
         if (player_.IsJumpInputPressed())
@@ -231,7 +246,10 @@ void PlayerJumpState::TryStartDoubleJump(
         }
         return;
     }
-    if (!player_.IsJumpInputPressed()) return;
+    if (!player_.IsJumpInputPressed())
+    {
+        return;
+    }
 
     // 二段Jumpは垂直速度をリセットしてから専用インパルスを与え、上昇量を安定させる。
     ++jumpCount;
@@ -290,14 +308,20 @@ void PlayerJumpState::NotifyJumpLoopRequested()
 // Runtimeフェーズを更新し、AnimationStateMachine用のJumpフェーズをBlackboardへ送る。
 void PlayerJumpState::ChangePhase(PLAYER_JUMP_RUNTIME_PHASE phase_)
 {
-    if (phase == phase_) return;
+    if (phase == phase_)
+    {
+        return;
+    }
 
     const PLAYER_JUMP_RUNTIME_PHASE previousPhase_ = phase;
     phase = phase_;
     phaseTimer = 0.0f;
 
     PlayerControllerComponent* player_ = GetPlayerController();
-    if (!player_) return;
+    if (!player_)
+    {
+        return;
+    }
 
     BS_LOG_INFO(
         LOG_CATEGORY::GAME,

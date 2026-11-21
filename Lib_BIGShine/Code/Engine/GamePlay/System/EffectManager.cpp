@@ -36,7 +36,10 @@ namespace
         // ヒット方向や補間方向がゼロベクトルになった場合は、呼び出し側の基準方向を使う。
         const float lengthSq_ =
             vector_.x * vector_.x + vector_.y * vector_.y + vector_.z * vector_.z;
-        if (lengthSq_ <= 0.000001f) return fallback_;
+        if (lengthSq_ <= 0.000001f)
+        {
+            return fallback_;
+        }
         const float invLength_ = 1.0f / std::sqrt(lengthSq_);
         return
         {
@@ -147,8 +150,11 @@ void from_json(const nlohmann::json& json_, SlashEffectSpawnSetting& setting_)
         {
             // 配列で保存されたVector3だけを読み、壊れた形式ならフォールバックを返す。
             const nlohmann::json value_ = json_.value(key_, nlohmann::json::array());
-            if (!value_.is_array() || value_.size() < 3u) return fallback_;
-            return DirectX::XMFLOAT3{
+            if (!value_.is_array() || value_.size() < 3u)
+        {
+            return fallback_;
+        }
+        return DirectX::XMFLOAT3{
                 value_[0].get<float>(), value_[1].get<float>(), value_[2].get<float>() };
         };
     setting_.localOffset = readVector3_("offset", { 0.0f, 1.0f, 1.2f });
@@ -262,7 +268,10 @@ void EffectManager::Update(float deltaTime_)
             }
         }
 
-        else effect_.lifeTimer -= effectDelta_;
+        else
+        {
+            effect_.lifeTimer -= effectDelta_;
+        }
         effect_.elapsedTime += effectDelta_;
         if (effect_.poolType == EFFECT_POOL_TYPE::VFX_SEQUENCE)
         {
@@ -294,11 +303,17 @@ void EffectManager::Update(float deltaTime_)
             [this](ManagedEffect& effect_)
             {
                 const std::shared_ptr<GameObject> object_ = effect_.object.lock();
-                if (!object_) return true;
+                if (!object_)
+        {
+            return true;
+        }
 
-                if (effect_.lifeTimer > 0.0f) return false;
+        if (effect_.lifeTimer > 0.0f)
+        {
+            return false;
+        }
 
-                if (effect_.poolType != EFFECT_POOL_TYPE::NONE)
+        if (effect_.poolType != EFFECT_POOL_TYPE::NONE)
                 {
                     ReleasePooledEffect(effect_);
                 }
@@ -434,7 +449,10 @@ void EffectManager::RebuildRuntimePools()
             entry_.fullPath,
             "Data/VFX");
         const auto assetIterator_ = meshVFXAssetCache.find(assetName_);
-        if (assetIterator_ == meshVFXAssetCache.end()) continue;
+        if (assetIterator_ == meshVFXAssetCache.end())
+        {
+            continue;
+        }
 
         std::vector<std::shared_ptr<GameObject>>& objects_ =
             meshVFXObjectPool[assetName_];
@@ -458,7 +476,10 @@ void EffectManager::RebuildRuntimePools()
             entry_.fullPath,
             "Data/VFXSequence");
         const auto assetIterator_ = vfxSequenceAssetCache.find(assetName_);
-        if (assetIterator_ == vfxSequenceAssetCache.end()) continue;
+        if (assetIterator_ == vfxSequenceAssetCache.end())
+        {
+            continue;
+        }
 
         std::vector<std::shared_ptr<GameObject>>& objects_ =
             vfxSequenceObjectPool[assetName_];
@@ -486,14 +507,23 @@ void EffectManager::RebuildRuntimePools()
 // Particle Asset名またはパスを実際のJSONパスへ解決する
 std::string EffectManager::ResolveParticlePath(const std::string& assetNameOrPath_) const
 {
-    if (assetNameOrPath_.empty()) return {};
+    if (assetNameOrPath_.empty())
+    {
+        return {};
+    }
 
     const auto directIterator_ = particlePathByKey.find(assetNameOrPath_);
-    if (directIterator_ != particlePathByKey.end()) return directIterator_->second;
+    if (directIterator_ != particlePathByKey.end())
+    {
+        return directIterator_->second;
+    }
 
     const std::string assetKey_ = BuildAssetNameFromPath(assetNameOrPath_, "Data/Particle");
     const auto keyIterator_ = particlePathByKey.find(assetKey_);
-    if (keyIterator_ != particlePathByKey.end()) return keyIterator_->second;
+    if (keyIterator_ != particlePathByKey.end())
+    {
+        return keyIterator_->second;
+    }
 
     const std::filesystem::path path_ =
         WindowsDialogHelper::Utf8ToPath(assetNameOrPath_);
@@ -509,14 +539,23 @@ std::string EffectManager::ResolveParticlePath(const std::string& assetNameOrPat
 // MeshVFX Asset名またはパスを実際のJSONパスへ解決する
 std::string EffectManager::ResolveMeshVFXPath(const std::string& assetNameOrPath_) const
 {
-    if (assetNameOrPath_.empty()) return {};
+    if (assetNameOrPath_.empty())
+    {
+        return {};
+    }
 
     const auto directIterator_ = meshVFXPathByKey.find(assetNameOrPath_);
-    if (directIterator_ != meshVFXPathByKey.end()) return directIterator_->second;
+    if (directIterator_ != meshVFXPathByKey.end())
+    {
+        return directIterator_->second;
+    }
 
     const std::string assetKey_ = BuildAssetNameFromPath(assetNameOrPath_, "Data/VFX");
     const auto keyIterator_ = meshVFXPathByKey.find(assetKey_);
-    if (keyIterator_ != meshVFXPathByKey.end()) return keyIterator_->second;
+    if (keyIterator_ != meshVFXPathByKey.end())
+    {
+        return keyIterator_->second;
+    }
 
     const std::filesystem::path path_ =
         WindowsDialogHelper::Utf8ToPath(assetNameOrPath_);
@@ -533,7 +572,10 @@ std::string EffectManager::ResolveMeshVFXPath(const std::string& assetNameOrPath
 std::string EffectManager::ResolveVFXSequencePath(
     const std::string& assetNameOrPath_) const
 {
-    if (assetNameOrPath_.empty()) return {};
+    if (assetNameOrPath_.empty())
+    {
+        return {};
+    }
 
     const auto directIterator_ = vfxSequencePathByKey.find(assetNameOrPath_);
     if (directIterator_ != vfxSequencePathByKey.end()) 
@@ -567,7 +609,10 @@ std::string EffectManager::ResolveVFXSequencePath(
 std::string EffectManager::ResolveImpactEffectPath(
     const std::string& assetNameOrPath_) const
 {
-    if (assetNameOrPath_.empty()) return {};
+    if (assetNameOrPath_.empty())
+    {
+        return {};
+    }
 
     const auto directIterator_ = impactEffectPathByKey.find(assetNameOrPath_);
 
@@ -601,7 +646,10 @@ std::string EffectManager::ResolveImpactEffectPath(
 std::shared_ptr<GameObject> EffectManager::SpawnParticle(
     const ParticleSpawnRequest& request_)
 {
-    if (!gameObjectManager || request_.assetPath.empty()) return nullptr;
+    if (!gameObjectManager || request_.assetPath.empty())
+    {
+        return nullptr;
+    }
 
     const std::string resolvedAssetPath_ =
         ResolveParticlePath(request_.assetPath);
@@ -614,7 +662,10 @@ std::shared_ptr<GameObject> EffectManager::SpawnParticle(
     std::shared_ptr<GameObject> object_ =
         AcquireParticleObject(resolvedAssetPath_);
 
-    if (!object_) return nullptr;
+    if (!object_)
+    {
+        return nullptr;
+    }
 
     const DirectX::XMFLOAT3 spawnPosition_ = ApplyNormalOffset(
         request_.position,
@@ -628,7 +679,10 @@ std::shared_ptr<GameObject> EffectManager::SpawnParticle(
     std::shared_ptr<ParticleComponent> particle_ =
         object_->GetComponent<ParticleComponent>();
 
-    if (!particle_) return object_;
+    if (!particle_)
+    {
+        return object_;
+    }
     // 演出プレビュー等で抑制されたPool個体を再利用しても、UpdateとRenderへ復帰させる。
     particle_->SetRuntimeSuppressed(false);
     particle_->ResetUpdateTiming();
@@ -710,14 +764,20 @@ void EffectManager::QueueTrailParticleEmission(
     const TrailParticleEmissionRequest& request_)
 {
     BS_PROFILE_SCOPE("EffectManager::QueueTrailParticleEmission");
-    if (request_.assetPath.empty()) return;
+    if (request_.assetPath.empty())
+    {
+        return;
+    }
     queuedTrailParticleEmissions.push_back(request_);
 }
 
 void EffectManager::ProcessTrailParticleEmissions()
 {
     BS_PROFILE_SCOPE("EffectManager::ProcessTrailParticleEmissions");
-    if (queuedTrailParticleEmissions.empty()) return;
+    if (queuedTrailParticleEmissions.empty())
+    {
+        return;
+    }
 
     std::vector<TrailParticleEmissionRequest> requests_ =
         std::move(queuedTrailParticleEmissions);
@@ -784,12 +844,18 @@ float EffectManager::GenerateTrailParticleRandom01()
 std::shared_ptr<GameObject> EffectManager::SpawnSlashEffect(
     const AttackEffectSpawnRequest& request_)
 {
-    if (!gameObjectManager || request_.setting.vfxPath.empty()) return nullptr;
+    if (!gameObjectManager || request_.setting.vfxPath.empty())
+    {
+        return nullptr;
+    }
     if (request_.ownerObject)
     {
         const auto health_ = request_.ownerObject->GetComponent<HealthComponent>();
         // 撃破後に古いAnimation Eventが走っても、斬撃VFXや遅延予約を作らない。
-        if (request_.ownerObject->IsPendingDestroy() || (health_ && health_->IsDead())) return nullptr;
+        if (request_.ownerObject->IsPendingDestroy() || (health_ && health_->IsDead()))
+        {
+            return nullptr;
+        }
     }
     if (request_.setting.spawnTime > 0.0f)
     {
@@ -804,7 +870,10 @@ std::shared_ptr<GameObject> EffectManager::SpawnSlashEffect(
     vfxRequest_.assetPath = request_.setting.vfxPath;
     vfxRequest_.lifeTime = request_.setting.lifeTime;
     std::shared_ptr<GameObject> object_ = SpawnMeshVFX(vfxRequest_);
-    if (!object_) return nullptr;
+    if (!object_)
+    {
+        return nullptr;
+    }
     if (std::shared_ptr<MeshVFXComponent> meshVFX_ = object_->GetComponent<MeshVFXComponent>())
     {
         meshVFX_->SetPlaybackSpeed(request_.setting.playbackSpeed);
@@ -880,7 +949,10 @@ std::shared_ptr<GameObject> EffectManager::SpawnSlashEffect(
         if (attackInstanceId_ == 0u)
         {
             attackInstanceId_ = gameObjectManager->GetAttackSystem().CreateAttackInstance();
-            if (sourceHitBox_) sourceHitBox_->SetAttackInstanceId(attackInstanceId_);
+            if (sourceHitBox_)
+            {
+                sourceHitBox_->SetAttackInstanceId(attackInstanceId_);
+            }
         }
 
         hitBox_ = object_->GetOrAddComponent<HitBox>();
@@ -939,7 +1011,10 @@ std::shared_ptr<GameObject> EffectManager::SpawnSlashEffect(
             break;
         }
     }
-    if (request_.ownerObject) RegisterAttackEffectOwner(object_, request_.ownerObject->weak_from_this().lock());
+    if (request_.ownerObject)
+    {
+        RegisterAttackEffectOwner(object_, request_.ownerObject->weak_from_this().lock());
+    }
     return object_;
 }
 
@@ -956,9 +1031,15 @@ std::shared_ptr<GameObject> EffectManager::SpawnAttackEffect(
     GameObject* ownerObject_,
     uint32_t attackInstanceId_)
 {
-    if (!gameObjectManager || !effectTemplate_.enabled) return nullptr;
+    if (!gameObjectManager || !effectTemplate_.enabled)
+    {
+        return nullptr;
+    }
     std::shared_ptr<GameObject> object_ = gameObjectManager->Create("RuntimeAttackEffect");
-    if (!object_) return nullptr;
+    if (!object_)
+    {
+        return nullptr;
+    }
     object_->SetNoSaveObject();
 
     using namespace DirectX;
@@ -1095,7 +1176,10 @@ std::shared_ptr<GameObject> EffectManager::SpawnAttackEffect(
         attackHit_->SetHitShapes(effectTemplate_.hitShapes);
         attackHit_->Play();
     }
-    if (ownerObject_) RegisterAttackEffectOwner(object_, ownerObject_->weak_from_this().lock());
+    if (ownerObject_)
+    {
+        RegisterAttackEffectOwner(object_, ownerObject_->weak_from_this().lock());
+    }
     return object_;
 }
 
@@ -1111,7 +1195,10 @@ std::shared_ptr<GameObject> EffectManager::SpawnEffectWithHitBox(
 std::shared_ptr<GameObject> EffectManager::SpawnMeshVFX(
     const MeshVFXSpawnRequest& request_)
 {
-    if (!gameObjectManager || request_.assetPath.empty()) return nullptr;
+    if (!gameObjectManager || request_.assetPath.empty())
+    {
+        return nullptr;
+    }
     const std::string resolvedSequencePath_ =
         ResolveVFXSequencePath(request_.assetPath);
     if (!resolvedSequencePath_.empty())
@@ -1120,7 +1207,10 @@ std::shared_ptr<GameObject> EffectManager::SpawnMeshVFX(
         if (object_ && !request_.lifetimeOwner.expired())
         {
             const auto effect_ = std::find_if(managedEffects.begin(), managedEffects.end(),
-                [&object_](const ManagedEffect& current_) { return current_.object.lock() == object_; });
+                [&object_](const ManagedEffect& current_)
+            {
+                return current_.object.lock() == object_;
+            });
             if (effect_ != managedEffects.end())
             {
                 effect_->lifetimeOwner = request_.lifetimeOwner;
@@ -1133,7 +1223,10 @@ std::shared_ptr<GameObject> EffectManager::SpawnMeshVFX(
 
     std::shared_ptr<GameObject> object_ =
         AcquireMeshVFXObject(resolvedAssetPath_);
-    if (!object_) return nullptr;
+    if (!object_)
+    {
+        return nullptr;
+    }
 
     const DirectX::XMFLOAT3 spawnPosition_ = ApplyNormalOffset(
         request_.position,
@@ -1145,7 +1238,10 @@ std::shared_ptr<GameObject> EffectManager::SpawnMeshVFX(
 
     std::shared_ptr<MeshVFXComponent> meshVFX_ =
         object_->GetComponent<MeshVFXComponent>();
-    if (!meshVFX_) return object_;
+    if (!meshVFX_)
+    {
+        return object_;
+    }
 
     object_->transform->localScale = request_.scale;
     object_->transform->MarkDirty();
@@ -1176,7 +1272,10 @@ std::shared_ptr<GameObject> EffectManager::SpawnMeshVFX(
 
 void EffectManager::SpawnForHit(const AttackHitEvent& event_)
 {
-    if (!event_.hasHitContact) return;
+    if (!event_.hasHitContact)
+    {
+        return;
+    }
 
     std::printf(
         "[EffectManager::SpawnForHit] particle='%s' emitter='%s' meshVFX='%s' "
@@ -1206,10 +1305,14 @@ void EffectManager::SpawnForHit(const AttackHitEvent& event_)
             request_.sizeScale = 2.0f;
             if (request_.assetPath == "LargeHitSparks_Weak" ||
                 request_.assetPath == "Data/Particle/LargeHitSparks_Weak.json")
+            {
                 request_.assetPath = "PlayerHitSparks_Weak";
+            }
             else if (request_.assetPath == "LargeHitSparks_Strong" ||
                 request_.assetPath == "Data/Particle/LargeHitSparks_Strong.json")
+            {
                 request_.assetPath = "PlayerHitSparks_Strong";
+            }
         }
         if (event_.hitParticleUseImpactAxis)
         {
@@ -1269,11 +1372,17 @@ void EffectManager::SpawnForHit(const AttackHitEvent& event_)
 std::shared_ptr<GameObject> EffectManager::SpawnDecal(
     const DecalSpawnRequest& request_)
 {
-    if (!gameObjectManager || request_.texturePath.empty()) return nullptr;
+    if (!gameObjectManager || request_.texturePath.empty())
+    {
+        return nullptr;
+    }
 
     std::shared_ptr<GameObject> object_ =
         gameObjectManager->Create("RuntimeImpactDecal");
-    if (!object_) return nullptr;
+    if (!object_)
+    {
+        return nullptr;
+    }
     object_->SetNoSaveObject();
 
     const DirectX::XMFLOAT3 position_ = ApplyNormalOffset(
@@ -1308,7 +1417,10 @@ std::shared_ptr<GameObject> EffectManager::SpawnDecal(
     }
     decal_->color = request_.color;
     decal_->SetTexture(request_.texturePath);
-    if (request_.groundSurface) decal_->SetGroundSurface(request_.emissiveStrength, request_.groundMaskPath);
+    if (request_.groundSurface)
+    {
+        decal_->SetGroundSurface(request_.emissiveStrength, request_.groundMaskPath);
+    }
     decal_->SetLifeTime(request_.lifeTime, request_.fadeOutDuration);
     decal_->SetDestroyOnLifeEnd(true);
     return object_;
@@ -1319,7 +1431,10 @@ void EffectManager::SpawnGroundMark(GroundMarkShape shape_, const DirectX::XMFLO
 {
     BS_PROFILE_SCOPE("EffectManager::SpawnGroundMark");
     auto* scene_ = PhysXSystem::GetScene();
-    if (!scene_ || halfWidth_ <= 0.0f || halfLength_ <= 0.0f) return;
+    if (!scene_ || halfWidth_ <= 0.0f || halfLength_ <= 0.0f)
+    {
+        return;
+    }
 
     physx::PxRaycastBuffer ground_;
     physx::PxQueryFilterData filter_;
@@ -1328,7 +1443,10 @@ void EffectManager::SpawnGroundMark(GroundMarkShape shape_, const DirectX::XMFLO
     filter_.flags = physx::PxQueryFlag::eSTATIC | physx::PxQueryFlag::eDYNAMIC;
     if (!scene_->raycast({ center_.x, center_.y + 2.0f, center_.z }, { 0.0f, -1.0f, 0.0f },
         32.0f, ground_, physx::PxHitFlag::eDEFAULT, filter_) ||
-        !ground_.hasBlock || ground_.block.normal.y < 0.5f) return;
+        !ground_.hasBlock || ground_.block.normal.y < 0.5f)
+    {
+        return;
+    }
 
     using namespace DirectX;
     const XMFLOAT3 position_{ ground_.block.position.x, ground_.block.position.y, ground_.block.position.z };
@@ -1362,9 +1480,18 @@ void EffectManager::SpawnGroundMark(GroundMarkShape shape_, const DirectX::XMFLO
     };
 
     const char* scorch_ = "Data/Texture/Decal/ScorchRound.png";
-    if (shape_ == GroundMarkShape::FIRE_BEAM) scorch_ = "Data/Texture/Decal/ScorchBeam.png";
-    if (shape_ == GroundMarkShape::FIRE_FAN) scorch_ = "Data/Texture/Decal/ScorchFan.png";
-    if (shape_ == GroundMarkShape::LIGHTNING_STRIP) scorch_ = "Data/Texture/Decal/ScorchLightning.png";
+    if (shape_ == GroundMarkShape::FIRE_BEAM)
+    {
+        scorch_ = "Data/Texture/Decal/ScorchBeam.png";
+    }
+    if (shape_ == GroundMarkShape::FIRE_FAN)
+    {
+        scorch_ = "Data/Texture/Decal/ScorchFan.png";
+    }
+    if (shape_ == GroundMarkShape::LIGHTNING_STRIP)
+    {
+        scorch_ = "Data/Texture/Decal/ScorchLightning.png";
+    }
 
     decal_.texturePath = "Data/Texture/Decal/GroundCrater.png";
     decal_.groundMaskPath = scorch_;
@@ -1474,7 +1601,10 @@ void EffectManager::SpawnImpactEffectAsset(
 
     for (const ImpactEffectEntry& entry_ : iterator_->second.entries)
     {
-        if (!entry_.enabled || entry_.assetPath.empty()) continue;
+        if (!entry_.enabled || entry_.assetPath.empty())
+        {
+            continue;
+        }
         ImpactEffectSpawnRequest request_{};
         request_.attackOwner = attackOwner_;
         request_.position = position_;
@@ -1523,52 +1653,96 @@ bool EffectManager::IsEffectOwnedBy(const std::shared_ptr<GameObject>& object_, 
 void EffectManager::RegisterAttackEffectOwner(const std::shared_ptr<GameObject>& object_, const std::shared_ptr<GameObject>& owner_)
 {
     // Animation・Sequence・独立判定・VFX寿命を同じ時計倍率へそろえる。
-    if (object_) object_->SetRuntimePlaybackRate(owner_ ? owner_->GetRuntimePlaybackRate() : 1.0f);
-    if (!object_ || !owner_) return;
+    if (object_)
+    {
+        object_->SetRuntimePlaybackRate(owner_ ? owner_->GetRuntimePlaybackRate() : 1.0f);
+    }
+    if (!object_ || !owner_)
+    {
+        return;
+    }
     for (auto& effect_ : managedEffects)
-        if (effect_.object.lock() == object_) { effect_.attackOwner = owner_; return; }
+    {
+        if (effect_.object.lock() == object_)
+        {
+            effect_.attackOwner = owner_;
+            return;
+        }
+    }
 }
 
 void EffectManager::StopAttackEffects(const std::shared_ptr<GameObject>& owner_,
     const std::vector<std::weak_ptr<GameObject>>& preservedEffects_)
 {
     BS_PROFILE_SCOPE("EffectManager::StopAttackEffects");
-    if (!owner_ || !gameObjectManager) return;
+    if (!owner_ || !gameObjectManager)
+    {
+        return;
+    }
     scheduledAttackEffects.erase(std::remove_if(scheduledAttackEffects.begin(), scheduledAttackEffects.end(),
-        [&owner_](const ScheduledAttackEffect& effect_) { return effect_.request.ownerObject == owner_.get(); }), scheduledAttackEffects.end());
+        [&owner_](const ScheduledAttackEffect& effect_)
+    {
+        return effect_.request.ownerObject == owner_.get();
+    }), scheduledAttackEffects.end());
     std::vector<std::shared_ptr<GameObject>> managedObjects_;
     std::vector<std::shared_ptr<GameObject>> attackObjects_;
     // 独立して発射を完了する弾は、見た目と判定を同じObject単位で停止対象から外す。
     const auto isPreserved_ = [&preservedEffects_](const std::shared_ptr<GameObject>& object_)
     {
         return object_ && std::any_of(preservedEffects_.begin(), preservedEffects_.end(),
-            [&object_](const std::weak_ptr<GameObject>& effect_) { return effect_.lock() == object_; });
+            [&object_](const std::weak_ptr<GameObject>& effect_)
+        {
+            return effect_.lock() == object_;
+        });
     };
     for (const auto& effect_ : managedEffects)
     {
         const auto object_ = effect_.object.lock();
-        if (isPreserved_(object_)) continue;
+        if (isPreserved_(object_))
+        {
+            continue;
+        }
         const auto hitBox_ = effect_.hitBox.lock();
         const auto attack_ = object_ ? object_->GetComponent<AttackEffectHitComponent>() : nullptr;
         if (object_ && (effect_.attackOwner.lock() == owner_ || (hitBox_ && hitBox_->GetAttackOwner() == owner_) || (attack_ && attack_->IsOwnedBy(owner_.get()))))
+        {
             managedObjects_.push_back(object_);
+        }
     }
     for (const auto& object_ : gameObjectManager->GetObjects())
     {
-        if (isPreserved_(object_)) continue;
+        if (isPreserved_(object_))
+        {
+            continue;
+        }
         const auto attack_ = object_ ? object_->GetComponent<AttackEffectHitComponent>() : nullptr;
-        if (!attack_ || !attack_->IsOwnedBy(owner_.get())) continue;
+        if (!attack_ || !attack_->IsOwnedBy(owner_.get()))
+        {
+            continue;
+        }
         attack_->Stop();
-        if (std::find(managedObjects_.begin(), managedObjects_.end(), object_) == managedObjects_.end()) attackObjects_.push_back(object_);
+        if (std::find(managedObjects_.begin(), managedObjects_.end(), object_) == managedObjects_.end())
+        {
+            attackObjects_.push_back(object_);
+        }
     }
     // 検索中にはManagerの配列を変更せず、Pool返却と通常Object削除を分けて行う。
-    for (const auto& object_ : managedObjects_) StopEffect(object_);
-    for (const auto& object_ : attackObjects_) gameObjectManager->Destroy(object_);
+    for (const auto& object_ : managedObjects_)
+    {
+        StopEffect(object_);
+    }
+    for (const auto& object_ : attackObjects_)
+    {
+        gameObjectManager->Destroy(object_);
+    }
 }
 
 void EffectManager::StopEffect(const std::shared_ptr<GameObject>& object_, const Component* lifetimeOwner_)
 {
-    if (!object_) return;
+    if (!object_)
+    {
+        return;
+    }
 
     const auto iterator_ = std::find_if(
         managedEffects.begin(),
@@ -1578,7 +1752,10 @@ void EffectManager::StopEffect(const std::shared_ptr<GameObject>& object_, const
             return effect_.object.lock() == object_ &&
                 (!lifetimeOwner_ || effect_.lifetimeOwner.lock().get() == lifetimeOwner_);
         });
-    if (iterator_ == managedEffects.end()) return;
+    if (iterator_ == managedEffects.end())
+    {
+        return;
+    }
 
     if (iterator_->poolType != EFFECT_POOL_TYPE::NONE)
     {
@@ -1625,7 +1802,10 @@ void EffectManager::RegisterManagedEffect(
     EFFECT_POOL_TYPE poolType_,
     const std::string& assetPath_)
 {
-    if (!object_) return;
+    if (!object_)
+    {
+        return;
+    }
 
     ManagedEffect managedEffect_{};
     managedEffect_.object = object_;
@@ -1654,7 +1834,10 @@ std::shared_ptr<GameObject> EffectManager::AcquireParticleObject(
     if (particleAssetCache.find(assetName_) == particleAssetCache.end())
     {
         PreloadParticleAsset(resolvedAssetPath_);
-        if (particleAssetCache.find(assetName_) == particleAssetCache.end()) return nullptr;
+        if (particleAssetCache.find(assetName_) == particleAssetCache.end())
+        {
+            return nullptr;
+        }
     }
     std::vector<std::shared_ptr<GameObject>>& objects_ =
         particleObjectPool[assetName_];
@@ -1741,15 +1924,24 @@ std::shared_ptr<GameObject> EffectManager::CreateParticlePoolObject(
     const ParticleEffectAsset& asset_)
 {
     (void)resolvedAssetPath_;
-    if (!gameObjectManager) return nullptr;
+    if (!gameObjectManager)
+    {
+        return nullptr;
+    }
     std::shared_ptr<GameObject> object_ =
         gameObjectManager->Create("PooledParticle");
-    if (!object_) return nullptr;
+    if (!object_)
+    {
+        return nullptr;
+    }
     object_->SetNoSaveObject();
 
     std::shared_ptr<ParticleComponent> particle_ =
         object_->AddComponent<ParticleComponent>();
-    if (!particle_) return nullptr;
+    if (!particle_)
+    {
+        return nullptr;
+    }
     particle_->SetAsset(asset_);
     particle_->ResetRuntime();
     if (!particle_->HasRuntimeResources())
@@ -1771,15 +1963,24 @@ std::shared_ptr<GameObject> EffectManager::CreateMeshVFXPoolObject(
     const MeshVFXAsset& asset_)
 {
     (void)resolvedAssetPath_;
-    if (!gameObjectManager) return nullptr;
+    if (!gameObjectManager)
+    {
+        return nullptr;
+    }
     std::shared_ptr<GameObject> object_ =
         gameObjectManager->Create("PooledMeshVFX");
-    if (!object_) return nullptr;
+    if (!object_)
+    {
+        return nullptr;
+    }
     object_->SetNoSaveObject();
 
     std::shared_ptr<MeshVFXComponent> meshVFX_ =
         object_->AddComponent<MeshVFXComponent>();
-    if (!meshVFX_) return nullptr;
+    if (!meshVFX_)
+    {
+        return nullptr;
+    }
     meshVFX_->SetAsset(asset_);
     if (!meshVFX_->HasRuntimeResources())
     {
@@ -1807,7 +2008,10 @@ std::shared_ptr<GameObject> EffectManager::AcquireVFXSequenceObject(
         vfxSequenceObjectPool[assetName_];
     for (const std::shared_ptr<GameObject>& object_ : objects_)
     {
-        if (!object_) continue;
+        if (!object_)
+        {
+            continue;
+        }
         const std::shared_ptr<ParticleComponent> particle_ =
             object_->GetComponent<ParticleComponent>();
         const std::shared_ptr<MeshVFXComponent> meshVFX_ =
@@ -1849,10 +2053,16 @@ std::shared_ptr<GameObject> EffectManager::CreateVFXSequencePoolObject(
     const std::string& resolvedAssetPath_,
     const VFXSequenceAsset& asset_)
 {
-    if (!gameObjectManager) return nullptr;
+    if (!gameObjectManager)
+    {
+        return nullptr;
+    }
     std::shared_ptr<GameObject> object_ =
         gameObjectManager->Create("PooledVFXSequence");
-    if (!object_) return nullptr;
+    if (!object_)
+    {
+        return nullptr;
+    }
     object_->SetNoSaveObject();
 
     if (asset_.hasParticle)
@@ -1913,11 +2123,17 @@ std::shared_ptr<GameObject> EffectManager::SpawnVFXSequence(
         resolvedAssetPath_,
         "Data/VFXSequence");
     const auto assetIterator_ = vfxSequenceAssetCache.find(assetName_);
-    if (assetIterator_ == vfxSequenceAssetCache.end()) return nullptr;
+    if (assetIterator_ == vfxSequenceAssetCache.end())
+    {
+        return nullptr;
+    }
 
     std::shared_ptr<GameObject> object_ =
         AcquireVFXSequenceObject(resolvedAssetPath_);
-    if (!object_) return nullptr;
+    if (!object_)
+    {
+        return nullptr;
+    }
 
     const DirectX::XMFLOAT3 spawnPosition_ = ApplyNormalOffset(
         request_.position,
@@ -1963,14 +2179,20 @@ std::shared_ptr<GameObject> EffectManager::SpawnVFXSequence(
 void EffectManager::UpdateVFXSequence(ManagedEffect& effect_)
 {
     const std::shared_ptr<GameObject> object_ = effect_.object.lock();
-    if (!object_ || effect_.sequenceDuration <= 0.0f) return;
+    if (!object_ || effect_.sequenceDuration <= 0.0f)
+    {
+        return;
+    }
 
     if (effect_.sequenceLoop && effect_.sequenceTime >= effect_.sequenceDuration)
     {
         effect_.sequenceTime = std::fmod(
             effect_.sequenceTime,
             effect_.sequenceDuration);
-        for (VFXSequenceTrack& track_ : effect_.sequenceTracks) track_.active = false;
+        for (VFXSequenceTrack& track_ : effect_.sequenceTracks)
+        {
+            track_.active = false;
+        }
         if (const std::shared_ptr<ParticleComponent> particle_ =
             object_->GetComponent<ParticleComponent>())
         {
@@ -1992,7 +2214,10 @@ void EffectManager::UpdateVFXSequence(ManagedEffect& effect_)
         const bool shouldBeActive_ =
             effect_.sequenceTime >= track_.startTime &&
             effect_.sequenceTime < track_.startTime + track_.duration;
-        if (track_.type == 1 && shouldBeActive_) meshTrackActive_ = true;
+        if (track_.type == 1 && shouldBeActive_)
+        {
+            meshTrackActive_ = true;
+        }
 
         if (shouldBeActive_ && !track_.active)
         {
@@ -2027,8 +2252,14 @@ void EffectManager::UpdateVFXSequence(ManagedEffect& effect_)
                 if (const std::shared_ptr<ParticleComponent> particle_ =
                     object_->GetComponent<ParticleComponent>())
                 {
-                    if (track_.targetName.empty()) particle_->Stop();
-                    else particle_->StopEmitter(track_.targetName);
+                    if (track_.targetName.empty())
+                    {
+                        particle_->Stop();
+                    }
+                    else
+                    {
+                        particle_->StopEmitter(track_.targetName);
+                    }
                 }
             }
         }
@@ -2048,7 +2279,10 @@ void EffectManager::UpdateVFXSequence(ManagedEffect& effect_)
 void EffectManager::ReleasePooledEffect(ManagedEffect& effect_)
 {
     const std::shared_ptr<GameObject> object_ = effect_.object.lock();
-    if (!object_) return;
+    if (!object_)
+    {
+        return;
+    }
     object_->SetRuntimePlaybackRate(1.0f);
 
     if (const std::shared_ptr<ParticleComponent> particle_ =
@@ -2084,7 +2318,10 @@ void EffectManager::ReleasePooledEffect(ManagedEffect& effect_)
         object_->transform->localScale = { 1.0f, 1.0f, 1.0f };
         object_->transform->MarkDirty();
     }
-    if (gameObjectManager) gameObjectManager->DetachObject(object_);
+    if (gameObjectManager)
+    {
+        gameObjectManager->DetachObject(object_);
+    }
 }
 
 // 指定フォルダ以下のJSONファイルをAsset候補として収集する
@@ -2097,14 +2334,26 @@ void EffectManager::CollectJsonAssets(
     const std::filesystem::path rootDirectory_ =
         WindowsDialogHelper::Utf8ToPath(rootPath_);
     std::error_code error_;
-    if (!std::filesystem::is_directory(rootDirectory_, error_)) return;
+    if (!std::filesystem::is_directory(rootDirectory_, error_))
+    {
+        return;
+    }
 
     for (const std::filesystem::directory_entry& entry_ :
         std::filesystem::recursive_directory_iterator(rootDirectory_, error_))
     {
-        if (error_) break;
-        if (!entry_.is_regular_file(error_)) continue;
-        if (entry_.path().extension() != ".json") continue;
+        if (error_)
+        {
+            break;
+        }
+        if (!entry_.is_regular_file(error_))
+        {
+            continue;
+        }
+        if (entry_.path().extension() != ".json")
+        {
+            continue;
+        }
 
         paths_.push_back(
             WindowsDialogHelper::PathToUtf8(entry_.path().lexically_normal()));
@@ -2170,7 +2419,10 @@ void EffectManager::RegisterAssetKey(
     const std::string& fullPath_,
     std::unordered_map<std::string, std::string>& pathByKey_) const
 {
-    if (key_.empty() || fullPath_.empty()) return;
+    if (key_.empty() || fullPath_.empty())
+    {
+        return;
+    }
 
     const auto iterator_ = pathByKey_.find(key_);
     if (iterator_ == pathByKey_.end())
@@ -2200,7 +2452,10 @@ void EffectManager::PreloadParticleAsset(const std::string& path_)
     }
 
     const std::string assetName_ = BuildAssetNameFromPath(path_, "Data/Particle");
-    if (assetName_.empty()) return;
+    if (assetName_.empty())
+    {
+        return;
+    }
 
     particleAssetCache[assetName_] = asset_;
     std::vector<std::shared_ptr<GameObject>>& objects_ =
@@ -2209,7 +2464,10 @@ void EffectManager::PreloadParticleAsset(const std::string& path_)
     {
         std::shared_ptr<GameObject> object_ =
             CreateParticlePoolObject(path_, asset_);
-        if (object_) objects_.push_back(object_);
+        if (object_)
+        {
+            objects_.push_back(object_);
+        }
     }
 }
 
@@ -2224,7 +2482,10 @@ void EffectManager::PreloadMeshVFXAsset(const std::string& path_)
     }
 
     const std::string assetName_ = BuildAssetNameFromPath(path_, "Data/VFX");
-    if (assetName_.empty()) return;
+    if (assetName_.empty())
+    {
+        return;
+    }
 
     meshVFXAssetCache[assetName_] = component_.GetAsset();
     const MeshVFXAsset& asset_ = meshVFXAssetCache[assetName_];
@@ -2234,7 +2495,10 @@ void EffectManager::PreloadMeshVFXAsset(const std::string& path_)
     {
         std::shared_ptr<GameObject> object_ =
             CreateMeshVFXPoolObject(path_, asset_);
-        if (object_) objects_.push_back(object_);
+        if (object_)
+        {
+            objects_.push_back(object_);
+        }
     }
 }
 
@@ -2258,7 +2522,10 @@ void EffectManager::PreloadVFXSequenceAsset(const std::string& path_)
         std::printf("[EffectManager] Failed to parse VFX sequence: %s\n", path_.c_str());
         return;
     }
-    if (json_.value("AssetType", std::string{}) != "VFXSequence") return;
+    if (json_.value("AssetType", std::string{}) != "VFXSequence")
+    {
+        return;
+    }
 
     VFXSequenceAsset asset_{};
     asset_.duration = (std::max)(json_.value("Duration", 1.0f), 0.001f);
@@ -2292,7 +2559,10 @@ void EffectManager::PreloadVFXSequenceAsset(const std::string& path_)
             asset_.tracks.push_back(std::move(track_));
         }
     }
-    if (!asset_.hasParticle && !asset_.hasMeshVFX) return;
+    if (!asset_.hasParticle && !asset_.hasMeshVFX)
+    {
+        return;
+    }
     if (asset_.tracks.empty())
     {
         // Track未設定のAssetは保持しているEffect種別を全時間再生対象にする
@@ -2313,7 +2583,10 @@ void EffectManager::PreloadVFXSequenceAsset(const std::string& path_)
     }
 
     const std::string assetName_ = BuildAssetNameFromPath(path_, "Data/VFXSequence");
-    if (assetName_.empty()) return;
+    if (assetName_.empty())
+    {
+        return;
+    }
     vfxSequenceAssetCache[assetName_] = asset_;
     std::vector<std::shared_ptr<GameObject>>& objects_ =
         vfxSequenceObjectPool[assetName_];
@@ -2322,7 +2595,10 @@ void EffectManager::PreloadVFXSequenceAsset(const std::string& path_)
         std::shared_ptr<GameObject> object_ = CreateVFXSequencePoolObject(
             path_,
             asset_);
-        if (object_) objects_.push_back(object_);
+        if (object_)
+        {
+            objects_.push_back(object_);
+        }
     }
 }
 
@@ -2339,9 +2615,15 @@ void EffectManager::PreloadImpactEffectAsset(const std::string& path_)
     {
         nlohmann::json json_;
         file_ >> json_;
-        if (json_.value("AssetType", std::string{}) != "ImpactEffect") return;
+        if (json_.value("AssetType", std::string{}) != "ImpactEffect")
+        {
+            return;
+        }
         const std::string assetKey_ = BuildAssetNameFromPath(path_, "Data/ImpactEffect");
-        if (!assetKey_.empty()) impactEffectAssetCache[assetKey_] = json_.get<ImpactEffectAsset>();
+        if (!assetKey_.empty())
+        {
+            impactEffectAssetCache[assetKey_] = json_.get<ImpactEffectAsset>();
+        }
     }
     catch (const nlohmann::json::exception&)
     {
@@ -2354,7 +2636,10 @@ std::string EffectManager::BuildAssetNameFromPath(
     const std::string& path_,
     const std::string& rootPath_) const
 {
-    if (path_.empty()) return {};
+    if (path_.empty())
+    {
+        return {};
+    }
 
     std::string normalizedPath_ = path_;
     std::replace(
@@ -2430,11 +2715,17 @@ const ParticleEffectAsset* EffectManager::FindParticleAssetFromRequest(
     const std::string& assetPath_) const
 {
     const auto directIterator_ = particleAssetCache.find(assetPath_);
-    if (directIterator_ != particleAssetCache.end()) return &directIterator_->second;
+    if (directIterator_ != particleAssetCache.end())
+    {
+        return &directIterator_->second;
+    }
 
     const std::string assetName_ = BuildAssetNameFromPath(assetPath_, "Data/Particle");
     const auto iterator_ = particleAssetCache.find(assetName_);
-    if (iterator_ == particleAssetCache.end()) return nullptr;
+    if (iterator_ == particleAssetCache.end())
+    {
+        return nullptr;
+    }
 
     return &iterator_->second;
 }
@@ -2443,11 +2734,17 @@ const MeshVFXAsset* EffectManager::FindMeshVFXAssetFromRequest(
     const std::string& assetPath_) const
 {
     const auto directIterator_ = meshVFXAssetCache.find(assetPath_);
-    if (directIterator_ != meshVFXAssetCache.end()) return &directIterator_->second;
+    if (directIterator_ != meshVFXAssetCache.end())
+    {
+        return &directIterator_->second;
+    }
 
     const std::string assetName_ = BuildAssetNameFromPath(assetPath_, "Data/VFX");
     const auto iterator_ = meshVFXAssetCache.find(assetName_);
-    if (iterator_ == meshVFXAssetCache.end()) return nullptr;
+    if (iterator_ == meshVFXAssetCache.end())
+    {
+        return nullptr;
+    }
 
     return &iterator_->second;
 }
@@ -2462,15 +2759,24 @@ bool EffectManager::AdvancePreload(float budgetMilliseconds_)
     while (incrementalPreloadCursor < total_)
     {
         std::size_t index_ = incrementalPreloadCursor++;
-        if (index_ < particleAssets.size()) PreloadParticleAsset(particleAssets[index_].fullPath);
+        if (index_ < particleAssets.size())
+        {
+            PreloadParticleAsset(particleAssets[index_].fullPath);
+        }
         else
         {
             index_ -= particleAssets.size();
-            if (index_ < meshVFXAssets.size()) PreloadMeshVFXAsset(meshVFXAssets[index_].fullPath);
+            if (index_ < meshVFXAssets.size())
+            {
+                PreloadMeshVFXAsset(meshVFXAssets[index_].fullPath);
+            }
             else
             {
                 index_ -= meshVFXAssets.size();
-                if (index_ < vfxSequenceAssets.size()) PreloadVFXSequenceAsset(vfxSequenceAssets[index_].fullPath);
+                if (index_ < vfxSequenceAssets.size())
+                {
+                    PreloadVFXSequenceAsset(vfxSequenceAssets[index_].fullPath);
+                }
                 else
                 {
                     index_ -= vfxSequenceAssets.size();
@@ -2479,7 +2785,9 @@ bool EffectManager::AdvancePreload(float budgetMilliseconds_)
             }
         }
         if (std::chrono::duration<float, std::milli>(std::chrono::steady_clock::now() - start_).count() >= budgetMilliseconds_)
+        {
             return incrementalPreloadCursor >= total_;
+        }
     }
     return true;
 }

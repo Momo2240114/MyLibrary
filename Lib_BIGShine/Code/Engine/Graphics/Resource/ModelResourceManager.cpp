@@ -64,14 +64,20 @@ bool ModelLoadHandle::IsFailed() const
 MODEL_LOAD_STATE ModelLoadHandle::GetState() const
 {
     const std::shared_ptr<ModelLoadEntry> entry_ = entry.lock();
-    if (!entry_) return MODEL_LOAD_STATE::UNLOADED;
+    if (!entry_)
+    {
+        return MODEL_LOAD_STATE::UNLOADED;
+    }
     return entry_->state.load();
 }
 
 std::shared_ptr<ModelResource> ModelLoadHandle::GetResource() const
 {
     const std::shared_ptr<ModelLoadEntry> entry_ = entry.lock();
-    if (!entry_) return nullptr;
+    if (!entry_)
+    {
+        return nullptr;
+    }
     std::lock_guard<std::mutex> lock_(entry_->mutex);
     return entry_->resource;
 }
@@ -79,7 +85,10 @@ std::shared_ptr<ModelResource> ModelLoadHandle::GetResource() const
 std::string ModelLoadHandle::GetErrorMessage() const
 {
     const std::shared_ptr<ModelLoadEntry> entry_ = entry.lock();
-    if (!entry_) return {};
+    if (!entry_)
+    {
+        return {};
+    }
     std::lock_guard<std::mutex> lock_(entry_->mutex);
     return entry_->errorMessage;
 }
@@ -100,10 +109,16 @@ bool PreloadHandle::IsValid() const
 bool PreloadHandle::IsReady() const
 {
     const std::shared_ptr<PreloadGroupState> group_ = group.lock();
-    if (!group_) return false;
+    if (!group_)
+    {
+        return false;
+    }
     for (const ModelLoadHandle& handle_ : group_->handles)
     {
-        if (!handle_.IsReady()) return false;
+        if (!handle_.IsReady())
+        {
+            return false;
+        }
     }
     return !group_->handles.empty();
 }
@@ -111,10 +126,16 @@ bool PreloadHandle::IsReady() const
 bool PreloadHandle::HasFailed() const
 {
     const std::shared_ptr<PreloadGroupState> group_ = group.lock();
-    if (!group_) return false;
+    if (!group_)
+    {
+        return false;
+    }
     for (const ModelLoadHandle& handle_ : group_->handles)
     {
-        if (handle_.IsFailed()) return true;
+        if (handle_.IsFailed())
+        {
+            return true;
+        }
     }
     return false;
 }
@@ -122,12 +143,18 @@ bool PreloadHandle::HasFailed() const
 float PreloadHandle::GetProgress() const
 {
     const std::shared_ptr<PreloadGroupState> group_ = group.lock();
-    if (!group_ || group_->handles.empty()) return 0.0f;
+    if (!group_ || group_->handles.empty())
+    {
+        return 0.0f;
+    }
 
     int readyCount_ = 0;
     for (const ModelLoadHandle& handle_ : group_->handles)
     {
-        if (handle_.IsReady() || handle_.IsFailed()) ++readyCount_;
+        if (handle_.IsReady() || handle_.IsFailed())
+        {
+            ++readyCount_;
+        }
     }
     return static_cast<float>(readyCount_) / static_cast<float>(group_->handles.size());
 }
@@ -135,7 +162,10 @@ float PreloadHandle::GetProgress() const
 void PreloadHandle::PromotePriority(PRELOAD_PRIORITY priority_)
 {
     const std::shared_ptr<PreloadGroupState> group_ = group.lock();
-    if (!group_ || !manager) return;
+    if (!group_ || !manager)
+    {
+        return;
+    }
     manager->PromotePreloadGroup(group_->name, priority_);
 }
 
@@ -359,7 +389,10 @@ std::string ModelResourceManager::NormalizePath(const std::string& filename_) co
     }
 #ifdef _WIN32
     std::transform(normalized_.begin(), normalized_.end(), normalized_.begin(),
-        [](unsigned char c_) { return static_cast<char>(std::tolower(c_)); });
+        [](unsigned char c_)
+    {
+        return static_cast<char>(std::tolower(c_));
+    });
 #endif
     return normalized_;
 }
@@ -430,7 +463,10 @@ std::shared_ptr<ModelResource> ModelResourceManager::LoadOrBuildCpuResource(
         isLoaded_ = true;
     }
 
-    if (!isLoaded_) return nullptr;
+    if (!isLoaded_)
+    {
+        return nullptr;
+    }
     return resource_;
 }
 
@@ -441,7 +477,10 @@ bool ModelResourceManager::CreateGpuResource(
     ModelLoadEntry& progress_, bool& completed_, float budgetMs_)
 {
     BS_PROFILE_SCOPE("AsyncModel::CreateGpuResource");
-    if (!device_ || !resource_) return false;
+    if (!device_ || !resource_)
+    {
+        return false;
+    }
     completed_ = false;
     const auto uploadStart_ = std::chrono::steady_clock::now();
     const auto budgetExpired_ = [&]()
@@ -471,7 +510,10 @@ bool ModelResourceManager::CreateGpuResource(
                 hr_ = material_.baseTextureFileName.empty()
                     ? CPUResourceLoader::CreateDummyTexture(device_, 0xFFFFFFFF, material_.baseMap.GetAddressOf())
                     : CPUResourceLoader::LoadTextureFromFile(device_, (dirpath_ / material_.baseTextureFileName).wstring().c_str(), material_.baseMap.GetAddressOf());
-                if (FAILED(hr_)) return false;
+                if (FAILED(hr_))
+                {
+                    return false;
+                }
             }
             if (material_.normalMap == nullptr)
             {
@@ -479,7 +521,10 @@ bool ModelResourceManager::CreateGpuResource(
                 hr_ = material_.normalTextureFileName.empty()
                     ? CPUResourceLoader::CreateDummyTexture(device_, 0xFFFF7F7F, material_.normalMap.GetAddressOf())
                     : loadFileTexture_(material_.normalTextureFileName, material_.normalMap.GetAddressOf(), TextureType::Data);
-                if (FAILED(hr_)) return false;
+                if (FAILED(hr_))
+                {
+                    return false;
+                }
             }
             if (material_.emissiveMap == nullptr)
             {
@@ -487,7 +532,10 @@ bool ModelResourceManager::CreateGpuResource(
                 hr_ = material_.emissiveTextureFileName.empty()
                     ? CPUResourceLoader::CreateDummyTexture(device_, 0x00000000, material_.emissiveMap.GetAddressOf())
                     : loadFileTexture_(material_.emissiveTextureFileName, material_.emissiveMap.GetAddressOf(), TextureType::Color);
-                if (FAILED(hr_)) return false;
+                if (FAILED(hr_))
+                {
+                    return false;
+                }
             }
             if (material_.occlusionMap == nullptr)
             {
@@ -495,7 +543,10 @@ bool ModelResourceManager::CreateGpuResource(
                 hr_ = material_.occlusionTextureFileName.empty()
                     ? CPUResourceLoader::CreateDummyTexture(device_, 0xFFFFFFFF, material_.occlusionMap.GetAddressOf())
                     : loadFileTexture_(material_.occlusionTextureFileName, material_.occlusionMap.GetAddressOf(), TextureType::Data);
-                if (FAILED(hr_)) return false;
+                if (FAILED(hr_))
+                {
+                    return false;
+                }
             }
             if (material_.metalnessRoughnessMap == nullptr)
             {
@@ -503,10 +554,16 @@ bool ModelResourceManager::CreateGpuResource(
                 hr_ = material_.metalnessRoughnessTextureFileName.empty()
                     ? CPUResourceLoader::CreateDummyTexture(device_, 0xFFFFFFFF, material_.metalnessRoughnessMap.GetAddressOf())
                     : loadFileTexture_(material_.metalnessRoughnessTextureFileName, material_.metalnessRoughnessMap.GetAddressOf(), TextureType::Data);
-                if (FAILED(hr_)) return false;
+                if (FAILED(hr_))
+                {
+                    return false;
+                }
             }
             ++progress_.gpuMaterialCursor;
-            if (budgetExpired_()) return true;
+            if (budgetExpired_())
+            {
+                return true;
+            }
         }
     }
 
@@ -518,7 +575,10 @@ bool ModelResourceManager::CreateGpuResource(
             GltfModelCommponennt::Node& node_ = resource_->nodes.at(nodeIndex_);
             node_.children.clear();
             node_.parent = node_.parentIndex >= 0 ? &resource_->nodes.at(node_.parentIndex) : nullptr;
-            if (node_.parent != nullptr) node_.parent->children.emplace_back(&node_);
+            if (node_.parent != nullptr)
+            {
+                node_.parent->children.emplace_back(&node_);
+            }
         }
         progress_.gpuNodesBound = true;
     }
@@ -543,7 +603,10 @@ bool ModelResourceManager::CreateGpuResource(
                 BS_PROFILE_SCOPE("AsyncModel::CreateVertexBuffer");
                 hr_ = device_->CreateBuffer(&bufferDesc_, &subresourceData_, mesh_.vertexBuffer.GetAddressOf());
             }
-            if (FAILED(hr_)) return false;
+            if (FAILED(hr_))
+            {
+                return false;
+            }
 
             bufferDesc_ = {};
             subresourceData_ = {};
@@ -555,7 +618,10 @@ bool ModelResourceManager::CreateGpuResource(
                 BS_PROFILE_SCOPE("AsyncModel::CreateIndexBuffer");
                 hr_ = device_->CreateBuffer(&bufferDesc_, &subresourceData_, mesh_.indexBuffer.GetAddressOf());
             }
-            if (FAILED(hr_)) return false;
+            if (FAILED(hr_))
+            {
+                return false;
+            }
 
             {
                 BS_PROFILE_SCOPE("AsyncModel::RebindBones");
@@ -565,7 +631,10 @@ bool ModelResourceManager::CreateGpuResource(
                 }
             }
             ++progress_.gpuMeshCursor;
-            if (budgetExpired_()) return true;
+            if (budgetExpired_())
+            {
+                return true;
+            }
         }
     }
 
@@ -668,12 +737,18 @@ void ModelResourceManager::PromotePriority(const std::string& filename_, int pri
     const std::string normalizedPath_ = NormalizePath(filename_);
     std::lock_guard<std::mutex> lock_(asyncMutex);
     auto found_ = loadEntries.find(normalizedPath_);
-    if (found_ == loadEntries.end()) return;
+    if (found_ == loadEntries.end())
+    {
+        return;
+    }
 
     found_->second->priority = (std::max)(found_->second->priority, priority_);
     for (ModelLoadJob& job_ : pendingJobs)
     {
-        if (job_.entry == found_->second) job_.priority = found_->second->priority;
+        if (job_.entry == found_->second)
+        {
+            job_.priority = found_->second->priority;
+        }
     }
 }
 
@@ -683,7 +758,10 @@ void ModelResourceManager::StartAsyncLoader()
     EnsureLoadProfileLoaded();
 
     std::lock_guard<std::mutex> lock_(asyncMutex);
-    if (workerRunning) return;
+    if (workerRunning)
+    {
+        return;
+    }
     workerStopRequested = false;
     workerRunning = true;
 
@@ -708,14 +786,20 @@ void ModelResourceManager::ShutdownAsyncLoader()
     {
         BS_PROFILE_SCOPE("AsyncModel::ShutdownAsyncLoader::RequestStop");
         std::lock_guard<std::mutex> lock_(asyncMutex);
-        if (!workerRunning) return;
+        if (!workerRunning)
+        {
+            return;
+        }
         workerStopRequested = true;
     }
     asyncCondition.notify_all();
     for (std::thread& workerThread_ : workerThreads)
     {
         BS_PROFILE_SCOPE("AsyncModel::ShutdownAsyncLoader::JoinWorker");
-        if (workerThread_.joinable()) workerThread_.join();
+        if (workerThread_.joinable())
+        {
+            workerThread_.join();
+        }
     }
     {
         BS_PROFILE_SCOPE("AsyncModel::ShutdownAsyncLoader::ClearQueues");
@@ -738,7 +822,10 @@ void ModelResourceManager::FlushLoadProfile()
         loadProfileDirty = false;
     }
 
-    if (MODEL_LOAD_PROFILE_MODE_VALUE != MODEL_LOAD_PROFILE_MODE::READ_WRITE) return;
+    if (MODEL_LOAD_PROFILE_MODE_VALUE != MODEL_LOAD_PROFILE_MODE::READ_WRITE)
+    {
+        return;
+    }
 
     bool saved_ = true;
     if (shouldSave_)
@@ -759,7 +846,10 @@ void ModelResourceManager::EnsureLoadProfileLoaded()
 {
     {
         std::lock_guard<std::mutex> lock_(asyncMutex);
-        if (loadProfileLoaded) return;
+        if (loadProfileLoaded)
+        {
+            return;
+        }
         loadProfileLoaded = true;
     }
 
@@ -820,7 +910,10 @@ void ModelResourceManager::WorkerLoop(unsigned int workerIndex_)
                 BS_PROFILE_PLOT("ModelLoad.WaitingWorkerCount", static_cast<double>(waitingWorkerCount.load()));
                 BS_PROFILE_PLOT("ModelLoad.ConditionWaitEndTime", GetProfileMilliseconds());
             }
-            if (workerStopRequested && pendingJobs.empty()) return;
+            if (workerStopRequested && pendingJobs.empty())
+            {
+                return;
+            }
 
             {
                 BS_PROFILE_SCOPE("AsyncModel::WorkerLoop::DequeueTask");
@@ -828,8 +921,11 @@ void ModelResourceManager::WorkerLoop(unsigned int workerIndex_)
                 auto best_ = std::max_element(pendingJobs.begin(), pendingJobs.end(),
                     [](const ModelLoadJob& lhs_, const ModelLoadJob& rhs_)
                     {
-                        if (lhs_.priority != rhs_.priority) return lhs_.priority < rhs_.priority;
-                        if (lhs_.relativeLoadWeight != rhs_.relativeLoadWeight)
+                        if (lhs_.priority != rhs_.priority)
+                    {
+                        return lhs_.priority < rhs_.priority;
+                    }
+                    if (lhs_.relativeLoadWeight != rhs_.relativeLoadWeight)
                         {
                             return lhs_.relativeLoadWeight < rhs_.relativeLoadWeight;
                         }
@@ -846,7 +942,10 @@ void ModelResourceManager::WorkerLoop(unsigned int workerIndex_)
             }
         }
 
-        if (!job_.entry) continue;
+        if (!job_.entry)
+        {
+            continue;
+        }
         try
         {
             BS_PROFILE_SCOPE("AsyncModel::WorkerLoop::ExecuteTask");
@@ -866,7 +965,10 @@ void ModelResourceManager::WorkerLoop(unsigned int workerIndex_)
                     resource_ = LoadOrBuildCpuResource(job_.entry->normalizedPath, 60.0f);
                 }
             }
-            if (!resource_) throw std::runtime_error("CPU model load failed.");
+            if (!resource_)
+            {
+                throw std::runtime_error("CPU model load failed.");
+            }
             const uint64_t completedCpuCount_ = ++completedCpuTaskCount;
             BS_PROFILE_PLOT("ModelLoad.CompletedCpuTaskCount", static_cast<double>(completedCpuCount_));
 
@@ -891,7 +993,10 @@ void ModelResourceManager::WorkerLoop(unsigned int workerIndex_)
             job_.entry->errorMessage =
                 "Worker " + std::to_string(workerIndex_) + ": " + exception_.what();
             job_.entry->state = MODEL_LOAD_STATE::FAILED;
-            if (executingWorkerCount.load() > 0) --executingWorkerCount;
+            if (executingWorkerCount.load() > 0)
+            {
+                --executingWorkerCount;
+            }
             BS_PROFILE_PLOT("ModelLoad.ActiveWorkerCount", static_cast<double>(executingWorkerCount.load()));
         }
         catch (...)
@@ -901,7 +1006,10 @@ void ModelResourceManager::WorkerLoop(unsigned int workerIndex_)
             job_.entry->errorMessage =
                 "Worker " + std::to_string(workerIndex_) + ": Unknown async model load error.";
             job_.entry->state = MODEL_LOAD_STATE::FAILED;
-            if (executingWorkerCount.load() > 0) --executingWorkerCount;
+            if (executingWorkerCount.load() > 0)
+            {
+                --executingWorkerCount;
+            }
             BS_PROFILE_PLOT("ModelLoad.ActiveWorkerCount", static_cast<double>(executingWorkerCount.load()));
         }
     }
@@ -938,7 +1046,10 @@ void ModelResourceManager::UpdateAsyncLoads(
         {
             BS_PROFILE_SCOPE("AsyncModel::GpuUpload::Dequeue");
             std::lock_guard<std::mutex> lock_(asyncMutex);
-            if (pendingGpuUploads.empty()) break;
+            if (pendingGpuUploads.empty())
+            {
+                break;
+            }
             entry_ = pendingGpuUploads.front();
             pendingGpuUploads.pop_front();
             BS_PROFILE_PLOT("ModelLoad.PendingGpuTaskCount", static_cast<double>(pendingGpuUploads.size()));
@@ -1019,7 +1130,10 @@ void ModelResourceManager::UpdateAsyncLoads(
 
         const auto now_ = std::chrono::steady_clock::now();
         const float elapsedMs_ = std::chrono::duration<float, std::milli>(now_ - startTime_).count();
-        if (elapsedMs_ >= gpuUploadBudgetMs_) break;
+        if (elapsedMs_ >= gpuUploadBudgetMs_)
+        {
+            break;
+        }
     }
 
     if (!HasPendingLoads())
@@ -1031,11 +1145,17 @@ void ModelResourceManager::UpdateAsyncLoads(
 bool ModelResourceManager::HasPendingLoads() const
 {
     std::lock_guard<std::mutex> lock_(asyncMutex);
-    if (!pendingJobs.empty() || !pendingGpuUploads.empty()) return true;
+    if (!pendingJobs.empty() || !pendingGpuUploads.empty())
+    {
+        return true;
+    }
     for (const auto& pair_ : loadEntries)
     {
         const MODEL_LOAD_STATE state_ = pair_.second->state.load();
-        if (state_ != MODEL_LOAD_STATE::READY && state_ != MODEL_LOAD_STATE::FAILED) return true;
+        if (state_ != MODEL_LOAD_STATE::READY && state_ != MODEL_LOAD_STATE::FAILED)
+        {
+            return true;
+        }
     }
     return false;
 }
@@ -1043,7 +1163,10 @@ bool ModelResourceManager::HasPendingLoads() const
 float ModelResourceManager::GetLoadProgress() const
 {
     std::lock_guard<std::mutex> lock_(asyncMutex);
-    if (loadEntries.empty()) return 1.0f;
+    if (loadEntries.empty())
+    {
+        return 1.0f;
+    }
 
     double completedEstimatedMilliseconds_ = 0.0;
     double totalEstimatedMilliseconds_ = 0.0;
@@ -1060,7 +1183,10 @@ float ModelResourceManager::GetLoadProgress() const
         }
     }
 
-    if (totalEstimatedMilliseconds_ <= 0.0) return 1.0f;
+    if (totalEstimatedMilliseconds_ <= 0.0)
+    {
+        return 1.0f;
+    }
     return static_cast<float>(
         std::clamp(
             completedEstimatedMilliseconds_ / totalEstimatedMilliseconds_,
@@ -1070,11 +1196,17 @@ float ModelResourceManager::GetLoadProgress() const
 
 void ModelResourceManager::LoadPreloadSettings(const std::string& filename_)
 {
-    if (preloadSettingsLoaded) return;
+    if (preloadSettingsLoaded)
+    {
+        return;
+    }
     preloadSettingsLoaded = true;
 
     std::ifstream file_(filename_);
-    if (!file_.is_open()) return;
+    if (!file_.is_open())
+    {
+        return;
+    }
 
     nlohmann::json json_;
     file_ >> json_;
@@ -1082,7 +1214,10 @@ void ModelResourceManager::LoadPreloadSettings(const std::string& filename_)
     {
         PreloadGroupSetting setting_;
         setting_.name = groupJson_.value("Name", "");
-        if (setting_.name.empty()) continue;
+        if (setting_.name.empty())
+        {
+            continue;
+        }
 
         for (const nlohmann::json& assetJson_ : groupJson_.value("Assets", nlohmann::json::array()))
         {
@@ -1090,7 +1225,10 @@ void ModelResourceManager::LoadPreloadSettings(const std::string& filename_)
             asset_.type = assetJson_.value("Type", "");
             asset_.path = assetJson_.value("Path", "");
             asset_.priority = assetJson_.value("Priority", static_cast<int>(PRELOAD_PRIORITY::NORMAL));
-            if (!asset_.path.empty()) setting_.assets.push_back(asset_);
+            if (!asset_.path.empty())
+            {
+                setting_.assets.push_back(asset_);
+            }
         }
         preloadSettings[setting_.name] = setting_;
     }
@@ -1098,7 +1236,10 @@ void ModelResourceManager::LoadPreloadSettings(const std::string& filename_)
 
 bool ModelResourceManager::LoadStartupResourceSettings(const std::string& filename_)
 {
-    if (startupResourceSettingsLoaded) return true;
+    if (startupResourceSettingsLoaded)
+    {
+        return true;
+    }
     startupResourceSettingsLoaded = true;
 
     const bool loaded_ = startupResourceConfig.Load(filename_);
@@ -1119,7 +1260,10 @@ PreloadHandle ModelResourceManager::RequestStartupCriticalModels()
 
     for (const StartupModelEntry& entry_ : startupResourceConfig.GetCriticalModels())
     {
-        if (entry_.filePath.empty()) continue;
+        if (entry_.filePath.empty())
+        {
+            continue;
+        }
         group_->handles.push_back(
             RequestResourceAsync(entry_.filePath, static_cast<int>(PRELOAD_PRIORITY::CRITICAL)));
     }
@@ -1140,7 +1284,10 @@ void ModelResourceManager::RequestStartupHighPriorityModels()
 
     for (const StartupModelEntry& entry_ : startupResourceConfig.GetHighPriorityModels())
     {
-        if (entry_.filePath.empty()) continue;
+        if (entry_.filePath.empty())
+        {
+            continue;
+        }
         RequestResourceAsync(entry_.filePath, static_cast<int>(PRELOAD_PRIORITY::HIGH));
     }
 }
@@ -1160,7 +1307,10 @@ PreloadHandle ModelResourceManager::RequestPreloadGroup(
     {
         for (const PreloadAsset& asset_ : setting_->second.assets)
         {
-            if (asset_.type != "MODEL") continue;
+            if (asset_.type != "MODEL")
+            {
+                continue;
+            }
             const int priorityValue_ = (std::max)(asset_.priority, static_cast<int>(priority_));
             group_->handles.push_back(RequestResourceAsync(asset_.path, priorityValue_));
         }
@@ -1176,12 +1326,18 @@ void ModelResourceManager::PromotePreloadGroup(
 {
     BS_PROFILE_SCOPE("Preload::PromoteGroup");
     auto group_ = preloadGroups.find(groupName_);
-    if (group_ == preloadGroups.end()) return;
+    if (group_ == preloadGroups.end())
+    {
+        return;
+    }
 
     for (ModelLoadHandle& handle_ : group_->second->handles)
     {
         const std::shared_ptr<ModelLoadEntry> entry_ = handle_.entry.lock();
-        if (!entry_) continue;
+        if (!entry_)
+        {
+            continue;
+        }
         PromotePriority(entry_->normalizedPath, static_cast<int>(priority_));
     }
 }
@@ -1189,10 +1345,16 @@ void ModelResourceManager::PromotePreloadGroup(
 bool ModelResourceManager::IsPreloadGroupReady(const std::string& groupName_) const
 {
     auto found_ = preloadGroups.find(groupName_);
-    if (found_ == preloadGroups.end()) return false;
+    if (found_ == preloadGroups.end())
+    {
+        return false;
+    }
     for (const ModelLoadHandle& handle_ : found_->second->handles)
     {
-        if (!handle_.IsReady()) return false;
+        if (!handle_.IsReady())
+        {
+            return false;
+        }
     }
     return !found_->second->handles.empty();
 }
@@ -1200,12 +1362,18 @@ bool ModelResourceManager::IsPreloadGroupReady(const std::string& groupName_) co
 float ModelResourceManager::GetPreloadGroupProgress(const std::string& groupName_) const
 {
     auto found_ = preloadGroups.find(groupName_);
-    if (found_ == preloadGroups.end() || found_->second->handles.empty()) return 0.0f;
+    if (found_ == preloadGroups.end() || found_->second->handles.empty())
+    {
+        return 0.0f;
+    }
 
     int completeCount_ = 0;
     for (const ModelLoadHandle& handle_ : found_->second->handles)
     {
-        if (handle_.IsReady() || handle_.IsFailed()) ++completeCount_;
+        if (handle_.IsReady() || handle_.IsFailed())
+        {
+            ++completeCount_;
+        }
     }
     return static_cast<float>(completeCount_) / static_cast<float>(found_->second->handles.size());
 }
@@ -1215,7 +1383,10 @@ bool ModelResourceManager::SaveToCereal(const std::string& cerealPath, const std
 {
     BS_PROFILE_SCOPE("ModelResourceManager::SaveToCereal");
     std::ofstream ostream(cerealPath, std::ios::binary);
-    if (!ostream.is_open()) return false;
+    if (!ostream.is_open())
+    {
+        return false;
+    }
 
     cereal::BinaryOutputArchive archive(ostream);
     try {
@@ -1250,7 +1421,10 @@ bool ModelResourceManager::LoadFromCereal(const std::string& cerealPath, std::sh
     BS_PROFILE_SCOPE("ModelResourceManager::LoadFromCereal");
 
     std::ifstream istream(cerealPath, std::ios::binary);
-    if (!istream.is_open()) return false;
+    if (!istream.is_open())
+    {
+        return false;
+    }
 
     cereal::BinaryInputArchive archive(istream);
     try {

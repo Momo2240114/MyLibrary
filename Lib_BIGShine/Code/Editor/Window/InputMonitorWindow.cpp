@@ -89,7 +89,10 @@ void InputMonitorWindow::UpdateInputState()
 
     for (const std::string& actionName_ : BuildActionNames())
     {
-        if (!IsActionMonitored(actionName_)) continue;
+        if (!IsActionMonitored(actionName_))
+        {
+            continue;
+        }
         if (keyConfig_.ActionPressedIn(actionName_))
         {
             PushActionHistory(actionName_, "Pressed");
@@ -102,25 +105,37 @@ void InputMonitorWindow::UpdateInputState()
 
     for (const std::string& axisName_ : BuildAxisNames())
     {
-        if (!IsAxisMonitored(axisName_)) continue;
+        if (!IsAxisMonitored(axisName_))
+        {
+            continue;
+        }
         const float value_ = keyConfig_.GetAxis(axisName_);
         // Axis履歴はしきい値と前回値との差分で間引き、スティックの微小な揺れで埋まらないようにする。
         const bool shouldRecord_ =
             std::abs(value_) >= axisRecordThreshold ||
             (recordAxisNeutral && std::abs(value_) <= 0.001f);
-        if (!shouldRecord_) continue;
+        if (!shouldRecord_)
+        {
+            continue;
+        }
 
         bool shouldPush_ = true;
         for (auto iterator_ = axisHistory.rbegin();
             iterator_ != axisHistory.rend();
             ++iterator_)
         {
-            if (iterator_->axisName != axisName_) continue;
+            if (iterator_->axisName != axisName_)
+            {
+                continue;
+            }
             shouldPush_ =
                 std::abs(iterator_->value - value_) >= axisRecordDelta;
             break;
         }
-        if (shouldPush_) PushAxisHistory(axisName_, value_);
+        if (shouldPush_)
+        {
+            PushAxisHistory(axisName_, value_);
+        }
     }
 }
 
@@ -166,11 +181,17 @@ void InputMonitorWindow::DrawActionMonitor()
 
     for (const std::string& actionName_ : BuildActionNames())
     {
-        if (!IsActionMonitored(actionName_)) continue;
+        if (!IsActionMonitored(actionName_))
+        {
+            continue;
+        }
         const bool held_ = keyConfig_.ActionPressed(actionName_);
         const bool pressed_ = keyConfig_.ActionPressedIn(actionName_);
         const bool released_ = keyConfig_.ActionPressedOut(actionName_);
-        if (showOnlyActiveActions && !held_ && !pressed_ && !released_) continue;
+        if (showOnlyActiveActions && !held_ && !pressed_ && !released_)
+        {
+            continue;
+        }
 
         const ImVec4 color_ = pressed_
             ? ImVec4(0.2f, 0.85f, 1.0f, 1.0f)
@@ -209,7 +230,10 @@ void InputMonitorWindow::DrawAxisMonitor()
     }
     if (HasSelectedStickAxis(AxisCode::RightStickX, AxisCode::RightStickY))
     {
-        if (drewStick_) ImGui::SameLine();
+        if (drewStick_)
+        {
+            ImGui::SameLine();
+        }
         DrawStickPad(
             "Selected Right Stick",
             BuildSelectedStickValue(AxisCode::RightStickX, AxisCode::RightStickY),
@@ -224,7 +248,10 @@ void InputMonitorWindow::DrawAxisMonitor()
     ImGui::Separator();
     for (const std::string& axisName_ : BuildAxisNames())
     {
-        if (!IsAxisMonitored(axisName_)) continue;
+        if (!IsAxisMonitored(axisName_))
+        {
+            continue;
+        }
         const float value_ = keyConfig_.GetAxis(axisName_);
         ImGui::Text("%s", axisName_.c_str());
         ImGui::SameLine(180.0f);
@@ -299,19 +326,37 @@ DirectX::XMFLOAT2 InputMonitorWindow::BuildSelectedStickValue(
 
     for (const auto& pair_ : keyConfig_.GetAxisMap())
     {
-        if (!IsAxisMonitored(pair_.first)) continue;
+        if (!IsAxisMonitored(pair_.first))
+        {
+            continue;
+        }
 
         bool usesX_ = false;
         bool usesY_ = false;
         for (const AxisUnit& unit_ : pair_.second)
         {
-            if (unit_.sourceType != AxisSourceType::GamepadStick) continue;
-            if (unit_.code == static_cast<int>(xCode_)) usesX_ = true;
-            if (unit_.code == static_cast<int>(yCode_)) usesY_ = true;
+            if (unit_.sourceType != AxisSourceType::GamepadStick)
+            {
+                continue;
+            }
+            if (unit_.code == static_cast<int>(xCode_))
+            {
+                usesX_ = true;
+            }
+            if (unit_.code == static_cast<int>(yCode_))
+            {
+                usesY_ = true;
+            }
         }
 
-        if (usesX_) value_.x += keyConfig_.GetAxis(pair_.first);
-        if (usesY_) value_.y += keyConfig_.GetAxis(pair_.first);
+        if (usesX_)
+        {
+            value_.x += keyConfig_.GetAxis(pair_.first);
+        }
+        if (usesY_)
+        {
+            value_.y += keyConfig_.GetAxis(pair_.first);
+        }
     }
 
     value_.x = std::clamp(value_.x, -1.0f, 1.0f);
@@ -326,11 +371,17 @@ bool InputMonitorWindow::HasSelectedStickAxis(
     const KeyConfig& keyConfig_ = KeyConfig::Instance();
     for (const auto& pair_ : keyConfig_.GetAxisMap())
     {
-        if (!IsAxisMonitored(pair_.first)) continue;
+        if (!IsAxisMonitored(pair_.first))
+        {
+            continue;
+        }
 
         for (const AxisUnit& unit_ : pair_.second)
         {
-            if (unit_.sourceType != AxisSourceType::GamepadStick) continue;
+            if (unit_.sourceType != AxisSourceType::GamepadStick)
+            {
+                continue;
+            }
             if (unit_.code == static_cast<int>(xCode_) ||
                 unit_.code == static_cast<int>(yCode_))
             {

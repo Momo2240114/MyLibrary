@@ -7,6 +7,7 @@ class BoxCollider : public ColliderComponent {
 private:
     // NaviMesh 生成や移動可能領域判定に、この Box を使うかどうか。
     bool usedNaviMeshSystemFlg = false;
+
 public:
 
     void Start()override;
@@ -20,7 +21,10 @@ public:
     // ローカル空間での半径サイズ。実際の OBB 生成時は Transform Scale を掛ける。
     DirectX::XMFLOAT3 halfSize{ 0.5f, 0.5f, 0.5f };
 
-    bool GetUsedNaviMeshSystemFlg() { return usedNaviMeshSystemFlg; }
+    bool GetUsedNaviMeshSystemFlg()
+    {
+        return usedNaviMeshSystemFlg;
+    }
 
 
     void Gui()  override;
@@ -48,7 +52,11 @@ public:
 
     }
 
-    ColliderType GetColliderType() const override { return ColliderType::Box; }
+    ColliderType GetColliderType() const override
+    {
+        return ColliderType::Box;
+    }
+
     CollisionManifold CheckCollision(std::shared_ptr<ColliderComponent> other) override;
 
     OBB CreateOBB() {
@@ -78,6 +86,7 @@ public:
         obb = obb;
         return obb;
     }
+
     // デバッグ描画や直近判定結果の確認用に保持する OBB。
     OBB obb;
 };

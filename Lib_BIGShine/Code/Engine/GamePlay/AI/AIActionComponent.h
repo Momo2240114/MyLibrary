@@ -95,8 +95,17 @@ public:
     bool SetSkillForAction(const std::string& actionName_, const std::string& skillName_, const std::string& path_);
     bool ReloadSkillDefinitions(const std::string& path_);
     void StopSkill();
-    const std::vector<AIActionDefinition>& GetActions() const { return actions; }
-    const SkillExecution& GetSkillExecution() const { return skillExecution; }
+
+    const std::vector<AIActionDefinition>& GetActions() const
+    {
+        return actions;
+    }
+
+    const SkillExecution& GetSkillExecution() const
+    {
+        return skillExecution;
+    }
+
     void Gui() override;
     void Serialize(nlohmann::json& json_) const override;
     void Deserialize(const nlohmann::json& json_) override;

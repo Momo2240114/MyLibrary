@@ -241,14 +241,18 @@ std::shared_ptr<Component> ComponentRegistry::Create(
 {
     auto it = creators.find(name_);
     if (it == creators.end())
+    {
         return nullptr;
+    }
 
     if (!allowDuplicate_)
     {
         // 単一想定の Component は、同名が既にあれば新規作成せず既存を返す。
         auto existing_ = go_->GetComponentByName(name_);
         if (existing_)
+        {
             return existing_;
+        }
     }
 
     // 登録済み Factory を通して、GameObject へ Component を追加する。

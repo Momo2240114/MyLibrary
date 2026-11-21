@@ -162,8 +162,12 @@ public:
     void Deserialize(const nlohmann::json& json_) override;
     // 元の移動を保ったまま補正だけを切り替え、比較用の移動量を表示する。
     void DrawComparisonGui();
+
     // RootMotionがないモーションでも、明示対象への追加補正を更新する。
-    bool RequiresRootMotionUpdate() const { return request.active && request.explicitTarget; }
+    bool RequiresRootMotionUpdate() const
+    {
+        return request.active && request.explicitTarget;
+    }
 
     void Play(const std::string& presetName_ = "");
     // AIの確定Targetと予定移動量を受け取り、既存RootMotion経路上で補正する。
@@ -175,8 +179,17 @@ public:
         const DirectX::XMFLOAT3* fixedPathStart_ = nullptr);
     // 保存済みプリセットを優先し、未登録の敵用初期値だけを補う。
     void AddPresetIfMissing(const MotionWarpPreset& preset_);
-    const MotionWarpPreset* GetPreset(const std::string& presetName_) const { return FindPreset(presetName_); }
-    const DirectX::XMFLOAT3& GetTargetPosition() const { return request.targetPosition; }
+
+    const MotionWarpPreset* GetPreset(const std::string& presetName_) const
+    {
+        return FindPreset(presetName_);
+    }
+
+    const DirectX::XMFLOAT3& GetTargetPosition() const
+    {
+        return request.targetPosition;
+    }
+
     void SetRegisterGlobalActions(bool enabled_);
     void Stop(const std::string& requestName_ = "");
     void Clear();
@@ -186,7 +199,11 @@ public:
         const ModelAnimator::RootMotionDelta& rootMotionDelta_,
         float normalizedTime_,
         float deltaTime_);
-    bool IsWarpActive() const { return request.active; }
+
+    bool IsWarpActive() const
+    {
+        return request.active;
+    }
 
 private:
     // Presetが空の時に、攻撃用の標準Warp設定を補充する。

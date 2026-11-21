@@ -12,17 +12,26 @@ void CylinderCollider::Gui()
     changed_ |= ImGui::DragFloat("Radius", &radius, 0.01f, 0.01f, 1000.0f);
     changed_ |= ImGui::DragFloat("Half Height", &halfHeight, 0.01f, 0.01f, 1000.0f);
     changed_ |= ImGui::SliderInt("Segments", &segments, 6, 64);
-    if (changed_) RecreatePhysXActor();
+    if (changed_)
+    {
+        RecreatePhysXActor();
+    }
 }
 
 void CylinderCollider::Update(float dt_)
 {
     (void)dt_;
-    if (!shapeRenderEnabled) return;
+    if (!shapeRenderEnabled)
+    {
+        return;
+    }
 
     // Debug表示用に、ObjectのWorld ScaleとOffsetを反映した円柱を描画する。
     auto owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        return;
+    }
 
     auto scale_ = owner_->transform->GetWorldScale();
     auto world_ = owner_->transform->GetWorld();

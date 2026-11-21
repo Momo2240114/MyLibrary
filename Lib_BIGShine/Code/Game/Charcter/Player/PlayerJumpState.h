@@ -8,7 +8,11 @@ class PlayerJumpState : public PlayerState
 public:
     using PlayerState::PlayerState;
 
-    const char* GetName() const override { return GetPlayerActionName(PLAYER_ACTION::JUMP); }
+    const char* GetName() const override
+    {
+        return GetPlayerActionName(PLAYER_ACTION::JUMP);
+    }
+
     // 新規ジャンプと空中行動からの復帰を区別して、開始するフェーズを選ぶ。
     void Enter() override;
     // 空中の速度調整、二段ジャンプ、離地後の着地と行動終了を管理する。

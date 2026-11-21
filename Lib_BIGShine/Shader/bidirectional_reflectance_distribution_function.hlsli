@@ -15,7 +15,8 @@ float v_ggx(float NoL, float NoV, float alpha_roughness)
  
   float ggx = ggxv + ggxl; 
   return (ggx > 0.0) ? 0.5 / ggx : 0.0; 
-} 
+}
+
 float d_ggx(float NoH, float alpha_roughness) 
 { 
   const float PI = 3.14159265358979; 

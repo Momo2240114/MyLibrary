@@ -19,7 +19,10 @@ PlayerActionState::PlayerActionState(
 void PlayerActionState::Enter()
 {
     PlayerControllerComponent* player_ = GetPlayerController();
-    if (!player_) return;
+    if (!player_)
+    {
+        return;
+    }
 
     player_->EnterAction(action);
     if (action == PLAYER_ACTION::GUARD ||
@@ -34,7 +37,10 @@ void PlayerActionState::Enter()
 void PlayerActionState::Execute(float)
 {
     PlayerControllerComponent* player_ = GetPlayerController();
-    if (!player_) return;
+    if (!player_)
+    {
+        return;
+    }
 
     const DirectX::XMFLOAT3 input_ = player_->GetMoveInput();
     player_->SendMoveInputToBlackboard(input_);

@@ -1,0 +1,588 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2675" height="4322" viewBox="0 0 2675 4322" role="img">
+<rect width="2675" height="4322" fill="#0d1420"/>
+<rect x="60" y="49" width="44" height="5" rx="2" fill="#61d2e6" stroke="none"/>
+<text x="60" y="104" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="36" font-weight="700">人型ボス BehaviorGraph 全体図</text>
+<text x="60" y="137" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="500">ANATHEMA   /   本編データ HumanBoss.json   /   64ノード・63接続</text>
+<rect x="65" y="163" width="13" height="13" rx="3" fill="#8cc9ff" stroke="none"/>
+<text x="85" y="175" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="15" font-weight="500">Root</text>
+<rect x="275" y="163" width="13" height="13" rx="3" fill="#a3a6ff" stroke="none"/>
+<text x="295" y="175" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="15" font-weight="500">Selector</text>
+<rect x="485" y="163" width="13" height="13" rx="3" fill="#61d2e6" stroke="none"/>
+<text x="505" y="175" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="15" font-weight="500">Sequence</text>
+<rect x="695" y="163" width="13" height="13" rx="3" fill="#f3bf71" stroke="none"/>
+<text x="715" y="175" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="15" font-weight="500">BlackboardCondition</text>
+<rect x="905" y="163" width="13" height="13" rx="3" fill="#df98f6" stroke="none"/>
+<text x="925" y="175" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="15" font-weight="500">RandomSelector</text>
+<rect x="1115" y="163" width="13" height="13" rx="3" fill="#71dfb4" stroke="none"/>
+<text x="1135" y="175" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="15" font-weight="500">PlayAction</text>
+<text x="65" y="211" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="16" font-weight="500">左から親 → 子を表示。Selector・Sequenceの子は、JSONのPriority昇順、同値はID昇順。WはJSONの基本重み。</text>
+<rect x="1108" y="239" width="1525" height="1" rx="0" fill="#28384d" stroke="none"/>
+<rect x="1108" y="503" width="1525" height="1" rx="0" fill="#28384d" stroke="none"/>
+<rect x="1108" y="683" width="1525" height="1" rx="0" fill="#28384d" stroke="none"/>
+<rect x="1108" y="1199" width="1525" height="1" rx="0" fill="#28384d" stroke="none"/>
+<rect x="1108" y="1379" width="1525" height="1" rx="0" fill="#28384d" stroke="none"/>
+<rect x="1108" y="1559" width="1525" height="1" rx="0" fill="#28384d" stroke="none"/>
+<rect x="1108" y="2159" width="1525" height="1" rx="0" fill="#28384d" stroke="none"/>
+<rect x="1108" y="2927" width="1525" height="1" rx="0" fill="#28384d" stroke="none"/>
+<rect x="1108" y="3107" width="1525" height="1" rx="0" fill="#28384d" stroke="none"/>
+<rect x="1108" y="3287" width="1525" height="1" rx="0" fill="#28384d" stroke="none"/>
+<rect x="1108" y="3467" width="1525" height="1" rx="0" fill="#28384d" stroke="none"/>
+<rect x="1108" y="4151" width="1525" height="1" rx="0" fill="#28384d" stroke="none"/>
+<g data-link-id="7"><path d="M 487,2271.5 C 541.0,2271.5 541.0,2271.5 595,2271.5" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="595,2271.5 586.0,2267.5 586.0,2275.5" fill="#89a6c6"/></g>
+<g data-link-id="11"><path d="M 1017,2249.5 C 1071.0,2249.5 1071.0,347.0 1125,347.0" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1125,347.0 1115.6142694120101,349.9846375541548 1120.9259939760802,355.9667427150034" fill="#89a6c6"/></g>
+<g data-link-id="229"><path d="M 1017,2253.5 C 1071.0,2253.5 1071.0,590.0 1125,590.0" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1125,590.0 1115.4380213882694,592.3597807162545 1120.3440783691528,598.6788474907333" fill="#89a6c6"/></g>
+<g data-link-id="23"><path d="M 1017,2257.5 C 1071.0,2257.5 1071.0,854.0 1125,854.0" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1125,854.0 1115.2796002649413,855.5855059100091 1119.6632004406376,862.2775944853073" fill="#89a6c6"/></g>
+<g data-link-id="241"><path d="M 1017,2261.5 C 1071.0,2261.5 1071.0,1286.0 1125,1286.0" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1125,1286.0 1115.1515425445336,1286.088801733466 1118.4664328887034,1293.3697015409161" fill="#89a6c6"/></g>
+<g data-link-id="189"><path d="M 1017,2265.5 C 1071.0,2265.5 1071.0,1466.0 1125,1466.0" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1125,1466.0 1115.1695100053023,1465.3987791885268 1117.9662912568926,1472.8939786275512" fill="#89a6c6"/></g>
+<g data-link-id="201"><path d="M 1017,2269.5 C 1071.0,2269.5 1071.0,1751.0 1125,1751.0" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1125,1751.0 1115.3116669239503,1749.2290674186966 1117.1933113835353,1757.0046326153697" fill="#89a6c6"/></g>
+<g data-link-id="140"><path d="M 1017,2273.5 C 1071.0,2273.5 1071.0,2393.0 1125,2393.0" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1125,2393.0 1116.2367115057166,2388.5050278347962 1115.7912190925451,2396.492614235569" fill="#89a6c6"/></g>
+<g data-link-id="55"><path d="M 1017,2277.5 C 1071.0,2277.5 1071.0,3014.0 1125,3014.0" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1125,3014.0 1117.789077389926,3007.2916026420967 1115.1885094904758,3014.85711958414" fill="#89a6c6"/></g>
+<g data-link-id="67"><path d="M 1017,2281.5 C 1071.0,2281.5 1071.0,3194.0 1125,3194.0" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1125,3194.0 1118.2869670434782,3186.793392717467 1115.1523415823065,3194.1536999948967" fill="#89a6c6"/></g>
+<g data-link-id="79"><path d="M 1017,2285.5 C 1071.0,2285.5 1071.0,3374.0 1125,3374.0" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1125,3374.0 1118.7877909115,3366.357457344525 1115.1643643098278,3373.4898328017125" fill="#89a6c6"/></g>
+<g data-link-id="91"><path d="M 1017,2289.5 C 1071.0,2289.5 1071.0,3680.0 1125,3680.0" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1125,3680.0 1119.6280073977978,3671.7452016692177 1115.272938155057,3678.4558925346155" fill="#89a6c6"/></g>
+<g data-link-id="119"><path d="M 1017,2293.5 C 1071.0,2293.5 1071.0,4196 1125,4196" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1125,4196 1120.9259939760802,4187.033257284997 1115.6142694120101,4193.015362445845" fill="#89a6c6"/></g>
+<g data-link-id="15"><path d="M 1547,345.0 C 1601.0,345.0 1601.0,284 1655,284" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1655,284 1645.8898115370434,280.2577458438245 1646.1174788728163,288.25450566166467" fill="#89a6c6"/></g>
+<g data-link-id="123"><path d="M 1547,349.0 C 1601.0,349.0 1601.0,410.0 1655,410.0" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1655,410.0 1646.1174788728163,405.74549433833533 1645.8898115370434,413.7422541561755" fill="#89a6c6"/></g>
+<g data-link-id="27"><path d="M 1547,852.0 C 1601.0,852.0 1601.0,728 1655,728" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1655,728 1645.7839275533763,724.5266718181864 1646.246140844112,732.5133080859695" fill="#89a6c6"/></g>
+<g data-link-id="31"><path d="M 1547,856.0 C 1601.0,856.0 1601.0,980.0 1655,980.0" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1655,980.0 1646.246140844112,975.4866919140305 1645.7839275533763,983.4733281818136" fill="#89a6c6"/></g>
+<g data-link-id="43"><path d="M 2077,972.0 C 2131.0,972.0 2131.0,812 2185,812" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2185,812 2175.7271175972196,808.6813177397945 2176.322861042108,816.6591050112046" fill="#89a6c6"/></g>
+<g data-link-id="39"><path d="M 2077,976.0 C 2131.0,976.0 2131.0,896 2185,896" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2185,896 2175.8570203436484,892.3385900252026 2176.1555134448636,900.3330194525306" fill="#89a6c6"/></g>
+<g data-link-id="35"><path d="M 2077,980.0 C 2131.0,980.0 2131.0,980 2185,980" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2185,980 2176.0,976.0 2176.0,984.0" fill="#89a6c6"/></g>
+<g data-link-id="51"><path d="M 2077,984.0 C 2131.0,984.0 2131.0,1064 2185,1064" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2185,1064 2176.1555134448636,1059.6669805474692 2175.8570203436484,1067.661409974797" fill="#89a6c6"/></g>
+<g data-link-id="47"><path d="M 2077,988.0 C 2131.0,988.0 2131.0,1148 2185,1148" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2185,1148 2176.322861042108,1143.340894988796 2175.7271175972196,1151.3186822602063" fill="#89a6c6"/></g>
+<g data-link-id="59"><path d="M 1547,3012.0 C 1601.0,3012.0 1601.0,2972 1655,2972" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1655,2972 1645.9269056880416,2968.1686869605433 1646.0762302152766,2976.1672932257347" fill="#89a6c6"/></g>
+<g data-link-id="63"><path d="M 1547,3016.0 C 1601.0,3016.0 1601.0,3056 1655,3056" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1655,3056 1646.076230215277,3051.832706774264 1645.9269056880412,3059.8313130394554" fill="#89a6c6"/></g>
+<g data-link-id="71"><path d="M 1547,3192.0 C 1601.0,3192.0 1601.0,3152 1655,3152" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1655,3152 1645.9269056880416,3148.1686869605433 1646.0762302152766,3156.1672932257347" fill="#89a6c6"/></g>
+<g data-link-id="75"><path d="M 1547,3196.0 C 1601.0,3196.0 1601.0,3236 1655,3236" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1655,3236 1646.0762302152766,3231.8327067742653 1645.9269056880416,3239.8313130394567" fill="#89a6c6"/></g>
+<g data-link-id="83"><path d="M 1547,3372.0 C 1601.0,3372.0 1601.0,3332 1655,3332" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1655,3332 1645.9269056880416,3328.1686869605433 1646.0762302152766,3336.1672932257347" fill="#89a6c6"/></g>
+<g data-link-id="87"><path d="M 1547,3376.0 C 1601.0,3376.0 1601.0,3416 1655,3416" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1655,3416 1646.0762302152766,3411.8327067742653 1645.9269056880416,3419.8313130394567" fill="#89a6c6"/></g>
+<g data-link-id="95"><path d="M 1547,3678.0 C 1601.0,3678.0 1601.0,3512 1655,3512" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1655,3512 1645.717913650079,3508.707148197593 1646.335866571978,3516.683245876679" fill="#89a6c6"/></g>
+<g data-link-id="99"><path d="M 1547,3682.0 C 1601.0,3682.0 1601.0,3848.0 1655,3848.0" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1655,3848.0 1646.335866571978,3843.316754123321 1645.717913650079,3851.292851802407" fill="#89a6c6"/></g>
+<g data-link-id="103"><path d="M 2077,3836.0 C 2131.0,3836.0 2131.0,3596 2185,3596" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2185,3596 2175.6106682123273,3593.0267108144353 2176.5012021901093,3600.976990635575" fill="#89a6c6"/></g>
+<g data-link-id="107"><path d="M 2077,3840.0 C 2131.0,3840.0 2131.0,3680 2185,3680" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2185,3680 2175.7271175972196,3676.6813177397944 2176.322861042108,3684.6591050112047" fill="#89a6c6"/></g>
+<g data-link-id="111"><path d="M 2077,3844.0 C 2131.0,3844.0 2131.0,3764 2185,3764" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2185,3764 2175.8570203436484,3760.338590025203 2176.1555134448636,3768.333019452531" fill="#89a6c6"/></g>
+<g data-link-id="115"><path d="M 2077,3848.0 C 2131.0,3848.0 2131.0,3848 2185,3848" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2185,3848 2176.0,3844.0 2176.0,3852.0" fill="#89a6c6"/></g>
+<g data-link-id="132"><path d="M 2077,3852.0 C 2131.0,3852.0 2131.0,3932 2185,3932" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2185,3932 2176.1555134448636,3927.666980547469 2175.8570203436484,3935.661409974797" fill="#89a6c6"/></g>
+<g data-link-id="136"><path d="M 2077,3856.0 C 2131.0,3856.0 2131.0,4016 2185,4016" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2185,4016 2176.322861042108,4011.3408949887953 2175.7271175972196,4019.3186822602056" fill="#89a6c6"/></g>
+<g data-link-id="169"><path d="M 2077,3860.0 C 2131.0,3860.0 2131.0,4100 2185,4100" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2185,4100 2176.5012021901093,4095.023009364425 2175.6106682123273,4102.973289185565" fill="#89a6c6"/></g>
+<g data-link-id="124"><path d="M 2077,408.0 C 2131.0,408.0 2131.0,368 2185,368" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2185,368 2175.9269056880416,364.1686869605432 2176.0762302152766,372.167293225735" fill="#89a6c6"/></g>
+<g data-link-id="128"><path d="M 2077,412.0 C 2131.0,412.0 2131.0,452 2185,452" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2185,452 2176.0762302152766,447.832706774265 2175.9269056880416,455.8313130394568" fill="#89a6c6"/></g>
+<g data-link-id="144"><path d="M 1547,2391.0 C 1601.0,2391.0 1601.0,2204 1655,2204" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1655,2204 1645.6862980933138,2200.79766385378 1646.381867768428,2208.767367915228" fill="#89a6c6"/></g>
+<g data-link-id="148"><path d="M 1547,2395.0 C 1601.0,2395.0 1601.0,2582.0 1655,2582.0" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1655,2582.0 1646.381867768428,2577.232632084772 1645.6862980933138,2585.20233614622" fill="#89a6c6"/></g>
+<g data-link-id="152"><path d="M 2077,2568.0 C 2131.0,2568.0 2131.0,2288 2185,2288" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2185,2288 2175.557559411641,2285.199943619263 2176.5941989932326,2293.132495439319" fill="#89a6c6"/></g>
+<g data-link-id="156"><path d="M 2077,2572.0 C 2131.0,2572.0 2131.0,2372 2185,2372" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2185,2372 2175.66719437577,2368.8537738192654 2176.4107149423935,2376.819147455637" fill="#89a6c6"/></g>
+<g data-link-id="160"><path d="M 2077,2576.0 C 2131.0,2576.0 2131.0,2456 2185,2456" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2185,2456 2175.7904068424577,2452.5095281303884 2176.2377574242037,2460.4970106785395" fill="#89a6c6"/></g>
+<g data-link-id="164"><path d="M 2077,2580.0 C 2131.0,2580.0 2131.0,2540 2185,2540" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2185,2540 2175.9269056880416,2536.1686869605433 2176.0762302152766,2544.1672932257347" fill="#89a6c6"/></g>
+<g data-link-id="173"><path d="M 2077,2584.0 C 2131.0,2584.0 2131.0,2624 2185,2624" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2185,2624 2176.0762302152766,2619.8327067742653 2175.9269056880416,2627.8313130394567" fill="#89a6c6"/></g>
+<g data-link-id="177"><path d="M 2077,2588.0 C 2131.0,2588.0 2131.0,2708 2185,2708" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2185,2708 2176.237757424204,2703.50298932146 2175.7904068424573,2711.4904718696102" fill="#89a6c6"/></g>
+<g data-link-id="181"><path d="M 2077,2592.0 C 2131.0,2592.0 2131.0,2792 2185,2792" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2185,2792 2176.410714942394,2787.180852544362 2175.6671943757697,2795.1462261807337" fill="#89a6c6"/></g>
+<g data-link-id="185"><path d="M 2077,2596.0 C 2131.0,2596.0 2131.0,2876 2185,2876" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2185,2876 2176.5941989932326,2870.867504560681 2175.557559411641,2878.800056380737" fill="#89a6c6"/></g>
+<g data-link-id="193"><path d="M 1547,1464.0 C 1601.0,1464.0 1601.0,1424 1655,1424" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1655,1424 1645.9269056880416,1420.1686869605433 1646.0762302152766,1428.1672932257352" fill="#89a6c6"/></g>
+<g data-link-id="197"><path d="M 1547,1468.0 C 1601.0,1468.0 1601.0,1508 1655,1508" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1655,1508 1646.0762302152766,1503.8327067742648 1645.9269056880416,1511.8313130394567" fill="#89a6c6"/></g>
+<g data-link-id="205"><path d="M 1547,1749.0 C 1601.0,1749.0 1601.0,1604 1655,1604" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1655,1604 1645.7504586179482,1600.6168085744807 1646.2906188405075,1608.598551926278" fill="#89a6c6"/></g>
+<g data-link-id="209"><path d="M 1547,1753.0 C 1601.0,1753.0 1601.0,1898.0 1655,1898.0" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1655,1898.0 1646.2906188405077,1893.4014480737214 1645.750458617948,1901.3831914255188" fill="#89a6c6"/></g>
+<g data-link-id="213"><path d="M 2077,1888.0 C 2131.0,1888.0 2131.0,1688 2185,1688" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2185,1688 2175.6671943757697,1684.8537738192663 2176.410714942394,1692.819147455638" fill="#89a6c6"/></g>
+<g data-link-id="217"><path d="M 2077,1892.0 C 2131.0,1892.0 2131.0,1772 2185,1772" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2185,1772 2175.7904068424573,1768.5095281303898 2176.237757424204,1776.4970106785404" fill="#89a6c6"/></g>
+<g data-link-id="221"><path d="M 2077,1896.0 C 2131.0,1896.0 2131.0,1856 2185,1856" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2185,1856 2175.9269056880416,1852.1686869605433 2176.0762302152766,1860.1672932257352" fill="#89a6c6"/></g>
+<g data-link-id="225"><path d="M 2077,1900.0 C 2131.0,1900.0 2131.0,1940 2185,1940" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2185,1940 2176.0762302152766,1935.8327067742648 2175.9269056880416,1943.8313130394567" fill="#89a6c6"/></g>
+<g data-link-id="297"><path d="M 2077,1904.0 C 2131.0,1904.0 2131.0,2024 2185,2024" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2185,2024 2176.237757424204,2019.5029893214596 2175.7904068424573,2027.4904718696102" fill="#89a6c6"/></g>
+<g data-link-id="301"><path d="M 2077,1908.0 C 2131.0,1908.0 2131.0,2108 2185,2108" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="2185,2108 2176.410714942394,2103.180852544362 2175.6671943757697,2111.1462261807337" fill="#89a6c6"/></g>
+<g data-link-id="233"><path d="M 1547,588.0 C 1601.0,588.0 1601.0,548 1655,548" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1655,548 1645.9269056880416,544.1686869605431 1646.0762302152766,552.1672932257351" fill="#89a6c6"/></g>
+<g data-link-id="237"><path d="M 1547,592.0 C 1601.0,592.0 1601.0,632 1655,632" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1655,632 1646.0762302152766,627.8327067742649 1645.9269056880416,635.8313130394569" fill="#89a6c6"/></g>
+<g data-link-id="245"><path d="M 1547,1284.0 C 1601.0,1284.0 1601.0,1244 1655,1244" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1655,1244 1645.9269056880416,1240.1686869605433 1646.0762302152766,1248.1672932257352" fill="#89a6c6"/></g>
+<g data-link-id="249"><path d="M 1547,1288.0 C 1601.0,1288.0 1601.0,1328 1655,1328" fill="none" stroke="#89a6c6" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1655,1328 1646.0762302152766,1323.8327067742648 1645.9269056880416,1331.8313130394567" fill="#89a6c6"/></g>
+<g data-node-id="12"><title>CounterReady</title>
+<rect x="1655" y="250" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1656" y="258" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="1668" y="267" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#12   BlackboardCondition   /   Priority 0</text>
+<text x="1668" y="288" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">CounterReady</text>
+<text x="1668" y="308" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">Local / HumanBossAI.CounterReady = true</text>
+</g>
+<g data-node-id="16"><title>COUNTER_ATTACK</title>
+<rect x="2185" y="334" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2186" y="342" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="2198" y="351" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#16   PlayAction   /   Priority 1   /   W 1   /   Wait ON</text>
+<text x="2198" y="372" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">COUNTER_ATTACK</text>
+<text x="2198" y="392" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">HumanBoss_COUNTER_ATTACK</text>
+</g>
+<g data-node-id="125"><title>通常Guard／Dodge後の軽反撃</title>
+<rect x="2185" y="418" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2186" y="426" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="2198" y="435" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#125   PlayAction   /   Priority 1   /   W 1   /   Wait ON</text>
+<text x="2198" y="456" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">通常Guard／Dodge後の軽反撃</text>
+<text x="2198" y="476" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">HumanBoss_LIGHT_COUNTER</text>
+</g>
+<g data-node-id="120"><title>Counter段階</title>
+<rect x="1655" y="376.0" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1656" y="384.0" width="4" height="52" rx="2" fill="#df98f6" stroke="none"/>
+<text x="1668" y="393.0" fill="#df98f6" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#120   RandomSelector   /   Priority 1</text>
+<text x="1668" y="414.0" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Counter段階</text>
+</g>
+<g data-node-id="8"><title>ジャストガード後の反撃</title>
+<rect x="1125" y="313.0" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1126" y="321.0" width="4" height="52" rx="2" fill="#61d2e6" stroke="none"/>
+<text x="1138" y="330.0" fill="#61d2e6" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#8   Sequence   /   Priority 0</text>
+<text x="1138" y="351.0" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">ジャストガード後の反撃</text>
+</g>
+<g data-node-id="230"><title>InitialSpecialReady</title>
+<rect x="1655" y="514" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1656" y="522" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="1668" y="531" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#230   BlackboardCondition   /   Priority 0</text>
+<text x="1668" y="552" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">InitialSpecialReady</text>
+<text x="1668" y="572" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">Local / HumanBossAI.InitialSpecialReady = true</text>
+</g>
+<g data-node-id="234"><title>Initial Shadow Ragnarok</title>
+<rect x="1655" y="598" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1656" y="606" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="1668" y="615" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#234   PlayAction   /   Priority 1   /   W 1   /   Wait ON</text>
+<text x="1668" y="636" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Initial Shadow Ragnarok</text>
+<text x="1668" y="656" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">HumanBoss_SHADOW_RAGNAROK</text>
+</g>
+<g data-node-id="226"><title>初回特殊攻撃の優先選択</title>
+<rect x="1125" y="556.0" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1126" y="564.0" width="4" height="52" rx="2" fill="#61d2e6" stroke="none"/>
+<text x="1138" y="573.0" fill="#61d2e6" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#226   Sequence   /   Priority 0</text>
+<text x="1138" y="594.0" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">初回特殊攻撃の優先選択</text>
+</g>
+<g data-node-id="24"><title>CanReact</title>
+<rect x="1655" y="694" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1656" y="702" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="1668" y="711" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#24   BlackboardCondition   /   Priority 0</text>
+<text x="1668" y="732" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">CanReact</text>
+<text x="1668" y="752" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">Local / HumanBossAI.CanReact = true</text>
+</g>
+<g data-node-id="40"><title>GUARD</title>
+<rect x="2185" y="778" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2186" y="786" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="2198" y="795" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#40   PlayAction   /   Priority 0   /   W 1   /   Wait ON</text>
+<text x="2198" y="816" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">GUARD</text>
+<text x="2198" y="836" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">HumanBoss_GUARD</text>
+</g>
+<g data-node-id="36"><title>SIDE_DODGE</title>
+<rect x="2185" y="862" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2186" y="870" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="2198" y="879" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#36   PlayAction   /   Priority 1   /   W 1   /   Wait ON</text>
+<text x="2198" y="900" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">SIDE_DODGE</text>
+<text x="2198" y="920" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">HumanBoss_SIDE_DODGE</text>
+</g>
+<g data-node-id="32"><title>BACK_DODGE</title>
+<rect x="2185" y="946" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2186" y="954" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="2198" y="963" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#32   PlayAction   /   Priority 2   /   W 1   /   Wait ON</text>
+<text x="2198" y="984" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">BACK_DODGE</text>
+<text x="2198" y="1004" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">HumanBoss_BACK_DODGE</text>
+</g>
+<g data-node-id="48"><title>NoReaction</title>
+<rect x="2185" y="1030" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2186" y="1038" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="2198" y="1047" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#48   PlayAction   /   Priority 3   /   W 1   /   Wait OFF</text>
+<text x="2198" y="1068" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">NoReaction</text>
+<text x="2198" y="1088" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">HumanBoss_NoReaction</text>
+</g>
+<g data-node-id="44"><title>JUST_GUARD</title>
+<rect x="2185" y="1114" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2186" y="1122" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="2198" y="1131" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#44   PlayAction   /   Priority 4   /   W 1   /   Wait ON</text>
+<text x="2198" y="1152" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">JUST_GUARD</text>
+<text x="2198" y="1172" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">HumanBoss_JUST_GUARD</text>
+</g>
+<g data-node-id="28"><title>防御と回避の選択</title>
+<rect x="1655" y="946.0" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1656" y="954.0" width="4" height="52" rx="2" fill="#df98f6" stroke="none"/>
+<text x="1668" y="963.0" fill="#df98f6" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#28   RandomSelector   /   Priority 1</text>
+<text x="1668" y="984.0" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">防御と回避の選択</text>
+</g>
+<g data-node-id="20"><title>プレイヤー攻撃への反応</title>
+<rect x="1125" y="820.0" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1126" y="828.0" width="4" height="52" rx="2" fill="#61d2e6" stroke="none"/>
+<text x="1138" y="837.0" fill="#61d2e6" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#20   Sequence   /   Priority 1</text>
+<text x="1138" y="858.0" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">プレイヤー攻撃への反応</text>
+</g>
+<g data-node-id="242"><title>GuardExecutionReady</title>
+<rect x="1655" y="1210" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1656" y="1218" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="1668" y="1227" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#242   BlackboardCondition   /   Priority 0</text>
+<text x="1668" y="1248" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">GuardExecutionReady</text>
+<text x="1668" y="1268" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">Local / HumanBossAI.GuardExecutionReady = true</text>
+</g>
+<g data-node-id="246"><title>GUARD_EXECUTION</title>
+<rect x="1655" y="1294" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1656" y="1302" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="1668" y="1311" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#246   PlayAction   /   Priority 1   /   W 1   /   Wait ON</text>
+<text x="1668" y="1332" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">GUARD_EXECUTION</text>
+<text x="1668" y="1352" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">HumanBoss_GUARD_EXECUTION</text>
+</g>
+<g data-node-id="238"><title>ガード継続への拘束攻撃</title>
+<rect x="1125" y="1252.0" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1126" y="1260.0" width="4" height="52" rx="2" fill="#61d2e6" stroke="none"/>
+<text x="1138" y="1269.0" fill="#61d2e6" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#238   Sequence   /   Priority 2</text>
+<text x="1138" y="1290.0" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">ガード継続への拘束攻撃</text>
+</g>
+<g data-node-id="190"><title>CanUseSpecialAttack</title>
+<rect x="1655" y="1390" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1656" y="1398" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="1668" y="1407" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#190   BlackboardCondition   /   Priority 0</text>
+<text x="1668" y="1428" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">CanUseSpecialAttack</text>
+<text x="1668" y="1448" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">Local / HumanBossAI.CanUseSpecialAttack = true</text>
+</g>
+<g data-node-id="194"><title>SHADOW_RAGNAROK</title>
+<rect x="1655" y="1474" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1656" y="1482" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="1668" y="1491" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#194   PlayAction   /   Priority 1   /   W 1   /   Wait ON</text>
+<text x="1668" y="1512" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">SHADOW_RAGNAROK</text>
+<text x="1668" y="1532" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">HumanBoss_SHADOW_RAGNAROK</text>
+</g>
+<g data-node-id="186"><title>HP50%以下の特殊攻撃</title>
+<rect x="1125" y="1432.0" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1126" y="1440.0" width="4" height="52" rx="2" fill="#61d2e6" stroke="none"/>
+<text x="1138" y="1449.0" fill="#61d2e6" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#186   Sequence   /   Priority 3</text>
+<text x="1138" y="1470.0" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">HP50%以下の特殊攻撃</text>
+</g>
+<g data-node-id="202"><title>CanRangedOffense</title>
+<rect x="1655" y="1570" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1656" y="1578" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="1668" y="1587" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#202   BlackboardCondition   /   Priority 0</text>
+<text x="1668" y="1608" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">CanRangedOffense</text>
+<text x="1668" y="1628" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">Local / HumanBossAI.CanRangedOffense = true</text>
+</g>
+<g data-node-id="210"><title>SHADOW_CHARGE</title>
+<rect x="2185" y="1654" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2186" y="1662" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="2198" y="1671" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#210   PlayAction   /   Priority 0   /   W 1   /   Wait ON</text>
+<text x="2198" y="1692" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">SHADOW_CHARGE</text>
+<text x="2198" y="1712" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">HumanBoss_SHADOW_CHARGE</text>
+</g>
+<g data-node-id="214"><title>SHADOW_ORB</title>
+<rect x="2185" y="1738" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2186" y="1746" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="2198" y="1755" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#214   PlayAction   /   Priority 1   /   W 1   /   Wait ON</text>
+<text x="2198" y="1776" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">SHADOW_ORB</text>
+<text x="2198" y="1796" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">HumanBoss_SHADOW_ORB</text>
+</g>
+<g data-node-id="218"><title>SHADOW_SHIFT_APPROACH</title>
+<rect x="2185" y="1822" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2186" y="1830" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="2198" y="1839" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#218   PlayAction   /   Priority 2   /   W 1   /   Wait ON</text>
+<text x="2198" y="1860" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">SHADOW_SHIFT_APPROACH</text>
+<text x="2198" y="1880" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">HumanBoss_SHADOW_SHIFT_APPROACH</text>
+</g>
+<g data-node-id="222"><title>Approach</title>
+<rect x="2185" y="1906" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2186" y="1914" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="2198" y="1923" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#222   PlayAction   /   Priority 3   /   W 0.35   /   Wait ON</text>
+<text x="2198" y="1944" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Approach</text>
+<text x="2198" y="1964" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">HumanBoss_Approach</text>
+</g>
+<g data-node-id="294"><title>Combo approach A</title>
+<rect x="2185" y="1990" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2186" y="1998" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="2198" y="2007" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#294   PlayAction   /   Priority 4   /   W 1   /   Wait ON</text>
+<text x="2198" y="2028" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Combo approach A</text>
+<text x="2198" y="2048" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">HumanBoss_NORMAL_ATTACK_A</text>
+</g>
+<g data-node-id="298"><title>Combo approach B</title>
+<rect x="2185" y="2074" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2186" y="2082" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="2198" y="2091" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#298   PlayAction   /   Priority 5   /   W 1   /   Wait ON</text>
+<text x="2198" y="2112" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Combo approach B</text>
+<text x="2198" y="2132" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">HumanBoss_NORMAL_ATTACK_B</text>
+</g>
+<g data-node-id="206"><title>RangedAttackSelector</title>
+<rect x="1655" y="1864.0" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1656" y="1872.0" width="4" height="52" rx="2" fill="#df98f6" stroke="none"/>
+<text x="1668" y="1881.0" fill="#df98f6" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#206   RandomSelector   /   Priority 1</text>
+<text x="1668" y="1902.0" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">RangedAttackSelector</text>
+</g>
+<g data-node-id="198"><title>遠距離の攻撃選択</title>
+<rect x="1125" y="1717.0" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1126" y="1725.0" width="4" height="52" rx="2" fill="#61d2e6" stroke="none"/>
+<text x="1138" y="1734.0" fill="#61d2e6" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#198   Sequence   /   Priority 4</text>
+<text x="1138" y="1755.0" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">遠距離の攻撃選択</text>
+</g>
+<g data-node-id="141"><title>CanShadow</title>
+<rect x="1655" y="2170" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1656" y="2178" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="1668" y="2187" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#141   BlackboardCondition   /   Priority 0</text>
+<text x="1668" y="2208" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">CanShadow</text>
+<text x="1668" y="2228" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">Local / HumanBossAI.CanShadow = true</text>
+</g>
+<g data-node-id="149"><title>SHADOW_SHIFT_APPROACH</title>
+<rect x="2185" y="2254" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2186" y="2262" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="2198" y="2271" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#149   PlayAction   /   Priority 0   /   W 1   /   Wait ON</text>
+<text x="2198" y="2292" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">SHADOW_SHIFT_APPROACH</text>
+<text x="2198" y="2312" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">HumanBoss_SHADOW_SHIFT_APPROACH</text>
+</g>
+<g data-node-id="153"><title>SHADOW_SHIFT_BACK</title>
+<rect x="2185" y="2338" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2186" y="2346" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="2198" y="2355" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#153   PlayAction   /   Priority 1   /   W 1   /   Wait ON</text>
+<text x="2198" y="2376" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">SHADOW_SHIFT_BACK</text>
+<text x="2198" y="2396" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">HumanBoss_SHADOW_SHIFT_BACK</text>
+</g>
+<g data-node-id="157"><title>SHADOW_SHIFT_SIDE</title>
+<rect x="2185" y="2422" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2186" y="2430" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="2198" y="2439" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#157   PlayAction   /   Priority 2   /   W 1   /   Wait ON</text>
+<text x="2198" y="2460" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">SHADOW_SHIFT_SIDE</text>
+<text x="2198" y="2480" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">HumanBoss_SHADOW_SHIFT_SIDE</text>
+</g>
+<g data-node-id="161"><title>SHADOW_SHIFT_BEHIND</title>
+<rect x="2185" y="2506" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2186" y="2514" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="2198" y="2523" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#161   PlayAction   /   Priority 3   /   W 1   /   Wait ON</text>
+<text x="2198" y="2544" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">SHADOW_SHIFT_BEHIND</text>
+<text x="2198" y="2564" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">HumanBoss_SHADOW_SHIFT_BEHIND</text>
+</g>
+<g data-node-id="170"><title>SHADOW_SLASH</title>
+<rect x="2185" y="2590" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2186" y="2598" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="2198" y="2607" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#170   PlayAction   /   Priority 4   /   W 1   /   Wait ON</text>
+<text x="2198" y="2628" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">SHADOW_SLASH</text>
+<text x="2198" y="2648" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">HumanBoss_SHADOW_SLASH</text>
+</g>
+<g data-node-id="174"><title>SHADOW_DIVE_01</title>
+<rect x="2185" y="2674" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2186" y="2682" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="2198" y="2691" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#174   PlayAction   /   Priority 5   /   W 1   /   Wait ON</text>
+<text x="2198" y="2712" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">SHADOW_DIVE_01</text>
+<text x="2198" y="2732" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">HumanBoss_SHADOW_DIVE_01</text>
+</g>
+<g data-node-id="178"><title>SHADOW_DIVE_02</title>
+<rect x="2185" y="2758" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2186" y="2766" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="2198" y="2775" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#178   PlayAction   /   Priority 6   /   W 1   /   Wait ON</text>
+<text x="2198" y="2796" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">SHADOW_DIVE_02</text>
+<text x="2198" y="2816" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">HumanBoss_SHADOW_DIVE_02</text>
+</g>
+<g data-node-id="182"><title>SHADOW_DOMAIN</title>
+<rect x="2185" y="2842" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2186" y="2850" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="2198" y="2859" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#182   PlayAction   /   Priority 7   /   W 1   /   Wait ON</text>
+<text x="2198" y="2880" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">SHADOW_DOMAIN</text>
+<text x="2198" y="2900" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">HumanBoss_SHADOW_DOMAIN</text>
+</g>
+<g data-node-id="145"><title>接近／離脱／PunishのShadow</title>
+<rect x="1655" y="2548.0" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1656" y="2556.0" width="4" height="52" rx="2" fill="#df98f6" stroke="none"/>
+<text x="1668" y="2565.0" fill="#df98f6" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#145   RandomSelector   /   Priority 1</text>
+<text x="1668" y="2586.0" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">接近／離脱／PunishのShadow</text>
+</g>
+<g data-node-id="137"><title>Intentに応じたShadow接続</title>
+<rect x="1125" y="2359.0" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1126" y="2367.0" width="4" height="52" rx="2" fill="#61d2e6" stroke="none"/>
+<text x="1138" y="2376.0" fill="#61d2e6" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#137   Sequence   /   Priority 5</text>
+<text x="1138" y="2397.0" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Intentに応じたShadow接続</text>
+</g>
+<g data-node-id="56"><title>NeedsReposition</title>
+<rect x="1655" y="2938" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1656" y="2946" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="1668" y="2955" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#56   BlackboardCondition   /   Priority 0</text>
+<text x="1668" y="2976" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">NeedsReposition</text>
+<text x="1668" y="2996" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">Local / HumanBossAI.NeedsReposition = true</text>
+</g>
+<g data-node-id="60"><title>Reposition</title>
+<rect x="1655" y="3022" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1656" y="3030" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="1668" y="3039" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#60   PlayAction   /   Priority 1   /   W 1   /   Wait OFF</text>
+<text x="1668" y="3060" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Reposition</text>
+<text x="1668" y="3080" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">HumanBoss_Reposition</text>
+</g>
+<g data-node-id="52"><title>間合いの調整</title>
+<rect x="1125" y="2980.0" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1126" y="2988.0" width="4" height="52" rx="2" fill="#61d2e6" stroke="none"/>
+<text x="1138" y="2997.0" fill="#61d2e6" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#52   Sequence   /   Priority 6</text>
+<text x="1138" y="3018.0" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">間合いの調整</text>
+</g>
+<g data-node-id="68"><title>NeedsApproach</title>
+<rect x="1655" y="3118" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1656" y="3126" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="1668" y="3135" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#68   BlackboardCondition   /   Priority 0</text>
+<text x="1668" y="3156" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">NeedsApproach</text>
+<text x="1668" y="3176" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">Local / HumanBossAI.NeedsApproach = true</text>
+</g>
+<g data-node-id="72"><title>Approach</title>
+<rect x="1655" y="3202" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1656" y="3210" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="1668" y="3219" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#72   PlayAction   /   Priority 1   /   W 1   /   Wait OFF</text>
+<text x="1668" y="3240" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Approach</text>
+<text x="1668" y="3260" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">HumanBoss_Approach</text>
+</g>
+<g data-node-id="64"><title>攻撃距離への接近</title>
+<rect x="1125" y="3160.0" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1126" y="3168.0" width="4" height="52" rx="2" fill="#61d2e6" stroke="none"/>
+<text x="1138" y="3177.0" fill="#61d2e6" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#64   Sequence   /   Priority 7</text>
+<text x="1138" y="3198.0" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">攻撃距離への接近</text>
+</g>
+<g data-node-id="80"><title>NeedsObservation</title>
+<rect x="1655" y="3298" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1656" y="3306" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="1668" y="3315" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#80   BlackboardCondition   /   Priority 0</text>
+<text x="1668" y="3336" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">NeedsObservation</text>
+<text x="1668" y="3356" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">Local / HumanBossAI.NeedsObservation = true</text>
+</g>
+<g data-node-id="84"><title>Observe</title>
+<rect x="1655" y="3382" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1656" y="3390" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="1668" y="3399" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#84   PlayAction   /   Priority 1   /   W 1   /   Wait OFF</text>
+<text x="1668" y="3420" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">Observe</text>
+<text x="1668" y="3440" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">HumanBoss_Observe</text>
+</g>
+<g data-node-id="76"><title>プレイヤーの観察</title>
+<rect x="1125" y="3340.0" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1126" y="3348.0" width="4" height="52" rx="2" fill="#61d2e6" stroke="none"/>
+<text x="1138" y="3357.0" fill="#61d2e6" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#76   Sequence   /   Priority 8</text>
+<text x="1138" y="3378.0" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">プレイヤーの観察</text>
+</g>
+<g data-node-id="92"><title>CanOffense</title>
+<rect x="1655" y="3478" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1656" y="3486" width="4" height="52" rx="2" fill="#f3bf71" stroke="none"/>
+<text x="1668" y="3495" fill="#f3bf71" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#92   BlackboardCondition   /   Priority 0</text>
+<text x="1668" y="3516" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">CanOffense</text>
+<text x="1668" y="3536" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">Local / HumanBossAI.CanOffense = true</text>
+</g>
+<g data-node-id="100"><title>ComboPattern01 (4 stages)</title>
+<rect x="2185" y="3562" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2186" y="3570" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="2198" y="3579" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#100   PlayAction   /   Priority 0   /   W 1   /   Wait ON</text>
+<text x="2198" y="3600" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">ComboPattern01 (4 stages)</text>
+<text x="2198" y="3620" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">HumanBoss_NORMAL_ATTACK_A</text>
+</g>
+<g data-node-id="104"><title>ComboPattern02 (4 stages)</title>
+<rect x="2185" y="3646" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2186" y="3654" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="2198" y="3663" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#104   PlayAction   /   Priority 1   /   W 1   /   Wait ON</text>
+<text x="2198" y="3684" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">ComboPattern02 (4 stages)</text>
+<text x="2198" y="3704" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">HumanBoss_NORMAL_ATTACK_B</text>
+</g>
+<g data-node-id="108"><title>DELAY_ATTACK</title>
+<rect x="2185" y="3730" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2186" y="3738" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="2198" y="3747" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#108   PlayAction   /   Priority 2   /   W 1   /   Wait ON</text>
+<text x="2198" y="3768" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">DELAY_ATTACK</text>
+<text x="2198" y="3788" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">HumanBoss_DELAY_ATTACK</text>
+</g>
+<g data-node-id="112"><title>GUARD_BREAK</title>
+<rect x="2185" y="3814" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2186" y="3822" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="2198" y="3831" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#112   PlayAction   /   Priority 3   /   W 1   /   Wait ON</text>
+<text x="2198" y="3852" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">GUARD_BREAK</text>
+<text x="2198" y="3872" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">HumanBoss_GUARD_BREAK</text>
+</g>
+<g data-node-id="129"><title>空振り後の反撃</title>
+<rect x="2185" y="3898" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2186" y="3906" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="2198" y="3915" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#129   PlayAction   /   Priority 4   /   W 1   /   Wait ON</text>
+<text x="2198" y="3936" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">空振り後の反撃</text>
+<text x="2198" y="3956" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">HumanBoss_WHIFF_PUNISH</text>
+</g>
+<g data-node-id="133"><title>予兆を見せて攻撃を誘う</title>
+<rect x="2185" y="3982" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2186" y="3990" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="2198" y="3999" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#133   PlayAction   /   Priority 5   /   W 1   /   Wait ON</text>
+<text x="2198" y="4020" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">予兆を見せて攻撃を誘う</text>
+<text x="2198" y="4040" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">HumanBoss_ATTACK_FEINT</text>
+</g>
+<g data-node-id="166"><title>HEAVY_SINGLE_ATTACK</title>
+<rect x="2185" y="4066" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="2186" y="4074" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="2198" y="4083" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#166   PlayAction   /   Priority 5   /   W 1   /   Wait ON</text>
+<text x="2198" y="4104" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">HEAVY_SINGLE_ATTACK</text>
+<text x="2198" y="4124" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">HumanBoss_HEAVY_SINGLE_ATTACK</text>
+</g>
+<g data-node-id="96"><title>攻撃パターンの抽選</title>
+<rect x="1655" y="3814.0" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1656" y="3822.0" width="4" height="52" rx="2" fill="#df98f6" stroke="none"/>
+<text x="1668" y="3831.0" fill="#df98f6" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#96   RandomSelector   /   Priority 1</text>
+<text x="1668" y="3852.0" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">攻撃パターンの抽選</text>
+</g>
+<g data-node-id="88"><title>攻撃の選択</title>
+<rect x="1125" y="3646.0" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1126" y="3654.0" width="4" height="52" rx="2" fill="#61d2e6" stroke="none"/>
+<text x="1138" y="3663.0" fill="#61d2e6" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#88   Sequence   /   Priority 9</text>
+<text x="1138" y="3684.0" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">攻撃の選択</text>
+</g>
+<g data-node-id="116"><title>待機と観察</title>
+<rect x="1125" y="4162" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="1126" y="4170" width="4" height="52" rx="2" fill="#71dfb4" stroke="none"/>
+<text x="1138" y="4179" fill="#71dfb4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#116   PlayAction   /   Priority 10   /   W 1   /   Wait OFF</text>
+<text x="1138" y="4200" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">待機と観察</text>
+<text x="1138" y="4220" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="13" font-weight="500">HumanBoss_Observe</text>
+</g>
+<g data-node-id="4"><title>行動の優先判断</title>
+<rect x="595" y="2237.5" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="596" y="2245.5" width="4" height="52" rx="2" fill="#a3a6ff" stroke="none"/>
+<text x="608" y="2254.5" fill="#a3a6ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#4   Selector   /   Priority 0</text>
+<text x="608" y="2275.5" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">行動の優先判断</text>
+</g>
+<g data-node-id="1"><title>HumanBoss</title>
+<rect x="65" y="2237.5" width="422" height="68" rx="8" fill="#162233" stroke="#344862"/>
+<rect x="66" y="2245.5" width="4" height="52" rx="2" fill="#8cc9ff" stroke="none"/>
+<text x="78" y="2254.5" fill="#8cc9ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="11" font-weight="700">#1   Root   /   Priority 0</text>
+<text x="78" y="2275.5" fill="#eff5ff" font-family="Yu Gothic, Meiryo, sans-serif" font-size="17" font-weight="700">HumanBoss</text>
+</g>
+<text x="65" y="4293" fill="#a9bdd4" font-family="Yu Gothic, Meiryo, sans-serif" font-size="15" font-weight="500">元データの全ノード・全接続を再配置。矢印は親から子への接続を示します。</text>
+</svg>

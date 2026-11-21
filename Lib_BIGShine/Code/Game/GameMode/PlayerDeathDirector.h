@@ -24,11 +24,32 @@ public:
     void RequestDeath(const std::shared_ptr<GameObject>& player_);
     // 死亡を検出し、専用時計でアニメーションとカメラを進める。
     bool Update(float deltaTime_);
-    bool IsActive() const { return active || !requestedPlayer.expired(); }
-    bool IsWorldPaused() const { return active; }
-    std::shared_ptr<CameraComponent> GetCamera() const { return camera; }
-    bool HasReachedGameOver() const { return reachedGameOver; }
-    ID3D11ShaderResourceView* GetFlashbackTexture() const { return flashbackTexture.Get(); }
+
+    bool IsActive() const
+    {
+        return active || !requestedPlayer.expired();
+    }
+
+    bool IsWorldPaused() const
+    {
+        return active;
+    }
+
+    std::shared_ptr<CameraComponent> GetCamera() const
+    {
+        return camera;
+    }
+
+    bool HasReachedGameOver() const
+    {
+        return reachedGameOver;
+    }
+
+    ID3D11ShaderResourceView* GetFlashbackTexture() const
+    {
+        return flashbackTexture.Get();
+    }
+
     void CaptureFlashback(ID3D11RenderTargetView* target_);
     void ClearDeathHistory();
     // 死亡暗転とコンテニューメニューを通常UIとして描画する。

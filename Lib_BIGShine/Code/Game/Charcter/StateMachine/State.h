@@ -7,14 +7,21 @@
 class State
 {
 public:
-	State(GameObject*gameObject):owner(gameObject){}
-	virtual ~State(){}
+	State(GameObject*gameObject):owner(gameObject)
+	{
+	}
+
+	virtual ~State()
+	{
+	}
 
 	// Stateへ入った瞬間の初期化処理。
 	virtual void Enter() = 0;
 
 	// 通常更新後に必要な追従処理。不要なStateは未実装のままにできる。
-	virtual void LateExecute(float et){}
+	virtual void LateExecute(float et)
+	{
+	}
 
 	// State中の毎フレーム処理。
 	virtual void Execute(float elapsedTime) = 0;
