@@ -59,13 +59,13 @@
                 "DefaultFov": 60.0,
                 "FovWaypoints": [
                     {
-                        "dur": 0.10000000149011612,
+                        "dur": 0.09,
                         "ease": 1,
-                        "fov": 72.0,
-                        "holdDur": 0.11999999731779099,
+                        "fov": 70.0,
+                        "holdDur": 0.13,
                         "pr": 0.0,
                         "pv": 0.0,
-                        "returnDur": 0.47999998927116394
+                        "returnDur": 0.58
                     }
                 ]
             },
@@ -86,9 +86,9 @@
                         "autoFrameTargets": false,
                         "blackboardCategory": "Intro",
                         "cameraOffset": [
-                            4.005388259887695,
-                            2.276157855987549,
-                            -48.53769302368164
+                            3.8,
+                            1.95,
+                            -48.9
                         ],
                         "cameraUp": [
                             0.0,
@@ -98,8 +98,8 @@
                         "enterDuration": 0.0,
                         "focusOffset": [
                             0.0,
-                            1.7000000476837158,
-                            -1.5
+                            1.42,
+                            0.65
                         ],
                         "focusPositionKey": "Position",
                         "framingEyeHeight": 1.600000023841858,
@@ -117,13 +117,18 @@
                         "suppressCameraCollision": true,
                         "suppressLockOnControl": true,
                         "suppressThirdPersonControl": true,
-                        "targetFov": 55.0,
+                        "targetFov": 56.0,
                         "targetMode": "WORLD_POSITION",
                         "targetObjectName": "PlayerModel",
                         "useExternalFov": false,
                         "useFramingEyeHeight": false,
                         "useModelBounds": true,
-                        "useUnscaledTime": true
+                        "useUnscaledTime": true,
+                        "holdMoveDuration": 4.5,
+                        "holdOrbitDegrees": -22.0,
+                        "holdDollyDistance": -1.7,
+                        "holdLift": -0.42,
+                        "holdFovDelta": -5.0
                     },
                     {
                         "actionName": "IntroPlayer",
@@ -131,20 +136,20 @@
                         "autoFrameTargets": false,
                         "blackboardCategory": "Intro",
                         "cameraOffset": [
-                            -0.29461175203323364,
-                            1.1261578798294067,
-                            -51.137691497802734
+                            -0.6,
+                            1.45,
+                            -50.7
                         ],
                         "cameraUp": [
                             0.0,
                             1.0,
                             0.0
                         ],
-                        "enterDuration": 0.612500011920929,
+                        "enterDuration": 0.28,
                         "focusOffset": [
                             0.0,
-                            1.2000000476837158,
-                            0.0
+                            1.42,
+                            0.15
                         ],
                         "focusPositionKey": "Position",
                         "framingEyeHeight": 1.600000023841858,
@@ -162,13 +167,18 @@
                         "suppressCameraCollision": true,
                         "suppressLockOnControl": true,
                         "suppressThirdPersonControl": true,
-                        "targetFov": 50.0,
+                        "targetFov": 46.0,
                         "targetMode": "WORLD_POSITION",
                         "targetObjectName": "PlayerModel",
                         "useExternalFov": false,
                         "useFramingEyeHeight": false,
                         "useModelBounds": true,
-                        "useUnscaledTime": true
+                        "useUnscaledTime": true,
+                        "holdMoveDuration": 2.75,
+                        "holdOrbitDegrees": 29.0,
+                        "holdDollyDistance": -0.66,
+                        "holdLift": -0.14,
+                        "holdFovDelta": -5.0
                     },
                     {
                         "actionName": "IntroShoulder",
@@ -176,16 +186,16 @@
                         "autoFrameTargets": false,
                         "blackboardCategory": "Intro",
                         "cameraOffset": [
-                            -1.899999976158142,
-                            1.649999976158142,
-                            -50.0
+                            -2.1,
+                            1.6,
+                            -55.8
                         ],
                         "cameraUp": [
                             0.0,
                             1.0,
                             0.0
                         ],
-                        "enterDuration": 1.1375000476837158,
+                        "enterDuration": 0.12,
                         "focusOffset": [
                             0.0,
                             2.299999952316284,
@@ -207,13 +217,18 @@
                         "suppressCameraCollision": true,
                         "suppressLockOnControl": true,
                         "suppressThirdPersonControl": true,
-                        "targetFov": 60.0,
+                        "targetFov": 58.0,
                         "targetMode": "WORLD_POSITION",
                         "targetObjectName": "TestTarget",
                         "useExternalFov": false,
                         "useFramingEyeHeight": false,
                         "useModelBounds": true,
-                        "useUnscaledTime": true
+                        "useUnscaledTime": true,
+                        "holdMoveDuration": 1.1,
+                        "holdOrbitDegrees": -5.0,
+                        "holdDollyDistance": -4.2,
+                        "holdLift": 0.18,
+                        "holdFovDelta": -8.0
                     },
                     {
                         "actionName": "IntroDragonWide",
@@ -221,8 +236,8 @@
                         "autoFrameTargets": false,
                         "blackboardCategory": "Intro",
                         "cameraOffset": [
-                            14.0,
-                            2.0,
+                            14.8,
+                            3.4,
                             5.0
                         ],
                         "cameraUp": [
@@ -230,11 +245,11 @@
                             1.0,
                             0.0
                         ],
-                        "enterDuration": 0.9624999761581421,
+                        "enterDuration": 0.0,
                         "focusOffset": [
                             0.0,
-                            2.5,
-                            0.0
+                            4.5,
+                            -3.5
                         ],
                         "focusPositionKey": "Position",
                         "framingEyeHeight": 1.600000023841858,
@@ -252,13 +267,18 @@
                         "suppressCameraCollision": true,
                         "suppressLockOnControl": true,
                         "suppressThirdPersonControl": true,
-                        "targetFov": 60.0,
+                        "targetFov": 58.0,
                         "targetMode": "WORLD_POSITION",
                         "targetObjectName": "TestTarget",
                         "useExternalFov": false,
                         "useFramingEyeHeight": false,
                         "useModelBounds": true,
-                        "useUnscaledTime": true
+                        "useUnscaledTime": true,
+                        "holdMoveDuration": 1.15,
+                        "holdOrbitDegrees": -13.0,
+                        "holdDollyDistance": -1.9,
+                        "holdLift": 1.25,
+                        "holdFovDelta": -4.0
                     },
                     {
                         "actionName": "IntroDragonClose",
@@ -266,20 +286,20 @@
                         "autoFrameTargets": false,
                         "blackboardCategory": "Intro",
                         "cameraOffset": [
-                            6.0,
-                            10.0,
-                            -4.0
+                            8.5,
+                            8.1,
+                            -3.5
                         ],
                         "cameraUp": [
                             0.0,
                             1.0,
                             0.0
                         ],
-                        "enterDuration": 0.699999988079071,
+                        "enterDuration": 0.26,
                         "focusOffset": [
                             0.0,
-                            9.0,
-                            -12.0
+                            8.9,
+                            -11.7
                         ],
                         "focusPositionKey": "Position",
                         "framingEyeHeight": 1.600000023841858,
@@ -303,7 +323,12 @@
                         "useExternalFov": true,
                         "useFramingEyeHeight": false,
                         "useModelBounds": true,
-                        "useUnscaledTime": true
+                        "useUnscaledTime": true,
+                        "holdMoveDuration": 4.0,
+                        "holdOrbitDegrees": -20.0,
+                        "holdDollyDistance": 2.2,
+                        "holdLift": -1.05,
+                        "holdFovDelta": 0.0
                     },
                     {
                         "actionName": "TransitionDeathWide",
@@ -311,8 +336,8 @@
                         "autoFrameTargets": false,
                         "blackboardCategory": "Guard",
                         "cameraOffset": [
-                            -14.0,
-                            1.7999999523162842,
+                            -15.0,
+                            2.45,
                             -36.0
                         ],
                         "cameraUp": [
@@ -320,11 +345,11 @@
                             1.0,
                             0.0
                         ],
-                        "enterDuration": 0.44999998807907104,
+                        "enterDuration": 0.0,
                         "focusOffset": [
                             0.0,
-                            4.5,
-                            -10.0
+                            4.2,
+                            -9.0
                         ],
                         "focusPositionKey": "Position",
                         "framingEyeHeight": 2.0,
@@ -342,13 +367,18 @@
                         "suppressCameraCollision": true,
                         "suppressLockOnControl": true,
                         "suppressThirdPersonControl": true,
-                        "targetFov": 72.0,
+                        "targetFov": 70.0,
                         "targetMode": "GAME_OBJECT_OFFSET",
                         "targetObjectName": "TestTarget",
                         "useExternalFov": false,
                         "useFramingEyeHeight": false,
                         "useModelBounds": true,
-                        "useUnscaledTime": true
+                        "useUnscaledTime": true,
+                        "holdMoveDuration": 2.95,
+                        "holdOrbitDegrees": 12.0,
+                        "holdDollyDistance": -3.6,
+                        "holdLift": -0.25,
+                        "holdFovDelta": -4.0
                     },
                     {
                         "actionName": "TransitionDissolve",
@@ -356,20 +386,20 @@
                         "autoFrameTargets": false,
                         "blackboardCategory": "Guard",
                         "cameraOffset": [
-                            0.0,
-                            8.0,
-                            -25.0
+                            -7.0,
+                            3.1,
+                            -23.5
                         ],
                         "cameraUp": [
                             0.0,
                             1.0,
                             0.0
                         ],
-                        "enterDuration": 0.550000011920929,
+                        "enterDuration": 0.2,
                         "focusOffset": [
                             0.0,
-                            1.7999999523162842,
-                            0.0
+                            2.0,
+                            -3.2
                         ],
                         "focusPositionKey": "Position",
                         "framingEyeHeight": 1.600000023841858,
@@ -387,13 +417,18 @@
                         "suppressCameraCollision": true,
                         "suppressLockOnControl": true,
                         "suppressThirdPersonControl": true,
-                        "targetFov": 62.0,
+                        "targetFov": 54.0,
                         "targetMode": "GAME_OBJECT_OFFSET",
                         "targetObjectName": "TestTarget",
                         "useExternalFov": false,
                         "useFramingEyeHeight": false,
                         "useModelBounds": true,
-                        "useUnscaledTime": true
+                        "useUnscaledTime": true,
+                        "holdMoveDuration": 3.7,
+                        "holdOrbitDegrees": 24.0,
+                        "holdDollyDistance": -2.2,
+                        "holdLift": 1.45,
+                        "holdFovDelta": -7.0
                     },
                     {
                         "actionName": "TransitionMudAttack",
@@ -401,9 +436,9 @@
                         "autoFrameTargets": false,
                         "blackboardCategory": "Guard",
                         "cameraOffset": [
-                            -8.0,
-                            4.0,
-                            -43.0
+                            -8.8,
+                            2.45,
+                            -43.8
                         ],
                         "cameraUp": [
                             0.0,
@@ -413,7 +448,7 @@
                         "enterDuration": 0.3499999940395355,
                         "focusOffset": [
                             0.0,
-                            1.2000000476837158,
+                            1.08,
                             0.0
                         ],
                         "focusPositionKey": "Position",
@@ -432,13 +467,18 @@
                         "suppressCameraCollision": true,
                         "suppressLockOnControl": true,
                         "suppressThirdPersonControl": true,
-                        "targetFov": 72.0,
+                        "targetFov": 66.0,
                         "targetMode": "GAME_OBJECT_OFFSET",
                         "targetObjectName": "PlayerModel",
                         "useExternalFov": false,
                         "useFramingEyeHeight": false,
                         "useModelBounds": true,
-                        "useUnscaledTime": true
+                        "useUnscaledTime": true,
+                        "holdMoveDuration": 3.15,
+                        "holdOrbitDegrees": -18.0,
+                        "holdDollyDistance": -1.6,
+                        "holdLift": -0.43,
+                        "holdFovDelta": -8.0
                     },
                     {
                         "actionName": "TransitionFormation",
@@ -446,8 +486,8 @@
                         "autoFrameTargets": true,
                         "blackboardCategory": "Guard",
                         "cameraOffset": [
-                            0.699999988079071,
-                            0.15000000596046448,
+                            0.85,
+                            0.03,
                             -1.0
                         ],
                         "cameraUp": [
@@ -455,7 +495,7 @@
                             1.0,
                             0.0
                         ],
-                        "enterDuration": 0.3499999940395355,
+                        "enterDuration": 0.0,
                         "focusOffset": [
                             0.0,
                             0.0,
@@ -477,13 +517,18 @@
                         "suppressCameraCollision": true,
                         "suppressLockOnControl": true,
                         "suppressThirdPersonControl": true,
-                        "targetFov": 58.0,
+                        "targetFov": 57.0,
                         "targetMode": "GAME_OBJECT_OFFSET",
                         "targetObjectName": "HumanBoss",
                         "useExternalFov": false,
                         "useFramingEyeHeight": false,
                         "useModelBounds": false,
-                        "useUnscaledTime": true
+                        "useUnscaledTime": true,
+                        "holdMoveDuration": 0.5,
+                        "holdOrbitDegrees": 12.0,
+                        "holdDollyDistance": -0.35,
+                        "holdLift": 0.6,
+                        "holdFovDelta": -2.0
                     },
                     {
                         "actionName": "TransitionSwordClash",
@@ -491,16 +536,16 @@
                         "autoFrameTargets": true,
                         "blackboardCategory": "Guard",
                         "cameraOffset": [
-                            0.699999988079071,
-                            0.18000000715255737,
-                            1.0
+                            1.0,
+                            0.1,
+                            0.75
                         ],
                         "cameraUp": [
                             0.0,
                             1.0,
                             0.0
                         ],
-                        "enterDuration": 0.3499999940395355,
+                        "enterDuration": 0.08,
                         "focusOffset": [
                             0.0,
                             0.0,
@@ -511,7 +556,7 @@
                         "framingPadding": 1.2999999523162842,
                         "framingRadius": 1.0,
                         "holdDuration": 60.0,
-                        "minimumFramingDistance": 13.0,
+                        "minimumFramingDistance": 11.0,
                         "positionMode": "WORLD_POSITION",
                         "priority": 110,
                         "returnDuration": 1.0,
@@ -522,13 +567,18 @@
                         "suppressCameraCollision": true,
                         "suppressLockOnControl": true,
                         "suppressThirdPersonControl": true,
-                        "targetFov": 55.0,
+                        "targetFov": 54.0,
                         "targetMode": "GAME_OBJECT_OFFSET",
                         "targetObjectName": "HumanBoss",
                         "useExternalFov": false,
                         "useFramingEyeHeight": false,
                         "useModelBounds": true,
-                        "useUnscaledTime": true
+                        "useUnscaledTime": true,
+                        "holdMoveDuration": 0.44,
+                        "holdOrbitDegrees": 17.0,
+                        "holdDollyDistance": -0.45,
+                        "holdLift": -0.18,
+                        "holdFovDelta": -5.0
                     },
                     {
                         "actionName": "TransitionKnockdown",
@@ -536,16 +586,16 @@
                         "autoFrameTargets": true,
                         "blackboardCategory": "Guard",
                         "cameraOffset": [
-                            -0.699999988079071,
-                            0.2199999988079071,
-                            1.0
+                            0.9,
+                            0.025,
+                            0.55
                         ],
                         "cameraUp": [
                             0.0,
                             1.0,
                             0.0
                         ],
-                        "enterDuration": 0.3499999940395355,
+                        "enterDuration": 0.13,
                         "focusOffset": [
                             0.0,
                             0.0,
@@ -556,7 +606,7 @@
                         "framingPadding": 1.2000000476837158,
                         "framingRadius": 1.0,
                         "holdDuration": 60.0,
-                        "minimumFramingDistance": 12.0,
+                        "minimumFramingDistance": 8.0,
                         "positionMode": "WORLD_POSITION",
                         "priority": 110,
                         "returnDuration": 1.0,
@@ -567,13 +617,18 @@
                         "suppressCameraCollision": true,
                         "suppressLockOnControl": true,
                         "suppressThirdPersonControl": true,
-                        "targetFov": 65.0,
+                        "targetFov": 55.0,
                         "targetMode": "GAME_OBJECT_OFFSET",
                         "targetObjectName": "PlayerModel",
                         "useExternalFov": false,
                         "useFramingEyeHeight": false,
                         "useModelBounds": true,
-                        "useUnscaledTime": true
+                        "useUnscaledTime": true,
+                        "holdMoveDuration": 2.8,
+                        "holdOrbitDegrees": -27.0,
+                        "holdDollyDistance": 1.4,
+                        "holdLift": 0.32,
+                        "holdFovDelta": 7.0
                     },
                     {
                         "actionName": "TransitionVortexCollection",
@@ -581,16 +636,16 @@
                         "autoFrameTargets": true,
                         "blackboardCategory": "Guard",
                         "cameraOffset": [
-                            -0.6499999761581421,
-                            0.2199999988079071,
-                            -0.75
+                            -0.75,
+                            0.06,
+                            -1.0
                         ],
                         "cameraUp": [
                             0.0,
                             1.0,
                             0.0
                         ],
-                        "enterDuration": 0.3499999940395355,
+                        "enterDuration": 0.26,
                         "focusOffset": [
                             0.0,
                             0.0,
@@ -612,13 +667,18 @@
                         "suppressCameraCollision": true,
                         "suppressLockOnControl": true,
                         "suppressThirdPersonControl": true,
-                        "targetFov": 66.0,
+                        "targetFov": 67.0,
                         "targetMode": "GAME_OBJECT_OFFSET",
                         "targetObjectName": "MudVortexTransform",
                         "useExternalFov": false,
                         "useFramingEyeHeight": false,
                         "useModelBounds": false,
-                        "useUnscaledTime": true
+                        "useUnscaledTime": true,
+                        "holdMoveDuration": 3.0,
+                        "holdOrbitDegrees": 27.0,
+                        "holdDollyDistance": -1.3,
+                        "holdLift": 1.5,
+                        "holdFovDelta": -8.0
                     },
                     {
                         "actionName": "TransitionFormationFeet",
@@ -626,8 +686,8 @@
                         "autoFrameTargets": true,
                         "blackboardCategory": "Guard",
                         "cameraOffset": [
-                            0.6000000238418579,
-                            0.15000000596046448,
+                            0.63,
+                            -0.04,
                             -1.0
                         ],
                         "cameraUp": [
@@ -635,7 +695,7 @@
                             1.0,
                             0.0
                         ],
-                        "enterDuration": 0.3499999940395355,
+                        "enterDuration": 0.04,
                         "focusOffset": [
                             0.0,
                             0.4000000059604645,
@@ -657,13 +717,18 @@
                         "suppressCameraCollision": true,
                         "suppressLockOnControl": true,
                         "suppressThirdPersonControl": true,
-                        "targetFov": 48.0,
+                        "targetFov": 42.0,
                         "targetMode": "GAME_OBJECT_OFFSET",
                         "targetObjectName": "HumanBoss",
                         "useExternalFov": false,
                         "useFramingEyeHeight": false,
                         "useModelBounds": false,
-                        "useUnscaledTime": true
+                        "useUnscaledTime": true,
+                        "holdMoveDuration": 1.35,
+                        "holdOrbitDegrees": 21.0,
+                        "holdDollyDistance": -0.23,
+                        "holdLift": 0.23,
+                        "holdFovDelta": -4.0
                     },
                     {
                         "actionName": "TransitionFormationFace",
@@ -671,8 +736,8 @@
                         "autoFrameTargets": true,
                         "blackboardCategory": "Guard",
                         "cameraOffset": [
-                            0.6000000238418579,
-                            0.07999999821186066,
+                            0.95,
+                            0.018,
                             -1.0
                         ],
                         "cameraUp": [
@@ -680,10 +745,10 @@
                             1.0,
                             0.0
                         ],
-                        "enterDuration": 0.3499999940395355,
+                        "enterDuration": 0.06,
                         "focusOffset": [
                             0.0,
-                            1.399999976158142,
+                            1.52,
                             0.0
                         ],
                         "focusPositionKey": "Position",
@@ -691,7 +756,7 @@
                         "framingPadding": 1.149999976158142,
                         "framingRadius": 0.550000011920929,
                         "holdDuration": 60.0,
-                        "minimumFramingDistance": 3.0,
+                        "minimumFramingDistance": 2.25,
                         "positionMode": "WORLD_POSITION",
                         "priority": 110,
                         "returnDuration": 1.0,
@@ -702,13 +767,18 @@
                         "suppressCameraCollision": true,
                         "suppressLockOnControl": true,
                         "suppressThirdPersonControl": true,
-                        "targetFov": 48.0,
+                        "targetFov": 40.0,
                         "targetMode": "GAME_OBJECT_OFFSET",
                         "targetObjectName": "HumanBoss",
                         "useExternalFov": false,
                         "useFramingEyeHeight": false,
                         "useModelBounds": false,
-                        "useUnscaledTime": true
+                        "useUnscaledTime": true,
+                        "holdMoveDuration": 1.06,
+                        "holdOrbitDegrees": -20.0,
+                        "holdDollyDistance": -0.42,
+                        "holdLift": 0.11,
+                        "holdFovDelta": -5.0
                     },
                     {
                         "actionName": "TransitionFormationFull",
@@ -716,8 +786,8 @@
                         "autoFrameTargets": true,
                         "blackboardCategory": "Guard",
                         "cameraOffset": [
-                            0.699999988079071,
-                            0.15000000596046448,
+                            0.55,
+                            0.07,
                             -1.0
                         ],
                         "cameraUp": [
@@ -725,7 +795,7 @@
                             1.0,
                             0.0
                         ],
-                        "enterDuration": 0.3499999940395355,
+                        "enterDuration": 0.19,
                         "focusOffset": [
                             0.0,
                             0.0,
@@ -736,7 +806,7 @@
                         "framingPadding": 1.149999976158142,
                         "framingRadius": 1.0,
                         "holdDuration": 60.0,
-                        "minimumFramingDistance": 8.0,
+                        "minimumFramingDistance": 5.0,
                         "positionMode": "WORLD_POSITION",
                         "priority": 110,
                         "returnDuration": 1.0,
@@ -747,13 +817,18 @@
                         "suppressCameraCollision": true,
                         "suppressLockOnControl": true,
                         "suppressThirdPersonControl": true,
-                        "targetFov": 55.0,
+                        "targetFov": 47.0,
                         "targetMode": "GAME_OBJECT_OFFSET",
                         "targetObjectName": "HumanBoss",
                         "useExternalFov": false,
                         "useFramingEyeHeight": false,
                         "useModelBounds": true,
-                        "useUnscaledTime": true
+                        "useUnscaledTime": true,
+                        "holdMoveDuration": 1.0,
+                        "holdOrbitDegrees": -28.0,
+                        "holdDollyDistance": 1.1,
+                        "holdLift": -0.17,
+                        "holdFovDelta": 5.0
                     },
                     {
                         "actionName": "TransitionSwordStrike",
@@ -761,16 +836,16 @@
                         "autoFrameTargets": true,
                         "blackboardCategory": "Guard",
                         "cameraOffset": [
-                            0.699999988079071,
-                            0.18000000715255737,
-                            1.0
+                            1.0,
+                            0.05,
+                            0.48
                         ],
                         "cameraUp": [
                             0.0,
                             1.0,
                             0.0
                         ],
-                        "enterDuration": 0.3499999940395355,
+                        "enterDuration": 0.1,
                         "focusOffset": [
                             0.0,
                             0.0,
@@ -781,7 +856,7 @@
                         "framingPadding": 1.2000000476837158,
                         "framingRadius": 1.0,
                         "holdDuration": 60.0,
-                        "minimumFramingDistance": 10.0,
+                        "minimumFramingDistance": 8.0,
                         "positionMode": "WORLD_POSITION",
                         "priority": 110,
                         "returnDuration": 1.0,
@@ -792,13 +867,118 @@
                         "suppressCameraCollision": true,
                         "suppressLockOnControl": true,
                         "suppressThirdPersonControl": true,
-                        "targetFov": 50.0,
+                        "targetFov": 48.0,
                         "targetMode": "GAME_OBJECT_OFFSET",
                         "targetObjectName": "HumanBoss",
                         "useExternalFov": false,
                         "useFramingEyeHeight": false,
                         "useModelBounds": true,
-                        "useUnscaledTime": true
+                        "useUnscaledTime": true,
+                        "holdMoveDuration": 0.51,
+                        "holdOrbitDegrees": -20.0,
+                        "holdDollyDistance": -0.45,
+                        "holdLift": 0.22,
+                        "holdFovDelta": -5.0
+                    },
+                    {
+                        "actionName": "TransitionSwordStrikeSecond",
+                        "attackDirectionKey": "Normal",
+                        "autoFrameTargets": true,
+                        "blackboardCategory": "Guard",
+                        "cameraOffset": [
+                            1.0,
+                            0.09,
+                            -0.46
+                        ],
+                        "cameraUp": [
+                            0.0,
+                            1.0,
+                            0.0
+                        ],
+                        "enterDuration": 0.08,
+                        "focusOffset": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "focusPositionKey": "Position",
+                        "framingEyeHeight": 1.600000023841858,
+                        "framingPadding": 1.2000000476837158,
+                        "framingRadius": 1.0,
+                        "holdDuration": 60.0,
+                        "minimumFramingDistance": 7.2,
+                        "positionMode": "WORLD_POSITION",
+                        "priority": 110,
+                        "returnDuration": 1.0,
+                        "secondaryRadius": 1.0,
+                        "secondaryTargetName": "PlayerModel",
+                        "shakeFrequency": 20.0,
+                        "shakeStrength": 0.0,
+                        "suppressCameraCollision": true,
+                        "suppressLockOnControl": true,
+                        "suppressThirdPersonControl": true,
+                        "targetFov": 46.0,
+                        "targetMode": "GAME_OBJECT_OFFSET",
+                        "targetObjectName": "HumanBoss",
+                        "useExternalFov": false,
+                        "useFramingEyeHeight": false,
+                        "useModelBounds": true,
+                        "useUnscaledTime": true,
+                        "holdMoveDuration": 0.51,
+                        "holdOrbitDegrees": 21.0,
+                        "holdDollyDistance": -0.46,
+                        "holdLift": -0.19,
+                        "holdFovDelta": -4.0
+                    },
+                    {
+                        "actionName": "TransitionSwordStrikeThird",
+                        "attackDirectionKey": "Normal",
+                        "autoFrameTargets": true,
+                        "blackboardCategory": "Guard",
+                        "cameraOffset": [
+                            1.0,
+                            0.08,
+                            0.54
+                        ],
+                        "cameraUp": [
+                            0.0,
+                            1.0,
+                            0.0
+                        ],
+                        "enterDuration": 0.09,
+                        "focusOffset": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "focusPositionKey": "Position",
+                        "framingEyeHeight": 1.600000023841858,
+                        "framingPadding": 1.2000000476837158,
+                        "framingRadius": 1.0,
+                        "holdDuration": 60.0,
+                        "minimumFramingDistance": 7.4,
+                        "positionMode": "WORLD_POSITION",
+                        "priority": 110,
+                        "returnDuration": 1.0,
+                        "secondaryRadius": 1.0,
+                        "secondaryTargetName": "PlayerModel",
+                        "shakeFrequency": 20.0,
+                        "shakeStrength": 0.0,
+                        "suppressCameraCollision": true,
+                        "suppressLockOnControl": true,
+                        "suppressThirdPersonControl": true,
+                        "targetFov": 48.0,
+                        "targetMode": "GAME_OBJECT_OFFSET",
+                        "targetObjectName": "HumanBoss",
+                        "useExternalFov": false,
+                        "useFramingEyeHeight": false,
+                        "useModelBounds": true,
+                        "useUnscaledTime": true,
+                        "holdMoveDuration": 1.63,
+                        "holdOrbitDegrees": -22.0,
+                        "holdDollyDistance": 1.04,
+                        "holdLift": 0.41,
+                        "holdFovDelta": 7.0
                     }
                 ]
             },
@@ -815,13 +995,13 @@
                 "presets": [
                     {
                         "actionName": "IntroRoarShake",
-                        "duration": 0.75,
+                        "duration": 1.04,
                         "fadeInRate": 0.07999999821186066,
                         "fadeOutRate": 0.699999988079071,
-                        "frequency": 7.0,
-                        "positionStrength": 0.18000000715255737,
+                        "frequency": 11.0,
+                        "positionStrength": 0.15,
                         "priority": 100,
-                        "rotationStrength": 1.25,
+                        "rotationStrength": 0.85,
                         "useUnscaledTime": true
                     },
                     {
@@ -837,13 +1017,13 @@
                     },
                     {
                         "actionName": "TransitionClashShake",
-                        "duration": 0.1599999964237213,
+                        "duration": 0.14,
                         "fadeInRate": 0.0,
                         "fadeOutRate": 0.699999988079071,
                         "frequency": 26.0,
-                        "positionStrength": 0.04500000178813934,
+                        "positionStrength": 0.064,
                         "priority": 110,
-                        "rotationStrength": 0.4000000059604645,
+                        "rotationStrength": 0.65,
                         "useUnscaledTime": true
                     },
                     {

@@ -38,13 +38,29 @@ public:
     // 初期状態をGlobalBlackboardへ書き込む。
     void Start();
     // 毎フレーム共有状態をGlobalBlackboardへ同期する。
-    void Update(float deltaTime_);
+    void Update(float deltaTime_, GameObjectManager& manager_);
     // 確定した形態・暴走・大技の状態から、戦闘中だけBGMを選ぶ。
     void UpdateBattleMusic(GameObjectManager& manager_);
     // 戦闘進行、HP割合、AI方針を初期値へ戻す。
     void ResetBattleState();
     // GameScene開始後の縦進行を開始する。
     void BeginGameSceneFlow();
+
+    struct BattleResult
+    {
+        double elapsedSeconds = 0.0;
+        int justDodges = 0;
+        int justGuards = 0;
+        double damageTaken = 0.0;
+    };
+
+    const BattleResult& GetBattleResult() const
+    {
+        return battleResult;
+    }
+
+    void RecordPlayerDefense(bool justDodge_);
+    void RecordPlayerDamage(float damage_);
 
     // 他Systemが参照する共有Blackboardを返す。
     BlackboardComponent& GetGlobalBlackboard()
@@ -204,6 +220,8 @@ public:
 private:
     // HP割合やAI重みなど、0から1の範囲で扱う値を補正する。
     float ClampRate(float value_) const;
+    bool IsBattleResultTracking() const;
+    bool IsBossSpecialActionActive(GameObjectManager& manager_) const;
     // 進行状態を切り替え、対応するロック状態を反映する。
     void SetGameState(GameProgressState state_);
     // 現在の進行状態に応じてPlayer操作とEnemy AIのロックを設定する。
@@ -239,6 +257,7 @@ private:
     bool battlePaused = false;
 
     // 現在の戦闘フェーズと、Player/BossのHP割合。
+    BattleResult battleResult;
     int currentBattlePhase = 0;
     float playerHpRate = 1.0f;
     float bossHpRate = 1.0f;

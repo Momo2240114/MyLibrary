@@ -229,9 +229,15 @@ public:
         return editorPlayModeEnabled ? editorPlayMode : EditorPlayMode::PLAY;
     }
 
+    bool IsResultPreviewScene() const
+    {
+        return editorPlayModeEnabled && loadedSceneName == "ResultPreview";
+    }
+
     bool CanStartEditorPlay() const
     {
-        return editorPlayModeEnabled && editorPlayMode == EditorPlayMode::EDITOR && sceneRuntimeState == SCENE_RUNTIME_STATE::RUNNING;
+        return editorPlayModeEnabled && editorPlayMode == EditorPlayMode::EDITOR &&
+            sceneRuntimeState == SCENE_RUNTIME_STATE::RUNNING && !IsResultPreviewScene();
     }
 
     bool ShouldSimulatePhysics() const;

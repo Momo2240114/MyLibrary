@@ -1,0 +1,140 @@
+{
+    "CollisionMask": 0,
+    "Components": [
+        {
+            "Data": {
+                "BoardId": "integrated_battle_hud",
+                "BoardLayer": 10,
+                "BoardName": "Integrated Battle HUD",
+                "InputEnabled": true,
+                "ReferenceResolution": [
+                    1920.0,
+                    1080.0
+                ],
+                "ScaleMode": "EXPAND",
+                "Version": 1,
+                "Visible": true,
+                "ZOrder": 0
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "WidgetBoardComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "InputEnabled": true,
+                "ParentWidgetId": "",
+                "RaycastTarget": false,
+                "RectTransform": {
+                    "AnchorMax": [
+                        1.0,
+                        1.0
+                    ],
+                    "AnchorMin": [
+                        0.0,
+                        0.0
+                    ],
+                    "AnchoredPosition": [
+                        0.0,
+                        0.0
+                    ],
+                    "LocalRotation": 0.0,
+                    "LocalScale": [
+                        1.0,
+                        1.0
+                    ],
+                    "Pivot": [
+                        0.5,
+                        0.5
+                    ],
+                    "SizeDelta": [
+                        0.0,
+                        0.0
+                    ]
+                },
+                "Version": 1,
+                "Visible": true,
+                "WidgetId": "BattleHudRoot",
+                "ZOrder": 0
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "UIWidgetComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "BossHeight": 12.0,
+                "BossPosition": [
+                    0.0,
+                    55.0
+                ],
+                "BossScale": 1.0,
+                "BossWidth": 850.0,
+                "ControllerIconType": 0,
+                "CooldownTextScale": 1.0,
+                "ElementLayouts": {},
+                "FadeDuration": 0.18000000715255737,
+                "GuideOpacity": 0.9399999976158142,
+                "GuidePosition": [
+                    -340.0,
+                    -250.0
+                ],
+                "GuideScale": 1.0,
+                "HideDuringPresentation": true,
+                "IconScale": 1.0,
+                "LabelScale": 1.0,
+                "PaletteFadeDuration": 0.15000000596046448,
+                "PlayerPosition": [
+                    60.0,
+                    -120.0
+                ],
+                "PlayerScale": 1.0,
+                "PortraitColumns": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4
+                ],
+                "PortraitHoldDuration": 0.800000011920929,
+                "PortraitLowHealthRate": 0.25
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "BattleHudComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        }
+    ],
+    "Layer": 16,
+    "Name": "UIRoot",
+    "ParentName": "",
+    "RequiredForSceneStart": false,
+    "Transform": {
+        "Pos": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

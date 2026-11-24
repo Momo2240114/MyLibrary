@@ -476,6 +476,28 @@ void CameraActionDirectorComponent::LateUpdate(float deltaTime_)
         }
     }
 
+    if (phase == CAMERA_ACTION_PHASE::HOLD && activePreset.holdMoveDuration > 0.0f)
+    {
+        // 注視点を中心に回り、寄り引きしても被写体を横切らない軌道を保つ。
+        const float move_ = SmoothStep(phaseTimer / activePreset.holdMoveDuration);
+        const auto offset_ = SubtractFloat3(actionCameraPosition, focusPosition_);
+        const float startRadius_ = std::hypot(offset_.x, offset_.z);
+        if (startRadius_ > 0.0001f)
+        {
+            const float angle_ = std::atan2(offset_.x, offset_.z) +
+                DirectX::XMConvertToRadians(activePreset.holdOrbitDegrees) * move_;
+            const float radius_ = (std::max)(startRadius_ + activePreset.holdDollyDistance * move_,
+                (std::min)(startRadius_, 0.25f));
+            cameraPosition_.x = focusPosition_.x + std::sin(angle_) * radius_;
+            cameraPosition_.z = focusPosition_.z + std::cos(angle_) * radius_;
+        }
+        cameraPosition_.y += activePreset.holdLift * move_;
+        if (!activePreset.useExternalFov)
+        {
+            fov_ = ClampFov(fov_ + activePreset.holdFovDelta * move_);
+        }
+    }
+
     if (activePreset.shakeStrength > 0.0001f)
     {
         const float shake_ =
@@ -1191,6 +1213,17 @@ void CameraActionDirectorComponent::Gui()
             ImGui::DragFloat("Enter", &preset_.enterDuration, 0.01f, 0.0f, 5.0f);
             ImGui::DragFloat("Hold", &preset_.holdDuration, 0.01f, 0.0f, 5.0f);
             ImGui::DragFloat("Return", &preset_.returnDuration, 0.01f, 0.0f, 5.0f);
+            ImGui::DragFloat("Hold Move Duration", &preset_.holdMoveDuration, 0.05f, 0.0f, 60.0f);
+            if (preset_.holdMoveDuration > 0.0f)
+            {
+                ImGui::DragFloat("Hold Orbit (deg)", &preset_.holdOrbitDegrees, 0.5f);
+                ImGui::DragFloat("Hold Dolly", &preset_.holdDollyDistance, 0.05f);
+                ImGui::DragFloat("Hold Lift", &preset_.holdLift, 0.05f);
+                if (!preset_.useExternalFov)
+                {
+                    ImGui::DragFloat("Hold FOV Change", &preset_.holdFovDelta, 0.1f);
+                }
+            }
             ImGui::DragFloat("FOV", &preset_.targetFov, 0.1f, 10.0f, 120.0f);
             ImGui::Checkbox("Use External FOV In Hold", &preset_.useExternalFov);
             char targetNameBuffer_[256]{};
@@ -1275,6 +1308,14 @@ void CameraActionDirectorComponent::Serialize(nlohmann::json& json_) const
         presetJson_["enterDuration"] = preset_.enterDuration;
         presetJson_["holdDuration"] = preset_.holdDuration;
         presetJson_["returnDuration"] = preset_.returnDuration;
+        if (preset_.holdMoveDuration > 0.0f)
+        {
+            presetJson_["holdMoveDuration"] = preset_.holdMoveDuration;
+            presetJson_["holdOrbitDegrees"] = preset_.holdOrbitDegrees;
+            presetJson_["holdDollyDistance"] = preset_.holdDollyDistance;
+            presetJson_["holdLift"] = preset_.holdLift;
+            presetJson_["holdFovDelta"] = preset_.holdFovDelta;
+        }
         presetJson_["targetFov"] = preset_.targetFov;
         presetJson_["useExternalFov"] = preset_.useExternalFov;
         presetJson_["targetObjectName"] = preset_.targetObjectName;
@@ -1330,6 +1371,11 @@ void CameraActionDirectorComponent::Deserialize(const nlohmann::json& json_)
             preset_.enterDuration = presetJson_.value("enterDuration", 0.08f);
             preset_.holdDuration = presetJson_.value("holdDuration", 0.12f);
             preset_.returnDuration = presetJson_.value("returnDuration", 0.18f);
+            preset_.holdMoveDuration = (std::max)(presetJson_.value("holdMoveDuration", 0.0f), 0.0f);
+            preset_.holdOrbitDegrees = presetJson_.value("holdOrbitDegrees", 0.0f);
+            preset_.holdDollyDistance = presetJson_.value("holdDollyDistance", 0.0f);
+            preset_.holdLift = presetJson_.value("holdLift", 0.0f);
+            preset_.holdFovDelta = presetJson_.value("holdFovDelta", 0.0f);
             preset_.targetFov = presetJson_.value("targetFov", 45.0f);
             preset_.useExternalFov = presetJson_.value("useExternalFov", false);
             preset_.targetObjectName = presetJson_.value("targetObjectName", std::string{});

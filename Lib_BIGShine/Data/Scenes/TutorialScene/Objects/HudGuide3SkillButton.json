@@ -1,0 +1,106 @@
+{
+    "CollisionMask": 0,
+    "Components": [
+        {
+            "Data": {
+                "InputEnabled": false,
+                "ParentWidgetId": "HudGuideRoot",
+                "RaycastTarget": false,
+                "RectTransform": {
+                    "AnchorMax": [
+                        0.5,
+                        0.5
+                    ],
+                    "AnchorMin": [
+                        0.5,
+                        0.5
+                    ],
+                    "AnchoredPosition": [
+                        -80.0,
+                        72.0
+                    ],
+                    "LocalRotation": 0.0,
+                    "LocalScale": [
+                        1.0,
+                        1.0
+                    ],
+                    "Pivot": [
+                        0.5,
+                        0.5
+                    ],
+                    "SizeDelta": [
+                        32.0,
+                        32.0
+                    ]
+                },
+                "Version": 1,
+                "Visible": true,
+                "WidgetId": "HudGuide3SkillButton",
+                "ZOrder": 43
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "UIWidgetComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "CatPos": [
+                    0.5,
+                    1280.5
+                ],
+                "CatSize": [
+                    127.0,
+                    127.0
+                ],
+                "Color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "LinearSampling": true,
+                "LocalSize": [
+                    32.0,
+                    32.0
+                ],
+                "SdrTexture": true,
+                "ShaderID": 0,
+                "TexturePath": "./Data/Sprite/Input/GamePad/PS/playstation-series_sheet_double.png",
+                "Visible": false,
+                "pivotType": 0
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "SpriteRenderer",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        }
+    ],
+    "Layer": 16,
+    "Name": "HudGuide3SkillButton",
+    "ParentName": "HudGuideRoot",
+    "RequiredForSceneStart": false,
+    "Transform": {
+        "Pos": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

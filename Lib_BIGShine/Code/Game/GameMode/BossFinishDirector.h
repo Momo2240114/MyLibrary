@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GameModeManager.h"
 #include "Engine/Graphics/Resource/Animation/ModelAnimator.h"
 #include "Engine/GamePlay/Transform/Transform.h"
 #include <nlohmann/json.hpp>
@@ -8,6 +9,7 @@
 #include <vector>
 
 class GameObjectManager;
+class GraphicsDeviceManager;
 class CameraComponent;
 class SpriteRenderSystem;
 class ParticleComponent;
@@ -98,8 +100,11 @@ public:
     float GetPreviewEndTime(Ending ending_) const;
     std::span<const EndingCue> GetBadEndingCues() const;
     std::span<const EndingCue> GetTrueEndingCues() const;
+    void ApplyPostEffects(GraphicsDeviceManager& graphics_) const;
     // PostEffect後、UI描画前の出力だけを複製し、同じ画像をSDRの2D経路で表示する。
-    void RenderOutput(SpriteRenderSystem& sprites_, ID3D11RenderTargetView* target_);
+    void RenderOutput(SpriteRenderSystem& sprites_, ID3D11RenderTargetView* target_, bool resultPreview_ = false);
+    void UpdateResultPreview(float deltaTime_);
+    void DrawResultPreviewControls();
 
     ID3D11ShaderResourceView* GetCapture() const
     {
@@ -198,16 +203,22 @@ private:
     void UpdateTrueEnding(float previousTime_, float time_);
     void BeginBadEnding();
     void ResetBadEnding();
+    void AdvanceBadEnding(float time_);
     void UpdateBadEnding(float previousTime_, float time_);
     void ApplyBadEndingMaterials();
+    void SetEndingCamera(Vector3 eye_, Vector3 focus_, float fov_, float roll_, float time_, float shake_);
     void RenderBadEnding(SpriteRenderSystem& sprites_, ID3D11RenderTargetView* target_, float width_, float height_);
+    float GetResultStartTime(Ending ending_) const;
+    void RenderResult(SpriteRenderSystem& sprites_, float left_, float top_, float width_, float height_, float held_);
     void CompleteFinish();
     void ReturnToTitle();
-    void PrepareSprites();
+    void PrepareSprites(const GameModeManager::BattleResult* previewResult_ = nullptr);
+    void RefreshResultSprites(const GameModeManager::BattleResult* result_, bool sampleRank_);
     bool Capture(ID3D11RenderTargetView* target_);
     void DrawSprite(SpriteRenderSystem& sprites_, const std::shared_ptr<GameObject>& object_,
         float x_, float y_, float width_, float height_, const DirectX::XMFLOAT4& color_);
     void Normalize();
+    bool ReloadResultRanks();
 
     GameObjectManager& manager;
     nlohmann::json settings;
@@ -225,6 +236,16 @@ private:
     std::shared_ptr<GameObject> solidSprite;
     std::shared_ptr<GameObject> clearSprite;
     std::shared_ptr<GameObject> promptSprite;
+    std::shared_ptr<GameObject> resultLabelsSprite;
+    std::shared_ptr<GameObject> resultValuesSprite;
+    std::shared_ptr<GameObject> resultRanksSprite;
+    std::shared_ptr<GameObject> overallLabelSprite;
+    std::shared_ptr<GameObject> overallRankSprite;
+    std::shared_ptr<GameObject> rankBurstSprite;
+    char overallRank = '\0';
+    GameModeManager::BattleResult resultPreviewValues;
+    float resultPreviewAge = 0.0f;
+    bool resultPreviewReady = false;
     Microsoft::WRL::ComPtr<ID3D11Texture2D> capturedTexture;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> capturedView;
     DirectX::XMFLOAT4 captureUv{0, 0, 1, 1};

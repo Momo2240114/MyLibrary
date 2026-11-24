@@ -742,6 +742,9 @@
     <ClCompile Include="Code\Engine\UI\MenuNavigationComponent.cpp">
       <Filter>Code\Engine\GamePlay\UI</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\UI\TitleSettingsComponent.cpp">
+      <Filter>Code\Engine\GamePlay\UI</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\UI\MenuPresentation.cpp">
       <Filter>Code\Engine\GamePlay\UI</Filter>
     </ClCompile>
@@ -1708,6 +1711,9 @@
       <Filter>Code\Engine\GamePlay\UI</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\UI\MenuNavigationComponent.h">
+      <Filter>Code\Engine\GamePlay\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\UI\TitleSettingsComponent.h">
       <Filter>Code\Engine\GamePlay\UI</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\UI\MenuPresentation.h">
@@ -2797,6 +2803,9 @@
     </None>
     <None Include="Data\UI\UIVisualEffectPresets.json">
       <Filter>Data\UI\Presets</Filter>
+    </None>
+    <None Include="Data\Scenes\ResultPreview\SceneList.json">
+      <Filter>Data\UI</Filter>
     </None>
     <None Include="Data\Scenes\UIEffectsGallery\SceneList.json">
       <Filter>Data\UI\Gallery</Filter>

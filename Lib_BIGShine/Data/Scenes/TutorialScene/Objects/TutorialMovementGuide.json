@@ -1,0 +1,133 @@
+{
+    "CollisionMask": 0,
+    "Components": [
+        {
+            "Data": {
+                "InputEnabled": false,
+                "ParentWidgetId": "BattleHudRoot",
+                "RaycastTarget": false,
+                "RectTransform": {
+                    "AnchorMax": [
+                        1.0,
+                        0.0
+                    ],
+                    "AnchorMin": [
+                        1.0,
+                        0.0
+                    ],
+                    "AnchoredPosition": [
+                        -60.0,
+                        42.0
+                    ],
+                    "LocalRotation": 0.0,
+                    "LocalScale": [
+                        1.0,
+                        1.0
+                    ],
+                    "Pivot": [
+                        1.0,
+                        0.0
+                    ],
+                    "SizeDelta": [
+                        450.0,
+                        66.0
+                    ]
+                },
+                "Version": 1,
+                "Visible": true,
+                "WidgetId": "TutorialMovementGuide",
+                "ZOrder": 48
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "UIWidgetComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "CatPos": [
+                    0.0,
+                    0.0
+                ],
+                "CatSize": [
+                    450.0,
+                    66.0
+                ],
+                "Color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "LinearSampling": true,
+                "LocalSize": [
+                    450.0,
+                    66.0
+                ],
+                "SdrTexture": true,
+                "ShaderID": 0,
+                "TexturePath": "",
+                "Visible": true,
+                "pivotType": 0
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "SpriteRenderer",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "AutoSizeWidget": false,
+                "Color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "FontPath": "Data/Font/NotoSansJP-Regular.otf",
+                "FontSize": 24.0,
+                "FontStrokeWidth": 1.2,
+                "HorizontalAlign": "RIGHT",
+                "MaxWidth": 450.0,
+                "Padding": 3.0,
+                "Text": "移動　WASD / 左スティック\n視点　マウス / 右スティック",
+                "Version": 1,
+                "VerticalAlign": "CENTER"
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "UITextComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        }
+    ],
+    "Layer": 16,
+    "Name": "TutorialMovementGuide",
+    "ParentName": "UIRoot",
+    "RequiredForSceneStart": false,
+    "Transform": {
+        "Pos": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

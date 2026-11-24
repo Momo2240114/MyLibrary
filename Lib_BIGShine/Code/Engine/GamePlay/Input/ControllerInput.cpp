@@ -1,6 +1,7 @@
 #include "PrecompiledHeader.h"
 
 #include "ControllerInput.h"
+#include "Engine/Core/GameRuntimeSettings.h"
 #include "Engine/Debug/TracyProfiler.h"
 
 #include <SDL3/SDL_events.h>
@@ -36,6 +37,11 @@ void ControllerInput::PlayRumble(float lowStrength_, float highStrength_, float 
         rumbleStatus = "Invalid rumble request";
         return;
     }
+    const float power_ = GameRuntimeSettings::GetUserPreferences().vibration;
+    if (power_ <= 0.0f)
+    {
+        return;
+    }
     const Uint64 now_ = SDL_GetTicks();
     if (now_ < rumbleEndTime && priority_ < rumblePriority)
     {
@@ -44,8 +50,8 @@ void ControllerInput::PlayRumble(float lowStrength_, float highStrength_, float 
     }
     const Uint32 durationMs_ = static_cast<Uint32>(std::clamp(duration_, 0.001f, 10.0f) * 1000.0f);
     if (SDL_RumbleGamepad(gamepad,
-        static_cast<Uint16>(std::clamp(lowStrength_, 0.0f, 1.0f) * 65535.0f),
-        static_cast<Uint16>(std::clamp(highStrength_, 0.0f, 1.0f) * 65535.0f),
+        static_cast<Uint16>(std::clamp(lowStrength_, 0.0f, 1.0f) * power_ * 65535.0f),
+        static_cast<Uint16>(std::clamp(highStrength_, 0.0f, 1.0f) * power_ * 65535.0f),
         durationMs_))
     {
         rumbleEndTime = now_ + durationMs_;

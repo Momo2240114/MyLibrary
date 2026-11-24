@@ -114,7 +114,7 @@
                 ],
                 "arenaRadius": 47.5,
                 "baseDistance": 5.0,
-                "cameraHeight": 0.25,
+                "cameraHeight": 0.95,
                 "centerDistanceWeight": 0.3499999940395355,
                 "closeDistance": 8.0,
                 "closeFocusBias": 0.4000000059604645,

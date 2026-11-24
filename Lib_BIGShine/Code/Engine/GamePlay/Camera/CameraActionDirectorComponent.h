@@ -104,6 +104,11 @@ struct CameraActionPreset
     float enterDuration = 0.08f;
     float holdDuration = 0.12f;
     float returnDuration = 0.18f;
+    float holdMoveDuration = 0.0f;
+    float holdOrbitDegrees = 0.0f;
+    float holdDollyDistance = 0.0f;
+    float holdLift = 0.0f;
+    float holdFovDelta = 0.0f;
 
     // 演出中だけ差し替える FOV と、必要なら追加する揺れ設定。
     float targetFov = 45.0f;

@@ -1,4 +1,5 @@
 #include "PrecompiledHeader.h"
+#include "Engine/Core/GameRuntimeSettings.h"
 
 #include "AudioManager.h"
 
@@ -128,6 +129,7 @@ void AudioManager::LoadFile()
     {
         AddAudioFromFile(fileName_, false);
     }
+    ApplyUserVolumes();
 }
 
 // FMODの内部更新を呼び、再生・DSP・3D音響の状態を進める。
@@ -181,20 +183,47 @@ void AudioManager::EnsurePresentationAudio()
         }
     };
     attach_(master_, sharedMuffleDsp);
-    if (!bgmPresentationGroup)
+    const auto ensureGroup_ = [&](const char* name_, FMOD::ChannelGroup*& group_)
     {
-        if (system_->createChannelGroup("BGM Presentation", &bgmPresentationGroup) != FMOD_OK)
+        if (group_ || system_->createChannelGroup(name_, &group_) != FMOD_OK || !group_)
         {
-            bgmPresentationGroup = nullptr;
+            return false;
         }
-        if (bgmPresentationGroup && master_->addGroup(bgmPresentationGroup) != FMOD_OK)
+        if (master_->addGroup(group_) != FMOD_OK)
         {
-            bgmPresentationGroup->release();
-            bgmPresentationGroup = nullptr;
+            group_->release();
+            group_ = nullptr;
+            return false;
         }
+        return true;
+    };
+    const bool createdBgm_ = ensureGroup_("BGM Presentation", bgmPresentationGroup);
+    const bool createdSe_ = ensureGroup_("Sound Effects", seGroup);
+    if (createdBgm_ || createdSe_)
+    {
+        ApplyUserVolumes();
     }
     attach_(bgmPresentationGroup, bgmMuffleDsp);
     attach_(bgmPresentationGroup, bgmDistanceDsp);
+}
+
+void AudioManager::ApplyUserVolumes()
+{
+    const auto& preferences_ = GameRuntimeSettings::GetUserPreferences();
+    auto* system_ = Audio::Instance().GetSystem();
+    FMOD::ChannelGroup* master_ = nullptr;
+    if (system_ && system_->getMasterChannelGroup(&master_) == FMOD_OK && master_)
+    {
+        master_->setVolume(preferences_.masterVolume);
+    }
+    if (bgmPresentationGroup)
+    {
+        bgmPresentationGroup->setVolume(preferences_.bgmVolume * deathBgmGain);
+    }
+    if (seGroup)
+    {
+        seGroup->setVolume(preferences_.seVolume);
+    }
 }
 
 void AudioManager::PlaySpatialAttackSound(const std::string& path_, const DirectX::XMFLOAT3& position_,
@@ -270,9 +299,10 @@ void AudioManager::SetDeathBgmEffect(float amount_)
     }
     EnsurePresentationAudio();
     const float amountValue_ = std::clamp(amount_, 0.0f, 1.0f);
+    deathBgmGain = (1.0f - amountValue_) * (1.0f - amountValue_);
     if (bgmPresentationGroup)
     {
-        bgmPresentationGroup->setVolume((1.0f - amountValue_) * (1.0f - amountValue_));
+        bgmPresentationGroup->setVolume(GameRuntimeSettings::GetUserPreferences().bgmVolume * deathBgmGain);
     }
     if (bgmDistanceDsp)
     {
@@ -299,9 +329,10 @@ void AudioManager::ResetPresentationAudio()
     {
         bgmDistanceDsp->setBypass(true);
     }
+    deathBgmGain = 1.0f;
     if (bgmPresentationGroup)
     {
-        bgmPresentationGroup->setVolume(1.0f);
+        bgmPresentationGroup->setVolume(GameRuntimeSettings::GetUserPreferences().bgmVolume);
     }
 }
 
@@ -363,6 +394,11 @@ void AudioManager::AddBGM(std::unique_ptr<AudioSource> source_)
 
 void AudioManager::AddSE(std::unique_ptr<AudioSource> source_)
 {
+    EnsurePresentationAudio();
+    if (source_)
+    {
+        source_->SetChannelGroup(seGroup);
+    }
     audioSEs.push_back(std::move(source_));
 }
 
@@ -884,6 +920,11 @@ void AudioManager::ClearAll()
         bgmPresentationGroup->release();
         bgmPresentationGroup = nullptr;
     }
+    if (seGroup)
+    {
+        seGroup->release();
+        seGroup = nullptr;
+    }
     loadedPaths.clear();
     bgmPathToIndex.clear();
     sePathToIndex.clear();
@@ -924,10 +965,7 @@ size_t AudioManager::AddAudioFromFile(const std::string& path_, bool isBGM_)
         return INVALID_AUDIO_INDEX;
     }
     EnsurePresentationAudio();
-    if (isBGM_)
-    {
-        raw_->SetChannelGroup(bgmPresentationGroup);
-    }
+    raw_->SetChannelGroup(isBGM_ ? bgmPresentationGroup : seGroup);
 
     if (isBGM_)
     {

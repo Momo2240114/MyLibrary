@@ -129,6 +129,11 @@ void UIVisualEffectComponent::SetProgress(float progress_)
     playing = false;
 }
 
+void UIVisualEffectComponent::SetSampleTime(float time_)
+{
+    playTime = std::isfinite(time_) ? (std::max)(0.0f, time_) : 0.0f;
+}
+
 void UIVisualEffectComponent::SetRuntimeStrength(float strength_)
 {
     runtimeStrength = std::isfinite(strength_) ? std::clamp(strength_,0.0f,1.0f) : 0.0f;

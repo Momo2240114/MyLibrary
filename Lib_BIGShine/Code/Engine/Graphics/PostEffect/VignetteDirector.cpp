@@ -146,6 +146,10 @@ void VignetteDirector::RegisterActions()
     {
         return;
     }
+    owner_->RegisterGlobalAction("PostProcess", "ResetVignette", [this]()
+    {
+        ResetToDefault();
+    });
     for (size_t index_ = 0; index_ < editorWaypoints.size(); ++index_)
     {
         owner_->RegisterGlobalAction("PostProcess", "Vignette_" + std::to_string(index_), [this, index_]()

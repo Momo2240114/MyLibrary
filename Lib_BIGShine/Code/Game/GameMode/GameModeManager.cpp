@@ -7,8 +7,11 @@
 #include "Engine/Audio/AudioManager.h"
 #include "Engine/Debug/TracyProfiler.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
+#include "Game/AI/Dragon/DragonAttackControllerComponent.h"
 #include "Game/AI/Human/HumanBossAIComponent.h"
 #include "Game/AI/Human/HumanBossActionComponent.h"
+
+#include <cmath>
 
 namespace
 {
@@ -34,14 +37,61 @@ void GameModeManager::Start()
 }
 
 // Manager自身の状態を正として、毎フレームGlobalBlackboardへ同期する。
-void GameModeManager::Update(float deltaTime_)
+void GameModeManager::Update(float deltaTime_, GameObjectManager& manager_)
 {
     BS_PROFILE_SCOPE("GameModeManager::Update");
 
-    (void)deltaTime_;
+    if (IsBattleResultTracking() && !playerControlLocked && std::isfinite(deltaTime_) && deltaTime_ > 0.0f &&
+        !IsBossSpecialActionActive(manager_))
+    {
+        battleResult.elapsedSeconds += deltaTime_;
+    }
 
     TryStartRequestedSequence();
     WriteBlackboard();
+}
+
+bool GameModeManager::IsBattleResultTracking() const
+{
+    return !cinematicPreview && !battlePaused && !gameplayLocked && !presentationPlaying &&
+        (currentGameState == GameProgressState::PHASE_1_BATTLE ||
+            currentGameState == GameProgressState::PHASE_2_BATTLE);
+}
+
+bool GameModeManager::IsBossSpecialActionActive(GameObjectManager& manager_) const
+{
+    if (currentGameState == GameProgressState::PHASE_1_BATTLE)
+    {
+        const auto dragon_ = manager_.Find("TestTarget");
+        const auto attacks_ = dragon_ ? dragon_->GetComponent<DragonAttackControllerComponent>() : nullptr;
+        return attacks_ && attacks_->IsEnabled() && attacks_->IsSpecialActionActive();
+    }
+
+    const auto boss_ = manager_.Find("HumanBoss");
+    if (!boss_)
+    {
+        return false;
+    }
+    const auto action_ = boss_->GetComponent<HumanBossActionComponent>();
+    const auto ai_ = boss_->GetComponent<HumanBossAIComponent>();
+    return (action_ && action_->IsEnabled() && action_->IsSpecialActionActive()) ||
+        (ai_ && ai_->IsEnabled() && ai_->IsBerserkInvulnerable());
+}
+
+void GameModeManager::RecordPlayerDefense(bool justDodge_)
+{
+    if (IsBattleResultTracking())
+    {
+        ++(justDodge_ ? battleResult.justDodges : battleResult.justGuards);
+    }
+}
+
+void GameModeManager::RecordPlayerDamage(float damage_)
+{
+    if (IsBattleResultTracking() && std::isfinite(damage_) && damage_ > 0.0f)
+    {
+        battleResult.damageTaken += damage_;
+    }
 }
 
 void GameModeManager::UpdateBattleMusic(GameObjectManager& manager_)
@@ -102,6 +152,7 @@ void GameModeManager::ResetBattleState()
     phaseTransitionPreview = false;
     cinematicPreview = false;
 
+    battleResult = {};
     currentBattlePhase = 0;
     playerHpRate = 1.0f;
     bossHpRate = 1.0f;

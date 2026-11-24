@@ -1,4 +1,5 @@
 #include "PrecompiledHeader.h"
+#include "Engine/Core/GameRuntimeSettings.h"
 
 #include "PostRenderSystem.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
@@ -151,7 +152,8 @@ void PostRenderSystem::Execute(const RenderContext& rc, ID3D11ShaderResourceView
     // GraphicsDeviceManagerに集約された現在のポストエフェクト設定を読み取る。
     auto& graphics_ = GraphicsDeviceManager::Instance();
     auto tracyGpuContext_ = graphics_.GetTracyGpuContext();
-    auto& bloomParams_ = graphics_.GetBloomParams();
+    auto bloomParams_ = graphics_.GetBloomParams();
+    bloomParams_.exposure *= GameRuntimeSettings::GetUserPreferences().brightness;
     auto& filterParams_ = graphics_.GetFilterParams();
     auto& radialBlurParams_ = graphics_.GetRadialBlurParams();
     auto& xeGtaoParams_ = graphics_.GetXeGtaoParams();

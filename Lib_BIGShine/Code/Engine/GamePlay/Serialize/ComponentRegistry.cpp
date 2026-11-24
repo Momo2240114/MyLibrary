@@ -46,6 +46,7 @@
 #include "Engine/UI/UIProgressBarComponent.h"
 #include "Engine/UI/BattleHudComponent.h"
 #include "Engine/UI/MenuNavigationComponent.h"
+#include "Engine/UI/TitleSettingsComponent.h"
 #include "Engine/UI/ScreenFadeComponent.h"
 #include "Engine/UI/ScreenTransitionComponent.h"
 #include "Engine/UI/LoadingPresentationComponent.h"
@@ -175,6 +176,7 @@ void RegisterAllComponents()
     registry.Register<UIProgressBarComponent>("UIProgressBarComponent");
     registry.Register<BattleHudComponent>("BattleHudComponent");
     registry.Register<MenuNavigationComponent>("MenuNavigationComponent");
+    registry.Register<TitleSettingsComponent>("TitleSettingsComponent");
     registry.Register<ScreenFadeComponent>("ScreenFadeComponent");
     registry.Register<ScreenTransitionComponent>("ScreenTransitionComponent");
     registry.Register<LoadingPresentationComponent>("LoadingPresentationComponent");

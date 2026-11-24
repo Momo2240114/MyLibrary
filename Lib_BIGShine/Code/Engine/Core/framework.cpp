@@ -1,5 +1,6 @@
 #include "PrecompiledHeader.h"
 #include "Engine/UI/ScreenTransitionManager.h"
+#include "Engine/UI/TitleSettingsComponent.h"
 
 #include "framework.h"
 #include "Engine/Core/GameRuntimeSettings.h"
@@ -203,6 +204,13 @@ void framework::update(float elapsedTime_/*Elapsed seconds from last frame*/)
         {
             manager_->SetPlayInputCaptured(false);
         }
+        if (focused_ && !systemKey_ && !releaseKey_ && manager_ &&
+            manager_->GetLoadedSceneName() == "TitleBackground" && !ScreenTransitionManager::Instance().IsInputBlocked())
+        {
+            const auto owner_ = manager_->Find("TitlePresentation");
+            const auto settings_ = owner_ ? owner_->GetComponent<TitleSettingsComponent>() : nullptr;
+            capture_ |= settings_ && settings_->WantsMouseCapture();
+        }
         mouse_.SetCursorLockEnabled(capture_);
         mouse_.Update(hwnd);
 		ControllerInput::Instance().Update();
@@ -234,6 +242,7 @@ void framework::update(float elapsedTime_/*Elapsed seconds from last frame*/)
                 // ゲーム内メニューの操作音と死亡時のBGM減衰を維持し、Editor Pauseは従来どおり反映する。
                 const bool paused_ = manager_->IsCinematicSequencePreview() ?
                     manager_->IsCinematicSequencePaused() || manager_->IsCinematicSequenceSeeking() :
+                    manager_->GetLoadedSceneName() != "TitleBackground" &&
                     manager_->GetEditorPlayMode() != EditorPlayMode::EDITOR &&
                     !manager_->ShouldSimulatePhysics() && !(manager_->GetEditorPlayMode() == EditorPlayMode::PLAY &&
                         (manager_->IsGameMenuPaused() || manager_->IsPlayerDeathActive()));

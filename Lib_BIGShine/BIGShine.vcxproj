@@ -622,6 +622,7 @@
     <ClCompile Include="Code\Engine\UI\UIProgressBarComponent.cpp" />
     <ClCompile Include="Code\Engine\UI\BattleHudComponent.cpp" />
     <ClCompile Include="Code\Engine\UI\MenuNavigationComponent.cpp" />
+    <ClCompile Include="Code\Engine\UI\TitleSettingsComponent.cpp" />
     <ClCompile Include="Code\Engine\UI\MenuPresentation.cpp" />
     <ClCompile Include="Code\Engine\UI\ScreenFadeComponent.cpp" />
     <ClCompile Include="Code\Engine\UI\ScenePresentationComponent.cpp" />
@@ -1029,6 +1030,7 @@
     <ClInclude Include="Code\Engine\UI\UIProgressBarComponent.h" />
     <ClInclude Include="Code\Engine\UI\BattleHudComponent.h" />
     <ClInclude Include="Code\Engine\UI\MenuNavigationComponent.h" />
+    <ClInclude Include="Code\Engine\UI\TitleSettingsComponent.h" />
     <ClInclude Include="Code\Engine\UI\MenuPresentation.h" />
     <ClInclude Include="Shader\Transition\TransitionCommon.hlsli" />
     <ClInclude Include="Shader\Transition\ShapeMaskTransition.hlsli" />
@@ -1509,6 +1511,7 @@
     <None Include="Data\UI\SceneTransitions.json" />
     <None Include="Data\UI\UIMotionPresets.json" />
     <None Include="Data\UI\UIVisualEffectPresets.json" />
+    <None Include="Data\Scenes\ResultPreview\SceneList.json" />
     <None Include="Data\Scenes\UIEffectsGallery\SceneList.json" />
     <None Include="Data\Scenes\UIEffectsGallery\Objects\Card01.json" />
     <None Include="Data\Scenes\UIEffectsGallery\Objects\Card01Label.json" />

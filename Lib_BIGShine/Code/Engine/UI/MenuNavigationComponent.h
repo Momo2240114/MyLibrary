@@ -35,6 +35,7 @@ private:
         std::string glowObject;
         bool visible = true;
         bool enabled = true;
+        bool useFade = true;
         float selection = 0.0f;
     };
 

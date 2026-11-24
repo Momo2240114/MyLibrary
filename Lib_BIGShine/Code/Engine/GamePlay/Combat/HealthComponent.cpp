@@ -85,10 +85,18 @@ void HealthComponent::ApplyDamage(float damage_)
     const bool wasDead_ = IsDead();
 
     // 0未満にならないようHPを減らし、死亡した瞬間だけDeath Actionを呼ぶ。
+    const float previousHealth_ = currentHealth;
     currentHealth = (std::max)(currentHealth - (std::max)(damage_, 0.0f), 0.0f);
+    if (currentHealth < previousHealth_ && actor_ && actor_->manager && actor_->GetComponent<PlayerControllerComponent>())
+    {
+        if (const auto mode_ = actor_->GetManager().GetGameModeManager())
+        {
+            mode_->RecordPlayerDamage(previousHealth_ - currentHealth);
+        }
+    }
     PublishToBlackboard();
 
-    const std::shared_ptr<GameObject> owner_ = GetGameObject();
+    const auto& owner_ = actor_;
     if (!wasDead_ && IsDead() && owner_)
     {
         // 既存の死亡Actionを維持し、Playerだけは衝突走査後のコンテニュー演出も予約する。

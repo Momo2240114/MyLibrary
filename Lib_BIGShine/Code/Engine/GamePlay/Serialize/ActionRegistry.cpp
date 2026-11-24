@@ -64,6 +64,22 @@ void RegisterAllActions()
     {
         ControllerInput::Instance().PlayRumble(0.18f, 0.5f, 0.14f, 3);
     });
+    reg.RegisterAction("Controller", "Controller.RumbleCinematicRoar", []()
+    {
+        ControllerInput::Instance().PlayRumble(0.21f, 0.52f, 0.16f, 5);
+    });
+    reg.RegisterAction("Controller", "Controller.RumbleCinematicRoarTail", []()
+    {
+        ControllerInput::Instance().PlayRumble(0.08f, 0.30f, 0.13f, 5);
+    });
+    reg.RegisterAction("Controller", "Controller.RumbleCinematicClash", []()
+    {
+        ControllerInput::Instance().PlayRumble(0.34f, 0.76f, 0.11f, 6);
+    });
+    reg.RegisterAction("Controller", "Controller.RumbleCinematicImpact", []()
+    {
+        ControllerInput::Instance().PlayRumble(0.78f, 0.43f, 0.24f, 7);
+    });
     reg.RegisterAction("Controller", "Controller.StopRumble", []()
     {
         ControllerInput::Instance().StopRumble();

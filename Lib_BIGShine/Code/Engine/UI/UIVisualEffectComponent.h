@@ -51,6 +51,8 @@ public:
     void Play(bool preview_ = false);
     void Stop();
     void SetProgress(float progress_);
+    // 描画専用Spriteで、演出時計からシェーダーの時刻を指定する。
+    void SetSampleTime(float time_);
     // 再生時間を維持したまま、選択状態に応じた効果量だけを調整する。
     void SetRuntimeStrength(float strength_);
     void SetRuntimeDissolve(float dissolve_);

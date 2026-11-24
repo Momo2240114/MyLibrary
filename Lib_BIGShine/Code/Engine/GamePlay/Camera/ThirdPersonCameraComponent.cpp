@@ -4,6 +4,7 @@
 
 #include "CameraComponent.h"
 #include "SpecialAttackCameraComponent.h"
+#include "Engine/Core/GameRuntimeSettings.h"
 #include "Engine/Debug/TracyProfiler.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
@@ -89,13 +90,16 @@ void ThirdPersonCameraComponent::LateUpdate(float deltaTime_)
     {
         // スティックは微調整しやすい二乗応答にし、マウスの移動量はフレーム時間を掛けずに角度へ変換する。
         const KeyConfig& keyConfig_ = KeyConfig::Instance();
+        const auto& preferences_ = GameRuntimeSettings::GetUserPreferences();
         const float stickX_ = keyConfig_.GetAxis("Camera_LookStickX");
         const float stickY_ = keyConfig_.GetAxis("Camera_LookStickY");
-        const float mouseX_ = keyConfig_.GetRawAxis("Camera_LookMouseX") * mouseSensitivity;
-        const float mouseY_ = keyConfig_.GetRawAxis("Camera_LookMouseY") * mouseSensitivity;
-        currentYaw -= stickX_ * std::abs(stickX_) * lookSpeedX * deltaTime_ + mouseX_;
+        const float mouseScale_ = mouseSensitivity * preferences_.mouseSensitivity;
+        const float stickTime_ = deltaTime_ * preferences_.controllerSensitivity;
+        const float mouseX_ = keyConfig_.GetRawAxis("Camera_LookMouseX") * mouseScale_;
+        const float mouseY_ = keyConfig_.GetRawAxis("Camera_LookMouseY") * mouseScale_;
+        currentYaw -= stickX_ * std::abs(stickX_) * lookSpeedX * stickTime_ + mouseX_;
         currentYaw = std::remainder(currentYaw, 360.0f);
-        currentPitch += stickY_ * std::abs(stickY_) * lookSpeedY * deltaTime_ - mouseY_;
+        currentPitch += stickY_ * std::abs(stickY_) * lookSpeedY * stickTime_ - mouseY_;
         currentPitch = std::clamp(currentPitch, minPitch, maxPitch);
     }
 

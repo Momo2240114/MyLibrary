@@ -37,24 +37,24 @@
                     },
                     {
                         "balance": [
-                            1.0499999523162842,
-                            0.9200000166893005,
-                            0.8799999952316284
+                            1.04,
+                            0.97,
+                            0.9
                         ],
-                        "bri": 1.0,
+                        "bri": 1.08,
                         "colorOffset": [
                             0.0,
                             0.0,
                             0.0
                         ],
-                        "con": 1.0,
-                        "dur": 0.10000000149011612,
+                        "con": 1.05,
+                        "dur": 0.075,
                         "ease": 1,
-                        "holdDur": 0.11999999731779099,
+                        "holdDur": 0.15,
                         "hue": 0.0,
                         "intensity": 1.0,
-                        "returnDur": 0.5,
-                        "sat": 0.699999988079071
+                        "returnDur": 0.65,
+                        "sat": 0.83
                     },
                     {
                         "balance": [
@@ -76,6 +76,90 @@
                         "intensity": 1.0,
                         "returnDur": 0.800000011920929,
                         "sat": 1.0
+                    },
+                    {
+                        "balance": [
+                            0.88,
+                            0.98,
+                            1.11
+                        ],
+                        "bri": 1.025,
+                        "colorOffset": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "con": 1.02,
+                        "dur": 0.36,
+                        "ease": 1,
+                        "holdDur": 0.55,
+                        "hue": 0.0,
+                        "intensity": 1.0,
+                        "returnDur": 0.68,
+                        "sat": 0.86
+                    },
+                    {
+                        "balance": [
+                            1.06,
+                            0.89,
+                            1.1
+                        ],
+                        "bri": 0.95,
+                        "colorOffset": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "con": 1.05,
+                        "dur": 0.5,
+                        "ease": 1,
+                        "holdDur": 0.85,
+                        "hue": 0.0,
+                        "intensity": 1.0,
+                        "returnDur": 0.88,
+                        "sat": 0.78
+                    },
+                    {
+                        "balance": [
+                            0.98,
+                            1.04,
+                            1.09
+                        ],
+                        "bri": 1.08,
+                        "colorOffset": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "con": 1.05,
+                        "dur": 0.035,
+                        "ease": 1,
+                        "holdDur": 0.03,
+                        "hue": 0.0,
+                        "intensity": 1.0,
+                        "returnDur": 0.16,
+                        "sat": 0.87
+                    },
+                    {
+                        "balance": [
+                            1.08,
+                            0.89,
+                            0.94
+                        ],
+                        "bri": 0.91,
+                        "colorOffset": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "con": 1.05,
+                        "dur": 0.05,
+                        "ease": 1,
+                        "holdDur": 0.18,
+                        "hue": 0.0,
+                        "intensity": 1.0,
+                        "returnDur": 0.52,
+                        "sat": 0.69
                     }
                 ],
                 "DefaultFilter": {
@@ -118,18 +202,88 @@
                 },
                 "Waypoints": [
                     {
-                        "hold": 1.0,
+                        "hold": 0.54,
+                        "target": {
+                            "center": [
+                                0.51,
+                                0.46
+                            ],
+                            "maskRadius": 0.48,
+                            "radius": 0.128,
+                            "samples": 18
+                        },
+                        "toDefault": 0.57,
+                        "toTarget": 0.11
+                    },
+                    {
+                        "hold": 0.07,
                         "target": {
                             "center": [
                                 0.5,
-                                0.5
+                                0.55
                             ],
-                            "maskRadius": 0.05000000074505806,
-                            "radius": 0.06499999761581421,
-                            "samples": 24
+                            "maskRadius": 0.48,
+                            "radius": 0.108,
+                            "samples": 18
                         },
-                        "toDefault": 1.2000000476837158,
-                        "toTarget": 0.1574999988079071
+                        "toDefault": 0.39,
+                        "toTarget": 0.035
+                    },
+                    {
+                        "hold": 0.048,
+                        "target": {
+                            "center": [
+                                0.49,
+                                0.47
+                            ],
+                            "maskRadius": 0.44,
+                            "radius": 0.097,
+                            "samples": 18
+                        },
+                        "toDefault": 0.27,
+                        "toTarget": 0.039
+                    },
+                    {
+                        "hold": 0.03,
+                        "target": {
+                            "center": [
+                                0.52,
+                                0.46
+                            ],
+                            "maskRadius": 0.47,
+                            "radius": 0.071,
+                            "samples": 18
+                        },
+                        "toDefault": 0.18,
+                        "toTarget": 0.024
+                    },
+                    {
+                        "hold": 0.09,
+                        "target": {
+                            "center": [
+                                0.49,
+                                0.53
+                            ],
+                            "maskRadius": 0.51,
+                            "radius": 0.15,
+                            "samples": 18
+                        },
+                        "toDefault": 0.4,
+                        "toTarget": 0.035
+                    },
+                    {
+                        "hold": 0.65,
+                        "target": {
+                            "center": [
+                                0.51,
+                                0.52
+                            ],
+                            "maskRadius": 0.52,
+                            "radius": 0.066,
+                            "samples": 18
+                        },
+                        "toDefault": 0.89,
+                        "toTarget": 0.5
                     }
                 ]
             },
@@ -138,6 +292,152 @@
             "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
             "TypeName": "RadialBlurDirector",
+            "UpdateEnabled": true,
+            "UpdatePriority": -100
+        },
+        {
+            "Data": {
+                "Default": {
+                    "enabled": true,
+                    "color": [
+                        1.0,
+                        0.8823529481887817,
+                        1.0,
+                        1.0
+                    ],
+                    "center": [
+                        0.5,
+                        0.5
+                    ],
+                    "intensity": 0.5,
+                    "smoothness": 0.20000000298023224,
+                    "rounded": 0.0,
+                    "roundness": 1.0,
+                    "opacity": 1.0
+                },
+                "Waypoints": [
+                    {
+                        "target": {
+                            "enabled": true,
+                            "color": [
+                                0.28,
+                                0.36,
+                                0.49,
+                                1.0
+                            ],
+                            "center": [
+                                0.51,
+                                0.43
+                            ],
+                            "intensity": 1.4,
+                            "smoothness": 0.54,
+                            "rounded": 0.0,
+                            "roundness": 1.0,
+                            "opacity": 0.42
+                        },
+                        "toTarget": 0.45,
+                        "hold": 1.4,
+                        "toDefault": 0.75
+                    },
+                    {
+                        "target": {
+                            "enabled": true,
+                            "color": [
+                                0.34,
+                                0.19,
+                                0.13,
+                                1.0
+                            ],
+                            "center": [
+                                0.51,
+                                0.46
+                            ],
+                            "intensity": 1.71,
+                            "smoothness": 0.54,
+                            "rounded": 0.0,
+                            "roundness": 1.0,
+                            "opacity": 0.61
+                        },
+                        "toTarget": 0.09,
+                        "hold": 0.58,
+                        "toDefault": 0.7
+                    },
+                    {
+                        "target": {
+                            "enabled": true,
+                            "color": [
+                                0.22,
+                                0.24,
+                                0.38,
+                                1.0
+                            ],
+                            "center": [
+                                0.48,
+                                0.52
+                            ],
+                            "intensity": 1.68,
+                            "smoothness": 0.54,
+                            "rounded": 0.0,
+                            "roundness": 1.0,
+                            "opacity": 0.54
+                        },
+                        "toTarget": 0.04,
+                        "hold": 0.23,
+                        "toDefault": 0.7
+                    },
+                    {
+                        "target": {
+                            "enabled": true,
+                            "color": [
+                                0.29,
+                                0.11,
+                                0.3,
+                                1.0
+                            ],
+                            "center": [
+                                0.51,
+                                0.47
+                            ],
+                            "intensity": 1.64,
+                            "smoothness": 0.54,
+                            "rounded": 0.0,
+                            "roundness": 1.0,
+                            "opacity": 0.55
+                        },
+                        "toTarget": 0.44,
+                        "hold": 1.25,
+                        "toDefault": 0.88
+                    },
+                    {
+                        "target": {
+                            "enabled": true,
+                            "color": [
+                                0.44,
+                                0.1,
+                                0.15,
+                                1.0
+                            ],
+                            "center": [
+                                0.48,
+                                0.53
+                            ],
+                            "intensity": 1.78,
+                            "smoothness": 0.54,
+                            "rounded": 0.0,
+                            "roundness": 1.0,
+                            "opacity": 0.71
+                        },
+                        "toTarget": 0.05,
+                        "hold": 0.24,
+                        "toDefault": 0.7
+                    }
+                ]
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "VignetteDirector",
             "UpdateEnabled": true,
             "UpdatePriority": -100
         },
@@ -794,6 +1094,16 @@
                             {
                                 "animationState": "",
                                 "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "BossIntro_Color_3",
+                                "time": 2.4000000953674316,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
                                 "cat": "ActorPresentation",
                                 "name": "BossIntro_PlayerIdle",
                                 "time": 2.5999999046325684,
@@ -826,6 +1136,16 @@
                                 "blackboardWrites": [],
                                 "cat": "CameraAction",
                                 "name": "IntroPlayer",
+                                "time": 4.724999904632568,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "BossIntro_Vignette_0",
                                 "time": 4.724999904632568,
                                 "useNormalizedTime": false,
                                 "waitForObject": "",
@@ -954,6 +1274,26 @@
                             {
                                 "animationState": "",
                                 "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "BossIntro_Vignette_1",
+                                "time": 11.649999618530273,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "Controller",
+                                "name": "Controller.RumbleCinematicRoar",
+                                "time": 11.649999618530273,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
                                 "cat": "ActorPresentation",
                                 "name": "BossIntro_RoarAirPlay",
                                 "time": 11.649999618530273,
@@ -964,9 +1304,49 @@
                             {
                                 "animationState": "",
                                 "blackboardWrites": [],
+                                "cat": "Controller",
+                                "name": "Controller.RumbleCinematicRoar",
+                                "time": 11.84,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "Controller",
+                                "name": "Controller.RumbleCinematicRoarTail",
+                                "time": 12.03,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
                                 "cat": "UI",
                                 "name": "BossIntroName_ShowBossName",
                                 "time": 12.074999809265137,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "Controller",
+                                "name": "Controller.RumbleCinematicRoarTail",
+                                "time": 12.21,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "Controller",
+                                "name": "Controller.RumbleCinematicRoarTail",
+                                "time": 12.4,
                                 "useNormalizedTime": false,
                                 "waitForObject": "",
                                 "waitForScreenCovered": false
@@ -996,6 +1376,36 @@
                                 "blackboardWrites": [],
                                 "cat": "Camera",
                                 "name": "EventCamera_RestorePriority",
+                                "time": 15.574999809265137,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "BossIntro_ResetRadialBlur",
+                                "time": 15.574999809265137,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "BossIntro_ResetVignette",
+                                "time": 15.574999809265137,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "Controller",
+                                "name": "Controller.StopRumble",
                                 "time": 15.574999809265137,
                                 "useNormalizedTime": false,
                                 "waitForObject": "",

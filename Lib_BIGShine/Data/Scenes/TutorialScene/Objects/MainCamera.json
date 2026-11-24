@@ -1,0 +1,530 @@
+{
+    "ColliderComponents": [
+        {
+            "Data": {
+                "CanBeCharacterGround": true,
+                "ColliderName": "",
+                "CollisionOwnerObjectName": "",
+                "CollisionRole": 0,
+                "ContainmentMode": 0,
+                "DebugPrimitiveColor": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0
+                ],
+                "GravityScale": 1.0,
+                "IsStatic": false,
+                "IsTrigger": false,
+                "Mass": 0.0,
+                "Offset": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "PhysicsControlsTransform": true,
+                "Radius": 0.0,
+                "RotateVelocityThreshold": 0.0010000000474974513,
+                "ShapeRenderFlg": false,
+                "UseGravity": false,
+                "UsePhysicsResponse": true,
+                "VelocityRotationMode": 0,
+                "shapeSizeScale": 1.0
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "SphereCollider",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        }
+    ],
+    "CollisionMask": 0,
+    "Components": [
+        {
+            "Data": {
+                "aspect": 1.7777777910232544,
+                "eventPriority": 8,
+                "eye": [
+                    0.0,
+                    2.16,
+                    -17.48
+                ],
+                "farZ": 1000.0,
+                "focus": [
+                    0.0,
+                    1.5,
+                    -8.0
+                ],
+                "fovY": 60.0,
+                "nearZ": 0.10000000149011612,
+                "priority": 0,
+                "up": [
+                    0.0,
+                    1.0,
+                    0.0
+                ],
+                "useEventPriority": false
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "CameraComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "baseDistance": 9.5,
+                "currentPitch": -4.0,
+                "currentYaw": 90.0,
+                "distance": 9.5,
+                "horizontalFollowSpeed": 5.0,
+                "lookSpeedX": 500.0,
+                "lookSpeedY": 300.0,
+                "maxPitch": 65.0,
+                "minPitch": -40.0,
+                "mouseSensitivity": 0.10000000149011612,
+                "returnBlendDuration": 0.3499999940395355,
+                "targetName": "PlayerModel",
+                "targetOffset": [
+                    0.0,
+                    1.5,
+                    0.0
+                ],
+                "verticalFollowSpeed": 5.0
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "ThirdPersonCameraComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "baseDistance": 7.0,
+                "cameraHeight": 0.75,
+                "centerDistanceWeight": 0.3499999940395355,
+                "closeDistance": 8.0,
+                "closeFocusBias": 0.18000000715255737,
+                "closeRangeDirectionHoldDistance": 1.5,
+                "closeRangeOrbitTurnSpeed": 90.0,
+                "currentSide": 1.0,
+                "directionalDotThreshold": 0.3499999940395355,
+                "enableCloseRangeDistanceGuard": false,
+                "farFocusBias": 0.3400000035762787,
+                "lockOnEnabled": true,
+                "lockOnFocusTargetName": "",
+                "lockOnTargetName": "",
+                "lookAtInterpolationSpeed": 12.5,
+                "maxDistance": 255.0,
+                "mouseAccumulationResetTime": 0.11999999731779099,
+                "mouseSwitchThreshold": 35.0,
+                "playerOffset": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "playerTargetName": "PlayerModel",
+                "positionInterpolationSpeed": 7.0,
+                "priorityWeight": 0.25,
+                "screenDistanceWeight": 0.550000011920929,
+                "sideOffset": 3.5,
+                "switchCooldown": 0.18000000715255737,
+                "switchStickReleaseThreshold": 0.25,
+                "switchStickThreshold": 0.6499999761581421,
+                "targetOffset": [
+                    0.0,
+                    1.7999999523162842,
+                    0.0
+                ]
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "CameraLockOnComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "arenaCameraMargin": 0.800000011920929,
+                "arenaCenter": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "arenaRadius": 67.5,
+                "baseDistance": 7.0,
+                "cameraHeight": 1.0,
+                "closeDistance": 8.0,
+                "closeFocusBias": 0.18000000715255737,
+                "closeRangeDirectionHoldDistance": 1.5,
+                "closeRangeMinimumHeight": 1.2000000476837158,
+                "closeRangeOrbitTurnSpeed": 90.0,
+                "collisionFovInterpolationSpeed": 10.0,
+                "collisionFovMaxAddition": 22.0,
+                "collisionLookAtInterpolationSpeed": 18.0,
+                "collisionLookAtLowerHeight": 1.100000023841858,
+                "collisionLookAtSearchRadius": 1.7999999523162842,
+                "currentSide": 1.0,
+                "distanceScale": 0.44999998807907104,
+                "enableCircularArenaCamera": false,
+                "enableCloseRangeDistanceGuard": false,
+                "enableCollisionVerticalCorrection": true,
+                "farFocusBias": 0.3400000035762787,
+                "framingSmoothSpeed": 16.0,
+                "heightDifferenceScale": 1.0,
+                "horizontalSafeMax": 0.8999999761581421,
+                "horizontalSafeMin": 0.10000000149011612,
+                "lookAtInterpolationSpeed": 12.5,
+                "maxCameraDistance": 14.0,
+                "minCameraDistance": 6.0,
+                "playerBottomLimit": 0.699999988079071,
+                "playerBottomOffset": [
+                    0.0,
+                    0.05000000074505806,
+                    0.0
+                ],
+                "playerFocusWeight": 0.75,
+                "playerOffset": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "positionInterpolationSpeed": 7.0,
+                "separationHeightScale": 0.05000000074505806,
+                "sideOffset": 3.5,
+                "targetFocusWeight": 0.25,
+                "targetOffset": [
+                    0.0,
+                    1.7999999523162842,
+                    0.0
+                ],
+                "verticalDistanceCorrectionStrength": 2.5,
+                "verticalFocusCorrectionStrength": 1.399999976158142,
+                "verticalSafeMax": 0.7799999713897705,
+                "verticalSafeMin": 0.2199999988079071,
+                "wallCameraContinuityScoreWeight": 0.11999999731779099,
+                "wallCameraDistance": 5.5,
+                "wallCameraHeight": 12.0,
+                "wallCameraMaximumFovAddition": 12.0,
+                "wallCameraMaximumHeightAddition": 1.2000000476837158,
+                "wallCameraOppositeSideMinimumHoldTime": 0.8500000238418579,
+                "wallCameraOppositeSideSwitchScoreThreshold": 0.75,
+                "wallCameraPositionSmoothSpeed": 8.0,
+                "wallCameraRateSmoothSpeed": 7.0,
+                "wallCameraSideMinimumHoldTime": 0.5,
+                "wallCameraSideOffset": 7.5,
+                "wallCameraSideSwitchScoreThreshold": 0.3499999940395355,
+                "wallCameraStartDistance": 3.0,
+                "wallCenterWeight": 0.75,
+                "wallCombatWeight": 0.25,
+                "wallLookAtPlayerBias": 0.41999998688697815
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "SpecialAttackCameraComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "cameraCollisionLayerMask": 672,
+                "collisionLiftDownSpeed": 5.0,
+                "collisionLiftStartRate": 0.25,
+                "collisionLiftUpSpeed": 14.0,
+                "collisionOffset": 0.20000000298023224,
+                "enableLockOnCollisionLift": true,
+                "ignoreLockOnTargetName": "",
+                "ignoreTargetName": "PlayerModel",
+                "includeDynamicColliders": true,
+                "maxCollisionLiftHeight": 3.0,
+                "minimumCameraDistance": 0.05000000074505806,
+                "probeRadius": 0.30000001192092896,
+                "reduceCollisionLiftWhenArenaWallCameraActive": true
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "CameraCollisionComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "presets": [
+                    {
+                        "actionName": "Camera_JustGuard",
+                        "attackDirectionKey": "Normal",
+                        "autoFrameTargets": false,
+                        "blackboardCategory": "Guard",
+                        "cameraOffset": [
+                            -7.5,
+                            6.699999809265137,
+                            10.0
+                        ],
+                        "cameraUp": [
+                            0.0,
+                            1.0,
+                            0.0
+                        ],
+                        "enterDuration": 0.03999999910593033,
+                        "focusOffset": [
+                            0.0,
+                            0.014999999664723873,
+                            0.0
+                        ],
+                        "focusPositionKey": "Position",
+                        "framingEyeHeight": 1.600000023841858,
+                        "framingPadding": 1.149999976158142,
+                        "framingRadius": 1.0,
+                        "holdDuration": 0.20000000298023224,
+                        "minimumFramingDistance": 3.0,
+                        "positionMode": "TPS_TARGET_RELATIVE",
+                        "priority": 20,
+                        "returnDuration": 0.17499999701976776,
+                        "secondaryRadius": 1.0,
+                        "secondaryTargetName": "",
+                        "shakeFrequency": 20.0,
+                        "shakeStrength": 0.03500000014901161,
+                        "suppressCameraCollision": false,
+                        "suppressLockOnControl": true,
+                        "suppressThirdPersonControl": true,
+                        "targetFov": 47.29999923706055,
+                        "targetMode": "PLAYER",
+                        "targetObjectName": "",
+                        "useExternalFov": false,
+                        "useFramingEyeHeight": false,
+                        "useModelBounds": true,
+                        "useUnscaledTime": true
+                    },
+                    {
+                        "actionName": "Camera_JustDodge",
+                        "attackDirectionKey": "Normal",
+                        "autoFrameTargets": false,
+                        "blackboardCategory": "Dodge",
+                        "cameraOffset": [
+                            0.0,
+                            10.0,
+                            -22.5
+                        ],
+                        "cameraUp": [
+                            0.0,
+                            1.0,
+                            0.0
+                        ],
+                        "enterDuration": 0.05999999865889549,
+                        "focusOffset": [
+                            0.0,
+                            1.100000023841858,
+                            0.0
+                        ],
+                        "focusPositionKey": "Position",
+                        "framingEyeHeight": 1.600000023841858,
+                        "framingPadding": 1.149999976158142,
+                        "framingRadius": 1.0,
+                        "holdDuration": 0.15000000596046448,
+                        "minimumFramingDistance": 3.0,
+                        "positionMode": "TPS_TARGET_RELATIVE",
+                        "priority": 15,
+                        "returnDuration": 0.09000000357627869,
+                        "secondaryRadius": 1.0,
+                        "secondaryTargetName": "",
+                        "shakeFrequency": 20.0,
+                        "shakeStrength": 0.014999999664723873,
+                        "suppressCameraCollision": false,
+                        "suppressLockOnControl": true,
+                        "suppressThirdPersonControl": true,
+                        "targetFov": 50.0,
+                        "targetMode": "PLAYER",
+                        "targetObjectName": "",
+                        "useExternalFov": false,
+                        "useFramingEyeHeight": false,
+                        "useModelBounds": true,
+                        "useUnscaledTime": true
+                    },
+                    {
+                        "actionName": "EnemyExecution",
+                        "attackDirectionKey": "Normal",
+                        "autoFrameTargets": false,
+                        "blackboardCategory": "Guard",
+                        "cameraOffset": [
+                            2.0,
+                            0.675000011920929,
+                            5.625
+                        ],
+                        "cameraUp": [
+                            0.0,
+                            1.0,
+                            0.0
+                        ],
+                        "enterDuration": 0.11999999731779099,
+                        "focusOffset": [
+                            0.0,
+                            1.2999999523162842,
+                            0.0
+                        ],
+                        "focusPositionKey": "Position",
+                        "framingEyeHeight": 1.600000023841858,
+                        "framingPadding": 1.149999976158142,
+                        "framingRadius": 1.0,
+                        "holdDuration": 3.0,
+                        "minimumFramingDistance": 3.0,
+                        "positionMode": "TARGET_LOCAL_RELATIVE",
+                        "priority": 30,
+                        "returnDuration": 0.2800000011920929,
+                        "secondaryRadius": 1.0,
+                        "secondaryTargetName": "",
+                        "shakeFrequency": 20.0,
+                        "shakeStrength": 0.0,
+                        "suppressCameraCollision": false,
+                        "suppressLockOnControl": true,
+                        "suppressThirdPersonControl": true,
+                        "targetFov": 48.0,
+                        "targetMode": "WORLD_POSITION",
+                        "targetObjectName": "",
+                        "useExternalFov": false,
+                        "useFramingEyeHeight": false,
+                        "useModelBounds": true,
+                        "useUnscaledTime": true
+                    }
+                ]
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 100,
+            "RequiredForSceneStart": false,
+            "TypeName": "CameraActionDirectorComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "presets": [
+                    {
+                        "actionName": "Light",
+                        "duration": 0.20000000298023224,
+                        "fadeInRate": 0.0,
+                        "fadeOutRate": 0.699999988079071,
+                        "frequency": 25.0,
+                        "positionStrength": 0.03500000014901161,
+                        "priority": 0,
+                        "rotationStrength": 0.25,
+                        "useUnscaledTime": true
+                    },
+                    {
+                        "actionName": "Heavy",
+                        "duration": 0.2800000011920929,
+                        "fadeInRate": 0.0,
+                        "fadeOutRate": 0.699999988079071,
+                        "frequency": 22.0,
+                        "positionStrength": 0.11999999731779099,
+                        "priority": 10,
+                        "rotationStrength": 1.2000000476837158,
+                        "useUnscaledTime": true
+                    },
+                    {
+                        "actionName": "JustGuard",
+                        "duration": 0.18000000715255737,
+                        "fadeInRate": 0.0,
+                        "fadeOutRate": 0.699999988079071,
+                        "frequency": 30.0,
+                        "positionStrength": 0.07000000029802322,
+                        "priority": 20,
+                        "rotationStrength": 0.699999988079071,
+                        "useUnscaledTime": true
+                    }
+                ]
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 200,
+            "RequiredForSceneStart": false,
+            "TypeName": "CameraShakeComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": null,
+            "Enabled": false,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "CameraFreeController",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "DefaultFov": 60.0,
+                "FovWaypoints": [
+                    {
+                        "dur": 0.029999999329447746,
+                        "ease": 1,
+                        "fov": 50.0,
+                        "holdDur": 1.2000000476837158,
+                        "pr": 0.0,
+                        "pv": 0.0,
+                        "returnDur": 1.7999999523162842
+                    },
+                    {
+                        "dur": 0.05000000074505806,
+                        "ease": 1,
+                        "fov": 75.0,
+                        "holdDur": 0.05000000074505806,
+                        "pr": 0.0,
+                        "pv": 0.0,
+                        "returnDur": 0.75
+                    }
+                ]
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "FovDirector",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": null,
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "Easing",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        }
+    ],
+    "Layer": 1,
+    "Name": "MainCamera",
+    "ParentName": "",
+    "RequiredForSceneStart": true,
+    "Transform": {
+        "Pos": [
+            0.0,
+            2.16,
+            -17.48
+        ],
+        "Rot": [
+            -4.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            0.9999998807907104,
+            0.9999998211860657,
+            0.9999998807907104
+        ]
+    }
+}

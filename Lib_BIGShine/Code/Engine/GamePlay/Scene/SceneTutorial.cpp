@@ -1,36 +1,27 @@
 #include "PrecompiledHeader.h"
-
 #include "SceneTutorial.h"
 
-void SceneTutorial::Finalize()
+SceneTutorial::SceneTutorial()
 {
-	// TutorialScene用の独自解放処理はまだ無いので、SceneBaseの終了処理に委譲する。
-	SceneBase::Finalize();
+    sceneName = "TutorialScene";
+    isEditorSuppressed = !SceneManager::IsEditorPlaySessionActive();
 }
-
-void SceneTutorial::DrawGUI()
-{
-	// 現状は仮実装。TutorialScene固有GUIを追加する場合はSceneBase::DrawGUIへ差し替える。
-	SceneBase::Finalize();
-}
-
 
 void SceneTutorial::Initialize()
 {
-	// 現状は仮実装。TutorialScene用のLoadScene処理を追加する入口。
-	SceneBase::Finalize();
+    SceneBase::Initialize();
+
+    if (isLoadingPreparation)
+    {
+        _GameObjectManager->LoadSceneAsync(sceneName, false);
+    }
+    else
+    {
+        _GameObjectManager->LoadScene(sceneName);
+    }
 }
 
-void SceneTutorial::Update(float elapsedTime)
+bool SceneTutorial::RequiresFreeCursor() const
 {
-	// 現状は仮実装。TutorialScene固有Updateを追加する入口。
-	SceneBase::Finalize();
+    return _GameObjectManager && _GameObjectManager->IsGameMenuPaused();
 }
-
-void SceneTutorial::Render(float elapsedTime)
-{
-	// 現状は仮実装。TutorialScene固有Renderを追加する入口。
-	SceneBase::Finalize();
-}
-
-

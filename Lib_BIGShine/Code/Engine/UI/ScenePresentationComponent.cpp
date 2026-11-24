@@ -2,6 +2,7 @@
 #include "ScenePresentationComponent.h"
 #include "MenuNavigationComponent.h"
 #include "ScreenFadeComponent.h"
+#include "TitleSettingsComponent.h"
 #include "Engine/Audio/AudioManager.h"
 #include "Engine/Core/GameRuntimeSettings.h"
 #include "Engine/GamePlay/Camera/CameraComponent.h"
@@ -71,6 +72,13 @@ void ScenePresentationComponent::OnDestroy()
 std::shared_ptr<CameraComponent> ScenePresentationComponent::GetCamera() const
 {
     const auto owner_ = gameObject.lock();
+    if (const auto titleSettings_ = owner_ ? owner_->GetComponent<TitleSettingsComponent>() : nullptr)
+    {
+        if (const auto previewCamera_ = titleSettings_->GetPreviewCamera())
+        {
+            return previewCamera_;
+        }
+    }
     const auto object_ = owner_ && owner_->manager ? owner_->GetManager().Find(settings.value("CameraObject", std::string())) : nullptr;
     return object_ ? object_->GetComponent<CameraComponent>() : nullptr;
 }
@@ -197,8 +205,11 @@ void ScenePresentationComponent::Update(float deltaTime_)
     auto& graphics_ = GraphicsDeviceManager::Instance();
     const float width_ = static_cast<float>((std::max)(1, graphics_.GetRenderWidth()));
     const float height_ = static_cast<float>((std::max)(1, graphics_.GetRenderHeight()));
+    const auto owner_ = GetGameObject();
+    const auto titleSettings_ = owner_ ? owner_->GetComponent<TitleSettingsComponent>() : nullptr;
+    const bool settingsOpen_ = titleSettings_ && titleSettings_->IsOpen();
     const auto& presentation_ = settings.at("Presentation");
-    if (const auto camera_ = GetCamera())
+    if (const auto camera_ = GetCamera(); camera_ && (!settingsOpen_ || !titleSettings_->GetPreviewCamera()))
     {
         const auto position_ = presentation_.value("CameraPosition", std::vector<float>{0,0,-5});
         const auto target_ = presentation_.value("LookAtPosition", std::vector<float>{0,0,0});
@@ -251,20 +262,19 @@ void ScenePresentationComponent::Update(float deltaTime_)
         }
         const float fadeOut_ = fade_ && fade_->IsFadingOut() ? 1.0f - std::clamp((fade_->GetFadeOutTime() - 0.2f) / 0.3f, 0.0f, 1.0f) : 1.0f;
         auto color_ = sprite_->GetConfiguredColor();
-        color_.w *= std::clamp((elapsedTime - 0.35f) / 0.9f, 0.0f, 1.0f) * fadeOut_;
+        color_.w *= settingsOpen_ ? 0.0f : std::clamp((elapsedTime - 0.35f) / 0.9f, 0.0f, 1.0f) * fadeOut_;
         sprite_->SetRuntimeColor(color_);
     }
-    const auto owner_ = GetGameObject();
     const auto menu_ = owner_ ? owner_->GetComponent<MenuNavigationComponent>() : nullptr;
-    if (!GameRuntimeSettings::IsGameOnly() && KeyConfig::Instance().ActionPressedIn(settings.value("SettingsInputAction", std::string())))
+    if (!settingsOpen_ && !GameRuntimeSettings::IsGameOnly() && KeyConfig::Instance().ActionPressedIn(settings.value("SettingsInputAction", std::string())))
     {
         showSettings = !showSettings;
     }
     if (menu_)
     {
-        menu_->SetInputSuppressed(showSettings);
+        menu_->SetInputSuppressed(showSettings || settingsOpen_);
     }
-    if (showSettings && !GameRuntimeSettings::IsGameOnly())
+    if (showSettings && !settingsOpen_ && !GameRuntimeSettings::IsGameOnly())
     {
         if (ImGui::Begin("Scene presentation", &showSettings))
         {

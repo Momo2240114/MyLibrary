@@ -57,6 +57,7 @@ public:
     std::vector<float> CaptureBgmVolumes() const;
     void ApplyBgmVolumes(const std::vector<float>& volumes_, float scale_);
     void SetVolumeSE(size_t index_, float volume_) const;
+    void ApplyUserVolumes();
 
     void PlaySE(size_t index_) const;
     void StopBGM();
@@ -110,6 +111,8 @@ private:
     // スローと独立した時計で、こもり効果の立ち上がりと復帰を更新する。
     void UpdatePresentationAudio();
     FMOD::ChannelGroup* bgmPresentationGroup = nullptr;
+    FMOD::ChannelGroup* seGroup = nullptr;
+    float deathBgmGain = 1.0f;
     FMOD::DSP* bgmMuffleDsp = nullptr;
     FMOD::DSP* sharedMuffleDsp = nullptr; // 全体へ軽いこもりを加え、BGM専用DSPでさらに高音を落とす。
     FMOD::DSP* bgmDistanceDsp = nullptr;

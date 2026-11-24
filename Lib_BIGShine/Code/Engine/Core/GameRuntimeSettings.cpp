@@ -5,6 +5,8 @@
 #include "Engine/GamePlay/Input/KeyConfig.h"
 
 #include <Windows.h>
+#include <algorithm>
+#include <cmath>
 #include <filesystem>
 #include <fstream>
 #include <stdexcept>
@@ -12,6 +14,110 @@
 
 bool GameRuntimeSettings::gameOnly = !BS_ENABLE_EDITOR;
 std::string GameRuntimeSettings::startupScene = "MainScene";
+GameRuntimeSettings::UserPreferences GameRuntimeSettings::userPreferences;
+
+namespace
+{
+    std::filesystem::path GetUserPreferencesPath()
+    {
+        const DWORD required_ = GetEnvironmentVariableW(L"LOCALAPPDATA", nullptr, 0);
+        if (required_ == 0)
+        {
+            return {};
+        }
+        std::wstring directory_(required_, L'\0');
+        const DWORD length_ = GetEnvironmentVariableW(L"LOCALAPPDATA", directory_.data(), required_);
+        if (length_ == 0 || length_ >= required_)
+        {
+            return {};
+        }
+        directory_.resize(length_);
+        return std::filesystem::path(directory_) / L"ANATHEMA" / L"UserSettings.json";
+    }
+}
+
+const GameRuntimeSettings::UserPreferences& GameRuntimeSettings::GetUserPreferences()
+{
+    return userPreferences;
+}
+
+void GameRuntimeSettings::SetUserPreferences(const UserPreferences& preferences_)
+{
+    const auto clamp_ = [](float value_, float min_, float max_)
+    {
+        return std::isfinite(value_) ? std::clamp(value_, min_, max_) : 1.0f;
+    };
+    userPreferences = {
+        clamp_(preferences_.brightness, 0.5f, 1.5f),
+        clamp_(preferences_.masterVolume, 0.0f, 1.0f),
+        clamp_(preferences_.bgmVolume, 0.0f, 1.0f),
+        clamp_(preferences_.seVolume, 0.0f, 1.0f),
+        clamp_(preferences_.mouseSensitivity, 0.1f, 3.0f),
+        clamp_(preferences_.controllerSensitivity, 0.1f, 3.0f),
+        clamp_(preferences_.vibration, 0.0f, 1.0f)
+    };
+}
+
+void GameRuntimeSettings::LoadUserPreferences()
+{
+    userPreferences = {};
+    const auto path_ = GetUserPreferencesPath();
+    if (path_.empty())
+    {
+        return;
+    }
+    std::ifstream file_(path_, std::ios::binary);
+    if (!file_)
+    {
+        return;
+    }
+    const auto json_ = nlohmann::json::parse(file_, nullptr, false);
+    if (!json_.is_object())
+    {
+        return;
+    }
+    const auto read_ = [&](const char* key_)
+    {
+        const auto value_ = json_.find(key_);
+        return value_ != json_.end() && value_->is_number() ? value_->get<float>() : 1.0f;
+    };
+    SetUserPreferences({read_("Brightness"), read_("MasterVolume"), read_("BgmVolume"), read_("SeVolume"),
+        read_("MouseSensitivity"), read_("ControllerSensitivity"), read_("Vibration")});
+}
+
+bool GameRuntimeSettings::SaveUserPreferences()
+{
+    const auto path_ = GetUserPreferencesPath();
+    if (path_.empty())
+    {
+        return false;
+    }
+    std::error_code error_;
+    std::filesystem::create_directories(path_.parent_path(), error_);
+    if (error_)
+    {
+        return false;
+    }
+    auto temporary_ = path_;
+    temporary_ += L".tmp";
+    const nlohmann::json json_ = {{"Brightness", userPreferences.brightness}, {"MasterVolume", userPreferences.masterVolume},
+        {"BgmVolume", userPreferences.bgmVolume}, {"SeVolume", userPreferences.seVolume},
+        {"MouseSensitivity", userPreferences.mouseSensitivity}, {"ControllerSensitivity", userPreferences.controllerSensitivity},
+        {"Vibration", userPreferences.vibration}};
+    std::ofstream file_(temporary_);
+    if (!file_)
+    {
+        return false;
+    }
+    file_ << json_.dump(4) << '\n';
+    file_.close();
+    if (file_ && MoveFileExW(temporary_.c_str(), path_.c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH))
+    {
+        return true;
+    }
+    std::filesystem::remove(temporary_, error_);
+    return false;
+}
 
 // 配布版と開発中のShipping起動で、それぞれのDataの配置先を解決する。
 bool GameRuntimeSettings::Initialize(std::string& error_)
@@ -108,6 +214,7 @@ bool GameRuntimeSettings::Initialize(std::string& error_)
         {
             throw std::runtime_error("Input configuration could not be read. Check file access and JSON syntax.\nPath: " + keyConfigPathText_);
         }
+        LoadUserPreferences();
         error_.clear();
         return true;
     }

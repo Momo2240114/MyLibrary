@@ -3061,6 +3061,36 @@
                             {
                                 "animationState": "",
                                 "blackboardWrites": [],
+                                "cat": "Controller",
+                                "name": "Controller.RumbleCinematicImpact",
+                                "time": 3.25,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "BossIntro_RadialBlur_1",
+                                "time": 3.25,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "BossIntro_Vignette_2",
+                                "time": 3.25,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ParticlePlayTransitionGroundImpact",
                                 "time": 3.25,
@@ -3541,6 +3571,26 @@
                             {
                                 "animationState": "",
                                 "blackboardWrites": [],
+                                "cat": "Controller",
+                                "name": "Controller.RumbleCinematicClash",
+                                "time": 3.072000026702881,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "BossIntro_RadialBlur_2",
+                                "time": 3.072000026702881,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ParticlePlayTransitionMudScatter",
                                 "time": 3.072000026702881,
@@ -3633,6 +3683,36 @@
                                 "blackboardWrites": [],
                                 "cat": "CameraAction",
                                 "name": "TransitionVortexCollection",
+                                "time": 4.199999809265137,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "BossIntro_RadialBlur_5",
+                                "time": 4.199999809265137,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "BossIntro_Color_4",
+                                "time": 4.199999809265137,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "BossIntro_Vignette_3",
                                 "time": 4.199999809265137,
                                 "useNormalizedTime": false,
                                 "waitForObject": "",
@@ -4181,6 +4261,36 @@
                             {
                                 "animationState": "",
                                 "blackboardWrites": [],
+                                "cat": "Controller",
+                                "name": "Controller.RumbleCinematicClash",
+                                "time": 12.343700408935547,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "BossIntro_RadialBlur_3",
+                                "time": 12.343700408935547,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "BossIntro_Color_5",
+                                "time": 12.343700408935547,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_SlashSound",
                                 "time": 12.343700408935547,
@@ -4231,6 +4341,16 @@
                             {
                                 "animationState": "",
                                 "blackboardWrites": [],
+                                "cat": "CameraAction",
+                                "name": "TransitionSwordStrikeSecond",
+                                "time": 12.875,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_PlayerParry",
                                 "time": 12.968700408935547,
@@ -4253,6 +4373,36 @@
                                 "blackboardWrites": [],
                                 "cat": "CameraShake",
                                 "name": "TransitionClashShake",
+                                "time": 12.968700408935547,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "Controller",
+                                "name": "Controller.RumbleCinematicClash",
+                                "time": 12.968700408935547,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "BossIntro_RadialBlur_3",
+                                "time": 12.968700408935547,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "BossIntro_Color_5",
                                 "time": 12.968700408935547,
                                 "useNormalizedTime": false,
                                 "waitForObject": "",
@@ -4311,6 +4461,16 @@
                             {
                                 "animationState": "",
                                 "blackboardWrites": [],
+                                "cat": "CameraAction",
+                                "name": "TransitionSwordStrikeThird",
+                                "time": 13.5,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_PlayerBlock",
                                 "time": 13.618800163269043,
@@ -4333,6 +4493,36 @@
                                 "blackboardWrites": [],
                                 "cat": "CameraShake",
                                 "name": "TransitionClashShake",
+                                "time": 13.618800163269043,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "Controller",
+                                "name": "Controller.RumbleCinematicClash",
+                                "time": 13.618800163269043,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "BossIntro_RadialBlur_3",
+                                "time": 13.618800163269043,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "BossIntro_Color_5",
                                 "time": 13.618800163269043,
                                 "useNormalizedTime": false,
                                 "waitForObject": "",
@@ -4433,6 +4623,46 @@
                                 "blackboardWrites": [],
                                 "cat": "CameraShake",
                                 "name": "TransitionHeavyShake",
+                                "time": 15.220000267028809,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "Controller",
+                                "name": "Controller.RumbleCinematicImpact",
+                                "time": 15.220000267028809,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "BossIntro_RadialBlur_4",
+                                "time": 15.220000267028809,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "BossIntro_Color_6",
+                                "time": 15.220000267028809,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "BossIntro_Vignette_4",
                                 "time": 15.220000267028809,
                                 "useNormalizedTime": false,
                                 "waitForObject": "",
@@ -4563,6 +4793,36 @@
                                 "blackboardWrites": [],
                                 "cat": "CameraAction",
                                 "name": "EventCamera_ReturnToGameplay",
+                                "time": 19.0,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "BossIntro_ResetRadialBlur",
+                                "time": 19.0,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "BossIntro_ResetVignette",
+                                "time": 19.0,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "Controller",
+                                "name": "Controller.StopRumble",
                                 "time": 19.0,
                                 "useNormalizedTime": false,
                                 "waitForObject": "",
@@ -4883,6 +5143,36 @@
                                 "blackboardWrites": [],
                                 "cat": "PostProcess",
                                 "name": "BossIntro_ResetColor",
+                                "time": 0.0,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "BossIntro_ResetRadialBlur",
+                                "time": 0.0,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "BossIntro_ResetVignette",
+                                "time": 0.0,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "Controller",
+                                "name": "Controller.StopRumble",
                                 "time": 0.0,
                                 "useNormalizedTime": false,
                                 "waitForObject": "",
@@ -6193,6 +6483,36 @@
                                 "blackboardWrites": [],
                                 "cat": "CameraShake",
                                 "name": "TransitionDragonFallShake",
+                                "time": 3.3499999046325684,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "Controller",
+                                "name": "Controller.RumbleCinematicImpact",
+                                "time": 3.3499999046325684,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "BossIntro_RadialBlur_1",
+                                "time": 3.3499999046325684,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "BossIntro_Vignette_2",
                                 "time": 3.3499999046325684,
                                 "useNormalizedTime": false,
                                 "waitForObject": "",
@@ -9731,6 +10051,26 @@
                             {
                                 "animationState": "",
                                 "blackboardWrites": [],
+                                "cat": "Controller",
+                                "name": "Controller.RumbleCinematicClash",
+                                "time": 0.32199999690055847,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "BossIntro_RadialBlur_2",
+                                "time": 0.32199999690055847,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_ParticlePlayTransitionMudScatter",
                                 "time": 0.32199999690055847,
@@ -10583,6 +10923,36 @@
                                 "blackboardWrites": [],
                                 "cat": "CameraAction",
                                 "name": "TransitionVortexCollection",
+                                "time": 0.10000000149011612,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "BossIntro_RadialBlur_5",
+                                "time": 0.10000000149011612,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "BossIntro_Color_4",
+                                "time": 0.10000000149011612,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "BossIntro_Vignette_3",
                                 "time": 0.10000000149011612,
                                 "useNormalizedTime": false,
                                 "waitForObject": "",
@@ -11891,6 +12261,36 @@
                             {
                                 "animationState": "",
                                 "blackboardWrites": [],
+                                "cat": "Controller",
+                                "name": "Controller.RumbleCinematicClash",
+                                "time": 0.7437000274658203,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "BossIntro_RadialBlur_3",
+                                "time": 0.7437000274658203,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "BossIntro_Color_5",
+                                "time": 0.7437000274658203,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_SlashSound",
                                 "time": 0.7437000274658203,
@@ -11941,6 +12341,16 @@
                             {
                                 "animationState": "",
                                 "blackboardWrites": [],
+                                "cat": "CameraAction",
+                                "name": "TransitionSwordStrikeSecond",
+                                "time": 1.274999976158142,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_PlayerParry",
                                 "time": 1.3687000274658203,
@@ -11963,6 +12373,36 @@
                                 "blackboardWrites": [],
                                 "cat": "CameraShake",
                                 "name": "TransitionClashShake",
+                                "time": 1.3687000274658203,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "Controller",
+                                "name": "Controller.RumbleCinematicClash",
+                                "time": 1.3687000274658203,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "BossIntro_RadialBlur_3",
+                                "time": 1.3687000274658203,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "BossIntro_Color_5",
                                 "time": 1.3687000274658203,
                                 "useNormalizedTime": false,
                                 "waitForObject": "",
@@ -12021,6 +12461,16 @@
                             {
                                 "animationState": "",
                                 "blackboardWrites": [],
+                                "cat": "CameraAction",
+                                "name": "TransitionSwordStrikeThird",
+                                "time": 1.899999976158142,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_PlayerBlock",
                                 "time": 2.0188000202178955,
@@ -12043,6 +12493,36 @@
                                 "blackboardWrites": [],
                                 "cat": "CameraShake",
                                 "name": "TransitionClashShake",
+                                "time": 2.0188000202178955,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "Controller",
+                                "name": "Controller.RumbleCinematicClash",
+                                "time": 2.0188000202178955,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "BossIntro_RadialBlur_3",
+                                "time": 2.0188000202178955,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "BossIntro_Color_5",
                                 "time": 2.0188000202178955,
                                 "useNormalizedTime": false,
                                 "waitForObject": "",
@@ -12961,6 +13441,46 @@
                             {
                                 "animationState": "",
                                 "blackboardWrites": [],
+                                "cat": "Controller",
+                                "name": "Controller.RumbleCinematicImpact",
+                                "time": 0.8199999928474426,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "BossIntro_RadialBlur_4",
+                                "time": 0.8199999928474426,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "BossIntro_Color_6",
+                                "time": 0.8199999928474426,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "BossIntro_Vignette_4",
+                                "time": 0.8199999928474426,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
                                 "cat": "TimeScale",
                                 "name": "PhaseTransition_TimeScale_0",
                                 "time": 0.8199999928474426,
@@ -13093,6 +13613,36 @@
                                 "blackboardWrites": [],
                                 "cat": "PostProcess",
                                 "name": "BossIntro_ResetColor",
+                                "time": 0.0,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "BossIntro_ResetRadialBlur",
+                                "time": 0.0,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "BossIntro_ResetVignette",
+                                "time": 0.0,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "Controller",
+                                "name": "Controller.StopRumble",
                                 "time": 0.0,
                                 "useNormalizedTime": false,
                                 "waitForObject": "",

@@ -2,6 +2,7 @@
 
 #include "EditorWindowManager.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
+#include "Game/GameMode/BossFinishDirector.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include "Engine/Debug/TracyProfiler.h"
 #include "Engine/GamePlay/Camera/CameraManager.h"
@@ -118,7 +119,17 @@ void EditorWindowManager::DrawSceneView()
     ImGuiWindowFlags flags_ = ImGuiWindowFlags_NoCollapse;
     if (ImGui::Begin("Scene", nullptr, flags_))
     {
-        DrawPlayModeToolbar();
+        if (gameObjectManager && gameObjectManager->IsResultPreviewScene())
+        {
+            if (const auto director_ = gameObjectManager->GetBossFinishDirector())
+            {
+                director_->DrawResultPreviewControls();
+            }
+        }
+        else
+        {
+            DrawPlayModeToolbar();
+        }
         auto& graphicsDeviceManager_ = GraphicsDeviceManager::Instance();
         ID3D11ShaderResourceView* sceneSRV_ = graphicsDeviceManager_.GetSceneViewSRV();
         const ImVec2 available_ = ImGui::GetContentRegionAvail();
@@ -599,6 +610,18 @@ void EditorWindowManager::DrawAll()
         if (useDockedSceneView)
         {
             DrawSceneView();
+        }
+        else if (gameObjectManager && gameObjectManager->IsResultPreviewScene())
+        {
+            ImGui::SetNextWindowSize(ImVec2(560.0f, 180.0f), ImGuiCond_FirstUseEver);
+            if (ImGui::Begin("Result Preview"))
+            {
+                if (const auto director_ = gameObjectManager->GetBossFinishDirector())
+                {
+                    director_->DrawResultPreviewControls();
+                }
+            }
+            ImGui::End();
         }
     }
 

@@ -25,14 +25,24 @@
 #include "Engine/Math/Curve/CurveTrack.h"
 #include "Engine/Platform/WindowsDialogHelper.h"
 #include <fstream>
+#include <format>
 #include <cmath>
 #include <algorithm>
+#include <array>
+#include <imgui.h>
 #include <filesystem>
+#include <string_view>
 
 namespace
 {
     constexpr const char* PRESET_PATH = "Data/Presentation/AnathemaBossFinish.json";
     constexpr float FIXED_STEP = 1.0f / 60.0f;
+    constexpr float RESULT_RANK_DELAY = 0.44f;
+    constexpr float RESULT_RANK_REVEAL = 0.52f;
+    constexpr char RESULT_GRADES[] = {'S', 'A', 'B', 'C'};
+    constexpr DirectX::XMFLOAT4 RESULT_CLEAR_TEXT_COLOR{0.9f, 1.0f, 0.94f, 1.0f};
+    constexpr DirectX::XMFLOAT4 RESULT_FAILURE_TEXT_COLOR{1.0f, 0.72f, 0.74f, 1.0f};
+    constexpr const char* RESULT_RANK_BURST_PATH = "Data/Texture/Particle/kenney_particle-pack/PNG (Transparent)/star_09.png";
     constexpr float TRUE_END_HAND_LIGHT = 0.85f;
     constexpr float TRUE_END_AWAKEN = 1.65f;
     constexpr float TRUE_END_LUNGE = 3.05f;
@@ -52,6 +62,7 @@ namespace
     constexpr float BAD_END_FLASHBACK_DURATION = 1.0f;
     constexpr float BAD_END_KNEEL = BAD_END_FLASHBACK + BAD_END_FLASHBACK_DURATION;
     constexpr float BAD_END_PIERCE = BAD_END_KNEEL + 1.28f;
+    constexpr float BAD_END_THRUST_START = BAD_END_PIERCE - 0.18f;
     constexpr float BAD_END_PIERCE_CUE = 0.37f;
     constexpr float BAD_END_IMPACT_HOLD = 0.16f;
     constexpr float BAD_END_FALL = BAD_END_PIERCE + 2.29f;
@@ -69,6 +80,54 @@ namespace
     {
         const float rate_ = std::clamp((time_ - start_) / (end_ - start_), 0.0f, 1.0f);
         return rate_ * rate_ * (3.0f - 2.0f * rate_);
+    }
+
+    float ImpactPulse(float time_, float cue_, float duration_)
+    {
+        return time_ < cue_ ? 0.0f : 1.0f - ShotProgress(time_, cue_, cue_ + duration_);
+    }
+
+    void SetResultText(const std::shared_ptr<GameObject>& object_, const std::string& text_, float size_,
+        const char* align_ = "LEFT", const DirectX::XMFLOAT4& color_ = RESULT_CLEAR_TEXT_COLOR)
+    {
+        auto textComponent_ = object_->GetComponent<UITextComponent>();
+        if (textComponent_)
+        {
+            textComponent_->SetText(text_);
+        }
+        else
+        {
+            textComponent_ = object_->AddComponent<UITextComponent>();
+            textComponent_->Deserialize({{"Text", text_}, {"FontSize", size_}, {"AutoSizeWidget", false},
+                {"HorizontalAlign", align_}, {"Color", {color_.x, color_.y, color_.z, color_.w}}});
+        }
+        textComponent_->Update(0.0f);
+    }
+
+    void ValidateResultRanks(const nlohmann::json& ranks_)
+    {
+    // ランク閾値は S、A、B の順。旧プリセットでは既定値がマージされる。
+    for (const char* key_ : {"TimeSeconds", "JustActions", "DamageTaken"})
+    {
+        const auto& thresholds_ = ranks_.at(key_);
+        if (!thresholds_.is_array() || thresholds_.size() != 3 ||
+            !std::all_of(thresholds_.begin(), thresholds_.end(), [](const auto& threshold_)
+            {
+                return threshold_.is_number() && threshold_ >= 0;
+            }))
+        {
+            throw std::runtime_error("invalid result rank thresholds");
+        }
+        const double s_ = thresholds_[0].get<double>();
+        const double a_ = thresholds_[1].get<double>();
+        const double b_ = thresholds_[2].get<double>();
+        const bool descending_ = std::string_view(key_) == "JustActions";
+        if (!std::isfinite(s_) || !std::isfinite(a_) || !std::isfinite(b_) ||
+            (descending_ ? !(s_ > a_ && a_ > b_) : !(s_ < a_ && a_ < b_)))
+        {
+            throw std::runtime_error("result rank thresholds are out of order");
+        }
+    }
     }
 
     DirectX::XMFLOAT3 ReadPosition(const nlohmann::json& json_)
@@ -150,12 +209,12 @@ namespace
   "Camera": {
     "Position": [
       5,
-      2.8,
+      1.55,
       -6
     ],
     "Focus": [
       0,
-      0.85,
+      1.15,
       0.1
     ],
     "Fov": 43.0,
@@ -233,6 +292,12 @@ namespace
   "ZoomStart": 1.0,
   "ZoomEnd": 1.0,
   "ClearText": "討伐完了",
+  "BadEndText": "討伐失敗",
+  "ResultRanks": {
+    "TimeSeconds": [300, 450, 600],
+    "JustActions": [20, 10, 5],
+    "DamageTaken": [500, 750, 1000]
+  },
   "PromptText": "ボタンを押してタイトルへ",
   "ClearPosition": [
     0.5,
@@ -383,7 +448,7 @@ void BossFinishDirector::Normalize()
     clamp_("CounterStart", settings["BlackoutEnd"].get<float>(), 15.0f);
     clamp_("CaptureTime", settings["CounterStart"].get<float>() + 0.1f, 25.0f);
     clamp_("HoldTime", 0.0f, 10.0f);
-    clamp_("PromptDelay", settings["HoldTime"].get<float>(), 20.0f);
+    clamp_("PromptDelay", settings["HoldTime"].get<float>() + RESULT_RANK_DELAY + RESULT_RANK_REVEAL, 20.0f);
     clamp_("ReturnFade", 0.1f, 3.0f);
     clamp_("ZoomStart", 1.0f, 1.5f);
     clamp_("ZoomEnd", 1.0f, 1.5f);
@@ -476,7 +541,8 @@ bool BossFinishDirector::LoadPreset(const std::string& path_)
     const auto previous_ = settings;
     try
     {
-        std::ifstream file_(WindowsDialogHelper::Utf8ToPath(path_));
+        const auto pathOnDisk_ = std::filesystem::absolute(WindowsDialogHelper::Utf8ToPath(path_));
+        std::ifstream file_(pathOnDisk_);
         if (!file_)
         {
             throw std::runtime_error("preset file missing");
@@ -510,9 +576,10 @@ bool BossFinishDirector::LoadPreset(const std::string& path_)
                 ReadPosition(effect_.at("Offset"));
             }
         }
+        ValidateResultRanks(merged_.at("ResultRanks"));
         settings = std::move(merged_);
         Normalize();
-        status = std::string("Loaded: ") + path_;
+        status = std::string("Loaded: ") + WindowsDialogHelper::PathToUtf8(pathOnDisk_);
         return true;
     }
     catch (const std::exception& error_)
@@ -520,6 +587,41 @@ bool BossFinishDirector::LoadPreset(const std::string& path_)
         settings = previous_;
         status = std::string("Finish preset fallback: ") + error_.what();
         BS_LOG_INFO(LOG_CATEGORY::GAME, status);
+        return false;
+    }
+}
+
+bool BossFinishDirector::ReloadResultRanks()
+{
+    try
+    {
+        const auto path_ = std::filesystem::absolute(WindowsDialogHelper::Utf8ToPath(PRESET_PATH));
+        std::ifstream file_(path_);
+        if (!file_)
+        {
+            throw std::runtime_error("preset file missing");
+        }
+        nlohmann::json preset_;
+        file_ >> preset_;
+        if (!preset_.is_object() || (preset_.contains("AssetType") &&
+            preset_.value("AssetType", std::string()) != "BossFinishCinematic"))
+        {
+            throw std::runtime_error("not a boss finish cinematic preset");
+        }
+        auto ranks_ = DefaultSettings().at("ResultRanks");
+        if (preset_.contains("ResultRanks"))
+        {
+            ranks_.merge_patch(preset_.at("ResultRanks"));
+        }
+        ValidateResultRanks(ranks_);
+        settings["ResultRanks"] = std::move(ranks_);
+        status = std::string("Rank criteria loaded: ") + WindowsDialogHelper::PathToUtf8(path_);
+        return true;
+    }
+    catch (const std::exception& error_)
+    {
+        status = std::string("Finish preset fallback: ") + error_.what();
+        BS_LOG_WARNING(LOG_CATEGORY::GAME, status);
         return false;
     }
 }
@@ -754,9 +856,13 @@ void BossFinishDirector::BlendExecutionPose(ActorPose& source_, ActorPose& execu
 void BossFinishDirector::Begin(bool preview_, Ending previewEnding_)
 {
     BS_PROFILE_SCOPE("BossFinishDirector::Begin");
-    if (active)
+    if (active || manager.IsResultPreviewScene())
     {
         return;
+    }
+    if (!preview_)
+    {
+        ReloadResultRanks();
     }
     Normalize();
     preview = preview_;
@@ -872,8 +978,24 @@ void BossFinishDirector::ResetBadEnding()
 void BossFinishDirector::Stop()
 {
     BS_PROFILE_SCOPE("BossFinishDirector::Stop");
+    if (!active && !resultPreviewReady)
+    {
+        return;
+    }
+    imageSprite.reset();
+    solidSprite.reset();
+    clearSprite.reset();
+    promptSprite.reset();
+    resultLabelsSprite.reset();
+    resultValuesSprite.reset();
+    resultRanksSprite.reset();
+    overallLabelSprite.reset();
+    overallRankSprite.reset();
+    rankBurstSprite.reset();
+    resultPreviewReady = false;
     if (!active)
     {
+        ending = Ending::TRUE_END;
         return;
     }
     ResetBadEnding();
@@ -919,10 +1041,6 @@ void BossFinishDirector::Stop()
     previousBgmVolumes.clear();
     capturedView.Reset();
     capturedTexture.Reset();
-    imageSprite.reset();
-    solidSprite.reset();
-    clearSprite.reset();
-    promptSprite.reset();
     camera.reset();
     player.object.reset();
     boss.object.reset();
@@ -1159,10 +1277,14 @@ float BossFinishDirector::GetClearTime() const
     return GetEndingBranchTime() + TRUE_END_FINISH;
 }
 
+float BossFinishDirector::GetResultStartTime(Ending ending_) const
+{
+    return ending_ == Ending::BAD_END ? GetEndingBranchTime() + BAD_END_FINISH : GetClearTime();
+}
+
 float BossFinishDirector::GetPreviewEndTime(Ending ending_) const
 {
-    return ending_ == Ending::BAD_END ? GetEndingBranchTime() + BAD_END_FINISH :
-        GetClearTime() + settings.value("PromptDelay", 2.8f) + 1.0f;
+    return GetResultStartTime(ending_) + settings.value("PromptDelay", 2.8f) + 1.0f;
 }
 
 std::span<const BossFinishDirector::EndingCue> BossFinishDirector::GetTrueEndingCues() const
@@ -1594,69 +1716,94 @@ void BossFinishDirector::UpdateTrueEnding(float previousTime_, float time_)
     {
         return;
     }
+    auto headPosition_ = playerPosition_ + offset_(0.0f, 1.52f, 0.0f);
+    ReadNodePosition(player.object, "head", headPosition_);
+    const Vector3 upperBody_ = headPosition_ - Vector3{0.0f, 0.23f, 0.0f};
     Vector3 eye_;
     Vector3 focus_;
-    float fov_ = 43.0f;
+    float fov_;
+    float roll_;
     if (time_ < TRUE_END_AWAKEN)
     {
-        if (time_ >= TRUE_END_HAND_LIGHT - 0.18f && time_ < TRUE_END_HAND_LIGHT + 0.16f)
-        {
-            eye_ = handPosition_ + offset_(0.95f, 0.44f, -0.48f);
-            focus_ = handPosition_;
-            fov_ = 35.0f;
-        }
-        else
-        {
-            eye_ = playerPosition_ + offset_(std::lerp(5.4f, 3.6f, approach_), 1.6f, -1.1f);
-            focus_ = playerPosition_ + offset_(0.0f, 0.98f, std::lerp(-2.6f, -1.7f, approach_));
-            fov_ = std::lerp(48.0f, 43.0f, approach_);
-        }
+        const float push_ = ShotProgress(time_, 0.0f, TRUE_END_AWAKEN);
+        eye_ = upperBody_ + offset_(std::lerp(3.75f, 1.8f, push_), 0.04f, std::lerp(3.0f, 2.15f, push_));
+        focus_ = Vector3::Lerp(upperBody_, Vector3{handPosition_}, 0.18f + 0.37f * recoil_);
+        fov_ = std::lerp(43.0f, 33.0f, push_);
+        roll_ = std::lerp(-2.0f, 0.0f, push_);
     }
     else if (time_ < TRUE_END_LUNGE)
     {
-        eye_ = playerPosition_ + offset_(3.0f - 0.8f * turn_, 1.14f - 0.45f * turn_, -2.8f);
-        focus_ = playerPosition_ + offset_(0.0f, 0.98f, -0.7f * (1.0f - turn_));
+        // 振り向く動きに合わせ、顔の正面寄りを回り込む。
+        const float orbit_ = std::lerp(0.68f, 2.88f, turn_);
+        eye_ = upperBody_ + offset_(std::sin(orbit_) * 2.7f, -0.26f, std::cos(orbit_) * 2.7f);
+        focus_ = upperBody_;
+        fov_ = std::lerp(34.0f, 39.0f, turn_);
+        roll_ = 2.0f * turn_;
     }
     else if (time_ < TRUE_END_CHARGE)
     {
-        eye_ = playerPosition_ + offset_(4.7f, 1.92f, -2.35f);
-        focus_ = playerPosition_ + offset_(0.0f, 0.85f, -2.6f);
-        fov_ = 49.0f;
+        eye_ = playerPosition_ + offset_(std::lerp(4.2f, 5.5f, lunge_), 1.12f, std::lerp(-2.35f, -4.1f, lunge_));
+        focus_ = Vector3::Lerp(upperBody_, mudPosition_ + offset_(0.0f, 1.0f, 0.0f), 0.36f + 0.20f * repel_);
+        fov_ = std::lerp(46.0f, 56.0f, lunge_);
+        roll_ = std::lerp(-4.0f, 1.0f, repel_);
     }
     else if (time_ < TRUE_END_BEAM)
     {
-        eye_ = playerPosition_ + offset_(2.65f, 0.98f, -2.7f);
-        focus_ = Vector3::Lerp(playerPosition_ + offset_(0.0f, 1.05f, 0.0f), bladeEnd_, 0.36f * charge_);
-        fov_ = 45.0f;
+        eye_ = upperBody_ + offset_(std::lerp(1.95f, 0.65f, charge_), std::lerp(-0.15f, -0.56f, charge_),
+            std::lerp(-3.0f, -2.65f, charge_));
+        focus_ = Vector3::Lerp(upperBody_, Vector3{bladeEnd_}, 0.24f * charge_);
+        fov_ = std::lerp(38.0f, 49.0f, charge_);
+        roll_ = std::lerp(2.5f, -1.0f, charge_);
     }
     else
     {
-        const float widen_ = ShotProgress(time_, TRUE_END_BEAM, TRUE_END_PILLAR + 0.55f);
-        const float settle_ = ShotProgress(time_, TRUE_END_PILLAR + 1.6f, TRUE_END_FINISH);
-        eye_ = playerPosition_ + offset_(std::lerp(4.1f, 8.3f, widen_), std::lerp(1.6f, 4.2f, widen_),
-            std::lerp(0.8f, -2.2f, widen_));
-        focus_ = playerPosition_ + offset_(0.0f, std::lerp(1.0f, 3.8f, widen_), std::lerp(-2.2f, -3.5f, widen_));
-        eye_ = Vector3::Lerp(eye_, playerPosition_ + offset_(2.8f, 1.42f, -3.4f), settle_);
-        focus_ = Vector3::Lerp(focus_, playerPosition_ + offset_(0.0f, 0.95f, 0.0f), settle_);
-        const float shake_ = 0.13f * std::exp(-(time_ - TRUE_END_BEAM) / 0.22f);
-        const auto shakeOffset_ = offset_(std::sin(time_ * 80.0f) * shake_, std::cos(time_ * 94.0f) * shake_, 0.0f);
-        eye_ += shakeOffset_;
-        focus_ += shakeOffset_;
-        fov_ = std::lerp(57.0f, 43.0f, settle_);
+        const float widen_ = ShotProgress(time_, TRUE_END_BEAM, TRUE_END_PILLAR + 0.62f);
+        const float settle_ = ShotProgress(time_, TRUE_END_PILLAR + 1.05f, TRUE_END_FINISH);
+        eye_ = playerPosition_ + offset_(std::lerp(4.6f, 8.0f, widen_), std::lerp(1.3f, 2.2f, widen_),
+            std::lerp(-1.4f, -4.0f, widen_));
+        focus_ = Vector3::Lerp(upperBody_, impact_ + offset_(0.0f, 3.2f, 0.0f), 0.38f + 0.32f * widen_);
+        eye_ = Vector3::Lerp(eye_, upperBody_ + offset_(1.1f, -0.10f, -2.75f), settle_);
+        focus_ = Vector3::Lerp(focus_, upperBody_, settle_);
+        fov_ = std::lerp(std::lerp(49.0f, 60.0f, widen_), 34.0f, settle_);
+        roll_ = std::lerp(-2.5f, 0.0f, settle_);
     }
+
+    const float shake_ = 0.055f * ImpactPulse(time_, TRUE_END_HAND_LIGHT, 0.24f) +
+        0.19f * ImpactPulse(time_, TRUE_END_SWEEP_HIT, 0.38f) +
+        0.16f * ImpactPulse(time_, TRUE_END_BEAM, 0.23f) +
+        0.23f * ImpactPulse(time_, TRUE_END_PILLAR, 0.64f);
+    SetEndingCamera(eye_, focus_, fov_, roll_, time_, shake_);
+}
+
+void BossFinishDirector::SetEndingCamera(Vector3 eye_, Vector3 focus_, float fov_, float roll_, float time_, float shake_)
+{
+    using namespace DirectX;
+    const auto right_ = XMVector3Normalize(XMVector3Cross(XMVectorSet(0, 1, 0, 0), XMLoadFloat3(&focus_) - XMLoadFloat3(&eye_)));
+    const float horizontal_ = std::sin(time_ * 58.0f);
+    const auto shakeOffset_ = right_ * (horizontal_ * shake_) +
+        XMVectorSet(0, std::cos(time_ * 73.0f) * shake_ * 0.60f, 0, 0);
+    XMStoreFloat3(&eye_, XMLoadFloat3(&eye_) + shakeOffset_);
+    XMStoreFloat3(&focus_, XMLoadFloat3(&focus_) + shakeOffset_ * 0.20f);
+    const auto forward_ = XMVector3Normalize(XMLoadFloat3(&focus_) - XMLoadFloat3(&eye_));
+    const auto rotation_ = XMQuaternionRotationAxis(forward_, XMConvertToRadians(roll_ + 8.0f * shake_ * horizontal_));
+    XMFLOAT3 up_{};
+    XMStoreFloat3(&up_, XMVector3Rotate(XMVectorSet(0, 1, 0, 0), rotation_));
+    camera->SetLookAt(eye_, focus_, up_);
+
     const auto& graphics_ = GraphicsDeviceManager::Instance();
-    const float aspect_ = static_cast<float>((std::max)(graphics_.GetRenderWidth(), 1)) / (std::max)(graphics_.GetRenderHeight(), 1);
-    camera->SetLookAt(eye_, focus_, {0, 1, 0});
+    const float aspect_ = static_cast<float>((std::max)(graphics_.GetRenderWidth(), 1)) /
+        (std::max)(graphics_.GetRenderHeight(), 1);
+    fov_ -= shake_ * 12.0f;
     if (aspect_ < GetAspect())
     {
-        fov_ = DirectX::XMConvertToDegrees(2.0f * std::atan(std::tan(DirectX::XMConvertToRadians(fov_) * 0.5f) * GetAspect() / aspect_));
+        fov_ = XMConvertToDegrees(2.0f * std::atan(std::tan(XMConvertToRadians(fov_) * 0.5f) * GetAspect() / aspect_));
     }
     camera->SetPerspectiveFov(fov_, aspect_, 0.05f, 300.0f);
 }
 
 bool BossFinishDirector::IsBadEndingImpactShot() const
 {
-    return badEndingTime >= BAD_END_PIERCE && badEndingTime < BAD_END_PIERCE + BAD_END_IMPACT_HOLD;
+    return badEndingTime >= BAD_END_PIERCE && badEndingTime < BAD_END_PIERCE + 0.085f;
 }
 
 void BossFinishDirector::BeginBadEnding()
@@ -1723,12 +1870,18 @@ void BossFinishDirector::BeginBadEnding()
     spearPart_.modelPath = "__InternalMeshCone__";
     spearPart_.meshIndex = 0;
     spearPart_.renderEnabled = true;
-    spearPart_.shapeCylinderRadius = 0.26f;
-    spearPart_.internalMeshSettings.coneTipRadiusRate = 0.015f;
+    spearPart_.shapeCylinderRadius = 0.19f;
+    spearPart_.internalMeshSettings.coneTipRadiusRate = 0.0f;
     spearPart_.internalMeshSettings.coneLength = 1.0f;
-    spearPart_.internalMeshSettings.segments = 14;
+    spearPart_.internalMeshSettings.segments = 6;
     spearPart_.useMaterialBaseTexture = false;
     spearPart_.useMaterialNormalTexture = false;
+    spearPart_.useFresnel = true;
+    spearPart_.fresnelStrength = 0.48f;
+    spearPart_.useFresnelNoise = true;
+    spearPart_.fresnelNoiseStrength = 0.45f;
+    spearPart_.noiseTexturePath = BAD_END_EQUIPMENT_TEXTURE;
+    spearPart_.noiseUVSpeed = {0.0f, 0.0f};
     spearPart_.emissiveStrength = 0.0f;
     spearPart_.emissivePulseAmount = 0.0f;
     spear_->SetAsset(spearAsset_);
@@ -1883,6 +2036,19 @@ void BossFinishDirector::ApplyBadEndingMaterials()
     }
 }
 
+void BossFinishDirector::AdvanceBadEnding(float time_)
+{
+    if (badEndingTime < 0.0f)
+    {
+        UpdateBadEnding(-1.0f, 0.0f);
+    }
+    // 低フレームレートでも、槍が刺さる区間のポーズと接触点を評価する。
+    while (badEndingTime < time_)
+    {
+        UpdateBadEnding(badEndingTime, (std::min)(badEndingTime + FIXED_STEP, time_));
+    }
+}
+
 void BossFinishDirector::UpdateBadEnding(float previousTime_, float time_)
 {
     BS_PROFILE_SCOPE("BossFinishDirector::UpdateBadEnding");
@@ -1917,9 +2083,10 @@ void BossFinishDirector::UpdateBadEnding(float previousTime_, float time_)
         {
             position_.y -= 0.57f * (1.0f - emerge_);
         }
-        else if (hitAge_ >= 0.0f)
+        else
         {
-            position_.y -= 0.66f * (1.0f - ShotProgress(afterHold_, 0.0f, 0.48f));
+            const float sink_ = ShotProgress(time_, BAD_END_THRUST_START, BAD_END_PIERCE);
+            position_.y -= 0.45f * sink_ * (1.0f - ShotProgress(afterHold_, 0.0f, 0.48f));
         }
         PlaceActor(player.object, position_, yaw_ + 180.0f * turn_);
         if (emerging_)
@@ -1982,25 +2149,39 @@ void BossFinishDirector::UpdateBadEnding(float previousTime_, float time_)
         }
     }
 
-    if (hitAge_ < 0.0f || crossed_(BAD_END_PIERCE))
+    if (hitAge_ < BAD_END_IMPACT_HOLD)
     {
         badEndingSpearContact = playerPosition_ + offset_(0.0f, 0.85f, 0.0f);
         ReadNodePosition(player.object, "spine_02", badEndingSpearContact);
     }
-    const float thrust_ = ShotProgress(time_, BAD_END_PIERCE - 0.22f, BAD_END_PIERCE);
-    const float retract_ = ShotProgress(afterHold_, 0.25f, 0.78f);
+    const Vector3 spearBase_ = playerPosition_ + offset_(-0.72f, -0.10f, -1.65f);
+    const Vector3 contact_ = Vector3{badEndingSpearContact};
+    Vector3 thrustDirection_ = contact_ - spearBase_;
+    thrustDirection_.Normalize();
+    const float thrust_ = ShotProgress(time_, BAD_END_THRUST_START, BAD_END_PIERCE);
+    const float through_ = ShotProgress(time_, BAD_END_PIERCE, BAD_END_PIERCE + 0.06f);
+    const float retract_ = ShotProgress(afterHold_, 0.16f, 0.65f);
     auto* spear_ = badEndingSpear->GetComponent<MeshVFXComponent>().get();
-    spear_->SetRuntimeSuppressed(time_ < BAD_END_PIERCE - 0.22f || retract_ >= 1.0f);
-    // 円錐の先端はローカル原点にあるので、胸を通過する位置まで先端を動かす。
-    const Vector3 spearTip_ = Vector3{badEndingSpearContact} +
-        offset_(0.0f, 0.04f, std::lerp(-2.0f, 1.35f, thrust_) - retract_ * 2.1f);
-    PlaceActor(badEndingSpear, spearTip_, yaw_ + 180.0f);
-    const auto spearColor_ = impactShot_ ? BAD_END_RED : DirectX::XMFLOAT4{0.24f,0.045f,0.068f,1.0f};
-    spear_->SetRuntimeAppearance({1, 1, std::lerp(0.5f, 3.4f, thrust_) * (1.0f - retract_)}, spearColor_, spearColor_);
+    const bool spearVisible_ = thrust_ > 0.0f && retract_ < 1.0f;
+    spear_->SetRuntimeSuppressed(!spearVisible_);
+    if (spearVisible_)
+    {
+        // 円錐は先端が原点、根元が +Z 側。先端と長さだけを変えて根元を地面に固定する。
+        const Vector3 spearTip_ = Vector3::Lerp(spearBase_, contact_ + thrustDirection_ * (1.12f * through_),
+            thrust_ * (1.0f - retract_));
+        const Vector3 towardBase_ = spearBase_ - spearTip_;
+        const float pitch_ = -std::atan2(towardBase_.y, std::hypot(towardBase_.x, towardBase_.z));
+        PlaceActor(badEndingSpear, spearTip_, DirectX::XMConvertToDegrees(std::atan2(towardBase_.x, towardBase_.z)));
+        badEndingSpear->transform->localRotation.x = DirectX::XMConvertToDegrees(pitch_);
+        badEndingSpear->transform->MarkDirty();
+        badEndingSpear->transform->UpdateWorldMatrix();
+        const auto spearColor_ = impactShot_ ? BAD_END_RED : DirectX::XMFLOAT4{0.20f, 0.055f, 0.078f, 1.0f};
+        spear_->SetRuntimeAppearance({1.0f, 0.72f, towardBase_.Length()}, spearColor_, spearColor_);
+    }
 
-    const float approach_ = ShotProgress(time_, 0.0f, BAD_END_PIERCE - 0.2f);
+    const float approach_ = ShotProgress(time_, 0.0f, BAD_END_THRUST_START);
     const float gather_ = ShotProgress(time_, BAD_END_FALL - 0.15f, BAD_END_RISE + 0.25f);
-    const Vector3 mudPosition_ = Vector3::Lerp(playerPosition_ + offset_(0, 0, std::lerp(-6.3f, -1.35f, approach_)),
+    const Vector3 mudPosition_ = Vector3::Lerp(spearBase_ + offset_(0.0f, 0.10f, -4.65f * (1.0f - approach_)),
         Vector3{badEndingFallPosition}, gather_);
     PlaceActor(badEndingMud, mudPosition_, yaw_);
     PlaceActor(badEndingParticles, mudPosition_ + offset_(0, 0.45f * emerge_, 0), yaw_);
@@ -2051,21 +2232,57 @@ void BossFinishDirector::UpdateBadEnding(float previousTime_, float time_)
     {
         return;
     }
-    // 倒れ際は泥へ視線を外し、身体を覆ったあとで背後からの出現カットに切り替える。
     const Vector3 fallPosition_{badEndingFallPosition};
-    const float approachShot_ = ShotProgress(time_, 0.0f, 0.85f);
-    const float floorShot_ = ShotProgress(time_, BAD_END_FALL - 0.45f, BAD_END_FALL - 0.05f);
-    Vector3 eye_ = Vector3::Lerp(Vector3{badEndingCameraEye}, playerPosition_ + offset_(3.5f, 1.5f, 0.7f), approachShot_);
-    const float focusDepth_ = std::lerp(-1.6f, -0.24f, ShotProgress(time_, BAD_END_FLASHBACK, BAD_END_PIERCE));
-    Vector3 focus_ = Vector3::Lerp(Vector3{badEndingCameraFocus}, playerPosition_ + offset_(0.0f, 0.83f, focusDepth_), approachShot_);
-    eye_ = Vector3::Lerp(eye_, fallPosition_ + offset_(2.9f, 1.05f, -2.25f), floorShot_);
-    focus_ = Vector3::Lerp(focus_, fallPosition_ + offset_(0.85f, 0.36f, -0.95f), floorShot_);
-    if (emerging_)
+    auto headPosition_ = playerPosition_ + offset_(0.0f, emerging_ ? std::lerp(0.45f, 1.52f, emerge_) : 1.35f, 0.0f);
+    ReadNodePosition(player.object, "head", headPosition_);
+    const Vector3 upperBody_ = headPosition_ - Vector3{0.0f, 0.18f, 0.0f};
+    Vector3 eye_;
+    Vector3 focus_;
+    float fov_;
+    float roll_;
+    if (time_ < BAD_END_KNEEL)
     {
-        eye_ = fallPosition_ + offset_(std::lerp(0.9f, 0.32f, emerge_), std::lerp(1.3f, 1.72f, emerge_), std::lerp(3.8f, 2.95f, emerge_));
-        focus_ = fallPosition_ + offset_(0.0f, std::lerp(0.44f, 1.21f, emerge_), 0.0f);
+        const float push_ = ShotProgress(time_, 0.0f, BAD_END_FLASHBACK);
+        eye_ = Vector3::Lerp(Vector3{badEndingCameraEye}, upperBody_ + offset_(2.8f, -0.12f, -1.35f), push_);
+        focus_ = Vector3::Lerp(Vector3{badEndingCameraFocus}, upperBody_, push_);
+        fov_ = std::lerp(43.0f, 36.0f, push_);
+        roll_ = -2.5f * push_;
     }
-    camera->SetLookAt(eye_, focus_, {0,1,0});
+    else if (time_ < BAD_END_FALL)
+    {
+        const float pull_ = ShotProgress(time_, BAD_END_KNEEL, BAD_END_THRUST_START);
+        const float fall_ = ShotProgress(time_, BAD_END_PIERCE + BAD_END_IMPACT_HOLD, BAD_END_FALL);
+        const Vector3 lowEye_ = playerPosition_ + offset_(std::lerp(3.0f, 3.4f, pull_), 0.76f, std::lerp(-1.75f, -2.65f, pull_));
+        const Vector3 strikeFocus_ = Vector3::Lerp(upperBody_, (spearBase_ + contact_) * 0.5f, 0.4f * pull_);
+        eye_ = Vector3::Lerp(lowEye_, fallPosition_ + offset_(2.55f, 0.46f, -1.95f), fall_);
+        focus_ = Vector3::Lerp(strikeFocus_, fallPosition_ + offset_(0.0f, 0.43f, 0.0f), fall_);
+        fov_ = std::lerp(std::lerp(37.0f, 49.0f, pull_), 41.0f, fall_);
+        roll_ = std::lerp(-3.5f, 5.0f, fall_);
+    }
+    else if (!emerging_)
+    {
+        const float drift_ = ShotProgress(time_, BAD_END_FALL, BAD_END_RISE);
+        eye_ = fallPosition_ + offset_(std::lerp(2.55f, 1.55f, drift_), std::lerp(0.46f, 0.31f, drift_),
+            std::lerp(-1.95f, -2.8f, drift_));
+        focus_ = fallPosition_ + offset_(0.0f, 0.43f, 0.0f);
+        fov_ = std::lerp(41.0f, 36.0f, drift_);
+        roll_ = std::lerp(5.0f, 1.5f, drift_);
+    }
+    else
+    {
+        const float reveal_ = ShotProgress(time_, BAD_END_RISE + 0.25f, BAD_END_WIPE);
+        eye_ = fallPosition_ + offset_(std::lerp(-2.05f, -0.65f, reveal_), std::lerp(0.45f, 1.16f, emerge_),
+            std::lerp(-3.1f, -2.55f, reveal_));
+        focus_ = Vector3::Lerp(fallPosition_ + offset_(0.0f, 0.55f, 0.0f), upperBody_, emerge_);
+        fov_ = std::lerp(43.0f, 32.0f, reveal_);
+        roll_ = std::lerp(-5.0f, 0.0f, reveal_);
+    }
+
+    const float shake_ = 0.065f * ImpactPulse(time_, BAD_END_COUNTER, 0.28f) +
+        0.28f * ImpactPulse(time_, BAD_END_PIERCE, 0.48f) +
+        0.12f * ImpactPulse(time_, BAD_END_FALL + 0.22f, 0.46f) +
+        0.09f * ImpactPulse(time_, BAD_END_RISE + 0.28f, 0.58f);
+    SetEndingCamera(eye_, focus_, fov_, roll_, time_, shake_);
 }
 
 void BossFinishDirector::Evaluate(float time_, float deltaTime_)
@@ -2240,6 +2457,10 @@ bool BossFinishDirector::Update(float rawDeltaTime_)
     if (!paused)
     {
         elapsed += delta_ * (preview ? previewPlaybackRate : 1.0f);
+        if (preview && IsBadEnding())
+        {
+            elapsed = (std::min)(elapsed, GetPreviewEndTime(ending));
+        }
     }
     if (!preview)
     {
@@ -2253,23 +2474,9 @@ bool BossFinishDirector::Update(float rawDeltaTime_)
             Evaluate(GetCaptureTime(), delta_);
             BeginBadEnding();
         }
-        UpdateBadEnding(badEndingTime, (std::min)(elapsed - branchTime_, BAD_END_FINISH));
-        if (badEndingTime >= BAD_END_FINISH)
-        {
-            if (preview)
-            {
-                elapsed = branchTime_ + BAD_END_FINISH;
-            }
-            else
-            {
-                CompleteFinish();
-                ReturnToTitle();
-            }
-        }
-        return true;
+        AdvanceBadEnding((std::min)(elapsed - branchTime_, BAD_END_FINISH));
     }
-    // 最初の短い停止は演出時計だけを進め、通常TimeScaleを変更せずに表現する。
-    if (!IsBadEnding() && elapsed >= branchTime_)
+    else if (elapsed >= branchTime_)
     {
         if (trueEndingTime < 0.0f)
         {
@@ -2280,14 +2487,15 @@ bool BossFinishDirector::Update(float rawDeltaTime_)
     }
     else
     {
+        // 最初の短い停止は演出時計だけを進め、通常TimeScaleを変更せずに表現する。
         Evaluate((std::max)(elapsed - settings["HitStop"].get<float>(), 0.0f), delta_);
     }
-    const float captureAt_ = GetClearTime();
-    if (elapsed >= captureAt_ && previous_ < captureAt_)
+    const float resultAt_ = GetResultStartTime(ending);
+    if (elapsed >= resultAt_ && previous_ < resultAt_ && !IsBadEnding())
     {
         RequestCapture();
     }
-    const float hold_ = elapsed - captureAt_;
+    const float hold_ = elapsed - resultAt_;
     if (!preview && completionCommitted && hold_ >= settings["PromptDelay"].get<float>())
     {
         const auto action_ = settings.value("ConfirmAction", std::string("UI.MenuConfirm"));
@@ -2367,7 +2575,7 @@ void BossFinishDirector::Seek(float time_)
     CreateEffects();
     capturedView.Reset();
     capturedTexture.Reset();
-    elapsed = std::clamp(time_, 0.0f, IsBadEnding() ? GetPreviewEndTime(ending) : GetPreviewEndTime(ending) + 4.0f);
+    elapsed = std::clamp(time_, 0.0f, GetPreviewEndTime(ending) + (IsBadEnding() ? 0.0f : 4.0f));
     const float branchTime_ = GetEndingBranchTime();
     paused = true;
     showFixed = false;
@@ -2376,13 +2584,7 @@ void BossFinishDirector::Seek(float time_)
     {
         Evaluate(GetCaptureTime(), 0.0f);
         BeginBadEnding();
-        const float target_ = (std::min)(elapsed - branchTime_, BAD_END_FINISH);
-        // シークも共通区間の末尾から再評価し、巻き戻した際に泥や材質を持ち越さない。
-        UpdateBadEnding(badEndingTime, 0.0f);
-        while (badEndingTime < target_)
-        {
-            UpdateBadEnding(badEndingTime, (std::min)(badEndingTime + FIXED_STEP, target_));
-        }
+        AdvanceBadEnding((std::min)(elapsed - branchTime_, BAD_END_FINISH));
     }
     else if (!IsBadEnding() && elapsed >= branchTime_)
     {
@@ -2456,7 +2658,114 @@ bool BossFinishDirector::ShouldRenderActor(const std::shared_ptr<GameObject>& ob
     return false;
 }
 
-void BossFinishDirector::PrepareSprites()
+void BossFinishDirector::UpdateResultPreview(float deltaTime_)
+{
+    if (!resultPreviewReady)
+    {
+        if (!Load())
+        {
+            ReloadResultRanks();
+            Normalize();
+        }
+        ending = Ending::TRUE_END;
+        resultPreviewValues = {240.0, 12, 8, 425.0};
+        resultPreviewAge = settings["PromptDelay"].get<float>() - settings["HoldTime"].get<float>();
+        PrepareSprites(&resultPreviewValues);
+        resultPreviewReady = true;
+    }
+    resultPreviewAge += std::isfinite(deltaTime_) ? std::clamp(deltaTime_, 0.0f, 0.1f) : 0.0f;
+}
+
+void BossFinishDirector::DrawResultPreviewControls()
+{
+    if (!resultPreviewReady)
+    {
+        return;
+    }
+
+    ImGui::PushID("ResultPreview");
+    ImGui::SetNextItemWidth(140.0f);
+    int endingIndex_ = IsBadEnding() ? 1 : 0;
+    bool rebuild_ = ImGui::Combo("##Ending", &endingIndex_, "TRUE END\0BAD END\0");
+    ending = endingIndex_ == 0 ? Ending::TRUE_END : Ending::BAD_END;
+    ImGui::SameLine();
+    if (ImGui::Button("演出を再生"))
+    {
+        resultPreviewAge = 0.0f;
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("プリセット再読込"))
+    {
+        rebuild_ |= LoadPreset(PRESET_PATH) || ReloadResultRanks();
+    }
+    if (status.starts_with("Finish preset fallback:"))
+    {
+        ImGui::TextWrapped("%s", status.c_str());
+    }
+    if (ImGui::TreeNode("適用中のランク基準（S / A / B）"))
+    {
+        const auto& ranks_ = settings.at("ResultRanks");
+        const auto show_ = [&](const char* label_, const char* key_)
+        {
+            const auto& thresholds_ = ranks_.at(key_);
+            ImGui::Text("%s  %g / %g / %g", label_, thresholds_[0].get<double>(),
+                thresholds_[1].get<double>(), thresholds_[2].get<double>());
+        };
+        show_("戦闘時間（秒）", "TimeSeconds");
+        show_("ジャストアクション", "JustActions");
+        show_("被ダメージ", "DamageTaken");
+        ImGui::TextWrapped("%s", status.c_str());
+        ImGui::TreePop();
+    }
+
+    bool valuesChanged_ = false;
+    const int columns_ = ImGui::GetContentRegionAvail().x >= 540.0f ? 2 : 1;
+    if (ImGui::BeginTable("Values", columns_, ImGuiTableFlags_SizingStretchSame))
+    {
+        constexpr double MIN_VALUE = 0.0;
+        constexpr double MAX_TIME = 36000.0;
+        constexpr double MAX_DAMAGE = 1000000.0;
+        constexpr auto CLAMP_INPUT = ImGuiSliderFlags_AlwaysClamp;
+        ImGui::TableNextColumn();
+        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.46f);
+        valuesChanged_ |= ImGui::DragScalar("戦闘時間（秒）", ImGuiDataType_Double,
+            &resultPreviewValues.elapsedSeconds, 1.0f, &MIN_VALUE, &MAX_TIME, "%.2f", CLAMP_INPUT);
+        ImGui::TableNextColumn();
+        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.46f);
+        valuesChanged_ |= ImGui::DragScalar("被ダメージ", ImGuiDataType_Double,
+            &resultPreviewValues.damageTaken, 1.0f, &MIN_VALUE, &MAX_DAMAGE, "%.2f", CLAMP_INPUT);
+        ImGui::TableNextColumn();
+        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.46f);
+        valuesChanged_ |= ImGui::DragInt("ジャスト回避", &resultPreviewValues.justDodges, 1.0f, 0, 999, "%d", CLAMP_INPUT);
+        ImGui::TableNextColumn();
+        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.46f);
+        valuesChanged_ |= ImGui::DragInt("ジャストガード", &resultPreviewValues.justGuards, 1.0f, 0, 999, "%d", CLAMP_INPUT);
+        ImGui::EndTable();
+    }
+    if (valuesChanged_)
+    {
+        if (!std::isfinite(resultPreviewValues.elapsedSeconds))
+        {
+            resultPreviewValues.elapsedSeconds = 0.0;
+        }
+        if (!std::isfinite(resultPreviewValues.damageTaken))
+        {
+            resultPreviewValues.damageTaken = 0.0;
+        }
+    }
+    if (rebuild_)
+    {
+        PrepareSprites(&resultPreviewValues);
+    }
+    else if (valuesChanged_)
+    {
+        RefreshResultSprites(&resultPreviewValues, false);
+    }
+    ImGui::Separator();
+    ImGui::PopID();
+}
+
+void BossFinishDirector::PrepareSprites(const GameModeManager::BattleResult* previewResult_)
 {
     const auto makeSprite_ = [](const char* name_)
     {
@@ -2470,14 +2779,114 @@ void BossFinishDirector::PrepareSprites()
     solidSprite = makeSprite_("FinishFade");
     clearSprite = makeSprite_("FinishClear");
     promptSprite = makeSprite_("FinishPrompt");
-    const auto setText_ = [](const std::shared_ptr<GameObject>& object_, const std::string& text_, float size_)
+    resultLabelsSprite = makeSprite_("ResultLabels");
+    resultValuesSprite = makeSprite_("ResultValues");
+    resultRanksSprite = makeSprite_("ResultRanks");
+    overallLabelSprite = makeSprite_("ResultOverallLabel");
+    overallRankSprite = makeSprite_("ResultOverallRank");
+    rankBurstSprite.reset();
+    overallRank = '\0';
+    const auto& titleColor_ = IsBadEnding() ? RESULT_FAILURE_TEXT_COLOR : RESULT_CLEAR_TEXT_COLOR;
+    SetResultText(clearSprite, settings.value(IsBadEnding() ? "BadEndText" : "ClearText", std::string()), 64.0f, "LEFT", titleColor_);
+    SetResultText(promptSprite, settings.value("PromptText", std::string()), 24.0f);
+    SetResultText(resultLabelsSprite, "戦闘時間\nジャストアクション\n被ダメージ", 27.0f);
+    SetResultText(overallLabelSprite, preview && !previewResult_ ? "総合ランク（演出確認）" : "総合ランク", 26.0f, "CENTER",
+        IsBadEnding() ? DirectX::XMFLOAT4{0.73f, 0.65f, 0.66f, 1.0f} : DirectX::XMFLOAT4{0.83f, 0.85f, 0.80f, 1.0f});
+
+    const auto mode_ = manager.GetGameModeManager();
+    const auto result_ = previewResult_ ? previewResult_ : (!preview && mode_ ? &mode_->GetBattleResult() : nullptr);
+    RefreshResultSprites(result_, preview && !previewResult_);
+}
+
+void BossFinishDirector::RefreshResultSprites(const GameModeManager::BattleResult* result_, bool sampleRank_)
+{
+    const char previousRank_ = overallRank;
+    const auto& titleColor_ = IsBadEnding() ? RESULT_FAILURE_TEXT_COLOR : RESULT_CLEAR_TEXT_COLOR;
+    if (!result_)
     {
-        const auto textComponent_ = object_->AddComponent<UITextComponent>();
-        textComponent_->Deserialize({{"Text", text_}, {"FontSize", size_}, {"AutoSizeWidget", false}, {"Color", {0.9f,1.0f,0.94f,1.0f}}});
-        textComponent_->Update(0.0f);
-    };
-    setText_(clearSprite, settings.value("ClearText", std::string()), 64.0f);
-    setText_(promptSprite, settings.value("PromptText", std::string()), 24.0f);
+        SetResultText(resultValuesSprite, "―\n―\n―", 27.0f, "RIGHT");
+        SetResultText(resultRanksSprite, "―\n―\n―", 27.0f, "CENTER", titleColor_);
+        overallRank = sampleRank_ ? 'S' : '\0';
+    }
+    else
+    {
+        const int actions_ = result_->justDodges + result_->justGuards;
+        const auto elapsedCentiseconds_ = std::llround(result_->elapsedSeconds * 100.0);
+        SetResultText(resultValuesSprite, std::format("{:02}:{:02}.{:02}\n{}回（回避{} / ガード{}）\n{:.2f}",
+            elapsedCentiseconds_ / 6000, elapsedCentiseconds_ / 100 % 60, elapsedCentiseconds_ % 100,
+            actions_, result_->justDodges, result_->justGuards, result_->damageTaken), 27.0f, "RIGHT");
+
+        const auto& ranks_ = settings.at("ResultRanks");
+        const auto getRankIndex_ = [&](const char* key_, double value_, bool higherIsBetter_)
+        {
+            const auto& thresholds_ = ranks_.at(key_);
+            for (int index_ = 0; index_ < 3; ++index_)
+            {
+                const double threshold_ = thresholds_[index_].get<double>();
+                if (higherIsBetter_ ? value_ >= threshold_ : value_ <= threshold_)
+                {
+                    return index_;
+                }
+            }
+            return 3;
+        };
+        const int timeRank_ = getRankIndex_("TimeSeconds", result_->elapsedSeconds, false);
+        const int actionsRank_ = getRankIndex_("JustActions", actions_, true);
+        const int damageRank_ = getRankIndex_("DamageTaken", result_->damageTaken, false);
+        SetResultText(resultRanksSprite, std::format("{}\n{}\n{}", RESULT_GRADES[timeRank_],
+            RESULT_GRADES[actionsRank_], RESULT_GRADES[damageRank_]), 27.0f, "CENTER", titleColor_);
+
+        // 低いランクほど重く評価する。総合の境界に並んだ場合は低いランクへ丸める。
+        std::array<int, 3> rankIndexes_{timeRank_, actionsRank_, damageRank_};
+        std::sort(rankIndexes_.begin(), rankIndexes_.end());
+        const int weightedRank_ = rankIndexes_[0] * 10 + rankIndexes_[1] * 15 + rankIndexes_[2] * 75;
+        overallRank = RESULT_GRADES[(weightedRank_ + 50) / 100];
+    }
+
+    const bool badEnding_ = IsBadEnding();
+    SetResultText(overallRankSprite, overallRank ? std::string(1, overallRank) : "―", badEnding_ ? 88.0f : 134.0f, "CENTER",
+        badEnding_ ? DirectX::XMFLOAT4{0.82f, 0.72f, 0.72f, 1.0f} : DirectX::XMFLOAT4{1, 1, 1, 1});
+    if (badEnding_ || !overallRank || overallRank == previousRank_)
+    {
+        return;
+    }
+
+    nlohmann::json effectSettings_ = {{"ShadowColor", {0.02f, 0.03f, 0.055f, 1.0f}}, {"ShadowOpacity", 0.82f},
+        {"ShadowOffset", {2.0f, 4.0f}}, {"ShadowSoftness", 5.0f}};
+    if (overallRank == 'S')
+    {
+        effectSettings_.update({{"GlowColor", {0.51f, 0.72f, 1.0f, 0.9f}}, {"GlowIntensity", 2.0f}, {"GlowRadius", 20.0f},
+            {"OutlineColor", {0.94f, 0.98f, 1.0f, 0.9f}}, {"OutlineWidth", 2.0f},
+            {"SweepColor", {0.86f, 0.96f, 1.0f, 1.0f}}, {"SweepIntensity", 0.58f}, {"SweepSpeed", 0.55f},
+            {"SweepWidth", 0.12f}, {"PulseAmount", 0.12f}, {"PulseSpeed", 0.52f}});
+
+        if (!rankBurstSprite)
+        {
+            const auto burst_ = MakeObject("ResultRankBurst");
+            const auto sprite_ = burst_->AddComponent<SpriteRenderer>();
+            sprite_->Deserialize({{"SdrTexture", true}, {"LinearSampling", true}});
+            if (sprite_->LoadTexture(GraphicsDeviceManager::Instance().GetDevice(), RESULT_RANK_BURST_PATH))
+            {
+                const auto size_ = sprite_->GetTextureSize();
+                sprite_->SetUVRect(0.0f, 0.0f, size_.x, size_.y);
+                sprite_->SetPivot(PosOfsset::MID);
+                rankBurstSprite = burst_;
+            }
+        }
+    }
+    else if (overallRank == 'A')
+    {
+        effectSettings_.update({{"GlowColor", {1.0f, 0.65f, 0.27f, 0.85f}}, {"GlowIntensity", 1.45f}, {"GlowRadius", 12.0f},
+            {"SweepColor", {1.0f, 0.90f, 0.63f, 1.0f}}, {"SweepIntensity", 0.38f}, {"SweepSpeed", 0.32f}});
+    }
+    else if (overallRank == 'B')
+    {
+        effectSettings_.update({{"GlowColor", {0.38f, 0.69f, 1.0f, 0.75f}}, {"GlowIntensity", 0.82f}, {"GlowRadius", 8.0f}});
+    }
+    const auto effect_ = overallRankSprite->GetOrAddComponent<UIVisualEffectComponent>(false);
+    effect_->Deserialize({{"Settings", effectSettings_}});
+    effect_->SetStarted(true);
+    effect_->SetProgress(1.0f);
 }
 
 bool BossFinishDirector::Capture(ID3D11RenderTargetView* target_)
@@ -2528,23 +2937,74 @@ void BossFinishDirector::DrawSprite(SpriteRenderSystem& sprites_, const std::sha
     sprites_.RenderAll(GraphicsDeviceManager::Instance().GetContext());
 }
 
-void BossFinishDirector::RenderOutput(SpriteRenderSystem& sprites_, ID3D11RenderTargetView* target_)
+void BossFinishDirector::ApplyPostEffects(GraphicsDeviceManager& graphics_) const
+{
+    if (IsBadEndingImpactShot() || (trueEndingTime < 0.0f && badEndingTime < 0.0f))
+    {
+        return;
+    }
+
+    auto& bloom_ = graphics_.GetBloomParams();
+    auto& filter_ = graphics_.GetFilterParams();
+    auto& radial_ = graphics_.GetRadialBlurParams();
+    auto& vignette_ = graphics_.GetVignetteParams();
+    radial_.blurCenter = {0.5f, 0.45f};
+    radial_.blurMaskRadius = 0.48f;
+    vignette_ = VignetteSystem::Parameters{};
+    vignette_.enabled = true;
+    vignette_.center = radial_.blurCenter;
+    vignette_.intensity = 1.65f;
+    vignette_.smoothness = 0.65f;
+
+    if (trueEndingTime >= 0.0f)
+    {
+        const float time_ = trueEndingTime;
+        const float charge_ = ShotProgress(time_, TRUE_END_CHARGE, TRUE_END_BEAM) *
+            (1.0f - ShotProgress(time_, TRUE_END_PILLAR, TRUE_END_PILLAR + 0.6f));
+        const float beam_ = ImpactPulse(time_, TRUE_END_BEAM, 0.48f);
+        const float pillar_ = ImpactPulse(time_, TRUE_END_PILLAR, 0.76f);
+        const float sweep_ = ImpactPulse(time_, TRUE_END_SWEEP_HIT, 0.28f);
+        bloom_.enabled = true;
+        bloom_.intensity = 0.42f + 0.48f * charge_ + 0.72f * (std::max)(beam_, pillar_);
+        filter_.colorBalance = {1.04f + 0.08f * charge_, 1.01f, 0.96f - 0.12f * charge_};
+        radial_.blurRadius = 0.07f * sweep_ + 0.16f * (std::max)(beam_, pillar_);
+        vignette_.color = {0.25f, 0.16f, 0.10f, 1.0f};
+        vignette_.opacity = 0.24f + 0.22f * charge_;
+    }
+    else
+    {
+        const float time_ = badEndingTime;
+        const float mud_ = ShotProgress(time_, BAD_END_KNEEL, BAD_END_FALL);
+        const float rise_ = ShotProgress(time_, BAD_END_RISE, BAD_END_RISE + 1.15f);
+        const float hit_ = ImpactPulse(time_, BAD_END_PIERCE, 0.55f);
+        const float roar_ = ImpactPulse(time_, BAD_END_RISE + 0.28f, 0.50f);
+        filter_.saturation = 0.90f - 0.28f * mud_;
+        filter_.colorBalance = {1.04f + 0.12f * rise_ + 0.14f * hit_, 0.98f - 0.10f * rise_, 1.02f - 0.08f * rise_};
+        radial_.blurRadius = 0.12f * hit_ + 0.07f * roar_;
+        vignette_.color = {0.30f, 0.08f, 0.11f, 1.0f};
+        vignette_.opacity = 0.27f + 0.18f * mud_ + 0.20f * hit_;
+    }
+}
+
+void BossFinishDirector::RenderOutput(SpriteRenderSystem& sprites_, ID3D11RenderTargetView* target_, bool resultPreview_)
 {
     BS_PROFILE_SCOPE("BossFinishDirector::RenderOutput");
-    if (!active)
+    if (resultPreview_ ? !resultPreviewReady : !active)
     {
         return;
     }
     auto& graphics_ = GraphicsDeviceManager::Instance();
     auto* context_ = graphics_.GetContext();
-    if (captureRequested)
+    if (!resultPreview_ && captureRequested)
     {
         showFixed = Capture(target_);
         captureRequested = false;
     }
     // 撮影要求の有無・成功とは独立して、本番の既定時刻に一度だけ完了させる。
     // 接触診断NGや再撮影で要求を消費しても、クリア文字と決定入力まで必ず進める。
-    if (!IsBadEnding() && elapsed >= GetClearTime())
+    const float held_ = resultPreview_ ? settings["HoldTime"].get<float>() + resultPreviewAge :
+        elapsed - GetResultStartTime(ending);
+    if (!resultPreview_ && held_ >= 0.0f)
     {
         CompleteFinish();
     }
@@ -2559,13 +3019,25 @@ void BossFinishDirector::RenderOutput(SpriteRenderSystem& sprites_, ID3D11Render
     const float width_ = viewport_.Width, height_ = viewport_.Height;
     const float fitWidth_ = (std::min)(width_, height_ * GetAspect()), fitHeight_ = fitWidth_ / GetAspect();
     const float left_ = (width_-fitWidth_)*0.5f, top_ = (height_-fitHeight_)*0.5f;
-    if (badEndingTime >= 0.0f)
+    if (resultPreview_)
     {
-        RenderBadEnding(sprites_, target_, width_, height_);
+        const DirectX::XMFLOAT4 backdrop_ = IsBadEnding() ? DirectX::XMFLOAT4{0, 0, 0, 1} :
+            DirectX::XMFLOAT4{0.055f, 0.059f, 0.086f, 1.0f};
+        const float clear_[4] = {backdrop_.x, backdrop_.y, backdrop_.z, backdrop_.w};
+        context_->ClearRenderTargetView(target_, clear_);
+        RenderResult(sprites_, left_, top_, fitWidth_, fitHeight_, held_);
         return;
     }
-    const float held_ = elapsed - GetClearTime();
-    if (showFixed && capturedView)
+    if (badEndingTime >= BAD_END_FINISH)
+    {
+        const float black_[] = {0, 0, 0, 1};
+        context_->ClearRenderTargetView(target_, black_);
+    }
+    else if (badEndingTime >= 0.0f)
+    {
+        RenderBadEnding(sprites_, target_, width_, height_);
+    }
+    else if (showFixed && capturedView)
     {
         const float black_[4] = {0,0,0,1};
         context_->ClearRenderTargetView(target_, black_);
@@ -2579,30 +3051,15 @@ void BossFinishDirector::RenderOutput(SpriteRenderSystem& sprites_, ID3D11Render
         DrawSprite(sprites_, imageSprite, left_, top_, fitWidth_, fitHeight_, ReadColor(settings["ImageTint"]));
     }
     // 本番とEditorとも同じアスペクト領域だけを見せ、画面サイズ変更でも伸長しない。
-    if (top_ > 0)
+    if (!IsBadEnding() && top_ > 0)
     {
         DrawSprite(sprites_, solidSprite, 0,0,width_,top_, {0,0,0,1});
         DrawSprite(sprites_, solidSprite,0,top_+fitHeight_,width_,top_,{0,0,0,1});
     }
-    if (left_ > 0)
+    if (!IsBadEnding() && left_ > 0)
     {
         DrawSprite(sprites_, solidSprite,0,0,left_,height_,{0,0,0,1});
         DrawSprite(sprites_, solidSprite,left_+fitWidth_,0,left_,height_,{0,0,0,1});
-    }
-    if (impactConfirmed && (preview || completionCommitted) && held_ >= settings["HoldTime"].get<float>())
-    {
-        const auto drawText_ = [&](const std::shared_ptr<GameObject>& object_, const char* position_, float alpha_)
-        {
-            const auto size_ = object_->GetComponent<SpriteRenderer>()->GetTextureSize();
-            const float scale_ = fitWidth_ / 1600.0f;
-            DrawSprite(sprites_, object_, left_+fitWidth_*settings[position_][0].get<float>()-size_.x*scale_*0.5f,
-                top_+fitHeight_*settings[position_][1].get<float>()-size_.y*scale_*0.5f, size_.x*scale_, size_.y*scale_, {1,1,1,alpha_});
-        };
-        drawText_(clearSprite,"ClearPosition",std::clamp((held_-settings["HoldTime"].get<float>())/0.5f,0.0f,1.0f));
-        if (held_ >= settings["PromptDelay"].get<float>())
-        {
-            drawText_(promptSprite,"PromptPosition",1.0f);
-        }
     }
     // 白い閃光も実際の命中時刻に合わせ、攻撃前やプレビュー停止中に再発火させない。
     const float impactAge_ = elapsed - settings["HitStop"].get<float>() - GetImpactTime();
@@ -2618,9 +3075,98 @@ void BossFinishDirector::RenderOutput(SpriteRenderSystem& sprites_, ID3D11Render
             DrawSprite(sprites_, solidSprite, 0, 0, width_, height_, {1.0f, 0.95f, 0.80f, 0.68f * std::exp(-beamAge_ / 0.065f)});
         }
     }
+    if ((preview || completionCommitted) && held_ >= settings["HoldTime"].get<float>())
+    {
+        RenderResult(sprites_, left_, top_, fitWidth_, fitHeight_, held_);
+    }
     if (returning)
     {
         DrawSprite(sprites_,solidSprite,0,0,width_,height_,{0,0,0,std::clamp(returnElapsed/settings["ReturnFade"].get<float>(),0.0f,1.0f)});
+    }
+}
+
+void BossFinishDirector::RenderResult(SpriteRenderSystem& sprites_, float left_, float top_,
+    float width_, float height_, float held_)
+{
+    const float hold_ = settings["HoldTime"].get<float>();
+    const float reveal_ = ShotProgress(held_, hold_, hold_ + 0.55f);
+    const float rows_ = ShotProgress(held_, hold_ + 0.2f, hold_ + 0.65f);
+    const float uiScale_ = (std::min)(width_ / 1600.0f, height_ / 900.0f);
+    const auto drawText_ = [&](const std::shared_ptr<GameObject>& object_, float x_, float y_, float pivot_,
+        const DirectX::XMFLOAT4& color_, float zoom_ = 1.0f)
+    {
+        const auto size_ = object_->GetComponent<SpriteRenderer>()->GetTextureSize();
+        const float scale_ = uiScale_ * zoom_;
+        DrawSprite(sprites_, object_, left_ + width_ * x_ - size_.x * scale_ * pivot_,
+            top_ + height_ * y_ - size_.y * scale_ * 0.5f, size_.x * scale_, size_.y * scale_, color_);
+    };
+    const bool badEnding_ = IsBadEnding();
+    DrawSprite(sprites_, solidSprite, left_ + width_ * 0.12f, top_ + height_ * 0.155f,
+        width_ * 0.76f, height_ * 0.67f, {0.018f, 0.014f, 0.025f, 0.88f * reveal_});
+    const auto& titlePosition_ = settings["ClearPosition"];
+    drawText_(clearSprite, titlePosition_[0].get<float>(), std::lerp(titlePosition_[1].get<float>(), 0.265f, reveal_),
+        0.5f, {1, 1, 1, reveal_});
+    const DirectX::XMFLOAT4 ruleColor_ = badEnding_
+        ? DirectX::XMFLOAT4{0.67f, 0.22f, 0.26f, 0.64f * rows_} : DirectX::XMFLOAT4{0.70f, 0.63f, 0.42f, 0.64f * rows_};
+    DrawSprite(sprites_, solidSprite, left_ + width_ * 0.165f, top_ + height_ * 0.364f,
+        width_ * 0.67f, (std::max)(1.0f, height_ * 0.0018f), ruleColor_);
+    DrawSprite(sprites_, solidSprite, left_ + width_ * 0.653f, top_ + height_ * 0.414f,
+        (std::max)(1.0f, width_ * 0.001f), height_ * 0.352f, {ruleColor_.x, ruleColor_.y, ruleColor_.z, ruleColor_.w * 0.48f});
+    drawText_(resultLabelsSprite, 0.152f, 0.585f, 0.0f, {1, 1, 1, rows_});
+    drawText_(resultValuesSprite, 0.582f, 0.585f, 1.0f, {1, 1, 1, rows_});
+    drawText_(resultRanksSprite, 0.618f, 0.585f, 0.5f, {1, 1, 1, rows_});
+
+    const float rankAge_ = held_ - hold_ - RESULT_RANK_DELAY;
+    const float rankReveal_ = ShotProgress(rankAge_, 0.0f, RESULT_RANK_REVEAL);
+    if (rankReveal_ > 0.0f)
+    {
+        constexpr float RANK_X = 0.766f;
+        constexpr float RANK_Y = 0.535f;
+        const bool isS_ = overallRank == 'S' && !badEnding_;
+        const float cycle_ = std::fmod(rankAge_, 2.35f) / 2.35f * DirectX::XM_2PI;
+        DirectX::XMFLOAT4 rankColor_{1, 1, 1, rankReveal_};
+        if (isS_)
+        {
+            rankColor_ = {0.72f + 0.28f * std::cos(cycle_), 0.72f + 0.28f * std::cos(cycle_ - 2.0944f),
+                0.72f + 0.28f * std::cos(cycle_ + 2.0944f), rankReveal_};
+        }
+        else if (!badEnding_ && overallRank == 'A')
+        {
+            rankColor_ = {1.0f, 0.86f, 0.48f, rankReveal_};
+        }
+        else if (!badEnding_ && overallRank == 'B')
+        {
+            rankColor_ = {0.73f, 0.87f, 1.0f, rankReveal_};
+        }
+        if (const auto effect_ = overallRankSprite->GetComponent<UIVisualEffectComponent>())
+        {
+            effect_->SetSampleTime(rankAge_);
+            effect_->SetRuntimeStrength(rankReveal_);
+        }
+        if (isS_ && rankBurstSprite)
+        {
+            // 尖った光を二層に分け、ランクの文字を中央に残したまま外へ広げる。
+            const float flare_ = ShotProgress(rankAge_, 0.0f, 0.18f) *
+                (1.0f - ShotProgress(rankAge_, 0.19f, 0.86f));
+            const float burstSize_ = uiScale_ * std::lerp(115.0f, 270.0f, ShotProgress(rankAge_, 0.0f, 0.8f));
+            const float rotation_ = std::fmod(rankAge_, 24.0f);
+            const float centerX_ = left_ + width_ * RANK_X;
+            const float centerY_ = top_ + height_ * RANK_Y;
+            rankBurstSprite->transform->localRotation.z = -15.0f * rotation_;
+            DrawSprite(sprites_, rankBurstSprite, centerX_, centerY_, burstSize_, burstSize_,
+                {rankColor_.z, rankColor_.x, rankColor_.y, 0.30f * rankReveal_ + 0.30f * flare_});
+            rankBurstSprite->transform->localRotation.z = 30.0f + 15.0f * rotation_;
+            DrawSprite(sprites_, rankBurstSprite, centerX_, centerY_, burstSize_ * 0.81f, burstSize_ * 0.81f,
+                {rankColor_.y, rankColor_.z, rankColor_.x, 0.23f * rankReveal_ + 0.22f * flare_});
+        }
+        const float rankZoom_ = isS_ ? std::lerp(1.24f, 1.0f, rankReveal_) : 1.0f;
+        drawText_(overallRankSprite, RANK_X, RANK_Y, 0.5f, rankColor_, rankZoom_);
+        drawText_(overallLabelSprite, RANK_X, 0.718f, 0.5f, {1, 1, 1, rankReveal_});
+    }
+    if (held_ >= settings["PromptDelay"].get<float>())
+    {
+        const auto& position_ = settings["PromptPosition"];
+        drawText_(promptSprite, position_[0].get<float>(), position_[1].get<float>(), 0.5f, {1, 1, 1, 1});
     }
 }
 

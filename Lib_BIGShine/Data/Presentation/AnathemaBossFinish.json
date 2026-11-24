@@ -13,6 +13,7 @@
         0.018,
         1.0
     ],
+    "BadEndText": "討伐失敗",
     "BlackoutEnd": 0.6499999761581421,
     "Boss": {
         "HitNode": "spine_02",
@@ -45,7 +46,7 @@
         "ImpactShakeDuration": 0.18,
         "Position": [
             6.6,
-            3.2,
+            1.65,
             -8.5
         ],
         "Roll": -5.0,
@@ -287,6 +288,11 @@
         0.9
     ],
     "PromptText": "ボタンを押してタイトルへ",
+    "ResultRanks": {
+        "TimeSeconds": [300, 450, 600],
+        "JustActions": [20, 10, 5],
+        "DamageTaken": [500, 750, 1000]
+    },
     "ReturnFade": 0.6499999761581421,
     "Version": 1,
     "ZoomEnd": 1.0449999570846558,

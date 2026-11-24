@@ -90,7 +90,7 @@
                     },
                     {
                         "Action": "GoSceneTutorial",
-                        "Enabled": false,
+                        "Enabled": true,
                         "GlowObject": "TitleMenu_tutorialGlow",
                         "HighlightObject": "TitleMenu_tutorialHighlight",
                         "LabelObject": "TitleMenu_tutorialLabel",
@@ -98,12 +98,13 @@
                         "Visible": true
                     },
                     {
-                        "Action": "",
-                        "Enabled": false,
+                        "Action": "UI.OpenTitleSettings",
+                        "Enabled": true,
                         "GlowObject": "TitleMenu_settingsGlow",
                         "HighlightObject": "TitleMenu_settingsHighlight",
                         "LabelObject": "TitleMenu_settingsLabel",
                         "MarkerObject": "TitleMenu_settingsMarker",
+                        "UseFade": false,
                         "Visible": true
                     },
                     {
@@ -132,6 +133,16 @@
             "TypeName": "MenuNavigationComponent",
             "UpdateEnabled": true,
             "UpdatePriority": 2000
+        },
+        {
+            "Data": {},
+            "Enabled": true,
+            "LateUpdateEnabled": false,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": true,
+            "TypeName": "TitleSettingsComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 2100
         }
     ],
     "Layer": 0,

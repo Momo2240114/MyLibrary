@@ -4,6 +4,7 @@
 #include "Game/GameMode/BossFinishDirector.h"
 #include "Engine/UI/ScreenTransitionManager.h"
 #include "Game/GameMode/PlayerDeathDirector.h"
+#include "Game/Charcter/Player/PlayerControllerComponent.h"
 #include "Engine/GamePlay/System/CombatObservationSystem.h"
 
 #include "GameObjectManager.h"
@@ -53,6 +54,7 @@
 #include "Engine/UI/WidgetBoardComponent.h"
 #include "Engine/UI/ScenePresentationComponent.h"
 #include "Engine/UI/MenuNavigationComponent.h"
+#include "Engine/UI/TitleSettingsComponent.h"
 #include "Engine/UI/ScreenFadeComponent.h"
 
 #include "Engine/Debug/TracyProfiler.h"
@@ -591,7 +593,7 @@ void GameObjectManager::UpdateCinematicSequencePreview(float deltaTime_)
             if (sequence_ && state_ == GameProgressState::PHASE_2_INTRO)
             {
                 // Phase2Introの開始要求だけを処理し、タイムラインの0秒で時計を進めない。
-                gameModeManager->Update(0.0f);
+                gameModeManager->Update(0.0f, *this);
             }
             const bool ready_ = cinematicPrepareFinish ? state_ == GameProgressState::PHASE_2_BATTLE :
                 state_ == GameProgressState::PHASE_2_INTRO && sequence_ && sequence_->GetPlayingSequenceName() == "Phase2Intro";
@@ -762,7 +764,7 @@ void GameObjectManager::UpdateRunningRuntime(float elapsedTime_)
     }
     {
         BS_PROFILE_SCOPE("gameModeManager::Update");
-        gameModeManager->Update(elapsedTime_);
+        gameModeManager->Update(elapsedTime_, *this);
     }
 
     {
@@ -2310,6 +2312,16 @@ void GameObjectManager::RenderAll(
     BS_PROFILE_SCOPE("Render::All");
     auto deviceContext_ = GraphicsDeviceManager::Instance().GetContext();
     auto& graphicsDeviceManager_ = GraphicsDeviceManager::Instance();
+    if (IsResultPreviewScene() && sceneRuntimeState == SCENE_RUNTIME_STATE::RUNNING)
+    {
+        graphicsDeviceManager_.SetBackBufferRenderTarget();
+        auto* target_ = finalRenderTargetView_ ? finalRenderTargetView_ : graphicsDeviceManager_.GetRenderTargetView();
+        if (bossFinishDirector && target_)
+        {
+            bossFinishDirector->RenderOutput(spriteSystem_, target_, true);
+        }
+        return;
+    }
     const bool finishActive_ = bossFinishDirector && bossFinishDirector->IsActive();
     const bool finishImpactShot_ = finishActive_ && bossFinishDirector->IsBadEndingImpactShot();
     const auto previousBloom_ = graphicsDeviceManager_.GetBloomParams();
@@ -2562,6 +2574,11 @@ void GameObjectManager::RenderAll(
 
     ID3D11RenderTargetView* finalRTV_ = finalRenderTargetView_ ? finalRenderTargetView_ : graphicsDeviceManager_.GetRenderTargetView();
 
+    if (finishActive_)
+    {
+        bossFinishDirector->ApplyPostEffects(graphicsDeviceManager_);
+    }
+
     // 2. ポストレンダーシステムを実行
     {
         BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::PostEffect");
@@ -2703,18 +2720,18 @@ void GameObjectManager::RenderAll(
     if (finishActive_)
     {
         bossFinishDirector->RenderOutput(spriteSystem_, finalRTV_);
+        if (presentation_ && !finishImpactShot_)
+        {
+            presentation_->EndRender();
+        }
         graphicsDeviceManager_.GetBloomParams() = previousBloom_;
         graphicsDeviceManager_.GetFilterParams() = previousFilter_;
         graphicsDeviceManager_.GetRadialBlurParams() = previousRadial_;
         graphicsDeviceManager_.GetMotionBlurParams() = previousMotion_;
+        graphicsDeviceManager_.GetVignetteParams() = previousVignette_;
         if (finishImpactShot_)
         {
-            graphicsDeviceManager_.GetVignetteParams() = previousVignette_;
             graphicsDeviceManager_.GetXeGtaoParams() = previousGtao_;
-        }
-        if (presentation_)
-        {
-            presentation_->EndRender();
         }
         return;
     }
@@ -2777,6 +2794,14 @@ void GameObjectManager::RenderAll(
         if (playerDeathDirector)
         {
             playerDeathDirector->RenderOutput(spriteSystem_);
+        }
+        if (const auto owner_ = presentation_ ? presentation_->GetGameObject() : nullptr)
+        {
+            const auto settings_ = owner_->GetComponent<TitleSettingsComponent>();
+            if (settings_ && settings_->IsEnabled() && settings_->IsStarted())
+            {
+                settings_->RenderSettings(spriteSystem_);
+            }
         }
     }
 
@@ -3316,7 +3341,7 @@ void GameObjectManager::ProcessEditorPlayCommand()
         AudioManager::Instance().StopBGM();
         AudioManager::Instance().StopSE();
         LoadSceneData(loadedSceneName, snapshot_);
-        if (gameModeManager)
+        if (gameModeManager && loadedSceneName != "TutorialScene")
         {
             gameModeManager->BeginGameSceneFlow();
         }
@@ -3336,7 +3361,6 @@ void GameObjectManager::ProcessEditorPlayCommand()
 void GameObjectManager::UpdateEditorScene(float deltaTime_)
 {
     BS_PROFILE_SCOPE("EditorPlayMode::UpdateEditorScene");
-    (void)deltaTime_;
     if (sceneRuntimeState == SCENE_RUNTIME_STATE::FAILED)
     {
         return;
@@ -3466,6 +3490,10 @@ void GameObjectManager::UpdateEditorScene(float deltaTime_)
         sceneLoadProgress = ready_ ? 1.0f : ModelResourceManager::Instance().GetLoadProgress();
     }
     sceneRuntimeState = ready_ ? SCENE_RUNTIME_STATE::RUNNING : SCENE_RUNTIME_STATE::LOADING;
+    if (ready_ && IsResultPreviewScene() && bossFinishDirector)
+    {
+        bossFinishDirector->UpdateResultPreview(deltaTime_);
+    }
     if (ready_ && !pendingEditorSelection.empty())
     {
         selectedObject = Find(pendingEditorSelection);
@@ -3828,6 +3856,22 @@ std::shared_ptr<GameObject> GameObjectManager::Instantiate(const std::string& pr
 
 void GameObjectManager::RegisterAttackCallbacks()
 {
+    const auto recordDefense_ = [this](const std::weak_ptr<GameObject>& actor_, bool justDodge_)
+    {
+        const auto player_ = actor_.lock();
+        if (gameModeManager && player_ && player_->GetComponent<PlayerControllerComponent>())
+        {
+            gameModeManager->RecordPlayerDefense(justDodge_);
+        }
+    };
+    justDodgeSystem->AddJustDodgeCallback([recordDefense_](const JustDodgeEvent& event_)
+    {
+        recordDefense_(event_.dodger, true);
+    });
+    justGuardSystem->AddJustGuardCallback([recordDefense_](const JustGuardEvent& event_)
+    {
+        recordDefense_(event_.defender, false);
+    });
     // AttackSystemのHit結果を、HitStop、Effect、SE再生へ橋渡しする。
     attackSystem->AddHitCallback(
         [this](const AttackHitEvent& event_)
@@ -3957,6 +4001,11 @@ void GameObjectManager::UpdateLoadingPresentation(float deltaTime_)
         if (menu_ && menu_->IsStarted() && menu_->IsEnabled() && menu_->ShouldUpdate())
         {
             menu_->Update(deltaTime_);
+        }
+        const auto settings_ = object_->GetComponent<TitleSettingsComponent>();
+        if (settings_ && settings_->IsStarted() && settings_->IsEnabled() && settings_->ShouldUpdate())
+        {
+            settings_->Update(deltaTime_);
         }
     }
     for (const auto& object_ : objects)

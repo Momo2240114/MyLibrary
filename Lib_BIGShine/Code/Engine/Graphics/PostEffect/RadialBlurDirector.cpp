@@ -142,6 +142,10 @@ void RadialBlurDirector::RegisterActions()
     {
         return;
     }
+    owner_->RegisterGlobalAction("PostProcess", "ResetRadialBlur", [this]()
+    {
+        ResetToDefault();
+    });
     for (size_t index_ = 0; index_ < editorWaypoints.size(); ++index_)
     {
         owner_->RegisterGlobalAction("PostProcess", "RadialBlur_" + std::to_string(index_), [this, index_]()

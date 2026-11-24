@@ -1,6 +1,7 @@
 #include "PrecompiledHeader.h"
 #include "MenuNavigationComponent.h"
 #include "ScreenFadeComponent.h"
+#include "TitleSettingsComponent.h"
 #include "Engine/UI/ScreenTransitionManager.h"
 #include "MenuPresentation.h"
 #include "UIWidgetComponent.h"
@@ -100,10 +101,17 @@ void MenuNavigationComponent::ConfirmSelection()
     {
         return;
     }
+    const auto& item_ = items[selectedIndex];
+    if (!item_.useFade)
+    {
+        ActionRegistry::Instance().Call(item_.action);
+        PlaySound(confirmSound);
+        return;
+    }
     const auto object_ = GetManager().Find(fadeObject);
     const auto fade_ = object_ ? object_->GetComponent<ScreenFadeComponent>() : nullptr;
     // 設定した暗転Objectが欠けた場合は、無操作状態へ移らず再度選択できるようにする。
-    if (!fade_ || !fade_->IsEnabled() || !fade_->BeginFadeOut(items[selectedIndex].action))
+    if (!fade_ || !fade_->IsEnabled() || !fade_->BeginFadeOut(item_.action))
     {
         return;
     }
@@ -116,7 +124,10 @@ void MenuNavigationComponent::UpdateVisuals()
     BS_PROFILE_SCOPE("MenuNavigationComponent::UpdateVisuals");
     const auto object_ = GetManager().Find(fadeObject);
     const auto fade_ = object_ ? object_->GetComponent<ScreenFadeComponent>() : nullptr;
-    const float fadeAlpha_ = fade_ && fade_->IsFadingOut() ? 1.0f - std::clamp(fade_->GetFadeOutTime() / 0.2f, 0.0f, 1.0f) : 1.0f;
+    const auto owner_ = GetGameObject();
+    const auto settings_ = owner_ ? owner_->GetComponent<TitleSettingsComponent>() : nullptr;
+    const float fadeAlpha_ = settings_ && settings_->IsOpen() ? 0.0f :
+        fade_ && fade_->IsFadingOut() ? 1.0f - std::clamp(fade_->GetFadeOutTime() / 0.2f, 0.0f, 1.0f) : 1.0f;
     const auto apply_ = [&](const std::string& name_, float alpha_, float brightness_ = 1.0f)
     {
         const auto element_ = GetManager().Find(name_);
@@ -314,7 +325,7 @@ void MenuNavigationComponent::Serialize(nlohmann::json& json_) const
     {
         json_["Items"].push_back({{"Action", item_.action}, {"LabelObject", item_.labelObject},
             {"HighlightObject", item_.highlightObject}, {"MarkerObject", item_.markerObject}, {"GlowObject", item_.glowObject},
-            {"Visible", item_.visible}, {"Enabled", item_.enabled}});
+            {"Visible", item_.visible}, {"Enabled", item_.enabled}, {"UseFade", item_.useFade}});
     }
 }
 
@@ -354,6 +365,7 @@ void MenuNavigationComponent::Deserialize(const nlohmann::json& json_)
             entry_.glowObject = item_.value("GlowObject", "");
             entry_.visible = item_.value("Visible", true);
             entry_.enabled = item_.value("Enabled", false);
+            entry_.useFade = item_.value("UseFade", true);
             if (!entry_.labelObject.empty())
             {
                 items.push_back(std::move(entry_));

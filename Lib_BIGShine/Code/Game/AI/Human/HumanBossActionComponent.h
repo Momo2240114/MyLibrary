@@ -108,6 +108,11 @@ public:
         return execution.IsActive() && rangedSkill == "SHADOW_RAGNAROK";
     }
 
+    bool IsSpecialActionActive() const
+    {
+        return IsSpecialMusicActive() || (execution.IsActive() && !executionCapturedPlayer.expired());
+    }
+
     // Combat Systemが確定した成功を一度だけAIへ返す。
     bool ConsumeJustGuardSuccess();
     // 通常Guardの実成立を、一度だけ軽反撃の判断へ渡す。

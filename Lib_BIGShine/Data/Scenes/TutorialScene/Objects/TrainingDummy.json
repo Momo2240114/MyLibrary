@@ -1,0 +1,132 @@
+{
+    "Name": "TrainingDummy",
+    "ParentName": "",
+    "Layer": 2,
+    "CollisionMask": 0,
+    "RequiredForSceneStart": true,
+    "Transform": {
+        "Pos": [
+            0.0,
+            0.14,
+            0.0
+        ],
+        "Rot": [
+            0.0,
+            180.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    },
+    "Components": [
+        {
+            "Data": {
+                "LocalScale": 0.8,
+                "LocalScaleXYZ": [
+                    0.8,
+                    0.8,
+                    0.8
+                ],
+                "MaterialOverrides": [],
+                "ModelName": "./Data/Model/Dummy/scene.gltf",
+                "OutlineColor": [
+                    0.019999999552965164,
+                    0.019999999552965164,
+                    0.02500000037252903,
+                    1.0
+                ],
+                "OverrideOutlineColor": false,
+                "RootMotionName": "",
+                "ShaderID": 3,
+                "StaticModel": true,
+                "UsedNaviMeshSystemFlg": false,
+                "_RootRotationOffset": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                }
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "GltfModel",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "CombatOwnerName": "",
+                "DefaultTarget": false,
+                "LockOnEnabled": true,
+                "Offset": [
+                    0.0,
+                    1.6,
+                    0.0
+                ],
+                "Priority": 1.0
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "LockOnTargetComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 20
+        }
+    ],
+    "ColliderComponents": [
+        {
+            "Data": {
+                "CanBeCharacterGround": false,
+                "ColliderName": "TrainingDummyBody",
+                "CollisionOwnerObjectName": "",
+                "CollisionRole": 3,
+                "ContainmentMode": 0,
+                "DamageMultiplier": 1.0,
+                "DebugPrimitiveColor": [
+                    0.20000000298023224,
+                    1.0,
+                    0.30000001192092896,
+                    1.0
+                ],
+                "EndNodeName": "",
+                "GravityScale": 1.0,
+                "HalfHeight": 0.9,
+                "HurtTag": "Body",
+                "InvincibilityDuration": 0.07999999821186066,
+                "IsStatic": false,
+                "IsTrigger": true,
+                "Mass": 0.0,
+                "NodeModelObjectName": "",
+                "NodeSegmentScale": 1.0,
+                "Offset": [
+                    0.0,
+                    1.58,
+                    0.0
+                ],
+                "PhysicsControlsTransform": false,
+                "Radius": 0.84,
+                "RotateVelocityThreshold": 0.0010000000474974513,
+                "ShapeRenderFlg": false,
+                "StartNodeName": "",
+                "SyncCharacterColliderShape": false,
+                "UseGravity": false,
+                "UsePhysicsResponse": false,
+                "VelocityRotationMode": 0,
+                "shapeSizeScale": 1.0
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "HurtBox",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        }
+    ]
+}
