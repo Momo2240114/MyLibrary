@@ -5,6 +5,9 @@
 #include <algorithm>
 #include <string>
 
+struct ImDrawList;
+struct ImVec2;
+
 enum class GameProgressState
 {
     GAME_SCENE_START,
@@ -38,6 +41,8 @@ public:
     // 初期状態をGlobalBlackboardへ書き込む。
     void Start();
     // 毎フレーム共有状態をGlobalBlackboardへ同期する。
+    bool CanSkipPresentation() const;
+    void DrawSkipPrompt(ImDrawList& draw_, const ImVec2& minimum_, const ImVec2& maximum_) const;
     void Update(float deltaTime_, GameObjectManager& manager_);
     // 確定した形態・暴走・大技の状態から、戦闘中だけBGMを選ぶ。
     void UpdateBattleMusic(GameObjectManager& manager_);
@@ -243,6 +248,7 @@ private:
 
     GameProgressState currentGameState = GameProgressState::GAME_SCENE_START;
     std::string currentSequenceName;
+    float skipHoldSeconds = 0.0f;
     bool sequenceStartRequested = false;
     bool sequenceStartAttempted = false;
     bool globalActionsRegistered = false;

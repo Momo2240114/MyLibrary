@@ -101,7 +101,7 @@
                 "SectorAngle": 360.0,
                 "SectorHalfHeight": 1.0,
                 "SectorRange": 0.0,
-                "ShapeRenderFlg": false,
+                "ShapeRenderFlg": true,
                 "SourceAction": "",
                 "StartNodeName": "ball_l_end",
                 "TargetAirLiftPower": 0.0,

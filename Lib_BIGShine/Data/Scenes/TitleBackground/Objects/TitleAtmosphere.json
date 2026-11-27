@@ -80,6 +80,18 @@
                             0.0
                         ],
                         "RadialVelocity": 0.0,
+                        "RandomColorEnd": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "RandomColorStart": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
                         "RenderType": 0,
                         "RotationSpeed": [
                             0.0,
@@ -148,6 +160,7 @@
                         "UseFresnel": 0,
                         "UseGradient": 0,
                         "UseMask": 0,
+                        "UseRandomColor": 0,
                         "UseRandomSize": 0,
                         "UseSpriteAnimation": 0,
                         "UseTargetAttraction": 0,
@@ -246,6 +259,18 @@
                             0.0
                         ],
                         "RadialVelocity": 0.0,
+                        "RandomColorEnd": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "RandomColorStart": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
                         "RenderType": 0,
                         "RotationSpeed": [
                             0.0,
@@ -314,6 +339,7 @@
                         "UseFresnel": 0,
                         "UseGradient": 0,
                         "UseMask": 0,
+                        "UseRandomColor": 0,
                         "UseRandomSize": 0,
                         "UseSpriteAnimation": 0,
                         "UseTargetAttraction": 0,

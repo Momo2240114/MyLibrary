@@ -86,15 +86,17 @@
                         "HighlightObject": "TitleMenu_game_startHighlight",
                         "LabelObject": "TitleMenu_game_startLabel",
                         "MarkerObject": "TitleMenu_game_startMarker",
+                        "UseFade": true,
                         "Visible": true
                     },
                     {
                         "Action": "GoSceneTutorial",
-                        "Enabled": true,
+                        "Enabled": false,
                         "GlowObject": "TitleMenu_tutorialGlow",
                         "HighlightObject": "TitleMenu_tutorialHighlight",
                         "LabelObject": "TitleMenu_tutorialLabel",
                         "MarkerObject": "TitleMenu_tutorialMarker",
+                        "UseFade": true,
                         "Visible": true
                     },
                     {
@@ -114,6 +116,7 @@
                         "HighlightObject": "TitleMenu_exitHighlight",
                         "LabelObject": "TitleMenu_exitLabel",
                         "MarkerObject": "TitleMenu_exitMarker",
+                        "UseFade": true,
                         "Visible": true
                     }
                 ],
@@ -135,7 +138,7 @@
             "UpdatePriority": 2000
         },
         {
-            "Data": {},
+            "Data": null,
             "Enabled": true,
             "LateUpdateEnabled": false,
             "LateUpdatePriority": 0,

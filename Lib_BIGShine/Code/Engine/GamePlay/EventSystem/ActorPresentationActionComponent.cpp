@@ -59,6 +59,15 @@ void ActorPresentationActionComponent::RegisterActions()
         return;
     }
     const std::weak_ptr<GameObject> weakOwner_ = owner_;
+    owner_->RegisterGlobalAction("ActorPresentation", "FinishMovement", [weakOwner_]()
+    {
+        const auto owner_ = weakOwner_.lock();
+        if (const auto component_ = owner_ ? owner_->GetComponent<ActorPresentationActionComponent>() : nullptr)
+        {
+            // スキップでも通常移動と同じ親座標変換と終点を使う。
+            component_->UpdateMovement(component_->moveDuration);
+        }
+    });
     owner_->RegisterGlobalAction("ActorPresentation", "RestoreSpawnPoints", [weakOwner_]()
     {
         const auto owner_ = weakOwner_.lock();

@@ -129,7 +129,9 @@ void framework::update(float elapsedTime_/*Elapsed seconds from last frame*/)
             !scene_->IsEditorWorkspaceOpen() && !scene_->RequiresFreeCursor() &&
             !ScreenTransitionManager::Instance().IsInputBlocked();
         auto& mouse_ = MouseInput::Instance();
-        const bool releaseKey_ = KeyInput::KeyPressedIn(VK_ESCAPE) ||
+        const auto mode_ = manager_ ? manager_->GetGameModeManager() : nullptr;
+        const bool skipInput_ = mode_ && mode_->CanSkipPresentation() && (!editorPlay_ || manager_->IsPlayInputCaptured());
+        const bool releaseKey_ = (!skipInput_ && KeyInput::KeyPressedIn(VK_ESCAPE)) ||
             (editorPlay_ && KeyInput::KeyPressedIn(VK_F1));
         if (!focused_ || systemKey_ || (mouse_.IsCursorLocked() && releaseKey_))
         {
@@ -323,7 +325,7 @@ void framework::render(float elapsedTime_/*Elapsed seconds from last frame*/)
             SceneManager::RenderTransition();
             const auto scene_ = dynamic_cast<SceneBase*>(SceneManager::GetCurrentScene());
             const auto manager_ = scene_ ? scene_->GetGameObjectManager() : nullptr;
-            if (!manager_ || !manager_->IsCinematicSequencePreview())
+            if (!manager_ || (!manager_->IsCinematicSequencePreview() && !manager_->GetGameModeManager()->CanSkipPresentation()))
             {
                 ScreenTransitionManager::Instance().Render();
             }
@@ -551,11 +553,17 @@ bool framework::uninitialize()
 
 void framework::GuiDraw()
 {
-	//#if defined(DEBUG) || defined(_DEBUG)
-	SceneManager::DrawGUI();
+    const auto scene_ = dynamic_cast<SceneBase*>(SceneManager::GetCurrentScene());
+    const auto manager_ = scene_ ? scene_->GetGameObjectManager() : nullptr;
+    if (manager_ && manager_->GetGameModeManager()->CanSkipPresentation())
+    {
+        // 暗転の代替描画もスキップ案内の背面に重ねる。
+        ScreenTransitionManager::Instance().DrawGUI(!GameRuntimeSettings::IsGameOnly());
+        SceneManager::DrawGUI();
+        return;
+    }
+    SceneManager::DrawGUI();
     ScreenTransitionManager::Instance().DrawGUI(!GameRuntimeSettings::IsGameOnly());
-	//GraphicsDeviceManager::Instance().ShowPostEffectGui(); // ここで呼び出す
-	//#endif // DEBUG
 }
 
 framework::~framework()

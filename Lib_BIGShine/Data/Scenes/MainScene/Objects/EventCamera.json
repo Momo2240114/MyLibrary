@@ -59,13 +59,13 @@
                 "DefaultFov": 60.0,
                 "FovWaypoints": [
                     {
-                        "dur": 0.09,
+                        "dur": 0.09000000357627869,
                         "ease": 1,
                         "fov": 70.0,
-                        "holdDur": 0.13,
+                        "holdDur": 0.12999999523162842,
                         "pr": 0.0,
                         "pv": 0.0,
-                        "returnDur": 0.58
+                        "returnDur": 0.5799999833106995
                     }
                 ]
             },
@@ -86,9 +86,9 @@
                         "autoFrameTargets": false,
                         "blackboardCategory": "Intro",
                         "cameraOffset": [
-                            3.8,
-                            1.95,
-                            -48.9
+                            3.799999952316284,
+                            1.9500000476837158,
+                            -48.900001525878906
                         ],
                         "cameraUp": [
                             0.0,
@@ -98,14 +98,19 @@
                         "enterDuration": 0.0,
                         "focusOffset": [
                             0.0,
-                            1.42,
-                            0.65
+                            1.4199999570846558,
+                            0.6499999761581421
                         ],
                         "focusPositionKey": "Position",
                         "framingEyeHeight": 1.600000023841858,
                         "framingPadding": 1.149999976158142,
                         "framingRadius": 1.0,
+                        "holdDollyDistance": -1.7000000476837158,
                         "holdDuration": 60.0,
+                        "holdFovDelta": -5.0,
+                        "holdLift": -0.41999998688697815,
+                        "holdMoveDuration": 4.5,
+                        "holdOrbitDegrees": -22.0,
                         "minimumFramingDistance": 3.0,
                         "positionMode": "WORLD_POSITION",
                         "priority": 100,
@@ -123,12 +128,7 @@
                         "useExternalFov": false,
                         "useFramingEyeHeight": false,
                         "useModelBounds": true,
-                        "useUnscaledTime": true,
-                        "holdMoveDuration": 4.5,
-                        "holdOrbitDegrees": -22.0,
-                        "holdDollyDistance": -1.7,
-                        "holdLift": -0.42,
-                        "holdFovDelta": -5.0
+                        "useUnscaledTime": true
                     },
                     {
                         "actionName": "IntroPlayer",
@@ -136,26 +136,31 @@
                         "autoFrameTargets": false,
                         "blackboardCategory": "Intro",
                         "cameraOffset": [
-                            -0.6,
-                            1.45,
-                            -50.7
+                            -0.6000000238418579,
+                            1.4500000476837158,
+                            -50.70000076293945
                         ],
                         "cameraUp": [
                             0.0,
                             1.0,
                             0.0
                         ],
-                        "enterDuration": 0.28,
+                        "enterDuration": 0.2800000011920929,
                         "focusOffset": [
                             0.0,
-                            1.42,
-                            0.15
+                            1.4199999570846558,
+                            0.15000000596046448
                         ],
                         "focusPositionKey": "Position",
                         "framingEyeHeight": 1.600000023841858,
                         "framingPadding": 1.149999976158142,
                         "framingRadius": 1.0,
+                        "holdDollyDistance": -0.6600000262260437,
                         "holdDuration": 60.0,
+                        "holdFovDelta": -5.0,
+                        "holdLift": -0.14000000059604645,
+                        "holdMoveDuration": 2.75,
+                        "holdOrbitDegrees": 29.0,
                         "minimumFramingDistance": 3.0,
                         "positionMode": "WORLD_POSITION",
                         "priority": 100,
@@ -173,12 +178,7 @@
                         "useExternalFov": false,
                         "useFramingEyeHeight": false,
                         "useModelBounds": true,
-                        "useUnscaledTime": true,
-                        "holdMoveDuration": 2.75,
-                        "holdOrbitDegrees": 29.0,
-                        "holdDollyDistance": -0.66,
-                        "holdLift": -0.14,
-                        "holdFovDelta": -5.0
+                        "useUnscaledTime": true
                     },
                     {
                         "actionName": "IntroShoulder",
@@ -186,16 +186,16 @@
                         "autoFrameTargets": false,
                         "blackboardCategory": "Intro",
                         "cameraOffset": [
-                            -2.1,
-                            1.6,
-                            -55.8
+                            -2.0999999046325684,
+                            1.600000023841858,
+                            -55.79999923706055
                         ],
                         "cameraUp": [
                             0.0,
                             1.0,
                             0.0
                         ],
-                        "enterDuration": 0.12,
+                        "enterDuration": 0.11999999731779099,
                         "focusOffset": [
                             0.0,
                             2.299999952316284,
@@ -205,7 +205,12 @@
                         "framingEyeHeight": 1.600000023841858,
                         "framingPadding": 1.149999976158142,
                         "framingRadius": 1.0,
+                        "holdDollyDistance": -4.199999809265137,
                         "holdDuration": 60.0,
+                        "holdFovDelta": -8.0,
+                        "holdLift": 0.18000000715255737,
+                        "holdMoveDuration": 1.100000023841858,
+                        "holdOrbitDegrees": -5.0,
                         "minimumFramingDistance": 3.0,
                         "positionMode": "WORLD_POSITION",
                         "priority": 100,
@@ -223,12 +228,7 @@
                         "useExternalFov": false,
                         "useFramingEyeHeight": false,
                         "useModelBounds": true,
-                        "useUnscaledTime": true,
-                        "holdMoveDuration": 1.1,
-                        "holdOrbitDegrees": -5.0,
-                        "holdDollyDistance": -4.2,
-                        "holdLift": 0.18,
-                        "holdFovDelta": -8.0
+                        "useUnscaledTime": true
                     },
                     {
                         "actionName": "IntroDragonWide",
@@ -236,8 +236,8 @@
                         "autoFrameTargets": false,
                         "blackboardCategory": "Intro",
                         "cameraOffset": [
-                            14.8,
-                            3.4,
+                            14.800000190734863,
+                            3.4000000953674316,
                             5.0
                         ],
                         "cameraUp": [
@@ -255,7 +255,12 @@
                         "framingEyeHeight": 1.600000023841858,
                         "framingPadding": 1.149999976158142,
                         "framingRadius": 1.0,
+                        "holdDollyDistance": -1.899999976158142,
                         "holdDuration": 60.0,
+                        "holdFovDelta": -4.0,
+                        "holdLift": 1.25,
+                        "holdMoveDuration": 1.149999976158142,
+                        "holdOrbitDegrees": -13.0,
                         "minimumFramingDistance": 3.0,
                         "positionMode": "WORLD_POSITION",
                         "priority": 100,
@@ -273,12 +278,7 @@
                         "useExternalFov": false,
                         "useFramingEyeHeight": false,
                         "useModelBounds": true,
-                        "useUnscaledTime": true,
-                        "holdMoveDuration": 1.15,
-                        "holdOrbitDegrees": -13.0,
-                        "holdDollyDistance": -1.9,
-                        "holdLift": 1.25,
-                        "holdFovDelta": -4.0
+                        "useUnscaledTime": true
                     },
                     {
                         "actionName": "IntroDragonClose",
@@ -287,7 +287,7 @@
                         "blackboardCategory": "Intro",
                         "cameraOffset": [
                             8.5,
-                            8.1,
+                            8.100000381469727,
                             -3.5
                         ],
                         "cameraUp": [
@@ -295,17 +295,22 @@
                             1.0,
                             0.0
                         ],
-                        "enterDuration": 0.26,
+                        "enterDuration": 0.25999999046325684,
                         "focusOffset": [
                             0.0,
-                            8.9,
-                            -11.7
+                            8.899999618530273,
+                            -11.699999809265137
                         ],
                         "focusPositionKey": "Position",
                         "framingEyeHeight": 1.600000023841858,
                         "framingPadding": 1.149999976158142,
                         "framingRadius": 1.0,
+                        "holdDollyDistance": 2.200000047683716,
                         "holdDuration": 60.0,
+                        "holdFovDelta": 0.0,
+                        "holdLift": -1.0499999523162842,
+                        "holdMoveDuration": 4.0,
+                        "holdOrbitDegrees": -20.0,
                         "minimumFramingDistance": 3.0,
                         "positionMode": "WORLD_POSITION",
                         "priority": 100,
@@ -323,12 +328,7 @@
                         "useExternalFov": true,
                         "useFramingEyeHeight": false,
                         "useModelBounds": true,
-                        "useUnscaledTime": true,
-                        "holdMoveDuration": 4.0,
-                        "holdOrbitDegrees": -20.0,
-                        "holdDollyDistance": 2.2,
-                        "holdLift": -1.05,
-                        "holdFovDelta": 0.0
+                        "useUnscaledTime": true
                     },
                     {
                         "actionName": "TransitionDeathWide",
@@ -337,7 +337,7 @@
                         "blackboardCategory": "Guard",
                         "cameraOffset": [
                             -15.0,
-                            2.45,
+                            2.450000047683716,
                             -36.0
                         ],
                         "cameraUp": [
@@ -348,14 +348,19 @@
                         "enterDuration": 0.0,
                         "focusOffset": [
                             0.0,
-                            4.2,
+                            4.199999809265137,
                             -9.0
                         ],
                         "focusPositionKey": "Position",
                         "framingEyeHeight": 2.0,
                         "framingPadding": 1.149999976158142,
                         "framingRadius": 1.0,
+                        "holdDollyDistance": -3.5999999046325684,
                         "holdDuration": 60.0,
+                        "holdFovDelta": -4.0,
+                        "holdLift": -0.25,
+                        "holdMoveDuration": 2.950000047683716,
+                        "holdOrbitDegrees": 12.0,
                         "minimumFramingDistance": 3.0,
                         "positionMode": "WORLD_POSITION",
                         "priority": 110,
@@ -373,12 +378,7 @@
                         "useExternalFov": false,
                         "useFramingEyeHeight": false,
                         "useModelBounds": true,
-                        "useUnscaledTime": true,
-                        "holdMoveDuration": 2.95,
-                        "holdOrbitDegrees": 12.0,
-                        "holdDollyDistance": -3.6,
-                        "holdLift": -0.25,
-                        "holdFovDelta": -4.0
+                        "useUnscaledTime": true
                     },
                     {
                         "actionName": "TransitionDissolve",
@@ -387,7 +387,7 @@
                         "blackboardCategory": "Guard",
                         "cameraOffset": [
                             -7.0,
-                            3.1,
+                            3.0999999046325684,
                             -23.5
                         ],
                         "cameraUp": [
@@ -395,17 +395,22 @@
                             1.0,
                             0.0
                         ],
-                        "enterDuration": 0.2,
+                        "enterDuration": 0.20000000298023224,
                         "focusOffset": [
                             0.0,
                             2.0,
-                            -3.2
+                            -3.200000047683716
                         ],
                         "focusPositionKey": "Position",
                         "framingEyeHeight": 1.600000023841858,
                         "framingPadding": 1.1799999475479126,
                         "framingRadius": 1.0,
+                        "holdDollyDistance": -2.200000047683716,
                         "holdDuration": 60.0,
+                        "holdFovDelta": -7.0,
+                        "holdLift": 1.4500000476837158,
+                        "holdMoveDuration": 3.700000047683716,
+                        "holdOrbitDegrees": 24.0,
                         "minimumFramingDistance": 3.0,
                         "positionMode": "WORLD_POSITION",
                         "priority": 110,
@@ -423,12 +428,7 @@
                         "useExternalFov": false,
                         "useFramingEyeHeight": false,
                         "useModelBounds": true,
-                        "useUnscaledTime": true,
-                        "holdMoveDuration": 3.7,
-                        "holdOrbitDegrees": 24.0,
-                        "holdDollyDistance": -2.2,
-                        "holdLift": 1.45,
-                        "holdFovDelta": -7.0
+                        "useUnscaledTime": true
                     },
                     {
                         "actionName": "TransitionMudAttack",
@@ -436,9 +436,9 @@
                         "autoFrameTargets": false,
                         "blackboardCategory": "Guard",
                         "cameraOffset": [
-                            -8.8,
-                            2.45,
-                            -43.8
+                            -8.800000190734863,
+                            2.450000047683716,
+                            -43.79999923706055
                         ],
                         "cameraUp": [
                             0.0,
@@ -448,14 +448,19 @@
                         "enterDuration": 0.3499999940395355,
                         "focusOffset": [
                             0.0,
-                            1.08,
+                            1.0800000429153442,
                             0.0
                         ],
                         "focusPositionKey": "Position",
                         "framingEyeHeight": 1.600000023841858,
                         "framingPadding": 1.0499999523162842,
                         "framingRadius": 8.0,
+                        "holdDollyDistance": -1.600000023841858,
                         "holdDuration": 60.0,
+                        "holdFovDelta": -8.0,
+                        "holdLift": -0.4300000071525574,
+                        "holdMoveDuration": 3.1500000953674316,
+                        "holdOrbitDegrees": -18.0,
                         "minimumFramingDistance": 3.0,
                         "positionMode": "WORLD_POSITION",
                         "priority": 110,
@@ -473,12 +478,7 @@
                         "useExternalFov": false,
                         "useFramingEyeHeight": false,
                         "useModelBounds": true,
-                        "useUnscaledTime": true,
-                        "holdMoveDuration": 3.15,
-                        "holdOrbitDegrees": -18.0,
-                        "holdDollyDistance": -1.6,
-                        "holdLift": -0.43,
-                        "holdFovDelta": -8.0
+                        "useUnscaledTime": true
                     },
                     {
                         "actionName": "TransitionFormation",
@@ -486,8 +486,8 @@
                         "autoFrameTargets": true,
                         "blackboardCategory": "Guard",
                         "cameraOffset": [
-                            0.85,
-                            0.03,
+                            0.8500000238418579,
+                            0.029999999329447746,
                             -1.0
                         ],
                         "cameraUp": [
@@ -505,7 +505,12 @@
                         "framingEyeHeight": 1.600000023841858,
                         "framingPadding": 1.149999976158142,
                         "framingRadius": 5.0,
+                        "holdDollyDistance": -0.3499999940395355,
                         "holdDuration": 60.0,
+                        "holdFovDelta": -2.0,
+                        "holdLift": 0.6000000238418579,
+                        "holdMoveDuration": 0.5,
+                        "holdOrbitDegrees": 12.0,
                         "minimumFramingDistance": 3.0,
                         "positionMode": "WORLD_POSITION",
                         "priority": 110,
@@ -523,12 +528,7 @@
                         "useExternalFov": false,
                         "useFramingEyeHeight": false,
                         "useModelBounds": false,
-                        "useUnscaledTime": true,
-                        "holdMoveDuration": 0.5,
-                        "holdOrbitDegrees": 12.0,
-                        "holdDollyDistance": -0.35,
-                        "holdLift": 0.6,
-                        "holdFovDelta": -2.0
+                        "useUnscaledTime": true
                     },
                     {
                         "actionName": "TransitionSwordClash",
@@ -537,7 +537,7 @@
                         "blackboardCategory": "Guard",
                         "cameraOffset": [
                             1.0,
-                            0.1,
+                            0.10000000149011612,
                             0.75
                         ],
                         "cameraUp": [
@@ -545,7 +545,7 @@
                             1.0,
                             0.0
                         ],
-                        "enterDuration": 0.08,
+                        "enterDuration": 0.07999999821186066,
                         "focusOffset": [
                             0.0,
                             0.0,
@@ -555,7 +555,12 @@
                         "framingEyeHeight": 1.600000023841858,
                         "framingPadding": 1.2999999523162842,
                         "framingRadius": 1.0,
+                        "holdDollyDistance": -0.44999998807907104,
                         "holdDuration": 60.0,
+                        "holdFovDelta": -5.0,
+                        "holdLift": -0.18000000715255737,
+                        "holdMoveDuration": 0.4399999976158142,
+                        "holdOrbitDegrees": 17.0,
                         "minimumFramingDistance": 11.0,
                         "positionMode": "WORLD_POSITION",
                         "priority": 110,
@@ -573,12 +578,7 @@
                         "useExternalFov": false,
                         "useFramingEyeHeight": false,
                         "useModelBounds": true,
-                        "useUnscaledTime": true,
-                        "holdMoveDuration": 0.44,
-                        "holdOrbitDegrees": 17.0,
-                        "holdDollyDistance": -0.45,
-                        "holdLift": -0.18,
-                        "holdFovDelta": -5.0
+                        "useUnscaledTime": true
                     },
                     {
                         "actionName": "TransitionKnockdown",
@@ -586,16 +586,16 @@
                         "autoFrameTargets": true,
                         "blackboardCategory": "Guard",
                         "cameraOffset": [
-                            0.9,
-                            0.025,
-                            0.55
+                            0.8999999761581421,
+                            0.02500000037252903,
+                            0.550000011920929
                         ],
                         "cameraUp": [
                             0.0,
                             1.0,
                             0.0
                         ],
-                        "enterDuration": 0.13,
+                        "enterDuration": 0.12999999523162842,
                         "focusOffset": [
                             0.0,
                             0.0,
@@ -605,7 +605,12 @@
                         "framingEyeHeight": 1.600000023841858,
                         "framingPadding": 1.2000000476837158,
                         "framingRadius": 1.0,
+                        "holdDollyDistance": 1.399999976158142,
                         "holdDuration": 60.0,
+                        "holdFovDelta": 7.0,
+                        "holdLift": 0.3199999928474426,
+                        "holdMoveDuration": 2.799999952316284,
+                        "holdOrbitDegrees": -27.0,
                         "minimumFramingDistance": 8.0,
                         "positionMode": "WORLD_POSITION",
                         "priority": 110,
@@ -623,12 +628,7 @@
                         "useExternalFov": false,
                         "useFramingEyeHeight": false,
                         "useModelBounds": true,
-                        "useUnscaledTime": true,
-                        "holdMoveDuration": 2.8,
-                        "holdOrbitDegrees": -27.0,
-                        "holdDollyDistance": 1.4,
-                        "holdLift": 0.32,
-                        "holdFovDelta": 7.0
+                        "useUnscaledTime": true
                     },
                     {
                         "actionName": "TransitionVortexCollection",
@@ -637,7 +637,7 @@
                         "blackboardCategory": "Guard",
                         "cameraOffset": [
                             -0.75,
-                            0.06,
+                            0.05999999865889549,
                             -1.0
                         ],
                         "cameraUp": [
@@ -645,7 +645,7 @@
                             1.0,
                             0.0
                         ],
-                        "enterDuration": 0.26,
+                        "enterDuration": 0.25999999046325684,
                         "focusOffset": [
                             0.0,
                             0.0,
@@ -655,7 +655,12 @@
                         "framingEyeHeight": 1.600000023841858,
                         "framingPadding": 1.149999976158142,
                         "framingRadius": 7.0,
+                        "holdDollyDistance": -1.2999999523162842,
                         "holdDuration": 60.0,
+                        "holdFovDelta": -8.0,
+                        "holdLift": 1.5,
+                        "holdMoveDuration": 3.0,
+                        "holdOrbitDegrees": 27.0,
                         "minimumFramingDistance": 3.0,
                         "positionMode": "WORLD_POSITION",
                         "priority": 110,
@@ -673,12 +678,7 @@
                         "useExternalFov": false,
                         "useFramingEyeHeight": false,
                         "useModelBounds": false,
-                        "useUnscaledTime": true,
-                        "holdMoveDuration": 3.0,
-                        "holdOrbitDegrees": 27.0,
-                        "holdDollyDistance": -1.3,
-                        "holdLift": 1.5,
-                        "holdFovDelta": -8.0
+                        "useUnscaledTime": true
                     },
                     {
                         "actionName": "TransitionFormationFeet",
@@ -686,8 +686,8 @@
                         "autoFrameTargets": true,
                         "blackboardCategory": "Guard",
                         "cameraOffset": [
-                            0.63,
-                            -0.04,
+                            0.6299999952316284,
+                            -0.03999999910593033,
                             -1.0
                         ],
                         "cameraUp": [
@@ -695,7 +695,7 @@
                             1.0,
                             0.0
                         ],
-                        "enterDuration": 0.04,
+                        "enterDuration": 0.03999999910593033,
                         "focusOffset": [
                             0.0,
                             0.4000000059604645,
@@ -705,7 +705,12 @@
                         "framingEyeHeight": 1.600000023841858,
                         "framingPadding": 1.149999976158142,
                         "framingRadius": 0.699999988079071,
+                        "holdDollyDistance": -0.23000000417232513,
                         "holdDuration": 60.0,
+                        "holdFovDelta": -4.0,
+                        "holdLift": 0.23000000417232513,
+                        "holdMoveDuration": 1.350000023841858,
+                        "holdOrbitDegrees": 21.0,
                         "minimumFramingDistance": 3.0,
                         "positionMode": "WORLD_POSITION",
                         "priority": 110,
@@ -723,12 +728,7 @@
                         "useExternalFov": false,
                         "useFramingEyeHeight": false,
                         "useModelBounds": false,
-                        "useUnscaledTime": true,
-                        "holdMoveDuration": 1.35,
-                        "holdOrbitDegrees": 21.0,
-                        "holdDollyDistance": -0.23,
-                        "holdLift": 0.23,
-                        "holdFovDelta": -4.0
+                        "useUnscaledTime": true
                     },
                     {
                         "actionName": "TransitionFormationFace",
@@ -736,8 +736,8 @@
                         "autoFrameTargets": true,
                         "blackboardCategory": "Guard",
                         "cameraOffset": [
-                            0.95,
-                            0.018,
+                            0.949999988079071,
+                            0.017999999225139618,
                             -1.0
                         ],
                         "cameraUp": [
@@ -745,17 +745,22 @@
                             1.0,
                             0.0
                         ],
-                        "enterDuration": 0.06,
+                        "enterDuration": 0.05999999865889549,
                         "focusOffset": [
                             0.0,
-                            1.52,
+                            1.5199999809265137,
                             0.0
                         ],
                         "focusPositionKey": "Position",
                         "framingEyeHeight": 1.600000023841858,
                         "framingPadding": 1.149999976158142,
                         "framingRadius": 0.550000011920929,
+                        "holdDollyDistance": -0.41999998688697815,
                         "holdDuration": 60.0,
+                        "holdFovDelta": -5.0,
+                        "holdLift": 0.10999999940395355,
+                        "holdMoveDuration": 1.059999942779541,
+                        "holdOrbitDegrees": -20.0,
                         "minimumFramingDistance": 2.25,
                         "positionMode": "WORLD_POSITION",
                         "priority": 110,
@@ -773,12 +778,7 @@
                         "useExternalFov": false,
                         "useFramingEyeHeight": false,
                         "useModelBounds": false,
-                        "useUnscaledTime": true,
-                        "holdMoveDuration": 1.06,
-                        "holdOrbitDegrees": -20.0,
-                        "holdDollyDistance": -0.42,
-                        "holdLift": 0.11,
-                        "holdFovDelta": -5.0
+                        "useUnscaledTime": true
                     },
                     {
                         "actionName": "TransitionFormationFull",
@@ -786,8 +786,8 @@
                         "autoFrameTargets": true,
                         "blackboardCategory": "Guard",
                         "cameraOffset": [
-                            0.55,
-                            0.07,
+                            0.550000011920929,
+                            0.07000000029802322,
                             -1.0
                         ],
                         "cameraUp": [
@@ -795,7 +795,7 @@
                             1.0,
                             0.0
                         ],
-                        "enterDuration": 0.19,
+                        "enterDuration": 0.1899999976158142,
                         "focusOffset": [
                             0.0,
                             0.0,
@@ -805,7 +805,12 @@
                         "framingEyeHeight": 1.600000023841858,
                         "framingPadding": 1.149999976158142,
                         "framingRadius": 1.0,
+                        "holdDollyDistance": 1.100000023841858,
                         "holdDuration": 60.0,
+                        "holdFovDelta": 5.0,
+                        "holdLift": -0.17000000178813934,
+                        "holdMoveDuration": 1.0,
+                        "holdOrbitDegrees": -28.0,
                         "minimumFramingDistance": 5.0,
                         "positionMode": "WORLD_POSITION",
                         "priority": 110,
@@ -823,12 +828,7 @@
                         "useExternalFov": false,
                         "useFramingEyeHeight": false,
                         "useModelBounds": true,
-                        "useUnscaledTime": true,
-                        "holdMoveDuration": 1.0,
-                        "holdOrbitDegrees": -28.0,
-                        "holdDollyDistance": 1.1,
-                        "holdLift": -0.17,
-                        "holdFovDelta": 5.0
+                        "useUnscaledTime": true
                     },
                     {
                         "actionName": "TransitionSwordStrike",
@@ -837,15 +837,15 @@
                         "blackboardCategory": "Guard",
                         "cameraOffset": [
                             1.0,
-                            0.05,
-                            0.48
+                            0.05000000074505806,
+                            0.47999998927116394
                         ],
                         "cameraUp": [
                             0.0,
                             1.0,
                             0.0
                         ],
-                        "enterDuration": 0.1,
+                        "enterDuration": 0.10000000149011612,
                         "focusOffset": [
                             0.0,
                             0.0,
@@ -855,7 +855,12 @@
                         "framingEyeHeight": 1.600000023841858,
                         "framingPadding": 1.2000000476837158,
                         "framingRadius": 1.0,
+                        "holdDollyDistance": -0.44999998807907104,
                         "holdDuration": 60.0,
+                        "holdFovDelta": -5.0,
+                        "holdLift": 0.2199999988079071,
+                        "holdMoveDuration": 0.5099999904632568,
+                        "holdOrbitDegrees": -20.0,
                         "minimumFramingDistance": 8.0,
                         "positionMode": "WORLD_POSITION",
                         "priority": 110,
@@ -873,12 +878,7 @@
                         "useExternalFov": false,
                         "useFramingEyeHeight": false,
                         "useModelBounds": true,
-                        "useUnscaledTime": true,
-                        "holdMoveDuration": 0.51,
-                        "holdOrbitDegrees": -20.0,
-                        "holdDollyDistance": -0.45,
-                        "holdLift": 0.22,
-                        "holdFovDelta": -5.0
+                        "useUnscaledTime": true
                     },
                     {
                         "actionName": "TransitionSwordStrikeSecond",
@@ -887,15 +887,15 @@
                         "blackboardCategory": "Guard",
                         "cameraOffset": [
                             1.0,
-                            0.09,
-                            -0.46
+                            0.09000000357627869,
+                            -0.46000000834465027
                         ],
                         "cameraUp": [
                             0.0,
                             1.0,
                             0.0
                         ],
-                        "enterDuration": 0.08,
+                        "enterDuration": 0.07999999821186066,
                         "focusOffset": [
                             0.0,
                             0.0,
@@ -905,8 +905,13 @@
                         "framingEyeHeight": 1.600000023841858,
                         "framingPadding": 1.2000000476837158,
                         "framingRadius": 1.0,
+                        "holdDollyDistance": -0.46000000834465027,
                         "holdDuration": 60.0,
-                        "minimumFramingDistance": 7.2,
+                        "holdFovDelta": -4.0,
+                        "holdLift": -0.1899999976158142,
+                        "holdMoveDuration": 0.5099999904632568,
+                        "holdOrbitDegrees": 21.0,
+                        "minimumFramingDistance": 7.199999809265137,
                         "positionMode": "WORLD_POSITION",
                         "priority": 110,
                         "returnDuration": 1.0,
@@ -923,12 +928,7 @@
                         "useExternalFov": false,
                         "useFramingEyeHeight": false,
                         "useModelBounds": true,
-                        "useUnscaledTime": true,
-                        "holdMoveDuration": 0.51,
-                        "holdOrbitDegrees": 21.0,
-                        "holdDollyDistance": -0.46,
-                        "holdLift": -0.19,
-                        "holdFovDelta": -4.0
+                        "useUnscaledTime": true
                     },
                     {
                         "actionName": "TransitionSwordStrikeThird",
@@ -937,15 +937,15 @@
                         "blackboardCategory": "Guard",
                         "cameraOffset": [
                             1.0,
-                            0.08,
-                            0.54
+                            0.07999999821186066,
+                            0.5400000214576721
                         ],
                         "cameraUp": [
                             0.0,
                             1.0,
                             0.0
                         ],
-                        "enterDuration": 0.09,
+                        "enterDuration": 0.09000000357627869,
                         "focusOffset": [
                             0.0,
                             0.0,
@@ -955,8 +955,13 @@
                         "framingEyeHeight": 1.600000023841858,
                         "framingPadding": 1.2000000476837158,
                         "framingRadius": 1.0,
+                        "holdDollyDistance": 1.0399999618530273,
                         "holdDuration": 60.0,
-                        "minimumFramingDistance": 7.4,
+                        "holdFovDelta": 7.0,
+                        "holdLift": 0.4099999964237213,
+                        "holdMoveDuration": 1.6299999952316284,
+                        "holdOrbitDegrees": -22.0,
+                        "minimumFramingDistance": 7.400000095367432,
                         "positionMode": "WORLD_POSITION",
                         "priority": 110,
                         "returnDuration": 1.0,
@@ -973,12 +978,7 @@
                         "useExternalFov": false,
                         "useFramingEyeHeight": false,
                         "useModelBounds": true,
-                        "useUnscaledTime": true,
-                        "holdMoveDuration": 1.63,
-                        "holdOrbitDegrees": -22.0,
-                        "holdDollyDistance": 1.04,
-                        "holdLift": 0.41,
-                        "holdFovDelta": 7.0
+                        "useUnscaledTime": true
                     }
                 ]
             },
@@ -995,13 +995,13 @@
                 "presets": [
                     {
                         "actionName": "IntroRoarShake",
-                        "duration": 1.04,
+                        "duration": 1.0399999618530273,
                         "fadeInRate": 0.07999999821186066,
                         "fadeOutRate": 0.699999988079071,
                         "frequency": 11.0,
-                        "positionStrength": 0.15,
+                        "positionStrength": 0.15000000596046448,
                         "priority": 100,
-                        "rotationStrength": 0.85,
+                        "rotationStrength": 0.8500000238418579,
                         "useUnscaledTime": true
                     },
                     {
@@ -1017,13 +1017,13 @@
                     },
                     {
                         "actionName": "TransitionClashShake",
-                        "duration": 0.14,
+                        "duration": 0.14000000059604645,
                         "fadeInRate": 0.0,
                         "fadeOutRate": 0.699999988079071,
                         "frequency": 26.0,
-                        "positionStrength": 0.064,
+                        "positionStrength": 0.06400000303983688,
                         "priority": 110,
-                        "rotationStrength": 0.65,
+                        "rotationStrength": 0.6499999761581421,
                         "useUnscaledTime": true
                     },
                     {

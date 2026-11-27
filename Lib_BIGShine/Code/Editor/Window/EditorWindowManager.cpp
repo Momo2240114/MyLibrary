@@ -158,6 +158,11 @@ void EditorWindowManager::DrawSceneView()
                 cursorPos_.x + (available_.x - imageSize_.x) * 0.5f,
                 cursorPos_.y + (available_.y - imageSize_.y) * 0.5f));
             ImGui::Image(reinterpret_cast<void*>(sceneSRV_), imageSize_);
+            if (gameObjectManager && !gameObjectManager->IsGameMenuPaused())
+            {
+                gameObjectManager->GetGameModeManager()->DrawSkipPrompt(*ImGui::GetWindowDrawList(),
+                    ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
+            }
             if (gameObjectManager && gameObjectManager->SupportsEditorPlayMode() &&
                 gameObjectManager->GetEditorPlayMode() == EditorPlayMode::PLAY &&
                 ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left))

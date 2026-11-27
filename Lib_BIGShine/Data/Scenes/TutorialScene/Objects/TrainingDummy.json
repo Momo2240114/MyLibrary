@@ -1,36 +1,109 @@
 {
-    "Name": "TrainingDummy",
-    "ParentName": "",
-    "Layer": 2,
+    "ColliderComponents": [
+        {
+            "Data": {
+                "CanBeCharacterGround": false,
+                "ColliderName": "TrainingDummyBody",
+                "CollisionOwnerObjectName": "",
+                "CollisionRole": 3,
+                "ContainmentMode": 0,
+                "DamageMultiplier": 1.0,
+                "DebugPrimitiveColor": [
+                    0.20000000298023224,
+                    1.0,
+                    0.30000001192092896,
+                    1.0
+                ],
+                "EndNodeName": "",
+                "GravityScale": 1.0,
+                "HalfHeight": 1.149999976158142,
+                "HurtTag": "Body",
+                "InvincibilityDuration": 0.07999999821186066,
+                "IsStatic": false,
+                "IsTrigger": true,
+                "Mass": 0.0,
+                "NodeModelObjectName": "",
+                "NodeSegmentScale": 1.0,
+                "Offset": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "PhysicsControlsTransform": false,
+                "Radius": 1.6299999952316284,
+                "RotateVelocityThreshold": 0.0010000000474974513,
+                "ShapeRenderFlg": true,
+                "StartNodeName": "",
+                "SyncCharacterColliderShape": false,
+                "UseGravity": false,
+                "UsePhysicsResponse": false,
+                "VelocityRotationMode": 0,
+                "shapeSizeScale": 1.0
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "HurtBox",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        }
+    ],
     "CollisionMask": 0,
-    "RequiredForSceneStart": true,
-    "Transform": {
-        "Pos": [
-            0.0,
-            0.14,
-            0.0
-        ],
-        "Rot": [
-            0.0,
-            180.0,
-            0.0
-        ],
-        "Scale": [
-            1.0,
-            1.0,
-            1.0
-        ]
-    },
     "Components": [
         {
             "Data": {
-                "LocalScale": 0.8,
+                "LocalScale": 1.5,
                 "LocalScaleXYZ": [
-                    0.8,
-                    0.8,
-                    0.8
+                    1.5,
+                    1.5,
+                    1.5
                 ],
-                "MaterialOverrides": [],
+                "MaterialOverrides": [
+                    {
+                        "alphaCutoff": 0.5,
+                        "alphaMode": 0,
+                        "baseColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "disableOutline": false,
+                        "emissiveColor": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "id": 0,
+                        "metalness": 1.0,
+                        "name": "dummy",
+                        "normalScale": 1.0,
+                        "occlusionStrength": 1.0,
+                        "outlineThicknessOffset": 1.0,
+                        "rimStrength": 0.05999999865889549,
+                        "roughness": 1.0,
+                        "shaderId": 3,
+                        "shadowTint": [
+                            0.3824999928474426,
+                            0.414000004529953,
+                            0.44999998807907104
+                        ],
+                        "specularStrength": 1.0,
+                        "specularToonBlend": 0.25,
+                        "toonPbrBlend": 0.5,
+                        "uvAddressMode": 0,
+                        "uvOffset": [
+                            0.0,
+                            0.0
+                        ],
+                        "uvRotation": 0.0,
+                        "uvScale": [
+                            1.0,
+                            1.0
+                        ]
+                    }
+                ],
                 "ModelName": "./Data/Model/Dummy/scene.gltf",
                 "OutlineColor": [
                     0.019999999552965164,
@@ -65,7 +138,7 @@
                 "LockOnEnabled": true,
                 "Offset": [
                     0.0,
-                    1.6,
+                    1.600000023841858,
                     0.0
                 ],
                 "Priority": 1.0
@@ -79,54 +152,25 @@
             "UpdatePriority": 20
         }
     ],
-    "ColliderComponents": [
-        {
-            "Data": {
-                "CanBeCharacterGround": false,
-                "ColliderName": "TrainingDummyBody",
-                "CollisionOwnerObjectName": "",
-                "CollisionRole": 3,
-                "ContainmentMode": 0,
-                "DamageMultiplier": 1.0,
-                "DebugPrimitiveColor": [
-                    0.20000000298023224,
-                    1.0,
-                    0.30000001192092896,
-                    1.0
-                ],
-                "EndNodeName": "",
-                "GravityScale": 1.0,
-                "HalfHeight": 0.9,
-                "HurtTag": "Body",
-                "InvincibilityDuration": 0.07999999821186066,
-                "IsStatic": false,
-                "IsTrigger": true,
-                "Mass": 0.0,
-                "NodeModelObjectName": "",
-                "NodeSegmentScale": 1.0,
-                "Offset": [
-                    0.0,
-                    1.58,
-                    0.0
-                ],
-                "PhysicsControlsTransform": false,
-                "Radius": 0.84,
-                "RotateVelocityThreshold": 0.0010000000474974513,
-                "ShapeRenderFlg": false,
-                "StartNodeName": "",
-                "SyncCharacterColliderShape": false,
-                "UseGravity": false,
-                "UsePhysicsResponse": false,
-                "VelocityRotationMode": 0,
-                "shapeSizeScale": 1.0
-            },
-            "Enabled": true,
-            "LateUpdateEnabled": true,
-            "LateUpdatePriority": 0,
-            "RequiredForSceneStart": false,
-            "TypeName": "HurtBox",
-            "UpdateEnabled": true,
-            "UpdatePriority": 0
-        }
-    ]
+    "Layer": 2,
+    "Name": "TrainingDummy",
+    "ParentName": "",
+    "RequiredForSceneStart": true,
+    "Transform": {
+        "Pos": [
+            0.0,
+            0.14000000059604645,
+            0.0
+        ],
+        "Rot": [
+            0.0,
+            -180.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
 }

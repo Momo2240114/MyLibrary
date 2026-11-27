@@ -186,7 +186,8 @@ void SceneBase::Update(float elapsedTime)
 
 	const bool workspacePaused_ = isEditorVisible && editorWindowManager && editorWindowManager->ShouldPauseScene();
 	_GameObjectManager->SetEditorWorkspacePaused(workspacePaused_);
-	if (_GameObjectManager->SupportsEditorPlayMode() && ImGui::IsKeyPressed(ImGuiKey_Escape, false))
+	if (_GameObjectManager->SupportsEditorPlayMode() && ImGui::IsKeyPressed(ImGuiKey_Escape, false) &&
+        !(_GameObjectManager->IsPlayInputCaptured() && _GameObjectManager->GetGameModeManager()->CanSkipPresentation()))
 	{
 		// Escでカーソルを解放し、実行中でも停止ボタンを操作できるようにする。
 		_GameObjectManager->SetPlayInputCaptured(false);
@@ -227,7 +228,7 @@ void SceneBase::Render(float elapsedTime)
         _GameObjectManager->GetCameraManager()->GetEditorCamera() : nullptr;
     _GameObjectManager->RenderAll(m_SpriteRenderSystem, m_ModelRenderSystem, finalRenderTargetView_, editorCamera_.get(), isLoadingPresentation);
 
-    if (_GameObjectManager->IsCinematicSequencePreview())
+    if (_GameObjectManager->IsCinematicSequencePreview() || _GameObjectManager->GetGameModeManager()->CanSkipPresentation())
 	{
 		ScreenTransitionManager::Instance().Render(finalRenderTargetView_);
 	}
@@ -275,6 +276,14 @@ void SceneBase::DrawGUI()
 			ImGui::End();
 		}
 	}
+
+    if (_GameObjectManager && !_GameObjectManager->IsGameMenuPaused() &&
+        !(isEditorVisible && editorWindowManager && editorWindowManager->ShouldUseDockedSceneView()))
+    {
+        const auto viewport_ = ImGui::GetMainViewport();
+        _GameObjectManager->GetGameModeManager()->DrawSkipPrompt(*ImGui::GetForegroundDrawList(viewport_),
+            viewport_->Pos, ImVec2(viewport_->Pos.x + viewport_->Size.x, viewport_->Pos.y + viewport_->Size.y));
+    }
 
 	if(isEditorVisible && editorWindowManager)
 	{

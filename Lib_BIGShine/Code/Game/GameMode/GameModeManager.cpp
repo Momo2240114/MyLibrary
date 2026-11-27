@@ -11,6 +11,9 @@
 #include "Game/AI/Human/HumanBossAIComponent.h"
 #include "Game/AI/Human/HumanBossActionComponent.h"
 
+#include "Engine/GamePlay/Input/KeyConfig.h"
+#include "Engine/Graphics/Core/GraphicsDeviceManager.h"
+#include <imgui.h>
 #include <cmath>
 
 namespace
@@ -24,6 +27,7 @@ namespace
     constexpr const char* ACTION_BEGIN_PHASE_2_INTRO = "GameMode.BeginPhase2Intro";
     constexpr const char* ACTION_BEGIN_BOSS_DEFEATED = "GameMode.BeginBossDefeated";
 
+    constexpr float SKIP_HOLD_SECONDS = 1.0f;
     constexpr const char* SEQUENCE_BOSS_INTRO = "BossIntro";
     constexpr const char* SEQUENCE_PHASE_1_DEFEAT = "Phase1Defeat";
     constexpr const char* SEQUENCE_PHASE_2_INTRO = "Phase2Intro";
@@ -47,8 +51,79 @@ void GameModeManager::Update(float deltaTime_, GameObjectManager& manager_)
         battleResult.elapsedSeconds += deltaTime_;
     }
 
+    const bool acceptsInput_ = !manager_.SupportsEditorPlayMode() || manager_.IsPlayInputCaptured();
+    if (CanSkipPresentation() && acceptsInput_ &&
+        GetForegroundWindow() == GraphicsDeviceManager::Instance().GetWindowHandle() &&
+        (KeyInput::KeyPressed(VK_ESCAPE) || ControllerInput::Instance().ButtonPressed(PadCode::Y)))
+    {
+        skipHoldSeconds += (std::max)(0.0f, deltaTime_);
+        if (skipHoldSeconds >= SKIP_HOLD_SECONDS)
+        {
+            skipHoldSeconds = 0.0f;
+            if (currentSequenceName == SEQUENCE_BOSS_INTRO)
+            {
+                RequestSequence("BossIntroBattleResume");
+            }
+            else
+            {
+                ActionRegistry::Instance().Call("GameMode.SkipPhaseTransition");
+            }
+        }
+    }
+    else
+    {
+        skipHoldSeconds = 0.0f;
+    }
+
     TryStartRequestedSequence();
     WriteBlackboard();
+}
+
+bool GameModeManager::CanSkipPresentation() const
+{
+    return !cinematicPreview && !phaseTransitionPreview &&
+        (currentSequenceName == SEQUENCE_BOSS_INTRO || currentSequenceName == SEQUENCE_PHASE_1_DEFEAT ||
+            currentSequenceName == SEQUENCE_PHASE_2_INTRO);
+}
+
+void GameModeManager::DrawSkipPrompt(ImDrawList& draw_, const ImVec2& minimum_, const ImVec2& maximum_) const
+{
+    if (!CanSkipPresentation())
+    {
+        return;
+    }
+
+    const float scale_ = (std::min)((maximum_.x - minimum_.x) / 1280.0f, (maximum_.y - minimum_.y) / 720.0f);
+    const char* label_ = IM_U8("長押しでスキップ");
+    const float fontSize_ = 18.0f * scale_;
+    const auto font_ = ImGui::GetFont();
+    const float width_ = font_->CalcTextSizeA(fontSize_, FLT_MAX, 0.0f, label_).x;
+    const ImVec2 center_(maximum_.x - width_ - 58.0f * scale_, maximum_.y - 40.0f * scale_);
+    const float radius_ = 20.0f * scale_;
+    draw_.AddRectFilled(ImVec2(center_.x - radius_ - 6.0f * scale_, center_.y - radius_ - 4.0f * scale_),
+        ImVec2(maximum_.x - 16.0f * scale_, center_.y + radius_ + 4.0f * scale_), IM_COL32(0, 0, 0, 175), radius_);
+    draw_.AddText(font_, fontSize_, ImVec2(center_.x + radius_ + 8.0f * scale_, center_.y - fontSize_ * 0.5f),
+        IM_COL32_WHITE, label_);
+    draw_.AddCircle(center_, radius_, IM_COL32(255, 255, 255, 90), 64, 2.0f * scale_);
+    const auto device_ = KeyConfig::Instance().GetActiveDevice();
+    if (device_ == InputDisplayDevice::PLAYSTATION_PAD)
+    {
+        draw_.AddTriangle(ImVec2(center_.x, center_.y - 9.0f * scale_),
+            ImVec2(center_.x + 10.0f * scale_, center_.y + 8.0f * scale_),
+            ImVec2(center_.x - 10.0f * scale_, center_.y + 8.0f * scale_), IM_COL32_WHITE, 2.0f * scale_);
+    }
+    else
+    {
+        const char* key_ = device_ == InputDisplayDevice::KEYBOARD_MOUSE ? "Esc" : "Y";
+        const float keyWidth_ = font_->CalcTextSizeA(fontSize_, FLT_MAX, 0.0f, key_).x;
+        draw_.AddText(font_, fontSize_, ImVec2(center_.x - keyWidth_ * 0.5f, center_.y - fontSize_ * 0.5f), IM_COL32_WHITE, key_);
+    }
+    if (skipHoldSeconds > 0.0f)
+    {
+        const float angle_ = DirectX::XM_2PI * skipHoldSeconds / SKIP_HOLD_SECONDS;
+        draw_.PathArcTo(center_, radius_, -DirectX::XM_PIDIV2, angle_ - DirectX::XM_PIDIV2, 64);
+        draw_.PathStroke(IM_COL32_WHITE, 0, 3.0f * scale_);
+    }
 }
 
 bool GameModeManager::IsBattleResultTracking() const
@@ -144,6 +219,7 @@ void GameModeManager::ResetBattleState()
     presentationPlaying = false;
     battlePaused = false;
 
+    skipHoldSeconds = 0.0f;
     currentGameState = GameProgressState::GAME_SCENE_START;
     currentSequenceName.clear();
     sequenceStartRequested = false;

@@ -13661,8 +13661,58 @@
                             {
                                 "animationState": "",
                                 "blackboardWrites": [],
-                                "cat": "ObjectDelete",
-                                "name": "PhaseTransition_CleanupEffects",
+                                "cat": "ActorPresentation",
+                                "name": "PlayerModel_PlayerPresentation_Reset",
+                                "time": 0.0,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "ActorPresentation",
+                                "name": "PhaseTransition_CloseHitBoxes",
+                                "time": 0.0,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "ActorPresentation",
+                                "name": "PhaseTransition_FreezePlayerModel",
+                                "time": 0.0,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "ActorPresentation",
+                                "name": "PhaseTransition_FreezeWeapon",
+                                "time": 0.0,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "ActorPresentation",
+                                "name": "PhaseTransition_FreezeShield",
+                                "time": 0.0,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "Camera",
+                                "name": "LockOn_Disable",
                                 "time": 0.0,
                                 "useNormalizedTime": false,
                                 "waitForObject": "",
@@ -13686,6 +13736,26 @@
                                 "time": 0.0,
                                 "useNormalizedTime": false,
                                 "waitForObject": "HumanBoss",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "ActorPresentation",
+                                "name": "PhaseTransition_MeshStopWeapon",
+                                "time": 0.0,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "ActorPresentation",
+                                "name": "PhaseTransition_MeshStopHumanBossWeapon",
+                                "time": 0.05000000074505806,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
                                 "waitForScreenCovered": false
                             },
                             {
@@ -13762,17 +13832,17 @@
                                 "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "ActorPresentation",
-                                "name": "PhaseTransition_PlaceHuman",
+                                "name": "PhaseTransition_PlacePlayer",
                                 "time": 0.05000000074505806,
                                 "useNormalizedTime": false,
                                 "waitForObject": "",
-                                "waitForScreenCovered": false
+                                "waitForScreenCovered": true
                             },
                             {
                                 "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "ActorPresentation",
-                                "name": "PhaseTransition_HumanFacePlayer",
+                                "name": "PhaseTransition_PlaceHuman",
                                 "time": 0.05000000074505806,
                                 "useNormalizedTime": false,
                                 "waitForObject": "",
@@ -13792,8 +13862,8 @@
                                 "animationState": "",
                                 "blackboardWrites": [],
                                 "cat": "ActorPresentation",
-                                "name": "PhaseTransition_RecoveryPlayer",
-                                "time": 0.05999999865889549,
+                                "name": "PhaseTransition_HumanFacePlayer",
+                                "time": 0.07000000029802322,
                                 "useNormalizedTime": false,
                                 "waitForObject": "",
                                 "waitForScreenCovered": false
@@ -13803,6 +13873,46 @@
                                 "blackboardWrites": [],
                                 "cat": "ActorPresentation",
                                 "name": "PhaseTransition_PlayerFaceHuman",
+                                "time": 0.07000000029802322,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "ActorPresentation",
+                                "name": "PhaseTransition_Knockback",
+                                "time": 0.07000000029802322,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "ActorPresentation",
+                                "name": "PhaseTransition_FinishMovement",
+                                "time": 0.07000000029802322,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "ActorPresentation",
+                                "name": "PhaseTransition_RetreatHuman",
+                                "time": 0.07000000029802322,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "ActorPresentation",
+                                "name": "PhaseTransition_FinishMovement",
                                 "time": 0.07000000029802322,
                                 "useNormalizedTime": false,
                                 "waitForObject": "",
@@ -13891,16 +14001,6 @@
                             {
                                 "animationState": "",
                                 "blackboardWrites": [],
-                                "cat": "ActorPresentation",
-                                "name": "PhaseTransition_Music",
-                                "time": 0.10000000149011612,
-                                "useNormalizedTime": false,
-                                "waitForObject": "",
-                                "waitForScreenCovered": false
-                            },
-                            {
-                                "animationState": "",
-                                "blackboardWrites": [],
                                 "cat": "Camera",
                                 "name": "EventCamera_RestorePriority",
                                 "time": 0.10000000149011612,
@@ -13913,6 +14013,16 @@
                                 "blackboardWrites": [],
                                 "cat": "CameraAction",
                                 "name": "EventCamera_ReturnToGameplay",
+                                "time": 0.10000000149011612,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "ActorPresentation",
+                                "name": "PhaseTransition_Music",
                                 "time": 0.10000000149011612,
                                 "useNormalizedTime": false,
                                 "waitForObject": "",

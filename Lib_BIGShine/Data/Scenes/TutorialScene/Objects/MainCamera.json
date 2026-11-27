@@ -25,7 +25,7 @@
                 "PhysicsControlsTransform": true,
                 "Radius": 0.0,
                 "RotateVelocityThreshold": 0.0010000000474974513,
-                "ShapeRenderFlg": false,
+                "ShapeRenderFlg": true,
                 "UseGravity": false,
                 "UsePhysicsResponse": true,
                 "VelocityRotationMode": 0,
@@ -48,22 +48,22 @@
                 "eventPriority": 8,
                 "eye": [
                     0.0,
-                    2.16,
-                    -17.48
+                    2.1600000858306885,
+                    -17.479999542236328
                 ],
                 "farZ": 1000.0,
                 "focus": [
                     0.0,
-                    1.5,
-                    -8.0
+                    2.2297565937042236,
+                    -16.48243522644043
                 ],
                 "fovY": 60.0,
                 "nearZ": 0.10000000149011612,
                 "priority": 0,
                 "up": [
                     0.0,
-                    1.0,
-                    0.0
+                    0.997563898563385,
+                    -0.06975645571947098
                 ],
                 "useEventPriority": false
             },
@@ -513,8 +513,8 @@
     "Transform": {
         "Pos": [
             0.0,
-            2.16,
-            -17.48
+            2.1600000858306885,
+            -17.479999542236328
         ],
         "Rot": [
             -4.0,

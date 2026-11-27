@@ -53,8 +53,8 @@
                     0.0
                 ],
                 "CatSize": [
-                    450.0,
-                    66.0
+                    456.0,
+                    81.0
                 ],
                 "Color": [
                     1.0,
@@ -64,8 +64,8 @@
                 ],
                 "LinearSampling": true,
                 "LocalSize": [
-                    450.0,
-                    66.0
+                    456.0,
+                    81.0
                 ],
                 "SdrTexture": true,
                 "ShaderID": 0,
@@ -92,7 +92,7 @@
                 ],
                 "FontPath": "Data/Font/NotoSansJP-Regular.otf",
                 "FontSize": 24.0,
-                "FontStrokeWidth": 1.2,
+                "FontStrokeWidth": 1.2000000476837158,
                 "HorizontalAlign": "RIGHT",
                 "MaxWidth": 450.0,
                 "Padding": 3.0,

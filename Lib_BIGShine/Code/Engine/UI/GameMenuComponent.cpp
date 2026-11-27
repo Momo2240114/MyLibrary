@@ -91,8 +91,9 @@ void GameMenuComponent::UpdateUnscaled(float deltaTime_)
         return;
     }
     const bool focused_ = GetForegroundWindow() == GraphicsDeviceManager::Instance().GetWindowHandle();
+    const bool skipKey_ = !active && toggleKey == VK_ESCAPE && GetManager().GetGameModeManager()->CanSkipPresentation();
     const bool toggle_ = focused_ && !ScreenTransitionManager::Instance().IsInputBlocked() &&
-        (KeyInput::KeyPressedIn(toggleKey) || ControllerInput::Instance().ButtonPressedIn(PadCode::BACK));
+        ((!skipKey_ && KeyInput::KeyPressedIn(toggleKey)) || ControllerInput::Instance().ButtonPressedIn(PadCode::BACK));
     if (!active)
     {
         if (toggle_ && !GetManager().IsPlayerDeathActive() && !GetManager().IsBossFinishActive())
