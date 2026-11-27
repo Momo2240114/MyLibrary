@@ -25,7 +25,7 @@ public:
     // 死亡演出の暗転も通常UIと同じ描画経路へ提出する。
     void DrawBackdrop(SpriteRenderSystem& sprites_, float alpha_);
     // 決定演出と入力の解放が完了した項目を一度だけ取得する。
-    int TakeResult();
+    int TakeResult(const std::string& releaseInputAction_ = {});
     // ESCなどのキャンセル操作も、再開ボタンと同じ決定演出へ渡す。
     void Confirm(int index_);
     // 既存のCurveアセット形式から、登場と選択の補間値を取得する。

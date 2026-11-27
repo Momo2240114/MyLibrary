@@ -97,6 +97,51 @@ float4 main(VS_OUT input_) : SV_TARGET
         base_ = float4(accumulation_.rgb/max(accumulation_.a,0.00001),accumulation_.a);
     }
     float2 local_ = (uv_-uvRect.xy)/max(uvRect.zw-uvRect.xy,0.00001);
+    [branch]
+    if (detail.z > 0.0)
+    {
+        // 色差の小さい方向を優先し、輪郭を残して筆で置いたような色面にまとめる。
+        float2 canvas_ = local_ * float2(1280, 720);
+        float brushAngle_ = (Noise(canvas_ / 37.0) - 0.5) * 1.4 - 0.28;
+        float2 brushAxis_ = float2(cos(brushAngle_), sin(brushAngle_));
+        float2 brush_ = brushAxis_ * abs(sampling.xy) * 5.5;
+        float2 crossBrush_ = float2(-brushAxis_.y, brushAxis_.x) * abs(sampling.xy) * 3.5;
+        float3 alongA_ = ReadSource(uv_ - brush_).rgb;
+        float3 alongB_ = ReadSource(uv_ + brush_).rgb;
+        float3 acrossA_ = ReadSource(uv_ - crossBrush_).rgb;
+        float3 acrossB_ = ReadSource(uv_ + crossBrush_).rgb;
+        float3 alongDelta_ = abs(alongA_ - base_.rgb) + abs(alongB_ - base_.rgb);
+        float3 acrossDelta_ = abs(acrossA_ - base_.rgb) + abs(acrossB_ - base_.rgb);
+        float3 lumaWeights_ = float3(0.2126, 0.7152, 0.0722);
+        float alongWeight_ = exp2(-20.0 * dot(alongDelta_, lumaWeights_));
+        float acrossWeight_ = exp2(-20.0 * dot(acrossDelta_, lumaWeights_));
+        float3 pigment_ = (base_.rgb + (alongA_ + alongB_) * alongWeight_ +
+            (acrossA_ + acrossB_) * acrossWeight_) / (1.0 + 2.0 * (alongWeight_ + acrossWeight_));
+        float value_ = dot(pigment_, lumaWeights_);
+        pigment_ *= lerp(1.0, round(value_ * 13.0) / max(value_ * 13.0, 0.001), 0.38);
+        float fibers_ = sin(canvas_.x * 2.75) * sin(canvas_.y * 3.1) * 0.014;
+        float grain_ = (Noise(canvas_ * 0.8) - 0.5) * 0.044;
+        float strokes_ = (Noise(canvas_ * float2(0.075, 0.34)) - 0.5) * 0.042;
+        base_.rgb = lerp(base_.rgb, max(pigment_ * float3(1.07, 0.99, 0.88) + fibers_ + grain_ + strokes_, 0.0), detail.z);
+    }
+
+    [branch]
+    if (detail.w > 0.0)
+    {
+        float value_ = dot(base_.rgb, float3(0.2126, 0.7152, 0.0722));
+        float3 crimson_ = float3(1.25, 0.14, 0.24) * pow(max(value_, 0.0), 0.85);
+        float highlight_ = smoothstep(0.24, 0.76, value_);
+        float3 inkColor_ = lerp(lerp(base_.rgb, crimson_, 0.68), base_.rgb * float3(1.14, 0.88, 0.91), highlight_);
+        float2 grainUv_ = float2(local_.x + local_.y * 0.74, local_.y);
+        float tornEdge_ = max((abs(local_.x - 0.48) * 2.0 - 0.55) * 1.25, (local_.y - 0.65) * 1.8);
+        tornEdge_ += (Noise(grainUv_ * float2(38, 8)) - 0.5) * 0.32;
+        tornEdge_ += (Noise(grainUv_ * float2(132, 28)) - 0.5) * 0.11;
+        float border_ = smoothstep(0.19, 0.48, tornEdge_);
+        float edgeLight_ = smoothstep(0.23, 0.33, tornEdge_) * (1.0 - smoothstep(0.34, 0.50, tornEdge_));
+        inkColor_ = lerp(inkColor_, float3(0.012, 0.002, 0.009), border_ * 0.96);
+        inkColor_ += float3(0.82, 0.028, 0.095) * edgeLight_ * Noise(grainUv_ * float2(75, 13)) * 0.42;
+        base_.rgb = lerp(base_.rgb, inkColor_, detail.w);
+    }
     base_.rgb *= input_.color.rgb;
     base_.rgb *= lerp(1,lerp(gradientTop.rgb,gradientBottom.rgb,saturate(local_.y)),sampling.w);
     float luminance_ = dot(base_.rgb,float3(0.2126,0.7152,0.0722));

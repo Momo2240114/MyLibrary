@@ -9,7 +9,7 @@
                 "SecondAction": "GoSceneTitle",
                 "SecondLabel": "タイトルへ戻る",
                 "Title": "PAUSED",
-                "ToggleKey": 27
+                "ToggleInputAction": "UI.ToggleGameMenu"
             },
             "Enabled": true,
             "LateUpdateEnabled": true,

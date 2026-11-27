@@ -27,7 +27,9 @@ void main(point VS_OUT input[1], inout TriangleStream<GS_OUT> outStream)
     float3 cameraForward = normalize(cross(right, up));
 
     float lifeRate = saturate(p.parameter.y / max(p.parameter.z, 0.0001f));
-    float size = lerp(p.scale.z, p.scale.x, lifeRate);
+    float age = max(p.parameter.z - p.parameter.y, 0.0f);
+    float sizeProgress = p.scale.w > 0.0f ? saturate(age / max(p.scale.w, 0.0001f)) : 1.0f - lifeRate;
+    float size = lerp(p.scale.x, p.scale.z, sizeProgress);
     float renderType = p.parameter.w;
 
     // Render Type 1: stretched billboard. Velocity direction is used as long axis.

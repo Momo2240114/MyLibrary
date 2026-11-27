@@ -128,7 +128,8 @@ void MenuNavigationComponent::UpdateVisuals()
     const auto settings_ = owner_ ? owner_->GetComponent<TitleSettingsComponent>() : nullptr;
     const float fadeAlpha_ = settings_ && settings_->IsOpen() ? 0.0f :
         fade_ && fade_->IsFadingOut() ? 1.0f - std::clamp(fade_->GetFadeOutTime() / 0.2f, 0.0f, 1.0f) : 1.0f;
-    const auto apply_ = [&](const std::string& name_, float alpha_, float brightness_ = 1.0f)
+    const auto apply_ = [&](const std::string& name_, float alpha_, float brightness_ = 1.0f,
+        const DirectX::XMFLOAT3& tint_ = { 1.0f, 1.0f, 1.0f })
     {
         const auto element_ = GetManager().Find(name_);
         const auto sprite_ = element_ ? element_->GetComponent<SpriteRenderer>() : nullptr;
@@ -137,9 +138,9 @@ void MenuNavigationComponent::UpdateVisuals()
             return;
         }
         auto color_ = sprite_->GetConfiguredColor();
-        color_.x *= brightness_;
-        color_.y *= brightness_;
-        color_.z *= brightness_;
+        color_.x *= brightness_ * tint_.x;
+        color_.y *= brightness_ * tint_.y;
+        color_.z *= brightness_ * tint_.z;
         color_.w *= std::clamp(alpha_, 0.0f, 1.0f);
         sprite_->SetRuntimeColor(color_);
         sprite_->SetRuntimeVisible(color_.w > 0.0f);
@@ -173,7 +174,11 @@ void MenuNavigationComponent::UpdateVisuals()
         {
             effect_->SetRuntimeStrength(0.25f + item_.selection * 0.75f);
         }
-        apply_(item_.labelObject, alpha_, IsSelectable(static_cast<int>(index_)) ? 1.0f + item_.selection * 0.16f : 0.48f);
+        const bool selectable_ = IsSelectable(static_cast<int>(index_));
+        constexpr DirectX::XMFLOAT3 SELECTED_LABEL_TINT{ 1.0f, 0.68f, 0.18f };
+        const DirectX::XMFLOAT3 labelTint_ = selected_ && selectable_
+            ? SELECTED_LABEL_TINT : DirectX::XMFLOAT3{ 1.0f, 1.0f, 1.0f };
+        apply_(item_.labelObject, alpha_, selectable_ ? 1.0f : 0.48f, labelTint_);
         apply_(item_.highlightObject, alpha_ * item_.selection);
         apply_(item_.markerObject, alpha_ * item_.selection);
         apply_(item_.glowObject, alpha_ * item_.selection * pulse_, transitioning && selected_ ? 2.0f : 1.0f);

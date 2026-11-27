@@ -134,6 +134,7 @@ struct MeshVFXPart
     // durationがある場合はパーツ単位の寿命として扱い、loop=falseなら寿命後は描画しない。
     bool loop = true;
     bool animateScale = false;
+    float scaleTransitionDuration = 0.0f;
     DirectX::XMFLOAT3 scaleStart = { 1.0f, 1.0f, 1.0f };
     DirectX::XMFLOAT3 scaleEnd = { 1.0f, 1.0f, 1.0f };
     bool animateAlpha = false;

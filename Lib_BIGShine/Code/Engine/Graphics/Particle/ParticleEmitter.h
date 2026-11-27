@@ -194,14 +194,15 @@ private:
     void BuildEmitList(float dt);
 
     // seedからランダム値を作り、速度・寿命・色などを初期化したEmitParticleDataを返す。
-    EmitParticleData MakeEmitData(UINT seed) const;
+    EmitParticleData MakeEmitData(UINT seed_, UINT colorSeed_) const;
 
     // ParticleHeaderのdepthを使って、GPU上で半透明描画用の順番に並べる。
     void RunBitonicSort(ID3D11DeviceContext* context);
 
     // Compute Shaderで扱いやすいよう、Particle数を内部都合のよい値へ丸める。
     static UINT RoundParticleCount(UINT count);
-    static float Random01(UINT seed);
+    static UINT HashSeed(UINT seed_);
+    static float Random01(UINT seed_);
     static float Lerp(float a, float b, float t);
 
 private:

@@ -4,7 +4,7 @@
 
 #include <algorithm>
 #include <array>
-#include <bit>
+#include <atomic>
 #include <cmath>
 #include <cstring>
 #include <vector>
@@ -376,6 +376,8 @@ void ParticleEmitter::BuildEmitList(float dt)
         return;
     }
 
+    // Poolで再利用されても、同じ粒子番号から色が繰り返されないようにする。
+    static std::atomic_uint nextColorSeed{ 0u };
     if (settings.emissionMode == 1)
     {
         // BurstはGUI/Actionからtriggerが立った瞬間だけ指定数を発生させる。
@@ -383,9 +385,19 @@ void ParticleEmitter::BuildEmitList(float dt)
         {
             UINT count = settings.burstCount > 0 ? settings.burstCount : numEmitParticles;
             count = (std::min)(count, numEmitParticles);
+            const UINT firstColorSeed_ = nextColorSeed.fetch_add(count * 2u, std::memory_order_relaxed);
+            float burstRotation_ = 0.0f;
+            if (settings.randomizeBurstRotation != 0)
+            {
+                static std::atomic_uint nextBurstRotationSeed{ 0u };
+                const UINT burstRotationSeed_ = nextBurstRotationSeed.fetch_add(1u, std::memory_order_relaxed);
+                burstRotation_ = Random01(burstRotationSeed_) * DirectX::XM_2PI;
+            }
             for (UINT i = 0; i < count; ++i)
             {
-                Emit(MakeEmitData(i));
+                auto particle_ = MakeEmitData(i, firstColorSeed_ + i * 2u);
+                particle_.rotation += burstRotation_;
+                Emit(particle_);
             }
         }
         return;
@@ -402,28 +414,29 @@ void ParticleEmitter::BuildEmitList(float dt)
 
     continuousAccumulator -= static_cast<float>(count);
     count = (std::min)(count, numEmitParticles);
+    const UINT firstColorSeed_ = nextColorSeed.fetch_add(count * 2u, std::memory_order_relaxed);
     for (UINT i = 0; i < count; ++i)
     {
-        Emit(MakeEmitData(static_cast<UINT>(settings.time * 1000.0f) + i));
+        Emit(MakeEmitData(static_cast<UINT>(settings.time * 1000.0f) + i, firstColorSeed_ + i * 2u));
     }
 }
 
-EmitParticleData ParticleEmitter::MakeEmitData(UINT seed) const
+EmitParticleData ParticleEmitter::MakeEmitData(UINT seed_, UINT colorSeed_) const
 {
     EmitParticleData data{};
 
     // seedから複数の乱数を作り、位置・速度・寿命・サイズへ別々に使う。
-    float r0 = Random01(seed * 17u + 1u);
-    float r1 = Random01(seed * 17u + 2u);
-    float r2 = Random01(seed * 17u + 3u);
-    float r3 = Random01(seed * 17u + 4u);
-    float r4 = Random01(seed * 17u + 5u);
-    float r5 = Random01(seed * 17u + 6u);
-    float r6 = Random01(seed * 17u + 7u);
-    float r7 = Random01(seed * 17u + 8u);
-    float r8 = Random01(seed * 17u + 9u);
-    float r9 = Random01(seed * 17u + 10u);
-    float r10_ = Random01(seed * 17u + 11u);
+    float r0 = Random01(seed_ * 17u + 1u);
+    float r1 = Random01(seed_ * 17u + 2u);
+    float r2 = Random01(seed_ * 17u + 3u);
+    float r3 = Random01(seed_ * 17u + 4u);
+    float r4 = Random01(seed_ * 17u + 5u);
+    float r5 = Random01(seed_ * 17u + 6u);
+    float r6 = Random01(seed_ * 17u + 7u);
+    float r7 = Random01(seed_ * 17u + 8u);
+    float r8 = Random01(seed_ * 17u + 9u);
+    float r9 = Random01(seed_ * 17u + 10u);
+    float r10_ = Random01(seed_ * 17u + 11u);
 
     constexpr float pi = 3.1415926535f;
 
@@ -618,9 +631,7 @@ EmitParticleData ParticleEmitter::MakeEmitData(UINT seed) const
     // 基本加速度。追加加速度XYZはUpdate_CS側で windVelocity.xyz として加算される。
     data.acceleration = { 0.0f, settings.gravity, 0.0f, 0.0f };
 
-    // 発生時刻も混ぜ、同じ粒子数のBurstを繰り返した場合も色の並びを変える。
-    const UINT colorSeed_ = std::bit_cast<UINT>(settings.time) + seed * 17u;
-    data.colorRandomRates = { Random01(colorSeed_ + 12u), Random01(colorSeed_ + 13u) };
+    data.packedColorRandomRates = { HashSeed(colorSeed_), HashSeed(colorSeed_ + 1u) };
     data.rotation = r6 * pi * 2.0f;
     data.angularSpeed = Lerp(settings.emissionAngularSpeed.x, settings.emissionAngularSpeed.y, r7);
 
@@ -635,7 +646,7 @@ EmitParticleData ParticleEmitter::MakeEmitData(UINT seed) const
     data.scale.x = startSize_;
     data.scale.y = startSize_;
     data.scale.z = endSize_;
-    data.scale.w = 0.0f;
+    data.scale.w = settings.sizeTransitionDuration;
     data.color = settings.useColorOverLife != 0 ? settings.colorStart : settings.manualColor;
 
     return data;
@@ -684,14 +695,18 @@ UINT ParticleEmitter::RoundParticleCount(UINT count)
     return ((rounded + (NumParticleThread - 1)) / NumParticleThread) * NumParticleThread;
 }
 
-float ParticleEmitter::Random01(UINT seed)
+UINT ParticleEmitter::HashSeed(UINT seed_)
 {
-    seed = (seed ^ 61u) ^ (seed >> 16u);
-    seed *= 9u;
-    seed = seed ^ (seed >> 4u);
-    seed *= 0x27d4eb2du;
-    seed = seed ^ (seed >> 15u);
-    return static_cast<float>(seed & 0x00FFFFFFu) / 16777216.0f;
+    seed_ = (seed_ ^ 61u) ^ (seed_ >> 16u);
+    seed_ *= 9u;
+    seed_ ^= seed_ >> 4u;
+    seed_ *= 0x27d4eb2du;
+    return seed_ ^ (seed_ >> 15u);
+}
+
+float ParticleEmitter::Random01(UINT seed_)
+{
+    return static_cast<float>(HashSeed(seed_) & 0x00FFFFFFu) / 16777216.0f;
 }
 
 float ParticleEmitter::Lerp(float a, float b, float t)

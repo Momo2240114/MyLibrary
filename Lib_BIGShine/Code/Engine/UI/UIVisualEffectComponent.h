@@ -18,6 +18,7 @@ struct UIVisualEffectSettings
     float sweepIntensity = 0, sweepWidth = 0.15f, sweepAngle = -30, sweepSpeed = 0.6f;
     float pulseAmount = 0, pulseSpeed = 1, grayscale = 0, sepia = 0, invert = 0, pixelSize = 1;
     float blurRadius = 0, gradientStrength = 0, dissolve = 0, edgeWidth = 0.06f, noiseScale = 12;
+    float paintStrength = 0.0f, inkStrength = 0.0f;
     DirectX::XMFLOAT2 maskScale{1,1}, maskOffset{0,0};
     bool maskInvert = false;
     int trailCount = 0;

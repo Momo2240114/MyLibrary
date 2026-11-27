@@ -48,7 +48,7 @@
         "hitMeshVfxAssetPath": "",
         "hitMeshVfxLifeTime": 1.0,
         "hitMeshVfxNormalOffset": 0.0,
-        "hitParticleAssetPath": "LargeHitSparks_Weak",
+        "hitParticleAssetPath": "PlayerRushHitSparks_Weak",
         "hitParticleAxisToAttackerBlend": 0.8500000238418579,
         "hitParticleEmitterName": "",
         "hitParticleLifeTime": 0.44999998807907104,
@@ -57,7 +57,7 @@
         "hitParticleTargetAttractionRange": 3.0,
         "hitParticleTargetAttractionStrength": 1.399999976158142,
         "hitParticleUseImpactAxis": true,
-        "hitParticleUseTargetAttraction": true,
+        "hitParticleUseTargetAttraction": false,
         "spawnOnHit": true
     },
     "id": "RashAttack_03",

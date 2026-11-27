@@ -178,7 +178,7 @@ void MenuPresentation::Update(float deltaTime_)
     }
 }
 
-int MenuPresentation::TakeResult()
+int MenuPresentation::TakeResult(const std::string& releaseInputAction_)
 {
     if (GetForegroundWindow() != GraphicsDeviceManager::Instance().GetWindowHandle())
     {
@@ -187,7 +187,7 @@ int MenuPresentation::TakeResult()
     // 決定ボタンの保持をゲームへ持ち越し、再開直後に攻撃することを防ぐ。
     if (delivered || confirmedIndex < 0 || confirmTime < 0.28f ||
         KeyConfig::Instance().ActionPressed("UI.MenuConfirm") || MouseInput::Instance().LeftDown() ||
-        KeyInput::KeyPressed(VK_ESCAPE) || ControllerInput::Instance().ButtonPressed(PadCode::BACK))
+        KeyConfig::Instance().ActionPressed(releaseInputAction_))
     {
         return -1;
     }

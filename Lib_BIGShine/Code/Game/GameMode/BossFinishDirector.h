@@ -14,7 +14,7 @@ class CameraComponent;
 class SpriteRenderSystem;
 class ParticleComponent;
 class MeshVFXComponent;
-class TextureMaskTransition;
+class GlassTransition;
 
 // 人型ボスの決着を通常の戦闘更新から分離し、撮影とタイトル復帰まで管理する。
 class BossFinishDirector
@@ -108,7 +108,7 @@ public:
 
     ID3D11ShaderResourceView* GetCapture() const
     {
-        return capturedView.Get();
+        return showFixed ? capturedView.Get() : nullptr;
     }
 
     DirectX::XMFLOAT4 GetCaptureUv() const
@@ -304,7 +304,7 @@ private:
     std::shared_ptr<GameObject> badEndingSpear;
     std::shared_ptr<GameObject> badEndingParticles;
     std::shared_ptr<GameObject> flashbackSprite;
-    std::unique_ptr<TextureMaskTransition> badEndingWipe;
+    std::unique_ptr<GlassTransition> badEndingGlass;
     std::vector<std::pair<std::weak_ptr<Component>, bool>> badEndingMaterialStates;
     bool previousSilhouette = false;
     DirectX::XMFLOAT4 previousSilhouetteColor{};

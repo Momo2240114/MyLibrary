@@ -217,6 +217,8 @@ bool ShaderTransitionEffect::Render(ID3D11RenderTargetView* renderTarget_)
     {
         context_->OMSetRenderTargets(1, &target_, nullptr);
     }
+    float aspect_ = static_cast<float>((std::max)(1, graphics_.GetRenderWidth())) /
+        (std::max)(1, graphics_.GetRenderHeight());
     // ガラス演出だけ現在の画面を保存する。開く段階では新Sceneを取り込み直す。
     if (parameters.type == TransitionType::GLASS)
     {
@@ -228,6 +230,15 @@ bool ShaderTransitionEffect::Render(ID3D11RenderTargetView* renderTarget_)
         {
             D3D11_TEXTURE2D_DESC description_{};
             sourceTexture_->GetDesc(&description_);
+            if (renderTarget_)
+            {
+                // EditorのSceneViewでも、破片をコピー元のアスペクトと解像度で描く。
+                const float width_ = static_cast<float>(description_.Width);
+                const float height_ = static_cast<float>(description_.Height);
+                const D3D11_VIEWPORT viewport_{0.0f, 0.0f, width_, height_, 0.0f, 1.0f};
+                context_->RSSetViewports(1, &viewport_);
+                aspect_ = width_ / height_;
+            }
             D3D11_TEXTURE2D_DESC old_{};
             if (snapshotTexture)
             {
@@ -254,7 +265,9 @@ bool ShaderTransitionEffect::Render(ID3D11RenderTargetView* renderTarget_)
                 }
                 if (snapshotView)
                 {
-                    context_->CopyResource(snapshotTexture.Get(),sourceTexture_.Get());
+                    context_->OMSetRenderTargets(0, nullptr, nullptr);
+                    context_->CopyResource(snapshotTexture.Get(), sourceTexture_.Get());
+                    context_->OMSetRenderTargets(1, &target_, nullptr);
                 }
                 snapshotRevealing = revealing;
             }
@@ -266,7 +279,7 @@ bool ShaderTransitionEffect::Render(ID3D11RenderTargetView* renderTarget_)
     cb_.timing = {progress,elapsedTime,0,static_cast<float>(parameters.easing)};
     cb_.geometry = {parameters.centerPosition.x,parameters.centerPosition.y,parameters.direction.x,parameters.direction.y};
     cb_.noise = {parameters.noiseScale,parameters.noiseSpeed,parameters.glowIntensity,parameters.edgeWidth};
-    cb_.style = {static_cast<float>((std::max)(1,graphics_.GetRenderWidth())) / (std::max)(1,graphics_.GetRenderHeight()),parameters.softness,parameters.boundaryCurve,hasGlow ? 1.0f : 0.0f};
+    cb_.style = {aspect_,parameters.softness,parameters.boundaryCurve,hasGlow ? 1.0f : 0.0f};
     if (parameters.type == TransitionType::GLASS)
     {
         cb_.style.z = Number(parameters.effectSettings,"ShardRotation",.8f,0,2);

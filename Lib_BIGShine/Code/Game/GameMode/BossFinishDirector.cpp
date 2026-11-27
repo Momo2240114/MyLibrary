@@ -20,7 +20,7 @@
 #include "Engine/Graphics/VFX/MaterialOverlayComponent.h"
 #include "Engine/UI/UITextComponent.h"
 #include "Engine/UI/UIVisualEffectComponent.h"
-#include "Engine/UI/TextureMaskTransition.h"
+#include "Engine/UI/GlassTransition.h"
 #include "Engine/Audio/AudioManager.h"
 #include "Engine/Math/Curve/CurveTrack.h"
 #include "Engine/Platform/WindowsDialogHelper.h"
@@ -52,6 +52,7 @@ namespace
     constexpr float TRUE_END_BEAM = 6.3f;
     constexpr float TRUE_END_PILLAR = TRUE_END_BEAM + 0.18f;
     constexpr float TRUE_END_FINISH = 9.45f;
+    constexpr float TRUE_END_PORTRAIT = TRUE_END_BEAM + 1.75f;
     constexpr float TRUE_END_RAISED_POSE = 0.52f;
     constexpr float TRUE_END_RELEASE_POSE = 0.78f;
     constexpr float TRUE_END_IMPACT_DEPTH = -5.4f;
@@ -72,7 +73,6 @@ namespace
     constexpr float BAD_END_FINISH = BAD_END_COVERED + 0.55f;
     constexpr DirectX::XMFLOAT4 BAD_END_RED{1.0f, 0.0f, 0.0f, 1.0f};
     constexpr DirectX::XMFLOAT4 BAD_END_MUD{0.1f, 0.025f, 0.032f, 1.0f};
-    constexpr const char* BAD_END_MUD_TEXTURE = "Data/Texture/Particle/TransitionViscousMud.png";
     constexpr const char* BAD_END_EQUIPMENT_TEXTURE = "Data/Texture/VFX/T_Free_Magic_Noise2.PNG";
     constexpr const char* BAD_END_HAIR_TEXTURE = "Data/Model/Material/BadEndHiar.png";
 
@@ -971,7 +971,7 @@ void BossFinishDirector::ResetBadEnding()
     badEndingSpear.reset();
     badEndingParticles.reset();
     flashbackSprite.reset();
-    badEndingWipe.reset();
+    badEndingGlass.reset();
     effects.clear();
 }
 
@@ -1309,7 +1309,7 @@ std::span<const BossFinishDirector::EndingCue> BossFinishDirector::GetBadEndingC
         {"Fall", BAD_END_PIERCE + BAD_END_IMPACT_HOLD, BAD_END_FALL},
         {"Mud gathers", BAD_END_FALL, BAD_END_RISE},
         {"BadEndPlayer rises", BAD_END_RISE, BAD_END_WIPE},
-        {"Mud wipe / Blackout", BAD_END_WIPE, BAD_END_FINISH}
+        {"Glass shatter / Blackout", BAD_END_WIPE, BAD_END_FINISH}
     };
     return CUES;
 }
@@ -1758,13 +1758,14 @@ void BossFinishDirector::UpdateTrueEnding(float previousTime_, float time_)
     else
     {
         const float widen_ = ShotProgress(time_, TRUE_END_BEAM, TRUE_END_PILLAR + 0.62f);
-        const float settle_ = ShotProgress(time_, TRUE_END_PILLAR + 1.05f, TRUE_END_FINISH);
+        const float settle_ = ShotProgress(time_, TRUE_END_PORTRAIT, TRUE_END_FINISH - 0.16f);
+        const Vector3 face_ = headPosition_ + offset_(0.0f, 0.10f, -0.035f);
         eye_ = playerPosition_ + offset_(std::lerp(4.6f, 8.0f, widen_), std::lerp(1.3f, 2.2f, widen_),
             std::lerp(-1.4f, -4.0f, widen_));
         focus_ = Vector3::Lerp(upperBody_, impact_ + offset_(0.0f, 3.2f, 0.0f), 0.38f + 0.32f * widen_);
-        eye_ = Vector3::Lerp(eye_, upperBody_ + offset_(1.1f, -0.10f, -2.75f), settle_);
-        focus_ = Vector3::Lerp(focus_, upperBody_, settle_);
-        fov_ = std::lerp(std::lerp(49.0f, 60.0f, widen_), 34.0f, settle_);
+        eye_ = Vector3::Lerp(eye_, face_ + offset_(0.32f, 0.02f, -1.24f), settle_);
+        focus_ = Vector3::Lerp(focus_, face_, settle_);
+        fov_ = std::lerp(std::lerp(49.0f, 60.0f, widen_), 27.0f, settle_);
         roll_ = std::lerp(-2.5f, 0.0f, settle_);
     }
 
@@ -1909,21 +1910,22 @@ void BossFinishDirector::BeginBadEnding()
         }
     }
 
-    badEndingWipe = std::make_unique<TextureMaskTransition>();
-    TransitionParameters wipe_;
-    wipe_.type = TransitionType::TEXTURE_MASK;
-    wipe_.color = {0.025f, 0.008f, 0.012f, 1.0f};
-    wipe_.edgeColor = {0.19f, 0.04f, 0.048f, 0.82f};
-    wipe_.edgeWidth = 0.065f;
-    wipe_.softness = 0.025f;
-    wipe_.glowIntensity = 0.7f;
-    wipe_.direction = {-0.18f, -1.0f};
-    wipe_.effectSettings = {{"Texture", BAD_END_MUD_TEXTURE}, {"MaskMode", 1}, {"Channel", 4},
-        {"SurfaceStrength", 0.92f}, {"ScrollY", 0.28f}};
-    badEndingWipe->SetParameters(wipe_);
-    if (!badEndingWipe->Initialize())
+    badEndingGlass = std::make_unique<GlassTransition>();
+    TransitionParameters glass_;
+    glass_.type = TransitionType::GLASS;
+    glass_.easing = TransitionEasing::EASE_OUT_CUBIC;
+    glass_.durationOut = BAD_END_COVERED - BAD_END_WIPE;
+    glass_.color = {0.014f, 0.003f, 0.008f, 1.0f};
+    glass_.edgeColor = {1.0f, 0.30f, 0.39f, 0.85f};
+    glass_.edgeWidth = 0.010f;
+    glass_.glowIntensity = 0.85f;
+    glass_.noiseSpeed = 1.35f;
+    glass_.panelCount = 5;
+    glass_.effectSettings = {{"ShardRotation", 1.15f}};
+    badEndingGlass->SetParameters(glass_);
+    if (!badEndingGlass->Initialize())
     {
-        badEndingWipe.reset();
+        badEndingGlass.reset();
     }
 }
 
@@ -2776,6 +2778,14 @@ void BossFinishDirector::PrepareSprites(const GameModeManager::BattleResult* pre
         return object_;
     };
     imageSprite = makeSprite_("FinishImage");
+    const auto imageEffect_ = imageSprite->AddComponent<UIVisualEffectComponent>(false);
+    const nlohmann::json imageSettings_ = IsBadEnding()
+        ? nlohmann::json{{"InkStrength", 1.0f}, {"GradientStrength", 0.18f},
+            {"GradientTop", {1.0f, 0.76f, 0.81f, 1.0f}}, {"GradientBottom", {0.72f, 0.33f, 0.40f, 1.0f}}}
+        : nlohmann::json{{"PaintStrength", 0.95f}, {"Sepia", 0.10f}};
+    imageEffect_->Deserialize({{"Settings", imageSettings_}});
+    imageEffect_->SetStarted(true);
+    imageEffect_->SetProgress(1.0f);
     solidSprite = makeSprite_("FinishFade");
     clearSprite = makeSprite_("FinishClear");
     promptSprite = makeSprite_("FinishPrompt");
@@ -2902,17 +2912,32 @@ bool BossFinishDirector::Capture(ID3D11RenderTargetView* target_)
     }
     D3D11_TEXTURE2D_DESC description_{};
     source_->GetDesc(&description_);
-    description_.Usage = D3D11_USAGE_DEFAULT;
-    description_.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-    description_.CPUAccessFlags = 0;
-    description_.MiscFlags = 0;
-    capturedView.Reset();
-    capturedTexture.Reset();
-    if (FAILED(graphics_.GetDevice()->CreateTexture2D(&description_, nullptr, capturedTexture.GetAddressOf())) ||
-        FAILED(graphics_.GetDevice()->CreateShaderResourceView(capturedTexture.Get(), nullptr, capturedView.GetAddressOf())))
+    if (description_.SampleDesc.Count != 1)
     {
-        BS_LOG_INFO(LOG_CATEGORY::GAME, "Finish capture unavailable; clear and title flow continues.");
         return false;
+    }
+    D3D11_TEXTURE2D_DESC previous_{};
+    if (capturedTexture)
+    {
+        capturedTexture->GetDesc(&previous_);
+    }
+    if (!capturedView || previous_.Width != description_.Width || previous_.Height != description_.Height ||
+        previous_.Format != description_.Format || previous_.MipLevels != description_.MipLevels ||
+        previous_.ArraySize != description_.ArraySize)
+    {
+        // 終盤の加工中は毎フレームコピーするため、解像度と形式が同じ間はバッファを使い回す。
+        description_.Usage = D3D11_USAGE_DEFAULT;
+        description_.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+        description_.CPUAccessFlags = 0;
+        description_.MiscFlags = 0;
+        capturedView.Reset();
+        capturedTexture.Reset();
+        if (FAILED(graphics_.GetDevice()->CreateTexture2D(&description_, nullptr, capturedTexture.GetAddressOf())) ||
+            FAILED(graphics_.GetDevice()->CreateShaderResourceView(capturedTexture.Get(), nullptr, capturedView.GetAddressOf())))
+        {
+            BS_LOG_INFO(LOG_CATEGORY::GAME, "Finish capture unavailable; clear and title flow continues.");
+            return false;
+        }
     }
     graphics_.GetContext()->OMSetRenderTargets(0, nullptr, nullptr);
     graphics_.GetContext()->CopyResource(capturedTexture.Get(), source_.Get());
@@ -3000,6 +3025,11 @@ void BossFinishDirector::RenderOutput(SpriteRenderSystem& sprites_, ID3D11Render
         showFixed = Capture(target_);
         captureRequested = false;
     }
+    const float styleStrength_ = IsBadEnding()
+        ? ShotProgress(badEndingTime, BAD_END_RISE + 0.1f, BAD_END_RISE + 1.25f)
+        : ShotProgress(trueEndingTime, TRUE_END_FINISH - 0.85f, TRUE_END_FINISH - 0.12f);
+    const bool drawLiveStyle_ = !resultPreview_ && !showFixed && styleStrength_ > 0.0f &&
+        badEndingTime < BAD_END_COVERED && Capture(target_);
     // 撮影要求の有無・成功とは独立して、本番の既定時刻に一度だけ完了させる。
     // 接触診断NGや再撮影で要求を消費しても、クリア文字と決定入力まで必ず進める。
     const float held_ = resultPreview_ ? settings["HoldTime"].get<float>() + resultPreviewAge :
@@ -3027,6 +3057,14 @@ void BossFinishDirector::RenderOutput(SpriteRenderSystem& sprites_, ID3D11Render
         context_->ClearRenderTargetView(target_, clear_);
         RenderResult(sprites_, left_, top_, fitWidth_, fitHeight_, held_);
         return;
+    }
+    imageSprite->GetComponent<UIVisualEffectComponent>()->SetRuntimeStrength(styleStrength_);
+    if (drawLiveStyle_)
+    {
+        const auto sprite_ = imageSprite->GetComponent<SpriteRenderer>();
+        const auto size_ = sprite_->GetTextureSize();
+        sprite_->SetUVRect(0.0f, 0.0f, size_.x, size_.y);
+        DrawSprite(sprites_, imageSprite, 0.0f, 0.0f, width_, height_, {1, 1, 1, 1});
     }
     if (badEndingTime >= BAD_END_FINISH)
     {
@@ -3200,12 +3238,12 @@ void BossFinishDirector::RenderBadEnding(SpriteRenderSystem& sprites_, ID3D11Ren
     if (time_ >= BAD_END_WIPE)
     {
         const float progress_ = std::clamp((time_ - BAD_END_WIPE) / (BAD_END_COVERED - BAD_END_WIPE), 0.0f, 1.0f);
-        if (badEndingWipe)
+        if (badEndingGlass)
         {
-            badEndingWipe->SetProgress(progress_);
-            badEndingWipe->Update(time_ - BAD_END_WIPE, false);
+            badEndingGlass->SetProgress(progress_);
+            badEndingGlass->Update(time_ - BAD_END_WIPE, false);
         }
-        if (!badEndingWipe || !badEndingWipe->Render(target_))
+        if (!badEndingGlass || !badEndingGlass->Render(target_))
         {
             DrawSprite(sprites_, solidSprite, 0, 0, width_, height_, {0.025f,0.008f,0.012f,progress_});
         }

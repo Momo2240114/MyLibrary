@@ -12,6 +12,8 @@
 #include "Engine/Graphics/VFXMaterial/VFXMaterialConversionUtility.h"
 #include "Engine/Graphics/VFXMaterial/VFXMaterialSerializer.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
+#include "Engine/GamePlay/Core/Object/GameObjectManager.h"
+#include "Engine/GamePlay/System/EffectManager.h"
 #include "Engine/Math/Curve/CurveComponent.h"
 #include "Engine/Platform/WindowsDialogHelper.h"
 #include "Engine/UI/ImGuiColorEditor.h"
@@ -2440,6 +2442,7 @@ void MeshVFXComponent::Gui()
                 {
                     ImGui::DragFloat3("Scale Start", &part_.scaleStart.x, 0.01f);
                     ImGui::DragFloat3("Scale End", &part_.scaleEnd.x, 0.01f);
+                    ImGui::DragFloat("Scale Transition (sec)", &part_.scaleTransitionDuration, 0.001f, 0.0f, 10.0f, "%.3f");
                 }
 
                 ImGui::Checkbox("Animate Alpha", &part_.animateAlpha);
@@ -2827,6 +2830,7 @@ void MeshVFXComponent::Serialize(nlohmann::json& json_) const
         partJson_["Duration"] = part_.duration;
         partJson_["Loop"] = part_.loop;
         partJson_["AnimateScale"] = part_.animateScale;
+        partJson_["ScaleTransitionDuration"] = part_.scaleTransitionDuration;
         partJson_["ScaleStart"] = { part_.scaleStart.x, part_.scaleStart.y, part_.scaleStart.z };
         partJson_["ScaleEnd"] = { part_.scaleEnd.x, part_.scaleEnd.y, part_.scaleEnd.z };
         partJson_["AnimateAlpha"] = part_.animateAlpha;
@@ -3123,6 +3127,7 @@ void MeshVFXComponent::Deserialize(const nlohmann::json& json_)
         part_.duration = (std::max)(partJson_.value("Duration", 0.0f), 0.0f);
         part_.loop = partJson_.value("Loop", true);
         part_.animateScale = partJson_.value("AnimateScale", false);
+        part_.scaleTransitionDuration = (std::max)(0.0f, partJson_.value("ScaleTransitionDuration", 0.0f));
         ReadFloatArray(partJson_, "ScaleStart", part_.scaleStart, 3);
         ReadFloatArray(partJson_, "ScaleEnd", part_.scaleEnd, 3);
         part_.animateAlpha = partJson_.value("AnimateAlpha", false);
@@ -3318,7 +3323,17 @@ bool MeshVFXComponent::SaveAsset(const std::string& path_) const
         return false;
     }
     file_ << json_.dump(4);
-    return file_.good();
+    file_.close();
+    if (!file_)
+    {
+        return false;
+    }
+
+    if (const auto owner_ = gameObject.lock(); owner_ && owner_->manager)
+    {
+        owner_->GetManager().GetEffectManager().ReloadVFXAssets(path_);
+    }
+    return true;
 }
 
 bool MeshVFXComponent::LoadAsset(const std::string& path_)

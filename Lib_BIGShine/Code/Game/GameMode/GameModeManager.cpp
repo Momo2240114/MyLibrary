@@ -12,6 +12,7 @@
 #include "Game/AI/Human/HumanBossActionComponent.h"
 
 #include "Engine/GamePlay/Input/KeyConfig.h"
+#include "Engine/UI/InputIconAtlas.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include <imgui.h>
 #include <cmath>
@@ -28,6 +29,7 @@ namespace
     constexpr const char* ACTION_BEGIN_BOSS_DEFEATED = "GameMode.BeginBossDefeated";
 
     constexpr float SKIP_HOLD_SECONDS = 1.0f;
+    constexpr const char* SKIP_INPUT_ACTION = "UI.SkipPresentation";
     constexpr const char* SEQUENCE_BOSS_INTRO = "BossIntro";
     constexpr const char* SEQUENCE_PHASE_1_DEFEAT = "Phase1Defeat";
     constexpr const char* SEQUENCE_PHASE_2_INTRO = "Phase2Intro";
@@ -54,7 +56,7 @@ void GameModeManager::Update(float deltaTime_, GameObjectManager& manager_)
     const bool acceptsInput_ = !manager_.SupportsEditorPlayMode() || manager_.IsPlayInputCaptured();
     if (CanSkipPresentation() && acceptsInput_ &&
         GetForegroundWindow() == GraphicsDeviceManager::Instance().GetWindowHandle() &&
-        (KeyInput::KeyPressed(VK_ESCAPE) || ControllerInput::Instance().ButtonPressed(PadCode::Y)))
+        KeyConfig::Instance().ActionPressed(SKIP_INPUT_ACTION))
     {
         skipHoldSeconds += (std::max)(0.0f, deltaTime_);
         if (skipHoldSeconds >= SKIP_HOLD_SECONDS)
@@ -106,18 +108,25 @@ void GameModeManager::DrawSkipPrompt(ImDrawList& draw_, const ImVec2& minimum_, 
         IM_COL32_WHITE, label_);
     draw_.AddCircle(center_, radius_, IM_COL32(255, 255, 255, 90), 64, 2.0f * scale_);
     const auto device_ = KeyConfig::Instance().GetActiveDevice();
-    if (device_ == InputDisplayDevice::PLAYSTATION_PAD)
+    const auto binding_ = InputIconAtlas::FindBinding(SKIP_INPUT_ACTION, device_);
+    std::string key_;
+    for (const auto& unit_ : binding_)
     {
-        draw_.AddTriangle(ImVec2(center_.x, center_.y - 9.0f * scale_),
-            ImVec2(center_.x + 10.0f * scale_, center_.y + 8.0f * scale_),
-            ImVec2(center_.x - 10.0f * scale_, center_.y + 8.0f * scale_), IM_COL32_WHITE, 2.0f * scale_);
+        if (!key_.empty())
+        {
+            key_ += "+";
+        }
+        key_ += InputIconAtlas::GetKeyLabel(device_, unit_.code);
     }
-    else
+    if (key_.empty())
     {
-        const char* key_ = device_ == InputDisplayDevice::KEYBOARD_MOUSE ? "Esc" : "Y";
-        const float keyWidth_ = font_->CalcTextSizeA(fontSize_, FLT_MAX, 0.0f, key_).x;
-        draw_.AddText(font_, fontSize_, ImVec2(center_.x - keyWidth_ * 0.5f, center_.y - fontSize_ * 0.5f), IM_COL32_WHITE, key_);
+        key_ = "-";
     }
+    const float keyFontSize_ = (std::min)(fontSize_,
+        fontSize_ * radius_ * 1.65f / (std::max)(1.0f, font_->CalcTextSizeA(fontSize_, FLT_MAX, 0.0f, key_.c_str()).x));
+    const float keyWidth_ = font_->CalcTextSizeA(keyFontSize_, FLT_MAX, 0.0f, key_.c_str()).x;
+    draw_.AddText(font_, keyFontSize_, ImVec2(center_.x - keyWidth_ * 0.5f, center_.y - keyFontSize_ * 0.5f),
+        IM_COL32_WHITE, key_.c_str());
     if (skipHoldSeconds > 0.0f)
     {
         const float angle_ = DirectX::XM_2PI * skipHoldSeconds / SKIP_HOLD_SECONDS;

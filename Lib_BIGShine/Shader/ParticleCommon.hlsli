@@ -20,7 +20,7 @@ struct Particle
 {
     float4 parameter; // x:スプライト番号 y:残り寿命 z:総寿命 w:描画タイプ。
     float4 position; // ワールド座標。
-    float2 colorRandomRates; // 生成時に決めた開始色・終了色の補間率。
+    uint2 packedColorRandomRates; // 開始色・終了色のRGBA補間率を各8bitで保持する。
     float rotation;
     float angularSpeed;
     float4 scale; // x/y:開始サイズ z:終了サイズ。
@@ -35,7 +35,7 @@ struct EmitParticleData
 {
     float4 parameter; // x:スプライト番号 y:初期寿命 z:未使用 w:描画タイプ。
     float4 position; // 生成位置。
-    float2 colorRandomRates;
+    uint2 packedColorRandomRates;
     float rotation;
     float angularSpeed;
     float4 scale; // 開始サイズと終了サイズ。
@@ -118,8 +118,8 @@ cbuffer ParticleSystemConstants : register(b9)
     uint fresnelPadding; // 16byteアライン用。
     float verticalSpawnRange; // CPU生成時の縦方向発生幅。
     uint spawnDirectionMode; // CPU生成時の初速方向モード。
-    uint cpuSpawnPadding0; // 16byteアライン用。
-    uint cpuSpawnPadding1; // 16byteアライン用。
+    float sizeTransitionDuration; // CPUが発生時にParticleのscale.wへ記録する。
+    uint randomizeBurstRotation; // CPUがBurstごとの回転オフセットを決める。
     float4 emissionAxis;
     float4 targetPosition;
     float targetAttractionStrength;

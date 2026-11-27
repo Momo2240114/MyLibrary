@@ -350,6 +350,62 @@ void EffectManager::RefreshAssetCache()
     CollectJsonAssets("Data/ImpactEffect", impactEffectAssetPaths);
 }
 
+void EffectManager::ReloadVFXAssets(const std::string& savedPath_)
+{
+    BS_PROFILE_SCOPE("EffectManager::ReloadVFXAssets");
+    const size_t oldVFXCount_ = particleAssetPaths.size() + meshVFXAssetPaths.size();
+    const auto savedFile_ = WindowsDialogHelper::Utf8ToPath(savedPath_);
+    const auto savedFileName_ = savedFile_.filename();
+    std::error_code pathError_;
+    const auto savedRelativePath_ = savedFile_.empty() ? std::filesystem::path{}
+        : std::filesystem::relative(savedFile_, pathError_);
+
+    const auto reloadAssets_ = [&](const std::string& rootPath_,
+        std::vector<std::string>& paths_,
+        std::vector<EffectAssetEntry>& entries_,
+        std::vector<std::string>& keys_,
+        std::unordered_map<std::string, std::string>& pathByKey_,
+        auto preload_)
+    {
+        std::vector<std::string> currentPaths_;
+        CollectJsonAssets(rootPath_, currentPaths_);
+        const bool catalogChanged_ = currentPaths_ != paths_;
+        if (catalogChanged_)
+        {
+            paths_ = std::move(currentPaths_);
+            BuildAssetNameMap(paths_, rootPath_, entries_, keys_, pathByKey_);
+        }
+
+        for (const auto& path_ : paths_)
+        {
+            std::error_code error_;
+            const auto filePath_ = WindowsDialogHelper::Utf8ToPath(path_);
+            const bool justSaved_ = !savedFile_.empty() &&
+                (filePath_ == savedRelativePath_ ||
+                    (filePath_.filename() == savedFileName_ && std::filesystem::equivalent(filePath_, savedFile_, error_)));
+            const auto writeTime_ = std::filesystem::last_write_time(filePath_, error_);
+            const auto previousTime_ = vfxAssetWriteTimes.find(path_);
+            if (!error_ && (justSaved_ ||
+                (savedPath_.empty() && (previousTime_ == vfxAssetWriteTimes.end() || previousTime_->second != writeTime_))))
+            {
+                (this->*preload_)(path_, true);
+            }
+        }
+        return catalogChanged_;
+    };
+
+    const bool particleCatalogChanged_ = reloadAssets_("Data/Particle", particleAssetPaths, particleAssets,
+        particleAssetKeys, particlePathByKey, &EffectManager::PreloadParticleAsset);
+    const bool meshCatalogChanged_ = reloadAssets_("Data/VFX", meshVFXAssetPaths, meshVFXAssets,
+        meshVFXAssetKeys, meshVFXPathByKey, &EffectManager::PreloadMeshVFXAsset);
+    if (particleCatalogChanged_ || meshCatalogChanged_)
+    {
+        // 先読み中は更新された一覧をたどり直し、後続のSequenceとImpactの進捗を引き継ぐ。
+        incrementalPreloadCursor = incrementalPreloadCursor < oldVFXCount_ ? 0
+            : particleAssetPaths.size() + meshVFXAssetPaths.size() + (incrementalPreloadCursor - oldVFXCount_);
+    }
+}
+
 // 収集したAssetパスから名前解決用のMapを作成する
 void EffectManager::BuildAssetNameMap()
 {
@@ -383,6 +439,7 @@ void EffectManager::BuildAssetNameMap()
 void EffectManager::PreloadAllEffects()
 {
     Clear();
+    vfxAssetWriteTimes.clear();
     particleAssetCache.clear();
     meshVFXAssetCache.clear();
     vfxSequenceAssetCache.clear();
@@ -2442,8 +2499,16 @@ void EffectManager::RegisterAssetKey(
 }
 
 // Particle AssetをCacheへ読み込み、初期Poolを作成する
-void EffectManager::PreloadParticleAsset(const std::string& path_)
+void EffectManager::PreloadParticleAsset(const std::string& path_, bool reload_)
 {
+    const std::string assetName_ = BuildAssetNameFromPath(path_, "Data/Particle");
+    if (assetName_.empty() || (!reload_ && particleAssetCache.contains(assetName_)))
+    {
+        return;
+    }
+
+    std::error_code error_;
+    const auto writeTime_ = std::filesystem::last_write_time(WindowsDialogHelper::Utf8ToPath(path_), error_);
     ParticleEffectAsset asset_{};
     if (!ParticleComponent::LoadAssetDataOnly(path_, asset_))
     {
@@ -2451,13 +2516,17 @@ void EffectManager::PreloadParticleAsset(const std::string& path_)
         return;
     }
 
-    const std::string assetName_ = BuildAssetNameFromPath(path_, "Data/Particle");
-    if (assetName_.empty())
+    particleAssetCache[assetName_] = asset_;
+    if (!error_)
     {
+        vfxAssetWriteTimes[path_] = writeTime_;
+    }
+    if (reload_)
+    {
+        // 再生中のObjectはSceneに残し、次回生成から保存後のAssetを使う。
+        particleObjectPool.erase(assetName_);
         return;
     }
-
-    particleAssetCache[assetName_] = asset_;
     std::vector<std::shared_ptr<GameObject>>& objects_ =
         particleObjectPool[assetName_];
     for (size_t index_ = 0; index_ < EFFECT_PREWARM_COUNT; ++index_)
@@ -2472,8 +2541,16 @@ void EffectManager::PreloadParticleAsset(const std::string& path_)
 }
 
 // MeshVFX AssetをCacheへ読み込み、初期Poolを作成する
-void EffectManager::PreloadMeshVFXAsset(const std::string& path_)
+void EffectManager::PreloadMeshVFXAsset(const std::string& path_, bool reload_)
 {
+    const std::string assetName_ = BuildAssetNameFromPath(path_, "Data/VFX");
+    if (assetName_.empty() || (!reload_ && meshVFXAssetCache.contains(assetName_)))
+    {
+        return;
+    }
+
+    std::error_code error_;
+    const auto writeTime_ = std::filesystem::last_write_time(WindowsDialogHelper::Utf8ToPath(path_), error_);
     MeshVFXComponent component_;
     if (!component_.LoadAsset(path_))
     {
@@ -2481,13 +2558,16 @@ void EffectManager::PreloadMeshVFXAsset(const std::string& path_)
         return;
     }
 
-    const std::string assetName_ = BuildAssetNameFromPath(path_, "Data/VFX");
-    if (assetName_.empty())
+    meshVFXAssetCache[assetName_] = component_.GetAsset();
+    if (!error_)
     {
+        vfxAssetWriteTimes[path_] = writeTime_;
+    }
+    if (reload_)
+    {
+        meshVFXObjectPool.erase(assetName_);
         return;
     }
-
-    meshVFXAssetCache[assetName_] = component_.GetAsset();
     const MeshVFXAsset& asset_ = meshVFXAssetCache[assetName_];
     std::vector<std::shared_ptr<GameObject>>& objects_ =
         meshVFXObjectPool[assetName_];

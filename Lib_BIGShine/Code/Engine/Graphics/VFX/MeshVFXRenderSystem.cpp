@@ -86,7 +86,10 @@ namespace
         state_.rotation.z += part_.meshRotationSpeed.z * state_.time;
         if (part_.animateScale)
         {
-            state_.scale = Lerp(part_.scaleStart, part_.scaleEnd, normalizedTime_);
+            const float scaleProgress_ = part_.scaleTransitionDuration > 0.0f
+                ? std::clamp(state_.time / part_.scaleTransitionDuration, 0.0f, 1.0f)
+                : normalizedTime_;
+            state_.scale = Lerp(part_.scaleStart, part_.scaleEnd, scaleProgress_);
         }
         if (part_.animateAlpha)
         {

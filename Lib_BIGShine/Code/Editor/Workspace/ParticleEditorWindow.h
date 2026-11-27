@@ -63,7 +63,6 @@ private:
     void DrawInspectorPanel();
     void RenderPreview(const ImVec2& previewSize_);
     // Asset一覧はファイル追加/削除をEditor側へ即反映できるよう、種類ごとに再スキャンする。
-    void RefreshParticleAssets();
     void RefreshSequenceAssets();
     void RefreshImpactEffectAssets();
     // Timelineの現在時刻から、Particle/MeshVFX/ImpactPreviewの再生状態を同期する。
@@ -97,11 +96,10 @@ private:
     std::shared_ptr<GltfModelCommponennt> previewImpactGroundModel;
     std::shared_ptr<GameObject> previewDecalObject;
     std::shared_ptr<DecalComponent> previewDecal;
-    std::vector<std::string> particleAssetPaths;        // Particle Asset候補。
     std::vector<std::string> sequenceAssetPaths;        // Sequence Asset候補。
     std::vector<std::string> impactEffectAssetPaths;    // ImpactEffect Asset候補。
     std::vector<TimelineTrack> timelineTracks;          // Timeline上の再生トラック一覧。
-    int selectedAssetIndex = -1;       // 選択中Particle Asset。
+    std::string selectedParticleAssetPath;
     int selectedSequenceIndex = -1;    // 選択中Sequence Asset。
     int selectedTimelineTrack = -1;    // 選択中Timeline Track。
     int firstTimelineFrame = 0;        // Timeline表示の左端フレーム。

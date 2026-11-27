@@ -1,13 +1,5 @@
 {
     "actions": {
-        "Player.DebugGuardHit": [
-            [
-                {
-                    "code": 70,
-                    "dev": 0
-                }
-            ]
-        ],
         "Player.Dodge": [
             [
                 {
@@ -130,73 +122,101 @@
                 }
             ]
         ],
-        "UI.MenuPrevious": [
+        "UI.MenuConfirm": [
             [
                 {
-                    "dev": 0,
-                    "code": 38
+                    "code": 13,
+                    "dev": 0
                 }
             ],
             [
                 {
-                    "dev": 1,
-                    "code": 1
-                }
-            ],
-            [
-                {
-                    "dev": 1,
-                    "code": 262144
+                    "code": 4096,
+                    "dev": 1
                 }
             ]
         ],
         "UI.MenuNext": [
             [
                 {
-                    "dev": 0,
-                    "code": 40
+                    "code": 40,
+                    "dev": 0
                 }
             ],
             [
                 {
-                    "dev": 1,
-                    "code": 2
+                    "code": 2,
+                    "dev": 1
                 }
             ],
             [
                 {
-                    "dev": 1,
-                    "code": 524288
+                    "code": 524288,
+                    "dev": 1
                 }
             ]
         ],
-        "UI.MenuConfirm": [
+        "UI.MenuPrevious": [
             [
                 {
-                    "dev": 0,
-                    "code": 13
+                    "code": 38,
+                    "dev": 0
                 }
             ],
             [
                 {
-                    "dev": 1,
-                    "code": 4096
+                    "code": 1,
+                    "dev": 1
+                }
+            ],
+            [
+                {
+                    "code": 262144,
+                    "dev": 1
                 }
             ]
         ],
         "UI.OpenEditor": [
             [
                 {
-                    "dev": 0,
-                    "code": 112
+                    "code": 112,
+                    "dev": 0
                 }
             ]
         ],
         "UI.PresentationSettings": [
             [
                 {
-                    "dev": 0,
-                    "code": 113
+                    "code": 113,
+                    "dev": 0
+                }
+            ]
+        ],
+        "UI.SkipPresentation": [
+            [
+                {
+                    "code": 27,
+                    "dev": 0
+                }
+            ],
+            [
+                {
+                    "code": 32768,
+                    "dev": 1
+                }
+            ]
+        ],
+        "UI.ToggleGameMenu": [
+            [
+                {
+                    "code": 27,
+                    "dev": 0
+                }
+            ],
+            [
+                {
+                    "code": 16,
+                    "dev": 1
                 }
             ]
         ]

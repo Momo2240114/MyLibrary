@@ -684,11 +684,13 @@ void GameObjectManager::Update(float elapsedTime_)
         UpdateCinematicSequencePreview(elapsedTime_);
         return;
     }
+
     // 決着中もEditorのStop要求は処理し、プレビューの専用更新で復元操作を塞がない。
     if (editorPlayModeEnabled && bossFinishDirector && bossFinishDirector->IsActive())
     {
         ProcessEditorPlayCommand();
     }
+
     // Editorの一時停止やTimeScaleより先に、生の時間で専用プレビューを更新する。
     if (sceneRuntimeState == SCENE_RUNTIME_STATE::RUNNING && bossFinishDirector && bossFinishDirector->Update(elapsedTime_))
     {

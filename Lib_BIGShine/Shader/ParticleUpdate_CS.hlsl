@@ -45,6 +45,12 @@ float3 SmoothNoise3(float3 p)
     return lerp(nxy0, nxy1, f.z);
 }
 
+float4 UnpackColorRandomRates(uint packed_)
+{
+    const uint4 RGBA_SHIFTS = uint4(0u, 8u, 16u, 24u);
+    return float4((packed_ >> RGBA_SHIFTS) & 0xffu) / 255.0f;
+}
+
 [numthreads(NumParticleThread, 1, 1)]
 void main(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
@@ -191,7 +197,7 @@ void main(uint3 dispatchThreadID : SV_DispatchThreadID)
     float4 startColor_ = fadeColor_ ? colorStart : manualColor;
     if (useRandomColor != 0)
     {
-        startColor_ = lerp(startColor_, randomColorStart, data.colorRandomRates.x);
+        startColor_ = lerp(startColor_, randomColorStart, UnpackColorRandomRates(data.packedColorRandomRates.x));
     }
 
     float4 lifeColor_ = startColor_;
@@ -200,7 +206,7 @@ void main(uint3 dispatchThreadID : SV_DispatchThreadID)
         float4 endColor_ = colorEnd;
         if (useRandomColor != 0)
         {
-            endColor_ = lerp(endColor_, randomColorEnd, data.colorRandomRates.y);
+            endColor_ = lerp(endColor_, randomColorEnd, UnpackColorRandomRates(data.packedColorRandomRates.y));
         }
         lifeColor_ = lerp(startColor_, endColor_, life01);
     }

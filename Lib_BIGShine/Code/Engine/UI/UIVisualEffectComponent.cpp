@@ -272,6 +272,8 @@ void UIVisualEffectComponent::Normalize()
     number_("Invert",parameters.invert,0,1);
     number_("PixelSize",parameters.pixelSize,1,64);
     number_("BlurRadius",parameters.blurRadius,0,12);
+    number_("PaintStrength",parameters.paintStrength,0,1);
+    number_("InkStrength",parameters.inkStrength,0,1);
     number_("GradientStrength",parameters.gradientStrength,0,1);
     number_("Dissolve",parameters.dissolve,0,1);
     number_("EdgeWidth",parameters.edgeWidth,0.001f,0.25f);
@@ -348,6 +350,8 @@ void UIVisualEffectComponent::Gui()
         number_("Invert",0,0,1);
         number_("PixelSize",1,1,64);
         number_("BlurRadius",0,0,12);
+        number_("PaintStrength",0,0,1);
+        number_("InkStrength",0,0,1);
         ImGui::TreePop();
     }
     if (ImGui::TreeNode("Glow / Outline / Shadow"))

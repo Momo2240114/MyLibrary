@@ -3,7 +3,7 @@
 #include "ScreenTransitionManager.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
-#include "Engine/GamePlay/Input/KeyInput.h"
+#include "Engine/GamePlay/Input/KeyConfig.h"
 #include "Engine/GamePlay/Input/MouseInput.h"
 #include "Engine/GamePlay/Input/ControllerInput.h"
 #include <imgui.h>
@@ -91,9 +91,9 @@ void GameMenuComponent::UpdateUnscaled(float deltaTime_)
         return;
     }
     const bool focused_ = GetForegroundWindow() == GraphicsDeviceManager::Instance().GetWindowHandle();
-    const bool skipKey_ = !active && toggleKey == VK_ESCAPE && GetManager().GetGameModeManager()->CanSkipPresentation();
-    const bool toggle_ = focused_ && !ScreenTransitionManager::Instance().IsInputBlocked() &&
-        ((!skipKey_ && KeyInput::KeyPressedIn(toggleKey)) || ControllerInput::Instance().ButtonPressedIn(PadCode::BACK));
+    const bool skippingPresentation_ = !active && GetManager().GetGameModeManager()->CanSkipPresentation();
+    const bool toggle_ = focused_ && !skippingPresentation_ &&
+        KeyConfig::Instance().ActionPressedIn(toggleInputAction);
     if (!active)
     {
         if (toggle_ && !GetManager().IsPlayerDeathActive() && !GetManager().IsBossFinishActive())
@@ -111,7 +111,7 @@ void GameMenuComponent::UpdateUnscaled(float deltaTime_)
     {
         return;
     }
-    const int result_ = menu.TakeResult();
+    const int result_ = menu.TakeResult(toggleInputAction);
     if (result_ < 0)
     {
         return;
@@ -146,7 +146,7 @@ void GameMenuComponent::Gui()
     ImGui::InputText("First Action",&firstAction);
     ImGui::InputText("Second Action",&secondAction);
     ImGui::Checkbox("Pause World",&pauseWorld);
-    ImGui::InputInt("Toggle Virtual Key",&toggleKey);
+    ImGui::InputText("Toggle Input Action", &toggleInputAction);
     if (ImGui::Button("Open Menu"))
     {
         Open();
@@ -160,7 +160,7 @@ void GameMenuComponent::Gui()
 
 void GameMenuComponent::Serialize(nlohmann::json& json_) const
 {
-    json_ = {{"Title",title},{"FirstLabel",firstLabel},{"SecondLabel",secondLabel},{"FirstAction",firstAction},{"SecondAction",secondAction},{"PauseWorld",pauseWorld},{"ToggleKey",toggleKey}};
+    json_ = {{"Title",title},{"FirstLabel",firstLabel},{"SecondLabel",secondLabel},{"FirstAction",firstAction},{"SecondAction",secondAction},{"PauseWorld",pauseWorld},{"ToggleInputAction",toggleInputAction}};
 }
 
 void GameMenuComponent::Deserialize(const nlohmann::json& json_)
@@ -171,5 +171,5 @@ void GameMenuComponent::Deserialize(const nlohmann::json& json_)
     firstAction = json_.value("FirstAction",std::string());
     secondAction = json_.value("SecondAction",std::string("GoSceneTitle"));
     pauseWorld = json_.value("PauseWorld",true);
-    toggleKey = json_.value("ToggleKey",27);
+    toggleInputAction = json_.value("ToggleInputAction", std::string("UI.ToggleGameMenu"));
 }

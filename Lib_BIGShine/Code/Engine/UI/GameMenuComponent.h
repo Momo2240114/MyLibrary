@@ -40,5 +40,5 @@ private:
     bool submitted = false;
     bool previousInputCapture = false;
     bool previousCursorLock = false;
-    int toggleKey = 27;
+    std::string toggleInputAction = "UI.ToggleGameMenu";
 };

@@ -16,6 +16,7 @@
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
+#include "Engine/GamePlay/System/EffectManager.h"
 #include "Engine/GamePlay/Graphics/ModelDissolveComponent.h"
 #include <imgui_stdlib.h>
 #include "Engine/Debug/TracyProfiler.h"
@@ -531,12 +532,20 @@ void ParticleComponent::Gui()
                     ImGuiColorEditor::DrawColorEdit4("Color B", &s.randomColorStart.x);
                 }
             }
-            if (useRandomColor_ && s.useGradientTexture != 0)
+            if (useRandomColor_)
             {
-                ImGui::TextDisabled("Gradient Texture supplies RGB. Random Color still varies alpha.");
+                ImGui::TextDisabled(s.useGradientTexture != 0
+                    ? "Gradient Texture supplies RGB. Alpha varies between A and B."
+                    : "R, G, B and Alpha vary independently between A and B.");
             }
 
             ImGui::DragFloat2("Size Start/End", &s.emissionSize.x, 0.02f, 0.01f, 100.0f);
+            ImGui::DragFloat("Size Transition (sec)", &s.sizeTransitionDuration, 0.001f, 0.0f, 10.0f, "%.3f");
+            bool randomizeBurstRotation_ = s.randomizeBurstRotation != 0;
+            if (ImGui::Checkbox("Randomize Burst Rotation", &randomizeBurstRotation_))
+            {
+                s.randomizeBurstRotation = randomizeBurstRotation_ ? 1u : 0u;
+            }
             bool useRandomSize_ = s.useRandomSize != 0;
             if (ImGui::Checkbox("Random Spawn Size", &useRandomSize_))
             {
@@ -1358,26 +1367,24 @@ bool ParticleComponent::LoadAssetDataOnly(
     try
     {
         file_ >> json_;
+        if (json_.value("AssetType", std::string{}) == "ParticleEmitter")
+        {
+            return false;
+        }
+
+        ParticleComponent component_;
+        component_.Deserialize(json_);
+        if (component_.tracks.empty())
+        {
+            return false;
+        }
+
+        asset_ = component_.GetAsset();
     }
     catch (const nlohmann::json::exception&)
     {
         return false;
     }
-
-    if (json_.contains("AssetType") &&
-        json_.value("AssetType", std::string{}) == "ParticleEmitter")
-    {
-        return false;
-    }
-
-    ParticleComponent component_;
-    component_.Deserialize(json_);
-    if (component_.tracks.empty())
-    {
-        return false;
-    }
-
-    asset_ = component_.GetAsset();
     return true;
 }
 
@@ -1389,8 +1396,16 @@ bool ParticleComponent::SaveAsset(const std::string& path_)
         return false;
     }
 
-    std::filesystem::path assetPath_ = path_;
-    std::filesystem::create_directories(assetPath_.parent_path());
+    const std::filesystem::path assetPath_ = WindowsDialogHelper::Utf8ToPath(path_);
+    std::error_code error_;
+    if (assetPath_.has_parent_path())
+    {
+        std::filesystem::create_directories(assetPath_.parent_path(), error_);
+        if (error_)
+        {
+            return false;
+        }
+    }
 
     std::string previousAssetPath_ = assetPath;
     assetPath = path_;
@@ -1400,7 +1415,7 @@ bool ParticleComponent::SaveAsset(const std::string& path_)
     json_["AssetType"] = "ParticleEffect";
     json_["AssetVersion"] = 1;
 
-    std::ofstream file_(path_, std::ios::out | std::ios::trunc);
+    std::ofstream file_(assetPath_, std::ios::out | std::ios::trunc);
     if (!file_.is_open())
     {
         assetPath = previousAssetPath_;
@@ -1408,6 +1423,17 @@ bool ParticleComponent::SaveAsset(const std::string& path_)
     }
 
     file_ << json_.dump(4);
+    file_.close();
+    if (!file_)
+    {
+        assetPath = previousAssetPath_;
+        return false;
+    }
+
+    if (const auto owner_ = GetGameObject(); owner_ && owner_->manager)
+    {
+        owner_->GetManager().GetEffectManager().ReloadVFXAssets(path_);
+    }
     return true;
 }
 
@@ -1876,6 +1902,8 @@ void ParticleComponent::Serialize(nlohmann::json& j) const
         ej["RandomColorStart"] = { s.randomColorStart.x, s.randomColorStart.y, s.randomColorStart.z, s.randomColorStart.w };
         ej["RandomColorEnd"] = { s.randomColorEnd.x, s.randomColorEnd.y, s.randomColorEnd.z, s.randomColorEnd.w };
         ej["Size"] = { s.emissionSize.x, s.emissionSize.y };
+        ej["SizeTransitionDuration"] = s.sizeTransitionDuration;
+        ej["RandomizeBurstRotation"] = s.randomizeBurstRotation;
         ej["SizeRandomStart"] = { s.sizeRandomStart.x, s.sizeRandomStart.y };
         ej["SizeRandomEnd"] = { s.sizeRandomEnd.x, s.sizeRandomEnd.y };
         ej["UseRandomSize"] = s.useRandomSize;
@@ -2105,6 +2133,8 @@ void ParticleComponent::Deserialize(const nlohmann::json& j)
             {
                 s.emissionSize = { ej["Size"][0], ej["Size"][1] };
             }
+            s.sizeTransitionDuration = (std::max)(0.0f, ej.value("SizeTransitionDuration", 0.0f));
+            s.randomizeBurstRotation = ej.value("RandomizeBurstRotation", 0u);
             if (ej.contains("SizeRandomStart"))
             {
                 s.sizeRandomStart = { ej["SizeRandomStart"][0], ej["SizeRandomStart"][1] };

@@ -247,7 +247,7 @@
                     1.0,
                     1.0
                 ],
-                "meshVFXAssetPath": "PlayerSwordArc_Aqua",
+                "meshVFXAssetPath": "PlayerRushSwordArc_Aqua",
                 "meshVFXLifeTime": 0.5,
                 "meshVFXPlaybackSpeed": 1.0,
                 "mirrorMeshVFX": false,

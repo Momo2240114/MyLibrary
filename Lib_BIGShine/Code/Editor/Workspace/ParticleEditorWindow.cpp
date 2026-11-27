@@ -200,7 +200,6 @@ void ParticleEditorWindow::EnsurePreviewObjects()
     previewCamera.SetPerspectiveFov(45.0f, 16.0f / 9.0f, 0.01f, 100.0f);
 
     // 起動時に既存アセット一覧を更新し、保存済みVFXやImpactをすぐ読み込める状態にする。
-    RefreshParticleAssets();
     RefreshSequenceAssets();
     RefreshImpactEffectAssets();
     isInitialized = true;
@@ -211,7 +210,10 @@ void ParticleEditorWindow::DrawToolbar()
     // 再生制御、表示補助、カメラ設定は常に触れるようメニューバーへ集約している。
     if (ImGui::MenuItem("Refresh Assets"))
     {
-        RefreshParticleAssets();
+        if (gameObjectManager)
+        {
+            gameObjectManager->GetEffectManager().ReloadVFXAssets();
+        }
         RefreshSequenceAssets();
         RefreshImpactEffectAssets();
     }
@@ -367,39 +369,43 @@ void ParticleEditorWindow::DrawAssetBrowserPanel()
     }
 
     ImGui::SeparatorText("Particle Assets");
+    if (!gameObjectManager)
+    {
+        return;
+    }
+    EffectManager& effectManager_ = gameObjectManager->GetEffectManager();
     if (ImGui::Button("Refresh Assets"))
     {
-        RefreshParticleAssets();
+        effectManager_.ReloadVFXAssets();
         RefreshSequenceAssets();
     }
+    const auto& particleAssets_ = effectManager_.GetParticleAssets();
     ImGui::SameLine();
-    if (ImGui::Button("Load Particle") &&
-        previewParticle &&
-        selectedAssetIndex >= 0 &&
-        selectedAssetIndex < static_cast<int>(particleAssetPaths.size()))
+    if (ImGui::Button("Load Particle") && previewParticle && !selectedParticleAssetPath.empty() &&
+        previewParticle->LoadAsset(selectedParticleAssetPath))
     {
-        previewParticle->LoadAsset(particleAssetPaths[selectedAssetIndex]);
         previewParticle->Play();
     }
 
-    if (particleAssetPaths.empty())
+    if (particleAssets_.empty())
     {
         ImGui::TextDisabled("No particle json assets found.");
         return;
     }
 
-    for (int i_ = 0; i_ < static_cast<int>(particleAssetPaths.size()); ++i_)
+    for (const auto& asset_ : particleAssets_)
     {
-        const std::filesystem::path path_(particleAssetPaths[i_]);
-        if (ImGui::Selectable(path_.filename().string().c_str(), selectedAssetIndex == i_))
+        ImGui::PushID(asset_.fullPath.c_str());
+        if (ImGui::Selectable(asset_.fileName.c_str(), selectedParticleAssetPath == asset_.fullPath))
         {
-            selectedAssetIndex = i_;
+            selectedParticleAssetPath = asset_.fullPath;
         }
-        if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left) && previewParticle)
+        if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left) && previewParticle &&
+            previewParticle->LoadAsset(asset_.fullPath))
         {
-            previewParticle->LoadAsset(particleAssetPaths[i_]);
             previewParticle->Play();
         }
+        ImGui::PopID();
     }
 }
 
@@ -1133,29 +1139,6 @@ bool ParticleEditorWindow::LoadSequence(const std::string& path_)
     sequenceNameBuffer[sizeof(sequenceNameBuffer) - 1] = '\0';
     selectedTimelineTrack = -1;
     return true;
-}
-
-void ParticleEditorWindow::RefreshParticleAssets()
-{
-    // Particle単体アセットはData/Particle直下のJSONだけを対象にする。
-    particleAssetPaths.clear();
-    const std::filesystem::path particleDir_("Data/Particle");
-    if (!std::filesystem::exists(particleDir_))
-    {
-        return;
-    }
-
-    for (const auto& entry_ : std::filesystem::directory_iterator(particleDir_))
-    {
-        if (!entry_.is_regular_file())
-        {
-            continue;
-        }
-        if (entry_.path().extension() == ".json")
-        {
-            particleAssetPaths.push_back(entry_.path().generic_string());
-        }
-    }
 }
 
 void ParticleEditorWindow::RefreshSequenceAssets()

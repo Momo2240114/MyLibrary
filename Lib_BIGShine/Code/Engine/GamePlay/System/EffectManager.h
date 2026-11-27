@@ -6,6 +6,7 @@
 #include "Engine/GamePlay/VFX/ImpactEffectAsset.h"
 
 #include <DirectXMath.h>
+#include <filesystem>
 #include <nlohmann/json.hpp>
 #include <memory>
 #include <string>
@@ -179,6 +180,7 @@ public:
     void Update(float deltaTime_);
     void Clear();
     void RefreshAssetCache();
+    void ReloadVFXAssets(const std::string& savedPath_ = {});
     void BuildAssetNameMap();
     void PreloadAllEffects();
     void RebuildRuntimePools();
@@ -401,9 +403,9 @@ private:
         const std::string& fullPath_,
         std::unordered_map<std::string, std::string>& pathByKey_) const;
     // Particle Assetを読み込み、CacheとPoolを準備する
-    void PreloadParticleAsset(const std::string& path_);
+    void PreloadParticleAsset(const std::string& path_, bool reload_ = false);
     // MeshVFX Assetを読み込み、CacheとPoolを準備する
-    void PreloadMeshVFXAsset(const std::string& path_);
+    void PreloadMeshVFXAsset(const std::string& path_, bool reload_ = false);
     // VFX Sequence Assetを読み込み、CacheとPoolを準備する
     void PreloadVFXSequenceAsset(const std::string& path_);
     // Impact Effect Assetを読み込み、Cacheへ登録する
@@ -437,6 +439,7 @@ private:
     std::unordered_map<std::string, std::string> meshVFXPathByKey;
     std::unordered_map<std::string, std::string> vfxSequencePathByKey;
     std::unordered_map<std::string, std::string> impactEffectPathByKey;
+    std::unordered_map<std::string, std::filesystem::file_time_type> vfxAssetWriteTimes;
     std::unordered_map<std::string, ParticleEffectAsset> particleAssetCache;
     std::unordered_map<std::string, MeshVFXAsset> meshVFXAssetCache;
     std::unordered_map<std::string, VFXSequenceAsset> vfxSequenceAssetCache;

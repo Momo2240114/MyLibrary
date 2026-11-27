@@ -51,10 +51,10 @@ struct Particle
 {
     DirectX::XMFLOAT4 parameter = { 0, 0, 0, 0 };      // x:スプライト番号 y:残り寿命 z:総寿命 w:描画タイプ。
     DirectX::XMFLOAT4 position = { 0, 0, 0, 1 };       // ワールド座標。wは同次座標用。
-    DirectX::XMFLOAT2 colorRandomRates = { 0, 0 };     // 生成時に決めた開始色・終了色の補間率。
+    DirectX::XMUINT2 packedColorRandomRates = { 0, 0 }; // 開始色・終了色のRGBA補間率を各8bitで保持する。
     float rotation = 0.0f;
     float angularSpeed = 0.0f;
-    DirectX::XMFLOAT4 scale = { 1, 1, 1, 0 };          // x/y:開始サイズ z:終了サイズ。
+    DirectX::XMFLOAT4 scale = { 1, 1, 1, 0 };          // x/y:開始サイズ z:終了サイズ w:サイズ変化秒数。
     DirectX::XMFLOAT4 velocity = { 0, 0, 0, 0 };       // 速度。Update_CSで位置へ積分する。
     DirectX::XMFLOAT4 acceleration = { 0, 0, 0, 0 };   // 基本加速度。重力などを入れる。
     DirectX::XMFLOAT4 texcoord = { 0, 0, 1, 1 };       // スプライトシート内のUV領域。
@@ -66,10 +66,10 @@ struct EmitParticleData
 {
     DirectX::XMFLOAT4 parameter = { 0, 1, 0, 0 };      // x:スプライト番号 y:初期寿命 z:未使用 w:描画タイプ。
     DirectX::XMFLOAT4 position = { 0, 0, 0, 1 };       // 生成時のワールド座標。
-    DirectX::XMFLOAT2 colorRandomRates = { 0, 0 };
+    DirectX::XMUINT2 packedColorRandomRates = { 0, 0 };
     float rotation = 0.0f;
     float angularSpeed = 0.0f;
-    DirectX::XMFLOAT4 scale = { 1, 1, 1, 0 };          // 開始サイズと終了サイズ。
+    DirectX::XMFLOAT4 scale = { 1, 1, 1, 0 };          // 開始サイズ、終了サイズ、サイズ変化秒数。
     DirectX::XMFLOAT4 velocity = { 0, 0, 0, 0 };       // 生成時の初速。
     DirectX::XMFLOAT4 acceleration = { 0, 0, 0, 0 };   // 生成時の基本加速度。
     DirectX::XMFLOAT4 color = { 1, 1, 1, 1 };          // 生成時の色。
@@ -159,8 +159,8 @@ struct ParticleSystemConstants
 
     float verticalSpawnRange = 0.0f;       // Point/Circle/Mesh spawnに追加するY方向のランダム幅
     uint32_t spawnDirectionMode = 0;       // PARTICLE_SPAWN_DIRECTION_MODE
-    uint32_t cpuSpawnPadding0 = 0;
-    uint32_t cpuSpawnPadding1 = 0;
+    float sizeTransitionDuration = 0.0f; // 0の場合は寿命全体でサイズを補間する。
+    uint32_t randomizeBurstRotation = 0;
     DirectX::XMFLOAT4 emissionAxis = { 0.0f, 1.0f, 0.0f, 0.0f };
 
     // Target Attraction を使う時の吸引先ワールド座標。

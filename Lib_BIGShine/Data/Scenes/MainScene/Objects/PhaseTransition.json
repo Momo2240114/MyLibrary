@@ -13591,16 +13591,6 @@
                             {
                                 "animationState": "",
                                 "blackboardWrites": [],
-                                "cat": "ScreenTransition",
-                                "name": "PhaseTransition_Cancel",
-                                "time": 0.0,
-                                "useNormalizedTime": false,
-                                "waitForObject": "",
-                                "waitForScreenCovered": false
-                            },
-                            {
-                                "animationState": "",
-                                "blackboardWrites": [],
                                 "cat": "StageCorruption",
                                 "name": "PhaseTransition_ApplyCameraProfile",
                                 "time": 0.0,
@@ -13836,7 +13826,7 @@
                                 "time": 0.05000000074505806,
                                 "useNormalizedTime": false,
                                 "waitForObject": "",
-                                "waitForScreenCovered": true
+                                "waitForScreenCovered": false
                             },
                             {
                                 "animationState": "",
@@ -14013,6 +14003,16 @@
                                 "blackboardWrites": [],
                                 "cat": "CameraAction",
                                 "name": "EventCamera_ReturnToGameplay",
+                                "time": 0.10000000149011612,
+                                "useNormalizedTime": false,
+                                "waitForObject": "",
+                                "waitForScreenCovered": false
+                            },
+                            {
+                                "animationState": "",
+                                "blackboardWrites": [],
+                                "cat": "ScreenTransition",
+                                "name": "PhaseTransition_Cancel",
                                 "time": 0.10000000149011612,
                                 "useNormalizedTime": false,
                                 "waitForObject": "",

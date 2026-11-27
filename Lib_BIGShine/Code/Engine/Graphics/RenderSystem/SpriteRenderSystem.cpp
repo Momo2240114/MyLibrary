@@ -598,7 +598,8 @@ void SpriteRenderSystem::RenderSprite(
             auto* mask_ = effect_->GetMaskTexture();
             context_->PSSetShaderResources(1,1,&mask_);
             cb_.uvRect = {u0_,v0_,u1_,v1_};
-            cb_.detail = {settings_.uvScroll.x,settings_.uvScroll.y,0,0};
+            cb_.detail = {settings_.uvScroll.x, settings_.uvScroll.y,
+                settings_.paintStrength * strength_, settings_.inkStrength * strength_};
             cb_.burnColor = settings_.burnColor;
             // 光と影の余白を確保し、字形や画像の矩形境界で切れないようにする。
             const float padding_ = (std::max)({settings_.glowIntensity > 0 ? settings_.glowRadius : 0,settings_.outlineWidth,

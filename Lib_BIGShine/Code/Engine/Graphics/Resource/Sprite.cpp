@@ -53,19 +53,19 @@ void SpriteRenderer::Gui()
     }
 
     DirectX::XMFLOAT2 h = localSize;
-    if (ImGui::DragFloat2("size", &h.x, 0.01f))
+    if (ImGui::DragFloat2(IM_U8("サイズ"), &h.x, 0.01f))
     {
         localSize = h;
     }
 
     h = catSize;
-    if (ImGui::DragFloat2("catSize", &h.x, 0.01f))
+    if (ImGui::DragFloat2(IM_U8("切り取りサイズ"), &h.x, 0.01f))
     {
         catSize = h;
     }
 
     h = catPos;
-    if (ImGui::DragFloat2("catPosLeftTop", &h.x, 0.01f))
+    if (ImGui::DragFloat2(IM_U8("切り取り開始位置(左上基準)"), &h.x, 0.01f))
     {
         catPos = h;
     }
@@ -74,7 +74,7 @@ void SpriteRenderer::Gui()
     // --- Pivot設定の追加 ---
     const char* pivotNames[] = { "Top-Left", "Center", "Bottom-Center" };
     int currentPivot = (int)pivotType;
-    if (ImGui::Combo("Pivot", &currentPivot, pivotNames, IM_ARRAYSIZE(pivotNames)))
+    if (ImGui::Combo(IM_U8("ピボット"), &currentPivot, pivotNames, IM_ARRAYSIZE(pivotNames)))
     {
         pivotType = (PosOfsset)currentPivot;
     }
