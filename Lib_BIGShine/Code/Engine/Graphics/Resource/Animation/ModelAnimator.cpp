@@ -727,7 +727,7 @@ void ModelAnimator::SetCurrentTime(float time_)
     prevRootRotation = DirectX::SimpleMath::Quaternion::Identity;
     prevRootYawDegrees = 0.0f;
     previousRootMotionNodeIndex = -1;
-    hasPrevPose = false;
+    usePreviousBlendedPose = false;
 }
 
 void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent* curvecomp, const std::shared_ptr<PoseLibraryResource>& poseLib, std::shared_ptr<GameObject> owner, const BlackboardCategory* blackboard_, const std::unordered_map<std::string, std::unique_ptr<AnimState>>* states_)
@@ -767,6 +767,7 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
     if (tempPoseB.size() != nodeCount)
     {
         tempPoseB.resize(nodeCount);
+        usePreviousBlendedPose = false;
     }
     if (blendPoseScratch.size() != nodeCount)
     {
@@ -774,7 +775,7 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
     }
     if (finalPose.size() != nodeCount)
     {
-        finalPose.resize(nodeCount);
+        finalPose.clear();
     }
     if (rootMotionLoopStartPose.size() != nodeCount)
     {
@@ -1125,7 +1126,7 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
                 isTransitioning = false;
             }
 
-            if (previous.state)
+            if (isTransitioning && previous.state && !usePreviousBlendedPose)
             {
                 SamplePose(previous.state, previous.time, previous.sampleDuration, tempPoseB, 0);
             }
@@ -1168,7 +1169,6 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
         };
 
     const int currentRootNodeIndex_ = resolveRootNodeIndex_(current.state);
-    const int previousRootNodeIndex_ = isTransitioning ? resolveRootNodeIndex_(previous.state) : -1;
     const int defaultRootNodeIndex_ = model->GetRootMotionName().empty()
         ? -1
         : model->GetNodeIndex(model->GetRootMotionName().c_str());
@@ -1426,12 +1426,16 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
             rootMotionBaseRotation);
         if (isTransitioning && previous.state)
         {
-            applyVisualRootMotionCut_(
-                tempPoseB,
-                previous.state,
-                previousRootNodeIndex_,
-                previousRootMotionBasePosition,
-                previousRootMotionBaseRotation);
+            if (!usePreviousBlendedPose)
+            {
+                applyVisualRootMotionCut_(
+                    tempPoseB,
+                    previous.state,
+                    resolveRootNodeIndex_(previous.state),
+                    previousRootMotionBasePosition,
+                    previousRootMotionBaseRotation);
+            }
+            finalPose.resize(nodeCount);
             for (size_t nodeIndex_ = 0; nodeIndex_ < nodeCount; ++nodeIndex_)
             {
                 finalPose[nodeIndex_].position = DirectX::SimpleMath::Vector3::Lerp(
@@ -1542,6 +1546,13 @@ void ModelAnimator::CrossFadeTo(const AnimState* newState, float duration, std::
     CallStateExitEndActions(current, owner);
     // Exit Actionが旧攻撃の予兆を停止しても、新しい区間の再開始は抑制しない。
     attackTelegraphs.Reset();
+    // フェード中の再遷移は、Root Motion補正済みの描画ポーズからつなぐ。
+    usePreviousBlendedPose = isTransitioning && !finalPose.empty();
+    if (usePreviousBlendedPose)
+    {
+        tempPoseB = finalPose;
+    }
+
     previousRootMotionBasePosition = rootMotionBasePosition;
     previousRootMotionBaseRotation = rootMotionBaseRotation;
     previous = current;

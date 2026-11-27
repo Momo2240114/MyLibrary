@@ -512,7 +512,7 @@
             "applyRotationY": false,
             "applyRotationZ": false,
             "cutVisualPositionX": true,
-            "cutVisualPositionY": true,
+            "cutVisualPositionY": false,
             "cutVisualPositionZ": true,
             "cutVisualWhenDisabled": false,
             "enable": true,

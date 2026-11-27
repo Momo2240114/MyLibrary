@@ -146,7 +146,7 @@ private:
     float manualBlendTime = 0.0f;
     GltfModelCommponennt::NodePose prevRootPose;
     const AnimState* _prevRootMotionState = nullptr;
-    bool hasPrevPose = false;
+    bool usePreviousBlendedPose = false;
 
     // 最終的にModelへ渡す姿勢と、ブレンド計算用の一時配列。
     std::vector<GltfModelCommponennt::NodePose> finalPose;
